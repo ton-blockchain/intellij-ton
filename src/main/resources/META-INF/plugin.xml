@@ -1,0 +1,40 @@
+<idea-plugin>
+    <id>com.github.andreypfau.ton-intellij</id>
+    <name>TON Development</name>
+    <vendor email="andreypfau@yandex.ru" url="https://github.com/andreypfau/ton-intellij">andreypfau</vendor>
+
+    <description><![CDATA[
+        TON Development plugin for IntelliJ Platform.
+
+        Includes support for Fift and FunC languages.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="FunC"
+                  implementationClass="com.github.andreypfau.intellijton.func.FuncFileType"
+                  fieldName="INSTANCE"
+                  language="FunC"
+                  extensions="fc"/>
+        <lang.parserDefinition language="FunC"
+                               implementationClass="com.github.andreypfau.intellijton.func.core.FuncParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="FunC"
+                                       implementationClass="com.github.andreypfau.intellijton.func.ide.FuncSyntaxHighlighterFactory"/>
+        <lang.commenter language="FunC"
+                        implementationClass="com.github.andreypfau.intellijton.func.ide.FuncCommenter"/>
+
+        <colorSettingsPage implementation="com.github.andreypfau.intellijton.func.ide.FuncColorSettingsPage"/>
+
+        <internalFileTemplate name="FunC Contract"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action id="func.file.create"
+                class="com.github.andreypfau.intellijton.func.ide.actions.FuncCreateFileAction"
+                text="Create FunC File">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewXml"/>
+        </action>
+    </actions>
+</idea-plugin>

@@ -1,0 +1,214 @@
+{
+  parserClass="com.github.andreypfau.intellijton.func.parser.FuncParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Func"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.github.andreypfau.intellijton.func.psi"
+  psiImplPackage="com.github.andreypfau.intellijton.func.psi.impl"
+
+  elementTypeHolderClass="com.github.andreypfau.intellijton.func.psi.FuncTypes"
+  elementTypeClass="com.github.andreypfau.intellijton.func.psi.FuncElementType"
+  tokenTypeClass="com.github.andreypfau.intellijton.func.psi.FuncTokenType"
+
+  tokens = [
+
+    comment='regexp:(;;.*)|(\{-[\s\S]*?-})'
+    stringLiteral='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'
+    decimalNumber='regexp:([0-9][_0-9]*)'
+    fixedNumber='regexp:(([0-9][_0-9]*)+\.[_0-9]*|([0-9][_0-9]*)*\.([0-9][_0-9]*))'
+    scientificNumber='regexp:((([0-9][_0-9]*)+|([0-9][_0-9]*)+\.[_0-9]*|([0-9][_0-9]*|[0-9])*\.[_0-9]+)[Ee][+-]?[_0-9]+)'
+    hexNumber='regexp:(0[xX][_0-9a-fA-F]+)'
+    booleanLiteral='regexp:true|false'
+    space='regexp:\s+'
+
+    Identifier='regexp:[a-zA-Z_$][a-zA-Z_$0-9]*'
+
+    DOT='.'
+    COLON=':'
+    SEMICOLON=';'
+    COMMA=','
+    PLUS='+'
+    MINUS='-'
+    MULT='*'
+    DIV='/'
+    EXPONENT='**'
+    NOT='!'
+    ASSIGN='='
+    TO='=>'
+    EQ='=='
+    NEQ='!='
+    INC='++'
+    DEC='--'
+    PLUS_ASSIGN='+='
+    MINUS_ASSIGN='-='
+    MULT_ASSIGN='*='
+    DIV_ASSIGN='/='
+    OR_ASSIGN='|='
+    XOR_ASSIGN='^='
+    AND_ASSIGN='&='
+    LSHIFT_ASSIGN='<<='
+    RSHIFT_ASSIGN='>>='
+    PERCENT_ASSIGN='%='
+    LESS='<'
+    LESSEQ='<='
+    MORE='>'
+    MOREEQ='>='
+    CARET='^'
+    AND='&'
+    ANDAND='&&'
+    OR='|'
+    OROR='||'
+    LBRACKET='['
+    RBRACKET=']'
+    LBRACE='{'
+    RBRACE='}'
+    LPAREN='('
+    RPAREN=')'
+    QUESTION='?'
+    PERCENT='%'
+    TILDE='~'
+    LSHIFT='<<'
+    RSHIFT='>>'
+    LEFT_ASSEMBLY=':='
+    RIGHT_ASSEMBLY='=:'
+    NAT_SPEC_TAG='regexp:@[a-zA-Z_0-9:]*'
+  ]
+
+  extends(".*Expression")=Expression
+  extends(".*TypeName")=TypeName
+}
+
+SourceUnit ::= (
+    FunctionDefinition
+    | ConstantVariableDeclaration
+    | Expression
+  )*
+
+private UntilSemicolonRecover ::= !(';')
+private UntilBraceRecover ::= !('}')
+
+ConstantVariableDeclaration ::= 'global' TypeName Identifier ('=' Expression)? ';'
+
+ReturnDef ::=
+    TypeName |
+    '(' ( TypeName (',' TypeName)* )? ')' |
+    '[' ( TypeName (',' TypeName)* )? ']' |
+    '_'
+
+ParameterDef ::= TypeName Identifier?
+ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
+
+FunctionDefinition ::= ReturnDef Identifier ParameterList FunctionSpecifiers* ( ';' | Block ) { pin = 2 }
+
+DeclarationItem ::= Identifier ','? | ','
+DeclarationList ::= '(' DeclarationItem*  ')'
+TypedDeclarationItem ::= (TypeName)? Identifier ','? | ','
+TypedDeclarationList ::= '(' TypedDeclarationItem*  ')'
+
+TypedItem ::= TypeName ','? | ','
+TypedList ::= '(' TypedItem* ')'
+
+VariableDeclaration ::=
+    DeclarationList |
+    TypedDeclarationList |
+    TypedList Identifier |
+    TypeName Identifier
+
+TypeName ::=  PrimitiveTypeName
+
+FunctionSpecifiers ::= impure | inline | inline_ref | method_id
+
+private UnfinishedBlock ::= '{' (Statement)* {
+    pin = 1
+    recoverWhile = UntilBraceRecover
+}
+Block ::= UnfinishedBlock '}'
+
+private FinishedStatement ::=
+    DoUntilStatement
+    | ReturnSt
+    | SimpleStatement {
+    recoverWhile = UntilSemicolonRecover
+}
+Statement ::= IfStatement | IfNotStatement | WhileStatement | RepeatStatement | Block | ReturnTupleStatement | FinishedStatement ';'
+
+ReturnTupleStatement ::= return SeqExpression ';'
+
+private ExpressionStatement ::= Expression
+IfStatement ::= if '(' Expression ')' Block ( else Block )? {pin=1}
+IfNotStatement ::= ifnot '(' Expression ')' Block ( else Block )? {pin=1}
+WhileStatement ::= while '(' Expression ')' Block {pin=1}
+RepeatStatement ::= repeat '(' Expression ')' Block {pin=1}
+private SimpleStatement ::= VariableDefinition | ExpressionStatement
+DoUntilStatement ::= do Block until '(' Expression ')' {pin=1}
+ReturnSt ::= return Expression? {pin=1}
+SeqExpression ::= '(' (Expression ',')* Expression? ','* ')'
+VariableDefinition ::= VariableDeclaration ( '=' Expression | SeqExpression )?
+
+Expression ::=
+  TernaryExpression
+  | OrExpression
+  | AndExpression
+  | CompExpression
+  | OrOpExpression
+  | XorOpExpression
+  | AndOpExpression
+  | EqExpression
+  | ShiftExpression
+  | MultDivExpression
+  | HighestPriorityGroup
+  | AssignmentExpression
+  | PlusMinExpression
+  | InlineArrayExpression
+  | PrimaryExpression
+
+private HighestPriorityGroup ::=
+                      IndexAccessExpression
+                      | MemberAccessExpression
+                      | ModifierAccessExpression
+                      | FunctionCallExpression
+                      | SeqExpression
+
+AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression
+InlineArrayExpression ::= '[' Expression (',' Expression)* ']'
+TernaryExpression ::= Expression '?' RightTernaryExpression
+private RightTernaryExpression ::= Expression ':' Expression
+OrExpression ::= Expression '||' Expression
+AndExpression ::= Expression '&&' Expression
+EqExpression ::= Expression ('==' | '!=') Expression
+CompExpression ::= Expression ('<' | '>' | '<=' | '>=') Expression
+OrOpExpression ::= Expression '|' Expression
+XorOpExpression ::= Expression '^' Expression
+AndOpExpression ::= Expression '&' Expression
+ShiftExpression ::= Expression ('<<' | '>>') Expression
+PlusMinExpression ::= Expression ('+' | '-') Expression
+MultDivExpression ::= Expression ('*' | '/' | '%') Expression
+
+PrimaryExpression ::= VarLiteral
+                  | BooleanLiteral
+                  | NumberLiteral
+                  | HexLiteral
+                  | StringLiteral
+                  | PrimitiveTypeNameExpression
+
+VarLiteral ::= Identifier
+FunctionCallExpression ::= Expression FunctionInvocation
+private FunctionInvocation ::= '(' FunctionCallArguments? ')'
+FunctionCallArguments ::= Expression? ( ',' Expression )*
+MemberAccessExpression ::= Expression '.' Identifier
+ModifierAccessExpression ::= Expression '~' Identifier
+IndexAccessExpression ::= Expression '[' ( Expression? ':' Expression? | Expression? ) ']' {pin=2}
+
+BooleanLiteral ::= booleanLiteral
+NumberLiteral ::= ( HexNumber | DecimalNumber | FixedNumber | ScientificNumber)
+private HexLiteral ::= hexLiteral
+private StringLiteral ::= stringLiteral
+private HexNumber ::= hexNumber
+private FixedNumber ::= fixedNumber
+private DecimalNumber ::= decimalNumber
+private ScientificNumber ::= scientificNumber
+
+private PrimitiveTypeNameExpression ::= PrimitiveTypeName
+PrimitiveTypeName ::= int | cell | slice | builder | tuple | cont | var

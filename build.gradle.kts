@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.andreypfau"
-version = "0.1.0-SNAPSHOT"
+version = "0.1.0"
 
 repositories {
     mavenCentral()
@@ -25,7 +25,8 @@ intellij {
 
 tasks {
     patchPluginXml {
-        untilBuild.set("221.*")
+        sinceBuild.set("201")
+        untilBuild.set("999")
     }
 }
 

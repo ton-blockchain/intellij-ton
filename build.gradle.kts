@@ -2,10 +2,11 @@ plugins {
     id("org.jetbrains.intellij") version "1.3.1"
     kotlin("jvm") version "1.6.10"
     java
+    idea
 }
 
 group = "com.github.andreypfau"
-version = "0.1.0"
+version = "0.1.1"
 
 repositories {
     mavenCentral()
@@ -13,23 +14,17 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
 sourceSets["main"].java.srcDirs("src/main/gen")
 
 intellij {
-    version.set("2021.3.1")
+    version.set("LATEST-EAP-SNAPSHOT")
+    updateSinceUntilBuild.set(false)
 }
 
 tasks {
-    patchPluginXml {
-        sinceBuild.set("201")
-        untilBuild.set("999")
+    buildSearchableOptions {
+        enabled = false
     }
-}
-
-tasks.getByName<Test>("test") {
-    useJUnitPlatform()
 }

@@ -33,6 +33,10 @@
                   fieldName="INSTANCE"
                   language="Fift"
                   extensions="fif"/>
+        <fileType name="Bug of Cells"
+                  implementationClass="com.github.andreypfau.intellijton.boc.BocFileType"
+                  fieldName="INSTANCE"
+                  extensions="boc"/>
     </extensions>
 
     <actions>

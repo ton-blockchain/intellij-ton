@@ -30,4 +30,9 @@ tasks {
     patchPluginXml {
         sinceBuild.set("212")
     }
+    compileKotlin {
+        kotlinOptions.jvmTarget = "11"
+    }
 }
+
+

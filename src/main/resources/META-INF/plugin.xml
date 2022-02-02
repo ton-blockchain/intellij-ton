@@ -27,6 +27,12 @@
         <colorSettingsPage implementation="com.github.andreypfau.intellijton.func.ide.FuncColorSettingsPage"/>
 
         <internalFileTemplate name="FunC Contract"/>
+
+        <fileType name="Fift"
+                  implementationClass="com.github.andreypfau.intellijton.fift.FiftFileType"
+                  fieldName="INSTANCE"
+                  language="Fift"
+                  extensions="fif"/>
     </extensions>
 
     <actions>

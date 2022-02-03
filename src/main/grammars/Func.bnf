@@ -1,5 +1,6 @@
 {
   parserClass="com.github.andreypfau.intellijton.func.parser.FuncParser"
+  parserUtilClass="com.github.andreypfau.intellijton.func.parser.FuncParserUtil"
 
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
@@ -23,7 +24,7 @@
     booleanLiteral='regexp:true|false'
     space='regexp:\s+'
 
-    Identifier='regexp:[a-zA-Z_$][a-zA-Z_$0-9]*'
+    IDENTIFIER='regexp:[a-zA-Z_$][a-zA-Z_$0-9]*'
 
     DOT='.'
     COLON=':'
@@ -87,44 +88,49 @@ SourceUnit ::= (
   )*
 
 private UntilSemicolonRecover ::= !(';')
-private UntilBraceRecover ::= !('}')
+private UntilBraceRecover ::= !(RBRACE)
 
-ConstantVariableDeclaration ::= 'global' TypeName Identifier ('=' Expression)? ';'
+ConstantIdentifier ::= IDENTIFIER
+ConstantVariableDeclaration ::= 'global' TypeName ConstantIdentifier ('=' Expression)? ';'
 
 ReturnDef ::=
     TypeName |
-    '(' ( TypeName (',' TypeName)* )? ')' |
-    '[' ( TypeName (',' TypeName)* )? ']' |
+    LPAREN ( TypeName (COMMA TypeName)* )? RPAREN |
+    LBRACKET ( TypeName (COMMA TypeName)* )? RBRACKET |
     '_'
 
-ParameterDef ::= TypeName Identifier?
-ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
+ParameterIdentifier ::= IDENTIFIER
+ParameterDef ::= TypeName ParameterIdentifier?
+ParameterList ::= LPAREN ( ParameterDef (COMMA ParameterDef)* )? RPAREN
 
-FunctionDefinition ::= ReturnDef Identifier ParameterList FunctionSpecifiers* ( ';' | Block ) { pin = 2 }
+FunctionIdentifier ::= IDENTIFIER
+FunctionDefinition ::= ReturnDef FunctionIdentifier ParameterList FunctionSpecifiers* ( ';' | Block ) { pin = 2 }
 
-DeclarationItem ::= Identifier ','? | ','
-DeclarationList ::= '(' DeclarationItem*  ')'
-TypedDeclarationItem ::= (TypeName)? Identifier ','? | ','
-TypedDeclarationList ::= '(' TypedDeclarationItem*  ')'
+DeclarationIdentifier ::= IDENTIFIER
+DeclarationItem ::= DeclarationIdentifier COMMA? | COMMA
+DeclarationList ::= LPAREN DeclarationItem*  RPAREN
+TypedDeclarationItem ::= (TypeName)? DeclarationIdentifier COMMA? | COMMA
+TypedDeclarationList ::= LPAREN TypedDeclarationItem*  RPAREN
 
-TypedItem ::= TypeName ','? | ','
-TypedList ::= '(' TypedItem* ')'
+TypedItem ::= TypeName COMMA? | COMMA
+TypedList ::= LPAREN TypedItem* RPAREN
 
+VariableIdentifier ::= IDENTIFIER
 VariableDeclaration ::=
     DeclarationList |
     TypedDeclarationList |
-    TypedList Identifier |
-    TypeName Identifier
+    TypedList VariableIdentifier |
+    TypeName VariableIdentifier
 
 TypeName ::=  PrimitiveTypeName
 
 FunctionSpecifiers ::= impure | inline | inline_ref | method_id
 
-private UnfinishedBlock ::= '{' (Statement)* {
+private UnfinishedBlock ::= LBRACE (Statement)* {
     pin = 1
     recoverWhile = UntilBraceRecover
 }
-Block ::= UnfinishedBlock '}'
+Block ::= UnfinishedBlock RBRACE
 
 private FinishedStatement ::=
     DoUntilStatement
@@ -137,14 +143,14 @@ Statement ::= IfStatement | IfNotStatement | WhileStatement | RepeatStatement | 
 ReturnTupleStatement ::= return SeqExpression ';'
 
 private ExpressionStatement ::= Expression
-IfStatement ::= if '(' Expression ')' Block ( else Block )? {pin=1}
-IfNotStatement ::= ifnot '(' Expression ')' Block ( else Block )? {pin=1}
-WhileStatement ::= while '(' Expression ')' Block {pin=1}
-RepeatStatement ::= repeat '(' Expression ')' Block {pin=1}
+IfStatement ::= if LPAREN Expression RPAREN Block ( else Block )? {pin=1}
+IfNotStatement ::= ifnot LPAREN Expression RPAREN Block ( else Block )? {pin=1}
+WhileStatement ::= while LPAREN Expression RPAREN Block {pin=1}
+RepeatStatement ::= repeat LPAREN Expression RPAREN Block {pin=1}
 private SimpleStatement ::= VariableDefinition | ExpressionStatement
-DoUntilStatement ::= do Block until '(' Expression ')' {pin=1}
+DoUntilStatement ::= do Block until LPAREN Expression RPAREN {pin=1}
 ReturnSt ::= return Expression? {pin=1}
-SeqExpression ::= '(' (Expression ',')* Expression? ','* ')'
+SeqExpression ::= LPAREN (Expression COMMA)* Expression? COMMA* RPAREN
 VariableDefinition ::= VariableDeclaration ( '=' Expression | SeqExpression )?
 
 Expression ::=
@@ -172,7 +178,7 @@ private HighestPriorityGroup ::=
                       | SeqExpression
 
 AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression
-InlineArrayExpression ::= '[' Expression (',' Expression)* ']'
+InlineArrayExpression ::= LBRACKET Expression (COMMA Expression)* RBRACKET
 TernaryExpression ::= Expression '?' RightTernaryExpression
 private RightTernaryExpression ::= Expression ':' Expression
 OrExpression ::= Expression '||' Expression
@@ -193,13 +199,15 @@ PrimaryExpression ::= VarLiteral
                   | StringLiteral
                   | PrimitiveTypeNameExpression
 
-VarLiteral ::= Identifier
+VarLiteral ::= IDENTIFIER
 FunctionCallExpression ::= Expression FunctionInvocation
-private FunctionInvocation ::= '(' FunctionCallArguments? ')'
-FunctionCallArguments ::= Expression? ( ',' Expression )*
-MemberAccessExpression ::= Expression '.' Identifier
-ModifierAccessExpression ::= Expression '~' Identifier
-IndexAccessExpression ::= Expression '[' ( Expression? ':' Expression? | Expression? ) ']' {pin=2}
+private FunctionInvocation ::= LPAREN FunctionCallArguments? RPAREN
+FunctionCallArguments ::= Expression? ( COMMA Expression )*
+MemberAccessIdentifier ::= IDENTIFIER
+MemberAccessExpression ::= Expression '.' MemberAccessIdentifier
+ModifierAccessIdentifier ::= IDENTIFIER
+ModifierAccessExpression ::= Expression '~' ModifierAccessIdentifier
+IndexAccessExpression ::= Expression LBRACKET ( Expression? ':' Expression? | Expression? ) RBRACKET {pin=2}
 
 BooleanLiteral ::= booleanLiteral
 NumberLiteral ::= ( HexNumber | DecimalNumber | FixedNumber | ScientificNumber)

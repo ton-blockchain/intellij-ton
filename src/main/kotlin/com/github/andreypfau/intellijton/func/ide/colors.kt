@@ -25,6 +25,7 @@ enum class FuncColor(
     NUMBER("Number", Defaults.NUMBER),
     STRING("String", Defaults.STRING),
     KEYWORD("Keyword", Defaults.KEYWORD),
+    FUNCTION_IDENTIFIER("Function identifier", Defaults.FUNCTION_DECLARATION),
 
     OPERATION_SIGN("Operation signs", Defaults.OPERATION_SIGN),
     CONTRACT_REFERENCE("Contract reference", Defaults.CLASS_REFERENCE)

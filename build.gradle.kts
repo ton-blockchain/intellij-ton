@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.github.andreypfau"
-version = "0.1.1"
+version = "0.2.0"
 
 repositories {
     mavenCentral()
@@ -28,6 +28,11 @@ tasks {
         enabled = false
     }
     patchPluginXml {
-        sinceBuild.set("201")
+        sinceBuild.set("212")
+    }
+    compileKotlin {
+        kotlinOptions.jvmTarget = "11"
     }
 }
+
+

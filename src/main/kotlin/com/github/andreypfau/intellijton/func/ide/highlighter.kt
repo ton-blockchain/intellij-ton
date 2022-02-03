@@ -22,6 +22,7 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
         LPAREN to FuncColor.PARENTHESES,
         RPAREN to FuncColor.PARENTHESES,
         SEMICOLON to FuncColor.SEMICOLON,
+        FUNCTION_IDENTIFIER to FuncColor.FUNCTION_IDENTIFIER,
 
         SCIENTIFICNUMBER to FuncColor.NUMBER,
         NUMBER_LITERAL to FuncColor.NUMBER,
@@ -49,10 +50,7 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
         LESS, MORE, LESSEQ, MOREEQ,
         AND, ANDAND, OR, OROR,
         EQ, NEQ, TO,
-        INC, DEC,
-        TILDE, PERCENT,
-        LSHIFT, RSHIFT,
-        LEFT_ASSEMBLY, RIGHT_ASSEMBLY
+        INC, DEC
     )
 
     override fun getHighlightingLexer() = FuncLexerAdapter()

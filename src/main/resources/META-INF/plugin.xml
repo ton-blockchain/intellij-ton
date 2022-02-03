@@ -12,6 +12,9 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+
+        <!--  FunC Language -->
+
         <fileType name="FunC"
                   implementationClass="com.github.andreypfau.intellijton.func.FuncFileType"
                   fieldName="INSTANCE"
@@ -25,16 +28,29 @@
                         implementationClass="com.github.andreypfau.intellijton.func.ide.FuncCommenter"/>
         <lang.braceMatcher language="FunC"
                            implementationClass="com.github.andreypfau.intellijton.func.ide.FuncBraceMatcher"/>
-
         <colorSettingsPage implementation="com.github.andreypfau.intellijton.func.ide.FuncColorSettingsPage"/>
-
         <internalFileTemplate name="FunC Contract"/>
+
+        <!--  Fift Language -->
 
         <fileType name="Fift"
                   implementationClass="com.github.andreypfau.intellijton.fift.FiftFileType"
                   fieldName="INSTANCE"
                   language="Fift"
                   extensions="fif"/>
+        <lang.parserDefinition language="Fift"
+                               implementationClass="com.github.andreypfau.intellijton.fift.core.FiftParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="Fift"
+                                       implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftSyntaxHighlighterFactory"/>
+        <lang.commenter language="Fift"
+                        implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftCommenter"/>
+        <lang.braceMatcher language="Fift"
+                           implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftBraceMatcher"/>
+        <colorSettingsPage implementation="com.github.andreypfau.intellijton.fift.ide.FiftColorSettingsPage"/>
+        <internalFileTemplate name="Fift File"/>
+
+        <!--  Bug of Cells File -->
+
         <fileType name="Bug of Cells"
                   implementationClass="com.github.andreypfau.intellijton.boc.BocFileType"
                   fieldName="INSTANCE"
@@ -47,6 +63,11 @@
                 class="com.github.andreypfau.intellijton.func.ide.actions.FuncCreateFileAction"
                 text="Create FunC File">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewXml"/>
+        </action>
+        <action id="fift.file.create"
+                class="com.github.andreypfau.intellijton.fift.ide.actions.FiftCreateFileAction"
+                text="Create Fift File">
+            <add-to-group group-id="NewGroup" anchor="after" relative-to-action="func.file.create"/>
         </action>
     </actions>
 </idea-plugin>

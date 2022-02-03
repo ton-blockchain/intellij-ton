@@ -1,18 +1,99 @@
 {
-  parserClass="com.github.andreypfau.intellijton.fift.parser.FiftParser"
-  parserUtilClass="com.github.andreypfau.intellijton.fift.parser.FiftParserUtil"
+    parserClass="com.github.andreypfau.intellijton.fift.parser.FiftParser"
 
-  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+    extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
-  psiClassPrefix="Fift"
-  psiImplClassSuffix="Impl"
-  psiPackage="com.github.andreypfau.intellijton.fift.psi"
-  psiImplPackage="com.github.andreypfau.intellijton.fift.psi.impl"
+    psiClassPrefix="Fift"
+    psiImplClassSuffix="Impl"
+    psiPackage="com.github.andreypfau.intellijton.fift.psi"
+    psiImplPackage="com.github.andreypfau.intellijton.fift.psi.impl"
 
-  elementTypeHolderClass="com.github.andreypfau.intellijton.fift.psi.FiftTypes"
-  elementTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftElementType"
-  tokenTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftTokenType"
-
-  tokens = [
-  ]
+    elementTypeHolderClass="com.github.andreypfau.intellijton.fift.psi.FiftTypes"
+    elementTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftElementType"
+    tokenTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftTokenType"
+    
+    tokens = [
+        COMMENT='regexp:(//.*)|(/\*[\s\S]*?\*/)'
+        STRING_LITERAL='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'        
+        NUMBER_LITERAL='regexp:([0-9][_0-9]*)'
+        NUMBER_HEX_LITERAL='regexp:(0[xX][0-9a-fA-F]+)'
+        NUMBER_BINARY_LITERAL='regexp:(0[bB][01]+)'
+        SLICE_BINARY_LITERAL='regexp:(b\{[01]+})'
+        SLICE_HEX_LITERAL='regexp:(x\{[0-9a-fA-F_]+})'
+        BINARY_HEX_LITERAL='regexp:(B\{[0-9a-fA-F_]+})'
+        SPACE='regexp:\s+'
+        LBRACKET='['     
+        RBRACKET=']'     
+        LBRACE='{'       
+        RBRACE='}'       
+        LPAREN='('       
+        RPAREN=')'
+        STRING_WORD='regexp:(abort|\.|\+)"([^"])*"'
+        PRINT_WORD='regexp:(\.|\._|\.dump|\.s|\.l|.sl|.tc)'
+        STACK_WORD='regexp:(dup|drop|swap|rot|-rot|over|tuck|nip|2dup|2drop|2swap|pick|roll|-roll|exch|exch2|\?dup)'
+        IDENTIFIER='regexp:[a-zA-Z_$#]\S*'
+        CHAR='regexp:(char\s(\S))'
+        BOOLEAN='regexp:(true|false)'
+        VARIABLE='regexp:(variable\s(\S+))'
+        WORD_SCAN="regexp:(:|::|:_|::_|constant|2constant|=:|2=:|'|\('\)|@'|\[compile])\s(\S+)"
+        //         stringLiteral='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'
+        //         IDENTIFIER='regexp:[a-zA-Z_$][a-zA-Z_$0-9]*'
+    ]
 }
+
+SourceUnit ::= (
+    Word
+)*
+
+private UntilBraceRecover ::= !('}')
+private UnfinishedBlock ::= '{' (Word)* {
+        pin = 1
+        recoverWhile = UntilBraceRecover
+}
+Block ::= UnfinishedBlock '}'
+
+Word ::= (
+    PRINT_WORD
+    | STRING_WORD
+    | STACK_WORD
+    | StringManipulationWord
+    | IntegerComparisonWord
+    | StringComparisonWord
+    | VariableWord
+    | VariableOperatorWord
+    | DictionaryManipulationWord
+    | SliceManipulationWord
+    | BuilderManipulationWord
+    | IntegerManipulationWord
+    | CellHashManipulationWord
+    | BagOfCellsManipulationWord
+    | BinaryManipulationWord
+    | CryptographyWord
+    | TvmWord
+    | NUMBER_LITERAL
+    | NUMBER_BINARY_LITERAL
+    | NUMBER_HEX_LITERAL
+    | SLICE_HEX_LITERAL
+    | SLICE_BINARY_LITERAL
+    | BINARY_HEX_LITERAL
+    | STRING_LITERAL
+    | WORD_SCAN
+    | IntegerConstantWord
+    | ExpressionWord
+    | Block)
+StringManipulationWord ::= type | cr | emit | CHAR | bl | 'space' | '$+' | '$len' | 'word' | '(.)' | '(number)'
+IntegerConstantWord ::= '1+' | '2+'
+IntegerComparisonWord ::= '<' | '>' | '<>' | '<=' | '>=' | '0<' | '0>' | '0=' | '0<>' | '0<=' | '0>=' | 'cmp' | 'sgn'
+StringComparisonWord ::= '$=' | '$cmp'
+VariableWord ::= VARIABLE | hole | box
+VariableOperatorWord ::= '@' | '!' | '+!' | '1+!' | '0!'
+DictionaryManipulationWord ::= create | '(create)' | '(forget)' | forget | nop | "'nop" | find | 'words' | '({)' | '(})' | '(compile)' | does
+BuilderManipulationWord ::= '<b' | 'b>' | 'i,' | 'u,' | 'ref,' | 's,' | 'sr,' | '$,' | 'B,' | 'b+' | bbits | brefs | bbitrefs | brembits | bremrefs | brembitrefs
+ExpressionWord ::= '-' NUMBER_LITERAL
+IntegerManipulationWord ::= '-' | '+' | '*' | '/'
+SliceManipulationWord ::= ('|_' | '|+' | '<s' | 's>' | 'i@' | 'i@+' | 'i@?' | 'i@?+' | 'u@' | 'u@+' | 'u@?' | 'u@?+' | 'B@' | 'B@+' | 'B@?' | 'B@?+' | '$@' | '$@+' | '$@?' | '$@?+' | 'ref@' | 'ref@+' | 'ref@?' | 'ref@?+' | 'empty?' | 'remaining' | 'sbits' | 'srefs' | 'sbitrefs' | '$>s' | 's>c' | 'csr.')
+CellHashManipulationWord ::= 'hashB' | 'hashu' | 'shash'
+BagOfCellsManipulationWord ::= 'B>boc' | 'boc+>B' | 'boc>B'
+BinaryManipulationWord ::= 'Bx.' | 'file>B' | 'B>file' | 'file-exists?' | 'Blen' | 'BhashB' | 'Bhashu' | 'B=' | 'Bcmp' | 'B>i@' | 'B>i@+' | 'B>u@' | 'B>u@+' | 'B>Lu@' | 'B>Lu@+' | 'B|' | 'i>B' | 'u>B' | 'Li>B' | 'Lu>B' | 'B+'
+CryptographyWord ::= 'now' | 'newkeypair' | 'priv>pub' | 'ed25519_sign' | 'ed25519_sign_uint' | 'ed25519_chksign'
+TvmWord ::= 'runvmcode' | 'runvmdict' | 'runvm' | 'runvmctx' | 'gasrunvmcode' | 'gasrunvmdict' | 'gasrunvm' | 'gasrunvmctx'

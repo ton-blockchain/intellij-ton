@@ -1,0 +1,18 @@
+{
+  parserClass="com.github.andreypfau.intellijton.fift.parser.FiftParser"
+  parserUtilClass="com.github.andreypfau.intellijton.fift.parser.FiftParserUtil"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Fift"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.github.andreypfau.intellijton.fift.psi"
+  psiImplPackage="com.github.andreypfau.intellijton.fift.psi.impl"
+
+  elementTypeHolderClass="com.github.andreypfau.intellijton.fift.psi.FiftTypes"
+  elementTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftElementType"
+  tokenTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftTokenType"
+
+  tokens = [
+  ]
+}

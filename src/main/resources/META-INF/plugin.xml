@@ -23,6 +23,8 @@
                                        implementationClass="com.github.andreypfau.intellijton.func.ide.FuncSyntaxHighlighterFactory"/>
         <lang.commenter language="FunC"
                         implementationClass="com.github.andreypfau.intellijton.func.ide.FuncCommenter"/>
+        <lang.braceMatcher language="FunC"
+                           implementationClass="com.github.andreypfau.intellijton.func.ide.FuncBraceMatcher"/>
 
         <colorSettingsPage implementation="com.github.andreypfau.intellijton.func.ide.FuncColorSettingsPage"/>
 

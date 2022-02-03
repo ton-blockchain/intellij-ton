@@ -50,10 +50,7 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
         LESS, MORE, LESSEQ, MOREEQ,
         AND, ANDAND, OR, OROR,
         EQ, NEQ, TO,
-        INC, DEC,
-        TILDE, PERCENT,
-        LSHIFT, RSHIFT,
-        LEFT_ASSEMBLY, RIGHT_ASSEMBLY
+        INC, DEC
     )
 
     override fun getHighlightingLexer() = FuncLexerAdapter()

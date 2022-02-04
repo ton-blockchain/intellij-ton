@@ -7,6 +7,7 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.tree.IElementType
+import org.apache.commons.net.imap.IMAPReply.CONT
 
 class FuncSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
     override fun getSyntaxHighlighter(project: Project?, virtualFile: VirtualFile?) = FuncSyntaxHighlighter
@@ -22,7 +23,6 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
         LPAREN to FuncColor.PARENTHESES,
         RPAREN to FuncColor.PARENTHESES,
         SEMICOLON to FuncColor.SEMICOLON,
-        FUNCTION_IDENTIFIER to FuncColor.FUNCTION_IDENTIFIER,
 
         SCIENTIFICNUMBER to FuncColor.NUMBER,
         NUMBER_LITERAL to FuncColor.NUMBER,

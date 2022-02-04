@@ -6,6 +6,7 @@
     psiImplClassSuffix="Impl"
     psiPackage="com.github.andreypfau.intellijton.func.psi"
     psiImplPackage="com.github.andreypfau.intellijton.func.psi.impl"
+    implements="com.github.andreypfau.intellijton.func.psi.FuncElement"
 
     elementTypeHolderClass="com.github.andreypfau.intellijton.func.psi.FuncTypes"
     elementTypeClass="com.github.andreypfau.intellijton.func.psi.FuncElementType"
@@ -72,7 +73,9 @@ SourceUnit ::= (
         FunctionDefinition
         | ConstantVariableDeclaration
         | Expression
-    )*
+    )* {
+    implements = 'com.github.andreypfau.intellijton.func.psi.FuncSourceUnit'
+}
 
 private UntilSemicolonRecover ::= !(';')
 private UntilBraceRecover ::= !('}')
@@ -90,8 +93,10 @@ ParameterIdentifier ::= IDENTIFIER
 ParameterDef ::= TypeName ParameterIdentifier?
 ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
 
-FunctionIdentifier ::= IDENTIFIER
-FunctionDefinition ::= ReturnDef FunctionIdentifier ParameterList FunctionSpecifiers* ( ';' | Block ) { pin = 2 }
+FunctionDefinition ::= ReturnDef IDENTIFIER ParameterList FunctionSpecifiers* ( ';' | Block ) {
+    pin = 2
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionDefinitionMixin"
+}
 
 DeclarationIdentifier ::= IDENTIFIER
 DeclarationItem ::= DeclarationIdentifier ','? | ','
@@ -155,7 +160,9 @@ Expression ::=
     | AssignmentExpression
     | PlusMinExpression
     | InlineArrayExpression
-    | PrimaryExpression
+    | PrimaryExpression {
+    
+    }
 
 private HighestPriorityGroup ::=
     IndexAccessExpression
@@ -187,7 +194,9 @@ PrimaryExpression ::= VarLiteral
     | PrimitiveTypeNameExpression
 
 VarLiteral ::= IDENTIFIER
-FunctionCallExpression ::= Expression FunctionInvocation
+FunctionCallExpression ::= Expression FunctionInvocation {
+    mixin = 'com.github.andreypfau.intellijton.func.psi.FuncFunctionCallMixin'
+}
 private FunctionInvocation ::= '(' FunctionCallArguments? ')'
 FunctionCallArguments ::= Expression? ( ',' Expression )*
 MemberAccessIdentifier ::= IDENTIFIER

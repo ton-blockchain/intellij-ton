@@ -27,30 +27,3 @@ class FuncVarLiteralReference(
     override fun multiResolve(): Sequence<PsiElement> =
         FuncResolver.resolveVarLiteralReference(element)
 }
-
-//class FuncReferenceContributor : PsiReferenceContributor() {
-//    init {
-//        println("AZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZA")
-//    }
-//
-//    override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
-//        registrar.registerReferenceProvider(PlatformPatterns.psiElement(FuncFunctionCallExpression::class.java),
-//            object : PsiReferenceProvider() {
-//                override fun getReferencesByElement(
-//                    element: PsiElement, context: ProcessingContext
-//                ): Array<PsiReference> {
-//                    println("1 ELEMENT: $element")
-//                   return emptyArray()
-//                }
-//            })
-//        registrar.registerReferenceProvider(PlatformPatterns.psiElement(FuncFunctionDefinition::class.java),
-//            object : PsiReferenceProvider() {
-//                override fun getReferencesByElement(
-//                    element: PsiElement, context: ProcessingContext
-//                ): Array<PsiReference> {
-//                    println("2 ELEMENT: $element")
-//                    return emptyArray()
-//                }
-//            })
-//    }
-//}

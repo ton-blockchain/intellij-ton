@@ -24,12 +24,15 @@
                                implementationClass="com.github.andreypfau.intellijton.func.core.FuncParserDefinition"/>
         <lang.syntaxHighlighterFactory language="FunC"
                                        implementationClass="com.github.andreypfau.intellijton.func.ide.FuncSyntaxHighlighterFactory"/>
+
         <lang.commenter language="FunC"
                         implementationClass="com.github.andreypfau.intellijton.func.ide.FuncCommenter"/>
         <lang.braceMatcher language="FunC"
                            implementationClass="com.github.andreypfau.intellijton.func.ide.FuncBraceMatcher"/>
-        <lang.findUsagesProvider language="FunC"
-                                 implementationClass="com.github.andreypfau.intellijton.func.ide.FuncFindUsagesProvider"/>
+        <!--        <psi.referenceContributor-->
+        <!--                implementation="com.github.andreypfau.intellijton.func.resolve.FuncReferenceContributor"/>-->
+        <!--        <lang.findUsagesProvider language="FunC"-->
+        <!--                                 implementationClass="com.github.andreypfau.intellijton.func.ide.FuncFindUsagesProvider"/>-->
         <colorSettingsPage implementation="com.github.andreypfau.intellijton.func.ide.FuncColorSettingsPage"/>
         <internalFileTemplate name="FunC Contract"/>
 

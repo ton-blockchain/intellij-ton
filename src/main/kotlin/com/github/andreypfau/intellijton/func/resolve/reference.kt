@@ -1,60 +1,67 @@
 package com.github.andreypfau.intellijton.func.resolve
 
 import com.github.andreypfau.intellijton.func.psi.FuncElement
-import com.github.andreypfau.intellijton.func.psi.FuncFunctionCallMixin
-import com.github.andreypfau.intellijton.func.psi.FuncFunctionDefinitionMixin
-import com.github.andreypfau.intellijton.func.psi.FuncSourceUnit
-import com.github.andreypfau.intellijton.parentOfType
-import com.intellij.codeInsight.lookup.LookupElementBuilder
-import com.intellij.psi.PsiElementResolveResult
-import com.intellij.psi.PsiPolyVariantReference
-import com.intellij.psi.PsiReferenceBase
-import com.intellij.psi.ResolveResult
-import com.intellij.psi.util.childrenOfType
+import com.github.andreypfau.intellijton.func.psi.FuncFunctionCallElement
+import com.github.andreypfau.intellijton.func.psi.FuncVarLiteralMixin
+import com.intellij.openapi.util.TextRange
+import com.intellij.psi.*
 
-interface FuncReference : PsiPolyVariantReference {
+interface FuncReference : PsiReference {
     override fun getElement(): FuncElement
-
     override fun resolve(): FuncElement?
-
-    override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult>
+    fun multiResolve(): Sequence<PsiElement>
 }
 
-abstract class FuncReferenceImpl<T : FuncElement>(element: T) : PsiReferenceBase<T>(element), PsiPolyVariantReference {
-    override fun resolve(): FuncElement? = null
-
-    override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> = emptyArray()
+abstract class FuncReferenceImpl<T : FuncElement>(
+    element: T
+) : PsiPolyVariantReferenceBase<T>(element), FuncReference {
+    override fun calculateDefaultRangeInElement() = TextRange(0, element.textRange.length)
+    override fun getVariants(): Array<Any> = emptyArray()
+    override fun resolve(): FuncElement? = super.resolve() as? FuncElement
+    override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> =
+        multiResolve().map(::PsiElementResolveResult).toList().toTypedArray()
 }
 
 class FuncFunctionCallReference(
-    element: FuncFunctionCallMixin
-) : FuncReferenceImpl<FuncFunctionCallMixin>(element), FuncReference {
-    override fun resolve(): FuncElement? = multiResolve(false).firstOrNull()?.element as? FuncElement
-
-    override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
-        return findFunctions(incompleteCode)?.map {
-            PsiElementResolveResult(it)
-        }?.toList()?.also {
-            println("function call resolve: $it")
-        }?.toTypedArray() ?: emptyArray()
-    }
-
-    override fun getVariants(): Array<Any> = findFunctions()?.map {
-        LookupElementBuilder.createWithIcon(it)
-    }?.toList()?.also { println("variant resolve: $it") }?.toTypedArray() ?: emptyArray()
-
-    fun findFunctions(incompleteCode: Boolean = true): Sequence<FuncFunctionDefinitionMixin>? {
-        println("Resolving: $element")
-        return element.parentOfType<FuncSourceUnit>()
-            ?.childrenOfType<FuncFunctionDefinitionMixin>()
-            ?.asSequence()
-            ?.filter {
-                val elementName = element.name ?: return@filter false
-                if (incompleteCode) {
-                    it.name?.contains(elementName) == true
-                } else {
-                    it.name == elementName
-                }
-            }
+    element: FuncFunctionCallElement,
+) : FuncReferenceImpl<FuncFunctionCallElement>(element) {
+    override fun multiResolve(): Sequence<PsiElement> {
+        return FuncResolver.resolveFunctions(element).filter {
+            it.identifier.text == element.referenceNameElement.text
+        }
     }
 }
+
+class FuncVarLiteralReference(
+    element: FuncVarLiteralMixin
+) : FuncReferenceImpl<FuncVarLiteralMixin>(element) {
+    override fun multiResolve(): Sequence<PsiElement> =
+        FuncResolver.resolveVarLiteralReference(element)
+}
+
+//class FuncReferenceContributor : PsiReferenceContributor() {
+//    init {
+//        println("AZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZAAZAZA")
+//    }
+//
+//    override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
+//        registrar.registerReferenceProvider(PlatformPatterns.psiElement(FuncFunctionCallExpression::class.java),
+//            object : PsiReferenceProvider() {
+//                override fun getReferencesByElement(
+//                    element: PsiElement, context: ProcessingContext
+//                ): Array<PsiReference> {
+//                    println("1 ELEMENT: $element")
+//                   return emptyArray()
+//                }
+//            })
+//        registrar.registerReferenceProvider(PlatformPatterns.psiElement(FuncFunctionDefinition::class.java),
+//            object : PsiReferenceProvider() {
+//                override fun getReferencesByElement(
+//                    element: PsiElement, context: ProcessingContext
+//                ): Array<PsiReference> {
+//                    println("2 ELEMENT: $element")
+//                    return emptyArray()
+//                }
+//            })
+//    }
+//}

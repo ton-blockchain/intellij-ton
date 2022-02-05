@@ -73,10 +73,7 @@ SourceUnit ::= (
         FunctionDefinition
         | ConstantVariableDeclaration
         | Expression
-    )* {
-    implements = 'com.github.andreypfau.intellijton.func.psi.FuncSourceUnit'
-}
-
+    )*
 private UntilSemicolonRecover ::= !(';')
 private UntilBraceRecover ::= !('}')
 
@@ -96,6 +93,7 @@ ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
 FunctionDefinition ::= ReturnDef IDENTIFIER ParameterList FunctionSpecifiers* ( ';' | Block ) {
     pin = 2
     mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionDefinitionMixin"
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
 }
 
 DeclarationIdentifier ::= IDENTIFIER
@@ -161,7 +159,7 @@ Expression ::=
     | PlusMinExpression
     | InlineArrayExpression
     | PrimaryExpression {
-    
+
     }
 
 private HighestPriorityGroup ::=
@@ -193,7 +191,9 @@ PrimaryExpression ::= VarLiteral
     | StringLiteral
     | PrimitiveTypeNameExpression
 
-VarLiteral ::= IDENTIFIER
+VarLiteral ::= IDENTIFIER {
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncVarLiteralMixin"
+}
 FunctionCallExpression ::= Expression FunctionInvocation {
     mixin = 'com.github.andreypfau.intellijton.func.psi.FuncFunctionCallMixin'
 }

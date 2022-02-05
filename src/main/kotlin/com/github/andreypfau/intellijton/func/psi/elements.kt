@@ -1,30 +1,33 @@
 package com.github.andreypfau.intellijton.func.psi
 
 import com.github.andreypfau.intellijton.func.FuncIcons
-import com.github.andreypfau.intellijton.parentOfType
+import com.github.andreypfau.intellijton.func.resolve.FuncFunctionCallReference
+import com.github.andreypfau.intellijton.func.resolve.FuncReference
+import com.github.andreypfau.intellijton.func.resolve.FuncVarLiteralReference
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.ide.projectView.PresentationData
 import com.intellij.lang.ASTNode
 import com.intellij.navigation.ItemPresentation
 import com.intellij.openapi.editor.colors.TextAttributesKey
-import com.intellij.psi.*
-import com.intellij.psi.util.childrenOfType
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNameIdentifierOwner
 import javax.swing.Icon
 
-interface FuncElement : PsiElement {
-    override fun getReference(): PsiReference? = null
-
-}
+interface FuncElement : PsiElement
 
 open class FuncElementImpl(node: ASTNode) : ASTWrapperPsiElement(node), FuncElement {
-    override fun getReference(): PsiReference? = null
 }
 
-interface FuncSourceUnit : FuncElement
+interface FuncNamedElement : FuncElement, PsiNameIdentifierOwner
+interface FuncReferenceElement : FuncNamedElement {
+    val referenceNameElement: PsiElement
+    val referenceName: String
+        get() = referenceNameElement.text
 
-interface FuncNamedElement : FuncElement, PsiNamedElement, NavigatablePsiElement
-interface FuncNamedIdentifierElement : FuncNamedElement, PsiNameIdentifierOwner
-open class FuncNamedElementImpl(node: ASTNode) : FuncElementImpl(node), FuncNamedIdentifierElement {
+    override fun getReference(): FuncReference?
+}
+
+abstract class FuncNamedElementImpl(node: ASTNode) : FuncElementImpl(node), FuncNamedElement {
     override fun getNameIdentifier(): PsiElement? = findChildByType(FuncTypes.IDENTIFIER)
     override fun getName(): String? = nameIdentifier?.text
     override fun setName(name: String): PsiElement = apply {
@@ -35,7 +38,34 @@ open class FuncNamedElementImpl(node: ASTNode) : FuncElementImpl(node), FuncName
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
 }
 
-open class FuncFunctionDefinitionMixin(node: ASTNode) : FuncNamedElementImpl(node) {
+interface FuncFunctionCallElement : FuncReferenceElement {
+}
+
+abstract class FuncFunctionCallMixin(
+    node: ASTNode
+) : FuncNamedElementImpl(node), FuncFunctionCallElement, FuncFunctionCallExpression {
+    override val referenceNameElement: PsiElement
+        get() = when (val expr = expression) {
+            is FuncPrimaryExpression -> expr.varLiteral ?: expr.primitiveTypeName!!
+            is FuncMemberAccessExpression -> expr.memberAccessIdentifier
+            is FuncModifierAccessExpression -> expr.firstChild
+            else -> error("Can't extract reference name element for expression: $expr")
+        }
+
+    override fun getReference(): FuncReference? = FuncFunctionCallReference(this)
+}
+
+interface FuncVarLiteralElement : FuncReferenceElement
+abstract class FuncVarLiteralMixin(
+    node: ASTNode
+) : FuncNamedElementImpl(node), FuncVarLiteralElement, FuncVarLiteral {
+    override val referenceNameElement: PsiElement
+        get() = nameIdentifier!!
+
+    override fun getReference() = FuncVarLiteralReference(this)
+}
+
+abstract class FuncFunctionDefinitionMixin(node: ASTNode) : FuncNamedElementImpl(node) {
     var isBuiltIn: Boolean = false
 
     override fun canNavigate(): Boolean = !isBuiltIn
@@ -53,13 +83,3 @@ open class FuncFunctionDefinitionMixin(node: ASTNode) : FuncNamedElementImpl(nod
         )
     }
 }
-
-open class FuncFunctionCallMixin(node: ASTNode) : FuncNamedElementImpl(node) {
-    override fun getReference() = object : PsiReferenceBase<FuncFunctionCallMixin>(this) {
-        override fun resolve(): PsiElement? =
-            element.parentOfType<FuncSourceUnit>()?.childrenOfType<FuncFunctionDefinition>()?.find {
-                it.identifier.textMatches(element)
-            }
-    }
-}
-

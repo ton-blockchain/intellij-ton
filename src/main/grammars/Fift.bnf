@@ -13,7 +13,7 @@
     tokenTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftTokenType"
     
     tokens = [
-        COMMENT='regexp:(//.*)|(/\*[\s\S]*?\*/)'
+        COMMENT='regexp:(//.*)|(#.*)|(/\*[\s\S]*?\*/)'
         STRING_LITERAL='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'        
         NUMBER_LITERAL='regexp:([0-9][_0-9]*)'
         NUMBER_HEX_LITERAL='regexp:(0[xX][0-9a-fA-F]+)'
@@ -55,7 +55,8 @@ private UnfinishedBlock ::= '{' (Word)* {
 Block ::= UnfinishedBlock '}'
 
 Word ::= (
-    PRINT_WORD
+    IncludeWord
+    | PRINT_WORD
     | STRING_WORD
     | STACK_WORD
     | CONDITION_WORD
@@ -95,6 +96,7 @@ VariableOperatorWord ::= '@' | '!' | '+!' | '1+!' | '0!'
 DictionaryManipulationWord ::= create | '(create)' | '(forget)' | forget | nop | "'nop" | find | 'words' | '({)' | '(})' | '(compile)' | does | "'" | 'execute'
 BuilderManipulationWord ::= '<b' | 'b>' | 'i,' | 'u,' | 'ref,' | 's,' | 'sr,' | '$,' | 'B,' | 'b+' | bbits | brefs | bbitrefs | brembits | bremrefs | brembitrefs
 ExpressionWord ::= '-' NUMBER_LITERAL
+IncludeWord ::= STRING_LITERAL 'include'
 IntegerManipulationWord ::= '-' | '+' | '*' | '/' | '/mod' | 'not' | 'negate'
 SliceManipulationWord ::= ('|_' | '|+' | '<s' | 's>' | 'i@' | 'i@+' | 'i@?' | 'i@?+' | 'u@' | 'u@+' | 'u@?' | 'u@?+' | 'B@' | 'B@+' | 'B@?' | 'B@?+' | '$@' | '$@+' | '$@?' | '$@?+' | 'ref@' | 'ref@+' | 'ref@?' | 'ref@?+' | 'empty?' | 'remaining' | 'sbits' | 'srefs' | 'sbitrefs' | '$>s' | 's>c' | 'csr.')
 CellHashManipulationWord ::= 'hashB' | 'hashu' | 'shash'

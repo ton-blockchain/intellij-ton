@@ -40,7 +40,7 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
     private fun keywords() = setOf(
         IF, IFNOT, ELSE, WHILE, DO, RETURN, VAR,
         INT, CELL, SLICE, BUILDER, TUPLE, CONT,
-        IMPURE, INLINE, INLINE_REF, METHOD_ID
+        IMPURE, INLINE, INLINE_REF, METHOD_ID, ASM
     )
 
     private fun literals() = setOf(BOOLEAN_LITERAL)

@@ -83,3 +83,28 @@ abstract class FuncFunctionDefinitionMixin(node: ASTNode) : FuncNamedElementImpl
         )
     }
 }
+
+abstract class FuncParameterDefMixin(node: ASTNode) : FuncNamedElementImpl(node), FuncParameterDef {
+    override fun getNameIdentifier(): PsiElement? = parameterIdentifier?.identifier
+
+    override fun toString(): String = if (name != null) {
+        typeName.text + " " + name
+    } else typeName.text
+}
+
+abstract class FuncReturnDefMixin(node: ASTNode) : FuncElementImpl(node), FuncReturnDef {
+    override fun toString(): String {
+        val typeName = typeName
+        val typeNameList = typeNameList
+        if (typeName != null) {
+           return typeName.text
+        }
+        if (typeNameList != null) {
+           return typeNameList.typeNameItemList.asSequence().map { it.typeName?.text }.filterNotNull().joinToString()
+        }
+        if (placeholder != null) {
+            return "_"
+        }
+        return ""
+    }
+}

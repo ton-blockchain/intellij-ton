@@ -8,18 +8,26 @@ import com.intellij.util.ProcessingContext
 
 class FuncFunctionCompletionContributor : CompletionContributor(), DumbAware {
     init {
-        extend(CompletionType.BASIC, block(), FuncFunctionCompletionProvider())
+        extend(CompletionType.BASIC, expression(), FuncFunctionCompletionProvider(false))
+        extend(CompletionType.BASIC, block(), FuncFunctionCompletionProvider(true))
     }
 }
 
-class FuncFunctionCompletionProvider : CompletionProvider<CompletionParameters>() {
+class FuncFunctionCompletionProvider(
+    private val insertSemicolon: Boolean
+) : CompletionProvider<CompletionParameters>() {
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
         result: CompletionResultSet
     ) {
         FuncResolver.resolveFunctions(parameters.originalFile).map {
-            LookupElementBuilder.createWithIcon(it)
+            val paramList = it.parameterList?.parameterDefList?.joinToString() ?: ""
+            LookupElementBuilder
+                .createWithIcon(it)
+                .withTailText("($paramList)")
+                .withTypeText(it.returnDef.toString())
+                .insertParenthesis(insertSemicolon)
         }.forEach {
             result.addElement(it)
         }

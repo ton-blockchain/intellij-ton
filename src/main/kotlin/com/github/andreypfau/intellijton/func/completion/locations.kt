@@ -11,7 +11,7 @@ import com.intellij.psi.PsiElement
 
 fun expression(): ElementPattern<PsiElement> =
     StandardPatterns.or(
-        functionCall(), block(), functionCallArguments()
+        functionCall(), functionCallArguments()
     )
 
 fun functionCall(): ElementPattern<PsiElement> =

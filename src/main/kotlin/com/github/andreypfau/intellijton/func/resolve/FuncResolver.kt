@@ -17,12 +17,7 @@ object FuncResolver {
     fun resolveVarLiteralReference(element: FuncNamedElement): Sequence<FuncNamedElement> {
         val functionCall = element.parent?.parent
         return if (functionCall is FuncFunctionCallMixin) {
-            val resolved = functionCall.reference?.multiResolve()?.toList() ?: emptyList()
-            return if (resolved.isNotEmpty()) {
-                resolved.asSequence().filterIsInstance<FuncNamedElement>()
-            } else {
-                resolveVarLiteral(element)
-            }
+            return resolveFunctions(functionCall).filter { it.name == element.name }
         } else {
             resolveVarLiteral(element)
         }

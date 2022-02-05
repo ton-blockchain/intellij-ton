@@ -1,7 +1,6 @@
 package com.github.andreypfau.intellijton.func.psi
 
 import com.github.andreypfau.intellijton.func.FuncIcons
-import com.github.andreypfau.intellijton.func.resolve.FuncFunctionCallReference
 import com.github.andreypfau.intellijton.func.resolve.FuncReference
 import com.github.andreypfau.intellijton.func.resolve.FuncVarLiteralReference
 import com.intellij.extapi.psi.ASTWrapperPsiElement
@@ -52,7 +51,7 @@ abstract class FuncFunctionCallMixin(
             else -> error("Can't extract reference name element for expression: $expr")
         }
 
-    override fun getReference(): FuncReference? = FuncFunctionCallReference(this)
+    override fun getReference(): FuncReference? = null
 }
 
 interface FuncVarLiteralElement : FuncReferenceElement

@@ -1,7 +1,6 @@
 package com.github.andreypfau.intellijton.func.resolve
 
 import com.github.andreypfau.intellijton.func.psi.FuncElement
-import com.github.andreypfau.intellijton.func.psi.FuncFunctionCallElement
 import com.github.andreypfau.intellijton.func.psi.FuncVarLiteralMixin
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
@@ -20,16 +19,6 @@ abstract class FuncReferenceImpl<T : FuncElement>(
     override fun resolve(): FuncElement? = super.resolve() as? FuncElement
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> =
         multiResolve().map(::PsiElementResolveResult).toList().toTypedArray()
-}
-
-class FuncFunctionCallReference(
-    element: FuncFunctionCallElement,
-) : FuncReferenceImpl<FuncFunctionCallElement>(element) {
-    override fun multiResolve(): Sequence<PsiElement> {
-        return FuncResolver.resolveFunctions(element).filter {
-            it.identifier.text == element.referenceNameElement.text
-        }
-    }
 }
 
 class FuncVarLiteralReference(

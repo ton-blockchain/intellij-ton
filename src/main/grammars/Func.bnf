@@ -90,7 +90,8 @@ ParameterIdentifier ::= IDENTIFIER
 ParameterDef ::= TypeName ParameterIdentifier?
 ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
 
-FunctionDefinition ::= ReturnDef IDENTIFIER ParameterList FunctionSpecifiers* ( ';' | Block ) {
+FunctionIdentifier ::= IDENTIFIER
+FunctionDefinition ::= ReturnDef FunctionIdentifier ParameterList FunctionSpecifiers* ( ';' | Block ) {
     pin = 2
     mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionDefinitionMixin"
     implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"

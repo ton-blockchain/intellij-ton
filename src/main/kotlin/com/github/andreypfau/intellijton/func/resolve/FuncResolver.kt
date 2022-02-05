@@ -1,18 +1,18 @@
 package com.github.andreypfau.intellijton.func.resolve
 
-import com.github.andreypfau.intellijton.func.psi.FuncElement
 import com.github.andreypfau.intellijton.func.psi.FuncFunctionCallMixin
 import com.github.andreypfau.intellijton.func.psi.FuncFunctionDefinition
 import com.github.andreypfau.intellijton.func.psi.FuncNamedElement
-import com.github.andreypfau.intellijton.psiFile
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.findParentOfType
 
 object FuncResolver {
-    fun FuncElement.resolveFile(): PsiFile = findParentOfType()!!
-    fun resolveFunctions(element: FuncElement) =
-        element.psiFile().childrenOfType<FuncFunctionDefinition>().asSequence()
+    fun PsiElement.resolveFile(): PsiFile = if (this is PsiFile) this else findParentOfType()!!
+
+    fun resolveFunctions(element: PsiElement) =
+        element.resolveFile().childrenOfType<FuncFunctionDefinition>().asSequence()
 
     fun resolveVarLiteralReference(element: FuncNamedElement): Sequence<FuncNamedElement> {
         val functionCall = element.parent?.parent

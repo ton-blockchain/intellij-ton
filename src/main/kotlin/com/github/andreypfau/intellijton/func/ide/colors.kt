@@ -25,7 +25,8 @@ enum class FuncColor(
     NUMBER("Number", Defaults.NUMBER),
     STRING("String", Defaults.STRING),
     KEYWORD("Keyword", Defaults.KEYWORD),
-    FUNCTION_IDENTIFIER("Function identifier", Defaults.FUNCTION_DECLARATION),
+    FUNCTION_DECLARATION("Function declaration", Defaults.FUNCTION_DECLARATION),
+    FUNCTION_CALL("Function call", Defaults.FUNCTION_CALL),
 
     OPERATION_SIGN("Operation signs", Defaults.OPERATION_SIGN),
     CONTRACT_REFERENCE("Contract reference", Defaults.CLASS_REFERENCE)
@@ -54,4 +55,8 @@ class FuncColorSettingsPage : ColorSettingsPage {
     companion object {
         val ATTRIBUTE_DESCRIPTORS = FuncColor.values().map { it.attributesDescriptor }.toTypedArray()
     }
+}
+
+fun saklas() {
+
 }

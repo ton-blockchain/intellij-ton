@@ -48,6 +48,7 @@ abstract class FuncFunctionCallMixin(
             is FuncPrimaryExpression -> expr.varLiteral ?: expr.primitiveTypeName!!
             is FuncMemberAccessExpression -> expr.memberAccessIdentifier
             is FuncModifierAccessExpression -> expr.firstChild
+            is FuncFunctionCallElement -> expr.referenceNameElement
             else -> error("Can't extract reference name element for expression: $expr")
         }
 
@@ -64,9 +65,9 @@ abstract class FuncVarLiteralMixin(
     override fun getReference() = FuncVarLiteralReference(this)
 }
 
-abstract class FuncFunctionDefinitionMixin(node: ASTNode) : FuncNamedElementImpl(node) {
+abstract class FuncFunctionDefinitionMixin(node: ASTNode) : FuncNamedElementImpl(node), FuncFunctionDefinition {
     var isBuiltIn: Boolean = false
-
+    override fun getNameIdentifier(): PsiElement? = functionIdentifier.identifier
     override fun canNavigate(): Boolean = !isBuiltIn
     override fun canNavigateToSource(): Boolean = !isBuiltIn
 

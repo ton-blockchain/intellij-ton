@@ -31,9 +31,6 @@
                            implementationClass="com.github.andreypfau.intellijton.func.ide.FuncBraceMatcher"/>
         <lang.findUsagesProvider language="FunC"
                                  implementationClass="com.github.andreypfau.intellijton.func.ide.FuncFindUsagesProvider"/>
-        <completion.contributor language="FunC"
-                                implementationClass="com.github.andreypfau.intellijton.func.completion.FuncFunctionCompletionContributor"/>
-
         <colorSettingsPage implementation="com.github.andreypfau.intellijton.func.ide.FuncColorSettingsPage"/>
         <internalFileTemplate name="FunC Contract"/>
 

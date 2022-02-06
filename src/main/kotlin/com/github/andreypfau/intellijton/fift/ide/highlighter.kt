@@ -23,10 +23,11 @@ object FiftSyntaxHighlighter : SyntaxHighlighterBase() {
         RPAREN to FiftColor.PARENTHESES,
 
         STACK_WORD to FiftColor.KEYWORD,
-        PRINT_WORD to FiftColor.ACTIVE_WORD,
-        BOOLEAN to FiftColor.KEYWORD,
+        LOOP_WORD to FiftColor.KEYWORD,
+        CONDITION_WORD to FiftColor.KEYWORD,
+        INCLUDE to FiftColor.KEYWORD,
 
-        NUMBER_LITERAL to FiftColor.NUMBER,
+        NUMBER_DIGIT_LITERAL to FiftColor.NUMBER,
         NUMBER_BINARY_LITERAL to FiftColor.NUMBER,
         NUMBER_HEX_LITERAL to FiftColor.NUMBER,
         STRING_LITERAL to FiftColor.STRING,

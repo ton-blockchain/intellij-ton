@@ -25,10 +25,9 @@ enum class FiftColor(
     NUMBER("Number", Defaults.NUMBER),
     STRING("String", Defaults.STRING),
     KEYWORD("Keyword", Defaults.KEYWORD),
-    ACTIVE_WORD("Active word", Defaults.FUNCTION_CALL),
 
     OPERATION_SIGN("Operation signs", Defaults.OPERATION_SIGN),
-    CONTRACT_REFERENCE("Contract reference", Defaults.CLASS_REFERENCE)
+    WORD("Word execution", Defaults.FUNCTION_DECLARATION),
     ;
 
     val textAttributesKey =

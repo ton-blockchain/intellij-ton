@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.github.andreypfau"
-version = "0.3.0"
+version = "0.3.1"
 
 repositories {
     mavenCentral()
@@ -29,6 +29,7 @@ tasks {
     }
     patchPluginXml {
         sinceBuild.set("212")
+        changeNotes.set(File(rootProject.projectDir, "src/main/resources/META-INF/change-notes.html").readText())
     }
     compileKotlin {
         kotlinOptions.jvmTarget = "11"

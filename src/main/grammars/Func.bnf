@@ -147,7 +147,8 @@ Statement ::=
 ReturnTupleStatement ::= return SeqExpression ';'
 
 private ExpressionStatement ::= Expression
-IfStatement ::= if ('(' Expression ')' | Expression) Block ( else Block )? {pin=1}
+private ConditionExpression ::= ('(' Expression ')' | Expression)
+IfStatement ::= if ConditionExpression Block (( elseif ConditionExpression Block ( (elseifnot ConditionExpression Block (else Block)? ) | else Block)? ) | ( else Block ))? {pin=1}
 IfNotStatement ::= ifnot ('(' Expression ')' | Expression) Block ( else Block )? {pin=1}
 WhileStatement ::= while ('(' Expression ')' | Expression) Block {pin=1}
 RepeatStatement ::= repeat ('(' Expression ')' | Expression) Block {pin=1}

@@ -7,6 +7,7 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.tree.IElementType
+import com.openhtmltopdf.css.constants.IdentValue.INLINE
 import org.apache.commons.net.imap.IMAPReply.CONT
 
 class FuncSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
@@ -24,9 +25,7 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
         RPAREN to FuncColor.PARENTHESES,
         SEMICOLON to FuncColor.SEMICOLON,
 
-        SCIENTIFICNUMBER to FuncColor.NUMBER,
         NUMBER_LITERAL to FuncColor.NUMBER,
-        FIXEDNUMBER to FuncColor.NUMBER,
         DECIMALNUMBER to FuncColor.NUMBER,
         HEXNUMBER to FuncColor.NUMBER,
 
@@ -40,7 +39,7 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
     private fun keywords() = setOf(
         IF, IFNOT, ELSE, WHILE, DO, RETURN, VAR,
         INT, CELL, SLICE, BUILDER, TUPLE, CONT,
-        IMPURE, INLINE, INLINE_REF, METHOD_ID, ASM
+        METHOD_ID, ASM
     )
 
     private fun literals() = setOf(BOOLEAN_LITERAL)

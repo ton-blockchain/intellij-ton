@@ -42,8 +42,8 @@ Root ::= (Statement*)
 Statement ::= Include | Declaration | Block | Literal | WordStatement
 
 WordStatement ::= STACK_WORD | CONDITION_WORD | LOOP_WORD | WORD | STRING_WORD
-Declaration ::= Block ':' WORD
-Include ::= STRING_LITERAL INCLUDE_WORD
+Declaration ::= Block ':' WORD { pin=2 }
+Include ::= (STRING_LITERAL | WORD) INCLUDE_WORD { pin=2 }
 
 NumberLiteral ::= NUMBER_DIGIT_LITERAL | NUMBER_HEX_LITERAL | NUMBER_BINARY_LITERAL
 Literal ::= STRING_LITERAL | NumberLiteral | SliceLiteral | ByteLiteral

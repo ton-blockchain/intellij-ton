@@ -90,9 +90,11 @@ asm_function_body ::= asm_specifier (asm_instruction)+ ';'
 asm_specifier ::= 'asm' ('(' (IDENTIFIER)* ('->' (number_literal)*)? ')')? {pin=1}
 asm_instruction ::= STRING_LITERAL
 
-parameter_list ::= '(' parameter_list_element* ')'
+private parameter_list_recovery ::= !')'
+private parameter_list_begin ::= '(' parameter_list_element* {recoverWhile=parameter_list_recovery}
 private parameter_list_element ::= !(')') parameter_declaration (',' | &')') { pin=2 }
-parameter_declaration ::= (type)? (IDENTIFIER | '_')
+parameter_declaration ::= ((type) (IDENTIFIER | '_')) | IDENTIFIER | '_' |
+parameter_list ::= parameter_list_begin ')'
 
 global_var_declarations ::= 'global' global_var_declaration (',' global_var_declaration)* ';' {pin=1}
 private global_var_declaration ::= (type)? IDENTIFIER
@@ -162,7 +164,6 @@ private atomic_type ::= (primitive_type | var_type | hole_type | type_identifier
 primitive_type ::= ('int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple')
 var_type ::= 'var'
 hole_type ::= '_'
-type_identifier ::= IDENTIFIER
 private tensor_type_element ::= !')' type (','|&')') {pin=2}
 tensor_type ::= '(' tensor_type_element* ')'
 unit_type ::= unit_literal
@@ -176,5 +177,6 @@ function_type ::= atomic_type '->' type {pin=2}
 
 boolean_literal ::= TRUE | FALSE
 number_literal ::= DECIMNAL_NUMBER_LITERAL | HEX_NUMBER_LITERAL | BINARY_NUMBER_LITERAL
-function_name ::= IDENTIFIER
+function_name ::= ('~')? IDENTIFIER
 unit_literal ::= '(' ')'
+type_identifier ::= IDENTIFIER

@@ -1,6 +1,7 @@
 package com.github.andreypfau.intellijton.func.ide
 
 import com.github.andreypfau.intellijton.func.psi.FuncFunctionName
+import com.github.andreypfau.intellijton.func.psi.FuncTypeIdentifier
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
@@ -13,6 +14,11 @@ class FuncAnnotator : Annotator {
                 .newSilentAnnotation(HighlightSeverity.INFORMATION)
                 .range(element)
                 .textAttributes(FuncColor.FUNCTION_DECLARATION.textAttributesKey)
+                .create()
+            is FuncTypeIdentifier -> holder
+                .newSilentAnnotation(HighlightSeverity.INFORMATION)
+                .range(element)
+                .textAttributes(FuncColor.PARAMETER.textAttributesKey)
                 .create()
         }
     }

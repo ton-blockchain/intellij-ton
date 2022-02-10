@@ -27,9 +27,9 @@ enum class FuncColor(
     KEYWORD("Keyword", Defaults.KEYWORD),
     FUNCTION_DECLARATION("Function declaration", Defaults.FUNCTION_DECLARATION),
     FUNCTION_CALL("Function call", Defaults.FUNCTION_CALL),
+    PARAMETER("Type parameter", TextAttributesKey.find("KOTLIN_TYPE_PARAMETER")),
 
     OPERATION_SIGN("Operation signs", Defaults.OPERATION_SIGN),
-    CONTRACT_REFERENCE("Contract reference", Defaults.CLASS_REFERENCE)
     ;
 
     val textAttributesKey =
@@ -55,8 +55,4 @@ class FuncColorSettingsPage : ColorSettingsPage {
     companion object {
         val ATTRIBUTE_DESCRIPTORS = FuncColor.values().map { it.attributesDescriptor }.toTypedArray()
     }
-}
-
-fun saklas() {
-
 }

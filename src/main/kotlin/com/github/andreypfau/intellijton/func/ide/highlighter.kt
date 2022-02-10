@@ -7,8 +7,6 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.tree.IElementType
-import com.openhtmltopdf.css.constants.IdentValue.INLINE
-import org.apache.commons.net.imap.IMAPReply.CONT
 
 class FuncSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
     override fun getSyntaxHighlighter(project: Project?, virtualFile: VirtualFile?) = FuncSyntaxHighlighter

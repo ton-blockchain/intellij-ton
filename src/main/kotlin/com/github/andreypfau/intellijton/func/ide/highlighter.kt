@@ -25,31 +25,29 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
         RPAREN to FuncColor.PARENTHESES,
         SEMICOLON to FuncColor.SEMICOLON,
 
-        NUMBER_LITERAL to FuncColor.NUMBER,
-        DECIMALNUMBER to FuncColor.NUMBER,
-        HEXNUMBER to FuncColor.NUMBER,
-
-        STRINGLITERAL to FuncColor.STRING,
+        STRING_LITERAL to FuncColor.STRING,
     )
         .plus(keywords().map { it to FuncColor.KEYWORD })
-        .plus(literals().map { it to FuncColor.KEYWORD })
-        .plus(operators().map { it to FuncColor.OPERATION_SIGN })
+        .plus(primitiveTypes().map { it to FuncColor.KEYWORD })
+        .plus(booleanLiterals().map { it to FuncColor.KEYWORD })
+        .plus(functionKeywords().map { it to FuncColor.KEYWORD })
+        .plus(numberLiterals().map { it to FuncColor.NUMBER })
         .mapValues { it.value.textAttributesKey }
 
     private fun keywords() = setOf(
-        IF, IFNOT, ELSE, WHILE, DO, RETURN, VAR,
-        INT, CELL, SLICE, BUILDER, TUPLE, CONT,
-        METHOD_ID, ASM, FUNCTION_SPECIFIERS
+        RETURN, REPEAT, IF, IFNOT, ELSEIF, ELSEIFNOT, ELSE, DO, UNTIL, WHILE, TYPE, VAR, GLOBAL
     )
-
-    private fun literals() = setOf(BOOLEAN_LITERAL)
-    private fun operators() = setOf(
-        NOT, ASSIGN, PLUS_ASSIGN, MINUS_ASSIGN, MULT_ASSIGN, DIV_ASSIGN, PERCENT_ASSIGN,
-        PLUS, MINUS, MULT, DIV, CARET,
-        LESS, MORE, LESSEQ, MOREEQ,
-        AND, ANDAND, OR, OROR,
-        EQ, NEQ, TO,
-        INC, DEC
+    private fun functionKeywords() = setOf(
+        FORALL, IMPURE, INLINE, INLINE_REF, METHOD_ID, ASM
+    )
+    private fun primitiveTypes() = setOf(
+        INT, CELL, SLICE, BUILDER, CONT, TUPLE
+    )
+    private fun booleanLiterals() = setOf(
+        TRUE, FALSE
+    )
+    private fun numberLiterals() = setOf(
+        DECIMNAL_NUMBER_LITERAL, HEX_NUMBER_LITERAL, BINARY_NUMBER_LITERAL
     )
 
     override fun getHighlightingLexer() = FuncLexerAdapter()

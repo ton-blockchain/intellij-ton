@@ -80,23 +80,22 @@
 }
 
 private root ::= (function_definition | global_var_declarations)*
-function_definition ::= (type_variables_list)? type function_name parameter_list (impure)? (inline)? (method_id)? (';' | block_statement | asm_function_body)
+function_definition ::= (type_variables_list)? type function_name parameter_list 'impure'? inline_specifier? method_id_specifier? (';' | block_statement | asm_function_body)
 
 type_variables_list ::= 'forall' (('type')? type_identifier (',' ('type')? type_identifier)*)? '->' {pin=1}
-impure ::= 'impure'
-inline ::= ('inline' | 'inline_ref')
-method_id ::= 'method_id' ('(' number_literal ')')? {pin=1}
+inline_specifier ::= ('inline' | 'inline_ref')
+method_id_specifier ::= 'method_id' ('(' number_literal ')')? {pin=1}
 
 asm_function_body ::= asm_specifier (asm_instruction)+ ';'
-asm_specifier ::= 'asm' ('(' (identifier)* ('->' (number_literal)*)? ')')? {pin=1}
-asm_instruction ::= string_literal
+asm_specifier ::= 'asm' ('(' (IDENTIFIER)* ('->' (number_literal)*)? ')')? {pin=1}
+asm_instruction ::= STRING_LITERAL
 
 parameter_list ::= '(' parameter_list_element* ')'
 private parameter_list_element ::= !(')') parameter_declaration (',' | &')') { pin=2 }
-parameter_declaration ::= (type)? (identifier | underscore)
+parameter_declaration ::= (type)? (IDENTIFIER | '_')
 
 global_var_declarations ::= 'global' global_var_declaration (',' global_var_declaration)* ';' {pin=1}
-private global_var_declaration ::= (type)? identifier
+private global_var_declaration ::= (type)? IDENTIFIER
 
 //
 // STATEMENTS
@@ -134,12 +133,12 @@ private expr75 ::= ('~')? expr80
 private expr80 ::= expr90 (method_call)*
 private expr90 ::= (variable_declaration | function_application | expr100)
 private expr100 ::= (type_expression | nontype_expr100)
-private nontype_expr100 ::= (parenthesized_expression | tensor_expression | tuple_expression | unit_literal | primitive_type | number_literal | boolean_literal | underscore | identifier)
+private nontype_expr100 ::= (parenthesized_expression | tensor_expression | tuple_expression | unit_literal | primitive_type | number_literal | boolean_literal | '_' | IDENTIFIER)
 
-method_call ::= ('.' | '~') identifier expr100 {pin=1}
+method_call ::= ('.' | '~') IDENTIFIER expr100 {pin=1}
 
-variable_declaration ::= type_expression (identifier | tuple_expression | tensor_expression | parenthesized_expression)
-function_application ::= nontype_expr100 ((identifier | parenthesized_expression | tensor_expression | unit_literal))+
+variable_declaration ::= type_expression (IDENTIFIER | tuple_expression | tensor_expression | parenthesized_expression)
+function_application ::= nontype_expr100 ((IDENTIFIER | parenthesized_expression | tensor_expression | unit_literal))+
 
 type_expression ::= (primitive_type | 'type' | var_type | parenthesized_type_expression | tensor_type_expression | tuple_type_expression)
 parenthesized_type_expression ::= '(' type_expression ')'
@@ -162,8 +161,8 @@ private type ::= (function_type | atomic_type)
 private atomic_type ::= (primitive_type | var_type | hole_type | type_identifier | unit_type | tensor_type | tuple_type)
 primitive_type ::= ('int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple')
 var_type ::= 'var'
-hole_type ::= underscore
-type_identifier ::= identifier
+hole_type ::= '_'
+type_identifier ::= IDENTIFIER
 private tensor_type_element ::= !')' type (','|&')') {pin=2}
 tensor_type ::= '(' tensor_type_element* ')'
 unit_type ::= unit_literal
@@ -177,8 +176,5 @@ function_type ::= atomic_type '->' type {pin=2}
 
 boolean_literal ::= TRUE | FALSE
 number_literal ::= DECIMNAL_NUMBER_LITERAL | HEX_NUMBER_LITERAL | BINARY_NUMBER_LITERAL
-string_literal ::= STRING_LITERAL
-identifier ::= IDENTIFIER
 function_name ::= IDENTIFIER
 unit_literal ::= '(' ')'
-underscore ::= '_'

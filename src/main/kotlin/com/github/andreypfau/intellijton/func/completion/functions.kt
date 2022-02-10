@@ -8,8 +8,8 @@ import com.intellij.util.ProcessingContext
 
 class FuncFunctionCompletionContributor : CompletionContributor(), DumbAware {
     init {
-        extend(CompletionType.BASIC, expression(), FuncFunctionCompletionProvider(false))
-        extend(CompletionType.BASIC, block(), FuncFunctionCompletionProvider(true))
+//        extend(CompletionType.BASIC, expression(), FuncFunctionCompletionProvider(false))
+//        extend(CompletionType.BASIC, block(), FuncFunctionCompletionProvider(true))
     }
 }
 
@@ -21,15 +21,15 @@ class FuncFunctionCompletionProvider(
         context: ProcessingContext,
         result: CompletionResultSet
     ) {
-        FuncResolver.resolveFunctions(parameters.originalFile).map {
-            val paramList = it.parameterList?.parameterDefList?.joinToString() ?: ""
-            LookupElementBuilder
-                .createWithIcon(it)
-                .withTailText("($paramList)")
-                .withTypeText(it.returnDef.toString())
-                .insertParenthesis(insertSemicolon)
-        }.forEach {
-            result.addElement(it)
-        }
+//        FuncResolver.resolveFunctions(parameters.originalFile).map {
+//            val paramList = it.parameterList?.parameterDefList?.joinToString() ?: ""
+//            LookupElementBuilder
+//                .createWithIcon(it)
+//                .withTailText("($paramList)")
+//                .withTypeText(it.returnDef.toString())
+//                .insertParenthesis(insertSemicolon)
+//        }.forEach {
+//            result.addElement(it)
+//        }
     }
 }

@@ -1,10 +1,10 @@
 package com.github.andreypfau.intellijton.func.core
 
-import com.github.andreypfau.intellijton.func.FuncLanguage
 import com.github.andreypfau.intellijton.func.parser.FuncLexerAdapter
 import com.github.andreypfau.intellijton.func.parser.FuncParser
 import com.github.andreypfau.intellijton.func.psi.FuncFile
 import com.github.andreypfau.intellijton.func.psi.FuncTypes
+import com.github.andreypfau.intellijton.func.stub.FuncFileStub
 import com.intellij.lang.ASTNode
 import com.intellij.lang.ParserDefinition
 import com.intellij.lang.PsiParser
@@ -19,7 +19,7 @@ import com.intellij.psi.tree.TokenSet
 class FuncParserDefinition : ParserDefinition {
     override fun createLexer(project: Project?): Lexer = FuncLexerAdapter()
     override fun createParser(project: Project?): PsiParser = FuncParser()
-    override fun getFileNodeType(): IFileElementType = FILE
+    override fun getFileNodeType(): IFileElementType = FuncFileStub.Type
     override fun getCommentTokens(): TokenSet = COMMENTS
     override fun getStringLiteralElements(): TokenSet = TokenSet.EMPTY
     override fun createElement(node: ASTNode?): PsiElement = FuncTypes.Factory.createElement(node)
@@ -27,6 +27,5 @@ class FuncParserDefinition : ParserDefinition {
 
     companion object {
         val COMMENTS = TokenSet.create(FuncTypes.COMMENT)
-        val FILE = IFileElementType(FuncLanguage)
     }
 }

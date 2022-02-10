@@ -80,7 +80,14 @@
 }
 
 private root ::= (function_definition | global_var_declarations)*
-function_definition ::= (type_variables_list)? type function_name parameter_list 'impure'? inline_specifier? method_id_specifier? (';' | block_statement | asm_function_body)
+function_definition ::= (type_variables_list)? function_return function_name parameter_list 'impure'? inline_specifier? method_id_specifier? (';' | block_statement | asm_function_body) {
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionDefinitionMixin"
+    stubClass = "com.github.andreypfau.intellijton.func.stub.FuncFunctionDefinitionStub"
+    elementTypeClass = "com.github.andreypfau.intellijton.func.stub.FuncFunctionDefinitionStub.Type"
+    elementTypeFactory = "com.github.andreypfau.intellijton.func.stub.StubKt.factory"
+}
+function_return ::= type
 
 type_variables_list ::= 'forall' (('type')? type_identifier (',' ('type')? type_identifier)*)? '->' {pin=1}
 inline_specifier ::= ('inline' | 'inline_ref')
@@ -149,7 +156,9 @@ tensor_type_expression ::= '(' tensor_type_expression_element+ ')'
 private tuple_type_expression_element ::= !')' type_expression (','|&')') {pin=2}
 tuple_type_expression ::= '[' tuple_type_expression_element+ ']'
 
-parenthesized_expression ::= '(' expression ')'
+private parenthesized_expression_recovery ::= !(')')
+private unfinished_parenthesized_expression ::= '(' expression {recoverWhile=parenthesized_expression_recovery}
+parenthesized_expression ::= unfinished_parenthesized_expression ')'
 private tensor_expression_element ::= !')' expression (','|&')') {pin=2}
 tensor_expression ::= '(' tensor_expression_element+ ')'
 private tuple_expression_element ::= !')' expression (','|&')') {pin=2}

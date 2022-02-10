@@ -13,6 +13,8 @@
     tokenTypeClass="com.github.andreypfau.intellijton.func.psi.FuncTokenType"
 
     tokens = [
+        SPACE='regexp:\s+'
+        COMMENT='regexp:(;;.*)|(\{-(\s|\S)*?-})'
         RETURN='return'
         REPEAT='repeat'
         IF='if'
@@ -45,8 +47,6 @@
         BINARY_NUMBER_LITERAL='regexp:(0[bB][_0-1]+)'
         STRING_LITERAL='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'
         IDENTIFIER="regexp:(`.*`)|(([a-zA-Z_](\w|['?:])+)|([a-zA-Z]))"
-        SPACE='regexp:\s+'
-        COMMENT='regexp:(;;.*)|(\{-[\s\S]*?-})'
         SEMICOLON=';'
         COMMA=','
         PLUS='+'
@@ -97,7 +97,7 @@ parameter_declaration ::= ((type) (IDENTIFIER | '_')) | IDENTIFIER | '_' |
 parameter_list ::= parameter_list_begin ')'
 
 global_var_declarations ::= 'global' global_var_declaration (',' global_var_declaration)* ';' {pin=1}
-private global_var_declaration ::= (type)? IDENTIFIER
+global_var_declaration ::= ((type) IDENTIFIER) | IDENTIFIER
 
 //
 // STATEMENTS

@@ -31,6 +31,7 @@ object FiftSyntaxHighlighter : SyntaxHighlighterBase() {
         NUMBER_BINARY_LITERAL to FiftColor.NUMBER,
         NUMBER_HEX_LITERAL to FiftColor.NUMBER,
         STRING_LITERAL to FiftColor.STRING,
+        STRING_WORD to FiftColor.STRING_WORD
     ).mapValues { it.value.textAttributesKey }
 
     override fun getHighlightingLexer() = FiftLexerAdapter()

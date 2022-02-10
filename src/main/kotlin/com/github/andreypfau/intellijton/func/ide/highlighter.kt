@@ -22,6 +22,8 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
         LPAREN to FuncColor.PARENTHESES,
         RPAREN to FuncColor.PARENTHESES,
         SEMICOLON to FuncColor.SEMICOLON,
+        COMMA to FuncColor.COMMA,
+        DOT to FuncColor.DOT,
 
         STRING_LITERAL to FuncColor.STRING,
     )
@@ -30,6 +32,7 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
         .plus(booleanLiterals().map { it to FuncColor.KEYWORD })
         .plus(functionKeywords().map { it to FuncColor.KEYWORD })
         .plus(numberLiterals().map { it to FuncColor.NUMBER })
+        .plus(operatorSigns().map { it to FuncColor.OPERATION_SIGN })
         .mapValues { it.value.textAttributesKey }
 
     private fun keywords() = setOf(
@@ -46,6 +49,9 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
     )
     private fun numberLiterals() = setOf(
         DECIMNAL_NUMBER_LITERAL, HEX_NUMBER_LITERAL, BINARY_NUMBER_LITERAL
+    )
+    private fun operatorSigns() = setOf(
+        PLUS, MINUS, DIV, MULT, ASSIGN, PLUS_ASSIGN, MINUS_ASSIGN, DIV_ASSIGN, MULT_ASSIGN
     )
 
     override fun getHighlightingLexer() = FuncLexerAdapter()

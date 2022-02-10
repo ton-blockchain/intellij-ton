@@ -28,6 +28,7 @@ enum class FiftColor(
 
     OPERATION_SIGN("Operation signs", Defaults.OPERATION_SIGN),
     WORD("Word execution", Defaults.FUNCTION_DECLARATION),
+    STRING_WORD("String parameter word", Defaults.INSTANCE_FIELD)
     ;
 
     val textAttributesKey =

@@ -4,8 +4,8 @@ import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.vfs.VirtualFile
 
 object BocFileType : FileType {
-    override fun getName() = "Bug of Cells"
-    override fun getDescription() = "Bug of Cells file"
+    override fun getName() = "Bag of Cells"
+    override fun getDescription() = "Bag of Cells file"
     override fun getDefaultExtension() = "boc"
     override fun getIcon() = BocIcons.FILE
     override fun isBinary(): Boolean = true

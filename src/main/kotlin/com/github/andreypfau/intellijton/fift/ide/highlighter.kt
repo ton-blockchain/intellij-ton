@@ -13,27 +13,28 @@ class FiftSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
 }
 
 object FiftSyntaxHighlighter : SyntaxHighlighterBase() {
-    private val tokenMapping = mapOf(
-        COMMENT to FiftColor.COMMENT,
-        LBRACE to FiftColor.BRACES,
-        RBRACE to FiftColor.BRACES,
-        LBRACKET to FiftColor.BRACKETS,
-        RBRACKET to FiftColor.BRACKETS,
-        LPAREN to FiftColor.PARENTHESES,
-        RPAREN to FiftColor.PARENTHESES,
-
-        STACK_WORD to FiftColor.KEYWORD,
-        LOOP_WORD to FiftColor.KEYWORD,
-        CONDITION_WORD to FiftColor.KEYWORD,
-        INCLUDE to FiftColor.KEYWORD,
-
-        NUMBER_DIGIT_LITERAL to FiftColor.NUMBER,
-        NUMBER_BINARY_LITERAL to FiftColor.NUMBER,
-        NUMBER_HEX_LITERAL to FiftColor.NUMBER,
-        STRING_LITERAL to FiftColor.STRING,
-        STRING_WORD to FiftColor.STRING_WORD
-    ).mapValues { it.value.textAttributesKey }
-
     override fun getHighlightingLexer() = FiftLexerAdapter()
-    override fun getTokenHighlights(tokenType: IElementType) = pack(tokenMapping[tokenType])
+    override fun getTokenHighlights(tokenType: IElementType) = when(tokenType) {
+        COMMENT -> FiftColor.COMMENT
+        LBRACE, RBRACE -> FiftColor.BRACES
+        LBRACKET, RBRACKET -> FiftColor.BRACKETS
+        LPAREN, RPAREN -> FiftColor.PARENTHESES
+
+        NUMBER_DIGIT_LITERAL, NUMBER_HEX_LITERAL, NUMBER_BINARY_LITERAL -> FiftColor.NUMBER
+        SLICE_BINARY_LITERAL, SLICE_HEX_LITERAL, BYTE_HEX_LITERAL -> FiftColor.NUMBER
+        STRING_LITERAL -> FiftColor.STRING
+
+        ABORT, PRINT, STRING_CONCAT -> FiftColor.STRING_WORD
+
+        INCLUDE -> FiftColor.KEYWORD
+
+        IF, IFNOT, COND -> FiftColor.KEYWORD
+        TRUE, FALSE -> FiftColor.KEYWORD
+        DUP, DROP, SWAP, ROT, REV_ROT, OVER, TUCK, NIP, DUP_DUP,
+        DROP_DROP, SWAP_SWAP, PICK, ROLL, REV_ROLL, EXCH, EXCH2, COND_DUP -> FiftColor.KEYWORD
+
+        else -> null
+    }.let {
+        pack(it?.textAttributesKey)
+    }
 }

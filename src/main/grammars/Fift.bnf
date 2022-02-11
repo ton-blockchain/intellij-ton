@@ -13,7 +13,11 @@
     tokenTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftTokenType"
     
     tokens = [
-        SPACE='regexp:\s+'
+        COMMENT='regexp:(//.*)|(#.*)|(/\*[\s\S]*?\*/)'
+        ABORT='regexp:(abort"([^"\r\n\\]|\\.)*")'
+        PRINT='regexp:(\."([^"\r\n\\]|\\.)*")'
+        STRING_CONCAT='regexp:(\+"([^"\r\n\\]|\\.)*")'
+        CHAR='regexp:(char \S)'
         STRING_LITERAL='regexp:("([^"\r\n\\]|\\.)*")'
         NUMBER_DIGIT_LITERAL='regexp:(-?[0-9]+(/-?[0-9]+)?)'
         NUMBER_HEX_LITERAL='regexp:(0[xX][0-9a-fA-F]+)'
@@ -27,32 +31,46 @@
         RBRACE='}'
         LPAREN='('
         RPAREN=')'
-        STACK_WORD='regexp:(dup|drop|swap|rot|-rot|over|tuck|nip|2dup|2drop|2swap|pick|roll|-roll|exch|exch2|\?dup)(\s|\Z)'
-        CONDITION_WORD='regexp:(if|ifnot|cond)(\s|\Z)'
-        LOOP_WORD='regexp:(until|while|times)(\s|\Z)'
-        INCLUDE_WORD='include'
-        WORD='regexp:\S+'
-        STRING_WORD='regexp:(\S+"[^"]*"(\s|\n|\Z))'
-        COMMENT='regexp:(//.*)|(#.*)|(/\*[\s\S]*?\*/)'
+        DUP='dup'
+        DROP='drop'
+        SWAP='swap'
+        ROT='rot'
+        REV_ROT='-rot'
+        OVER='over'
+        TUCK='tuck'
+        NIP='nip'
+        DUP_DUP='2dup'
+        DROP_DROP='2drop'
+        SWAP_SWAP='2swap'
+        PICK='pick'
+        ROLL='roll'
+        REV_ROLL='-roll'
+        EXCH='exch'
+        EXCH2='exch2'
+        COND_DUP='?dup'
+        IF='if'
+        IFNOT='ifnot'
+        COND='cond'
+        UNTIL='until'
+        WHILE='while'
+        TIMES='times'
+        INCLUDE='include'
+        TRUE='true'
+        FALSE='false'
+        ORDINARY_WORD='regexp:\S+'
+        SPACE='regexp:\s+'
     ]
-    extends(".*Literal") = Literal
 }
 
-Root ::= (Statement*)
-Statement ::= Include | Declaration | Block | Literal | WordStatement
-
-WordStatement ::= STACK_WORD | CONDITION_WORD | LOOP_WORD | WORD | STRING_WORD
-Declaration ::= Block ':' WORD { pin=2 }
-Include ::= (STRING_LITERAL | WORD) INCLUDE_WORD { pin=2 }
-
-NumberLiteral ::= NUMBER_DIGIT_LITERAL | NUMBER_HEX_LITERAL | NUMBER_BINARY_LITERAL
-Literal ::= STRING_LITERAL | NumberLiteral | SliceLiteral | ByteLiteral
-SliceLiteral ::= SLICE_BINARY_LITERAL | SLICE_HEX_LITERAL
-ByteLiteral ::= BYTE_HEX_LITERAL
-
-private UntilBraceRecover ::= !('}')
-private UnfinishedBlock ::= '{' (Statement)* {
-        pin = 1
-        recoverWhile = UntilBraceRecover
-}
-Block ::= UnfinishedBlock '}'
+private root ::= statement*
+private statement ::= word_def | block | list | literal | word
+word ::= stack_word | loop_word | cond_word | INCLUDE | CHAR | ABORT | PRINT | STRING_CONCAT | ORDINARY_WORD
+number_literal ::= NUMBER_DIGIT_LITERAL | NUMBER_HEX_LITERAL | NUMBER_BINARY_LITERAL
+boolean_literal ::= TRUE | FALSE
+block ::= '{' statement* '}'
+list ::= ('(' | '_(') statement* ')'
+literal ::= number_literal | boolean_literal | STRING_LITERAL | SLICE_BINARY_LITERAL | SLICE_HEX_LITERAL | BYTE_HEX_LITERAL
+stack_word ::= DUP | DROP | SWAP | ROT | REV_ROT | OVER | TUCK | NIP | DUP_DUP | DROP_DROP | SWAP_SWAP | PICK | ROLL | REV_ROLL | EXCH | EXCH2 | COND_DUP
+loop_word ::= UNTIL | WHILE | TIMES
+cond_word ::= IF | IFNOT | COND
+word_def ::= block (':'|'::'|'::_') word

@@ -16,5 +16,5 @@ Pull requests are welcome 😀
 [plugin-repo]: https://plugins.jetbrains.com/plugin/18541-ton-development
 [plugin-version-svg]: https://img.shields.io/jetbrains/plugin/v/18541-ton-development.svg
 [plugin-downloads-svg]: https://img.shields.io/jetbrains/plugin/d/18541-ton-development.svg
-[ton-svg]: https://img.shields.io/badge/based%20on-The%20Open%20Network-blue
+[ton-svg]: https://img.shields.io/badge/%F0%9F%92%8E-TON-blue
 [ton]: https://ton.org

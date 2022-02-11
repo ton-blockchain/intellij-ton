@@ -153,12 +153,12 @@ type_expression ::= (primitive_type | 'type' | var_type | parenthesized_type_exp
 parenthesized_type_expression ::= '(' type_expression ')'
 private tensor_type_expression_element ::= !')' type_expression (','|&')') {pin=2}
 tensor_type_expression ::= '(' tensor_type_expression_element+ ')'
-private tuple_type_expression_element ::= !')' type_expression (','|&')') {pin=2}
+private tuple_type_expression_element ::= !']' type_expression (','|&']') {pin=2}
 tuple_type_expression ::= '[' tuple_type_expression_element+ ']'
 
 private tensor_expression_element ::= !')' expression (','|&')') {pin=2}
 tensor_expression ::= '(' tensor_expression_element+ ')'
-private tuple_expression_element ::= !')' expression (','|&')') {pin=2}
+private tuple_expression_element ::= !']' expression (','|&']') {pin=2}
 tuple_expression ::= '[' tuple_expression_element+ ']'
 
 //

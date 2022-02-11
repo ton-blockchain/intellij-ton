@@ -1,3 +1,5 @@
+import java.time.Instant
+import java.time.Clock
 plugins {
     id("org.jetbrains.intellij") version "1.3.1"
     kotlin("jvm") version "1.6.10"
@@ -6,7 +8,15 @@ plugins {
 }
 
 group = "com.github.andreypfau"
-version = "0.4.0-SNAPSHOT"
+version = "0.4.0"
+val isSnapshot = true
+
+if (isSnapshot) {
+    val time = Instant.now(Clock.systemUTC())
+    val formattedTime = time.toString().substring(2,16).replace("[-T:]".toRegex(), "")
+    version = "$version-SNAPSHOT-$formattedTime"
+    println("version: $version")
+}
 
 repositories {
     mavenCentral()

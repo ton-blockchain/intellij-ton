@@ -140,14 +140,14 @@ private expr20 ::= ('-')? expr30 (('-' | '+' | '|' | '^') expr30)*
 private expr30 ::= expr75 (('*' | '/' | '%' | '~/' | '^/' | '~%' | '^%' | '/%' | '&') expr75)*
 private expr75 ::= ('~')? expr80
 private expr80 ::= expr90 (method_call)*
-private expr90 ::= (variable_declaration | function_application | expr100)
+private expr90 ::= (variable_declaration | function_call | expr100)
 private expr100 ::= (type_expression | nontype_expr100)
 private nontype_expr100 ::= (tensor_expression | tuple_expression | unit_literal | primitive_type | number_literal | boolean_literal | '_' | IDENTIFIER)
 
 method_call ::= ('.' | '~') IDENTIFIER expr100 {pin=1}
 
 variable_declaration ::= type_expression (IDENTIFIER | tuple_expression | tensor_expression | unit_literal)
-function_application ::= nontype_expr100 (IDENTIFIER | tensor_expression | unit_literal)+
+function_call ::= nontype_expr100 (IDENTIFIER | tensor_expression | unit_literal)+
 
 type_expression ::= (primitive_type | 'type' | var_type | parenthesized_type_expression | tensor_type_expression | tuple_type_expression)
 parenthesized_type_expression ::= '(' type_expression ')'

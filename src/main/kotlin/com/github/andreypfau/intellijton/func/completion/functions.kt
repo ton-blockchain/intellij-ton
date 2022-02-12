@@ -1,10 +1,10 @@
 package com.github.andreypfau.intellijton.func.completion
 
 import com.github.andreypfau.intellijton.func.psi.*
-import com.github.andreypfau.intellijton.func.resolve.FuncResolver
+import com.github.andreypfau.intellijton.func.resolve.resolveFunctions
+import com.github.andreypfau.intellijton.func.resolve.resolveStdlibFile
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
-import com.intellij.execution.impl.DUMMY_ELEMENT_NAME
 import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.patterns.StandardPatterns
@@ -34,11 +34,9 @@ class FuncFunctionCompletionProvider(
         result: CompletionResultSet
     ) {
         if (parameters.position.text == CompletionInitializationContext.DUMMY_IDENTIFIER_TRIMMED) return
-
-        val stdlibFunctions = FuncResolver.resolveStdlibFile(parameters.originalFile)?.let {
-            FuncResolver.resolveFunctions(it)
-        } ?: emptySequence()
-        val fileFunctions = FuncResolver.resolveFunctions(parameters.originalFile)
+        val file = parameters.originalFile as? FuncFile ?: return
+        val stdlibFunctions = file.resolveStdlibFile()?.resolveFunctions() ?: emptySequence()
+        val fileFunctions = file.resolveFunctions()
 
         (stdlibFunctions + fileFunctions).map { functionDef ->
             val parameterList = functionDef.parameterList.text

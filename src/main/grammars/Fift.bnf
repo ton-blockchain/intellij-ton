@@ -13,7 +13,6 @@
     tokenTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftTokenType"
     
     tokens = [
-        COMMENT='regexp:(//.*)|(#.*)|(/\*[\s\S]*?\*/)'
         ABORT='regexp:(abort"([^"\r\n\\]|\\.)*")'
         PRINT='regexp:(\."([^"\r\n\\]|\\.)*")'
         STRING_CONCAT='regexp:(\+"([^"\r\n\\]|\\.)*")'
@@ -57,13 +56,15 @@
         INCLUDE='include'
         TRUE='true'
         FALSE='false'
+
+        WHITE_SPACE='regexp:\s+'
         ORDINARY_WORD='regexp:\S+'
-        SPACE='regexp:\s+'
+        COMMENT='regexp:(//.*)|(#.*)'
     ]
 }
 
 private root ::= statement*
-private statement ::= word_def | block | list | literal | word
+private statement ::= (word_def | block | list | literal | word)
 word ::= stack_word | loop_word | cond_word | INCLUDE | CHAR | ABORT | PRINT | STRING_CONCAT | ORDINARY_WORD
 number_literal ::= NUMBER_DIGIT_LITERAL | NUMBER_HEX_LITERAL | NUMBER_BINARY_LITERAL
 boolean_literal ::= TRUE | FALSE

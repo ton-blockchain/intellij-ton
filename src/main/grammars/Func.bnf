@@ -13,8 +13,6 @@
     tokenTypeClass="com.github.andreypfau.intellijton.func.psi.FuncTokenType"
 
     tokens = [
-        SPACE='regexp:\s+'
-        COMMENT='regexp:(;;.*)|(\{-(\s|\S)*?-})'
         RETURN='return'
         REPEAT='repeat'
         IF='if'
@@ -42,11 +40,6 @@
         TYPE='type'
         TRUE='true'
         FALSE='false'
-        DECIMNAL_NUMBER_LITERAL='regexp:([0-9][_0-9]*)'
-        HEX_NUMBER_LITERAL='regexp:(0[xX][_0-9a-fA-F]+)'
-        BINARY_NUMBER_LITERAL='regexp:(0[bB][_0-1]+)'
-        STRING_LITERAL='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'
-        IDENTIFIER="regexp:(`.*`)|(([a-zA-Z_](\w|['?:])+)|([a-zA-Z]))"
         SEMICOLON=';'
         COMMA=','
         PLUS='+'
@@ -76,6 +69,13 @@
         ARROW='->'
         DOT='.'
         TILDA='~'
+        WHITE_SPACE='regexp:\s+'
+        COMMENT='regexp:(;;.*)|(\{-(\s|\S)*?-})'
+        DECIMNAL_NUMBER_LITERAL='regexp:([0-9][_0-9]*)'
+        HEX_NUMBER_LITERAL='regexp:(0[xX][_0-9a-fA-F]+)'
+        BINARY_NUMBER_LITERAL='regexp:(0[bB][_0-1]+)'
+        STRING_LITERAL='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'
+        IDENTIFIER="regexp:(`.*`)|(([a-zA-Z_](\w|['?:])+)|([a-zA-Z]))"
     ]
 }
 
@@ -147,7 +147,10 @@ private nontype_expr100 ::= (tensor_expression | tuple_expression | unit_literal
 method_call ::= ('.' | '~') IDENTIFIER expr100 {pin=1}
 
 variable_declaration ::= type_expression (IDENTIFIER | tuple_expression | tensor_expression | unit_literal)
-function_call ::= nontype_expr100 (IDENTIFIER | tensor_expression | unit_literal)+
+function_call ::= IDENTIFIER (tensor_expression | unit_literal) {
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncReferenceElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionCallMixin"
+}
 
 type_expression ::= (primitive_type | 'type' | var_type | parenthesized_type_expression | tensor_type_expression | tuple_type_expression)
 parenthesized_type_expression ::= '(' type_expression ')'

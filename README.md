@@ -7,7 +7,7 @@
 
 https://plugins.jetbrains.com/plugin/18541-ton-development
 
-### Our chat on Telegram:
+### Join in Telegram chat:
 
 https://t.me/intellijton_chat
 

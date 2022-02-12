@@ -7,7 +7,15 @@
 
 https://plugins.jetbrains.com/plugin/18541-ton-development
 
+### Our chat on Telegram:
+
+https://t.me/intellijton_chat
+
+### Contributions
+
 Pull requests are welcome 😀
+
+### Support
 
 💎 TON Wallet for donations: `EQAKtVj024T9MfYaJzU1xnDAkf_GGbHNu-V2mgvyjTuP6rvC`
 

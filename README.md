@@ -1,4 +1,4 @@
-# TON Development plugin for the IntelliJ Platform
+# TON Development plugin for the IntelliJ IDEs
 
 [![JetBrains plugins][plugin-version-svg]][plugin-repo]
 [![JetBrains plugins][plugin-downloads-svg]][plugin-repo]

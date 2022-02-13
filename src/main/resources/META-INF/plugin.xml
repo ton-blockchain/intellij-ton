@@ -55,6 +55,8 @@
                         implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftCommenter"/>
         <lang.braceMatcher language="Fift"
                            implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftBraceMatcher"/>
+        <lang.findUsagesProvider language="Fift"
+                                 implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftFindUsagesProvider"/>
         <colorSettingsPage implementation="com.github.andreypfau.intellijton.fift.ide.FiftColorSettingsPage"/>
         <internalFileTemplate name="Fift File"/>
 

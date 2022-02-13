@@ -30,6 +30,7 @@
         RBRACE='}'
         LPAREN='('
         RPAREN=')'
+        UNDERSCORE_LPAREN='_('
         DUP='dup'
         DROP='drop'
         SWAP='swap'
@@ -56,16 +57,24 @@
         INCLUDE='include'
         TRUE='true'
         FALSE='false'
+        COLON=':'
+        DOUBLE_COLON='::'
+        DOUBLE_COLON_UNDERSCORE='::_'
 
         WHITE_SPACE='regexp:\s+'
-        ORDINARY_WORD='regexp:\S+'
+        IDENTIFIER='regexp:\S+'
         COMMENT='regexp:(//.*)|(#.*)'
     ]
+
+    implements(".*") = "com.github.andreypfau.intellijton.fift.psi.FiftElement"
 }
 
 private root ::= statement*
 private statement ::= (word_def | block | list | literal | word)
-word ::= stack_word | loop_word | cond_word | INCLUDE | CHAR | ABORT | PRINT | STRING_CONCAT | ORDINARY_WORD
+word ::= stack_word | loop_word | cond_word | INCLUDE | CHAR | ABORT | PRINT | STRING_CONCAT | ordinary_word
+ordinary_word ::= IDENTIFIER {
+    mixin = "com.github.andreypfau.intellijton.fift.psi.FiftOrdinaryWordMixin"
+}
 number_literal ::= NUMBER_DIGIT_LITERAL | NUMBER_HEX_LITERAL | NUMBER_BINARY_LITERAL
 boolean_literal ::= TRUE | FALSE
 block ::= '{' statement* '}'
@@ -74,4 +83,7 @@ literal ::= number_literal | boolean_literal | STRING_LITERAL | SLICE_BINARY_LIT
 stack_word ::= DUP | DROP | SWAP | ROT | REV_ROT | OVER | TUCK | NIP | DUP_DUP | DROP_DROP | SWAP_SWAP | PICK | ROLL | REV_ROLL | EXCH | EXCH2 | COND_DUP
 loop_word ::= UNTIL | WHILE | TIMES
 cond_word ::= IF | IFNOT | COND
-word_def ::= block (':'|'::'|'::_') word
+word_def ::= block (':'|'::'|'::_') word_def_identifier {
+    mixin = "com.github.andreypfau.intellijton.fift.psi.FiftWordDefMixin"
+}
+word_def_identifier ::= IDENTIFIER

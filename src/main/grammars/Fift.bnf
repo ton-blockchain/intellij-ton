@@ -84,6 +84,7 @@ stack_word ::= DUP | DROP | SWAP | ROT | REV_ROT | OVER | TUCK | NIP | DUP_DUP |
 loop_word ::= UNTIL | WHILE | TIMES
 cond_word ::= IF | IFNOT | COND
 word_def ::= block (':'|'::'|'::_') word_def_identifier {
+    implements = "com.github.andreypfau.intellijton.fift.psi.FiftNamedElement"
     mixin = "com.github.andreypfau.intellijton.fift.psi.FiftWordDefMixin"
 }
 word_def_identifier ::= IDENTIFIER

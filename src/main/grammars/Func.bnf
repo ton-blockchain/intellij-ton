@@ -144,25 +144,31 @@ private expr90 ::= (variable_declaration | function_call | expr100)
 private expr100 ::= (type_expression | nontype_expr100)
 private nontype_expr100 ::= (tensor_expression | tuple_expression | unit_literal | primitive_type | number_literal | boolean_literal | '_' | IDENTIFIER)
 
-method_call ::= ('.' | '~') IDENTIFIER expr100 {pin=1}
+method_call ::= (dot_method_call_identifier | tilda_method_call_identifier) expr100
+dot_method_call_identifier ::= '.' IDENTIFIER {pin=1}
+tilda_method_call_identifier ::= '~' IDENTIFIER {pin=1}
 
 variable_declaration ::= type_expression (IDENTIFIER | tuple_expression | tensor_expression | unit_literal)
-function_call ::= IDENTIFIER (tensor_expression | unit_literal) {
-    implements = "com.github.andreypfau.intellijton.func.psi.FuncReferenceElement"
+function_call ::= function_call_identifier (tensor_expression | unit_literal) {
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
     mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionCallMixin"
+}
+function_call_identifier ::= IDENTIFIER {
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionCallIdentifierMixin"
 }
 
 type_expression ::= (primitive_type | 'type' | var_type | parenthesized_type_expression | tensor_type_expression | tuple_type_expression)
 parenthesized_type_expression ::= '(' type_expression ')'
-private tensor_type_expression_element ::= !')' type_expression (','|&')') {pin=2}
-tensor_type_expression ::= '(' tensor_type_expression_element+ ')'
-private tuple_type_expression_element ::= !']' type_expression (','|&']') {pin=2}
-tuple_type_expression ::= '[' tuple_type_expression_element+ ']'
+tensor_type_expression_entry ::= !')' type_expression (','|&')') {pin=2}
+tensor_type_expression ::= '(' tensor_type_expression_entry+ ')'
+tuple_type_expression_entry ::= !']' type_expression (','|&']') {pin=2}
+tuple_type_expression ::= '[' tuple_type_expression_entry+ ']'
 
-private tensor_expression_element ::= !')' expression (','|&')') {pin=2}
-tensor_expression ::= '(' tensor_expression_element+ ')'
-private tuple_expression_element ::= !']' expression (','|&']') {pin=2}
-tuple_expression ::= '[' tuple_expression_element+ ']'
+tensor_expression_entry ::= !')' expression (','|&')') {pin=2}
+tensor_expression ::= '(' tensor_expression_entry+ ')'
+tuple_expression_entry ::= !']' expression (','|&']') {pin=2}
+tuple_expression ::= '[' tuple_expression_entry+ ']'
 
 //
 // TYPES
@@ -173,11 +179,11 @@ private atomic_type ::= (primitive_type | var_type | hole_type | type_identifier
 primitive_type ::= ('int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple')
 var_type ::= 'var'
 hole_type ::= '_'
-private tensor_type_element ::= !')' type (','|&')') {pin=2}
-tensor_type ::= '(' tensor_type_element* ')'
+tensor_type_entry ::= !')' type (','|&')') {pin=2}
+tensor_type ::= '(' tensor_type_entry* ')'
 unit_type ::= unit_literal
-private tuple_type_element ::= !'[' type (','|&']') {pin=2}
-tuple_type ::= '[' tuple_type_element* ']'
+tuple_type_entry ::= !'[' type (','|&']') {pin=2}
+tuple_type ::= '[' tuple_type_entry* ']'
 function_type ::= atomic_type '->' type {pin=2}
 
 //

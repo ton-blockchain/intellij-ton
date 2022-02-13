@@ -1,13 +1,13 @@
 package com.github.andreypfau.intellijton.func.completion
 
 import com.github.andreypfau.intellijton.func.psi.*
-import com.github.andreypfau.intellijton.func.resolve.resolveFunctions
-import com.github.andreypfau.intellijton.func.resolve.resolveStdlibFile
+import com.github.andreypfau.intellijton.func.resolve.resolveAllFunctions
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.patterns.StandardPatterns
+import com.intellij.psi.util.elementType
 import com.intellij.util.ProcessingContext
 
 class FuncFunctionCompletionContributor : CompletionContributor(), DumbAware {
@@ -35,10 +35,10 @@ class FuncFunctionCompletionProvider(
     ) {
         if (parameters.position.text == CompletionInitializationContext.DUMMY_IDENTIFIER_TRIMMED) return
         val file = parameters.originalFile as? FuncFile ?: return
-        val stdlibFunctions = file.resolveStdlibFile()?.resolveFunctions() ?: emptySequence()
-        val fileFunctions = file.resolveFunctions()
-
-        (stdlibFunctions + fileFunctions).map { functionDef ->
+        val functions = file.resolveAllFunctions().filter {
+            it.functionName.firstChild.elementType === FuncTypes.IDENTIFIER
+        }
+        functions.map { functionDef ->
             val parameterList = functionDef.parameterList.text
             val functionReturn = functionDef.functionReturn.text
             LookupElementBuilder

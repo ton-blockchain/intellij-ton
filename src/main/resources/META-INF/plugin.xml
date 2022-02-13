@@ -58,9 +58,9 @@
         <colorSettingsPage implementation="com.github.andreypfau.intellijton.fift.ide.FiftColorSettingsPage"/>
         <internalFileTemplate name="Fift File"/>
 
-        <!--  Bug of Cells File -->
+        <!--  Bag of Cells File -->
 
-        <fileType name="Bug of Cells"
+        <fileType name="Bag of Cells"
                   implementationClass="com.github.andreypfau.intellijton.boc.BocFileType"
                   fieldName="INSTANCE"
                   extensions="boc"/>

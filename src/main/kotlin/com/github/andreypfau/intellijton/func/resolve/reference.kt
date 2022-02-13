@@ -1,11 +1,6 @@
 package com.github.andreypfau.intellijton.func.resolve
 
-import com.github.andreypfau.intellijton.func.psi.FuncElement
-import com.github.andreypfau.intellijton.func.psi.FuncFunctionCall
-import com.github.andreypfau.intellijton.func.psi.FuncFunctionDefinition
-import com.github.andreypfau.intellijton.func.psi.FuncReferenceElement
-import com.github.andreypfau.intellijton.func.psi.FuncTypes
-import com.github.andreypfau.intellijton.func.psi.funcPsiFactory
+import com.github.andreypfau.intellijton.func.psi.*
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import com.intellij.psi.util.elementType
@@ -16,7 +11,7 @@ interface FuncReference : PsiReference {
     fun multiResolve(): Sequence<PsiElement>
 }
 
-abstract class FuncReferenceBase<T : FuncReferenceElement>(
+abstract class FuncReferenceBase<T : FuncNamedElement>(
     element: T
 ) : PsiPolyVariantReferenceBase<T>(element), FuncReference {
     override fun calculateDefaultRangeInElement() = TextRange(0, element.textRange.length)
@@ -26,7 +21,8 @@ abstract class FuncReferenceBase<T : FuncReferenceElement>(
         multiResolve().map(::PsiElementResolveResult).toList().toTypedArray()
 
     override fun handleElementRename(newElementName: String): PsiElement {
-        doRename(element.referenceNameElement, newElementName)
+        val name = element.nameIdentifier ?: return element
+        doRename(name, newElementName)
         return element
     }
     protected open fun doRename(identifier: PsiElement, newName: String) {
@@ -36,33 +32,25 @@ abstract class FuncReferenceBase<T : FuncReferenceElement>(
 }
 
 class FuncFunctionCallReference(
-    element: FuncFunctionCall
+    element: FuncFunctionCall,
 ) : FuncReferenceBase<FuncFunctionCall>(element), FuncReference {
-    override fun calculateDefaultRangeInElement(): TextRange {
-        val range = super.calculateDefaultRangeInElement()
-        println("element=${element.text} range: $range")
-        val ref = element.identifier.reference
-        println("ref: $ref")
-        return TextRange.create(0, range.length+5)
-    }
-
+    override fun calculateDefaultRangeInElement(): TextRange = element.functionCallIdentifier.textRange
     fun resolveFunctionCall(): Sequence<FuncFunctionDefinition> {
         val element = element
-        val name = element.name ?: return emptySequence()
+        val name = element.functionCallIdentifier.identifier.text
         val file = element.resolveFile()
-
-        val parameterCount = element.tensorExpression?.children?.size ?: 0
-
-        val stdlibFunctions = file.resolveStdlibFile()?.resolveFunctions() ?: emptySequence()
-        val fileFunctions = file.resolveFunctions()
-        val functions =  (stdlibFunctions + fileFunctions).filter {
+        return file.resolveAllFunctions().filter {
             it.name == name
-        }.filter {
-            it.parameterList.parameterDeclarationList.size == parameterCount
-        }.toList()
-        return functions.asSequence()
+        }
     }
 
     override fun multiResolve(): Sequence<PsiElement> = resolveFunctionCall()
+}
+
+class FuncFunctionCallIdentifierReference(
+    element: FuncFunctionCallIdentifier
+) : FuncReferenceBase<FuncFunctionCallIdentifier>(element) {
+    override fun multiResolve(): Sequence<PsiElement> =
+        (element.parent as FuncFunctionCallMixin).reference.multiResolve()
 }
 

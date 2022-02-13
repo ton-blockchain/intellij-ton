@@ -10,6 +10,10 @@ import com.intellij.psi.util.findParentOfType
 fun FuncElement.resolveFile()= if (this is FuncFile) this else findParentOfType()!!
 fun FuncFile.resolveFunctions() = childrenOfType<FuncFunctionDefinition>().asSequence()
 fun FuncFile.resolveStdlibFile(): FuncFile? {
+    if (name == "stdlib.fc") return this
     val virtualFile = virtualFile.parent.findChild("stdlib.fc") ?: return null
     return project.psiManager.findFile(virtualFile) as? FuncFile
 }
+
+fun FuncFile.resolveAllFunctions() =
+    (resolveStdlibFile()?.resolveFunctions() ?: emptySequence()) + resolveFunctions()

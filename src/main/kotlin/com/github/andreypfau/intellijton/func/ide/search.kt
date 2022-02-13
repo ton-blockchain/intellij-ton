@@ -2,6 +2,7 @@ package com.github.andreypfau.intellijton.func.ide
 
 import com.github.andreypfau.intellijton.func.core.FuncParserDefinition
 import com.github.andreypfau.intellijton.func.parser.FuncLexerAdapter
+import com.github.andreypfau.intellijton.func.psi.FuncNamedElement
 import com.github.andreypfau.intellijton.func.psi.FuncTypes
 import com.intellij.lang.HelpID
 import com.intellij.lang.cacheBuilder.DefaultWordsScanner
@@ -12,8 +13,7 @@ import com.intellij.psi.tree.TokenSet
 
 class FuncFindUsagesProvider : FindUsagesProvider {
     override fun getWordsScanner(): WordsScanner = FuncWordScanner()
-//    override fun canFindUsagesFor(element: PsiElement) = element is FuncNamedElement
-    override fun canFindUsagesFor(element: PsiElement) = false
+    override fun canFindUsagesFor(element: PsiElement) = element is FuncNamedElement
 
     override fun getHelpId(element: PsiElement) = HelpID.FIND_OTHER_USAGES
     override fun getType(element: PsiElement) = ""

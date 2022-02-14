@@ -1,5 +1,5 @@
-import java.time.Instant
 import java.time.Clock
+import java.time.Instant
 plugins {
     id("org.jetbrains.intellij") version "1.3.1"
     kotlin("jvm") version "1.6.10"
@@ -9,7 +9,7 @@ plugins {
 
 group = "com.github.andreypfau"
 version = "0.4.0"
-val isSnapshot = true
+val isSnapshot = false
 
 if (isSnapshot) {
     val time = Instant.now(Clock.systemUTC())

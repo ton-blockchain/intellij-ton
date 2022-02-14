@@ -71,7 +71,7 @@
         TILDA='~'
         WHITE_SPACE='regexp:\s+'
         COMMENT='regexp:(;;.*)|(\{-(\s|\S)*?-})'
-        DECIMNAL_NUMBER_LITERAL='regexp:([0-9][_0-9]*)'
+        DECIMNAL_NUMBER_LITERAL='regexp:(-?[0-9][_0-9]*)'
         HEX_NUMBER_LITERAL='regexp:(0[xX][_0-9a-fA-F]+)'
         BINARY_NUMBER_LITERAL='regexp:(0[bB][_0-1]+)'
         STRING_LITERAL='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'

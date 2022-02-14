@@ -31,8 +31,13 @@
                            implementationClass="com.github.andreypfau.intellijton.func.ide.FuncBraceMatcher"/>
         <lang.findUsagesProvider language="FunC"
                                  implementationClass="com.github.andreypfau.intellijton.func.ide.FuncFindUsagesProvider"/>
+        <completion.contributor language="FunC"
+                                implementationClass="com.github.andreypfau.intellijton.func.completion.FuncFunctionCompletionContributor"/>
         <colorSettingsPage implementation="com.github.andreypfau.intellijton.func.ide.FuncColorSettingsPage"/>
         <internalFileTemplate name="FunC Contract"/>
+
+        <stubIndex implementation="com.github.andreypfau.intellijton.func.stub.FuncNamedElementIndex"/>
+        <stubIndex implementation="com.github.andreypfau.intellijton.func.stub.FuncFunctionIndex"/>
 
         <!--  Fift Language -->
 
@@ -45,16 +50,21 @@
                                implementationClass="com.github.andreypfau.intellijton.fift.core.FiftParserDefinition"/>
         <lang.syntaxHighlighterFactory language="Fift"
                                        implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftSyntaxHighlighterFactory"/>
+        <annotator language="Fift" implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftAnnotator"/>
         <lang.commenter language="Fift"
                         implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftCommenter"/>
         <lang.braceMatcher language="Fift"
                            implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftBraceMatcher"/>
+        <completion.contributor language="Fift"
+                                implementationClass="com.github.andreypfau.intellijton.fift.completion.FiftWordCompletionContributor"/>
+        <lang.findUsagesProvider language="Fift"
+                                 implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftFindUsagesProvider"/>
         <colorSettingsPage implementation="com.github.andreypfau.intellijton.fift.ide.FiftColorSettingsPage"/>
         <internalFileTemplate name="Fift File"/>
 
-        <!--  Bug of Cells File -->
+        <!--  Bag of Cells File -->
 
-        <fileType name="Bug of Cells"
+        <fileType name="Bag of Cells"
                   implementationClass="com.github.andreypfau.intellijton.boc.BocFileType"
                   fieldName="INSTANCE"
                   extensions="boc"/>

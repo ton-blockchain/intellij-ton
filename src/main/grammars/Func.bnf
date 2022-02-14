@@ -13,223 +13,185 @@
     tokenTypeClass="com.github.andreypfau.intellijton.func.psi.FuncTokenType"
 
     tokens = [
-        COMMENT='regexp:(;;.*)|(\{-[\s\S]*?-})'
-        stringLiteral='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'
-        decimalNumber='regexp:([0-9][_0-9]*)'
-        fixedNumber='regexp:(([0-9][_0-9]*)+\.[_0-9]*|([0-9][_0-9]*)*\.([0-9][_0-9]*))'
-        scientificNumber='regexp:((([0-9][_0-9]*)+|([0-9][_0-9]*)+\.[_0-9]*|([0-9][_0-9]*|[0-9])*\.[_0-9]+)[Ee][+-]?[_0-9]+)'
-        hexNumber='regexp:(0[xX][_0-9a-fA-F]+)'
-        booleanLiteral='regexp:true|false'
-        space='regexp:\s+'
-
-        IDENTIFIER='regexp:[a-zA-Z_$][a-zA-Z_$0-9:?]*'
+        RETURN='return'
+        REPEAT='repeat'
+        IF='if'
+        IFNOT='ifnot'
+        ELSEIF='elseif'
+        ELSEIFNOT='elseifnot'
+        ELSE='else'
+        WHILE='while'
+        DO='do'
+        UNTIL='until'
+        FORALL='forall'
+        IMPURE='impure'
+        INLINE='inline'
+        INLINE_REF='inline_ref'
+        METHOD_ID='method_id'
         ASM='asm'
+        GLOBAL='global'
+        VAR='var'
+        INT='int'
+        CELL='cell'
+        SLICE='slice'
+        BUILDER='builder'
+        CONT='cont'
+        TUPLE='tuple'
+        TYPE='type'
+        TRUE='true'
+        FALSE='false'
         SEMICOLON=';'
         COMMA=','
         PLUS='+'
         MINUS='-'
         MULT='*'
         DIV='/'
-        EXPONENT='**'
         NOT='!'
         ASSIGN='='
-        TO='=>'
-        EQ='=='
-        NEQ='!='
-        INC='++'
-        DEC='--'
         PLUS_ASSIGN='+='
         MINUS_ASSIGN='-='
         MULT_ASSIGN='*='
         DIV_ASSIGN='/='
-        OR_ASSIGN='|='
-        XOR_ASSIGN='^='
-        AND_ASSIGN='&='
-        LSHIFT_ASSIGN='<<='
-        RSHIFT_ASSIGN='>>='
-        PERCENT_ASSIGN='%='
+        EQUALS='=='
         LESS='<'
-        LESSEQ='<='
-        MORE='>'
-        MOREEQ='>='
-        CARET='^'
-        AND='&'
-        ANDAND='&&'
-        OR='|'
-        OROR='||'
+        GREATER='>'
+        LESS_EQUALS='<='
+        GREATER_EQUALS='>='
+        NOT_EQUALS='!='
+        IN_RANGE='<=>'
         LBRACKET='['
         RBRACKET=']'
         LBRACE='{'
         RBRACE='}'
         LPAREN='('
         RPAREN=')'
+        UNDERSCORE='_'
+        ARROW='->'
+        DOT='.'
+        TILDA='~'
+        WHITE_SPACE='regexp:\s+'
+        COMMENT='regexp:(;;.*)|(\{-(\s|\S)*?-})'
+        DECIMNAL_NUMBER_LITERAL='regexp:(-?[0-9][_0-9]*)'
+        HEX_NUMBER_LITERAL='regexp:(0[xX][_0-9a-fA-F]+)'
+        BINARY_NUMBER_LITERAL='regexp:(0[bB][_0-1]+)'
+        STRING_LITERAL='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'
+        IDENTIFIER="regexp:(`.*`)|(([a-zA-Z_](\w|['?:])+)|([a-zA-Z]))"
     ]
-
-    extends(".*Expression")=Expression
-    extends(".*TypeName")=TypeName
 }
 
-SourceUnit ::= (
-        FunctionDefinition
-        | ConstantVariableDeclaration
-        | Expression
-    )*
-private UntilSemicolonRecover ::= !(';')
-private UntilBraceRecover ::= !('}')
-
-ConstantIdentifier ::= IDENTIFIER
-ConstantVariableDeclaration ::= 'global' TypeName ConstantIdentifier ('=' Expression)? ';'
-
-Placeholder ::= '_'
-ReturnDef ::=
-    TypeName |
-    TypeNameList |
-    '[' ( TypeName (',' TypeName)* )? ']' |
-    Placeholder {
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncReturnDefMixin"
-}
-
-ParameterIdentifier ::= IDENTIFIER
-ParameterDef ::= TypeName ParameterIdentifier? {
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncParameterDefMixin"
-}
-ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
-
-FunctionIdentifier ::= IDENTIFIER
-AsmInstruction ::= StringLiteral
-FunctionDefinition ::= ReturnDef FunctionIdentifier ParameterList FunctionSpecifiers*
-((ASM AsmInstruction* )? ';' | Block ) {
-    pin = 2
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionDefinitionMixin"
+private root ::= (function_definition | global_var_declarations)*
+function_definition ::= (type_variables_list)? function_return function_name parameter_list 'impure'? inline_specifier? method_id_specifier? (';' | block_statement | asm_function_body) {
     implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionDefinitionMixin"
+    stubClass = "com.github.andreypfau.intellijton.func.stub.FuncFunctionDefinitionStub"
+    elementTypeClass = "com.github.andreypfau.intellijton.func.stub.FuncFunctionDefinitionStub.Type"
+    elementTypeFactory = "com.github.andreypfau.intellijton.func.stub.StubKt.factory"
+}
+function_return ::= type
+
+type_variables_list ::= 'forall' (('type')? type_identifier (',' ('type')? type_identifier)*)? '->' {pin=1}
+inline_specifier ::= ('inline' | 'inline_ref')
+method_id_specifier ::= 'method_id' ('(' number_literal ')')? {pin=1}
+
+asm_function_body ::= asm_specifier (asm_instruction)+ ';'
+asm_specifier ::= 'asm' ('(' (IDENTIFIER)* ('->' (number_literal)*)? ')')? {pin=1}
+asm_instruction ::= STRING_LITERAL
+
+private parameter_list_recovery ::= !')'
+private parameter_list_begin ::= '(' parameter_list_element* {recoverWhile=parameter_list_recovery}
+private parameter_list_element ::= !(')') parameter_declaration (',' | &')') { pin=2 }
+parameter_declaration ::= ((type) (IDENTIFIER | '_')) | IDENTIFIER | '_' |
+parameter_list ::= parameter_list_begin ')'
+
+global_var_declarations ::= 'global' global_var_declaration (',' global_var_declaration)* ';' {pin=1}
+global_var_declaration ::= ((type) IDENTIFIER) | IDENTIFIER
+
+//
+// STATEMENTS
+//
+
+private statement ::= (return_statement | block_statement | empty_statement | repeat_statement | if_statement | do_statement | while_statement | expression_statement)
+
+private block_statement_recovery ::= !('}')
+private block_statement_element ::= !('}') statement* { recoverWhile=block_statement_recovery }
+block_statement ::= '{' (block_statement_element)* '}'
+
+return_statement ::= 'return' expression ';' {pin=1}
+expression_statement ::= expression ';' {pin=1}
+empty_statement ::= ';'
+repeat_statement ::= 'repeat' expression block_statement {pin=1}
+if_statement ::= ('if' | 'ifnot') expression block_statement (else_statement|elseif_statement|elseifnot_statement)? {pin=1}
+elseif_statement ::= 'elseif' expression block_statement (elseifnot_statement|else_statement)? {pin=1}
+elseifnot_statement ::= 'elseifnot' expression block_statement (else_statement)? {pin=1}
+else_statement ::= 'else' block_statement {pin=1}
+do_statement ::= 'do' block_statement 'until' expression {pin=1}
+while_statement ::= 'while' expression block_statement {pin=1}
+
+//
+// EXPRESSIONS
+//
+
+private expression ::= expr10
+private expr10 ::= expr13 (('=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '~>>=' | '^>>=' | '&=' | '|=' | '^=') expr10)?
+private expr13 ::= expr15 ('?' expression ':' expr13)?
+private expr15 ::= expr17 (('==' | '<' | '>' | '<=' | '>=' | '!=' | '<=>') expr17)?
+private expr17 ::= expr20 (('<<' | '>>' | '~>>' | '^>>') expr20)*
+private expr20 ::= ('-')? expr30 (('-' | '+' | '|' | '^') expr30)*
+private expr30 ::= expr75 (('*' | '/' | '%' | '~/' | '^/' | '~%' | '^%' | '/%' | '&') expr75)*
+private expr75 ::= ('~')? expr80
+private expr80 ::= expr90 (method_call)*
+private expr90 ::= (variable_declaration | function_call | expr100)
+private expr100 ::= (type_expression | nontype_expr100)
+private nontype_expr100 ::= (tensor_expression | tuple_expression | unit_literal | primitive_type | number_literal | boolean_literal | '_' | IDENTIFIER)
+
+method_call ::= (dot_method_call_identifier | tilda_method_call_identifier) expr100
+dot_method_call_identifier ::= '.' IDENTIFIER {pin=1}
+tilda_method_call_identifier ::= '~' IDENTIFIER {pin=1}
+
+variable_declaration ::= type_expression (IDENTIFIER | tuple_expression | tensor_expression | unit_literal)
+function_call ::= function_call_identifier (tensor_expression | unit_literal) {
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionCallMixin"
+}
+function_call_identifier ::= IDENTIFIER {
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionCallIdentifierMixin"
 }
 
-DeclarationIdentifier ::= IDENTIFIER
-DeclarationItem ::= DeclarationIdentifier ','? | ','
-DeclarationList ::= '(' DeclarationItem*    ')'
-TypedDeclarationItem ::= (TypeName)? DeclarationIdentifier ','? | ','
-TypedDeclarationList ::= '(' TypedDeclarationItem*    ')'
+type_expression ::= (primitive_type | 'type' | var_type | parenthesized_type_expression | tensor_type_expression | tuple_type_expression)
+parenthesized_type_expression ::= '(' type_expression ')'
+tensor_type_expression_entry ::= !')' type_expression (','|&')') {pin=2}
+tensor_type_expression ::= '(' tensor_type_expression_entry+ ')'
+tuple_type_expression_entry ::= !']' type_expression (','|&']') {pin=2}
+tuple_type_expression ::= '[' tuple_type_expression_entry+ ']'
 
-TypeNameItem ::= TypeName ','? | ','
-TypeNameList ::= '(' TypeNameItem* ')'
+tensor_expression_entry ::= !')' expression (','|&')') {pin=2}
+tensor_expression ::= '(' tensor_expression_entry+ ')'
+tuple_expression_entry ::= !']' expression (','|&']') {pin=2}
+tuple_expression ::= '[' tuple_expression_entry+ ']'
 
-VariableIdentifier ::= IDENTIFIER
-VariableDeclaration ::=
-        DeclarationList |
-        TypedDeclarationList |
-        TypeNameList VariableIdentifier |
-        TypeName VariableIdentifier |
-        TypeName TypedDeclarationList
+//
+// TYPES
+//
 
-TypeName ::= PrimitiveTypeName
+private type ::= (function_type | atomic_type)
+private atomic_type ::= (primitive_type | var_type | hole_type | type_identifier | unit_type | tensor_type | tuple_type)
+primitive_type ::= ('int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple')
+var_type ::= 'var'
+hole_type ::= '_'
+tensor_type_entry ::= !')' type (','|&')') {pin=2}
+tensor_type ::= '(' tensor_type_entry* ')'
+unit_type ::= unit_literal
+tuple_type_entry ::= !'[' type (','|&']') {pin=2}
+tuple_type ::= '[' tuple_type_entry* ']'
+function_type ::= atomic_type '->' type {pin=2}
 
-FunctionSpecifiers ::= impure | inline | inline_ref | method_id
+//
+// LITERALS
+//
 
-private UnfinishedBlock ::= '{' (Statement)* {
-        pin = 1
-        recoverWhile = UntilBraceRecover
-}
-Block ::= UnfinishedBlock '}'
-
-private FinishedStatement ::= SimpleStatement | ReturnSt  {
-    recoverWhile = UntilSemicolonRecover
-}
-Statement ::=
-    IfStatement
-    | IfNotStatement
-    | WhileStatement
-    | DoUntilStatement
-    | RepeatStatement
-    | Block
-    | ReturnTupleStatement
-    | FinishedStatement ';'
-
-ReturnTupleStatement ::= return SeqExpression ';'
-
-private ExpressionStatement ::= Expression
-private ConditionExpression ::= ('(' Expression ')' | Expression)
-IfStatement ::= if ConditionExpression Block (( elseif ConditionExpression Block ( (elseifnot ConditionExpression Block (else Block)? ) | else Block)? ) | ( else Block ))? {pin=1}
-IfNotStatement ::= ifnot ('(' Expression ')' | Expression) Block ( else Block )? {pin=1}
-WhileStatement ::= while ('(' Expression ')' | Expression) Block {pin=1}
-RepeatStatement ::= repeat ('(' Expression ')' | Expression) Block {pin=1}
-private SimpleStatement ::= VariableDefinition | ExpressionStatement
-DoUntilStatement ::= do Block until ('(' Expression ')' | Expression) {pin=1}
-ReturnSt ::= return Expression? {pin=1}
-SeqExpression ::= '(' (Expression ',')* Expression? ','* ')'
-VariableDefinition ::= VariableDeclaration ( '=' Expression | SeqExpression )?
-
-Expression ::=
-    TernaryExpression
-    | OrExpression
-    | AndExpression
-    | CompExpression
-    | OrOpExpression
-    | XorOpExpression
-    | AndOpExpression
-    | EqExpression
-    | ShiftExpression
-    | MultDivExpression
-    | UnaryExpression
-    | AssignmentExpression
-    | HighestPriorityGroup
-    | PlusMinExpression
-    | InlineArrayExpression
-    | PrimaryExpression {
-
-    }
-
-private HighestPriorityGroup ::=
-    IndexAccessExpression
-    | MemberAccessExpression
-    | ModifierAccessExpression
-    | SeqExpression
-    | FunctionCallExpression
-
-AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression
-InlineArrayExpression ::= '[' Expression (',' Expression)* ']'
-TernaryExpression ::= Expression '?' RightTernaryExpression
-private RightTernaryExpression ::= Expression ':' Expression
-OrExpression ::= Expression '||' Expression
-AndExpression ::= Expression '&&' Expression
-EqExpression ::= Expression ('==' | '!=') Expression
-CompExpression ::= Expression ('<' | '>' | '<=' | '>=') Expression
-OrOpExpression ::= Expression '|' Expression
-XorOpExpression ::= Expression '^' Expression
-AndOpExpression ::= Expression '&' Expression
-ShiftExpression ::= Expression ('<<' | '>>') Expression
-PlusMinExpression ::= Expression ('+' | '-') Expression
-MultDivExpression ::= Expression ('*' | '/' | '%') Expression
-UnaryExpression ::= ('!' | '~' |'+' | '-') Expression {pin=1}
-
-PrimaryExpression ::= VarLiteral
-    | BooleanLiteral
-    | NumberLiteral
-    | HexLiteral
-    | StringLiteral
-    | PrimitiveTypeNameExpression
-
-VarLiteral ::= IDENTIFIER {
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncVarLiteralMixin"
-}
-FunctionCallExpression ::= Expression FunctionInvocation {
-    mixin = 'com.github.andreypfau.intellijton.func.psi.FuncFunctionCallMixin'
-}
-private FunctionInvocation ::= '(' FunctionCallArguments? ')'
-FunctionCallArguments ::= Expression? ( ',' Expression )*
-MemberAccessIdentifier ::= IDENTIFIER
-MemberAccessExpression ::= Expression '.' MemberAccessIdentifier
-ModifierAccessIdentifier ::= IDENTIFIER
-ModifierAccessExpression ::= Expression '~' ModifierAccessIdentifier
-IndexAccessExpression ::= Expression '[' ( Expression? ':' Expression? | Expression? ) ']' {pin=2}
-
-BooleanLiteral ::= booleanLiteral
-NumberLiteral ::= ( HexNumber | DecimalNumber | FixedNumber | ScientificNumber)
-private HexLiteral ::= hexLiteral
-private StringLiteral ::= stringLiteral
-private HexNumber ::= hexNumber
-private FixedNumber ::= fixedNumber
-private DecimalNumber ::= decimalNumber
-private ScientificNumber ::= scientificNumber
-
-private PrimitiveTypeNameExpression ::= PrimitiveTypeName
-PrimitiveTypeName ::= int | cell | slice | builder | tuple | cont | var
+boolean_literal ::= TRUE | FALSE
+number_literal ::= DECIMNAL_NUMBER_LITERAL | HEX_NUMBER_LITERAL | BINARY_NUMBER_LITERAL
+function_name ::= ('~')? IDENTIFIER
+unit_literal ::= '(' ')'
+type_identifier ::= IDENTIFIER

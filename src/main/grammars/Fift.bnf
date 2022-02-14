@@ -13,7 +13,10 @@
     tokenTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftTokenType"
     
     tokens = [
-        SPACE='regexp:\s+'
+        CHAR='regexp:(char \S)'
+        ABORT='regexp:(abort"([^"\r\n\\]|\\.)*")'
+        PRINT='regexp:(\."([^"\r\n\\]|\\.)*")'
+        STRING_CONCAT='regexp:(\+"([^"\r\n\\]|\\.)*")'
         STRING_LITERAL='regexp:("([^"\r\n\\]|\\.)*")'
         NUMBER_DIGIT_LITERAL='regexp:(-?[0-9]+(/-?[0-9]+)?)'
         NUMBER_HEX_LITERAL='regexp:(0[xX][0-9a-fA-F]+)'
@@ -27,32 +30,61 @@
         RBRACE='}'
         LPAREN='('
         RPAREN=')'
-        STACK_WORD='regexp:(dup|drop|swap|rot|-rot|over|tuck|nip|2dup|2drop|2swap|pick|roll|-roll|exch|exch2|\?dup)(\s|\Z)'
-        CONDITION_WORD='regexp:(if|ifnot|cond)(\s|\Z)'
-        LOOP_WORD='regexp:(until|while|times)(\s|\Z)'
-        INCLUDE_WORD='include'
-        WORD='regexp:\S+'
-        STRING_WORD='regexp:(\S+"[^"]*"(\s|\n|\Z))'
-        COMMENT='regexp:(//.*)|(#.*)|(/\*[\s\S]*?\*/)'
+        UNDERSCORE_LPAREN='_('
+        DUP='dup'
+        DROP='drop'
+        SWAP='swap'
+        ROT='rot'
+        REV_ROT='-rot'
+        OVER='over'
+        TUCK='tuck'
+        NIP='nip'
+        DUP_DUP='2dup'
+        DROP_DROP='2drop'
+        SWAP_SWAP='2swap'
+        PICK='pick'
+        ROLL='roll'
+        REV_ROLL='-roll'
+        EXCH='exch'
+        EXCH2='exch2'
+        COND_DUP='?dup'
+        IF='if'
+        IFNOT='ifnot'
+        COND='cond'
+        UNTIL='until'
+        WHILE='while'
+        TIMES='times'
+        INCLUDE='include'
+        TRUE='true'
+        FALSE='false'
+        COLON=':'
+        DOUBLE_COLON='::'
+        DOUBLE_COLON_UNDERSCORE='::_'
+
+        COMMENT='regexp:(//.*)|(#.*)'
+        WHITE_SPACE='regexp:\s+'
+        IDENTIFIER='regexp:\S+'
     ]
-    extends(".*Literal") = Literal
+
+    implements(".*") = "com.github.andreypfau.intellijton.fift.psi.FiftElement"
 }
 
-Root ::= (Statement*)
-Statement ::= Include | Declaration | Block | Literal | WordStatement
-
-WordStatement ::= STACK_WORD | CONDITION_WORD | LOOP_WORD | WORD | STRING_WORD
-Declaration ::= Block ':' WORD
-Include ::= STRING_LITERAL INCLUDE_WORD
-
-NumberLiteral ::= NUMBER_DIGIT_LITERAL | NUMBER_HEX_LITERAL | NUMBER_BINARY_LITERAL
-Literal ::= STRING_LITERAL | NumberLiteral | SliceLiteral | ByteLiteral
-SliceLiteral ::= SLICE_BINARY_LITERAL | SLICE_HEX_LITERAL
-ByteLiteral ::= BYTE_HEX_LITERAL
-
-private UntilBraceRecover ::= !('}')
-private UnfinishedBlock ::= '{' (Statement)* {
-        pin = 1
-        recoverWhile = UntilBraceRecover
+private root ::= statement*
+private statement ::= (word_def | block | list | literal | word)
+word ::= stack_word | loop_word | cond_word | INCLUDE | CHAR | ABORT | PRINT | STRING_CONCAT | ordinary_word
+ordinary_word ::= IDENTIFIER {
+    mixin = "com.github.andreypfau.intellijton.fift.psi.FiftOrdinaryWordMixin"
 }
-Block ::= UnfinishedBlock '}'
+number_literal ::= NUMBER_DIGIT_LITERAL | NUMBER_HEX_LITERAL | NUMBER_BINARY_LITERAL
+boolean_literal ::= TRUE | FALSE
+block ::= '{' statement* '}'
+list ::= ('(' | '_(') statement* ')'
+literal ::= number_literal | boolean_literal | STRING_LITERAL | SLICE_BINARY_LITERAL | SLICE_HEX_LITERAL | BYTE_HEX_LITERAL
+stack_word ::= DUP | DROP | SWAP | ROT | REV_ROT | OVER | TUCK | NIP | DUP_DUP | DROP_DROP | SWAP_SWAP | PICK | ROLL | REV_ROLL | EXCH | EXCH2 | COND_DUP
+loop_word ::= UNTIL | WHILE | TIMES
+cond_word ::= IF | IFNOT | COND
+word_def ::= (block | ordinary_word) (':'|'::'|'::_') word_def_identifier {
+    implements = "com.github.andreypfau.intellijton.fift.psi.FiftNamedElement"
+    mixin = "com.github.andreypfau.intellijton.fift.psi.FiftWordDefMixin"
+}
+word_def_identifier ::= IDENTIFIER

@@ -1,9 +1,9 @@
-package com.github.andreypfau.intellijton.func.ide
+package com.github.andreypfau.intellijton.fift.ide
 
-import com.github.andreypfau.intellijton.func.core.FuncParserDefinition
+import com.github.andreypfau.intellijton.fift.core.FiftParserDefinition
+import com.github.andreypfau.intellijton.fift.psi.FiftNamedElement
+import com.github.andreypfau.intellijton.fift.psi.FiftTypes
 import com.github.andreypfau.intellijton.func.parser.FuncLexerAdapter
-import com.github.andreypfau.intellijton.func.psi.FuncNamedElement
-import com.github.andreypfau.intellijton.func.psi.FuncTypes
 import com.intellij.lang.HelpID
 import com.intellij.lang.cacheBuilder.DefaultWordsScanner
 import com.intellij.lang.cacheBuilder.WordsScanner
@@ -11,9 +11,9 @@ import com.intellij.lang.findUsages.FindUsagesProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
 
-class FuncFindUsagesProvider : FindUsagesProvider {
-    override fun getWordsScanner(): WordsScanner = FuncWordScanner()
-    override fun canFindUsagesFor(element: PsiElement) = element is FuncNamedElement
+class FiftFindUsagesProvider : FindUsagesProvider {
+    override fun getWordsScanner(): WordsScanner = FiftWordScanner()
+    override fun canFindUsagesFor(element: PsiElement) = element is FiftNamedElement
 
     override fun getHelpId(element: PsiElement) = HelpID.FIND_OTHER_USAGES
     override fun getType(element: PsiElement) = ""
@@ -21,9 +21,9 @@ class FuncFindUsagesProvider : FindUsagesProvider {
     override fun getNodeText(element: PsiElement, useFullName: Boolean) = ""
 }
 
-class FuncWordScanner : DefaultWordsScanner(
+class FiftWordScanner : DefaultWordsScanner(
     FuncLexerAdapter(),
-    TokenSet.create(FuncTypes.IDENTIFIER),
-    FuncParserDefinition.COMMENTS,
-    TokenSet.create(FuncTypes.STRING_LITERAL)
+    TokenSet.create(FiftTypes.IDENTIFIER),
+    FiftParserDefinition.COMMENTS,
+    TokenSet.create(FiftTypes.STRING_LITERAL)
 )

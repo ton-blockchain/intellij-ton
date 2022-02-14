@@ -13,7 +13,7 @@ class FuncBraceMatcher : PairedBraceMatcher {
 
     override fun getCodeConstructStart(file: PsiFile?, openingBraceOffset: Int): Int = openingBraceOffset
 
-    companion object{
+    companion object {
         val BRACE_PAIRS = arrayOf(
             BracePair(FuncTypes.LBRACE, FuncTypes.RBRACE, false),
             BracePair(FuncTypes.LPAREN, FuncTypes.RPAREN, false),

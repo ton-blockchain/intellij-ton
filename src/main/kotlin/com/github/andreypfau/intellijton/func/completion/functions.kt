@@ -12,13 +12,17 @@ import com.intellij.util.ProcessingContext
 
 class FuncFunctionCompletionContributor : CompletionContributor(), DumbAware {
     init {
-        extend(CompletionType.BASIC, StandardPatterns.or(
-            PlatformPatterns.psiElement(FuncTypes.IDENTIFIER).inside(FuncTensorExpression::class.java),
-            PlatformPatterns.psiElement(FuncTypes.IDENTIFIER).inside(FuncTupleExpression::class.java)
-        ), FuncFunctionCompletionProvider(false))
-        extend(CompletionType.BASIC, StandardPatterns.or(
-            PlatformPatterns.psiElement(FuncTypes.IDENTIFIER).inside(FuncExpressionStatement::class.java)
-        ), FuncFunctionCompletionProvider(true))
+        extend(
+            CompletionType.BASIC, StandardPatterns.or(
+                PlatformPatterns.psiElement(FuncTypes.IDENTIFIER).inside(FuncTensorExpression::class.java),
+                PlatformPatterns.psiElement(FuncTypes.IDENTIFIER).inside(FuncTupleExpression::class.java)
+            ), FuncFunctionCompletionProvider(false)
+        )
+        extend(
+            CompletionType.BASIC, StandardPatterns.or(
+                PlatformPatterns.psiElement(FuncTypes.IDENTIFIER).inside(FuncExpressionStatement::class.java)
+            ), FuncFunctionCompletionProvider(true)
+        )
     }
 
     override fun beforeCompletion(context: CompletionInitializationContext) {

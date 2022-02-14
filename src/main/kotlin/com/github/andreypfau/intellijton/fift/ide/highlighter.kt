@@ -14,7 +14,7 @@ class FiftSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
 
 object FiftSyntaxHighlighter : SyntaxHighlighterBase() {
     override fun getHighlightingLexer() = FiftLexerAdapter()
-    override fun getTokenHighlights(tokenType: IElementType) = when(tokenType) {
+    override fun getTokenHighlights(tokenType: IElementType) = when (tokenType) {
         COMMENT -> FiftColor.COMMENT
         LBRACE, RBRACE -> FiftColor.BRACES
         LBRACKET, RBRACKET -> FiftColor.BRACKETS

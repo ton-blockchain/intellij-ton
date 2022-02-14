@@ -14,7 +14,7 @@ import com.intellij.psi.StubBuilder
 import com.intellij.psi.stubs.*
 import com.intellij.psi.tree.IStubFileElementType
 
-fun factory(name: String): FuncStubElementType<*,*> = when(name) {
+fun factory(name: String): FuncStubElementType<*, *> = when (name) {
     "FUNCTION_DEFINITION" -> FuncFunctionDefinitionStub.Type
     else -> error("Can't reFuncve stub for $name")
 }
@@ -32,6 +32,7 @@ abstract class FuncStubElementType<S : StubElement<*>, P : FuncElement>(
 abstract class FuncStubbedElementImpl<StubT : StubElement<*>> : StubBasedPsiElementBase<StubT>, FuncElement {
     constructor(node: ASTNode) : super(node)
     constructor(stub: StubT, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
     override fun getReference(): FuncReference? = null
     override fun toString(): String = "${javaClass.simpleName}($elementType)"
 }
@@ -49,6 +50,7 @@ abstract class FuncStubbedNamedElementImpl<S> :
     override fun setName(name: String): PsiElement? = apply {
         nameIdentifier?.replace(project.funcPsiFactory.createIdentifier(name))
     }
+
     override fun getNavigationElement(): PsiElement = nameIdentifier ?: this
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
     override fun getPresentation() = PresentationData(name, "", getIcon(0), null)
@@ -56,12 +58,14 @@ abstract class FuncStubbedNamedElementImpl<S> :
 
 class FuncFileStub(file: FuncFile?) : PsiFileStubImpl<FuncFile>(file) {
     override fun getType() = Type
+
     object Type : IStubFileElementType<FuncFileStub>(FuncLanguage) {
         // bump version every time stub tree changes
         override fun getStubVersion() = 1
         override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
             override fun createStubForFile(file: PsiFile) = FuncFileStub(file as FuncFile)
         }
+
         override fun serialize(stub: FuncFileStub, dataStream: StubOutputStream) {}
         override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) = FuncFileStub(null)
         override fun getExternalId(): String = "func.file"

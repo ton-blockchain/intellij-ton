@@ -7,7 +7,7 @@ import com.github.andreypfau.intellijton.psiManager
 import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.findParentOfType
 
-fun FuncElement.resolveFile()= if (this is FuncFile) this else findParentOfType()!!
+fun FuncElement.resolveFile() = if (this is FuncFile) this else findParentOfType()!!
 fun FuncFile.resolveFunctions() = childrenOfType<FuncFunctionDefinition>().asSequence()
 fun FuncFile.resolveStdlibFile(): FuncFile? {
     if (name == "stdlib.fc") return this

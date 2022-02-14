@@ -2,7 +2,6 @@ package com.github.andreypfau.intellijton.func.ide
 
 import com.github.andreypfau.intellijton.func.psi.FuncFunctionName
 import com.github.andreypfau.intellijton.func.psi.FuncGlobalVarDeclaration
-import com.github.andreypfau.intellijton.func.psi.FuncGlobalVarDeclarations
 import com.github.andreypfau.intellijton.func.psi.FuncTypeIdentifier
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator

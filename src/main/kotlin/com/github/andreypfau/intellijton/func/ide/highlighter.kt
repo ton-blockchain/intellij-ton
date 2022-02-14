@@ -38,18 +38,23 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
     private fun keywords() = setOf(
         RETURN, REPEAT, IF, IFNOT, ELSEIF, ELSEIFNOT, ELSE, DO, UNTIL, WHILE, TYPE, VAR, GLOBAL
     )
+
     private fun functionKeywords() = setOf(
         FORALL, IMPURE, INLINE, INLINE_REF, METHOD_ID, ASM
     )
+
     private fun primitiveTypes() = setOf(
         INT, CELL, SLICE, BUILDER, CONT, TUPLE
     )
+
     private fun booleanLiterals() = setOf(
         TRUE, FALSE
     )
+
     private fun numberLiterals() = setOf(
         DECIMNAL_NUMBER_LITERAL, HEX_NUMBER_LITERAL, BINARY_NUMBER_LITERAL
     )
+
     private fun operatorSigns() = setOf(
         PLUS, MINUS, DIV, MULT, ASSIGN, PLUS_ASSIGN, MINUS_ASSIGN, DIV_ASSIGN, MULT_ASSIGN
     )

@@ -25,6 +25,7 @@ abstract class FuncReferenceBase<T : FuncNamedElement>(
         doRename(name, newElementName)
         return element
     }
+
     protected open fun doRename(identifier: PsiElement, newName: String) {
         check(identifier.elementType == FuncTypes.IDENTIFIER)
         identifier.replace(identifier.project.funcPsiFactory.createIdentifier(newName.replace(".fc", "")))

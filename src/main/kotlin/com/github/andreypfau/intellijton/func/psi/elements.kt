@@ -24,12 +24,15 @@ abstract class FuncNamedElementImpl(node: ASTNode) : FuncElementImpl(node), Func
     override fun setName(name: String): PsiElement = apply {
         nameIdentifier?.replace(project.funcPsiFactory.createIdentifier(name))
     }
+
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
 }
 
-abstract class FuncFunctionDefinitionMixin : FuncStubbedNamedElementImpl<FuncFunctionDefinitionStub>, FuncFunctionDefinition {
+abstract class FuncFunctionDefinitionMixin : FuncStubbedNamedElementImpl<FuncFunctionDefinitionStub>,
+    FuncFunctionDefinition {
     constructor(node: ASTNode) : super(node)
     constructor(stub: FuncFunctionDefinitionStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
     override fun getNameIdentifier(): PsiElement? = functionName.identifier
     override fun getIcon(flags: Int): Icon = FuncIcons.FUNCTION
     override fun getPresentation(): PresentationData {

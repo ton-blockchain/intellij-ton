@@ -13,10 +13,10 @@
     tokenTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftTokenType"
     
     tokens = [
+        CHAR='regexp:(char \S)'
         ABORT='regexp:(abort"([^"\r\n\\]|\\.)*")'
         PRINT='regexp:(\."([^"\r\n\\]|\\.)*")'
         STRING_CONCAT='regexp:(\+"([^"\r\n\\]|\\.)*")'
-        CHAR='regexp:(char \S)'
         STRING_LITERAL='regexp:("([^"\r\n\\]|\\.)*")'
         NUMBER_DIGIT_LITERAL='regexp:(-?[0-9]+(/-?[0-9]+)?)'
         NUMBER_HEX_LITERAL='regexp:(0[xX][0-9a-fA-F]+)'
@@ -61,9 +61,9 @@
         DOUBLE_COLON='::'
         DOUBLE_COLON_UNDERSCORE='::_'
 
+        COMMENT='regexp:(//.*)|(#.*)'
         WHITE_SPACE='regexp:\s+'
         IDENTIFIER='regexp:\S+'
-        COMMENT='regexp:(//.*)|(#.*)'
     ]
 
     implements(".*") = "com.github.andreypfau.intellijton.fift.psi.FiftElement"
@@ -83,7 +83,7 @@ literal ::= number_literal | boolean_literal | STRING_LITERAL | SLICE_BINARY_LIT
 stack_word ::= DUP | DROP | SWAP | ROT | REV_ROT | OVER | TUCK | NIP | DUP_DUP | DROP_DROP | SWAP_SWAP | PICK | ROLL | REV_ROLL | EXCH | EXCH2 | COND_DUP
 loop_word ::= UNTIL | WHILE | TIMES
 cond_word ::= IF | IFNOT | COND
-word_def ::= block (':'|'::'|'::_') word_def_identifier {
+word_def ::= (block | ordinary_word) (':'|'::'|'::_') word_def_identifier {
     implements = "com.github.andreypfau.intellijton.fift.psi.FiftNamedElement"
     mixin = "com.github.andreypfau.intellijton.fift.psi.FiftWordDefMixin"
 }

@@ -15,7 +15,7 @@ val isSnapshot = false
 if (isSnapshot) {
     val time = Instant.now(Clock.systemUTC())
     val formattedTime = time.toString().substring(2,16).replace("[-T:]".toRegex(), "")
-    version = "$version-SNAPSHOT-$formattedTime"
+    version = "$version-SNAPSHOT+$formattedTime"
     println("version: $version")
 }
 

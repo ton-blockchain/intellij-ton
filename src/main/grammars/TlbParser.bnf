@@ -1,0 +1,31 @@
+{
+    parserClass="com.github.andreypfau.intellijton.tlb.parser.TlbParser"
+    extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+    psiClassPrefix="Tlb"
+    psiImplClassSuffix="Impl"
+    psiPackage="com.github.andreypfau.intellijton.tlb.psi"
+    psiImplPackage="com.github.andreypfau.intellijton.tlb.psi.impl"
+    implements="com.github.andreypfau.intellijton.tlb.psi.TlbElement"
+
+    elementTypeHolderClass="com.github.andreypfau.intellijton.tlb.psi.TlbTypes"
+    elementTypeClass="com.github.andreypfau.intellijton.tlb.psi.TlbElementType"
+    tokenTypeClass="com.github.andreypfau.intellijton.tlb.psi.TlbTokenType"
+
+    tokens = [
+        LPAREN='('
+        RPAREN=')'
+        EQUALS='='
+        COLUMN=':'
+        WHITE_SPACE='regexp:\s+'
+        COMMENT='regexp:(//.*)'
+        IDENTIFIER='regexp:[a-zA-Z_]+'
+    ]
+}
+
+root ::= combinator_statement
+
+
+combinator_statement ::= combinator_declaration
+
+combinator_type_name ::= IDENTIFIER

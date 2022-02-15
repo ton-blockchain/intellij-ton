@@ -4,7 +4,7 @@
 [![JetBrains plugins][plugin-downloads-svg]][plugin-repo]
 [![Based on TON][ton-svg]][ton]
 
-### Available on JetBrains Marketplace:
+### Available on JetBrains Marketplace
 
 https://plugins.jetbrains.com/plugin/18541-ton-development
 

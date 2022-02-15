@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.cli.common.toBooleanLenient
 import java.time.Clock
 import java.time.Instant
 
@@ -8,13 +9,13 @@ plugins {
     id("org.jetbrains.qodana") version "0.1.13"
 }
 
-group = "com.github.andreypfau"
-version = "0.4.0"
-val isSnapshot = false
+group = properties("pluginGroup")
+version = properties("pluginVersion")
+val isSnapshot = properties("pluginSnapshot").toBooleanLenient() ?: false
 
 if (isSnapshot) {
     val time = Instant.now(Clock.systemUTC())
-    val formattedTime = time.toString().substring(2,16).replace("[-T:]".toRegex(), "")
+    val formattedTime = time.toString().substring(2, 16).replace("[-T:]".toRegex(), "")
     version = "$version-SNAPSHOT+$formattedTime"
     println("version: $version")
 }
@@ -68,4 +69,4 @@ tasks {
     }
 }
 
-
+fun properties(key: String) = project.findProperty(key).toString()

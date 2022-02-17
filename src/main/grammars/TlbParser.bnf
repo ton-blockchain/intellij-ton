@@ -59,10 +59,11 @@ constructor_binary_tag ::= BINARY_BITSTRING
 
 private field_list_recovery ::= !('='|']')
 field_list ::= (constraint | param)* {recoverWhile=field_list_recovery}
-constraint ::= '{' expr '}' {pin=1}
+constraint ::= '{' (implicit_param | expr) '}' {pin=1}
 param ::= named_param | unnamed_param
 named_param ::= ('_' | IDENTIFIER) ':' expr95
 unnamed_param ::= expr95
+implicit_param ::= IDENTIFIER ':' ('#'|'Type')
 
 type_name ::= IDENTIFIER
 

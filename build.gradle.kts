@@ -11,9 +11,8 @@ plugins {
 
 group = properties("pluginGroup")
 version = properties("pluginVersion")
-val isSnapshot = properties("pluginSnapshot").toBooleanLenient() ?: false
 
-if (isSnapshot) {
+if (properties("pluginSnapshot").toBooleanLenient() ?: false) {
     val time = Instant.now(Clock.systemUTC())
     val formattedTime = time.toString().substring(2, 16).replace("[-T:]".toRegex(), "")
     version = "$version-SNAPSHOT+$formattedTime"

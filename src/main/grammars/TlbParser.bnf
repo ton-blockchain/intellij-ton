@@ -80,7 +80,7 @@
 
 root ::= constructor_def*
 
-constructor_def ::= ( '_' | constructor_name ) field_list '=' type_name type* ';' {pin=1}
+constructor_def ::= ( '_' | constructor_name ) field_list '=' IDENTIFIER type* ';' {pin=1}
 
 constructor_name ::= IDENTIFIER constructor_tag?
 constructor_tag ::= HEX_TAG | BINARY_TAG
@@ -93,9 +93,8 @@ named_param ::= ('_' | IDENTIFIER) ':' expr95
 unnamed_param ::= expr95
 implicit_param ::= IDENTIFIER ':' ( '#' | 'Type' )
 
-type_name ::= IDENTIFIER
+anonymous_constructor ::= '[' field_list ']' {pin=1}
 
-int_const ::= NUMBER
 cell_ref ::= '^' type {pin=1}
 
 expression ::= expr10
@@ -107,9 +106,7 @@ private expr95 ::= expr97 cond_type?
 private cond_type ::= '?' type {pin=1}
 private expr97 ::= type ( '.' type )?
 
-anonymous_constructor ::= '[' field_list ']' {pin=1}
-
-type ::= '~'? ( paren_expr | anonymous_constructor | int_const | cell_ref | builtin_type | NUMBER | IDENTIFIER )
+type ::= '~'? ( paren_expr | anonymous_constructor | cell_ref | builtin_type | NUMBER | IDENTIFIER )
 paren_expr ::= "(" expression ')' {pin=1}
 builtin_type ::= '#' | '##' | '#<' | '#<=' | 'Any' | 'Cell' | 'int' | 'Type' | uint | bits
 uint ::= 'uint' | 'uint1' | 'uint2' | 'uint4' | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'uint128' | 'uint256' | 'uint257'

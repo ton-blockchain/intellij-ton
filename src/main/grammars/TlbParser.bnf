@@ -71,48 +71,45 @@
         BITS1024 = 'bits1023'
         WHITE_SPACE='regexp:\s+'
         COMMENT='regexp:(//.*)'
-        HEX_BITSTRING='regexp:#[0-9a-f]*_?'
-        BINARY_BITSTRING='regexp:\$[01]*_?'
-        INT_CONST='regexp[0-9]+'
-        IDENTIFIER='regexp:[a-zA-Z_][0-9a-zA-Z0-9_]*'
+        HEX_TAG='regexp:#[0-9a-f]*_?'
+        BINARY_TAG='regexp:\$[01]*_?'
         NUMBER='regexp:[0-9]+'
+        IDENTIFIER='regexp:[a-zA-Z_][0-9a-zA-Z0-9_]*'
     ]
 }
 
 root ::= constructor_def*
 
-constructor_def ::= ('_' | constructor_name) field_list '=' type_name type* ';' {pin=1}
+constructor_def ::= ( '_' | constructor_name ) field_list '=' type_name type* ';' {pin=1}
 
 constructor_name ::= IDENTIFIER constructor_tag?
-constructor_tag ::= constructor_hex_tag | constructor_binary_tag
-constructor_hex_tag ::= HEX_BITSTRING
-constructor_binary_tag ::= BINARY_BITSTRING
+constructor_tag ::= HEX_TAG | BINARY_TAG
 
 private field_list_recovery ::= !('='|']')
-field_list ::= (constraint | param)* {recoverWhile=field_list_recovery}
-constraint ::= '{' (implicit_param | expression) '}' {pin=1}
+field_list ::= ( constraint | param )* {recoverWhile=field_list_recovery}
+constraint ::= '{' ( implicit_param | expression ) '}' {pin=1}
 param ::= named_param | unnamed_param
 named_param ::= ('_' | IDENTIFIER) ':' expr95
 unnamed_param ::= expr95
-implicit_param ::= IDENTIFIER ':' ('#'|'Type')
+implicit_param ::= IDENTIFIER ':' ( '#' | 'Type' )
 
 type_name ::= IDENTIFIER
 
-int_const ::= INT_CONST
+int_const ::= NUMBER
 cell_ref ::= '^' type {pin=1}
 
 expression ::= expr10
 private expr10 ::= expr20 '=' expr20 | expr20 '<=' expr20 | expr20 '<' expr20 | expr20 '>=' expr20 | expr20 '>' expr20 | expr20
-private expr20 ::= expr30 ('+' expr30)*
-private expr30 ::= expr90 ('*' expr90)*
+private expr20 ::= expr30 ( '+' expr30 )*
+private expr30 ::= expr90 ( '*' expr90 )*
 private expr90 ::= expr95+
 private expr95 ::= expr97 cond_type?
 private cond_type ::= '?' type {pin=1}
-private expr97 ::= type ('.' type)?
+private expr97 ::= type ( '.' type )?
 
 anonymous_constructor ::= '[' field_list ']' {pin=1}
 
-type ::= '~'? (paren_expr | anonymous_constructor | int_const | cell_ref | builtin_type | NUMBER | IDENTIFIER)
+type ::= '~'? ( paren_expr | anonymous_constructor | int_const | cell_ref | builtin_type | NUMBER | IDENTIFIER )
 paren_expr ::= "(" expression ')' {pin=1}
 builtin_type ::= '#' | '##' | '#<' | '#<=' | 'Any' | 'Cell' | 'int' | 'Type' | uint | bits
 uint ::= 'uint' | 'uint1' | 'uint2' | 'uint4' | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'uint128' | 'uint256' | 'uint257'

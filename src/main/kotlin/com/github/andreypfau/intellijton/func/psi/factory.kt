@@ -11,7 +11,7 @@ val Project.funcPsiFactory get() = FuncPsiFactory(this)
 class FuncPsiFactory(val project: Project) {
 
     fun createIdentifier(name: String): PsiElement =
-        createFromText<FuncFunctionDefinition>("() $name();")?.functionName?.identifier
+        createFromText<FuncFunction>("() $name();")?.functionName?.identifier
             ?: error("Failed to create identifier: `$name`")
 
     private inline fun <reified T : FuncElement> createFromText(code: CharSequence): T? =

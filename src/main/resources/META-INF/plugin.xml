@@ -21,7 +21,7 @@
                   language="FunC"
                   extensions="fc"/>
         <lang.parserDefinition language="FunC"
-                               implementationClass="com.github.andreypfau.intellijton.func.core.FuncParserDefinition"/>
+                               implementationClass="com.github.andreypfau.intellijton.func.ide.FuncParserDefinition"/>
         <lang.syntaxHighlighterFactory language="FunC"
                                        implementationClass="com.github.andreypfau.intellijton.func.ide.FuncSyntaxHighlighterFactory"/>
         <annotator language="FunC" implementationClass="com.github.andreypfau.intellijton.func.ide.FuncAnnotator"/>

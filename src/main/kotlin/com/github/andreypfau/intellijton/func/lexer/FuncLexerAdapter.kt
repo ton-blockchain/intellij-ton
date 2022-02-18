@@ -1,4 +1,4 @@
-package com.github.andreypfau.intellijton.func.parser
+package com.github.andreypfau.intellijton.func.lexer
 
 import com.intellij.lexer.FlexAdapter
 

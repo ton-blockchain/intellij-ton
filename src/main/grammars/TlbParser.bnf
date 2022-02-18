@@ -80,22 +80,22 @@
 
 root ::= constructor_def*
 
-constructor_def ::= ( '_' | constructor_name ) field_list '=' IDENTIFIER type* ';' {pin=1}
+constructor_def ::= ( '_' | constructor_name ) field_list '=' IDENTIFIER type_expression* ';' {pin=1}
 
 constructor_name ::= IDENTIFIER constructor_tag?
 constructor_tag ::= HEX_TAG | BINARY_TAG
 
-private field_list_recovery ::= !('='|']')
+private field_list_recovery ::= !( '=' | ']' )
 field_list ::= ( constraint | param )* {recoverWhile=field_list_recovery}
 constraint ::= '{' ( implicit_param | expression ) '}' {pin=1}
 param ::= named_param | unnamed_param
-named_param ::= ('_' | IDENTIFIER) ':' expr95
-unnamed_param ::= expr95
+private named_param ::= ( '_' | IDENTIFIER ) ':' expr95
+private unnamed_param ::= expr95
 implicit_param ::= IDENTIFIER ':' ( '#' | 'Type' )
 
 anonymous_constructor ::= '[' field_list ']' {pin=1}
 
-cell_ref ::= '^' type {pin=1}
+cell_ref ::= '^' type_expression {pin=1}
 
 expression ::= expr10
 private expr10 ::= expr20 '=' expr20 | expr20 '<=' expr20 | expr20 '<' expr20 | expr20 '>=' expr20 | expr20 '>' expr20 | expr20
@@ -103,11 +103,11 @@ private expr20 ::= expr30 ( '+' expr30 )*
 private expr30 ::= expr90 ( '*' expr90 )*
 private expr90 ::= expr95+
 private expr95 ::= expr97 cond_type?
-private cond_type ::= '?' type {pin=1}
-private expr97 ::= type ( '.' type )?
+private cond_type ::= '?' type_expression {pin=1}
+private expr97 ::= type_expression ( '.' type_expression )?
 
-type ::= '~'? ( paren_expr | anonymous_constructor | cell_ref | builtin_type | NUMBER | IDENTIFIER )
+type_expression ::= '~'? ( paren_expr | anonymous_constructor | cell_ref | builtin_type | NUMBER | IDENTIFIER )
 paren_expr ::= "(" expression ')' {pin=1}
 builtin_type ::= '#' | '##' | '#<' | '#<=' | 'Any' | 'Cell' | 'int' | 'Type' | uint | bits
-uint ::= 'uint' | 'uint1' | 'uint2' | 'uint4' | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'uint128' | 'uint256' | 'uint257'
-bits ::= 'bits' | 'bits1' | 'bits2' | 'bits4' | 'bits8' | 'bits16' | 'bits32' | 'bits64' | 'bits128' | 'bits256' | 'bits512' | 'bits1023'
+private uint ::= 'uint' | 'uint1' | 'uint2' | 'uint4' | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'uint128' | 'uint256' | 'uint257'pr
+private bits ::= 'bits' | 'bits1' | 'bits2' | 'bits4' | 'bits8' | 'bits16' | 'bits32' | 'bits64' | 'bits128' | 'bits256' | 'bits512' | 'bits1023'

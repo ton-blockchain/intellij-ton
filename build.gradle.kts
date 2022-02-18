@@ -1,3 +1,4 @@
+
 import org.jetbrains.kotlin.cli.common.toBooleanLenient
 import java.time.Clock
 import java.time.Instant
@@ -12,7 +13,7 @@ plugins {
 group = properties("pluginGroup")
 version = properties("pluginVersion")
 
-if (properties("pluginSnapshot").toBooleanLenient() ?: false) {
+if (properties("pluginSnapshot").toBooleanLenient() == true) {
     val time = Instant.now(Clock.systemUTC())
     val formattedTime = time.toString().substring(2, 16).replace("[-T:]".toRegex(), "")
     version = "$version-SNAPSHOT+$formattedTime"
@@ -25,6 +26,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
+
+    testImplementation(kotlin("test-junit"))
 }
 
 sourceSets["main"].java.srcDirs("src/main/gen")
@@ -65,6 +68,9 @@ tasks {
     }
     compileKotlin {
         kotlinOptions.jvmTarget = "11"
+    }
+    test {
+        useJUnitPlatform()
     }
 }
 

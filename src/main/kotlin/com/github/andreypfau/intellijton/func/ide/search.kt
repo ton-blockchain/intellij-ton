@@ -1,7 +1,6 @@
 package com.github.andreypfau.intellijton.func.ide
 
-import com.github.andreypfau.intellijton.func.core.FuncParserDefinition
-import com.github.andreypfau.intellijton.func.parser.FuncLexerAdapter
+import com.github.andreypfau.intellijton.func.lexer.FuncLexerAdapter
 import com.github.andreypfau.intellijton.func.psi.FuncNamedElement
 import com.github.andreypfau.intellijton.func.psi.FuncTypes
 import com.intellij.lang.HelpID

@@ -16,7 +16,7 @@ enum class FuncColor(
     default: TextAttributesKey
 ) {
     COMMENT("Comment", Defaults.LINE_COMMENT),
-    DOC_COMMENT("Documentation", Defaults.DOC_COMMENT),
+    DOCUMENTATION("Documentation", Defaults.DOC_COMMENT),
 
     BRACES("Braces", Defaults.BRACES),
     BRACKETS("Brackets", Defaults.BRACKETS),
@@ -29,6 +29,7 @@ enum class FuncColor(
     NUMBER("Number", Defaults.NUMBER),
     STRING("String", Defaults.STRING),
     KEYWORD("Keyword", Defaults.KEYWORD),
+    PRIMITIVE_TYPES("Primitive types", Defaults.KEYWORD),
     FUNCTION_DECLARATION("Function declaration", Defaults.FUNCTION_DECLARATION),
     FUNCTION_CALL("Function call", Defaults.FUNCTION_CALL),
     PARAMETER("Type parameter", TextAttributesKey.find("KOTLIN_TYPE_PARAMETER")),

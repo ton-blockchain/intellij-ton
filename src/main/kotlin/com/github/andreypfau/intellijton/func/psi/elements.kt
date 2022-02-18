@@ -3,7 +3,7 @@ package com.github.andreypfau.intellijton.func.psi
 import com.github.andreypfau.intellijton.func.FuncIcons
 import com.github.andreypfau.intellijton.func.resolve.FuncFunctionCallIdentifierReference
 import com.github.andreypfau.intellijton.func.resolve.FuncFunctionCallReference
-import com.github.andreypfau.intellijton.func.stub.FuncFunctionDefinitionStub
+import com.github.andreypfau.intellijton.func.stub.FuncFunctionStub
 import com.github.andreypfau.intellijton.func.stub.FuncStubbedNamedElementImpl
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.ide.projectView.PresentationData
@@ -28,10 +28,10 @@ abstract class FuncNamedElementImpl(node: ASTNode) : FuncElementImpl(node), Func
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
 }
 
-abstract class FuncFunctionDefinitionMixin : FuncStubbedNamedElementImpl<FuncFunctionDefinitionStub>,
-    FuncFunctionDefinition {
+abstract class FuncFunctionDefinitionMixin : FuncStubbedNamedElementImpl<FuncFunctionStub>,
+    FuncFunction {
     constructor(node: ASTNode) : super(node)
-    constructor(stub: FuncFunctionDefinitionStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+    constructor(stub: FuncFunctionStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
     override fun getNameIdentifier(): PsiElement? = functionName.identifier
     override fun getIcon(flags: Int): Icon = FuncIcons.FUNCTION

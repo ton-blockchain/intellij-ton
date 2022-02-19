@@ -30,7 +30,6 @@
         LBRACE='{'
         RBRACE='}'
         EQUALS='='
-        UNDERSCORE='_'
         LESS='<'
         GREATER='>'
         AND='&'
@@ -107,17 +106,17 @@
         INFIXR='infixr'
 
         WHITE_SPACE='regexp:\s+'
-        COMMENT='regexp:(;;.*)|(\{-(\s|\S)*?-})'
-        DECIMNAL_NUMBER_LITERAL='regexp:(-?[0-9][_0-9]*)'
-        HEX_NUMBER_LITERAL='regexp:(0[xX][_0-9a-fA-F]+)'
-        BINARY_NUMBER_LITERAL='regexp:(0[bB][_0-1]+)'
+        LINE_COMMENT="regexp:;;.*"
+        BLOCK_COMMENT="regexp:\{-(.|\n)*-}"
+        INTEGER_LITERAL='regexp:(-?[0-9][_0-9]*)|(0[xX][_0-9a-fA-F]+)|(0[bB][_0-1]+)'
         STRING_LITERAL='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'
         IDENTIFIER="regexp:(`.*`)|(([a-zA-Z_](\w|['?:])+)|([a-zA-Z]))"
     ]
 }
 
-private root ::= global_var_declaration* function*
-function ::= documentation? type_variables_list? function_return_type function_name parameter_list 'impure'? inline_specifier? method_id_specifier? (';' | block_statement | asm_function_body) {
+private root ::= (global_var_declaration | function)*
+function ::= type_variables_list? function_return_type function_name parameter_list
+             'impure'? inline_specifier? method_id_specifier? (';' | block_statement | asm_function_body) {
     implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
     mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionDefinitionMixin"
     stubClass = "com.github.andreypfau.intellijton.func.stub.FuncFunctionStub"
@@ -128,10 +127,10 @@ function_return_type ::= type
 
 type_variables_list ::= 'forall' type_identifier (',' type_identifier)* '->' {pin=1}
 inline_specifier ::= 'inline' | 'inline_ref'
-method_id_specifier ::= 'method_id' ('(' number_literal ')')? {pin=1}
+method_id_specifier ::= 'method_id' ('('  INTEGER_LITERAL ')')? {pin=1}
 
 asm_function_body ::= asm_specifier asm_instruction+ ';'
-asm_specifier ::= 'asm' ('(' IDENTIFIER* ('->' number_literal*)? ')')? {pin=1}
+asm_specifier ::= 'asm' ('(' IDENTIFIER* ('->'  INTEGER_LITERAL*)? ')')? {pin=1}
 asm_instruction ::= STRING_LITERAL
 
 private parameter_list_recovery ::= !')'
@@ -140,15 +139,15 @@ private parameter_list_item ::= !')' parameter_declaration (',' | &')' ) { pin=2
 parameter_declaration ::= (type (IDENTIFIER | '_')) | IDENTIFIER | '_'
 parameter_list ::= parameter_list_begin ')'
 
-global_var_declaration ::= documentation? 'global' global_var (',' global_var)* ';' {pin=2}
+global_var_declaration ::= 'global' global_var (',' global_var)* ';' {pin=1}
 global_var ::= (type IDENTIFIER) | IDENTIFIER
 
 //
 // STATEMENTS
 //
 
-private statement ::= return_statement | block_statement | empty_statement | repeat_statement | if_statement | do_statement | while_statement | expression_statement
-
+private statement ::= return_statement | block_statement | empty_statement | repeat_statement |
+                      if_statement | do_statement | while_statement | expression_statement
 private block_statement_recovery ::= !'}'
 private block_statement_item ::= !'}' statement* { recoverWhile=block_statement_recovery }
 block_statement ::= '{' block_statement_item* '}'
@@ -179,7 +178,7 @@ private expr75 ::= '~'? expr80
 private expr80 ::= expr90 (method_call)*
 private expr90 ::= variable_declaration | function_call | expr100
 private expr100 ::= (type_expression | nontype_expr100)
-private nontype_expr100 ::= (tensor_expression | tuple_expression | unit_literal | primitive_type | number_literal | boolean_literal | '_' | IDENTIFIER)
+private nontype_expr100 ::= (tensor_expression | tuple_expression | unit_literal | primitive_type |  INTEGER_LITERAL | boolean_literal | '_' | IDENTIFIER)
 
 method_call ::= (dot_method_call_identifier | tilda_method_call_identifier) expr100
 dot_method_call_identifier ::= '.' IDENTIFIER {pin=1}
@@ -234,13 +233,10 @@ function_type ::= atomic_type '->' atomic_type {pin=2}
 // LITERALS
 //
 
-boolean_literal ::= TRUE | FALSE
-number_literal ::= DECIMNAL_NUMBER_LITERAL | HEX_NUMBER_LITERAL | BINARY_NUMBER_LITERAL
+boolean_literal ::= 'true' | 'false'
 function_name ::= '~'? IDENTIFIER
 unit_literal ::= '(' ')'
 type_identifier ::= IDENTIFIER
 
-documentation ::= LINE_DOCUMENTATION | BLOCK_DOCUMENTATION
-
 //noinspection BnfUnusedRule
-unused_in_bnf ::= NEW_LINE | LINE_COMMENT | BLOCK_COMMENT
+private unused_in_bnf ::= LINE_COMMENT | BLOCK_COMMENT | LINE_DOCUMENTATION | BLOCK_DOCUMENTATION

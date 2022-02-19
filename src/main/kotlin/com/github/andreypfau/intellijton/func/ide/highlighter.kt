@@ -15,7 +15,6 @@ class FuncSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
 object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
     override fun getHighlightingLexer() = FuncLexerAdapter()
     override fun getTokenHighlights(tokenType: IElementType) = when(tokenType) {
-        in FuncParserDefinition.NUMBERS -> FuncColor.NUMBER
         in FuncParserDefinition.DOCUMENTATION -> FuncColor.DOCUMENTATION
         in FuncParserDefinition.COMMENTS -> FuncColor.COMMENT
         in FuncParserDefinition.KEYWORDS -> FuncColor.KEYWORD
@@ -27,8 +26,10 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
         DOT -> FuncColor.DOT
         COMMA -> FuncColor.COMMA
         SEMICOLON -> FuncColor.SEMICOLON
+        INTEGER_LITERAL -> FuncColor.NUMBER
         else -> null
     }.let {
+        println("$tokenType -> $it")
         pack(it?.textAttributesKey)
     }
 }

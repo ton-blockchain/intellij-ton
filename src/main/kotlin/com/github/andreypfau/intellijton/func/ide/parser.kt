@@ -20,14 +20,15 @@ class FuncParserDefinition : ParserDefinition {
     override fun createLexer(project: Project?): Lexer = FuncLexerAdapter()
     override fun createParser(project: Project?): PsiParser = FuncParser()
     override fun getFileNodeType(): IFileElementType = FuncFileStub.Type
-    override fun getCommentTokens(): TokenSet = TokenSet.forAllMatching { it in COMMENTS || it in DOCUMENTATION }
+    override fun getCommentTokens(): TokenSet = COMMENTS
     override fun getStringLiteralElements(): TokenSet = TokenSet.EMPTY
     override fun createElement(node: ASTNode?): PsiElement = Factory.createElement(node)
     override fun createFile(viewProvider: FileViewProvider): PsiFile = FuncFile(viewProvider)
 
     companion object {
-        val COMMENTS = TokenSet.create(LINE_COMMENT, BLOCK_COMMENT)
         val DOCUMENTATION = TokenSet.create(LINE_DOCUMENTATION, BLOCK_DOCUMENTATION)
+        val COMMENTS = TokenSet.create(LINE_COMMENT, BLOCK_COMMENT, *DOCUMENTATION.types)
+
         val KEYWORDS = TokenSet.create(
             RETURN, VAR, REPEAT, DO, WHILE, UNTIL, IF, IFNOT, THEN, ELSE, ELSEIF, ELSEIFNOT,
             EXTERN, GLOBAL, ASM, IMPURE, INLINE, INLINE_REF, AUTO_APPLY, METHOD_ID, OPERATOR,
@@ -36,7 +37,6 @@ class FuncParserDefinition : ParserDefinition {
         val BRACES = TokenSet.create(LBRACE, RBRACE)
         val PARENTHESES = TokenSet.create(LPAREN, RPAREN)
         val BRACKETS = TokenSet.create(LBRACKET, RBRACKET)
-        val NUMBERS = TokenSet.create(BINARY_NUMBER_LITERAL, DECIMNAL_NUMBER_LITERAL, HEX_NUMBER_LITERAL)
         val TYPES = TokenSet.create(
             INT, CELL, SLICE, BUILDER, CONT, TUPLE, TYPE, MAPSTO, FORALL, TRUE, FALSE
         )

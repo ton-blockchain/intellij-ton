@@ -1,8 +1,9 @@
-package com.github.andreypfau.intellijton.fift.ide
+package com.github.andreypfau.intellijton.tlb.ide
 
-import com.github.andreypfau.intellijton.fift.FiftIcons
-import com.github.andreypfau.intellijton.fift.FiftLanguage
 import com.github.andreypfau.intellijton.loadTextResource
+import com.github.andreypfau.intellijton.tlb.TlbIcons
+import com.github.andreypfau.intellijton.tlb.TlbLanguage
+import com.intellij.openapi.editor.XmlHighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.fileTypes.SyntaxHighlighter
 import com.intellij.openapi.options.colors.AttributesDescriptor
@@ -11,7 +12,7 @@ import com.intellij.openapi.options.colors.ColorSettingsPage
 import javax.swing.Icon
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
-enum class FiftColor(
+enum class TlbColor(
     displayName: String,
     default: TextAttributesKey
 ) {
@@ -24,35 +25,35 @@ enum class FiftColor(
     SEMICOLON("Semicolon", Defaults.SEMICOLON),
 
     NUMBER("Number", Defaults.NUMBER),
-    STRING("String", Defaults.STRING),
-    KEYWORD("Keyword", Defaults.KEYWORD),
-
-    OPERATION_SIGN("Operation signs", Defaults.OPERATION_SIGN),
-    WORD_DECLARATION("Word declaration", Defaults.FUNCTION_DECLARATION),
-    STRING_WORD("String parameter word", Defaults.INSTANCE_FIELD)
+    CONSTRUCTOR_NAME("Constructor name", Defaults.STATIC_METHOD),
+    HEX_TAG("HEX Tag", Defaults.STATIC_FIELD),
+    BINARY_TAG("Binary Tag", Defaults.STATIC_FIELD),
+    PARAMETER_NAME("Parameter name", XmlHighlighterColors.HTML_ATTRIBUTE_NAME),
+    COMBINATOR_NAME("Combinator name", Defaults.KEYWORD),
+    TYPE("Type", XmlHighlighterColors.HTML_ATTRIBUTE_VALUE)
     ;
 
     val textAttributesKey =
-        TextAttributesKey.createTextAttributesKey("com.github.andreypfau.intellijton.fift.$name", default)
+        TextAttributesKey.createTextAttributesKey("com.github.andreypfau.intellijton.Tlb.$name", default)
     val attributesDescriptor = AttributesDescriptor(displayName, textAttributesKey)
 }
 
 
-class FiftColorSettingsPage : ColorSettingsPage {
+class TlbColorSettingsPage : ColorSettingsPage {
     private val DEMO_TEXT by lazy {
-        loadTextResource(this, "colors/highlighter_example.fif")
+        loadTextResource(this, "colors/highlighter_example.tlb")
     }
 
     override fun getAttributeDescriptors(): Array<AttributesDescriptor> = ATTRIBUTE_DESCRIPTORS
     override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
-    override fun getDisplayName(): String = FiftLanguage.displayName
-    override fun getIcon(): Icon = FiftIcons.FILE
-    override fun getHighlighter(): SyntaxHighlighter = FiftSyntaxHighlighter
+    override fun getDisplayName(): String = TlbLanguage.displayName
+    override fun getIcon(): Icon = TlbIcons.FILE
+    override fun getHighlighter(): SyntaxHighlighter = TlbSyntaxHighlighter
     override fun getDemoText(): String = DEMO_TEXT
 
     override fun getAdditionalHighlightingTagToDescriptorMap(): MutableMap<String, TextAttributesKey>? = null
 
     companion object {
-        val ATTRIBUTE_DESCRIPTORS = FiftColor.values().map { it.attributesDescriptor }.toTypedArray()
+        val ATTRIBUTE_DESCRIPTORS = TlbColor.values().map { it.attributesDescriptor }.toTypedArray()
     }
 }

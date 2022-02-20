@@ -15,10 +15,11 @@ class FiftSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
 object FiftSyntaxHighlighter : SyntaxHighlighterBase() {
     override fun getHighlightingLexer() = FiftLexerAdapter()
     override fun getTokenHighlights(tokenType: IElementType) = when (tokenType) {
-        COMMENT -> FiftColor.COMMENT
-        LBRACE, RBRACE -> FiftColor.BRACES
-        LBRACKET, RBRACKET -> FiftColor.BRACKETS
-        LPAREN, RPAREN -> FiftColor.PARENTHESES
+        in FiftParserDefinition.DOCUMENTATION -> FiftColor.DOCUMENTATION
+        in FiftParserDefinition.COMMENTS -> FiftColor.COMMENT
+        in FiftParserDefinition.BRACES -> FiftColor.BRACES
+        in FiftParserDefinition.PARENTHESES -> FiftColor.PARENTHESES
+        in FiftParserDefinition.BRACKETS -> FiftColor.BRACKETS
 
         NUMBER_DIGIT_LITERAL, NUMBER_HEX_LITERAL, NUMBER_BINARY_LITERAL -> FiftColor.NUMBER
         SLICE_BINARY_LITERAL, SLICE_HEX_LITERAL, BYTE_HEX_LITERAL -> FiftColor.NUMBER

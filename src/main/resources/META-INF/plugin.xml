@@ -47,7 +47,7 @@
                   language="Fift"
                   extensions="fif"/>
         <lang.parserDefinition language="Fift"
-                               implementationClass="com.github.andreypfau.intellijton.fift.core.FiftParserDefinition"/>
+                               implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftParserDefinition"/>
         <lang.syntaxHighlighterFactory language="Fift"
                                        implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftSyntaxHighlighterFactory"/>
         <annotator language="Fift" implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftAnnotator"/>
@@ -61,6 +61,24 @@
                                  implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftFindUsagesProvider"/>
         <colorSettingsPage implementation="com.github.andreypfau.intellijton.fift.ide.FiftColorSettingsPage"/>
         <internalFileTemplate name="Fift File"/>
+
+        <!--  TL-B File -->
+
+        <fileType name="TL-B"
+                  implementationClass="com.github.andreypfau.intellijton.tlb.TlbFileType"
+                  fieldName="INSTANCE"
+                  language="TL-B"
+                  extensions="tlb"/>
+        <lang.parserDefinition language="TL-B"
+                               implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="TL-B"
+                                       implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbSyntaxHighlighterFactory"/>
+        <annotator language="TL-B" implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbAnnotator"/>
+        <colorSettingsPage implementation="com.github.andreypfau.intellijton.tlb.ide.TlbColorSettingsPage"/>
+        <lang.commenter language="TL-B"
+                        implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbCommenter"/>
+        <lang.braceMatcher language="TL-B"
+                           implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbBraceMatcher"/>
 
         <!--  Bag of Cells File -->
 

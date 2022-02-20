@@ -1,10 +1,7 @@
 package com.github.andreypfau.intellijton.tlb
 
-import com.intellij.lang.Language
 import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.openapi.vfs.VirtualFile
-
-object TlbLanguage : Language("TL-B", "text/tlb")
 
 object TlbFileType : LanguageFileType(TlbLanguage) {
     override fun getName() = "TL-B"

@@ -1,4 +1,4 @@
-package com.github.andreypfau.intellijton.fift.core
+package com.github.andreypfau.intellijton.fift.ide
 
 import com.github.andreypfau.intellijton.fift.FiftLanguage
 import com.github.andreypfau.intellijton.fift.parser.FiftLexerAdapter
@@ -26,7 +26,12 @@ class FiftParserDefinition : ParserDefinition {
     override fun createFile(viewProvider: FileViewProvider): PsiFile = FiftFile(viewProvider)
 
     companion object {
-        val COMMENTS = TokenSet.create(FiftTypes.COMMENT)
         val FILE = IFileElementType(FiftLanguage)
+        val DOCUMENTATION = TokenSet.create(FiftTypes.LINE_DOCUMENTATION, FiftTypes.BLOCK_DOCUMENTATION)
+        val COMMENTS = TokenSet.create(FiftTypes.LINE_COMMENT, FiftTypes.BLOCK_COMMENT, *DOCUMENTATION.types)
+
+        val BRACES = TokenSet.create(FiftTypes.LBRACE, FiftTypes.RBRACE)
+        val PARENTHESES = TokenSet.create(FiftTypes.LPAREN, FiftTypes.RPAREN)
+        val BRACKETS = TokenSet.create(FiftTypes.LBRACKET, FiftTypes.RBRACKET)
     }
 }

@@ -27,6 +27,7 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
         COMMA -> FuncColor.COMMA
         SEMICOLON -> FuncColor.SEMICOLON
         INTEGER_LITERAL -> FuncColor.NUMBER
+        STRING_LITERAL -> FuncColor.STRING
         else -> null
     }.let {
         println("$tokenType -> $it")

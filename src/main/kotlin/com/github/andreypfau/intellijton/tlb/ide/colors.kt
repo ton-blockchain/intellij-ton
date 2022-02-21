@@ -28,7 +28,8 @@ enum class TlbColor(
     CONSTRUCTOR_NAME("Constructor name", Defaults.STATIC_METHOD),
     HEX_TAG("HEX Tag", Defaults.STATIC_FIELD),
     BINARY_TAG("Binary Tag", Defaults.STATIC_FIELD),
-    PARAMETER_NAME("Parameter name", XmlHighlighterColors.HTML_ATTRIBUTE_NAME),
+    FIELD_NAME("Field name", XmlHighlighterColors.HTML_ATTRIBUTE_NAME),
+    IMPLICIT_FIELD_NAME("Implicit field name", XmlHighlighterColors.HTML_ATTRIBUTE_NAME),
     COMBINATOR_NAME("Combinator name", Defaults.KEYWORD),
     TYPE("Type", XmlHighlighterColors.HTML_ATTRIBUTE_VALUE)
     ;

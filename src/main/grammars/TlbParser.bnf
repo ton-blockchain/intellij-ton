@@ -79,23 +79,24 @@
     ]
 }
 
-root ::= constructor_def*
+root ::= combinator_declaration*
 
-constructor_def ::= constructor '=' combinator ';' {pin=1}
+combinator_declaration ::= constructor field_definition_list '=' combinator ';' {pin=1}
 
-constructor ::= ( '_' | constructor_name ) field_list
-constructor_name ::= IDENTIFIER constructor_tag?
-constructor_tag ::= HEX_TAG | BINARY_TAG
+constructor ::= ( '_' | constructor_name )
+constructor_name ::= IDENTIFIER [ constructor_prefix ]
+constructor_prefix ::= HEX_TAG | BINARY_TAG
 combinator ::= combinator_name type_expression* {pin=1}
 combinator_name ::= IDENTIFIER
 
-private field_list_recovery ::= !( '=' | ']' )
-field_list ::= ( constraint | param | paren_expr )* {recoverWhile=field_list_recovery}
-constraint ::= '{' ( implicit_param | expression ) '}' {pin=1}
-param ::= ( '_' | IDENTIFIER ) ':' expr95 {pin=1}
-implicit_param ::= IDENTIFIER ':' ( '#' | 'Type' )
+private field_definition_list_recovery ::= !( '=' | ']' )
+field_definition_list ::= field_definition* {recoverWhile=field_definition_list_recovery}
+field_definition ::= implicit_definition | named_field | paren_expression
+implicit_definition ::= '{' ( implicit_field | expression ) '}' {pin=1}
+named_field ::= ( '_' | IDENTIFIER ) ':' expr95 {pin=1}
+implicit_field ::= IDENTIFIER ':' ( '#' | 'Type' )
 
-anonymous_constructor ::= '[' field_list ']' {pin=1}
+anonymous_constructor ::= '[' field_definition_list ']' {pin=1}
 
 cell_ref ::= '^' type_expression {pin=1}
 
@@ -104,12 +105,12 @@ private expr10 ::= expr20 '=' expr20 | expr20 '<=' expr20 | expr20 '<' expr20 | 
 private expr20 ::= expr30 ( '+' expr30 )*
 private expr30 ::= expr90 ( '*' expr90 )*
 private expr90 ::= expr95+
-private expr95 ::= expr97 cond_type?
+private expr95 ::= expr97 [ cond_type ]
 private cond_type ::= '?' type_expression {pin=1}
-private expr97 ::= type_expression ( '.' type_expression )?
+private expr97 ::= type_expression [ '.' type_expression ]
 
-type_expression ::= '~'? ( paren_expr | anonymous_constructor | cell_ref | builtin_type | NUMBER | IDENTIFIER )
-paren_expr ::= "(" expression ')' {pin=1}
+type_expression ::= [ '~' ] ( paren_expression | anonymous_constructor | cell_ref | builtin_type | NUMBER | IDENTIFIER )
+paren_expression ::= "(" expression ')' {pin=1}
 builtin_type ::= '#<' | '#<=' | '##' | '#' | 'Any' | 'Cell' | 'int' | 'Type' | uint | bits
 private uint ::= 'uint' | 'uint1' | 'uint2' | 'uint4' | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'uint128' | 'uint256' | 'uint257'
 private bits ::= 'bits' | 'bits1' | 'bits2' | 'bits4' | 'bits8' | 'bits16' | 'bits32' | 'bits64' | 'bits128' | 'bits256' | 'bits512' | 'bits1023'

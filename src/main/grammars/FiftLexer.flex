@@ -58,8 +58,6 @@ import static com.github.andreypfau.intellijton.fift.psi.FiftTypes.*;
         switch (state) {
             case BLOCK_COMMENT_STATE:
                 return BLOCK_COMMENT;
-            case DOC_COMMENT_STATE:
-                return BLOCK_DOCUMENTATION;
             default:
                 throw new IllegalArgumentException("Unexpected state: " + state);
         }
@@ -88,10 +86,9 @@ SLICE_HEX_LITERAL=(x\{[0-9a-fA-F_]+})
 BYTE_HEX_LITERAL=(B\{[0-9a-fA-F_]+})
 WHITE_SPACE=[ \t\n\x0B\f\r]+
 IDENTIFIER=[^ \t\n\x0B\f\r]+
-LINE_DOCUMENTATION = "/""/""/"[^\n]*
 LINE_COMMENT = "/""/"[^\n]*
 
-%xstate BLOCK_COMMENT_STATE, DOC_COMMENT_STATE
+%xstate BLOCK_COMMENT_STATE
 
 %%
 
@@ -143,15 +140,8 @@ LINE_COMMENT = "/""/"[^\n]*
 {SLICE_BINARY_LITERAL} { return SLICE_BINARY_LITERAL; }
 {SLICE_HEX_LITERAL} { return SLICE_HEX_LITERAL; }
 {BYTE_HEX_LITERAL} { return BYTE_HEX_LITERAL; }
-{WHITE_SPACE} { return WHITE_SPACE; }
-{IDENTIFIER} { return IDENTIFIER; }
 
 "/**/" { return BLOCK_COMMENT; }
-"/**" {
-          pushState(DOC_COMMENT_STATE);
-          commentDepth = 0;
-          commentStart = getTokenStart();
-}
 
 "/*" {
           pushState(BLOCK_COMMENT_STATE);
@@ -159,7 +149,7 @@ LINE_COMMENT = "/""/"[^\n]*
           commentStart = getTokenStart();
 }
 
-<BLOCK_COMMENT_STATE, DOC_COMMENT_STATE> {
+<BLOCK_COMMENT_STATE> {
     "/*" {
           commentDepth++;
       }
@@ -185,6 +175,7 @@ LINE_COMMENT = "/""/"[^\n]*
     [\s\S] {}
 }
 
-{LINE_DOCUMENTATION} { return LINE_DOCUMENTATION; }
+{WHITE_SPACE} { return WHITE_SPACE; }
 {LINE_COMMENT} { return LINE_COMMENT; }
+{IDENTIFIER} { return IDENTIFIER; }
 ({WHITE_SPACE_CHAR})+ { return WHITE_SPACE; }

@@ -81,20 +81,32 @@
 
 root ::= combinator_declaration*
 
-combinator_declaration ::= constructor field_definition_list '=' combinator ';' {pin=1}
+combinator_declaration ::= constructor [ constructor_prefix ] field_definition_list '=' combinator ';' {pin=1}
 
 constructor ::= ( '_' | constructor_name )
-constructor_name ::= IDENTIFIER [ constructor_prefix ]
+constructor_name ::= IDENTIFIER
 constructor_prefix ::= HEX_TAG | BINARY_TAG
 combinator ::= combinator_name type_expression* {pin=1}
-combinator_name ::= IDENTIFIER
+combinator_name ::= IDENTIFIER {
+    implements = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElement"
+    mixin = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElementImpl"
+}
 
 private field_definition_list_recovery ::= !( '=' | ']' )
 field_definition_list ::= field_definition* {recoverWhile=field_definition_list_recovery}
 field_definition ::= implicit_definition | named_field | paren_expression
 implicit_definition ::= '{' ( implicit_field | expression ) '}' {pin=1}
-named_field ::= ( '_' | IDENTIFIER ) ':' expr95 {pin=1}
-implicit_field ::= IDENTIFIER ':' ( '#' | 'Type' )
+named_field ::= field_name ':' expr95 {pin=1}
+field_name ::= '_' | IDENTIFIER {
+    implements = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElement"
+    mixin = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElementImpl"
+}
+implicit_field ::= implicit_field_name ':' implicit_field_type {pin=2}
+implicit_field_type ::= '#' | 'Type'
+implicit_field_name ::= IDENTIFIER {
+    implements = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElement"
+    mixin = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElementImpl"
+}
 
 anonymous_constructor ::= '[' field_definition_list ']' {pin=1}
 
@@ -109,7 +121,11 @@ private expr95 ::= expr97 [ cond_type ]
 private cond_type ::= '?' type_expression {pin=1}
 private expr97 ::= type_expression [ '.' type_expression ]
 
-type_expression ::= [ '~' ] ( paren_expression | anonymous_constructor | cell_ref | builtin_type | NUMBER | IDENTIFIER )
+type_expression ::= [ '~' ] ( paren_expression | anonymous_constructor | cell_ref | builtin_type | NUMBER | named_ref )
+named_ref ::= IDENTIFIER {
+    implements = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElement"
+    mixin = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedRefMixin"
+}
 paren_expression ::= "(" expression ')' {pin=1}
 builtin_type ::= '#<' | '#<=' | '##' | '#' | 'Any' | 'Cell' | 'int' | 'Type' | uint | bits
 private uint ::= 'uint' | 'uint1' | 'uint2' | 'uint4' | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'uint128' | 'uint256' | 'uint257'

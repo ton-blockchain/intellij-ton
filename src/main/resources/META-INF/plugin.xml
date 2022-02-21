@@ -6,7 +6,7 @@
     <description><![CDATA[
         TON Development plugin for IntelliJ Platform.
 
-        Includes support for Fift and FunC languages.
+        Includes support for Fift and FunC languages and TL-B schemes.
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -79,6 +79,8 @@
                         implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbCommenter"/>
         <lang.braceMatcher language="TL-B"
                            implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbBraceMatcher"/>
+        <lang.findUsagesProvider language="TL-B"
+                                 implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbFindUsagesProvider"/>
 
         <!--  Bag of Cells File -->
 
@@ -99,6 +101,11 @@
                 class="com.github.andreypfau.intellijton.fift.ide.actions.FiftCreateFileAction"
                 text="Create Fift File">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="func.file.create"/>
+        </action>
+        <action id="tlb.file.create"
+                class="com.github.andreypfau.intellijton.tlb.ide.actions.TlbCreateFileAction"
+                text="Create TL-B Scheme">
+            <add-to-group group-id="NewGroup" anchor="after" relative-to-action="fift.file.create"/>
         </action>
     </actions>
 </idea-plugin>

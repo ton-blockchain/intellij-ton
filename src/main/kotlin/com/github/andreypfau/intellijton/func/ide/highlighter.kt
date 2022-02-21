@@ -30,7 +30,6 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
         STRING_LITERAL -> FuncColor.STRING
         else -> null
     }.let {
-        println("$tokenType -> $it")
         pack(it?.textAttributesKey)
     }
 }

@@ -14,12 +14,11 @@
     <extensions defaultExtensionNs="com.intellij">
 
         <!--  FunC Language -->
-
-        <fileType name="FunC"
+        <fileType name="func"
                   implementationClass="com.github.andreypfau.intellijton.func.FuncFileType"
                   fieldName="INSTANCE"
                   language="FunC"
-                  extensions="fc"/>
+                  extensions="func;fc"/>
         <lang.parserDefinition language="FunC"
                                implementationClass="com.github.andreypfau.intellijton.func.ide.FuncParserDefinition"/>
         <lang.syntaxHighlighterFactory language="FunC"

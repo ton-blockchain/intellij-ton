@@ -4,9 +4,8 @@ import com.github.andreypfau.intellijton.tlb.psi.TlbCombinatorDeclaration
 import com.github.andreypfau.intellijton.tlb.psi.TlbElement
 import com.github.andreypfau.intellijton.tlb.psi.TlbFile
 import com.intellij.psi.util.childrenOfType
-import com.intellij.psi.util.findParentOfType
 
-fun TlbElement.resolveFile() = if (this is TlbFile) this else findParentOfType()!!
+fun TlbElement.resolveFile() = if (this is TlbFile) this else containingFile as TlbFile
 
 fun TlbFile.resolveCombinatorDeclarations() = childrenOfType<TlbCombinatorDeclaration>().asSequence()
 

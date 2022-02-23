@@ -1,5 +1,12 @@
 # TON Development Changelog
 
+## [0.5.0]
+
+### Added
+
+- TL-B Schemes support
+- Using new type extension `.func` for FunC files
+
 ## [0.4.0]
 
 ### Added

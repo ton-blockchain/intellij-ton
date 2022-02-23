@@ -2,7 +2,7 @@ package com.github.andreypfau.intellijton.func.stub
 
 import com.github.andreypfau.intellijton.func.FuncLanguage
 import com.github.andreypfau.intellijton.func.psi.*
-import com.github.andreypfau.intellijton.func.psi.impl.FuncFunctionDefinitionImpl
+import com.github.andreypfau.intellijton.func.psi.impl.FuncFunctionImpl
 import com.github.andreypfau.intellijton.func.resolve.FuncReference
 import com.intellij.extapi.psi.StubBasedPsiElementBase
 import com.intellij.ide.projectView.PresentationData
@@ -15,7 +15,7 @@ import com.intellij.psi.stubs.*
 import com.intellij.psi.tree.IStubFileElementType
 
 fun factory(name: String): FuncStubElementType<*, *> = when (name) {
-    "FUNCTION_DEFINITION" -> FuncFunctionDefinitionStub.Type
+    "FUNCTION" -> FuncFunctionStub.Type
     else -> error("Can't reFuncve stub for $name")
 }
 
@@ -72,24 +72,24 @@ class FuncFileStub(file: FuncFile?) : PsiFileStubImpl<FuncFile>(file) {
     }
 }
 
-class FuncFunctionDefinitionStub(
+class FuncFunctionStub(
     parent: StubElement<*>?,
     elementType: IStubElementType<*, *>,
     override val name: String?
-) : StubBase<FuncFunctionDefinition>(parent, elementType), FuncNamedStub {
-    object Type : FuncStubElementType<FuncFunctionDefinitionStub, FuncFunctionDefinition>("FUNCTION_DEFINITION") {
+) : StubBase<FuncFunction>(parent, elementType), FuncNamedStub {
+    object Type : FuncStubElementType<FuncFunctionStub, FuncFunction>("FUNCTION") {
         override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
-            FuncFunctionDefinitionStub(parentStub, this, dataStream.readNameString())
+            FuncFunctionStub(parentStub, this, dataStream.readNameString())
 
-        override fun serialize(stub: FuncFunctionDefinitionStub, dataStream: StubOutputStream) = with(dataStream) {
+        override fun serialize(stub: FuncFunctionStub, dataStream: StubOutputStream) = with(dataStream) {
             writeName(stub.name)
         }
 
-        override fun createPsi(stub: FuncFunctionDefinitionStub) = FuncFunctionDefinitionImpl(stub, this)
+        override fun createPsi(stub: FuncFunctionStub) = FuncFunctionImpl(stub, this)
 
-        override fun createStub(psi: FuncFunctionDefinition, parentStub: StubElement<*>?) =
-            FuncFunctionDefinitionStub(parentStub, this, psi.name)
+        override fun createStub(psi: FuncFunction, parentStub: StubElement<*>?) =
+            FuncFunctionStub(parentStub, this, psi.name)
 
-        override fun indexStub(stub: FuncFunctionDefinitionStub, sink: IndexSink) = sink.indexFunctionDef(stub)
+        override fun indexStub(stub: FuncFunctionStub, sink: IndexSink) = sink.indexFunctionDef(stub)
     }
 }

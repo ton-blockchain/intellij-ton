@@ -6,7 +6,7 @@
     <description><![CDATA[
         TON Development plugin for IntelliJ Platform.
 
-        Includes support for Fift and FunC languages.
+        Includes support for Fift and FunC languages and TL-B schemes.
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -14,14 +14,13 @@
     <extensions defaultExtensionNs="com.intellij">
 
         <!--  FunC Language -->
-
-        <fileType name="FunC"
+        <fileType name="func"
                   implementationClass="com.github.andreypfau.intellijton.func.FuncFileType"
                   fieldName="INSTANCE"
                   language="FunC"
-                  extensions="fc"/>
+                  extensions="func;fc"/>
         <lang.parserDefinition language="FunC"
-                               implementationClass="com.github.andreypfau.intellijton.func.core.FuncParserDefinition"/>
+                               implementationClass="com.github.andreypfau.intellijton.func.ide.FuncParserDefinition"/>
         <lang.syntaxHighlighterFactory language="FunC"
                                        implementationClass="com.github.andreypfau.intellijton.func.ide.FuncSyntaxHighlighterFactory"/>
         <annotator language="FunC" implementationClass="com.github.andreypfau.intellijton.func.ide.FuncAnnotator"/>
@@ -47,7 +46,7 @@
                   language="Fift"
                   extensions="fif"/>
         <lang.parserDefinition language="Fift"
-                               implementationClass="com.github.andreypfau.intellijton.fift.core.FiftParserDefinition"/>
+                               implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftParserDefinition"/>
         <lang.syntaxHighlighterFactory language="Fift"
                                        implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftSyntaxHighlighterFactory"/>
         <annotator language="Fift" implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftAnnotator"/>
@@ -61,6 +60,26 @@
                                  implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftFindUsagesProvider"/>
         <colorSettingsPage implementation="com.github.andreypfau.intellijton.fift.ide.FiftColorSettingsPage"/>
         <internalFileTemplate name="Fift File"/>
+
+        <!--  TL-B File -->
+
+        <fileType name="TL-B"
+                  implementationClass="com.github.andreypfau.intellijton.tlb.TlbFileType"
+                  fieldName="INSTANCE"
+                  language="TL-B"
+                  extensions="tlb"/>
+        <lang.parserDefinition language="TL-B"
+                               implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="TL-B"
+                                       implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbSyntaxHighlighterFactory"/>
+        <annotator language="TL-B" implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbAnnotator"/>
+        <colorSettingsPage implementation="com.github.andreypfau.intellijton.tlb.ide.TlbColorSettingsPage"/>
+        <lang.commenter language="TL-B"
+                        implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbCommenter"/>
+        <lang.braceMatcher language="TL-B"
+                           implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbBraceMatcher"/>
+        <lang.findUsagesProvider language="TL-B"
+                                 implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbFindUsagesProvider"/>
 
         <!--  Bag of Cells File -->
 
@@ -81,6 +100,11 @@
                 class="com.github.andreypfau.intellijton.fift.ide.actions.FiftCreateFileAction"
                 text="Create Fift File">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="func.file.create"/>
+        </action>
+        <action id="tlb.file.create"
+                class="com.github.andreypfau.intellijton.tlb.ide.actions.TlbCreateFileAction"
+                text="Create TL-B Scheme">
+            <add-to-group group-id="NewGroup" anchor="after" relative-to-action="fift.file.create"/>
         </action>
     </actions>
 </idea-plugin>

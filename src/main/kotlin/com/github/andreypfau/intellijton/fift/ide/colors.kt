@@ -16,6 +16,7 @@ enum class FiftColor(
     default: TextAttributesKey
 ) {
     COMMENT("Comment", Defaults.LINE_COMMENT),
+    DOCUMENTATION("Documentation", Defaults.DOC_COMMENT),
 
     BRACES("Braces", Defaults.BRACES),
     BRACKETS("Brackets", Defaults.BRACKETS),

@@ -6,9 +6,9 @@ import com.intellij.psi.PsiManager
 import com.intellij.psi.util.PsiTreeUtil
 
 fun loadTextResource(ctx: Any, resource: String): String =
-    ctx.javaClass.classLoader.getResourceAsStream(resource)!!.bufferedReader().use {
+    ctx.javaClass.classLoader.getResourceAsStream(resource)?.bufferedReader()?.use {
         it.readText()
-    }
+    } ?: ""
 
 val Project.psiManager get() = PsiManager.getInstance(this)
 

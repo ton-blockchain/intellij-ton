@@ -36,7 +36,7 @@ class FuncFunctionCallReference(
     element: FuncFunctionCall,
 ) : FuncReferenceBase<FuncFunctionCall>(element), FuncReference {
     override fun calculateDefaultRangeInElement(): TextRange = element.functionCallIdentifier.textRange
-    fun resolveFunctionCall(): Sequence<FuncFunctionDefinition> {
+    fun resolveFunctionCall(): Sequence<FuncFunction> {
         val element = element
         val name = element.functionCallIdentifier.identifier.text
         val file = element.resolveFile()

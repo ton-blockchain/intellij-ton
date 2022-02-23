@@ -61,7 +61,6 @@
         DOUBLE_COLON='::'
         DOUBLE_COLON_UNDERSCORE='::_'
 
-        COMMENT='regexp:(//.*)|(#.*)'
         WHITE_SPACE='regexp:\s+'
         IDENTIFIER='regexp:\S+'
     ]
@@ -88,3 +87,6 @@ word_def ::= (block | ordinary_word) (':'|'::'|'::_') word_def_identifier {
     mixin = "com.github.andreypfau.intellijton.fift.psi.FiftWordDefMixin"
 }
 word_def_identifier ::= IDENTIFIER
+
+//noinspection BnfUnusedRule
+private unused_in_bnf ::= LINE_COMMENT | BLOCK_COMMENT | LINE_DOCUMENTATION | BLOCK_DOCUMENTATION

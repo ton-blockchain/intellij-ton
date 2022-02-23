@@ -44,7 +44,7 @@ class FuncFunctionCompletionProvider(
         }
         functions.map { functionDef ->
             val parameterList = functionDef.parameterList.text
-            val functionReturn = functionDef.functionReturn.text
+            val functionReturn = functionDef.functionReturnType.text
             LookupElementBuilder
                 .createWithIcon(functionDef)
                 .withTailText(parameterList)

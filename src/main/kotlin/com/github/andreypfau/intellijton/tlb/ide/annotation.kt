@@ -1,6 +1,7 @@
 package com.github.andreypfau.intellijton.tlb.ide
 
 import com.github.andreypfau.intellijton.tlb.psi.*
+import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
@@ -48,10 +49,10 @@ class TlbAnnotator : Annotator {
                         .textAttributes(TlbColor.IMPLICIT_FIELD_NAME.textAttributesKey)
                         .create()
                     // TODO: Enable after add include support
-//                    else -> holder.newAnnotation(HighlightSeverity.ERROR, "Unresolved reference: ${element.text}")
-//                        .range(element)
-//                        .highlightType(ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
-//                        .create()
+                    else -> holder.newAnnotation(HighlightSeverity.ERROR, "Unresolved reference: ${element.text}")
+                        .range(element)
+                        .highlightType(ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
+                        .create()
                 }
             }
         }

@@ -65,7 +65,7 @@ class TlbNamedRefReference(
         }
 
     private fun resolveCombinators() = element.resolveFile()
-        .resolveCombinatorDeclarations()
+        .resolveAllCombinatorDeclarations()
         .map {
             it.combinator?.combinatorName
         }

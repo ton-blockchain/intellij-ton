@@ -2,6 +2,7 @@ package com.github.andreypfau.intellijton.tlb.resolve
 
 import com.github.andreypfau.intellijton.psiManager
 import com.github.andreypfau.intellijton.tlb.TlbFileType
+import com.github.andreypfau.intellijton.tlb.psi.TlbAnonymousConstructor
 import com.github.andreypfau.intellijton.tlb.psi.TlbCombinatorDeclaration
 import com.github.andreypfau.intellijton.tlb.psi.TlbElement
 import com.github.andreypfau.intellijton.tlb.psi.TlbFile
@@ -24,10 +25,25 @@ fun TlbCombinatorDeclaration.resolveImplicitDefinitions() =
         it.implicitDefinition
     }?.filterNotNull() ?: emptySequence()
 
+fun TlbAnonymousConstructor?.resolveImplicitDefinitions() =
+    this?.fieldDefinitionList?.fieldDefinitionList?.asSequence()?.map {
+        it.implicitDefinition
+    }?.filterNotNull() ?: emptySequence()
+
 fun TlbCombinatorDeclaration.resolveImplicitFields() = resolveImplicitDefinitions().map {
     it.implicitField
 }.filterNotNull()
 
-fun TlbCombinatorDeclaration.resolveFields() = fieldDefinitionList?.fieldDefinitionList?.asSequence()?.map {
-    it.namedField
-}?.filterNotNull() ?: emptySequence()
+fun TlbAnonymousConstructor?.resolveImplicitFields() = resolveImplicitDefinitions().map {
+    it.implicitField
+}.filterNotNull()
+
+fun TlbCombinatorDeclaration.resolveFields() =
+    fieldDefinitionList?.fieldDefinitionList?.asSequence()?.map {
+        it.namedField
+    }?.filterNotNull() ?: emptySequence()
+
+fun TlbAnonymousConstructor?.resolveFields() =
+    this?.fieldDefinitionList?.fieldDefinitionList?.asSequence()?.map {
+        it.namedField
+    }?.filterNotNull() ?: emptySequence()

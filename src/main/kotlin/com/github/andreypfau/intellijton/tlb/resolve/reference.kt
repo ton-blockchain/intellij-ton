@@ -39,29 +39,41 @@ class TlbNamedRefReference(
 ) : TlbReferenceBase<TlbNamedRef>(element) {
     override fun multiResolve(): Sequence<TlbElement> {
         if (element.parent !is TlbTypeExpression) return emptySequence()
+
+        val anonymousConstructor = element.parentOfType<TlbAnonymousConstructor>()
         val currentCombinatorDeclaration =
             element.parentOfType<TlbCombinatorDeclaration>() ?: return resolveCombinators()
 
-        val fields = resolveFields(currentCombinatorDeclaration).toList()
+        val fields =
+            resolveFields(anonymousConstructor) + resolveFields(currentCombinatorDeclaration)
         if (fields.isNotEmpty()) return fields.asSequence()
 
-        val implicitFields = resolveImplicitFields(currentCombinatorDeclaration).toList()
+        val implicitFields =
+            resolveImplicitFields(anonymousConstructor) + resolveImplicitFields(currentCombinatorDeclaration)
         if (implicitFields.isNotEmpty()) return implicitFields.asSequence()
 
         return resolveCombinators()
     }
 
     private fun resolveFields(combinatorDeclaration: TlbCombinatorDeclaration) =
-        combinatorDeclaration.resolveFields().map {
-            it.fieldName
-        }.filter { it.textMatches(element) }.toList()
+        combinatorDeclaration.resolveFields().filter { namedField ->
+            namedField.fieldName.textMatches(element)
+        }.toList()
+
+    private fun resolveFields(anonymousConstructor: TlbAnonymousConstructor?) =
+        anonymousConstructor.resolveFields().filter { namedField ->
+            namedField.fieldName.textMatches(element)
+        }.toList()
 
     private fun resolveImplicitFields(combinatorDeclaration: TlbCombinatorDeclaration) =
-        combinatorDeclaration.resolveImplicitFields().map {
-            it.implicitFieldName
-        }.filter {
-            it.textMatches(element)
-        }
+        combinatorDeclaration.resolveImplicitFields().filter { implicitField ->
+            implicitField.implicitFieldName.textMatches(element)
+        }.toList()
+
+    private fun resolveImplicitFields(anonymousConstructor: TlbAnonymousConstructor?) =
+        anonymousConstructor.resolveImplicitFields().filter { implicitField ->
+            implicitField.implicitFieldName.textMatches(element)
+        }.toList()
 
     private fun resolveCombinators() = element.resolveFile()
         .resolveAllCombinatorDeclarations()

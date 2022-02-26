@@ -10,44 +10,21 @@ import com.intellij.psi.PsiElement
 class TlbAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         when (element) {
-            is TlbConstructorName -> holder
-                .newSilentAnnotation(HighlightSeverity.INFORMATION)
-                .range(element)
-                .textAttributes(TlbColor.CONSTRUCTOR_NAME.textAttributesKey)
-                .create()
-            is TlbFieldName -> {
-                holder
-                    .newSilentAnnotation(HighlightSeverity.INFORMATION)
-                    .range(element)
-                    .textAttributes(TlbColor.FIELD_NAME.textAttributesKey)
-                    .create()
-            }
-            is TlbImplicitFieldName -> {
-                holder
-                    .newSilentAnnotation(HighlightSeverity.INFORMATION)
-                    .range(element)
-                    .textAttributes(TlbColor.IMPLICIT_FIELD_NAME.textAttributesKey)
-                    .create()
-            }
-            is TlbCombinatorName -> holder
-                .newSilentAnnotation(HighlightSeverity.INFORMATION)
-                .range(element)
-                .textAttributes(TlbColor.COMBINATOR_NAME.textAttributesKey)
-                .create()
+            is TlbConstructorName -> holder.annotateInfo(element, TlbColor.CONSTRUCTOR_NAME)
+            is TlbFieldName -> holder.annotateInfo(element, TlbColor.FIELD_NAME)
+            is TlbImplicitFieldName -> holder.annotateInfo(element, TlbColor.IMPLICIT_FIELD_NAME)
+            is TlbImplicitFieldType -> holder.annotateInfo(element, TlbColor.TYPE)
+            is TlbCombinatorName -> holder.annotateInfo(element, TlbColor.COMBINATOR_NAME)
             is TlbNamedRefMixin -> {
                 when (element.reference.multiResolve().firstOrNull()) {
-                    is TlbFieldName -> holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-                        .range(element)
-                        .textAttributes(TlbColor.FIELD_NAME.textAttributesKey)
-                        .create()
-                    is TlbImplicitFieldName -> holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-                        .range(element)
-                        .textAttributes(TlbColor.IMPLICIT_FIELD_NAME.textAttributesKey)
-                        .create()
-                    is TlbCombinatorName -> holder.annotateType(element)
+                    is TlbFieldName -> holder.annotateInfo(element, TlbColor.FIELD_NAME)
+                    is TlbNamedField -> holder.annotateInfo(element, TlbColor.FIELD_NAME)
+                    is TlbImplicitFieldName -> holder.annotateInfo(element, TlbColor.IMPLICIT_FIELD_NAME)
+                    is TlbImplicitField -> holder.annotateInfo(element, TlbColor.IMPLICIT_FIELD_NAME)
+                    is TlbCombinatorName -> holder.annotateInfo(element, TlbColor.TYPE)
                     else -> {
                         if (element.name in TlbParserDefinition.INBUILT_TYPE_NAMES) {
-                            holder.annotateType(element)
+                            holder.annotateInfo(element, TlbColor.TYPE)
                         } else {
                             holder.annotateUnknown(element)
                         }
@@ -57,10 +34,10 @@ class TlbAnnotator : Annotator {
         }
     }
 
-    private fun AnnotationHolder.annotateType(element: PsiElement) {
+    private fun AnnotationHolder.annotateInfo(element: PsiElement, color: TlbColor) {
         newSilentAnnotation(HighlightSeverity.INFORMATION)
             .range(element)
-            .textAttributes(TlbColor.TYPE.textAttributesKey)
+            .textAttributes(color.textAttributesKey)
             .create()
     }
 

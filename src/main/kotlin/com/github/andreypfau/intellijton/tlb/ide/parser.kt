@@ -52,6 +52,9 @@ class TlbParserDefinition : ParserDefinition {
             repeat(1023) {
                 add("bits$it")
             }
+            BUILTIN_TYPES.types.forEach { builtinType ->
+                add(builtinType.toString())
+            }
         }
     }
 }

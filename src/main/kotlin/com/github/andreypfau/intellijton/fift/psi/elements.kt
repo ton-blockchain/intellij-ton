@@ -17,7 +17,7 @@ interface FiftNamedElement : FiftElement, PsiNameIdentifierOwner
 abstract class FiftNamedElementImpl(node: ASTNode) : FiftElementImpl(node), FiftNamedElement {
     override fun getNameIdentifier(): PsiElement? = findChildByType(FiftTypes.IDENTIFIER)
     override fun getName(): String? = nameIdentifier?.text
-    override fun setName(name: String): PsiElement {
+    override fun setName(name: String): PsiElement = apply {
         val newWord = project.fiftPsiFactory.createFromText<FiftOrdinaryWord>(name) ?: return this
         replace(newWord)
         return newWord
@@ -26,8 +26,22 @@ abstract class FiftNamedElementImpl(node: ASTNode) : FiftElementImpl(node), Fift
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
 }
 
-abstract class FiftWordDefMixin(node: ASTNode) : FiftNamedElementImpl(node), FiftWordDef {
-    override fun getNameIdentifier(): PsiElement? = wordDefIdentifier.identifier
+abstract class FiftWordDefStatementMixin(node: ASTNode) : FiftNamedElementImpl(node), FiftWordDefStatement {
+    override fun getNameIdentifier(): PsiElement? = findChildByType(FiftTypes.WORD_DEF)
+    override fun getName(): String? = nameIdentifier?.text?.split(" ")?.let { wordDefText ->
+        if (wordDefText.size == 2) {
+            wordDefText[1]
+        } else null
+    }
+
+    override fun setName(name: String): PsiElement = apply {
+        val wordDefStatement = requireNotNull(
+            project.fiftPsiFactory.createFromText<FiftWordDefStatement>("{ } : $name")
+        )
+        val newWordDef = wordDefStatement.wordDef
+        nameIdentifier?.replace(newWordDef)
+    }
+
     override fun getIcon(flags: Int): Icon = FiftIcons.FUNCTION
     override fun getPresentation(): PresentationData {
         val name = name

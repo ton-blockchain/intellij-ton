@@ -29,7 +29,7 @@ enum class TlbColor(
     HEX_TAG("HEX Tag", Defaults.STATIC_FIELD),
     BINARY_TAG("Binary Tag", Defaults.STATIC_FIELD),
     FIELD_NAME("Field name", XmlHighlighterColors.HTML_ATTRIBUTE_NAME),
-    IMPLICIT_FIELD_NAME("Implicit field name", XmlHighlighterColors.HTML_ATTRIBUTE_NAME),
+    IMPLICIT_FIELD_NAME("Implicit field name", TextAttributesKey.find("KOTLIN_TYPE_PARAMETER")),
     COMBINATOR_NAME("Combinator name", Defaults.KEYWORD),
     TYPE("Type", XmlHighlighterColors.HTML_ATTRIBUTE_VALUE)
     ;

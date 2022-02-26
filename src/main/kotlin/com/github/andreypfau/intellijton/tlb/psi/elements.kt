@@ -23,10 +23,5 @@ abstract class TlbNamedElementImpl(node: ASTNode) : TlbElementImpl(node), TlbNam
 }
 
 abstract class TlbNamedRefMixin(node: ASTNode) : TlbNamedElementImpl(node), TlbNamedRef {
-    override fun canNavigate(): Boolean {
-        val res = reference.multiResolve().firstOrNull() != null
-        return res
-    }
-
     override fun getReference() = TlbNamedRefReference(this)
 }

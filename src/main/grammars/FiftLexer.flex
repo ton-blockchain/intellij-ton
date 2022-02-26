@@ -84,6 +84,7 @@ NUMBER_BINARY_LITERAL=(0[bB][01]+)
 SLICE_BINARY_LITERAL=(b\{[01]+})
 SLICE_HEX_LITERAL=(x\{[0-9a-fA-F_]+})
 BYTE_HEX_LITERAL=(B\{[0-9a-fA-F_]+})
+WORD_DEF=(::_|::|:)\s(\S+)
 WHITE_SPACE=[ \t\n\x0B\f\r]+
 IDENTIFIER=[^ \t\n\x0B\f\r]+
 LINE_COMMENT = "/""/"[^\n]*
@@ -92,46 +93,44 @@ LINE_COMMENT = "/""/"[^\n]*
 
 %%
 
- "[" { return LBRACKET; }
- "]" { return RBRACKET; }
- " {" { return LBRACE; }
- "}" { return RBRACE; }
- "(" { return LPAREN; }
- ")" { return RPAREN; }
- "_(" { return UNDERSCORE_LPAREN; }
- "dup" { return DUP; }
- "drop" { return DROP; }
- "swap" { return SWAP; }
- "rot" { return ROT; }
- "-rot" { return REV_ROT; }
- "over" { return OVER; }
- "tuck" { return TUCK; }
- "nip" { return NIP; }
- "2dup" { return DUP_DUP; }
- "2drop" { return DROP_DROP; }
- "2swap" { return SWAP_SWAP; }
- "pick" { return PICK; }
- "roll" { return ROLL; }
- "-roll" { return REV_ROLL; }
- "exch" { return EXCH; }
- "exch2" { return EXCH2; }
- "?dup" { return COND_DUP; }
- "if" { return IF; }
- "ifnot" { return IFNOT; }
- "cond" { return COND; }
- "until" { return UNTIL; }
- "while" { return WHILE; }
- "times" { return TIMES; }
- "include" { return INCLUDE; }
- "true" { return TRUE; }
- "false" { return FALSE; }
- ":" { return COLON; }
- "::" { return DOUBLE_COLON; }
- "::_" { return DOUBLE_COLON_UNDERSCORE; }
+"[" { return LBRACKET; }
+"]" { return RBRACKET; }
+"{" { return LBRACE; }
+"}" { return RBRACE; }
+"(" { return LPAREN; }
+")" { return RPAREN; }
+"_(" { return UNDERSCORE_LPAREN; }
+"dup" { return DUP; }
+"drop" { return DROP; }
+"swap" { return SWAP; }
+"rot" { return ROT; }
+"-rot" { return REV_ROT; }
+"over" { return OVER; }
+"tuck" { return TUCK; }
+"nip" { return NIP; }
+"2dup" { return DUP_DUP; }
+"2drop" { return DROP_DROP; }
+"2swap" { return SWAP_SWAP; }
+"pick" { return PICK; }
+"roll" { return ROLL; }
+"-roll" { return REV_ROLL; }
+"exch" { return EXCH; }
+"exch2" { return EXCH2; }
+"?dup" { return COND_DUP; }
+"if" { return IF; }
+"ifnot" { return IFNOT; }
+"cond" { return COND; }
+"until" { return UNTIL; }
+"while" { return WHILE; }
+"times" { return TIMES; }
+"include" { return INCLUDE; }
+"true" { return TRUE; }
+"false" { return FALSE; }
 
 {CHAR} { return CHAR; }
 {ABORT} { return ABORT; }
 {PRINT} { return PRINT; }
+{WORD_DEF} { return WORD_DEF; }
 {STRING_CONCAT} { return STRING_CONCAT; }
 {STRING_LITERAL} { return STRING_LITERAL; }
 {NUMBER_DIGIT_LITERAL} { return NUMBER_DIGIT_LITERAL; }

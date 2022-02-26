@@ -2,6 +2,7 @@ package com.github.andreypfau.intellijton.fift.resolve
 
 import com.github.andreypfau.intellijton.fift.psi.FiftElement
 import com.github.andreypfau.intellijton.fift.psi.FiftOrdinaryWord
+import com.github.andreypfau.intellijton.fift.psi.fiftPsiFactory
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 
@@ -27,8 +28,15 @@ class FiftOrdinaryWordReference(
     override fun multiResolve(): Sequence<PsiElement> {
         val name = element.text
         val file = element.resolveFile()
-        return file.resolveAllWordDefs().filter {
-            it.wordDefIdentifier.text == name
+        return file.resolveAllWordDefStatements().filter {
+            it.name == name
         }
+    }
+
+    override fun handleElementRename(newElementName: String): PsiElement {
+        val newNameElement =
+            requireNotNull(element.project.fiftPsiFactory.createFromText<FiftOrdinaryWord>(newElementName))
+        element.replace(newNameElement)
+        return newNameElement
     }
 }

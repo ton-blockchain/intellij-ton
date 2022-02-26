@@ -13,7 +13,8 @@
     tokenTypeClass="com.github.andreypfau.intellijton.tlb.psi.TlbTokenType"
 
     tokens = [
-        HEX_TAG='regexp:#([0-9a-f]|_)'
+        HEX_TAG='regexp:#([0-9a-f]+_?|_)'
+        BINARY_TAG='regexp:\$[01]*_?'
 
         PLUS='+'
         MINUS='-'
@@ -41,39 +42,10 @@
         LEQ='<='
         GEQ='>='
         NEQ='!='
-        TYPE='Type'
-        EMPTY='EMPTY'
-        ANY='Any'
-        CELL='Cell'
-        INT='int'
-        UINT='uint'
-        BITS='bits'
         NAT_LESS='#<'
         NAT_LEQ='#<='
-        UINT1 = 'uint1'
-        UINT2 = 'uint2'
-        UINT4 = 'uint4'
-        UINT8 = 'uint8'
-        UINT16 = 'uint16'
-        UINT32 = 'uint32'
-        UINT64 = 'uint64'
-        UINT128 = 'uint128'
-        UINT256 = 'uint256'
-        UINT257 = 'uint257'
-        BITS1 = 'bits1'
-        BITS2 = 'bits2'
-        BITS4 = 'bits4'
-        BITS8 = 'bits8'
-        BITS16 = 'bits16'
-        BITS32 = 'bits32'
-        BITS64 = 'bits64'
-        BITS128 = 'bits128'
-        BITS256 = 'bits256'
-        BITS512 = 'bits512'
-        BITS1023 = 'bits1023'
         WHITE_SPACE='regexp:\s+'
         COMMENT='regexp:(//.*)'
-        BINARY_TAG='regexp:\$[01]*_?'
         NUMBER='regexp:[0-9]+'
         IDENTIFIER='regexp:[a-zA-Z_][0-9a-zA-Z0-9_]*'
     ]
@@ -81,7 +53,7 @@
 
 root ::= combinator_declaration*
 
-combinator_declaration ::= constructor [ constructor_prefix ] field_definition_list '=' combinator ';' {pin=1}
+combinator_declaration ::= [ '!' ] constructor [ constructor_prefix ] field_definition_list '=' combinator ';' {pin=2}
 
 constructor ::= ( '_' | constructor_name )
 constructor_name ::= IDENTIFIER
@@ -94,9 +66,9 @@ combinator_name ::= IDENTIFIER {
 
 private field_definition_list_recovery ::= !( '=' | ']' )
 field_definition_list ::= field_definition* {recoverWhile=field_definition_list_recovery}
-field_definition ::= implicit_definition | named_field | paren_expression
+field_definition ::= implicit_definition | named_field | cell_ref | paren_expression | expr95
 implicit_definition ::= '{' ( implicit_field | expression ) '}' {pin=1}
-named_field ::= field_name ':' expr95 {pin=1}
+named_field ::= field_name ':' expr95 {pin=2}
 field_name ::= '_' | IDENTIFIER {
     implements = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElement"
     mixin = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElementImpl"
@@ -126,10 +98,7 @@ named_ref ::= IDENTIFIER {
     implements = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElement"
     mixin = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedRefMixin"
 }
-paren_expression ::= "(" expression ')' {pin=1}
-builtin_type ::= '#<' | '#<=' | '##' | '#' | 'Any' | 'Cell' | 'int' | 'Type' | uint | bits
-private uint ::= 'uint' | 'uint1' | 'uint2' | 'uint4' | 'uint8' | 'uint16' | 'uint32' | 'uint64' | 'uint128' | 'uint256' | 'uint257'
-private bits ::= 'bits' | 'bits1' | 'bits2' | 'bits4' | 'bits8' | 'bits16' | 'bits32' | 'bits64' | 'bits128' | 'bits256' | 'bits512' | 'bits1023'
-
+private paren_expression ::= "(" expression ')' {pin=1}
+builtin_type ::= '#<' | '#<=' | '##' | '#'
 //noinspection BnfUnusedRule
 private unused_in_bnf ::= LINE_COMMENT | BLOCK_COMMENT | LINE_DOCUMENTATION | BLOCK_DOCUMENTATION

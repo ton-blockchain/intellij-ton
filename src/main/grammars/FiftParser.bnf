@@ -16,6 +16,7 @@
         CHAR='regexp:(char \S)'
         ABORT='regexp:(abort"([^"\r\n\\]|\\.)*")'
         PRINT='regexp:(\."([^"\r\n\\]|\\.)*")'
+        WORD_DEF='regexp:(::_|::|:)\s(\S+)'
         STRING_CONCAT='regexp:(\+"([^"\r\n\\]|\\.)*")'
         STRING_LITERAL='regexp:("([^"\r\n\\]|\\.)*")'
         NUMBER_DIGIT_LITERAL='regexp:(-?[0-9]+(/-?[0-9]+)?)'
@@ -69,7 +70,7 @@
 }
 
 private root ::= statement*
-private statement ::= (word_def | block | list | literal | word)
+private statement ::= (word_def_statement | block | list | literal | word)
 word ::= stack_word | loop_word | cond_word | INCLUDE | CHAR | ABORT | PRINT | STRING_CONCAT | ordinary_word
 ordinary_word ::= IDENTIFIER {
     mixin = "com.github.andreypfau.intellijton.fift.psi.FiftOrdinaryWordMixin"
@@ -82,11 +83,10 @@ literal ::= number_literal | boolean_literal | STRING_LITERAL | SLICE_BINARY_LIT
 stack_word ::= DUP | DROP | SWAP | ROT | REV_ROT | OVER | TUCK | NIP | DUP_DUP | DROP_DROP | SWAP_SWAP | PICK | ROLL | REV_ROLL | EXCH | EXCH2 | COND_DUP
 loop_word ::= UNTIL | WHILE | TIMES
 cond_word ::= IF | IFNOT | COND
-word_def ::= (block | ordinary_word) (':'|'::'|'::_') word_def_identifier {
+word_def_statement ::= (block | ordinary_word) WORD_DEF {
     implements = "com.github.andreypfau.intellijton.fift.psi.FiftNamedElement"
-    mixin = "com.github.andreypfau.intellijton.fift.psi.FiftWordDefMixin"
+    mixin = "com.github.andreypfau.intellijton.fift.psi.FiftWordDefStatementMixin"
 }
-word_def_identifier ::= IDENTIFIER
 
 //noinspection BnfUnusedRule
 private unused_in_bnf ::= LINE_COMMENT | BLOCK_COMMENT | LINE_DOCUMENTATION | BLOCK_DOCUMENTATION

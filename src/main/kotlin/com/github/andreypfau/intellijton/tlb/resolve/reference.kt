@@ -12,7 +12,6 @@ interface TlbReference : PsiReference {
     fun multiResolve(): Sequence<TlbElement>
 }
 
-
 abstract class TlbReferenceBase<T : TlbNamedElement>(
     element: T
 ) : PsiPolyVariantReferenceBase<T>(element), TlbReference {

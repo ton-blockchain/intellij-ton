@@ -36,10 +36,6 @@ class TlbAnnotator : Annotator {
                 .create()
             is TlbNamedRefMixin -> {
                 when (element.reference.multiResolve().firstOrNull()) {
-                    is TlbCombinatorName -> holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-                        .range(element)
-                        .textAttributes(TlbColor.TYPE.textAttributesKey)
-                        .create()
                     is TlbFieldName -> holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
                         .range(element)
                         .textAttributes(TlbColor.FIELD_NAME.textAttributesKey)
@@ -48,13 +44,30 @@ class TlbAnnotator : Annotator {
                         .range(element)
                         .textAttributes(TlbColor.IMPLICIT_FIELD_NAME.textAttributesKey)
                         .create()
-                    // TODO: Enable after add include support
-                    else -> holder.newAnnotation(HighlightSeverity.ERROR, "Unresolved reference: ${element.text}")
-                        .range(element)
-                        .highlightType(ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
-                        .create()
+                    is TlbCombinatorName -> holder.annotateType(element)
+                    else -> {
+                        if (element.name in TlbParserDefinition.INBUILT_TYPE_NAMES) {
+                            holder.annotateType(element)
+                        } else {
+                            holder.annotateUnknown(element)
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private fun AnnotationHolder.annotateType(element: PsiElement) {
+        newSilentAnnotation(HighlightSeverity.INFORMATION)
+            .range(element)
+            .textAttributes(TlbColor.TYPE.textAttributesKey)
+            .create()
+    }
+
+    private fun AnnotationHolder.annotateUnknown(element: PsiElement) {
+        newAnnotation(HighlightSeverity.ERROR, "Unresolved reference: ${element.text}")
+            .range(element)
+            .highlightType(ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
+            .create()
     }
 }

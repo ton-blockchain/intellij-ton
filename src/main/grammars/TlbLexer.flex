@@ -75,7 +75,7 @@ import static com.github.andreypfau.intellijton.tlb.psi.TlbTypes.*;
 EOL=\R
 
 WHITE_SPACE_CHAR = [\ \n\t\f]
-HEX_TAG=#([0-9a-f]+|_)\s
+HEX_TAG=#([0-9a-f]+_?|_)\s
 BINARY_TAG=\$([01]*|_)\s
 
 LINE_DOCUMENTATION = "/""/""/"[^\n]*
@@ -132,36 +132,6 @@ IDENTIFIER=[a-zA-Z_][0-9a-zA-Z0-9_]*
 {LINE_COMMENT} { return LINE_COMMENT; }
 
 {NUMBER} { return NUMBER; }
- 
-"Type" { return TYPE; }
-"EMPTY" { return EMPTY; }
-"Any" { return ANY; }
-"Cell" { return CELL; }
-"int " { return INT; }
-"uint" { return UINT; }
-"bits" { return BITS; }
-"uint1" { return UINT1; }
-"uint2" { return UINT2; }
-"uint4" { return UINT4; }
-"uint8" { return UINT8; }
-"uint16" { return UINT16; }
-"uint32" { return UINT32; }
-"uint64" { return UINT64; }
-"uint128" { return UINT128; }
-"uint256" { return UINT256; }
-"uint257" { return UINT257; }
-"bits1" { return BITS1; }
-"bits2" { return BITS2; }
-"bits4" { return BITS4; }
-"bits8" { return BITS8; }
-"bits16" { return BITS16; }
-"bits32" { return BITS32; }
-"bits64" { return BITS64; }
-"bits128" { return BITS128; }
-"bits256" { return BITS256; }
-"bits512" { return BITS512; }
-"bits1023" { return BITS1023; }
-
 {IDENTIFIER} { return IDENTIFIER; }
 
 "+" { return PLUS; }

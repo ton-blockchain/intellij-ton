@@ -2,7 +2,7 @@ package com.github.andreypfau.intellijton.fift.completion
 
 import com.github.andreypfau.intellijton.fift.psi.FiftFile
 import com.github.andreypfau.intellijton.fift.psi.FiftTypes.*
-import com.github.andreypfau.intellijton.fift.resolve.resolveAllWordDefs
+import com.github.andreypfau.intellijton.fift.resolve.resolveAllWordDefStatements
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.editor.EditorModificationUtil
@@ -46,8 +46,8 @@ class FuncWordCompletionProvider : CompletionProvider<CompletionParameters>() {
         if (parameters.position.text == CompletionInitializationContext.DUMMY_IDENTIFIER_TRIMMED) return
         val file = parameters.originalFile as? FiftFile ?: return
         val textOffset = parameters.position.textOffset
-        file.resolveAllWordDefs().filter {
-            it.wordDefIdentifier.textOffset < textOffset
+        file.resolveAllWordDefStatements().filter {
+            it.textOffset < textOffset
         }.map { wordDef ->
             LookupElementBuilder.createWithIcon(wordDef).insertSpace()
         }.forEach {

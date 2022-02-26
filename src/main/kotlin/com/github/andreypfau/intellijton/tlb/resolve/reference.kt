@@ -29,8 +29,8 @@ abstract class TlbReferenceBase<T : TlbNamedElement>(
 
     protected open fun doRename(identifier: PsiElement, newName: String) {
         check(identifier.elementType == TlbTypes.IDENTIFIER)
-        TODO()
-//        identifier.replace(identifier.project.TlbPsiFactory.createIdentifier(newName.replace(".fc", "")))
+        val newIdentifier = identifier.project.tlbPsiFactory.createFromText<TlbConstructorName>("$newName#_ = DUMMY")
+        identifier.replace(requireNotNull(newIdentifier?.identifier))
     }
 }
 

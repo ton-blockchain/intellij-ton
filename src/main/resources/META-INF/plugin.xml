@@ -103,7 +103,7 @@
         </action>
         <action id="tlb.file.create"
                 class="com.github.andreypfau.intellijton.tlb.ide.actions.TlbCreateFileAction"
-                text="Create TL-B Scheme">
+                text="Create TL-B Schema">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="fift.file.create"/>
         </action>
     </actions>

@@ -1,5 +1,6 @@
 package com.github.andreypfau.intellijton.func.ide
 
+import com.github.andreypfau.intellijton.func.psi.FuncConstDeclarationElement
 import com.github.andreypfau.intellijton.func.psi.FuncFunctionName
 import com.github.andreypfau.intellijton.func.psi.FuncGlobalVar
 import com.github.andreypfau.intellijton.func.psi.FuncTypeIdentifier
@@ -22,6 +23,11 @@ class FuncAnnotator : Annotator {
                 .textAttributes(FuncColor.PARAMETER.textAttributesKey)
                 .create()
             is FuncGlobalVar -> holder
+                .newSilentAnnotation(HighlightSeverity.INFORMATION)
+                .range(element.identifier)
+                .textAttributes(FuncColor.CONSTANT.textAttributesKey)
+                .create()
+            is FuncConstDeclarationElement -> holder
                 .newSilentAnnotation(HighlightSeverity.INFORMATION)
                 .range(element.identifier)
                 .textAttributes(FuncColor.CONSTANT.textAttributesKey)

@@ -4,7 +4,7 @@
 
 ### Added
 
-- TL-B Schemes support
+- TL-B Schemas support
 - Using new type extension `.func` for FunC files
 
 ## [0.4.0]

@@ -1,10 +1,7 @@
 package com.github.andreypfau.intellijton.func.resolve
 
 import com.github.andreypfau.intellijton.func.FuncFileType
-import com.github.andreypfau.intellijton.func.psi.FuncElement
-import com.github.andreypfau.intellijton.func.psi.FuncFile
-import com.github.andreypfau.intellijton.func.psi.FuncFunction
-import com.github.andreypfau.intellijton.func.psi.FuncFunctionCall
+import com.github.andreypfau.intellijton.func.psi.*
 import com.github.andreypfau.intellijton.psiManager
 import com.intellij.psi.util.childrenOfType
 
@@ -31,10 +28,9 @@ private fun FuncFile.collectNeighbourFiles() = virtualFile.parent.children.asSeq
     project.psiManager.findFile(file) as? FuncFile
 }
 
-fun FuncFunctionCall.resolveFunction(): FuncFunction? {
-    val resolve = reference?.resolve()
-    return resolve as? FuncFunction
-}
+fun FuncFunctionCall.resolveFunction() = reference?.resolve() as? FuncFunction
+fun FuncMethodCall.resolveFunction() = reference?.resolve() as? FuncFunction
+fun FuncModifyingMethodCall.resolveFunction() = reference?.resolve() as? FuncFunction
 
 private fun FuncFile.loadStdlib(): FuncFile? = null
 //    ReadOnlyLightVirtualFile(

@@ -35,27 +35,70 @@ abstract class FuncReferenceBase<T : FuncNamedElement>(
 class FuncFunctionCallReference(
     element: FuncFunctionCall,
 ) : FuncReferenceBase<FuncFunctionCall>(element), FuncReference {
+    val file = element.resolveFile()
     override fun calculateDefaultRangeInElement(): TextRange = element.functionCallIdentifier.textRange
-    fun resolveFunctionCall(): Sequence<FuncFunction> {
+    override fun multiResolve(): Sequence<FuncFunction> {
         val params = element.tensorExpression?.tensorExpressionItemList ?: emptyList()
         val name = element.functionCallIdentifier.identifier.text
-        val file = element.resolveFile()
-        return file.resolveAllFunctions().filter {
-            it.name == name && it.parameterList.parameterDeclarationList.size == params.size
+        return file.resolveAllFunctions().filter { funcFunction ->
+            val paramList = funcFunction.parameterList.parameterDeclarationList
+            paramList.size == params.size && funcFunction.name == name
         }.sortedBy {
             if (it.resolveFile() == file) 1 else -1
-        }.distinctBy {
-            it.functionReturnType.text + it.functionName.text + it.parameterList.text
         }
     }
-
-    override fun multiResolve(): Sequence<PsiElement> = resolveFunctionCall()
 }
 
 class FuncFunctionCallIdentifierReference(
     element: FuncFunctionCallIdentifier
 ) : FuncReferenceBase<FuncFunctionCallIdentifier>(element) {
-    override fun multiResolve(): Sequence<PsiElement> =
-        (element.parent as FuncFunctionCallMixin).reference.multiResolve()
+    override fun multiResolve() = (element.parent as FuncFunctionCallMixin).reference.multiResolve()
 }
 
+class FuncMethodCallReference(
+    element: FuncMethodCall
+) : FuncReferenceBase<FuncMethodCall>(element), FuncReference {
+    val file = element.resolveFile()
+    override fun calculateDefaultRangeInElement(): TextRange =
+        element.methodCallIdentifier?.textRange ?: super.calculateDefaultRangeInElement()
+
+    override fun multiResolve(): Sequence<FuncFunction> {
+        val params = element.tensorExpression?.tensorExpressionItemList ?: emptyList()
+        val name = element.name ?: return emptySequence()
+        return file.resolveAllFunctions().filter { funcFunction ->
+            val paramList = funcFunction.parameterList.parameterDeclarationList
+            (paramList.size - 1) == params.size && funcFunction.name == name
+        }
+    }
+}
+
+class FuncMethodCallIdentifierReference(
+    element: FuncMethodCallIdentifier
+) : FuncReferenceBase<FuncMethodCallIdentifier>(element) {
+    override fun multiResolve() = (element.parent as FuncMethodCallMixin).reference.multiResolve()
+}
+
+class FuncModifyingMethodCallReference(
+    element: FuncModifyingMethodCall
+) : FuncReferenceBase<FuncModifyingMethodCall>(element), FuncReference {
+    val file = element.resolveFile()
+    override fun calculateDefaultRangeInElement(): TextRange =
+        element.modifyingMethodCallIdentifier?.textRange ?: super.calculateDefaultRangeInElement()
+
+    // TODO
+    override fun multiResolve(): Sequence<FuncFunction> {
+        return emptySequence()
+//        val params = element.tensorExpression?.tensorExpressionItemList ?: emptyList()
+//        val name = element.name?.let { "~$it" } ?: return emptySequence()
+//        return file.resolveAllFunctions().filter { funcFunction ->
+//            val paramList = funcFunction.parameterList.parameterDeclarationList
+//            (paramList.size - 1) == params.size && funcFunction.name == name
+//        }
+    }
+}
+
+class FuncModifyingMethodCallIdentifierReference(
+    element: FuncModifyingMethodCallIdentifier
+) : FuncReferenceBase<FuncModifyingMethodCallIdentifier>(element) {
+    override fun multiResolve() = (element.parent as FuncModifyingMethodCallMixin).reference.multiResolve()
+}

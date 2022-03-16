@@ -184,14 +184,30 @@ private expr17 ::= expr20 (('<<' | '>>' | '~>>' | '^>>') expr20)*
 private expr20 ::= '-'? expr30 (('-' | '+' | '|' | '^') expr30)*
 private expr30 ::= expr75 (('*' | '/' | '%' | '~/' | '^/' | '~%' | '^%' | '/%' | '&') expr75)*
 private expr75 ::= '~'? expr80
-private expr80 ::= expr90 (method_call)*
+private expr80 ::= expr90 (method_call | modifying_method_call)*
 private expr90 ::= variable_declaration | function_call | expr100
 private expr100 ::= (type_expression | nontype_expr100)
 private nontype_expr100 ::= (tensor_expression | tuple_expression | unit_literal | primitive_type | INTEGER_LITERAL | STRING_LITERAL | boolean_literal | IDENTIFIER)
 
-method_call ::= (dot_method_call_identifier | tilda_method_call_identifier) expr100
-dot_method_call_identifier ::= '.' IDENTIFIER {pin=1}
-tilda_method_call_identifier ::= '~' IDENTIFIER {pin=1}
+method_call ::= '.' method_call_identifier (tensor_expression | unit_literal) {
+    pin = 1
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncMethodCallMixin"
+}
+method_call_identifier ::= IDENTIFIER {
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncMethodCallIdentifierMixin"
+}
+
+modifying_method_call ::= '~' modifying_method_call_identifier (tensor_expression | unit_literal) {
+    pin = 1
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncModifyingMethodCallMixin"
+}
+modifying_method_call_identifier ::= IDENTIFIER {
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncModifyingMethodCallIdentifierMixin"
+}
 
 variable_declaration ::= type_expression (IDENTIFIER | tuple_expression | tensor_expression | unit_literal)
 function_call ::= function_call_identifier (tensor_expression | unit_literal) {

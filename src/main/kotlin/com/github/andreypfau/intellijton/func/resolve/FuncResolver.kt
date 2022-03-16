@@ -4,6 +4,7 @@ import com.github.andreypfau.intellijton.func.FuncFileType
 import com.github.andreypfau.intellijton.func.psi.FuncElement
 import com.github.andreypfau.intellijton.func.psi.FuncFile
 import com.github.andreypfau.intellijton.func.psi.FuncFunction
+import com.github.andreypfau.intellijton.func.psi.FuncFunctionCall
 import com.github.andreypfau.intellijton.psiManager
 import com.intellij.psi.util.childrenOfType
 
@@ -28,6 +29,11 @@ private fun FuncFile.collectNeighbourFiles() = virtualFile.parent.children.asSeq
     file.extension?.lowercase() in FuncFileType.extensions
 }.map { file ->
     project.psiManager.findFile(file) as? FuncFile
+}
+
+fun FuncFunctionCall.resolveFunction(): FuncFunction? {
+    val resolve = reference?.resolve()
+    return resolve as? FuncFunction
 }
 
 private fun FuncFile.loadStdlib(): FuncFile? = null

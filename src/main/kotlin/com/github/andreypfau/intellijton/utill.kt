@@ -21,3 +21,5 @@ fun <T : PsiElement> PsiElement.childOfType(type: Class<T>, strict: Boolean = tr
 inline fun <reified T : PsiElement> PsiElement.parentOfType(strict: Boolean = true, minStartOffset: Int = -1): T? =
     PsiTreeUtil.getParentOfType(this, T::class.java, strict, minStartOffset)
 
+inline fun <reified T : PsiElement> PsiElement.collectElements() =
+    PsiTreeUtil.collectElementsOfType(this, T::class.java)

@@ -37,11 +37,15 @@ class FuncFunctionCallReference(
 ) : FuncReferenceBase<FuncFunctionCall>(element), FuncReference {
     override fun calculateDefaultRangeInElement(): TextRange = element.functionCallIdentifier.textRange
     fun resolveFunctionCall(): Sequence<FuncFunction> {
-        val element = element
+        val params = element.tensorExpression?.tensorExpressionItemList ?: emptyList()
         val name = element.functionCallIdentifier.identifier.text
         val file = element.resolveFile()
         return file.resolveAllFunctions().filter {
-            it.name == name
+            it.name == name && it.parameterList.parameterDeclarationList.size == params.size
+        }.sortedBy {
+            if (it.resolveFile() == file) 1 else -1
+        }.distinctBy {
+            it.functionReturnType.text + it.functionName.text + it.parameterList.text
         }
     }
 

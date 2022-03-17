@@ -12,7 +12,7 @@ https://plugins.jetbrains.com/plugin/18541-ton-development
 
 - FunC
 - Fift
-- TL-B Schemes
+- TL-B Schemas
 
 ---
 

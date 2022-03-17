@@ -75,8 +75,8 @@ import static com.github.andreypfau.intellijton.tlb.psi.TlbTypes.*;
 EOL=\R
 
 WHITE_SPACE_CHAR = [\ \n\t\f]
-HEX_TAG=#([0-9a-f]+_?|_)\s
-BINARY_TAG=\$([01]*|_)\s
+HEX_TAG=#([0-9a-f]+_?|_)
+BINARY_TAG=\$([01]*|_)
 
 LINE_DOCUMENTATION = "/""/""/"[^\n]*
 LINE_COMMENT = "/""/"[^\n]*

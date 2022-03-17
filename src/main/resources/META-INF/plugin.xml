@@ -6,7 +6,7 @@
     <description><![CDATA[
         TON Development plugin for IntelliJ Platform.
 
-        Includes support for Fift and FunC languages and TL-B schemes.
+        Includes support for Fift and FunC languages and TL-B schemas.
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -30,6 +30,10 @@
                            implementationClass="com.github.andreypfau.intellijton.func.ide.FuncBraceMatcher"/>
         <lang.findUsagesProvider language="FunC"
                                  implementationClass="com.github.andreypfau.intellijton.func.ide.FuncFindUsagesProvider"/>
+        <lang.foldingBuilder language="FunC"
+                             implementationClass="com.github.andreypfau.intellijton.func.ide.FuncFoldingBuilder"/>
+        <codeInsight.parameterNameHints language="FunC"
+                                        implementationClass="com.github.andreypfau.intellijton.func.ide.FuncParameterHintsProvider"/>
         <completion.contributor language="FunC"
                                 implementationClass="com.github.andreypfau.intellijton.func.completion.FuncFunctionCompletionContributor"/>
         <colorSettingsPage implementation="com.github.andreypfau.intellijton.func.ide.FuncColorSettingsPage"/>
@@ -103,7 +107,7 @@
         </action>
         <action id="tlb.file.create"
                 class="com.github.andreypfau.intellijton.tlb.ide.actions.TlbCreateFileAction"
-                text="Create TL-B Scheme">
+                text="Create TL-B Schema">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="fift.file.create"/>
         </action>
     </actions>

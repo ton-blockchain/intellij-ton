@@ -8,9 +8,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.InputValidatorEx
 import com.intellij.psi.PsiDirectory
 
-private const val CAPTION = "TL-B Scheme"
-private const val DESCRIPTION = "Creates new TL-B scheme"
-private const val TLB_FILE_TEMPLATE = "TL-B empty scheme"
+private const val CAPTION = "TL-B Schema"
+private const val DESCRIPTION = "Creates new TL-B schema"
+private const val TLB_FILE_TEMPLATE = "TL-B empty schema"
 
 class TlbCreateFileAction : CreateFileFromTemplateAction(CAPTION, DESCRIPTION, TlbIcons.FILE), DumbAware {
     override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?) = CAPTION
@@ -25,7 +25,7 @@ class TlbCreateFileAction : CreateFileFromTemplateAction(CAPTION, DESCRIPTION, T
         setValidator(object : InputValidatorEx {
             override fun getErrorText(inputString: String?): String? =
                 if (inputString.isNullOrEmpty()) {
-                    "`$inputString` is not valid TL-B scheme name"
+                    "`$inputString` is not valid TL-B schema name"
                 } else null
         })
     }

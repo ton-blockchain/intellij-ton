@@ -1,10 +1,26 @@
 # TON Development Changelog
 
+## [0.6.0]
+
+### Added
+
+- String literals & Constants support ([https://github.com/newton-blockchain/ton/pull/75]())
+- Block folding
+- Parameter hints in function calls
+- References in method calls (`foo.bar()`)
+- Resolving references by neighbour files in directory
+- New icon for TL-B Schema files
+
+### Fixes
+
+- Function names with `:`
+- A lot of small bugs and issues
+
 ## [0.5.0]
 
 ### Added
 
-- TL-B Schemes support
+- TL-B Schemas support
 - Using new type extension `.func` for FunC files
 
 ## [0.4.0]

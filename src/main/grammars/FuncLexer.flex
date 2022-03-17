@@ -77,7 +77,7 @@ HEX_DIGIT = [0-9A-Fa-f]
 WHITE_SPACE_CHAR = [\ \n\t\f]
 
 LETTER = [a-zA-Z]|_
-IDENTIFIER_PART = {DIGIT}|{LETTER}|"?"|":"":"
+IDENTIFIER_PART = {DIGIT}|{LETTER}|"?"|":"
 PLAIN_IDENTIFIER = {LETTER} {IDENTIFIER_PART}*
 ESCAPED_IDENTIFIER = `[^`\n]+`
 IDENTIFIER = {PLAIN_IDENTIFIER}|{ESCAPED_IDENTIFIER}
@@ -89,7 +89,7 @@ DECIMAL_INTEGER_LITERAL=(0|([1-9]({DIGIT})*))
 HEX_INTEGER_LITERAL=0[Xx]({HEX_DIGIT})*
 BIN_INTEGER_LITERAL=0[Bb]({BIN_DIGIT})*
 INTEGER_LITERAL={DECIMAL_INTEGER_LITERAL}|{HEX_INTEGER_LITERAL}|{BIN_INTEGER_LITERAL}
-STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")
+STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")[sauhHc]?
 
 %xstate BLOCK_COMMENT_STATE, DOC_COMMENT_STATE
 
@@ -177,6 +177,7 @@ STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")
 "operator" { return OPERATOR; }
 "infixl" { return INFIXL; }
 "infixr" { return INFIXR; }
+"const" { return CONST; }
 
 {STRING_LITERAL} { return STRING_LITERAL; }
 {IDENTIFIER} { return IDENTIFIER; }
@@ -187,7 +188,6 @@ STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")
 "/" { return DIVIDE; }
 "%" { return PERCENT; }
 "?" { return QUESTION; }
-":" { return COLON; }
 "," { return COMMA; }
 "." { return DOT; }
 ";" { return SEMICOLON; }

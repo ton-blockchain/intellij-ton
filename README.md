@@ -12,6 +12,7 @@ https://plugins.jetbrains.com/plugin/18541-ton-development
 
 - FunC
 - Fift
+- TL-B Schemes
 
 ---
 
@@ -38,7 +39,7 @@ https://plugins.jetbrains.com/plugin/18541-ton-development
 
 Based on [The Open Network](https://ton.org)
 
-_Built with 💚 by Andrey Pfau_
+_Built with 💚 by [Andrey Pfau](https://t.me/andreypfau)_
 
 <!-- Badges -->
 [plugin-repo]: https://plugins.jetbrains.com/plugin/18541-ton-development

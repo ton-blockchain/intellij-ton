@@ -14,16 +14,19 @@ import com.intellij.psi.stubs.IStubElementType
 
 interface FuncElement : PsiElement
 abstract class FuncElementImpl(node: ASTNode) : ASTWrapperPsiElement(node), FuncElement
-interface FuncNamedElement : FuncElement, PsiNameIdentifierOwner
+interface FuncNamedElement : FuncElement, PsiNameIdentifierOwner {
+    override fun getReference(): FuncReferenceBase<*>?
+}
 
 abstract class FuncNamedElementImpl(node: ASTNode) : FuncElementImpl(node), FuncNamedElement {
-    override fun getNameIdentifier(): PsiElement? = findChildByType(FuncTypes.IDENTIFIER)
+    override fun getNameIdentifier(): PsiElement? = findChildByType(FuncTokenTypes.IDENTIFIER)
     override fun getName(): String? = nameIdentifier?.text
     override fun setName(name: String): PsiElement = apply {
         nameIdentifier?.replace(project.funcPsiFactory.createIdentifier(name))
     }
 
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
+    override fun getReference(): FuncReferenceBase<*>? = null
 }
 
 abstract class FuncFunctionDefinitionMixin : FuncStubbedNamedElementImpl<FuncFunctionStub>,

@@ -3,7 +3,7 @@ package com.github.andreypfau.intellijton.func.ide
 import com.github.andreypfau.intellijton.func.lexer.FuncLexerAdapter
 import com.github.andreypfau.intellijton.func.lexer.FuncParser
 import com.github.andreypfau.intellijton.func.psi.FuncFile
-import com.github.andreypfau.intellijton.func.psi.FuncTypes.*
+import com.github.andreypfau.intellijton.func.psi.FuncTokenTypes.*
 import com.github.andreypfau.intellijton.func.stub.FuncFileStub
 import com.intellij.lang.ASTNode
 import com.intellij.lang.ParserDefinition

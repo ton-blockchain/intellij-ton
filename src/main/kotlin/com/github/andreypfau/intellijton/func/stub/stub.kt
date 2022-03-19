@@ -4,6 +4,7 @@ import com.github.andreypfau.intellijton.func.FuncLanguage
 import com.github.andreypfau.intellijton.func.psi.*
 import com.github.andreypfau.intellijton.func.psi.impl.FuncFunctionImpl
 import com.github.andreypfau.intellijton.func.resolve.FuncReference
+import com.github.andreypfau.intellijton.func.resolve.FuncReferenceBase
 import com.intellij.extapi.psi.StubBasedPsiElementBase
 import com.intellij.ide.projectView.PresentationData
 import com.intellij.lang.ASTNode
@@ -45,7 +46,7 @@ abstract class FuncStubbedNamedElementImpl<S> :
     constructor(node: ASTNode) : super(node)
     constructor(stub: S, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
-    override fun getNameIdentifier(): PsiElement? = findChildByType(FuncTypes.IDENTIFIER)
+    override fun getNameIdentifier(): PsiElement? = findChildByType(FuncTokenTypes.IDENTIFIER)
     override fun getName() = stub?.name ?: nameIdentifier?.text
     override fun setName(name: String): PsiElement? = apply {
         nameIdentifier?.replace(project.funcPsiFactory.createIdentifier(name))
@@ -54,6 +55,7 @@ abstract class FuncStubbedNamedElementImpl<S> :
     override fun getNavigationElement(): PsiElement = nameIdentifier ?: this
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
     override fun getPresentation() = PresentationData(name, "", getIcon(0), null)
+    override fun getReference(): FuncReferenceBase<*>? = null
 }
 
 class FuncFileStub(file: FuncFile?) : PsiFileStubImpl<FuncFile>(file) {

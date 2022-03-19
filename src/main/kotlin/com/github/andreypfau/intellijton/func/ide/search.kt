@@ -2,7 +2,7 @@ package com.github.andreypfau.intellijton.func.ide
 
 import com.github.andreypfau.intellijton.func.lexer.FuncLexerAdapter
 import com.github.andreypfau.intellijton.func.psi.FuncNamedElement
-import com.github.andreypfau.intellijton.func.psi.FuncTypes
+import com.github.andreypfau.intellijton.func.psi.FuncTokenTypes
 import com.intellij.lang.HelpID
 import com.intellij.lang.cacheBuilder.DefaultWordsScanner
 import com.intellij.lang.cacheBuilder.WordsScanner
@@ -22,7 +22,7 @@ class FuncFindUsagesProvider : FindUsagesProvider {
 
 class FuncWordScanner : DefaultWordsScanner(
     FuncLexerAdapter(),
-    TokenSet.create(FuncTypes.IDENTIFIER),
+    TokenSet.create(FuncTokenTypes.IDENTIFIER),
     FuncParserDefinition.COMMENTS,
-    TokenSet.create(FuncTypes.STRING_LITERAL)
+    TokenSet.create(FuncTokenTypes.STRING_LITERAL)
 )

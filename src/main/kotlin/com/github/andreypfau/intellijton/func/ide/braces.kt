@@ -1,6 +1,6 @@
 package com.github.andreypfau.intellijton.func.ide
 
-import com.github.andreypfau.intellijton.func.psi.FuncTypes
+import com.github.andreypfau.intellijton.func.psi.FuncTokenTypes
 import com.intellij.lang.BracePair
 import com.intellij.lang.PairedBraceMatcher
 import com.intellij.psi.PsiFile
@@ -15,9 +15,9 @@ class FuncBraceMatcher : PairedBraceMatcher {
 
     companion object {
         val BRACE_PAIRS = arrayOf(
-            BracePair(FuncTypes.LBRACE, FuncTypes.RBRACE, false),
-            BracePair(FuncTypes.LPAREN, FuncTypes.RPAREN, false),
-            BracePair(FuncTypes.LBRACKET, FuncTypes.RBRACKET, false),
+            BracePair(FuncTokenTypes.LBRACE, FuncTokenTypes.RBRACE, false),
+            BracePair(FuncTokenTypes.LPAREN, FuncTokenTypes.RPAREN, false),
+            BracePair(FuncTokenTypes.LBRACKET, FuncTokenTypes.RBRACKET, false),
         )
     }
 }

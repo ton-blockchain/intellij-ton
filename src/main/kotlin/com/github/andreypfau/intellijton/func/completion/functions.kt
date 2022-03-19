@@ -14,13 +14,13 @@ class FuncFunctionCompletionContributor : CompletionContributor(), DumbAware {
     init {
         extend(
             CompletionType.BASIC, StandardPatterns.or(
-                PlatformPatterns.psiElement(FuncTypes.IDENTIFIER).inside(FuncTensorExpression::class.java),
-                PlatformPatterns.psiElement(FuncTypes.IDENTIFIER).inside(FuncTupleExpression::class.java)
+                PlatformPatterns.psiElement(FuncTokenTypes.IDENTIFIER).inside(FuncTensorExpression::class.java),
+                PlatformPatterns.psiElement(FuncTokenTypes.IDENTIFIER).inside(FuncTupleExpression::class.java)
             ), FuncFunctionCompletionProvider(false)
         )
         extend(
             CompletionType.BASIC, StandardPatterns.or(
-                PlatformPatterns.psiElement(FuncTypes.IDENTIFIER).inside(FuncExpressionStatement::class.java)
+                PlatformPatterns.psiElement(FuncTokenTypes.IDENTIFIER).inside(FuncExpressionStatement::class.java)
             ), FuncFunctionCompletionProvider(true)
         )
     }
@@ -40,7 +40,7 @@ class FuncFunctionCompletionProvider(
         if (parameters.position.text == CompletionInitializationContext.DUMMY_IDENTIFIER_TRIMMED) return
         val file = parameters.originalFile as? FuncFile ?: return
         val functions = file.resolveAllFunctions().filter {
-            it.functionName.firstChild.elementType === FuncTypes.IDENTIFIER
+            it.functionName.firstChild.elementType === FuncTokenTypes.IDENTIFIER
         }
         functions.map { functionDef ->
             val parameterList = functionDef.parameterList.text

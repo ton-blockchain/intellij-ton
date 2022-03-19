@@ -32,7 +32,7 @@ data class FuncTensorTypeName(val list: List<FuncTypeName?> = emptyList()) : Fun
     override fun toString() = list.joinToString(prefix = "(", postfix = ")")
 }
 
-private fun PsiElement?.resolveType() = if (this == null) null else when {
+private fun PsiElement.resolveType() = when {
     elementType == FuncTokenTypes.INTEGER_LITERAL -> FuncIntTypeName
     elementType == FuncTokenTypes.STRING_LITERAL -> when (text.last()) {
         'u', 'h', 'H', 'c' -> FuncIntTypeName
@@ -42,16 +42,15 @@ private fun PsiElement?.resolveType() = if (this == null) null else when {
     else -> null
 }
 
-fun FuncElement?.resolveType(): FuncTypeName? {
-    if (this == null) return null
+fun FuncElement.resolveType(): FuncTypeName? {
     val resolved = when {
         this is FuncExpression -> firstChild.resolveType()
-        this is FuncAssignmentExpression -> assignmentExpression.resolveType() ?: ternaryExpression.resolveType()
-        this is FuncTernaryExpression -> ternaryExpression.resolveType() ?: equationExpression.resolveType()
-        this is FuncEquationExpression -> bitwiseExpressionList.firstOrNull().resolveType()
-        this is FuncBitwiseExpression -> arithmeticExpressionList.firstOrNull().resolveType()
-        this is FuncArithmeticExpression -> expr30List.firstOrNull().resolveType()
-        this is FuncExpr30 -> expr75List.firstOrNull().resolveType()
+        this is FuncAssignmentExpression -> assignmentExpression?.resolveType() ?: ternaryExpression.resolveType()
+        this is FuncTernaryExpression -> ternaryExpression?.resolveType() ?: equationExpression.resolveType()
+        this is FuncEquationExpression -> bitwiseExpressionList.firstOrNull()?.resolveType()
+        this is FuncBitwiseExpression -> arithmeticExpressionList.firstOrNull()?.resolveType()
+        this is FuncArithmeticExpression -> expr30List.firstOrNull()?.resolveType()
+        this is FuncExpr30 -> expr75List.firstOrNull()?.resolveType()
         this is FuncExpr75 -> expr80.resolveType()
         this is FuncExpr80 -> {
             val type = expr90.resolveType()
@@ -63,7 +62,8 @@ fun FuncElement?.resolveType(): FuncTypeName? {
                 currentChainType
             } else type
         }
-        this is FuncExpr90 -> variableDeclaration?.resolveType() ?: functionCall.resolveType() ?: expr100.resolveType()
+        this is FuncExpr90 -> variableDeclaration?.resolveType() ?: functionCall?.resolveType()
+        ?: expr100?.resolveType()
         this is FuncExpr100 -> typeExpression?.resolveType() ?: nonTypeExpression?.resolveType()
         this is FuncTypeExpression -> primitiveType?.resolveType() ?: varType?.resolveType()
         ?: parenthesizedTypeExpression?.resolveType() ?: tensorTypeExpression?.resolveType()
@@ -81,7 +81,7 @@ fun FuncElement?.resolveType(): FuncTypeName? {
         })
         this is FuncTensorExpression -> resolveType()
         this is FuncFunctionReturnType ->
-            primitiveType.resolveType() ?: tensorType.resolveType() ?: tupleType.resolveType()
+            primitiveType?.resolveType() ?: tensorType?.resolveType() ?: tupleType?.resolveType()
         this is FuncPrimitiveType -> resolveType()
         else -> null
     }
@@ -95,7 +95,7 @@ fun FuncCallable.resolveType(): FuncTypeName? =
 
 fun FuncFunction.resolveType(): FuncTypeName? {
     return if (functionReturnType.holeType != null) {
-        return blockStatement?.childOfType<FuncReturnStatement>()?.expression.resolveType()
+        return blockStatement?.childOfType<FuncReturnStatement>()?.expression?.resolveType()
     } else {
         functionReturnType.resolveType()
     }
@@ -129,7 +129,7 @@ fun FuncPrimitiveType.resolveType() = when (firstChild.elementType) {
 fun FuncTensorExpression.resolveType(): FuncTensorTypeName? {
     var resolved: FuncTensorTypeName? = null
     if (parent is FuncVariableDeclaration) {
-        parent.parentOfType<FuncAssignmentExpression>().resolveType()
+        parent.parentOfType<FuncAssignmentExpression>()?.resolveType()
     } else {
         resolved = FuncTensorTypeName(tensorExpressionItemList.map {
             it.expression.resolveType()

@@ -27,8 +27,7 @@ object FuncContTypeName : FuncTypeName {
     override fun toString(): String = "cont"
 }
 
-data class FuncTensorTypeName(val list: List<FuncTypeName?> = emptyList()) : FuncTypeName,
-    List<FuncTypeName?> by list {
+data class FuncTensorTypeName(val list: List<FuncTypeName?> = emptyList()) : FuncTypeName, List<FuncTypeName?> by list {
     override fun toString() = list.joinToString(prefix = "(", postfix = ")")
 }
 
@@ -65,9 +64,7 @@ fun FuncElement.resolveType(): FuncTypeName? {
         this is FuncExpr90 -> variableDeclaration?.resolveType() ?: functionCall?.resolveType()
         ?: expr100?.resolveType()
         this is FuncExpr100 -> typeExpression?.resolveType() ?: nonTypeExpression?.resolveType()
-        this is FuncTypeExpression -> primitiveType?.resolveType() ?: varType?.resolveType()
-        ?: parenthesizedTypeExpression?.resolveType() ?: tensorTypeExpression?.resolveType()
-        ?: tupleTypeExpression?.resolveType()
+        this is FuncTypeExpression -> firstChild.resolveType()
         this is FuncFunctionCall -> {
             val funcFunction = reference?.resolve() as? FuncFunction
             val parameters = tensorExpression.resolveType()?.list
@@ -80,8 +77,8 @@ fun FuncElement.resolveType(): FuncTypeName? {
             it.firstChild.resolveType()
         })
         this is FuncTensorExpression -> resolveType()
-        this is FuncFunctionReturnType ->
-            primitiveType?.resolveType() ?: tensorType?.resolveType() ?: tupleType?.resolveType()
+        this is FuncFunctionReturnType -> primitiveType?.resolveType() ?: tensorType?.resolveType()
+        ?: tupleType?.resolveType()
         this is FuncPrimitiveType -> resolveType()
         else -> null
     }

@@ -61,34 +61,39 @@ fun FuncElement.resolveType(): FuncTypeName? {
                 currentChainType
             } else type
         }
-        this is FuncExpr90 -> variableDeclaration?.resolveType() ?: functionCall?.resolveType()
-        ?: expr100?.resolveType()
-        this is FuncExpr100 -> typeExpression?.resolveType() ?: nonTypeExpression?.resolveType()
+        this is FuncExpr90 -> firstChild.resolveType()
+        this is FuncExpr100 -> firstChild.resolveType()
         this is FuncTypeExpression -> firstChild.resolveType()
         this is FuncFunctionCall -> {
             val funcFunction = reference?.resolve() as? FuncFunction
             val parameters = tensorExpression.resolveType()?.list
             funcFunction?.resolveTemplate(parameters)
         }
-        this is FuncCallable -> resolveType()
+        this is FuncCallable -> firstChild.resolveType()
+        this is FuncMethodCall -> reference?.resolve()?.resolveType()
+        this is FuncModifyingMethodCall -> resolveType()
         this is FuncFunction -> resolveType()
-        this is FuncNonTypeExpression -> resolveType()
+        this is FuncNonTypeExpression -> firstChild.resolveType()
         this is FuncTensorType -> FuncTensorTypeName(tensorTypeItemList.map {
             it.firstChild.resolveType()
         })
         this is FuncTensorExpression -> resolveType()
-        this is FuncFunctionReturnType -> primitiveType?.resolveType() ?: tensorType?.resolveType()
-        ?: tupleType?.resolveType()
+        this is FuncFunctionReturnType -> firstChild.resolveType()
         this is FuncPrimitiveType -> resolveType()
+        this is FuncParameterDeclaration -> firstChild.resolveType()
+        this is FuncReferenceExpression -> {
+            val resolved = reference?.resolve()
+            if (resolved is FuncReferenceExpression) {
+                null
+            } else {
+                resolved?.resolveType()
+            }
+        }
+        this is FuncVariableDeclaration -> typeExpression.resolveType()
         else -> null
     }
     return resolved
 }
-
-fun FuncNonTypeExpression.resolveType(): FuncTypeName? = firstChild.resolveType()
-
-fun FuncCallable.resolveType(): FuncTypeName? =
-    methodCall?.reference?.resolve()?.resolveType() ?: modifyingMethodCall?.reference?.resolve()?.resolveType()
 
 fun FuncFunction.resolveType(): FuncTypeName? {
     return if (functionReturnType.holeType != null) {
@@ -96,6 +101,17 @@ fun FuncFunction.resolveType(): FuncTypeName? {
     } else {
         functionReturnType.resolveType()
     }
+}
+
+fun FuncModifyingMethodCall.resolveType(): FuncTypeName? {
+    val funcFunction = reference?.resolve() as? FuncFunction ?: return null
+    val functionType = funcFunction.resolveType() ?: return null
+    if (functionType is FuncTensorTypeName) {
+        if (functionType.size >= 2) {
+            return functionType[1]
+        }
+    }
+    return functionType
 }
 
 fun FuncFunction.resolveTemplate(parameters: List<FuncTypeName?>?): FuncTypeName? {

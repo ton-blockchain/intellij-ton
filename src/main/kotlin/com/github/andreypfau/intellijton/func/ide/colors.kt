@@ -33,7 +33,9 @@ enum class FuncColor(
     FUNCTION_DECLARATION("Function declaration", Defaults.FUNCTION_DECLARATION),
     FUNCTION_CALL("Function call", Defaults.FUNCTION_CALL),
     PARAMETER("Type parameter", TextAttributesKey.find("KOTLIN_TYPE_PARAMETER")),
-    CONSTANT("Global variable", Defaults.CONSTANT)
+    CONSTANT("Constant", Defaults.CONSTANT),
+    GLOBAL_VARIABLE("Global variable", Defaults.GLOBAL_VARIABLE),
+    LOCAL_VARIABLE("Local variable", Defaults.LOCAL_VARIABLE),
     ;
 
     val textAttributesKey =

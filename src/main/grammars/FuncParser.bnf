@@ -116,7 +116,7 @@
     ]
 }
 
-private root ::= (global_var_declaration | const_declaration | function)*
+private root ::= (global_var_expression | const_expression | function)*
 function ::= type_variables_list? function_return_type function_name parameter_list
              'impure'? inline_specifier? method_id_specifier? (';' | block_statement | asm_function_body) {
     implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
@@ -138,18 +138,25 @@ asm_instruction ::= STRING_LITERAL
 private parameter_list_recovery ::= !')'
 private parameter_list_begin ::= '(' parameter_list_item* {recoverWhile=parameter_list_recovery}
 private parameter_list_item ::= !')' parameter_declaration (',' | &')' ) { pin=2 }
-parameter_declaration ::= (type (IDENTIFIER)) | IDENTIFIER
+parameter_declaration ::= type? IDENTIFIER {
+   implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+   mixin = "com.github.andreypfau.intellijton.func.psi.FuncParameterDeclarationMixin"
+}
 parameter_list ::= parameter_list_begin ')'
 
-global_var_declaration ::= 'global' global_var (',' global_var)* ';' {pin=1}
-global_var ::= (type IDENTIFIER) | IDENTIFIER
-
+global_var_expression ::= 'global' global_var (',' global_var)* ';' {pin=1}
+global_var ::= type? IDENTIFIER {
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncGlobalVarMixin"
+}
 private const_list_recovery ::= !';'
-private const_list_item ::= const_declaration_element (',' | &';')
+private const_list_item ::= const_declaration (',' | &';')
 private const_list ::= const_list_item+ {recoverWhile=const_list_recovery}
-const_declaration_expression ::= expression
-const_declaration_element ::= primitive_type? IDENTIFIER '=' const_declaration_expression
-const_declaration ::= const const_list ';' {pin=1}
+const_declaration ::= primitive_type? IDENTIFIER '=' expression {
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncConstDeclarationMixin"
+}
+const_expression ::= const const_list ';' {pin=1}
 
 //
 // STATEMENTS
@@ -187,7 +194,12 @@ expr75 ::= '~'? expr80
 expr80 ::= expr90 callable*
 expr90 ::= variable_declaration | function_call | expr100
 expr100 ::= (type_expression | non_type_expression)
-non_type_expression ::= (tensor_expression | tuple_expression | primitive_type | INTEGER_LITERAL | STRING_LITERAL | boolean_literal | IDENTIFIER)
+non_type_expression ::= (tensor_expression | tuple_expression | primitive_type | INTEGER_LITERAL | STRING_LITERAL | boolean_literal | reference_expression)
+
+reference_expression ::= IDENTIFIER {
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncReferenceExpressionMixin"
+}
 
 callable ::= method_call | modifying_method_call
 
@@ -202,7 +214,6 @@ method_call_identifier ::= IDENTIFIER {
 }
 
 modifying_method_call ::= '~' modifying_method_call_identifier tensor_expression {
-    pin = 1
     implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
     mixin = "com.github.andreypfau.intellijton.func.psi.FuncModifyingMethodCallMixin"
 }
@@ -211,7 +222,10 @@ modifying_method_call_identifier ::= IDENTIFIER {
     mixin = "com.github.andreypfau.intellijton.func.psi.FuncModifyingMethodCallIdentifierMixin"
 }
 
-variable_declaration ::= type_expression (IDENTIFIER | tuple_expression | tensor_expression)
+variable_declaration ::= type_expression (IDENTIFIER | tuple_expression | tensor_expression) {
+    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
+    mixin = "com.github.andreypfau.intellijton.func.psi.FuncVariableDeclarationMixin"
+}
 function_call ::= function_call_identifier tensor_expression {
     implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
     mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionCallMixin"

@@ -2,6 +2,7 @@ package com.github.andreypfau.intellijton.func.completion
 
 import com.github.andreypfau.intellijton.func.psi.*
 import com.github.andreypfau.intellijton.func.resolve.resolveAllFunctions
+import com.github.andreypfau.intellijton.func.resolve.resolveReferenceExpressionProviders
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
@@ -50,6 +51,11 @@ class FuncFunctionCompletionProvider(
                 .withTailText(parameterList)
                 .withTypeText(functionReturn)
                 .insertParenthesis(insertSemicolon, functionDef.parameterList.parameterDeclarationList.isEmpty())
+        }.forEach {
+            result.addElement(it)
+        }
+        file.resolveReferenceExpressionProviders(parameters.position.textOffset).map {
+            LookupElementBuilder.createWithIcon(it)
         }.forEach {
             result.addElement(it)
         }

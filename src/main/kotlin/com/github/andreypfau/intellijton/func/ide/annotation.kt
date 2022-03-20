@@ -1,9 +1,6 @@
 package com.github.andreypfau.intellijton.func.ide
 
-import com.github.andreypfau.intellijton.func.psi.FuncConstDeclarationElement
-import com.github.andreypfau.intellijton.func.psi.FuncFunctionName
-import com.github.andreypfau.intellijton.func.psi.FuncGlobalVar
-import com.github.andreypfau.intellijton.func.psi.FuncTypeIdentifier
+import com.github.andreypfau.intellijton.func.psi.*
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
@@ -25,13 +22,32 @@ class FuncAnnotator : Annotator {
             is FuncGlobalVar -> holder
                 .newSilentAnnotation(HighlightSeverity.INFORMATION)
                 .range(element.identifier)
-                .textAttributes(FuncColor.CONSTANT.textAttributesKey)
+                .textAttributes(FuncColor.GLOBAL_VARIABLE.textAttributesKey)
                 .create()
-            is FuncConstDeclarationElement -> holder
+            is FuncConstDeclaration -> holder
                 .newSilentAnnotation(HighlightSeverity.INFORMATION)
                 .range(element.identifier)
                 .textAttributes(FuncColor.CONSTANT.textAttributesKey)
                 .create()
+            is FuncReferenceExpression -> {
+                when (element.reference?.resolve()) {
+                    is FuncVariableDeclaration -> holder
+                        .newSilentAnnotation(HighlightSeverity.INFORMATION)
+                        .range(element.identifier)
+                        .textAttributes(FuncColor.LOCAL_VARIABLE.textAttributesKey)
+                        .create()
+                    is FuncConstDeclaration -> holder
+                        .newSilentAnnotation(HighlightSeverity.INFORMATION)
+                        .range(element.identifier)
+                        .textAttributes(FuncColor.CONSTANT.textAttributesKey)
+                        .create()
+                    is FuncGlobalVar -> holder
+                        .newSilentAnnotation(HighlightSeverity.INFORMATION)
+                        .range(element.identifier)
+                        .textAttributes(FuncColor.GLOBAL_VARIABLE.textAttributesKey)
+                        .create()
+                }
+            }
         }
     }
 }

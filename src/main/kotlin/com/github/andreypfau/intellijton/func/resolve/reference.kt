@@ -8,17 +8,22 @@ import com.intellij.psi.util.elementType
 interface FuncReference : PsiReference {
     override fun getElement(): FuncElement
     override fun resolve(): FuncElement?
-    fun multiResolve(): Sequence<PsiElement>
+    fun multiResolve(): Sequence<FuncElement>
 }
 
 abstract class FuncReferenceBase<T : FuncNamedElement>(
     element: T
 ) : PsiPolyVariantReferenceBase<T>(element), FuncReference {
+    val file = element.resolveFile()
+
     override fun calculateDefaultRangeInElement() = TextRange(0, element.textRange.length)
     override fun getVariants(): Array<Any> = emptyArray()
     override fun resolve(): FuncElement? = super.resolve() as? FuncElement
-    override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> =
-        multiResolve().map(::PsiElementResolveResult).toList().toTypedArray()
+    override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
+        val multiFileResolve = multiResolve().map(::PsiElementResolveResult).toList()
+        val currentFileResolve = multiFileResolve.filter { it.element.containingFile == file }
+        return currentFileResolve.ifEmpty { multiFileResolve }.toTypedArray()
+    }
 
     override fun handleElementRename(newElementName: String): PsiElement {
         val name = element.nameIdentifier ?: return element
@@ -35,14 +40,10 @@ abstract class FuncReferenceBase<T : FuncNamedElement>(
 class FuncFunctionCallReference(
     element: FuncFunctionCall,
 ) : FuncReferenceBase<FuncFunctionCall>(element), FuncReference {
-    val file = element.resolveFile()
     override fun calculateDefaultRangeInElement(): TextRange = element.functionCallIdentifier.textRange
     override fun multiResolve(): Sequence<FuncFunction> {
-        val params = element.tensorExpression.tensorExpressionItemList
         val name = element.functionCallIdentifier.identifier.text
         return file.resolveAllFunctions().filter { funcFunction ->
-//            val paramList = funcFunction.parameterList.parameterDeclarationList
-//            paramList.size == params.size &&
             funcFunction.name == name
         }.sortedBy {
             if (it.resolveFile() == file) 1 else -1
@@ -59,7 +60,6 @@ class FuncFunctionCallIdentifierReference(
 class FuncMethodCallReference(
     element: FuncMethodCall
 ) : FuncReferenceBase<FuncMethodCall>(element), FuncReference {
-    val file = element.resolveFile()
     override fun calculateDefaultRangeInElement(): TextRange =
         element.methodCallIdentifier?.textRange ?: super.calculateDefaultRangeInElement()
 
@@ -82,7 +82,6 @@ class FuncMethodCallIdentifierReference(
 class FuncModifyingMethodCallReference(
     element: FuncModifyingMethodCall
 ) : FuncReferenceBase<FuncModifyingMethodCall>(element), FuncReference {
-    val file = element.resolveFile()
     val params = element.tensorExpression.tensorExpressionItemList
 
     override fun calculateDefaultRangeInElement(): TextRange =
@@ -110,7 +109,7 @@ class FuncReferenceExpressionReference(
     val elementTextOffset = element.textOffset
     val funcFile = element.resolveFile()
 
-    override fun multiResolve(): Sequence<PsiElement> {
+    override fun multiResolve(): Sequence<FuncElement> {
         return funcFile.resolveReferenceExpressionProviders(elementTextOffset).filter {
             it != element && it.identifyingElement?.textMatches(elementName) == true
         }

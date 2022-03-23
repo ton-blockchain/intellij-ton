@@ -29,6 +29,21 @@ class FuncAnnotator : Annotator {
                 .range(element.identifier)
                 .textAttributes(FuncColor.CONSTANT.textAttributesKey)
                 .create()
+            is FuncFunctionCallIdentifier -> holder
+                .newSilentAnnotation(HighlightSeverity.INFORMATION)
+                .range(element)
+                .textAttributes(FuncColor.FUNCTION_CALL.textAttributesKey)
+                .create()
+            is FuncMethodCallIdentifier -> holder
+                .newSilentAnnotation(HighlightSeverity.INFORMATION)
+                .range(element)
+                .textAttributes(FuncColor.FUNCTION_CALL.textAttributesKey)
+                .create()
+            is FuncModifyingMethodCall -> holder
+                .newSilentAnnotation(HighlightSeverity.INFORMATION)
+                .range(element)
+                .textAttributes(FuncColor.FUNCTION_CALL.textAttributesKey)
+                .create()
             is FuncReferenceExpression -> {
                 when (element.reference?.resolve()) {
                     is FuncVariableDeclaration -> holder

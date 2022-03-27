@@ -1,6 +1,5 @@
 package com.github.andreypfau.intellijton.notification
 
-import com.github.andreypfau.intellijton.Plugin
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.StartupActivity
@@ -29,7 +28,5 @@ class NotificationPostStartupActivity :
     }
 
     private fun checkUpdate() {
-        val version = Plugin.version
-        if (version != null)
     }
 }

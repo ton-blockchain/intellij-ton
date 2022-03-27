@@ -1,8 +1,10 @@
 package com.github.andreypfau.intellijton.func.ide
 
+import com.github.andreypfau.intellijton.childOfType
 import com.github.andreypfau.intellijton.func.psi.FuncFunctionCall
 import com.github.andreypfau.intellijton.func.psi.FuncMethodCall
 import com.github.andreypfau.intellijton.func.psi.FuncModifyingMethodCall
+import com.github.andreypfau.intellijton.func.psi.FuncReferenceExpression
 import com.github.andreypfau.intellijton.func.resolve.resolveFunction
 import com.intellij.codeInsight.hints.InlayInfo
 import com.intellij.codeInsight.hints.InlayParameterHintsProvider
@@ -12,6 +14,9 @@ import com.intellij.psi.PsiElement
 class FuncParameterHintsProvider : InlayParameterHintsProvider {
     override fun getDefaultBlackList(): Set<String> = emptySet()
     override fun getParameterHints(element: PsiElement): List<InlayInfo> {
+//        if (element is FuncExpression) {
+//            return listOf(InlayInfo(element.resolveType().toString(), element.textOffset))
+//        }
         val funcFunction = when (element) {
             is FuncFunctionCall -> element.resolveFunction()
             is FuncMethodCall -> element.resolveFunction()
@@ -24,10 +29,22 @@ class FuncParameterHintsProvider : InlayParameterHintsProvider {
             is FuncModifyingMethodCall -> element.tensorExpression
             else -> null
         }?.tensorExpressionItemList ?: return emptyList()
-        val paramOffset = if (element is FuncFunctionCall) 0 else 1
+        val paramOffset = when (element) {
+            is FuncFunctionCall -> 0
+            else -> 1
+        }
         val paramNames = funcFunction.parameterList.parameterDeclarationList.map { it.identifier.text }
         return arguments.mapIndexed { index, expressionItem ->
-            InlayInfo(paramNames[index + paramOffset], expressionItem.textOffset)
-        }
+            if (expressionItem.expression.childOfType<FuncReferenceExpression>() != null) {
+                null
+            } else {
+                val paramNameIndex = index + paramOffset
+                if (paramNameIndex > paramNames.lastIndex) {
+                    null
+                } else {
+                    InlayInfo(paramNames[index + paramOffset], expressionItem.textOffset)
+                }
+            }
+        }.filterNotNull()
     }
 }

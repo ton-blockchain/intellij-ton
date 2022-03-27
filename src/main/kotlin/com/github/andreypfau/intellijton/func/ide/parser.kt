@@ -3,7 +3,7 @@ package com.github.andreypfau.intellijton.func.ide
 import com.github.andreypfau.intellijton.func.lexer.FuncLexerAdapter
 import com.github.andreypfau.intellijton.func.lexer.FuncParser
 import com.github.andreypfau.intellijton.func.psi.FuncFile
-import com.github.andreypfau.intellijton.func.psi.FuncTypes.*
+import com.github.andreypfau.intellijton.func.psi.FuncTokenTypes.*
 import com.github.andreypfau.intellijton.func.stub.FuncFileStub
 import com.intellij.lang.ASTNode
 import com.intellij.lang.ParserDefinition
@@ -32,7 +32,7 @@ class FuncParserDefinition : ParserDefinition {
         val KEYWORDS = TokenSet.create(
             RETURN, VAR, REPEAT, DO, WHILE, UNTIL, IF, IFNOT, THEN, ELSE, ELSEIF, ELSEIFNOT,
             EXTERN, GLOBAL, ASM, IMPURE, INLINE, INLINE_REF, AUTO_APPLY, METHOD_ID, OPERATOR,
-            INFIXL, INFIXR, CONST
+            INFIXL, INFIXR, CONST, TILDE
         )
         val BRACES = TokenSet.create(LBRACE, RBRACE)
         val PARENTHESES = TokenSet.create(LPAREN, RPAREN)
@@ -41,7 +41,7 @@ class FuncParserDefinition : ParserDefinition {
             INT, CELL, SLICE, BUILDER, CONT, TUPLE, TYPE, FORALL, TRUE, FALSE
         )
         val OPERATORS = TokenSet.create(
-            PLUS, MINUS, TIMES, DIVIDE, PERCENT, QUESTION, EQUALS, LESS, GREATER, AND, OR, CIRCUMFLEX, TILDE,
+            PLUS, MINUS, TIMES, DIVIDE, PERCENT, QUESTION, EQUALS, LESS, GREATER, AND, OR, CIRCUMFLEX,
             EQ, NEQ, NEQ, LEQ, GEQ, SPACESHIP, LSHIFT, RSHIFT, RSHIFTR, RSHIFTC, DIVR, DIVC, MODR, MODC, DIVMOD,
             PLUSLET, MINUSLET, TIMESLET, DIVLET, DIVRLET, DIVCLET, MODLET, MODRLET, MODCLET, LSHIFTLET, RSHIFTLET,
             RSHIFTRLET, RSHIFTCLET, ANDLET, ORLET, XORLET, MAPSTO

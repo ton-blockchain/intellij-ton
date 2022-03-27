@@ -14,16 +14,19 @@ import com.intellij.psi.stubs.IStubElementType
 
 interface FuncElement : PsiElement
 abstract class FuncElementImpl(node: ASTNode) : ASTWrapperPsiElement(node), FuncElement
-interface FuncNamedElement : FuncElement, PsiNameIdentifierOwner
+interface FuncNamedElement : FuncElement, PsiNameIdentifierOwner {
+    override fun getReference(): FuncReferenceBase<*>?
+}
 
 abstract class FuncNamedElementImpl(node: ASTNode) : FuncElementImpl(node), FuncNamedElement {
-    override fun getNameIdentifier(): PsiElement? = findChildByType(FuncTypes.IDENTIFIER)
-    override fun getName(): String? = nameIdentifier?.text
-    override fun setName(name: String): PsiElement = apply {
+    override fun getNameIdentifier(): PsiElement? = findChildByType(FuncTokenTypes.IDENTIFIER)
+    override fun getName() = nameIdentifier?.text
+    override fun setName(name: String) = apply {
         nameIdentifier?.replace(project.funcPsiFactory.createIdentifier(name))
     }
 
-    override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
+    override fun getTextOffset() = nameIdentifier?.textOffset ?: super.getTextOffset()
+    override fun getReference(): FuncReferenceBase<*>? = null
 }
 
 abstract class FuncFunctionDefinitionMixin : FuncStubbedNamedElementImpl<FuncFunctionStub>,
@@ -39,6 +42,20 @@ abstract class FuncFunctionDefinitionMixin : FuncStubbedNamedElementImpl<FuncFun
             name,
             null,
             FuncIcons.FUNCTION,
+            TextAttributesKey.createTextAttributesKey("public")
+        )
+    }
+}
+
+abstract class FuncParameterDeclarationMixin(node: ASTNode) : FuncNamedElementImpl(node), FuncParameterDeclaration {
+    override fun getNameIdentifier(): PsiElement = identifier
+    override fun getIcon(flags: Int) = FuncIcons.PARAMETER
+    override fun getPresentation(): PresentationData {
+        val name = name
+        return PresentationData(
+            name,
+            null,
+            FuncIcons.VARIABLE,
             TextAttributesKey.createTextAttributesKey("public")
         )
     }
@@ -65,7 +82,7 @@ abstract class FuncMethodCallIdentifierMixin(node: ASTNode) : FuncNamedElementIm
 }
 
 abstract class FuncModifyingMethodCallMixin(node: ASTNode) : FuncNamedElementImpl(node), FuncModifyingMethodCall {
-    override fun getNameIdentifier() = modifyingMethodCallIdentifier?.identifier
+    override fun getNameIdentifier() = modifyingMethodCallIdentifier.identifier
     override fun getReference() = FuncModifyingMethodCallReference(this)
 }
 
@@ -73,4 +90,41 @@ abstract class FuncModifyingMethodCallIdentifierMixin(node: ASTNode) : FuncNamed
     FuncModifyingMethodCallIdentifier {
     override fun getNameIdentifier() = identifier
     override fun getReference() = FuncModifyingMethodCallIdentifierReference(this)
+}
+
+abstract class FuncGlobalVarMixin(node: ASTNode) : FuncNamedElementImpl(node), FuncGlobalVar {
+    override fun getNameIdentifier() = identifier
+}
+
+abstract class FuncConstDeclarationMixin(node: ASTNode) : FuncNamedElementImpl(node), FuncConstDeclaration {
+    override fun getNameIdentifier() = identifier
+    override fun getIcon(flags: Int) = FuncIcons.CONSTANT
+    override fun getPresentation(): PresentationData {
+        val name = name
+        return PresentationData(
+            name,
+            null,
+            FuncIcons.VARIABLE,
+            TextAttributesKey.createTextAttributesKey("public")
+        )
+    }
+}
+
+abstract class FuncVariableDeclarationMixin(node: ASTNode) : FuncNamedElementImpl(node), FuncVariableDeclaration {
+    override fun getNameIdentifier() = identifier
+    override fun getIcon(flags: Int) = FuncIcons.VARIABLE
+    override fun getPresentation(): PresentationData {
+        val name = name
+        return PresentationData(
+            name,
+            null,
+            FuncIcons.VARIABLE,
+            TextAttributesKey.createTextAttributesKey("public")
+        )
+    }
+}
+
+abstract class FuncReferenceExpressionMixin(node: ASTNode) : FuncNamedElementImpl(node), FuncReferenceExpression {
+    override fun getNameIdentifier() = identifier
+    override fun getReference() = FuncReferenceExpressionReference(this)
 }

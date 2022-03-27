@@ -1,9 +1,13 @@
 package com.github.andreypfau.intellijton.func.resolve
 
+import com.github.andreypfau.intellijton.childOfType
+import com.github.andreypfau.intellijton.collectElements
 import com.github.andreypfau.intellijton.func.FuncFileType
 import com.github.andreypfau.intellijton.func.psi.*
 import com.github.andreypfau.intellijton.psiManager
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.childrenOfType
+import com.intellij.psi.util.parentsOfType
 
 fun FuncElement.resolveFile() = if (this is FuncFile) this else containingFile as FuncFile
 
@@ -21,6 +25,46 @@ fun FuncFile.resolveStdlibFile(): FuncFile? {
     val virtualFile = virtualFile.parent.findChild("stdlib.fc") ?: return null
     return project.psiManager.findFile(virtualFile) as? FuncFile
 }
+
+fun FuncFile.resolveReferenceExpressionProviders(offset: Int): Sequence<FuncNamedElement> {
+    val function = resolveFunctions().find { it.textRange.contains(offset) }
+    val functionExpressionProviders = if (function != null) {
+        function.resolveParameters() + function.resolveVariables(offset).flattenVariables()
+    } else emptySequence()
+    return resolveConstants() + resolveGlobalVars() + functionExpressionProviders
+}
+
+fun FuncFile.resolveGlobalVars() = childrenOfType<FuncGlobalVarExpression>().asSequence().map {
+    it.globalVarList
+}.flatten()
+
+fun FuncFile.resolveConstants() = childrenOfType<FuncConstExpression>().asSequence().map {
+    it.constDeclarationList
+}.flatten()
+
+fun FuncFunction.resolveVariables(offset: Int): Sequence<FuncVariableDeclaration> {
+    val currentBlock =
+        PsiTreeUtil.findElementOfClassAtOffset(containingFile, offset, FuncBlockStatement::class.java, false)!!
+    val currentLevel = currentBlock.parentsOfType<FuncBlockStatement>().count()
+    return collectElements<FuncVariableDeclaration>()
+        .asSequence()
+        .filter { it.textOffset < offset }
+        .filter {
+            it.parentsOfType<FuncBlockStatement>().count() <= currentLevel
+        }
+}
+
+fun Sequence<FuncVariableDeclaration>.flattenVariables() = mapNotNull {
+    if (it.identifier != null) {
+        sequenceOf(it)
+    } else if (it.tensorExpression != null) {
+        it.tensorExpression?.tensorExpressionItemList?.asSequence()?.mapNotNull {
+            it.childOfType<FuncReferenceExpression>()
+        }
+    } else null
+}.flatten()
+
+fun FuncFunction.resolveParameters() = parameterList.parameterDeclarationList.asSequence()
 
 private fun FuncFile.collectNeighbourFiles() = virtualFile.parent.children.asSequence().filter { file ->
     file.extension?.lowercase() in FuncFileType.extensions

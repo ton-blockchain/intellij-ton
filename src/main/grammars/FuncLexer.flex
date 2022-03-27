@@ -1,11 +1,10 @@
 package com.github.andreypfau.intellijton.func.lexer;
 
-import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.Stack;
 
 import static com.intellij.psi.TokenType.*;
-import static com.github.andreypfau.intellijton.func.psi.FuncTypes.*;
+import static com.github.andreypfau.intellijton.func.psi.FuncTokenTypes.*;
 
 %%
 

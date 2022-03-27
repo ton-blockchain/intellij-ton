@@ -1,7 +1,7 @@
 package com.github.andreypfau.intellijton.func.ide
 
 import com.github.andreypfau.intellijton.func.lexer.FuncLexerAdapter
-import com.github.andreypfau.intellijton.func.psi.FuncTypes.*
+import com.github.andreypfau.intellijton.func.psi.FuncTokenTypes.*
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory
 import com.intellij.openapi.project.Project

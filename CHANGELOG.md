@@ -1,5 +1,18 @@
 # TON Development Changelog
 
+## [0.7.0]
+
+### Added
+
+- Variable references
+- Type checking for method calls
+
+### Fixed
+
+- Fixed method duplication on neighbour files
+- Fixed IndexOutOfBoundsException crash
+- A lot of bug fixes
+
 ## [0.6.0]
 
 ### Added

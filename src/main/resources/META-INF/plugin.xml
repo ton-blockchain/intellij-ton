@@ -91,6 +91,9 @@
                   implementationClass="org.ton.intellij.boc.BocFileType"
                   fieldName="INSTANCE"
                   extensions="boc"/>
+
+        <spellchecker.bundledDictionaryProvider
+                implementation="org.ton.intellij.ide.spellchecker.TonDictionaryProvider"/>
     </extensions>
 
     <actions>

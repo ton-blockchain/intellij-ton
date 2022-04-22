@@ -1,16 +1,16 @@
 {
-    parserClass="com.github.andreypfau.intellijton.func.lexer.FuncParser"
+    parserClass="org.ton.intellij.func.lexer.FuncParser"
     extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
     psiClassPrefix="Func"
     psiImplClassSuffix="Impl"
-    psiPackage="com.github.andreypfau.intellijton.func.psi"
-    psiImplPackage="com.github.andreypfau.intellijton.func.psi.impl"
-    implements="com.github.andreypfau.intellijton.func.psi.FuncElement"
+    psiPackage="org.ton.intellij.func.psi"
+    psiImplPackage="org.ton.intellij.func.psi.impl"
+    implements="org.ton.intellij.func.psi.FuncElement"
 
-    elementTypeHolderClass="com.github.andreypfau.intellijton.func.psi.FuncTokenTypes"
-    elementTypeClass="com.github.andreypfau.intellijton.func.psi.FuncElementType"
-    tokenTypeClass="com.github.andreypfau.intellijton.func.psi.FuncTokenType"
+    elementTypeHolderClass="org.ton.intellij.func.psi.FuncTokenTypes"
+    elementTypeClass="org.ton.intellij.func.psi.FuncElementType"
+    tokenTypeClass="org.ton.intellij.func.psi.FuncTokenType"
 
     tokens = [
         PLUS='+'
@@ -119,11 +119,11 @@
 private root ::= (global_var_expression | const_expression | function)*
 function ::= type_variables_list? function_return_type function_name parameter_list
              'impure'? inline_specifier? method_id_specifier? (';' | block_statement | asm_function_body) {
-    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionDefinitionMixin"
-    stubClass = "com.github.andreypfau.intellijton.func.stub.FuncFunctionStub"
-    elementTypeClass = "com.github.andreypfau.intellijton.func.stub.FuncFunctionStub.Type"
-    elementTypeFactory = "com.github.andreypfau.intellijton.func.stub.StubKt.factory"
+    implements = "org.ton.intellij.func.psi.FuncNamedElement"
+    mixin = "org.ton.intellij.func.psi.FuncFunctionDefinitionMixin"
+    stubClass = "org.ton.intellij.func.stub.FuncFunctionStub"
+    elementTypeClass = "org.ton.intellij.func.stub.FuncFunctionStub.Type"
+    elementTypeFactory = "org.ton.intellij.func.stub.StubKt.factory"
 }
 function_return_type ::= type
 
@@ -139,22 +139,22 @@ private parameter_list_recovery ::= !')'
 private parameter_list_begin ::= '(' parameter_list_item* {recoverWhile=parameter_list_recovery}
 private parameter_list_item ::= !')' parameter_declaration (',' | &')' ) { pin=2 }
 parameter_declaration ::= type? IDENTIFIER {
-   implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
-   mixin = "com.github.andreypfau.intellijton.func.psi.FuncParameterDeclarationMixin"
+   implements = "org.ton.intellij.func.psi.FuncNamedElement"
+   mixin = "org.ton.intellij.func.psi.FuncParameterDeclarationMixin"
 }
 parameter_list ::= parameter_list_begin ')'
 
 global_var_expression ::= 'global' global_var (',' global_var)* ';' {pin=1}
 global_var ::= type? IDENTIFIER {
-    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncGlobalVarMixin"
+    implements = "org.ton.intellij.func.psi.FuncNamedElement"
+    mixin = "org.ton.intellij.func.psi.FuncGlobalVarMixin"
 }
 private const_list_recovery ::= !';'
 private const_list_item ::= const_declaration (',' | &';')
 private const_list ::= const_list_item+ {recoverWhile=const_list_recovery}
 const_declaration ::= primitive_type? IDENTIFIER '=' expression {
-    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncConstDeclarationMixin"
+    implements = "org.ton.intellij.func.psi.FuncNamedElement"
+    mixin = "org.ton.intellij.func.psi.FuncConstDeclarationMixin"
 }
 const_expression ::= const const_list ';' {pin=1}
 
@@ -197,42 +197,42 @@ expr100 ::= (type_expression | non_type_expression)
 non_type_expression ::= (tensor_expression | tuple_expression | primitive_type | INTEGER_LITERAL | STRING_LITERAL | boolean_literal | reference_expression)
 
 reference_expression ::= IDENTIFIER {
-    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncReferenceExpressionMixin"
+    implements = "org.ton.intellij.func.psi.FuncNamedElement"
+    mixin = "org.ton.intellij.func.psi.FuncReferenceExpressionMixin"
 }
 
 callable ::= method_call | modifying_method_call
 
 method_call ::= '.' method_call_identifier tensor_expression {
     pin = 1
-    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncMethodCallMixin"
+    implements = "org.ton.intellij.func.psi.FuncNamedElement"
+    mixin = "org.ton.intellij.func.psi.FuncMethodCallMixin"
 }
 method_call_identifier ::= IDENTIFIER {
-    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncMethodCallIdentifierMixin"
+    implements = "org.ton.intellij.func.psi.FuncNamedElement"
+    mixin = "org.ton.intellij.func.psi.FuncMethodCallIdentifierMixin"
 }
 
 modifying_method_call ::= '~' modifying_method_call_identifier tensor_expression {
-    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncModifyingMethodCallMixin"
+    implements = "org.ton.intellij.func.psi.FuncNamedElement"
+    mixin = "org.ton.intellij.func.psi.FuncModifyingMethodCallMixin"
 }
 modifying_method_call_identifier ::= IDENTIFIER {
-    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncModifyingMethodCallIdentifierMixin"
+    implements = "org.ton.intellij.func.psi.FuncNamedElement"
+    mixin = "org.ton.intellij.func.psi.FuncModifyingMethodCallIdentifierMixin"
 }
 
 variable_declaration ::= type_expression (IDENTIFIER | tuple_expression | tensor_expression) {
-    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncVariableDeclarationMixin"
+    implements = "org.ton.intellij.func.psi.FuncNamedElement"
+    mixin = "org.ton.intellij.func.psi.FuncVariableDeclarationMixin"
 }
 function_call ::= function_call_identifier tensor_expression {
-    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionCallMixin"
+    implements = "org.ton.intellij.func.psi.FuncNamedElement"
+    mixin = "org.ton.intellij.func.psi.FuncFunctionCallMixin"
 }
 function_call_identifier ::= IDENTIFIER {
-    implements = "com.github.andreypfau.intellijton.func.psi.FuncNamedElement"
-    mixin = "com.github.andreypfau.intellijton.func.psi.FuncFunctionCallIdentifierMixin"
+    implements = "org.ton.intellij.func.psi.FuncNamedElement"
+    mixin = "org.ton.intellij.func.psi.FuncFunctionCallIdentifierMixin"
 }
 
 type_expression ::= primitive_type | var_type | parenthesized_type_expression | tensor_type_expression | tuple_type_expression

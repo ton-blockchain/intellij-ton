@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.andreypfau.intellij-ton</id>
     <name>TON Development</name>
-    <vendor email="andreypfau@yandex.ru" url="https://github.com/andreypfau/intellij-ton">andreypfau</vendor>
+    <vendor email="andreypfau@ton.org" url="https://github.com/andreypfau/intellij-ton">TON Foundation</vendor>
 
     <description><![CDATA[
         TON Development plugin for IntelliJ Platform.

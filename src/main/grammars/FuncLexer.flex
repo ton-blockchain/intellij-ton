@@ -187,6 +187,7 @@ STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")[sauhHc]?
 "/" { return DIVIDE; }
 "%" { return PERCENT; }
 "?" { return QUESTION; }
+":" { return COLON; }
 "," { return COMMA; }
 "." { return DOT; }
 ";" { return SEMICOLON; }

@@ -36,6 +36,7 @@
         OR='|'
         CIRCUMFLEX='^'
         TILDE='~'
+        UNDERSCORE='_'
 
         EQ='=='
         NEQ='!='
@@ -136,16 +137,16 @@ asm_specifier ::= 'asm' ('(' IDENTIFIER* ('->'  INTEGER_LITERAL*)? ')')? {pin=1}
 asm_instruction ::= STRING_LITERAL
 
 private parameter_list_recovery ::= !')'
-private parameter_list_begin ::= '(' parameter_list_item* {recoverWhile=parameter_list_recovery}
+private parameter_list_begin ::= '(' parameter_list_item* {pin=1; recoverWhile=parameter_list_recovery}
 private parameter_list_item ::= !')' parameter_declaration (',' | &')' ) { pin=2 }
-parameter_declaration ::= type? IDENTIFIER {
+parameter_declaration ::= (type IDENTIFIER) | IDENTIFIER {
    implements = "org.ton.intellij.func.psi.FuncNamedElement"
    mixin = "org.ton.intellij.func.psi.FuncParameterDeclarationMixin"
 }
 parameter_list ::= parameter_list_begin ')'
 
 global_var_expression ::= 'global' global_var (',' global_var)* ';' {pin=1}
-global_var ::= type? IDENTIFIER {
+global_var ::= type IDENTIFIER {
     implements = "org.ton.intellij.func.psi.FuncNamedElement"
     mixin = "org.ton.intellij.func.psi.FuncGlobalVarMixin"
 }

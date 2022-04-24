@@ -1,3 +1,7 @@
+import org.jetbrains.kotlin.cli.common.toBooleanLenient
+import java.time.Clock
+import java.time.Instant
+
 plugins {
     kotlin("jvm") version "1.6.20"
     id("org.jetbrains.intellij") version "1.5.3"
@@ -7,6 +11,13 @@ plugins {
 
 group = properties("pluginGroup")
 version = properties("pluginVersion")
+
+if (properties("pluginSnapshot").toBooleanLenient() == true) {
+    val time = Instant.now(Clock.systemUTC())
+    val formattedTime = time.toString().substring(2, 16).replace("[-T:]".toRegex(), "")
+    version = "$version-SNAPSHOT+$formattedTime"
+    println("version: $version")
+}
 
 repositories {
     mavenCentral()

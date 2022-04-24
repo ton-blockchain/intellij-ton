@@ -4,45 +4,38 @@ import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.PlatformPatterns
+import com.intellij.patterns.PlatformPatterns.*
 import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.util.elementType
+import com.intellij.psi.util.prevLeaf
+import com.intellij.psi.util.prevLeafs
 import com.intellij.util.ProcessingContext
+import com.jetbrains.rd.util.measureTimeMillis
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.resolve.resolveAllFunctions
 import org.ton.intellij.func.resolve.resolveReferenceExpressionProviders
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTimedValue
 
-class FuncFunctionCompletionContributor : CompletionContributor(), DumbAware {
+class FuncFunctionCompletionContributor : CompletionContributor() {
     init {
         extend(
-            CompletionType.BASIC, StandardPatterns.or(
-                PlatformPatterns.psiElement(FuncTokenTypes.IDENTIFIER).inside(FuncTensorExpression::class.java),
-                PlatformPatterns.psiElement(FuncTokenTypes.IDENTIFIER).inside(FuncTupleExpression::class.java)
-            ), FuncFunctionCompletionProvider(false)
+            CompletionType.BASIC,
+            psiElement().inside(psiElement().withElementType(FuncTokenTypes.BLOCK_STATEMENT)),
+            FuncFunctionCompletionProvider()
         )
-        extend(
-            CompletionType.BASIC, StandardPatterns.or(
-                PlatformPatterns.psiElement(FuncTokenTypes.IDENTIFIER).inside(FuncExpressionStatement::class.java)
-            ), FuncFunctionCompletionProvider(true)
-        )
-    }
-
-    override fun beforeCompletion(context: CompletionInitializationContext) {
     }
 }
 
-class FuncFunctionCompletionProvider(
-    private val insertSemicolon: Boolean
-) : CompletionProvider<CompletionParameters>() {
+class FuncFunctionCompletionProvider : CompletionProvider<CompletionParameters>() {
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
         result: CompletionResultSet
     ) {
-        if (parameters.position.text == CompletionInitializationContext.DUMMY_IDENTIFIER_TRIMMED) return
         val file = parameters.originalFile as? FuncFile ?: return
-        val functions = file.resolveAllFunctions().filter {
-            it.functionName.firstChild.elementType === FuncTokenTypes.IDENTIFIER
-        }
+        val functions = file.resolveAllFunctions()
+
         functions.map { functionDef ->
             val parameterList = functionDef.parameterList.text
             val functionReturn = functionDef.functionReturnType.text
@@ -50,7 +43,7 @@ class FuncFunctionCompletionProvider(
                 .createWithIcon(functionDef)
                 .withTailText(parameterList)
                 .withTypeText(functionReturn)
-                .insertParenthesis(insertSemicolon, functionDef.parameterList.parameterDeclarationList.isEmpty())
+                .insertParenthesis(functionDef.parameterList.parameterDeclarationList.isEmpty())
         }.forEach {
             result.addElement(it)
         }

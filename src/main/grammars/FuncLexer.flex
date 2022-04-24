@@ -1,5 +1,6 @@
 package org.ton.intellij.func.lexer;
 
+import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.Stack;
 

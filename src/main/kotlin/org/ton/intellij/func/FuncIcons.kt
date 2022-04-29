@@ -9,4 +9,5 @@ object FuncIcons {
     val CONSTANT = AllIcons.Nodes.Constant
     val PARAMETER = AllIcons.Nodes.Parameter
     val VARIABLE = AllIcons.Nodes.Variable
+    val IMPURE_FUNCTION_MARKER = IconLoader.getIcon("/icons/suspendCall.svg", FuncIcons::class.java)
 }

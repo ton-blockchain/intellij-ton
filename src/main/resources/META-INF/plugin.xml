@@ -24,7 +24,9 @@
         <lang.syntaxHighlighterFactory language="FunC"
                                        implementationClass="org.ton.intellij.func.ide.FuncSyntaxHighlighterFactory"/>
         <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.FuncAnnotator"/>
-        <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionAnnotator"/>
+        <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionCallAnnotator"/>
+        <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.RedundantImpureFunctionAnnotator"/>
+        <codeInsight.lineMarkerProvider language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionCallMarkerProvider"/>
         <lang.commenter language="FunC"
                         implementationClass="org.ton.intellij.func.ide.FuncCommenter"/>
         <lang.braceMatcher language="FunC"

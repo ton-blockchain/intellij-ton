@@ -23,3 +23,5 @@ inline fun <reified T : PsiElement> PsiElement.parentOfType(strict: Boolean = tr
 
 inline fun <reified T : PsiElement> PsiElement.collectElements() =
     PsiTreeUtil.collectElementsOfType(this, T::class.java)
+
+fun PsiElement.processElements(processor: (PsiElement)->Boolean) = PsiTreeUtil.processElements(this, processor)

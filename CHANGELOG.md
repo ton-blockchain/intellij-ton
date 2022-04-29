@@ -1,5 +1,17 @@
 # TON Development Changelog
 
+## [0.8.0]
+
+### Added
+
+- Impure functions smart-inspections ([#17](https://github.com/andreypfau/intellij-ton/issues/17))
+- TON-specific words in spellchecker dictionary ([#16](https://github.com/andreypfau/intellij-ton/issues/16))
+
+### Fixed
+
+- Ternary expression statements ([#15](https://github.com/andreypfau/intellij-ton/issues/15))
+- Code suggestions don't show after `.` (dot) ([#13](https://github.com/andreypfau/intellij-ton/issues/13))
+
 ## [0.7.0]
 
 ### Added

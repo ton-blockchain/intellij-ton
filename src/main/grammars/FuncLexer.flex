@@ -1,10 +1,11 @@
-package com.github.andreypfau.intellijton.func.lexer;
+package org.ton.intellij.func.lexer;
 
+import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.Stack;
 
 import static com.intellij.psi.TokenType.*;
-import static com.github.andreypfau.intellijton.func.psi.FuncTokenTypes.*;
+import static org.ton.intellij.func.psi.FuncTokenTypes.*;
 
 %%
 
@@ -187,6 +188,7 @@ STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")[sauhHc]?
 "/" { return DIVIDE; }
 "%" { return PERCENT; }
 "?" { return QUESTION; }
+":" { return COLON; }
 "," { return COMMA; }
 "." { return DOT; }
 ";" { return SEMICOLON; }

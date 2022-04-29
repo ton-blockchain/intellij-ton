@@ -1,3 +1,3 @@
-() recv_internal(slice in_msg) impure {
+() recv_internal(slice in_msg) {
   ;; handle internal messages
 }

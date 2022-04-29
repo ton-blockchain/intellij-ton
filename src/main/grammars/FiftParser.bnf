@@ -1,16 +1,16 @@
 {
-    parserClass="com.github.andreypfau.intellijton.fift.parser.FiftParser"
+    parserClass="org.ton.intellij.fift.parser.FiftParser"
 
     extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
     psiClassPrefix="Fift"
     psiImplClassSuffix="Impl"
-    psiPackage="com.github.andreypfau.intellijton.fift.psi"
-    psiImplPackage="com.github.andreypfau.intellijton.fift.psi.impl"
+    psiPackage="org.ton.intellij.fift.psi"
+    psiImplPackage="org.ton.intellij.fift.psi.impl"
 
-    elementTypeHolderClass="com.github.andreypfau.intellijton.fift.psi.FiftTypes"
-    elementTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftElementType"
-    tokenTypeClass="com.github.andreypfau.intellijton.fift.psi.FiftTokenType"
+    elementTypeHolderClass="org.ton.intellij.fift.psi.FiftTypes"
+    elementTypeClass="org.ton.intellij.fift.psi.FiftElementType"
+    tokenTypeClass="org.ton.intellij.fift.psi.FiftTokenType"
     
     tokens = [
         CHAR='regexp:(char \S)'
@@ -66,14 +66,14 @@
         IDENTIFIER='regexp:\S+'
     ]
 
-    implements(".*") = "com.github.andreypfau.intellijton.fift.psi.FiftElement"
+    implements(".*") = "org.ton.intellij.fift.psi.FiftElement"
 }
 
 private root ::= statement*
 private statement ::= (word_def_statement | block | list | literal | word)
 word ::= stack_word | loop_word | cond_word | INCLUDE | CHAR | ABORT | PRINT | STRING_CONCAT | ordinary_word
 ordinary_word ::= IDENTIFIER {
-    mixin = "com.github.andreypfau.intellijton.fift.psi.FiftOrdinaryWordMixin"
+    mixin = "org.ton.intellij.fift.psi.FiftOrdinaryWordMixin"
 }
 number_literal ::= NUMBER_DIGIT_LITERAL | NUMBER_HEX_LITERAL | NUMBER_BINARY_LITERAL
 boolean_literal ::= TRUE | FALSE
@@ -84,8 +84,8 @@ stack_word ::= DUP | DROP | SWAP | ROT | REV_ROT | OVER | TUCK | NIP | DUP_DUP |
 loop_word ::= UNTIL | WHILE | TIMES
 cond_word ::= IF | IFNOT | COND
 word_def_statement ::= (block | ordinary_word) WORD_DEF {
-    implements = "com.github.andreypfau.intellijton.fift.psi.FiftNamedElement"
-    mixin = "com.github.andreypfau.intellijton.fift.psi.FiftWordDefStatementMixin"
+    implements = "org.ton.intellij.fift.psi.FiftNamedElement"
+    mixin = "org.ton.intellij.fift.psi.FiftWordDefStatementMixin"
 }
 
 //noinspection BnfUnusedRule

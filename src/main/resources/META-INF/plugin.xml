@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.andreypfau.intellij-ton</id>
     <name>TON Development</name>
-    <vendor email="andreypfau@yandex.ru" url="https://github.com/andreypfau/intellij-ton">andreypfau</vendor>
+    <vendor email="andreypfau@ton.org" url="https://github.com/andreypfau/intellij-ton">TON Foundation</vendor>
 
     <description><![CDATA[
         TON Development plugin for IntelliJ Platform.
@@ -15,98 +15,104 @@
 
         <!--  FunC Language -->
         <fileType name="func"
-                  implementationClass="com.github.andreypfau.intellijton.func.FuncFileType"
+                  implementationClass="org.ton.intellij.func.FuncFileType"
                   fieldName="INSTANCE"
                   language="FunC"
                   extensions="func;fc"/>
         <lang.parserDefinition language="FunC"
-                               implementationClass="com.github.andreypfau.intellijton.func.ide.FuncParserDefinition"/>
+                               implementationClass="org.ton.intellij.func.ide.FuncParserDefinition"/>
         <lang.syntaxHighlighterFactory language="FunC"
-                                       implementationClass="com.github.andreypfau.intellijton.func.ide.FuncSyntaxHighlighterFactory"/>
-        <annotator language="FunC" implementationClass="com.github.andreypfau.intellijton.func.ide.FuncAnnotator"/>
+                                       implementationClass="org.ton.intellij.func.ide.FuncSyntaxHighlighterFactory"/>
+        <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.FuncAnnotator"/>
+        <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionCallAnnotator"/>
+        <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.RedundantImpureFunctionAnnotator"/>
+        <codeInsight.lineMarkerProvider language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionCallMarkerProvider"/>
         <lang.commenter language="FunC"
-                        implementationClass="com.github.andreypfau.intellijton.func.ide.FuncCommenter"/>
+                        implementationClass="org.ton.intellij.func.ide.FuncCommenter"/>
         <lang.braceMatcher language="FunC"
-                           implementationClass="com.github.andreypfau.intellijton.func.ide.FuncBraceMatcher"/>
+                           implementationClass="org.ton.intellij.func.ide.FuncBraceMatcher"/>
         <lang.findUsagesProvider language="FunC"
-                                 implementationClass="com.github.andreypfau.intellijton.func.ide.FuncFindUsagesProvider"/>
+                                 implementationClass="org.ton.intellij.func.ide.FuncFindUsagesProvider"/>
         <lang.foldingBuilder language="FunC"
-                             implementationClass="com.github.andreypfau.intellijton.func.ide.FuncFoldingBuilder"/>
+                             implementationClass="org.ton.intellij.func.ide.FuncFoldingBuilder"/>
         <codeInsight.parameterNameHints language="FunC"
-                                        implementationClass="com.github.andreypfau.intellijton.func.ide.FuncParameterHintsProvider"/>
+                                        implementationClass="org.ton.intellij.func.ide.FuncParameterHintsProvider"/>
         <completion.contributor language="FunC"
-                                implementationClass="com.github.andreypfau.intellijton.func.completion.FuncFunctionCompletionContributor"/>
-        <colorSettingsPage implementation="com.github.andreypfau.intellijton.func.ide.FuncColorSettingsPage"/>
+                                implementationClass="org.ton.intellij.func.completion.FuncFunctionCompletionContributor"/>
+        <colorSettingsPage implementation="org.ton.intellij.func.ide.FuncColorSettingsPage"/>
         <internalFileTemplate name="FunC Contract"/>
 
-        <stubIndex implementation="com.github.andreypfau.intellijton.func.stub.FuncNamedElementIndex"/>
-        <stubIndex implementation="com.github.andreypfau.intellijton.func.stub.FuncFunctionIndex"/>
+        <stubIndex implementation="org.ton.intellij.func.stub.FuncNamedElementIndex"/>
+        <stubIndex implementation="org.ton.intellij.func.stub.FuncFunctionIndex"/>
 
         <!--  Fift Language -->
 
         <fileType name="Fift"
-                  implementationClass="com.github.andreypfau.intellijton.fift.FiftFileType"
+                  implementationClass="org.ton.intellij.fift.FiftFileType"
                   fieldName="INSTANCE"
                   language="Fift"
                   extensions="fif"/>
         <lang.parserDefinition language="Fift"
-                               implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftParserDefinition"/>
+                               implementationClass="org.ton.intellij.fift.ide.FiftParserDefinition"/>
         <lang.syntaxHighlighterFactory language="Fift"
-                                       implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftSyntaxHighlighterFactory"/>
-        <annotator language="Fift" implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftAnnotator"/>
+                                       implementationClass="org.ton.intellij.fift.ide.FiftSyntaxHighlighterFactory"/>
+        <annotator language="Fift" implementationClass="org.ton.intellij.fift.ide.FiftAnnotator"/>
         <lang.commenter language="Fift"
-                        implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftCommenter"/>
+                        implementationClass="org.ton.intellij.fift.ide.FiftCommenter"/>
         <lang.braceMatcher language="Fift"
-                           implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftBraceMatcher"/>
+                           implementationClass="org.ton.intellij.fift.ide.FiftBraceMatcher"/>
         <completion.contributor language="Fift"
-                                implementationClass="com.github.andreypfau.intellijton.fift.completion.FiftWordCompletionContributor"/>
+                                implementationClass="org.ton.intellij.fift.completion.FiftWordCompletionContributor"/>
         <lang.findUsagesProvider language="Fift"
-                                 implementationClass="com.github.andreypfau.intellijton.fift.ide.FiftFindUsagesProvider"/>
-        <colorSettingsPage implementation="com.github.andreypfau.intellijton.fift.ide.FiftColorSettingsPage"/>
+                                 implementationClass="org.ton.intellij.fift.ide.FiftFindUsagesProvider"/>
+        <colorSettingsPage implementation="org.ton.intellij.fift.ide.FiftColorSettingsPage"/>
         <internalFileTemplate name="Fift File"/>
 
         <!--  TL-B File -->
 
         <fileType name="TL-B"
-                  implementationClass="com.github.andreypfau.intellijton.tlb.TlbFileType"
+                  implementationClass="org.ton.intellij.tlb.TlbFileType"
                   fieldName="INSTANCE"
                   language="TL-B"
                   extensions="tlb"/>
         <lang.parserDefinition language="TL-B"
-                               implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbParserDefinition"/>
+                               implementationClass="org.ton.intellij.tlb.ide.TlbParserDefinition"/>
         <lang.syntaxHighlighterFactory language="TL-B"
-                                       implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbSyntaxHighlighterFactory"/>
-        <annotator language="TL-B" implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbAnnotator"/>
-        <colorSettingsPage implementation="com.github.andreypfau.intellijton.tlb.ide.TlbColorSettingsPage"/>
+                                       implementationClass="org.ton.intellij.tlb.ide.TlbSyntaxHighlighterFactory"/>
+        <annotator language="TL-B" implementationClass="org.ton.intellij.tlb.ide.TlbAnnotator"/>
+        <colorSettingsPage implementation="org.ton.intellij.tlb.ide.TlbColorSettingsPage"/>
         <lang.commenter language="TL-B"
-                        implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbCommenter"/>
+                        implementationClass="org.ton.intellij.tlb.ide.TlbCommenter"/>
         <lang.braceMatcher language="TL-B"
-                           implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbBraceMatcher"/>
+                           implementationClass="org.ton.intellij.tlb.ide.TlbBraceMatcher"/>
         <lang.findUsagesProvider language="TL-B"
-                                 implementationClass="com.github.andreypfau.intellijton.tlb.ide.TlbFindUsagesProvider"/>
+                                 implementationClass="org.ton.intellij.tlb.ide.TlbFindUsagesProvider"/>
 
         <!--  Bag of Cells File -->
 
         <fileType name="Bag of Cells"
-                  implementationClass="com.github.andreypfau.intellijton.boc.BocFileType"
+                  implementationClass="org.ton.intellij.boc.BocFileType"
                   fieldName="INSTANCE"
                   extensions="boc"/>
+
+        <spellchecker.bundledDictionaryProvider
+                implementation="org.ton.intellij.ide.spellchecker.TonDictionaryProvider"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
         <action id="func.file.create"
-                class="com.github.andreypfau.intellijton.func.ide.actions.FuncCreateFileAction"
+                class="org.ton.intellij.func.ide.actions.FuncCreateFileAction"
                 text="Create FunC File">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewXml"/>
         </action>
         <action id="fift.file.create"
-                class="com.github.andreypfau.intellijton.fift.ide.actions.FiftCreateFileAction"
+                class="org.ton.intellij.fift.ide.actions.FiftCreateFileAction"
                 text="Create Fift File">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="func.file.create"/>
         </action>
         <action id="tlb.file.create"
-                class="com.github.andreypfau.intellijton.tlb.ide.actions.TlbCreateFileAction"
+                class="org.ton.intellij.tlb.ide.actions.TlbCreateFileAction"
                 text="Create TL-B Schema">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="fift.file.create"/>
         </action>

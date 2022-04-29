@@ -1,4 +1,4 @@
-package com.github.andreypfau.intellijton.fift.parser;
+package org.ton.intellij.fift.parser;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
@@ -6,7 +6,7 @@ import com.intellij.util.containers.Stack;
 
 import static com.intellij.psi.TokenType.BAD_CHARACTER;
 import static com.intellij.psi.TokenType.WHITE_SPACE;
-import static com.github.andreypfau.intellijton.fift.psi.FiftTypes.*;
+import static org.ton.intellij.fift.psi.FiftTypes.*;
 
 %%
 %unicode

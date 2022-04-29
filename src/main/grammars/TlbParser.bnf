@@ -1,16 +1,16 @@
 {
-    parserClass="com.github.andreypfau.intellijton.tlb.parser.TlbParser"
+    parserClass="org.ton.intellij.tlb.parser.TlbParser"
     extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
     psiClassPrefix="Tlb"
     psiImplClassSuffix="Impl"
-    psiPackage="com.github.andreypfau.intellijton.tlb.psi"
-    psiImplPackage="com.github.andreypfau.intellijton.tlb.psi.impl"
-    implements="com.github.andreypfau.intellijton.tlb.psi.TlbElement"
+    psiPackage="org.ton.intellij.tlb.psi"
+    psiImplPackage="org.ton.intellij.tlb.psi.impl"
+    implements="org.ton.intellij.tlb.psi.TlbElement"
 
-    elementTypeHolderClass="com.github.andreypfau.intellijton.tlb.psi.TlbTypes"
-    elementTypeClass="com.github.andreypfau.intellijton.tlb.psi.TlbElementType"
-    tokenTypeClass="com.github.andreypfau.intellijton.tlb.psi.TlbTokenType"
+    elementTypeHolderClass="org.ton.intellij.tlb.psi.TlbTypes"
+    elementTypeClass="org.ton.intellij.tlb.psi.TlbElementType"
+    tokenTypeClass="org.ton.intellij.tlb.psi.TlbTokenType"
 
     tokens = [
         HEX_TAG='regexp:#([0-9a-f]+_?|_)'
@@ -60,8 +60,8 @@ constructor_name ::= IDENTIFIER
 constructor_prefix ::= HEX_TAG | BINARY_TAG
 combinator ::= combinator_name type_expression* {pin=1}
 combinator_name ::= IDENTIFIER {
-    implements = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElement"
-    mixin = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElementImpl"
+    implements = "org.ton.intellij.tlb.psi.TlbNamedElement"
+    mixin = "org.ton.intellij.tlb.psi.TlbNamedElementImpl"
 }
 
 private field_definition_list_recovery ::= !( '=' | ']' )
@@ -70,14 +70,14 @@ field_definition ::= implicit_definition | named_field | cell_ref | paren_expres
 implicit_definition ::= '{' ( implicit_field | expression ) '}' {pin=1}
 named_field ::= field_name ':' expr95 {pin=2}
 field_name ::= '_' | IDENTIFIER {
-    implements = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElement"
-    mixin = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElementImpl"
+    implements = "org.ton.intellij.tlb.psi.TlbNamedElement"
+    mixin = "org.ton.intellij.tlb.psi.TlbNamedElementImpl"
 }
 implicit_field ::= implicit_field_name ':' implicit_field_type {pin=2}
 implicit_field_type ::= '#' | 'Type'
 implicit_field_name ::= IDENTIFIER {
-    implements = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElement"
-    mixin = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElementImpl"
+    implements = "org.ton.intellij.tlb.psi.TlbNamedElement"
+    mixin = "org.ton.intellij.tlb.psi.TlbNamedElementImpl"
 }
 
 anonymous_constructor ::= '[' field_definition_list ']' {pin=1}
@@ -95,8 +95,8 @@ private expr97 ::= type_expression [ '.' type_expression ]
 
 type_expression ::= [ '~' ] ( paren_expression | anonymous_constructor | cell_ref | builtin_type | NUMBER | named_ref )
 named_ref ::= IDENTIFIER {
-    implements = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedElement"
-    mixin = "com.github.andreypfau.intellijton.tlb.psi.TlbNamedRefMixin"
+    implements = "org.ton.intellij.tlb.psi.TlbNamedElement"
+    mixin = "org.ton.intellij.tlb.psi.TlbNamedRefMixin"
 }
 private paren_expression ::= "(" expression ')' {pin=1}
 builtin_type ::= '#<' | '#<=' | '##' | '#'

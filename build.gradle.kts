@@ -3,10 +3,9 @@ import java.time.Clock
 import java.time.Instant
 
 plugins {
-    kotlin("jvm") version "1.6.10"
-    id("org.jetbrains.intellij") version "1.3.1"
+    kotlin("jvm") version "1.6.20"
+    id("org.jetbrains.intellij") version "1.5.3"
     id("org.jetbrains.changelog") version "1.3.1"
-    id("org.jetbrains.qodana") version "0.1.13"
 }
 
 group = properties("pluginGroup")
@@ -32,7 +31,7 @@ dependencies {
 sourceSets["main"].java.srcDirs("src/main/gen")
 
 intellij {
-    version.set("LATEST-EAP-SNAPSHOT")
+    version.set("2022.1")
     updateSinceUntilBuild.set(false)
 }
 
@@ -46,11 +45,10 @@ changelog {
     groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"))
 }
 
-qodana {
-    cachePath.set(projectDir.resolve(".qodana").canonicalPath)
-    reportPath.set(projectDir.resolve("build/reports/inspections").canonicalPath)
-    saveReport.set(true)
-    showReport.set(System.getenv("QODANA_SHOW_REPORT")?.toBoolean() ?: false)
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
 }
 
 tasks {

@@ -10,7 +10,8 @@ val Project.funcPsiFactory get() = FuncPsiFactory(this)
 
 class FuncPsiFactory(val project: Project) {
 
-    fun createFile(code: CharSequence): FuncFile = createFromText(code) ?: error("Failed to create file: `$code`")
+    fun createFile(code: CharSequence): FuncFile = PsiFileFactory.getInstance(project)
+            .createFileFromText("DUMMY.${FuncFileType.defaultExtension}", FuncFileType, code) as FuncFile
 
     fun createIdentifier(name: String): PsiElement =
         createFromText<FuncFunction>("() $name();")?.functionName?.identifier
@@ -19,7 +20,5 @@ class FuncPsiFactory(val project: Project) {
     inline fun <reified T : FuncElement> createFromText(code: CharSequence): T? = createFromText(code, T::class.java)
 
     fun <T : FuncElement> createFromText(code: CharSequence, type: Class<T>): T? =
-        PsiFileFactory.getInstance(project)
-            .createFileFromText("DUMMY.${FuncFileType.defaultExtension}", FuncFileType, code)
-            .childOfType(type)
+            createFile(code).childOfType(type, strict = false)
 }

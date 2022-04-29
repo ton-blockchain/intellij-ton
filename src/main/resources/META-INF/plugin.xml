@@ -24,6 +24,7 @@
         <lang.syntaxHighlighterFactory language="FunC"
                                        implementationClass="org.ton.intellij.func.ide.FuncSyntaxHighlighterFactory"/>
         <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.FuncAnnotator"/>
+        <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionAnnotator"/>
         <lang.commenter language="FunC"
                         implementationClass="org.ton.intellij.func.ide.FuncCommenter"/>
         <lang.braceMatcher language="FunC"

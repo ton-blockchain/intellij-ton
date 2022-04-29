@@ -119,7 +119,7 @@
 
 private root ::= (global_var_expression | const_expression | function)*
 function ::= type_variables_list? function_return_type function_name parameter_list
-             'impure'? inline_specifier? method_id_specifier? (';' | block_statement | asm_function_body) {
+             impure_specifier? inline_specifier? method_id_specifier? (';' | block_statement | asm_function_body) {
     implements = "org.ton.intellij.func.psi.FuncNamedElement"
     mixin = "org.ton.intellij.func.psi.FuncFunctionDefinitionMixin"
     stubClass = "org.ton.intellij.func.stub.FuncFunctionStub"
@@ -129,6 +129,7 @@ function ::= type_variables_list? function_return_type function_name parameter_l
 function_return_type ::= type
 
 type_variables_list ::= 'forall' type_identifier (',' type_identifier)* '->' {pin=1}
+impure_specifier ::= 'impure'
 inline_specifier ::= 'inline' | 'inline_ref'
 method_id_specifier ::= 'method_id' ('('  INTEGER_LITERAL ')')? {pin=1}
 

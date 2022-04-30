@@ -36,4 +36,4 @@ jobs:
       - name: Publish intellij-ton plugin
         uses: gradle/gradle-build-action@v1
         with:
-          arguments: ":plugin:publishPlugin"
+          arguments: "publishPlugin"

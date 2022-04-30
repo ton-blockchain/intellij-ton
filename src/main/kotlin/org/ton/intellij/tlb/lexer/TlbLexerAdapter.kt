@@ -1,4 +1,4 @@
-package org.ton.intellij.tlb.parser
+package org.ton.intellij.tlb.lexer
 
 import com.intellij.lexer.FlexAdapter
 

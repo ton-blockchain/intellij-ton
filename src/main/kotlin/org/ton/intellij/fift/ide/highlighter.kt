@@ -5,7 +5,7 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.tree.IElementType
-import org.ton.intellij.fift.parser.FiftLexerAdapter
+import org.ton.intellij.fift.lexer.FiftLexerAdapter
 import org.ton.intellij.fift.psi.FiftTypes.*
 
 class FiftSyntaxHighlighterFactory : SyntaxHighlighterFactory() {

@@ -1,3 +1,5 @@
+import java.time.Clock
+import java.time.Instant
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.intellij.tasks.PublishPluginTask
@@ -32,7 +34,10 @@ group = prop("pluginGroup")
 version = prop("pluginVersion")
 
 if (channel != "stable" && channel != "release") {
-    version = "$version-${channel.toUpperCase()}+${prop("buildNumber")}"
+    val buildSuffix = prop("buildNumber") {
+        Instant.now(Clock.systemUTC()).toString().substring(2, 16).replace("[-T:]".toRegex(), "")
+    }
+    version = "$version-${channel.toUpperCase()}+$buildSuffix"
 }
 
 repositories {
@@ -162,5 +167,5 @@ tasks {
     }
 }
 
-fun prop(name: String) = extra.properties[name] as? String
-        ?: error("Property `$name` is not defined in gradle.properties")
+fun prop(name: String, default: (()->String?)? = null) = extra.properties[name] as? String
+        ?: default?.invoke() ?: error("Property `$name` is not defined in gradle.properties")

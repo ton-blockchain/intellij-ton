@@ -11,7 +11,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
 import org.ton.intellij.tlb.TlbLanguage
-import org.ton.intellij.tlb.parser.TlbLexerAdapter
+import org.ton.intellij.tlb.lexer.TlbLexerAdapter
 import org.ton.intellij.tlb.parser.TlbParser
 import org.ton.intellij.tlb.psi.TlbFile
 import org.ton.intellij.tlb.psi.TlbTypes.*

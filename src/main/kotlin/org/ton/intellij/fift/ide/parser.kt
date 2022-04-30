@@ -11,7 +11,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
 import org.ton.intellij.fift.FiftLanguage
-import org.ton.intellij.fift.parser.FiftLexerAdapter
+import org.ton.intellij.fift.lexer.FiftLexerAdapter
 import org.ton.intellij.fift.parser.FiftParser
 import org.ton.intellij.fift.psi.FiftFile
 import org.ton.intellij.fift.psi.FiftTypes

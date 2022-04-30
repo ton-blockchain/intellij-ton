@@ -6,7 +6,7 @@ import com.intellij.lang.cacheBuilder.WordsScanner
 import com.intellij.lang.findUsages.FindUsagesProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
-import org.ton.intellij.tlb.parser.TlbLexerAdapter
+import org.ton.intellij.tlb.lexer.TlbLexerAdapter
 import org.ton.intellij.tlb.psi.TlbNamedElement
 import org.ton.intellij.tlb.psi.TlbTypes
 

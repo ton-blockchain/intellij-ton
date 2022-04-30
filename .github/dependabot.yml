@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00" # UTC
+    open-pull-requests-limit: 10
+    labels: [ ]
+    assignees:
+      - "andreypfau"

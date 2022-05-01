@@ -1,4 +1,4 @@
-package org.ton.intellij.ide.spellchecker
+package org.ton.intellij.spelling
 
 import com.intellij.spellchecker.BundledDictionaryProvider
 

@@ -1,0 +1,14 @@
+package org.ton.intellij.toncli.toolchain.wsl
+
+import com.intellij.execution.wsl.WSLDistribution
+import java.nio.file.Path
+
+fun WSLDistribution.expandUserHome(path: String): String {
+    if (!path.startsWith("~/")) return path
+    val userHome = userHome ?: return path
+    return "$userHome${path.substring(1)}"
+}
+
+fun Path.hasExecutableOnWsl(toolName: String): Boolean = pathToExecutableOnWsl(toolName).toFile().isFile
+
+fun Path.pathToExecutableOnWsl(toolName: String): Path = resolve(toolName)

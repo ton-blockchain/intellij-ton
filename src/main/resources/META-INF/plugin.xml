@@ -24,9 +24,12 @@
         <lang.syntaxHighlighterFactory language="FunC"
                                        implementationClass="org.ton.intellij.func.ide.FuncSyntaxHighlighterFactory"/>
         <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.FuncAnnotator"/>
-        <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionCallAnnotator"/>
-        <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.RedundantImpureFunctionAnnotator"/>
-        <codeInsight.lineMarkerProvider language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionCallMarkerProvider"/>
+        <annotator language="FunC"
+                   implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionCallAnnotator"/>
+        <annotator language="FunC"
+                   implementationClass="org.ton.intellij.func.ide.inspections.RedundantImpureFunctionAnnotator"/>
+        <codeInsight.lineMarkerProvider language="FunC"
+                                        implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionCallMarkerProvider"/>
         <lang.commenter language="FunC"
                         implementationClass="org.ton.intellij.func.ide.FuncCommenter"/>
         <lang.braceMatcher language="FunC"
@@ -96,7 +99,11 @@
                   extensions="boc"/>
 
         <spellchecker.bundledDictionaryProvider
-                implementation="org.ton.intellij.ide.spellchecker.TonDictionaryProvider"/>
+                implementation="org.ton.intellij.spelling.TonDictionaryProvider"/>
+
+
+        <notificationGroup id="Ton Plugin" displayType="BALLOON"/>
+        <notificationGroup id="Ton Build Log" displayType="NONE"/>
     </extensions>
 
     <actions>
@@ -117,4 +124,30 @@
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="fift.file.create"/>
         </action>
     </actions>
+
+    <extensionPoints>
+        <extensionPoint qualifiedName="org.ton.toolchainProvider"
+                        interface="org.ton.intellij.toncli.toolchain.TonToolchainProvider"
+                        dynamic="true"/>
+        <extensionPoint qualifiedName="org.ton.toolchainFlavor"
+                        interface="org.ton.intellij.toncli.toolchain.flavors.TonToolchainFlavor"
+                        dynamic="true"/>
+    </extensionPoints>
+
+    <extensions defaultExtensionNs="org.ton">
+        <toolchainProvider implementation="org.ton.intellij.toncli.toolchain.wsl.TonWslToolchainProvider"/>
+
+        <toolchainFlavor id="ton.sysPathToolchainFlavor"
+                         implementation="org.ton.intellij.toncli.toolchain.flavors.TonSysPathToolchainFlavor"
+                         order="first"/>
+        <toolchainFlavor id="ton.unixToolchainFlavor"
+                         implementation="org.ton.intellij.toncli.toolchain.flavors.TonUnixToolchainFlavor"/>
+        <toolchainFlavor id="ton.macToolchainFlavor"
+                         implementation="org.ton.intellij.toncli.toolchain.flavors.TonMacToolchainFlavor"/>
+        <toolchainFlavor id="ton.winToolchainFlavor"
+                         implementation="org.ton.intellij.toncli.toolchain.flavors.TonWinToolchainFlavor"/>
+
+        <toolchainFlavor id="ton.wslToolchainFlavor"
+                         implementation="org.ton.intellij.toncli.toolchain.wsl.TonWslToolchainFlavor"/>
+    </extensions>
 </idea-plugin>

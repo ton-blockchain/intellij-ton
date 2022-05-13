@@ -14,7 +14,6 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import org.ton.intellij.childOfType
 import org.ton.intellij.func.FuncIcons
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.parentOfType
@@ -71,11 +70,21 @@ class ImpureFunctionCallMarkerProvider : RelatedItemLineMarkerProvider() {
     override fun collectNavigationMarkers(element: PsiElement, result: MutableCollection<in RelatedItemLineMarkerInfo<*>>) {
         val resolvedFuncFunction = resolveFuncFunctionReference(element) ?: return
         if (resolvedFuncFunction.impureSpecifier == null) return
-        val marker = NavigationGutterIconBuilder
-                .create(FuncIcons.IMPURE_FUNCTION_MARKER)
-                .setTarget(resolvedFuncFunction)
-                .createLineMarkerInfo(element.firstChild.firstChild) // identifier
-        result.add(marker)
+        val identifier = when (element) {
+            is FuncMethodCall -> element.methodCallIdentifier?.identifier
+            is FuncFunctionCall -> element.functionCallIdentifier.identifier
+            is FuncModifyingMethodCall -> element.modifyingMethodCallIdentifier.identifier
+            else -> null
+        }
+        if (identifier != null) {
+            val marker = NavigationGutterIconBuilder
+                    .create(FuncIcons.IMPURE_FUNCTION_MARKER)
+                    .setTarget(resolvedFuncFunction)
+                    .createLineMarkerInfo(identifier) // identifier
+            result.add(marker)
+        } else {
+            println("identifier=null  | element=$element | ${element.text}")
+        }
     }
 }
 

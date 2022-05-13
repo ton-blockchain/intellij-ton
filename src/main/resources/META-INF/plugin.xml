@@ -39,6 +39,8 @@
                                         implementationClass="org.ton.intellij.func.ide.FuncParameterHintsProvider"/>
         <completion.contributor language="FunC"
                                 implementationClass="org.ton.intellij.func.completion.FuncFunctionCompletionContributor"/>
+        <lang.formatter language="FunC"
+                        implementationClass="org.ton.intellij.func.ide.formatter.FuncFormattingModelBuilder"/>
         <colorSettingsPage implementation="org.ton.intellij.func.ide.FuncColorSettingsPage"/>
         <internalFileTemplate name="FunC Contract"/>
 

@@ -175,8 +175,8 @@ expression_statement ::= expression ';' {pin=1}
 empty_statement ::= ';'
 repeat_statement ::= 'repeat' expression block_statement {pin=1}
 if_statement ::= ('if' | 'ifnot') expression block_statement (else_statement | elseif_statement | elseifnot_statement)? {pin=1}
-elseif_statement ::= 'elseif' expression block_statement (elseifnot_statement | else_statement)? {pin=1}
-elseifnot_statement ::= 'elseifnot' expression block_statement else_statement? {pin=1}
+elseif_statement ::= 'elseif' expression block_statement (else_statement | elseif_statement | elseifnot_statement)? {pin=1}
+elseifnot_statement ::= 'elseifnot' expression block_statement (else_statement | elseif_statement | elseifnot_statement)? {pin=1}
 else_statement ::= 'else' block_statement {pin=1}
 do_statement ::= 'do' block_statement 'until' expression {pin=1}
 while_statement ::= 'while' expression block_statement {pin=1}

@@ -17,11 +17,13 @@ import org.ton.intellij.processElements
 class RedundantImpureFunctionAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         if (element !is FuncFunction) return
-        val impureSpecifier = element.impureSpecifier ?: return
-        val blockStatement = element.blockStatement ?: return
+        val node = element.node
+        val impureSpecifier = node.findChildByType(FuncTokenTypes.IMPURE) ?: return
+        val functionBody = node.findChildByType(FuncTokenTypes.FUNCTION_BODY) ?: return
+        if (functionBody.findChildByType(FuncTokenTypes.ASM_FUNCTION_BODY) != null) return
 
         val resolvedFunctionReferences = ArrayList<FuncFunction>()
-        blockStatement.processElements { statement ->
+        functionBody.getPsi(FuncFunctionBody::class.java).processElements { statement ->
             val resolvedFuncFunction = resolveFuncFunctionReference(statement)
             if (resolvedFuncFunction != null) {
                 resolvedFunctionReferences.add(resolvedFuncFunction)
@@ -30,7 +32,7 @@ class RedundantImpureFunctionAnnotator : Annotator {
         }
 
         val isRedundantSpecifier = resolvedFunctionReferences.all { funcFunction ->
-            funcFunction.impureSpecifier == null
+            funcFunction.node.findChildByType(FuncTokenTypes.IMPURE) == null
         }
         if (isRedundantSpecifier) {
             holder.newAnnotation(HighlightSeverity.INFORMATION,  "Redundant 'impure' specifier")
@@ -51,11 +53,11 @@ class RedundantImpureFunctionQuickFix(val funcFunction: FuncFunction) : BaseInte
     override fun isAvailable(project: Project, editor: Editor, file: PsiFile): Boolean = true
 
     override fun invoke(project: Project, editor: Editor, file: PsiFile) {
-        val funcImpureSpecifier = funcFunction.impureSpecifier ?: return
+        val funcImpure = funcFunction.node.findChildByType(FuncTokenTypes.IMPURE) ?: return
 
         ApplicationManager.getApplication().invokeLater {
             WriteCommandAction.runWriteCommandAction(project) {
-                funcFunction.node.removeChild(funcImpureSpecifier.node)
+                funcFunction.node.removeChild(funcImpure)
             }
         }
     }

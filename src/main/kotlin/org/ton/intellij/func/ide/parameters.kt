@@ -23,6 +23,7 @@ class FuncParameterHintsProvider : InlayParameterHintsProvider {
             is FuncModifyingMethodCall -> element.resolveFunction()
             else -> null
         } ?: return emptyList()
+        val parameterList = funcFunction.parameterList ?: return emptyList()
         val arguments = when (element) {
             is FuncFunctionCall -> element.tensorExpression
             is FuncMethodCall -> element.tensorExpression
@@ -33,7 +34,7 @@ class FuncParameterHintsProvider : InlayParameterHintsProvider {
             is FuncFunctionCall -> 0
             else -> 1
         }
-        val paramNames = funcFunction.parameterList.parameterDeclarationList.map { it.identifier.text }
+        val paramNames = parameterList.parameterDeclarationList.map { it.identifier.text }
         return arguments.mapIndexed { index, expressionItem ->
             if (expressionItem.expression.childOfType<FuncReferenceExpression>() != null) {
                 null

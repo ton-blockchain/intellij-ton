@@ -23,6 +23,7 @@ object FuncSyntaxHighlighter : SyntaxHighlighterBase() {
         in FuncParserDefinition.PARENTHESES -> FuncColor.PARENTHESES
         in FuncParserDefinition.BRACKETS ->  FuncColor.BRACKETS
         in FuncParserDefinition.OPERATORS -> FuncColor.OPERATION_SIGN
+        PRAGMA, INCLUDE, VERSION, NOT_VERSION, TEST_VERSION_SET -> FuncColor.MACRO
         DOT -> FuncColor.DOT
         COMMA -> FuncColor.COMMA
         SEMICOLON -> FuncColor.SEMICOLON

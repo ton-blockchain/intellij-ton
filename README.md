@@ -16,7 +16,6 @@ https://plugins.jetbrains.com/plugin/18541-ton-development
 
 ---
 
-
 ### Installation
 
 - Using IDE built-in plugin system:

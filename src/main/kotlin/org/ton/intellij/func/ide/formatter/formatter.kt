@@ -82,13 +82,13 @@ class FuncFormattingModelBuilder : FormattingModelBuilder {
 
     private fun createSpaceBuilder(codeStyleSettings: CodeStyleSettings): SpacingBuilder {
         return SpacingBuilder(codeStyleSettings, FuncLanguage)
-                .after(TokenSet(LPAREN, LBRACE, LBRACKET)).none()
-                .before(RPAREN).none()
-                .before(RBRACE).none()
-                .before(RBRACKET).none()
-                .before(COMMA).none()
-                .before(SEMICOLON).none()
-                .before(TokenSet(FUNCTION_NAME, IMPURE_SPECIFIER, INLINE_SPECIFIER, METHOD_ID_SPECIFIER)).spaces(1)
+            .after(TokenSet(LPAREN, LBRACE, LBRACKET)).none()
+            .before(RPAREN).none()
+            .before(RBRACE).none()
+            .before(RBRACKET).none()
+            .before(COMMA).none()
+            .before(SEMICOLON).none()
+            .around(TokenSet(IMPURE, INLINE, INLINE_REF, METHOD_ID)).spaces(1)
                 .aroundInside(TokenSet(
                         EQUALS, PLUSLET, MINUSLET, TIMESLET, DIVLET, DIVRLET, DIVCLET, MODLET, MODRLET,
                         MODCLET, LSHIFTLET, RSHIFTLET, RSHIFTRLET, RSHIFTCLET, ANDLET, ORLET, XORLET

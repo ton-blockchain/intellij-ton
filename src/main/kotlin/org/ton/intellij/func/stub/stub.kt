@@ -12,12 +12,14 @@ import com.intellij.psi.tree.IStubFileElementType
 import org.ton.intellij.func.FuncLanguage
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.impl.FuncFunctionImpl
+import org.ton.intellij.func.psi.impl.FuncIncludePathImpl
 import org.ton.intellij.func.resolve.FuncReference
 import org.ton.intellij.func.resolve.FuncReferenceBase
 
 fun factory(name: String): FuncStubElementType<*, *> = when (name) {
     "FUNCTION" -> FuncFunctionStub.Type
-    else -> error("Can't reFuncve stub for $name")
+    "INCLUDE_PATH" -> FuncIncludePathStub.Type
+    else -> error("Can't find stub for $name")
 }
 
 interface FuncNamedStub {
@@ -63,7 +65,7 @@ class FuncFileStub(file: FuncFile?) : PsiFileStubImpl<FuncFile>(file) {
 
     object Type : IStubFileElementType<FuncFileStub>(FuncLanguage) {
         // bump version every time stub tree changes
-        override fun getStubVersion() = 1
+        override fun getStubVersion() = 2
         override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
             override fun createStubForFile(file: PsiFile) = FuncFileStub(file as FuncFile)
         }
@@ -93,5 +95,31 @@ class FuncFunctionStub(
             FuncFunctionStub(parentStub, this, psi.name)
 
         override fun indexStub(stub: FuncFunctionStub, sink: IndexSink) = sink.indexFunctionDef(stub)
+    }
+}
+
+class FuncIncludePathStub(
+    parent: StubElement<*>?,
+    elementType: IStubElementType<*, *>,
+    override val name: String?,
+    val path: String?
+) : StubBase<FuncIncludePathImpl>(parent, elementType), FuncNamedStub {
+    object Type : FuncStubElementType<FuncIncludePathStub, FuncIncludePathImpl>("INCLUDE_PATH") {
+        override fun serialize(stub: FuncIncludePathStub, dataStream: StubOutputStream) = with(dataStream) {
+            writeName(stub.name)
+            writeUTFFast(stub.path ?: "")
+        }
+
+        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): FuncIncludePathStub =
+            FuncIncludePathStub(parentStub, this, dataStream.readName().toString(), dataStream.readUTFFast())
+
+        override fun createStub(
+            psi: FuncIncludePathImpl,
+            parentStub: StubElement<out PsiElement>?
+        ): FuncIncludePathStub = FuncIncludePathStub(parentStub, this, psi.name, psi.text)
+
+        override fun createPsi(stub: FuncIncludePathStub): FuncIncludePathImpl = FuncIncludePathImpl(stub, this)
+
+        override fun indexStub(stub: FuncIncludePathStub, sink: IndexSink) = sink.indexIncludePathDef(stub)
     }
 }

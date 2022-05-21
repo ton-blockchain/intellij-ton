@@ -108,52 +108,94 @@
         INFIXR='infixr'
         CONST='const'
 
+        PRAGMA='#pragma'
+        VERSION='version'
+        NOT_VERSION='not-version'
+        TEST_VERSION_SET='test-version-set'
+        INCLUDE='#include'
+
         WHITE_SPACE='regexp:\s+'
         LINE_COMMENT="regexp:;;.*"
         BLOCK_COMMENT="regexp:\{-(.|\n)*-}"
         INTEGER_LITERAL='regexp:(-?[0-9][_0-9]*)|(0[xX][_0-9a-fA-F]+)|(0[bB][_0-1]+)'
         STRING_LITERAL='regexp:(\"([^\"\r\n\\]|\\.)*\")[sauhHc]?'
-        IDENTIFIER="regexp:(`.*`)|(([a-zA-Z_](\w|['?:])+)|([a-zA-Z]))"
+        IDENTIFIER="regexp:`.*`|[a-zA-Z_][^\s\+\-\*\/\%\,\.\;\(\)\{\}\[\]\=\<\>\|\^\~]*"
     ]
 }
 
-private root ::= (global_var_expression | const_expression | function)*
+private root ::= (macro | global_var_expression | const_expression | function)*
+private UntilSemicolonRecover ::= !(';')
+private UntilBraceRecover ::= !('}')
+private UntilParenRecover ::= !(')')
+
+macro ::= (pragma_directive | include_directive)
+
+private pragma_directive_begin ::= PRAGMA (pragma_version | pragma_not_version | pragma_test_version_set) {
+    pin = 1
+    recoverWhile = UntilSemicolonRecover
+}
+pragma_directive ::= pragma_directive_begin ';'
+
+IncludePath ::= STRING_LITERAL {
+    implements = "org.ton.intellij.func.psi.FuncNamedElement"
+    mixin = "org.ton.intellij.func.psi.FuncIncludePathMixin"
+    stubClass = "org.ton.intellij.func.stub.FuncIncludePathStub"
+    elementTypeFactory = "org.ton.intellij.func.stub.StubKt.factory"
+}
+private include_directive_part ::= INCLUDE IncludePath {
+    pin = 1
+    recoverWhile = UntilSemicolonRecover
+}
+include_directive ::= include_directive_part ';'
+
+pragma_version ::= VERSION version_directive {pin=1}
+pragma_not_version ::= NOT_VERSION version_directive {pin=1}
+pragma_test_version_set ::= TEST_VERSION_SET STRING_LITERAL {pin=1}
+version_directive ::= ('>' | '<' | '<=' | '>=' | '^' | '=' )? INTEGER_LITERAL ('.' INTEGER_LITERAL)* {pin=2}
+
 function ::= type_variables_list? function_return_type function_name parameter_list
-             impure_specifier? inline_specifier? method_id_specifier? (';' | block_statement | asm_function_body) {
+             'impure'? ('inline' | 'inline_ref')? method_id_specifier? (function_body | ';') {
+    pin = 3;
     implements = "org.ton.intellij.func.psi.FuncNamedElement"
     mixin = "org.ton.intellij.func.psi.FuncFunctionDefinitionMixin"
     stubClass = "org.ton.intellij.func.stub.FuncFunctionStub"
     elementTypeClass = "org.ton.intellij.func.stub.FuncFunctionStub.Type"
     elementTypeFactory = "org.ton.intellij.func.stub.StubKt.factory"
 }
+function_body ::= block_statement | asm_function_body
+
 function_return_type ::= type
 
 type_variables_list ::= 'forall' type_identifier (',' type_identifier)* '->' {pin=1}
-impure_specifier ::= 'impure'
-inline_specifier ::= 'inline' | 'inline_ref'
-method_id_specifier ::= 'method_id' ('('  INTEGER_LITERAL ')')? {pin=1}
 
-asm_function_body ::= asm_specifier asm_instruction+ ';'
+private method_id_specifier_id_begin ::= '(' INTEGER_LITERAL {
+    pin = 1
+    recoverWhile = UntilParenRecover
+}
+method_id_specifier_id ::= method_id_specifier_id_begin ')'
+method_id_specifier ::= 'method_id' method_id_specifier_id? {pin=1}
+
+asm_function_body ::= asm_specifier asm_instruction+ ';' {pin=1}
 asm_specifier ::= 'asm' ('(' IDENTIFIER* ('->'  INTEGER_LITERAL*)? ')')? {pin=1}
 asm_instruction ::= STRING_LITERAL
 
-private parameter_list_recovery ::= !')'
-private parameter_list_begin ::= '(' parameter_list_item* {pin=1; recoverWhile=parameter_list_recovery}
-private parameter_list_item ::= !')' parameter_declaration (',' | &')' ) { pin=2 }
+private parameter_list_begin ::= '(' parameter_list_item* {pin=1; recoverWhile=UntilParenRecover}
+private parameter_list_item ::= UntilParenRecover parameter_declaration (',' | &')' ) { pin=2 }
 parameter_declaration ::= (type IDENTIFIER) | IDENTIFIER {
    implements = "org.ton.intellij.func.psi.FuncNamedElement"
    mixin = "org.ton.intellij.func.psi.FuncParameterDeclarationMixin"
 }
-parameter_list ::= parameter_list_begin ')'
+parameter_list ::= parameter_list_begin ')' {
+    mixin = "org.ton.intellij.func.psi.FuncFunctionParameterListMixin"
+}
 
 global_var_expression ::= 'global' global_var (',' global_var)* ';' {pin=1}
 global_var ::= type IDENTIFIER {
     implements = "org.ton.intellij.func.psi.FuncNamedElement"
     mixin = "org.ton.intellij.func.psi.FuncGlobalVarMixin"
 }
-private const_list_recovery ::= !';'
 private const_list_item ::= const_declaration (',' | &';')
-private const_list ::= const_list_item+ {recoverWhile=const_list_recovery}
+private const_list ::= const_list_item+ {recoverWhile=UntilSemicolonRecover}
 const_declaration ::= primitive_type? IDENTIFIER '=' expression {
     implements = "org.ton.intellij.func.psi.FuncNamedElement"
     mixin = "org.ton.intellij.func.psi.FuncConstDeclarationMixin"
@@ -166,8 +208,7 @@ const_expression ::= const const_list ';' {pin=1}
 
 private statement ::= return_statement | block_statement | empty_statement | repeat_statement |
                       if_statement | do_statement | while_statement | expression_statement
-private block_statement_recovery ::= !'}'
-private block_statement_item ::= !'}' statement* { recoverWhile=block_statement_recovery }
+private block_statement_item ::= UntilBraceRecover statement* { recoverWhile=UntilBraceRecover }
 block_statement ::= '{' block_statement_item* '}'
 
 return_statement ::= 'return' expression ';' {pin=1}
@@ -276,7 +317,9 @@ function_type ::= atomic_type '->' atomic_type {pin=2}
 //
 
 boolean_literal ::= 'true' | 'false'
-function_name ::= '~'? IDENTIFIER
+function_name ::= '~'? IDENTIFIER {
+    mixin = "org.ton.intellij.func.psi.FuncFunctionNameMixin"
+}
 type_identifier ::= IDENTIFIER
 
 //noinspection BnfUnusedRule

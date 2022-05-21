@@ -5,6 +5,7 @@ import com.intellij.codeInsight.daemon.RelatedItemLineMarkerProvider
 import com.intellij.codeInsight.intention.impl.BaseIntentionAction
 import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
 import com.intellij.codeInspection.ProblemHighlightType
+import com.intellij.lang.ASTNode
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
@@ -16,25 +17,29 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import org.ton.intellij.func.FuncIcons
 import org.ton.intellij.func.psi.*
+import org.ton.intellij.func.psi.FuncTokenTypes.IMPURE
+import org.ton.intellij.func.psi.FuncTokenTypes.INLINE
 import org.ton.intellij.parentOfType
 
 class ImpureFunctionCallAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         val resolvedFunction = resolveFuncFunctionReference(element) ?: return
-        if (resolvedFunction.impureSpecifier == null) return
-        val parentFuncFunction = element.parentOfType<FuncFunction>()
-        if (parentFuncFunction == null || parentFuncFunction.impureSpecifier != null) return
+        if (resolvedFunction.node.findChildByType(IMPURE) == null) return
+        val parentFuncFunction = element.parentOfType<FuncFunction>() ?: return
+        if (parentFuncFunction.node.findChildByType(IMPURE) != null ||
+            parentFuncFunction.node.findChildByType(INLINE) != null
+        ) return
 
         val elementName = (element as? FuncFunctionCall)?.nameIdentifier
-                ?: (element as? FuncMethodCall)?.nameIdentifier
-                ?: return
+            ?: (element as? FuncMethodCall)?.nameIdentifier
+            ?: return
         val message = "Impure function '${resolvedFunction.name}' should be called only from another impure function"
 
         holder.newAnnotation(HighlightSeverity.WARNING, message)
-                .range(elementName)
-                .highlightType(ProblemHighlightType.WARNING)
-                .withFix(ImpureFunctionCallQuickFix(parentFuncFunction))
-                .create()
+            .range(elementName)
+            .highlightType(ProblemHighlightType.WARNING)
+            .withFix(ImpureFunctionCallQuickFix(parentFuncFunction))
+            .create()
     }
 }
 
@@ -49,8 +54,8 @@ class ImpureFunctionCallQuickFix(val funcFunction: FuncFunction) : BaseIntention
     override fun invoke(project: Project, editor: Editor, file: PsiFile) {
         val whitespaceNode = project.funcPsiFactory.createFile(" ").firstChild.node
         val impureSpecifierNode = createImpureSpecifierNode(project)
-        val anchorNode = funcFunction.inlineSpecifier?.node ?: funcFunction.methodIdSpecifier?.node
-        ?: funcFunction.blockStatement?.node ?: funcFunction.asmFunctionBody?.node
+        val anchorNode = funcFunction.node.findChildByType(INLINE) ?: funcFunction.methodIdSpecifier?.node
+        ?: funcFunction.functionBody?.node
 
         ApplicationManager.getApplication().invokeLater {
             WriteCommandAction.runWriteCommandAction(project) {
@@ -62,14 +67,19 @@ class ImpureFunctionCallQuickFix(val funcFunction: FuncFunction) : BaseIntention
         }
     }
 
-    private fun createImpureSpecifierNode(project: Project) =
-            requireNotNull(project.funcPsiFactory.createFromText<FuncFunction>("() dummy() impure {}")).impureSpecifier!!.node
+    private fun createImpureSpecifierNode(project: Project): ASTNode {
+        val function = requireNotNull(project.funcPsiFactory.createFromText<FuncFunction>("() dummy() impure {}"))
+        return requireNotNull(function.node.findChildByType(IMPURE))
+    }
 }
 
 class ImpureFunctionCallMarkerProvider : RelatedItemLineMarkerProvider() {
-    override fun collectNavigationMarkers(element: PsiElement, result: MutableCollection<in RelatedItemLineMarkerInfo<*>>) {
+    override fun collectNavigationMarkers(
+        element: PsiElement,
+        result: MutableCollection<in RelatedItemLineMarkerInfo<*>>
+    ) {
         val resolvedFuncFunction = resolveFuncFunctionReference(element) ?: return
-        if (resolvedFuncFunction.impureSpecifier == null) return
+        if (resolvedFuncFunction.node.findChildByType(IMPURE) == null) return
         val identifier = when (element) {
             is FuncMethodCall -> element.methodCallIdentifier?.identifier
             is FuncFunctionCall -> element.functionCallIdentifier.identifier
@@ -78,9 +88,9 @@ class ImpureFunctionCallMarkerProvider : RelatedItemLineMarkerProvider() {
         }
         if (identifier != null) {
             val marker = NavigationGutterIconBuilder
-                    .create(FuncIcons.IMPURE_FUNCTION_MARKER)
-                    .setTarget(resolvedFuncFunction)
-                    .createLineMarkerInfo(identifier) // identifier
+                .create(FuncIcons.IMPURE_FUNCTION_MARKER)
+                .setTarget(resolvedFuncFunction)
+                .createLineMarkerInfo(identifier) // identifier
             result.add(marker)
         } else {
             println("identifier=null  | element=$element | ${element.text}")

@@ -36,6 +36,7 @@ enum class FuncColor(
     CONSTANT("Constant", Defaults.CONSTANT),
     GLOBAL_VARIABLE("Global variable", Defaults.GLOBAL_VARIABLE),
     LOCAL_VARIABLE("Local variable", Defaults.LOCAL_VARIABLE),
+    MACRO("Macro", Defaults.METADATA)
     ;
 
     val textAttributesKey =
@@ -46,7 +47,7 @@ enum class FuncColor(
 
 class FuncColorSettingsPage : ColorSettingsPage {
     private val DEMO_TEXT by lazy {
-        loadTextResource(this, "colors/highlighter_example.func")
+        loadTextResource(this, "colors/highlighter_example.fc")
     }
 
     override fun getAttributeDescriptors(): Array<AttributesDescriptor> = ATTRIBUTE_DESCRIPTORS

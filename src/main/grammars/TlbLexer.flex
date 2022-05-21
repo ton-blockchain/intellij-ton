@@ -74,7 +74,7 @@ import static org.ton.intellij.tlb.psi.TlbTypes.*;
 
 EOL=\R
 
-WHITE_SPACE_CHAR = [\ \n\t\f]
+WHITE_SPACE_CHAR = [\ \n\t\f\r]
 HEX_TAG=#([0-9a-f]+_?|_)
 BINARY_TAG=\$([01]*|_)
 

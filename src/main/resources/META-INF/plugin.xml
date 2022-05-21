@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.github.andreypfau.intellij-ton</id>
     <name>TON Development</name>
-    <vendor email="andreypfau@ton.org" url="https://github.com/andreypfau/intellij-ton">TON Foundation</vendor>
+    <vendor email="andreypfau@ton.org" url="https://github.com/ton-blockchain/intellij-ton">TON Foundation</vendor>
 
     <description><![CDATA[
         TON Development plugin for IntelliJ Platform.
@@ -19,14 +19,18 @@
                   fieldName="INSTANCE"
                   language="FunC"
                   extensions="func;fc"/>
+        <projectService serviceImplementation="org.ton.intellij.func.psi.FuncInternalFactory"/>
+
         <lang.parserDefinition language="FunC"
                                implementationClass="org.ton.intellij.func.ide.FuncParserDefinition"/>
         <lang.syntaxHighlighterFactory language="FunC"
                                        implementationClass="org.ton.intellij.func.ide.FuncSyntaxHighlighterFactory"/>
         <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.FuncAnnotator"/>
-        <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionCallAnnotator"/>
-        <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.RedundantImpureFunctionAnnotator"/>
-        <codeInsight.lineMarkerProvider language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionCallMarkerProvider"/>
+        <!--        <annotator language="FunC" implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionCallAnnotator"/>-->
+        <annotator language="FunC"
+                   implementationClass="org.ton.intellij.func.ide.inspections.RedundantImpureFunctionAnnotator"/>
+        <codeInsight.lineMarkerProvider language="FunC"
+                                        implementationClass="org.ton.intellij.func.ide.inspections.ImpureFunctionCallMarkerProvider"/>
         <lang.commenter language="FunC"
                         implementationClass="org.ton.intellij.func.ide.FuncCommenter"/>
         <lang.braceMatcher language="FunC"
@@ -44,8 +48,12 @@
         <colorSettingsPage implementation="org.ton.intellij.func.ide.FuncColorSettingsPage"/>
         <internalFileTemplate name="FunC Contract"/>
 
+        <stubIndex implementation="org.ton.intellij.func.stub.FuncFileIndex"/>
         <stubIndex implementation="org.ton.intellij.func.stub.FuncNamedElementIndex"/>
         <stubIndex implementation="org.ton.intellij.func.stub.FuncFunctionIndex"/>
+        <stubIndex implementation="org.ton.intellij.func.stub.FuncIncludeIndex"/>
+
+        <gotoFileContributor implementation="org.ton.intellij.func.ide.FuncFileNavigationContributor"/>
 
         <!--  Fift Language -->
 

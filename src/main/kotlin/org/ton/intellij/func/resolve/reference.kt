@@ -1,6 +1,7 @@
 package org.ton.intellij.func.resolve
 
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
 import com.intellij.psi.util.elementType
 import org.ton.intellij.func.psi.*
@@ -67,7 +68,7 @@ class FuncMethodCallReference(
         val params = element.tensorExpression?.tensorExpressionItemList ?: emptyList()
         val name = element.name ?: return emptySequence()
         return file.resolveAllFunctions().filter { funcFunction ->
-            val paramList = funcFunction.parameterList.parameterDeclarationList
+            val paramList = funcFunction.parameterList?.parameterDeclarationList ?: return@filter false
             (paramList.size - 1) == params.size && funcFunction.name == name
         }
     }
@@ -89,8 +90,8 @@ class FuncModifyingMethodCallReference(
 
     override fun multiResolve(): Sequence<FuncFunction> {
         return file.resolveAllFunctions().filter { funcFunction ->
-            val paramList = funcFunction.parameterList.parameterDeclarationList
-            val functionName = funcFunction.functionName
+            val paramList = funcFunction.parameterList?.parameterDeclarationList ?: return@filter false
+            val functionName = funcFunction.functionName ?: return@filter false
             (paramList.size - 1) == params.size && functionName.identifier.textMatches(element.modifyingMethodCallIdentifier.identifier)
         }
     }
@@ -113,5 +114,26 @@ class FuncReferenceExpressionReference(
         return funcFile.resolveReferenceExpressionProviders(elementTextOffset).filter {
             it != element && it.identifyingElement?.textMatches(elementName) == true
         }
+    }
+}
+
+class FuncIncludePathReference(element: FuncIncludePath) : FuncReferenceBase<FuncIncludePath>(element) {
+    override fun multiResolve(): Sequence<FuncElement> {
+        if (element.textLength < 3) return emptySequence()
+        var includeText = element.text
+        includeText = includeText.substring(1, includeText.lastIndex)
+        val virtualFile = element.containingFile.originalFile.virtualFile
+        val file = findIncludeFile(virtualFile, includeText)
+        if (file == null) {
+            return emptySequence()
+        }
+        val funcFile = PsiManager.getInstance(element.project).findFile(file) as? FuncFile ?: return emptySequence()
+        return sequenceOf(funcFile)
+    }
+
+    fun findIncludeFile(file: VirtualFile, path: String) = file.findFileByRelativePath("../$path")
+
+    override fun getVariants(): Array<Any> {
+        return super.getVariants()
     }
 }

@@ -15,12 +15,23 @@
 }
 
 () store_data(cfg_dict, stored_seqno, public_key, vote_dict) impure inline {
-  set_data(begin_cell()
-    .store_ref(cfg_dict)
-    .store_uint(stored_seqno, 32)
-    .store_uint(public_key, 256)
-    .store_dict(vote_dict)
-  .end_cell());
+  cell a = begin_cell()
+               .store_ref(cfg_dict)
+               .store_uint(stored_seqno, 32)
+               .store_uint(public_key, 256)
+               .store_dict(vote_dict)
+             .end_cell();
+
+  set_data(a);
+
+  ;; ----\
+
+  cell b = get_data();
+
+  b.load_ref(); ;; 1
+  b.load_ref(); ;; 2
+  cell b3 = b.load_ref(); ;; 3
+  b3.load_ref(); ;; 3 - 1
 }
 
 ;; (min_tot_rounds, max_tot_rounds, min_wins, max_losses, min_store_sec, max_store_sec, bit_price, cell_price)
@@ -49,9 +60,9 @@ _ get_vote_config(int critical?) inline {
 (int, int) check_validator_set(cell vset) {
   var cs = vset.begin_parse();
   throw_unless(9, cs~load_uint(8) == 0x12);  ;; validators_ext#12 only
-  int utime_since = cs~load_uint(32);
+  int utime_since = cs~load_uint(32); ;; 2^32
   int utime_until = cs~load_uint(32);
-  int total = cs~load_uint(16);
+  int total = cs~load_uint(16); ;; 2^16
   int main = cs~load_uint(16);
   throw_unless(9, main > 0);
   throw_unless(9, total >= main);

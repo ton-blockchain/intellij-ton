@@ -74,13 +74,10 @@ import static org.ton.intellij.func.psi.FuncTokenTypes.*;
 DIGIT = [0-9]
 BIN_DIGIT = [01]
 HEX_DIGIT = [0-9A-Fa-f]
-WHITE_SPACE_CHAR = [\ \n\t\f]
+WHITE_SPACE_CHAR = [\ \n\t\f\r]
 
 LETTER = [a-zA-Z]|_
-IDENTIFIER_PART = {DIGIT}|{LETTER}|"?"|":"
-PLAIN_IDENTIFIER = {LETTER} {IDENTIFIER_PART}*
-ESCAPED_IDENTIFIER = `[^`\n]+`
-IDENTIFIER = {PLAIN_IDENTIFIER}|{ESCAPED_IDENTIFIER}
+IDENTIFIER = `.*`|[a-zA-Z_][^\s\+\-\*\/\%\,\.\;\(\)\{\}\[\]\=\<\>\|\^\~]*
 
 LINE_DOCUMENTATION = ";"";"";"[^\n]*
 LINE_COMMENT = ";"";"[^\n]*
@@ -144,6 +141,11 @@ STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")[sauhHc]?
 
 {INTEGER_LITERAL} { return INTEGER_LITERAL; }
 
+"#pragma" { return PRAGMA; }
+"version" { return VERSION; }
+"not-version" { return NOT_VERSION; }
+"test-version-set" { return TEST_VERSION_SET; }
+"#include" { return INCLUDE; }
 "return" { return RETURN; }
 "var" { return VAR; }
 "repeat" { return REPEAT; }
@@ -178,9 +180,6 @@ STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")[sauhHc]?
 "infixl" { return INFIXL; }
 "infixr" { return INFIXR; }
 "const" { return CONST; }
-
-{STRING_LITERAL} { return STRING_LITERAL; }
-{IDENTIFIER} { return IDENTIFIER; }
 
 "+" { return PLUS; }
 "-" { return MINUS; }
@@ -236,6 +235,9 @@ STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")[sauhHc]?
 "&=" { return ANDLET; }
 "|=" { return ORLET; }
 "^=" { return XORLET; }
+
+{STRING_LITERAL} { return STRING_LITERAL; }
+{IDENTIFIER} { return IDENTIFIER; }
 
 [\s\S] { return BAD_CHARACTER; }
 <BLOCK_COMMENT_STATE, DOC_COMMENT_STATE> . { return BAD_CHARACTER; }

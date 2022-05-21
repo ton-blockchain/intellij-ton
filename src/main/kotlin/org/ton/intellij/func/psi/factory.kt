@@ -3,22 +3,37 @@ package org.ton.intellij.func.psi
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
+import com.intellij.psi.PsiParserFacade
 import org.ton.intellij.childOfType
 import org.ton.intellij.func.FuncFileType
 
-val Project.funcPsiFactory get() = FuncPsiFactory(this)
+val Project.funcPsiFactory get() = FuncInternalFactory[this].psiFactory
 
 class FuncPsiFactory(val project: Project) {
 
-    fun createFile(code: CharSequence): FuncFile = PsiFileFactory.getInstance(project)
-            .createFileFromText("DUMMY.${FuncFileType.defaultExtension}", FuncFileType, code) as FuncFile
+    fun createFile(code: CharSequence, fileName: String = "DUMMY", eventSystemEnabled: Boolean = false): FuncFile =
+        PsiFileFactory.getInstance(project)
+            .createFileFromText(
+                "$fileName.${FuncFileType.defaultExtension}",
+                FuncFileType,
+                code,
+                System.currentTimeMillis(),
+                eventSystemEnabled,
+                false
+            ) as FuncFile
 
     fun createIdentifier(name: String): PsiElement =
-        createFromText<FuncFunction>("() $name();")?.functionName?.identifier
-            ?: error("Failed to create identifier: `$name`")
+        createFromText<FuncFunction>("() $name();").functionName.identifier
 
-    inline fun <reified T : FuncElement> createFromText(code: CharSequence): T? = createFromText(code, T::class.java)
+    fun createIncludeDirective(includePath: String): FuncIncludeDirective =
+        createFromText("#include \"$includePath\";")
 
-    fun <T : FuncElement> createFromText(code: CharSequence, type: Class<T>): T? =
-            createFile(code).childOfType(type, strict = false)
+    fun createNewLine() = PsiParserFacade.SERVICE.getInstance(project).createWhiteSpaceFromText("\n")
+
+    inline fun <reified T : FuncElement> createFromText(code: CharSequence): T = createFromText(code, T::class.java)
+
+    fun <T : FuncElement> createFromText(code: CharSequence, type: Class<T>): T =
+        requireNotNull(createFile(code).childOfType(type, strict = false)) {
+            "Failed create $type for `$code`"
+        }
 }

@@ -10,10 +10,15 @@ import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.func.FuncIcons
 import org.ton.intellij.func.resolve.*
 import org.ton.intellij.func.stub.FuncFunctionStub
+import org.ton.intellij.func.stub.FuncIncludePathStub
 import org.ton.intellij.func.stub.FuncStubbedNamedElementImpl
 
 interface FuncElement : PsiElement
-abstract class FuncElementImpl(node: ASTNode) : ASTWrapperPsiElement(node), FuncElement
+abstract class FuncElementImpl(node: ASTNode) : ASTWrapperPsiElement(node), FuncElement {
+    override fun getName(): String? = super.toString()
+    override fun toString(): String = name ?: super.toString()
+}
+
 interface FuncNamedElement : FuncElement, PsiNameIdentifierOwner {
     override fun getReference(): FuncReferenceBase<*>?
 }
@@ -27,6 +32,7 @@ abstract class FuncNamedElementImpl(node: ASTNode) : FuncElementImpl(node), Func
 
     override fun getTextOffset() = nameIdentifier?.textOffset ?: super.getTextOffset()
     override fun getReference(): FuncReferenceBase<*>? = null
+    override fun toString(): String = name ?: super.toString()
 }
 
 abstract class FuncFunctionDefinitionMixin : FuncStubbedNamedElementImpl<FuncFunctionStub>,
@@ -40,11 +46,14 @@ abstract class FuncFunctionDefinitionMixin : FuncStubbedNamedElementImpl<FuncFun
         val name = name
         return PresentationData(
             name,
-            null,
+            containingFile.name,
             FuncIcons.FUNCTION,
             TextAttributesKey.createTextAttributesKey("public")
         )
     }
+
+    override fun toString(): String =
+        children.filter { it !is FuncBlockStatement && it !is FuncAsmFunctionBody }.joinToString(" ")
 }
 
 abstract class FuncParameterDeclarationMixin(node: ASTNode) : FuncNamedElementImpl(node), FuncParameterDeclaration {
@@ -59,6 +68,14 @@ abstract class FuncParameterDeclarationMixin(node: ASTNode) : FuncNamedElementIm
             TextAttributesKey.createTextAttributesKey("public")
         )
     }
+
+    override fun toString(): String = text
+}
+
+abstract class FuncFunctionNameMixin(node: ASTNode) : FuncNamedElementImpl(node), FuncFunctionName
+
+abstract class FuncFunctionParameterListMixin(node: ASTNode) : FuncElementImpl(node), FuncParameterList {
+    override fun toString(): String = text
 }
 
 abstract class FuncFunctionCallMixin(node: ASTNode) : FuncNamedElementImpl(node), FuncFunctionCall {
@@ -90,6 +107,14 @@ abstract class FuncModifyingMethodCallIdentifierMixin(node: ASTNode) : FuncNamed
     FuncModifyingMethodCallIdentifier {
     override fun getNameIdentifier() = identifier
     override fun getReference() = FuncModifyingMethodCallIdentifierReference(this)
+}
+
+abstract class FuncIncludePathMixin : FuncStubbedNamedElementImpl<FuncIncludePathStub>, FuncIncludePath {
+    constructor(node: ASTNode) : super(node)
+    constructor(stub: FuncIncludePathStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+    override fun getNameIdentifier(): PsiElement? = stringLiteral
+    override fun getReference() = FuncIncludePathReference(this)
 }
 
 abstract class FuncGlobalVarMixin(node: ASTNode) : FuncNamedElementImpl(node), FuncGlobalVar {

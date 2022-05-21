@@ -53,7 +53,6 @@ class FuncParserDefinition : ParserDefinition {
             AND,
             OR,
             CIRCUMFLEX,
-            TILDE,
             UNDERSCORE,
             EQ,
             NEQ,

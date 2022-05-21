@@ -1,14 +1,22 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package org.ton.intellij
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
+import com.intellij.psi.tree.IElementType
+import com.intellij.psi.tree.TokenSet
 import com.intellij.psi.util.PsiTreeUtil
 
-fun loadTextResource(ctx: Any, resource: String): String =
-    ctx.javaClass.classLoader.getResourceAsStream(resource)?.bufferedReader()?.use {
-        it.readText()
-    } ?: ""
+fun loadTextResource(ctx: Any, resource: String): String {
+    val clazz = if (ctx is Class<*>) ctx else ctx.javaClass
+    val classLoader = requireNotNull(clazz.classLoader) { "Can't load class loader for $ctx" }
+    val stream = requireNotNull(classLoader.getResourceAsStream(resource)) { "Can't find resource: `$resource`" }
+    return stream.use {
+        it.readAllBytes().decodeToString()
+    }
+}
 
 val Project.psiManager get() = PsiManager.getInstance(this)
 
@@ -24,4 +32,12 @@ inline fun <reified T : PsiElement> PsiElement.parentOfType(strict: Boolean = tr
 inline fun <reified T : PsiElement> PsiElement.collectElements() =
     PsiTreeUtil.collectElementsOfType(this, T::class.java)
 
-fun PsiElement.processElements(processor: (PsiElement)->Boolean) = PsiTreeUtil.processElements(this, processor)
+inline fun TokenSet(vararg elements: IElementType) = TokenSet.create(*elements)
+
+fun PsiElement.processElements(processor: (PsiElement) -> Boolean) = PsiTreeUtil.processElements(this, processor)
+
+inline fun <T> nullIfError(action: () -> T): T? = try {
+    action()
+} catch (e: Throwable) {
+    null
+}

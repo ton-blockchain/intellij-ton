@@ -9,10 +9,10 @@ import com.intellij.psi.tree.IElementType
 import com.intellij.psi.tree.TokenSet
 import com.intellij.psi.util.PsiTreeUtil
 
-fun loadTextResource(ctx: Any, resource: String): String {
-    val clazz = if (ctx is Class<*>) ctx else ctx.javaClass
-    val classLoader = requireNotNull(clazz.classLoader) { "Can't load class loader for $ctx" }
-    val stream = requireNotNull(classLoader.getResourceAsStream(resource)) { "Can't find resource: `$resource`" }
+fun loadTextResource(ctx: Class<*>, resource: String): String {
+    val classLoader = requireNotNull(ctx.classLoader) { "Can't load class loader for $ctx" }
+    val stream =
+        requireNotNull(classLoader.getResourceAsStream(resource)) { "Can't find resource: `$resource` in context: $ctx" }
     return stream.use {
         it.readAllBytes().decodeToString()
     }

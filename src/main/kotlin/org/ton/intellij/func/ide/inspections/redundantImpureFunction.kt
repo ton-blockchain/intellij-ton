@@ -35,11 +35,11 @@ class RedundantImpureFunctionAnnotator : Annotator {
             funcFunction.node.findChildByType(FuncTokenTypes.IMPURE) == null
         }
         if (isRedundantSpecifier) {
-            holder.newAnnotation(HighlightSeverity.INFORMATION,  "Redundant 'impure' specifier")
-                    .highlightType(ProblemHighlightType.LIKE_UNUSED_SYMBOL)
-                    .range(impureSpecifier)
-                    .withFix(RedundantImpureFunctionQuickFix(element))
-                    .create()
+            holder.newAnnotation(HighlightSeverity.INFORMATION, "Redundant 'impure' specifier")
+                .highlightType(ProblemHighlightType.LIKE_UNUSED_SYMBOL)
+                .range(impureSpecifier)
+                .withFix(RedundantImpureFunctionQuickFix(element))
+                .create()
         }
     }
 }

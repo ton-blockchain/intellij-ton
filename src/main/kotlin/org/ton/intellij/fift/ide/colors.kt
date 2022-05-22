@@ -40,7 +40,7 @@ enum class FiftColor(
 
 class FiftColorSettingsPage : ColorSettingsPage {
     private val DEMO_TEXT by lazy {
-        loadTextResource(this, "colors/highlighter_example.fif")
+        loadTextResource(FiftColorSettingsPage::class.java, "colors/highlighter_example.fif")
     }
 
     override fun getAttributeDescriptors(): Array<AttributesDescriptor> = ATTRIBUTE_DESCRIPTORS

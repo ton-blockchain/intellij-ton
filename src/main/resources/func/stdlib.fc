@@ -145,7 +145,7 @@ int string_hash(slice s) asm "SHA256U";
 # Signature checks
 -}
 
-;;; Checks the Ed25519-`signature` of a `hash` (a 256-bit unsigned integer, usually computed as the hash of some data)
+;;; Checks the Ed25519-[signature] of a [hash] (a 256-bit unsigned integer, usually computed as the hash of some data)
 ;;; using [public_key] (also represented by a 256-bit unsigned integer).
 ;;; The signature must contain at least 512 data bits; only the first 512 bits are used.
 ;;; The result is `−1` if the signature is valid, `0` otherwise.
@@ -154,7 +154,7 @@ int string_hash(slice s) asm "SHA256U";
 ;;; the second hashing occurring inside `CHKSIGNS`.
 int check_signature(int hash, slice signature, int public_key) asm "CHKSIGNU";
 
-;;; Checks whether [signature] is a valid Ed25519-signature of the data portion of `slice data` using `public_key`,
+;;; Checks whether [signature] is a valid Ed25519-signature of the data portion of `slice` [data] using [public_key],
 ;;; similarly to [check_signature].
 ;;; If the bit length of [data] is not divisible by eight, throws a cell underflow exception.
 ;;; The verification of Ed25519 signatures is the standard one,

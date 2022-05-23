@@ -1,9 +1,9 @@
-import java.time.Clock
-import java.time.Instant
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.intellij.tasks.PublishPluginTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.time.Clock
+import java.time.Instant
 
 val channel = prop("publishChannel")
 val isCI = System.getenv("CI") != null
@@ -33,7 +33,7 @@ plugins {
 group = prop("pluginGroup")
 version = prop("pluginVersion")
 
-if (channel != "stable" && channel != "release") {
+if (channel != "release") {
     val buildSuffix = prop("buildNumber") {
         Instant.now(Clock.systemUTC()).toString().substring(2, 16).replace("[-T:]".toRegex(), "")
     }

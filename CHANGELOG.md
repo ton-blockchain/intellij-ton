@@ -1,5 +1,17 @@
 # TON Development Changelog
 
+## [1.0.0]
+
+### Added
+
+- Support [FunC Update 2022.05](https://telegra.ph/FunC-Update-202205-05-17)
+- Auto-formatting in FunC
+- Support UTF-8 names in FunC functions
+- Auto-completion for inbuilt FunC statements
+- Auto-completion for all FunC functions in project scope
+- Documentation in FunC stdlib.fc
+- Language injection support (FunC, Fift, TL-B) for string literals in regular programming languages
+
 ## [0.8.0]
 
 ### Added

@@ -12,13 +12,13 @@ fun TlbElement.resolveFile() = if (this is TlbFile) this else containingFile as 
 
 fun TlbFile.resolveCombinatorDeclarations() = childrenOfType<TlbCombinatorDeclaration>().asSequence()
 fun TlbFile.resolveAllCombinatorDeclarations() =
-    virtualFile.parent.children.asSequence().filter { file ->
+    virtualFile.parent?.children?.asSequence()?.filter { file ->
         file.extension.equals(TlbFileType.defaultExtension, ignoreCase = true)
-    }.map { file ->
+    }?.map { file ->
         project.psiManager.findFile(file) as? TlbFile
-    }.filterNotNull().flatMap { file ->
+    }?.filterNotNull()?.flatMap { file ->
         file.resolveCombinatorDeclarations()
-    }
+    } ?: emptySequence()
 
 fun TlbCombinatorDeclaration.resolveImplicitDefinitions() =
     fieldDefinitionList?.fieldDefinitionList?.asSequence()?.map {

@@ -33,12 +33,14 @@ plugins {
 group = prop("pluginGroup")
 version = prop("pluginVersion")
 
-if (channel != "release") {
+if (channel != "release" || channel != "stable") {
     val buildSuffix = prop("buildNumber") {
         Instant.now(Clock.systemUTC()).toString().substring(2, 16).replace("[-T:]".toRegex(), "")
     }
     version = "$version-${channel.toUpperCase()}+$buildSuffix"
 }
+
+println("intellij-ton version: $version")
 
 repositories {
     mavenCentral()

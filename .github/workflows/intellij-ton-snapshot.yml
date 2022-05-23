@@ -33,7 +33,7 @@ jobs:
         with:
           java-version: 11
 
-      - name: Publish intellij-ton plugin
-        uses: gradle/gradle-build-action@v1
-        with:
-          arguments: "publishPlugin"
+#      - name: Publish intellij-ton plugin
+#        uses: gradle/gradle-build-action@v1
+#        with:
+#          arguments: "publishPlugin"

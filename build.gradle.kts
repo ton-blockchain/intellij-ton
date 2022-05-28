@@ -33,7 +33,7 @@ plugins {
 group = prop("pluginGroup")
 version = prop("pluginVersion")
 
-if (channel != "release" || channel != "stable") {
+if (channel != "release" && channel != "stable") {
     val buildSuffix = prop("buildNumber") {
         Instant.now(Clock.systemUTC()).toString().substring(2, 16).replace("[-T:]".toRegex(), "")
     }

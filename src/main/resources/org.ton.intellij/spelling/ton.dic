@@ -1,4 +1,5 @@
 adnl
+anycast
 fift
 jetton
 jettons
@@ -8,6 +9,7 @@ recv
 seqno
 shardchain
 shardchains
+smartcontract
 toncli
 toncoin
 toncoins

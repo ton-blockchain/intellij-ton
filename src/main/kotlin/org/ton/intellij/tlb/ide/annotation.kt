@@ -25,7 +25,7 @@ class TlbAnnotator : Annotator {
                     else -> {
                         if (element.name in TlbParserDefinition.INBUILT_TYPE_NAMES) {
                             holder.annotateInfo(element, TlbColor.TYPE)
-                        } else {
+                        } else if (element.containingFile.isPhysical) {
                             holder.annotateUnknown(element)
                         }
                     }

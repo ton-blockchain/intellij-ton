@@ -61,6 +61,7 @@ class FuncFormattingBlock(
                     PARAMETER_LIST
                 ) && childType !in TokenSet(LPAREN, RPAREN) -> Indent.getNormalIndent()
 
+                parentType == EXPR_80 && childType == CALLABLE -> Indent.getNormalIndent()
                 parentType in TokenSet(TUPLE_EXPRESSION, TUPLE_TYPE_EXPRESSION) && childType !in TokenSet(
                     LBRACKET,
                     RBRACKET

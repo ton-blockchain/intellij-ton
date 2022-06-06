@@ -56,7 +56,7 @@ configurations {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.charleskorn.kaml:kaml:0.43.0")
+    implementation("com.charleskorn.kaml:kaml:0.45.0")
 
     testImplementation(kotlin("test-junit"))
 }

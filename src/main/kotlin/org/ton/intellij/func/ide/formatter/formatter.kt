@@ -143,6 +143,5 @@ class FuncFormattingModelBuilder : FormattingModelBuilder {
             .between(TENSOR_TYPE_ITEM, TENSOR_TYPE_ITEM).spaces(1)
             .between(TUPLE_TYPE_ITEM, TUPLE_TYPE_ITEM).spaces(1)
             .between(LBRACE, RBRACE).lineBreakInCode()
-            .between(TokenSet(FUNCTION), TokenSet(FUNCTION)).blankLines(1)
     }
 }

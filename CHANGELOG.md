@@ -1,6 +1,6 @@
 # TON Development Changelog
 
-## [1.0.0]
+## [1.0.2]
 
 ### Added
 
@@ -11,6 +11,7 @@
 - Auto-completion for all FunC functions in project scope
 - Documentation in FunC stdlib.fc
 - Language injection support (FunC, Fift, TL-B) for string literals in regular programming languages
+- New template for FunC files creation
 
 ## [0.8.0]
 

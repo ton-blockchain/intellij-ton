@@ -1,3 +1,21 @@
-() recv_internal(slice in_msg) {
-  ;; handle internal messages
+#pragma version >=0.2.0;
+
+() load_data() inline_ref {
+    return ();
+}
+
+() store_data() impure inline_ref {
+    set_data(begin_cell().end_cell());
+}
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    ;; handle internal messages
+}
+
+() recv_external(slice in_msg_body) impure {
+    ;; handle external messages
+}
+
+_ my_get_method() method_id {
+
 }

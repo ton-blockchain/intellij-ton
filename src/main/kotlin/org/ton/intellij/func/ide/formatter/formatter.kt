@@ -30,43 +30,58 @@ class FuncFormattingBlock(
     }
 
     override fun buildChildren(): MutableList<Block> {
-        val blocks = ArrayList<Block>()
+        val childrenBlocks = ArrayList<Block>()
         var child = myNode.firstChildNode
         while (child != null) {
             if (child.elementType != TokenType.WHITE_SPACE) {
+                val indent = calcIndent(child)
                 val block = FuncFormattingBlock(
                     child,
                     Wrap.createWrap(WrapType.NONE, false),
                     null,
-                    calcIndent(child),
+                    indent,
                     spacingBuilder
                 )
-                blocks.add(block)
+                childrenBlocks.add(block)
             }
             child = child.treeNext
         }
-        return blocks
+        return childrenBlocks
     }
 
     companion object {
         private fun calcIndent(child: ASTNode): Indent {
             val childType = child.elementType
             val parent = child.treeParent
-            val parentType = parent?.elementType
-            val result = when {
-                parentType == BLOCK_STATEMENT && childType !in TokenSet(LBRACE, RBRACE) -> Indent.getNormalIndent()
-                parentType in TokenSet(
-                    TENSOR_EXPRESSION,
-                    TENSOR_TYPE_EXPRESSION,
-                    PARAMETER_LIST
-                ) && childType !in TokenSet(LPAREN, RPAREN) -> Indent.getNormalIndent()
-
-                parentType == EXPR_80 && childType == CALLABLE -> Indent.getNormalIndent()
-                parentType in TokenSet(TUPLE_EXPRESSION, TUPLE_TYPE_EXPRESSION) && childType !in TokenSet(
-                    LBRACKET,
-                    RBRACKET
-                ) -> Indent.getNormalIndent()
-
+            val result = when (parent?.elementType) {
+                FUNCTION -> when (childType) {
+                    FUNCTION_NAME -> Indent.getContinuationWithoutFirstIndent()
+                    PARAMETER_LIST -> Indent.getContinuationWithoutFirstIndent()
+                    else -> Indent.getNoneIndent()
+                }
+                PARAMETER_LIST -> when (childType) {
+                    LPAREN, COMMA -> Indent.getContinuationWithoutFirstIndent()
+                    RPAREN -> Indent.getNoneIndent()
+                    else -> Indent.getContinuationIndent()
+                }
+                TUPLE_EXPRESSION -> when (childType) {
+                    LBRACKET, COMMA -> Indent.getContinuationWithoutFirstIndent()
+                    RBRACKET -> Indent.getNoneIndent()
+                    else -> Indent.getContinuationIndent()
+                }
+                TENSOR_EXPRESSION -> when (childType) {
+                    LPAREN, COMMA -> Indent.getContinuationWithoutFirstIndent()
+                    RPAREN -> Indent.getNoneIndent()
+                    else -> Indent.getContinuationIndent()
+                }
+                BLOCK_STATEMENT -> when (childType) {
+                    LBRACE, RBRACE -> Indent.getNoneIndent()
+                    else -> Indent.getNormalIndent()
+                }
+                EXPR_80 -> when (childType) {
+                    EXPR_90 -> Indent.getNoneIndent()
+                    else -> Indent.getContinuationIndent()
+                }
                 else -> Indent.getNoneIndent()
             }
             return result
@@ -83,7 +98,7 @@ class FuncFormattingModelBuilder : FormattingModelBuilder {
                 formattingContext.node,
                 Wrap.createWrap(WrapType.NONE, false),
                 null,
-                null,
+                Indent.getNoneIndent(),
                 createSpaceBuilder(codeStyleSettings)
             ),
             codeStyleSettings

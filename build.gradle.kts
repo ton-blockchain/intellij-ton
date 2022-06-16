@@ -70,8 +70,8 @@ sourceSets {
 intellij {
     version.set(ideaVersion)
     val pluginList = listOf(
-            psiViewerPlugin,
-            graziePlugin
+        psiViewerPlugin,
+        graziePlugin,
     )
     plugins.set(pluginList)
     downloadSources.set(!isCI)

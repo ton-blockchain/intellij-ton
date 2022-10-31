@@ -27,7 +27,7 @@ plugins {
     kotlin("plugin.serialization") version "1.6.21"
     id("org.jetbrains.intellij") version "1.5.3"
     id("org.jetbrains.grammarkit") version "2021.2.2"
-    id("org.jetbrains.changelog") version "1.3.1"
+    id("org.jetbrains.changelog") version "2.0.0"
 }
 
 group = prop("pluginGroup")

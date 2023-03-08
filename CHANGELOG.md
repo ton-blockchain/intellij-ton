@@ -1,5 +1,10 @@
 # TON Development Changelog
 
+## [1.0.3]
+
+### Added
+- Support try-catch statements
+
 ## [1.0.2]
 
 ### Added

@@ -7,7 +7,6 @@ on:
 
 jobs:
   build:
-    needs: [ generate-build-number ]
     runs-on: ubuntu-18.04
     env:
       ORG_GRADLE_PROJECT_enableBuildSearchableOptions: true

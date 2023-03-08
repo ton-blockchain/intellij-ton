@@ -32,7 +32,7 @@ class FuncParserDefinition : ParserDefinition {
         val KEYWORDS = TokenSet.create(
             RETURN, VAR, REPEAT, DO, WHILE, UNTIL, IF, IFNOT, THEN, ELSE, ELSEIF, ELSEIFNOT,
             EXTERN, GLOBAL, ASM, IMPURE, INLINE, INLINE_REF, AUTO_APPLY, METHOD_ID, OPERATOR,
-            INFIXL, INFIXR, CONST
+            INFIXL, INFIXR, CONST, TRY, CATCH
         )
         val BRACES = TokenSet.create(LBRACE, RBRACE)
         val PARENTHESES = TokenSet.create(LPAREN, RPAREN)

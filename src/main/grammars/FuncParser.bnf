@@ -107,6 +107,8 @@
         INFIXL='infixl'
         INFIXR='infixr'
         CONST='const'
+        TRY='try'
+        CATCH='catch'
 
         PRAGMA='#pragma'
         VERSION='version'
@@ -207,7 +209,7 @@ const_expression ::= const const_list ';' {pin=1}
 //
 
 private statement ::= return_statement | block_statement | empty_statement | repeat_statement |
-                      if_statement | do_statement | while_statement | expression_statement
+                      if_statement | do_statement | while_statement | try_statement | expression_statement
 private block_statement_item ::= UntilBraceRecover statement* { recoverWhile=UntilBraceRecover }
 block_statement ::= '{' block_statement_item* '}'
 
@@ -221,6 +223,8 @@ elseifnot_statement ::= 'elseifnot' expression block_statement (else_statement |
 else_statement ::= 'else' block_statement {pin=1}
 do_statement ::= 'do' block_statement 'until' expression {pin=1}
 while_statement ::= 'while' expression block_statement {pin=1}
+catch_statement ::= 'catch' parameter_list block_statement {pin=1}
+try_statement ::= 'try' block_statement catch_statement {pin=1}
 
 //
 // EXPRESSIONS

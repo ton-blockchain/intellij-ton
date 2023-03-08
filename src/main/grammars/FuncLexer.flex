@@ -180,6 +180,8 @@ STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")[sauhHc]?
 "infixl" { return INFIXL; }
 "infixr" { return INFIXR; }
 "const" { return CONST; }
+"try" { return TRY; }
+"catch" { return CATCH; }
 
 "+" { return PLUS; }
 "-" { return MINUS; }

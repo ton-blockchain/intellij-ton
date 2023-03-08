@@ -83,16 +83,16 @@ class FuncMethodCallIdentifierReference(
 class FuncModifyingMethodCallReference(
     element: FuncModifyingMethodCall
 ) : FuncReferenceBase<FuncModifyingMethodCall>(element), FuncReference {
-    val params = element.tensorExpression.tensorExpressionItemList
+    val params = element.tensorExpression!!.tensorExpressionItemList
 
     override fun calculateDefaultRangeInElement(): TextRange =
-        element.modifyingMethodCallIdentifier.textRange
+        element.modifyingMethodCallIdentifier!!.textRange
 
     override fun multiResolve(): Sequence<FuncFunction> {
         return file.resolveAllFunctions().filter { funcFunction ->
             val paramList = funcFunction.parameterList?.parameterDeclarationList ?: return@filter false
             val functionName = funcFunction.functionName ?: return@filter false
-            (paramList.size - 1) == params.size && functionName.identifier.textMatches(element.modifyingMethodCallIdentifier.identifier)
+            (paramList.size - 1) == params.size && functionName.identifier!!.textMatches(element.modifyingMethodCallIdentifier!!.identifier)
         }
     }
 }

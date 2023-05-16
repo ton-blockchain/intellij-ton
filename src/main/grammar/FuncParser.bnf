@@ -1,0 +1,52 @@
+{
+    parserClass='org.ton.intellij.func.parser.FuncParser'
+
+    psiClassPrefix='Func'
+    psiImplClassSuffix='Impl'
+    psiPackage='org.ton.intellij.func.psi'
+    psiImplPackage='org.ton.intellij.func.psi.impl'
+
+    elementTypeHolderClass="org.ton.intellij.func.psi.FuncElementTypes"
+    tokenTypeClass="org.ton.intellij.func.psi.FuncToken"
+    elementTypeClass="org.ton.intellij.func.psi.FuncElementType"
+
+    tokens = [
+            LBRACE               =  '{'
+            RBRACE               =  '}'
+            LBRACK               =  '['
+            RBRACK               =  ']'
+            LPAREN               =  '('
+            RPAREN               =  ')'
+            COLON                =  ':'
+            SEMICOLON            =  ';'
+            COMMA                =  ','
+            QUOTE                =  "\""
+            BLOCK_COMMENT = "BLOCK_COMMENT"
+            DOC_COMMENT = "DOC_COMMENT"
+            ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
+            DANGLING_NEWLINE = "DANGLING_NEWLINE"
+            INCLUDE = "#include"
+            PRAGMA = "#pragma"
+    ]
+}
+
+private root ::= (macro)*
+macro ::= IncludeDefinition | PragmaDefinition
+StringLiteral ::= ('"' RAW_STRING* '"' ) | ('"""' RAW_STRING* '"""')
+
+private UntilSemicolonRecover ::= !(';')
+IncludePath ::= StringLiteral
+private IncludeDefinitionPart ::= INCLUDE IncludePath {
+    pin = 1
+    recoverWhile = UntilSemicolonRecover
+}
+IncludeDefinition ::= IncludeDefinitionPart ';' {
+//    stubClass="org.ton.intellij.func.stub.FuncIncludeDefinitionStub"
+    pin = 1
+}
+
+PragmaDefinition ::= PragmaDefinitionPart ';'
+private PragmaDefinitionPart ::= PRAGMA {
+    pin = 1
+    recoverWhile = UntilSemicolonRecover
+}

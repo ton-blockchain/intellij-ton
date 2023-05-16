@@ -5,8 +5,10 @@ import com.intellij.openapi.fileTypes.FileType
 import com.intellij.psi.FileViewProvider
 import org.ton.intellij.func.FuncFileType
 import org.ton.intellij.func.FuncLanguage
+import org.ton.intellij.func.stub.FuncFileStub
 
-class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncLanguage), FuncElement {
+class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncLanguage) {
     override fun getFileType(): FileType = FuncFileType
-    override fun toString(): String = "FunC"
+
+    override fun getStub(): FuncFileStub = super.getStub() as FuncFileStub
 }

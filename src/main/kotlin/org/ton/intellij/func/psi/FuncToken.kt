@@ -3,6 +3,8 @@ package org.ton.intellij.func.psi
 import com.intellij.psi.tree.IElementType
 import org.ton.intellij.func.FuncLanguage
 
-class FuncElementType(
+class FuncToken(
     debug: String
-) : IElementType(debug, FuncLanguage)
+) : IElementType(
+    debug, FuncLanguage
+)

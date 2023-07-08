@@ -7,10 +7,10 @@ import com.intellij.psi.tree.IStubFileElementType
 import org.ton.intellij.func.psi.FuncFile
 import org.ton.intellij.func.stub.FuncFileStub
 
-private const val VERSION = 1
+private const val STUB_VERSION = 1
 
 object FuncFileElementType : IStubFileElementType<FuncFileStub>("FUNC_FILE", FuncLanguage) {
-    override fun getStubVersion(): Int = VERSION
+    override fun getStubVersion(): Int = STUB_VERSION
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
         override fun createStubForFile(file: PsiFile): StubElement<*> =
@@ -23,6 +23,7 @@ object FuncFileElementType : IStubFileElementType<FuncFileStub>("FUNC_FILE", Fun
     }
 
     override fun serialize(stub: FuncFileStub, dataStream: StubOutputStream) {
+
     }
 
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): FuncFileStub {

@@ -8,8 +8,9 @@ enum class FuncSyntaxHighlightingColors(
     displayName: String,
     default: TextAttributesKey
 ) {
-    COMMENT("Comment", DefaultLanguageHighlighterColors.LINE_COMMENT),
-    DOCUMENTATION("Documentation", DefaultLanguageHighlighterColors.DOC_COMMENT),
+    LINE_COMMENT("Line comment", DefaultLanguageHighlighterColors.LINE_COMMENT),
+    BLOCK_COMMENT("Block comment", DefaultLanguageHighlighterColors.BLOCK_COMMENT),
+    DOC_COMMENT("Documentation", DefaultLanguageHighlighterColors.DOC_COMMENT),
 
     BRACES("Braces", DefaultLanguageHighlighterColors.BRACES),
     BRACKETS("Brackets", DefaultLanguageHighlighterColors.BRACKETS),

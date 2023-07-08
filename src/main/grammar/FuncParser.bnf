@@ -5,48 +5,304 @@
     psiImplClassSuffix='Impl'
     psiPackage='org.ton.intellij.func.psi'
     psiImplPackage='org.ton.intellij.func.psi.impl'
+    implements='org.ton.intellij.func.psi.FuncElement'
 
     elementTypeHolderClass="org.ton.intellij.func.psi.FuncElementTypes"
     tokenTypeClass="org.ton.intellij.func.psi.FuncToken"
     elementTypeClass="org.ton.intellij.func.psi.FuncElementType"
 
+    extends(".*Expression")=Expression
+
     tokens = [
-            LBRACE               =  '{'
-            RBRACE               =  '}'
-            LBRACK               =  '['
-            RBRACK               =  ']'
-            LPAREN               =  '('
-            RPAREN               =  ')'
-            COLON                =  ':'
-            SEMICOLON            =  ';'
-            COMMA                =  ','
-            QUOTE                =  "\""
+            PLUS                = '+'
+            MINUS               = '-'
+            TIMES               = '*'
+            DIV                 = '/'
+            MOD                 = '%'
+            QUEST               = '?'
+            COLON               = ':'
+            DOT                 = '.'
+            COMMA               = ','
+            SEMICOLON           = ';'
+            LBRACE              = '{'
+            RBRACE              = '}'
+            LBRACK              = '['
+            RBRACK              = ']'
+            LPAREN              = '('
+            RPAREN              = ')'
+            EQ                  = '='
+            UNDERSCORE          = '_'
+            LT                  = '<'
+            GT                  = '>'
+            AND                 = '&'
+            OR                  = '|'
+            XOR                 = '^'
+            TILDE               = '~'
+
+            EQEQ                = '=='
+            NEQ                 = '!='
+            LEQ                 = '<='
+            GEQ                 = '>='
+            SPACESHIP           = '<=>'
+            LSHIFT              = '<<'
+            RSHIFT              = '>>'
+            RSHIFTR             = '~>>'
+            RSHIFTC             = '^>>'
+            DIVR                = '~/'
+            DIVC                = '^/'
+            MODR                = '~%'
+            MODC                = '^%'
+            DIVMOD              = '/%'
+            PLUSLET             = '+='
+            MINUSLET            = '-='
+            TIMESLET            = '*='
+            DIVLET              = '/='
+            DIVRLET             = '~/='
+            DIVCLET             = '^/='
+            MODLET              = '%='
+            MODRLET             = '~%='
+            MODCLET             = '^%='
+            LSHIFTLET           = '<<='
+            RSHIFTLET           = '>>='
+            RSHIFTRLET          = '~>>='
+            RSHIFTCLET          = '^>>='
+            ANDLET              = '&='
+            ORLET               = '|='
+            XORLET              = '^='
+            MAPSTO              = '->'
+
+            RETURN_KEYWORD              = 'return'
+            VAR_KEYWORD                 = 'var'
+            REPEAT_KEYWORD              = 'repeat'
+            DO_KEYWORD                  = 'do'
+            WHILE_KEYWORD               = 'while'
+            UNTIL_KEYWORD               = 'until'
+            TRY_KEYWORD                 = 'try'
+            CATCH_KEYWORD               = 'catch'
+            IF_KEYWORD                  = 'if'
+            IFNOT_KEYWORD               = 'ifnot'
+            THEN_KEYWORD                = 'then'
+            ELSE_KEYWORD                = 'else'
+            ELSEIF_KEYWORD              = 'elseif'
+            ELSEIFNOT_KEYWORD           = 'elseifnot'
+
+            INT_KEYWORD                 = 'int'
+            CELL_KEYWORD                = 'cell'
+            SLICE_KEYWORD               = 'slice'
+            BUILDER_KEYWORD             = 'builder'
+            CONT_KEYWORD                = 'cont'
+            TUPLE_KEYWORD               = 'tuple'
+            TYPE_KEYWORD                = 'type'
+            FORALL_KEYWORD              = 'forall'
+
+            EXTERN_KEYWORD              = 'extern'
+            GLOBAL_KEYWORD              = 'global'
+            ASM_KEYWORD                 = 'asm'
+            IMPURE_KEYWORD              = 'impure'
+            INLINE_KEYWORD              = 'inline'
+            INLINE_REF_KEYWORD          = 'inline_ref'
+            AUTO_APPLY_KEYWORD          = 'auto_apply'
+            METHOD_ID_KEYWORD           = 'method_id'
+            OPERATOR_KEYWORD            = 'operator'
+            INFIX_KEYWORD               = 'infix'
+            INFIXL_KEYWORD              = 'infixl'
+            INFIXR_KEYWORD              = 'infixr'
+            CONST_KEYWORD               = 'const'
+
+            INCLUDE_MACRO             = "#include"
+            PRAGMA_MACRO              = "#pragma"
+
             BLOCK_COMMENT = "BLOCK_COMMENT"
             DOC_COMMENT = "DOC_COMMENT"
+            LINE_COMMENT = "LINE_COMMENT"
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
-            INCLUDE = "#include"
-            PRAGMA = "#pragma"
+            IDENTIFIER = 'regexp:[a-zA-Z]+'
+            WHITE_SPACE = 'regexp:[\ \n\t\f]'
+            INTEGER_LITERAL = 'regexp:(0|([1-9]([_0-9])*))'
     ]
 }
 
-private root ::= (macro)*
+private root ::= TopLevelDefinitions*
+private TopLevelDefinitions ::= macro | GlobalVarList | ConstVariable | Function
+
 macro ::= IncludeDefinition | PragmaDefinition
-StringLiteral ::= ('"' RAW_STRING* '"' ) | ('"""' RAW_STRING* '"""')
+RawString ::= RAW_STRING_ELEMENT*
+StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE
+
+GlobalVarList ::= 'global' << comma_separated_list GlobalVar >> ';' {
+    pin=1
+}
+GlobalVar ::= Type IDENTIFIER {
+    pin=1
+}
+
+ConstVariable ::= 'const' <<comma_separated_list AssignExpression>> ';' {
+    pin=1
+}
 
 private UntilSemicolonRecover ::= !(';')
 IncludePath ::= StringLiteral
-private IncludeDefinitionPart ::= INCLUDE IncludePath {
-    pin = 1
-    recoverWhile = UntilSemicolonRecover
-}
-IncludeDefinition ::= IncludeDefinitionPart ';' {
-//    stubClass="org.ton.intellij.func.stub.FuncIncludeDefinitionStub"
-    pin = 1
+IncludeDefinition ::= '#include' IncludePath ';' {
+    pin=2
+    stubClass="org.ton.intellij.func.stub.FuncIncludeDefinitionStub"
+    elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
 }
 
 PragmaDefinition ::= PragmaDefinitionPart ';'
-private PragmaDefinitionPart ::= PRAGMA {
+PragmaKey ::= IDENTIFIER
+PragmaValue ::= StringLiteral | IntegerExpression
+private PragmaDefinitionPart ::= '#pragma' PragmaKey PragmaValue  {
     pin = 1
     recoverWhile = UntilSemicolonRecover
 }
+
+private FunctionRecover ::= !('{'|'asm')
+Function ::= TypeParameterList? FunctionReturnType FunctionIdentifier FunctionArgumentList 'impure'? ('inline' | 'inline_ref')? MethodIdDefenition? (';' | AsmDefinition | BlockStatement) {
+    pin=3
+//    recoverWhile=FunctionRecover
+}
+
+TypeParameterList ::= 'forall' << comma_separated_list TypeParameter >> '->' {
+    pin=1
+}
+TypeParameter ::= IDENTIFIER
+
+AsmDefinition ::= 'asm' AsmParameters? AsmBody ';' {pin=1}
+AsmParameters ::= '(' AsmArgumentList? AsmIndexList? ')' {pin=1}
+AsmArgumentList ::= AsmArgument+
+AsmArgument ::= IDENTIFIER
+AsmIndexList ::= '->' AsmIndex+
+AsmIndex ::= IntegerExpression
+AsmBody ::= StringLiteral+
+
+MethodIdDefenition ::= 'method_id' MethodIdArgument?
+private MethodIdArgument ::= '(' (StringLiteral | INTEGER_LITERAL) ')' {pin=1}
+
+FunctionIdentifier ::= ('~'|'.')? IDENTIFIER
+FunctionReturnType ::= Type
+
+Statement ::=  ReturnStatement | BlockStatement | RepeatStatement | IfStatement | IfNotStatement | DoStatement | WhileStatement | TryStatement | SemicolonExpression
+private SemicolonExpression ::= Expression ';' {
+//    recoverWhile=SemiciolonRecovery
+}
+
+ReturnStatement ::= 'return' Expression ';' {pin=1}
+
+//BlockStatement ::= BlockStatementStart '}'
+//private BlockStatementStart ::= '{' Statement* {pin=1 recoverWhile=BlockStatementRecovery}
+private StatementRecovery ::= 'return' | 'repeat' | 'if' | 'ifnot' | 'else' | 'elseif' | 'elseifnot' | 'do' | 'until' | 'while' | 'try' | 'catch'
+private TypeRecovery ::= 'int' | 'var'
+private BlockStatementRecovery ::= !('}'|IDENTIFIER|StatementRecovery|TypeRecovery)
+BlockStatement ::= '{' Statement* '}'  {
+    pin=1
+}
+
+RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
+
+IfStatement ::= 'if' Expression BlockStatement (ElseStatement | ElseIfStatement | ElseIfNotStatement)? {pin=1}
+IfNotStatement ::= 'ifnot' Expression BlockStatement (ElseStatement | ElseIfStatement | ElseIfNotStatement)? {pin=1}
+ElseStatement ::= 'else' BlockStatement {pin=1}
+ElseIfStatement ::= 'elseif' Expression BlockStatement (ElseStatement | ElseIfStatement | ElseIfNotStatement)? {pin=1}
+ElseIfNotStatement ::= 'elseifnot' Expression BlockStatement (ElseStatement | ElseIfStatement | ElseIfNotStatement)? {pin=1}
+
+DoStatement ::= 'do' BlockStatement 'until' Expression ';' {pin=1}
+WhileStatement ::= 'while' Expression BlockStatement {pin=1}
+TryStatement ::= 'try' BlockStatement CatchStatement {pin=1}
+CatchStatement ::= 'catch' Expression BlockStatement {pin=1}
+
+Expression ::= AssignExpression | TernaryExpression | CompExpression_group | BinaryShiftExpression_group | UnaryExpression_group | AddExpression_group | MulExpression_group | InvExpression | ReferenceCallExpression | FunctionCallExpression | VarExpression | Expr100_group
+
+AssignExpression ::= Expression ('=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '^>>=' | '~>>=' | '&=' | '|=' | '^=') Expression {
+    rightAssociative=true
+}
+
+private CompExpression_group ::= EqExpression | LtExpression | GtExpression | LeqExpression | GeqExpression | NeqExpression | SpaceshipExpression
+private BinaryShiftExpression_group ::= LShiftExpression | RShiftExpression | RShiftCExpression | RShiftRExpression
+private UnaryExpression_group ::= UnaryMinusExpression
+private AddExpression_group ::= PlusExpression | MinusExpression | OrExpression | XorExpression
+private MulExpression_group ::= MulExpression | DivExpression | ModExpression | DivModExpression | DivCExpression | DivRExpression | ModCExpression | ModRExpression | AndExpression
+
+VarExpression ::= (PrimitiveTypeExpression | HoleTypeExpression | TensorExpression | TupleExpression) (TensorExpression|TupleExpression|ReferenceExpression)
+private Expr100_group ::= TensorExpression
+ | TupleExpression
+ | IntegerExpression
+ | StringExpression
+ | HoleTypeExpression
+ | PrimitiveTypeExpression
+ | ReferenceExpression
+
+//private CompositeExpression ::= Expression [ TensorExpression | TupleExpression | ReferenceExpression ]
+
+TernaryExpression ::= Expression '?' Expression ':' Expression
+EqExpression ::= Expression '==' Expression
+LtExpression ::= Expression '<' Expression
+GtExpression ::= Expression '>' Expression
+LeqExpression ::= Expression '<=' Expression
+GeqExpression ::= Expression '>=' Expression
+NeqExpression ::= Expression '!=' Expression
+SpaceshipExpression ::= Expression '<=>' Expression
+LShiftExpression ::= Expression '<<' Expression
+RShiftExpression ::= Expression '>>' Expression
+RShiftCExpression ::= Expression '^>>' Expression
+RShiftRExpression ::= Expression '~>>' Expression
+UnaryMinusExpression ::= '-' Expression
+PlusExpression ::= Expression '+' Expression
+MinusExpression ::= Expression '-' Expression
+OrExpression ::= Expression '|' Expression
+XorExpression ::= Expression '^' Expression
+MulExpression ::= Expression '*' Expression
+DivExpression ::= Expression '/' Expression
+ModExpression ::= Expression '%' Expression
+DivModExpression ::= Expression '/%' Expression
+DivCExpression ::= Expression '^/' Expression
+DivRExpression ::= Expression '~/' Expression
+ModCExpression ::= Expression '^%' Expression
+ModRExpression ::= Expression '~%' Expression
+AndExpression ::= Expression '&' Expression
+InvExpression ::= '~' Expression
+ReferenceCallExpression ::= Expression ('~' | '.') FunctionCallExpression
+FunctionCallExpression ::= IDENTIFIER FunctionCallArguments {
+//    implements="org.ton.intellij.func.psi.FuncNamedElement"
+}
+FunctionCallArguments ::= '(' [ <<comma_separated_list Expression >> ] ')' {pin=1}
+
+TensorExpression ::= '(' [ <<comma_separated_list Expression>> ] ')' {
+    pin=1
+    extends=Expression
+}
+TupleExpression ::= '[' [ <<comma_separated_list Expression>> ] ']' {
+    pin=1
+    extends=Expression
+}
+
+IntegerExpression ::= INTEGER_LITERAL
+StringExpression ::= StringLiteral
+ReferenceExpression ::= IDENTIFIER
+HoleTypeExpression ::= HoleType
+PrimitiveTypeExpression ::= PrimitiveType
+AtomicTypeExpression ::= AtomicTypeExpression
+
+FunctionArgumentList ::= '(' [ << comma_separated_list FunctionArgument >> ] ')'
+FunctionArgument ::= Type IDENTIFIER?
+
+Type ::= MapType | AtomicType
+AtomicType ::= PrimitiveType | HoleType | TypeIdentifier | TensorType | TupleType
+MapType ::= AtomicType '->' Type {
+    pin=2
+}
+
+HoleType ::= 'var' | '_'
+PrimitiveType ::= 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type'
+TypeIdentifier ::= IDENTIFIER
+
+TensorType ::= '(' [ <<comma_separated_list Type>> ] ')' {
+    pin=1
+}
+
+TupleType ::= TupleTypeStart ']'
+TupleTypeItem ::= Type ( ','| &']' ) {pin=1}
+private TupleTypeItemRecovery ::= !']'
+private TupleTypeStart ::= '[' TupleTypeItem* {pin=1 recoverWhile=TupleTypeItemRecovery}
+
+private meta comma_separated_list ::= <<param>> (',' <<param>>)*

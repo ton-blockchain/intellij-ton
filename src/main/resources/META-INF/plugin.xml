@@ -5,4 +5,9 @@
     <vendor url="https://github.com/ton-blockchain/intellij-ton">TON Foundation</vendor>
 
     <xi:include href="func.xml" xpointer="xpointer(/idea-plugin/*)"/>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <spellchecker.bundledDictionaryProvider
+                implementation="org.ton.intellij.ide.spellchecker.TonDictionaryProvider"/>
+    </extensions>
 </idea-plugin>

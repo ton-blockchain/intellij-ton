@@ -10,6 +10,9 @@
         <lang.parserDefinition language="func"
                                implementationClass="org.ton.intellij.func.parser.FuncParserDefinition"/>
         <lang.syntaxHighlighterFactory language="func" implementationClass="org.ton.intellij.func.highlighting.FuncSyntaxHighlighterFactory"/>
+        <lang.commenter language="func" implementationClass="org.ton.intellij.func.FuncCommenter"/>
+        <lang.braceMatcher language="func" implementationClass="org.ton.intellij.func.FuncBraceMatcher"/>
+        <lang.foldingBuilder language="func" implementationClass="org.ton.intellij.func.ide.FuncFoldingBuilder"/>
 
         <stubElementTypeHolder class="org.ton.intellij.func.psi.FuncElementTypes" externalIdPrefix="func."/>
     </extensions>

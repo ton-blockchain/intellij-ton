@@ -117,7 +117,7 @@
             LINE_COMMENT = "LINE_COMMENT"
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
-            IDENTIFIER = 'regexp:[a-zA-Z]+'
+            IDENTIFIER = "regexp:[a-zA-Z_$?:][0-9a-zA-Z_$?:]*"
             WHITE_SPACE = 'regexp:[\ \n\t\f]'
             INTEGER_LITERAL = 'regexp:(0|([1-9]([_0-9])*))'
     ]
@@ -158,9 +158,15 @@ private PragmaDefinitionPart ::= '#pragma' PragmaKey PragmaValue  {
 }
 
 private FunctionRecover ::= !('{'|'asm')
-Function ::= TypeParameterList? FunctionReturnType FunctionIdentifier FunctionArgumentList 'impure'? ('inline' | 'inline_ref')? MethodIdDefenition? (';' | AsmDefinition | BlockStatement) {
+Function ::= TypeParameterList? FunctionReturnType FunctionIdentifier FunctionArgumentList 'impure'? ('inline' | 'inline_ref')? MethodIdDefinition? (';' | AsmDefinition | BlockStatement) {
     pin=3
-//    recoverWhile=FunctionRecover
+    mixin="org.ton.intellij.func.psi.impl.FuncFunctionMixin"
+    implements=[
+    "org.ton.intellij.func.psi.FuncNamedElement"
+    'org.ton.intellij.func.psi.FuncFunctionSignatureOwner'
+    ]
+    stubClass="org.ton.intellij.func.stub.FuncFunctionStub"
+    elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
 }
 
 TypeParameterList ::= 'forall' << comma_separated_list TypeParameter >> '->' {
@@ -176,10 +182,10 @@ AsmIndexList ::= '->' AsmIndex+
 AsmIndex ::= IntegerExpression
 AsmBody ::= StringLiteral+
 
-MethodIdDefenition ::= 'method_id' MethodIdArgument?
+MethodIdDefinition ::= 'method_id' MethodIdArgument? {pin=1}
 private MethodIdArgument ::= '(' (StringLiteral | INTEGER_LITERAL) ')' {pin=1}
 
-FunctionIdentifier ::= ('~'|'.')? IDENTIFIER
+private FunctionIdentifier ::= ('~'|'.')? IDENTIFIER
 FunctionReturnType ::= Type
 
 Statement ::=  ReturnStatement | BlockStatement | RepeatStatement | IfStatement | IfNotStatement | DoStatement | WhileStatement | TryStatement | SemicolonExpression
@@ -265,7 +271,7 @@ ReferenceCallExpression ::= Expression ('~' | '.') FunctionCallExpression
 FunctionCallExpression ::= IDENTIFIER FunctionCallArguments {
 //    implements="org.ton.intellij.func.psi.FuncNamedElement"
 }
-FunctionCallArguments ::= '(' [ <<comma_separated_list Expression >> ] ')' {pin=1}
+FunctionCallArguments ::=  <<comma_separated_list Expression >>
 
 TensorExpression ::= '(' [ <<comma_separated_list Expression>> ] ')' {
     pin=1

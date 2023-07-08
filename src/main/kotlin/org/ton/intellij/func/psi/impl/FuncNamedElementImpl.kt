@@ -3,7 +3,6 @@ package org.ton.intellij.func.psi.impl
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
-import org.ton.intellij.func.psi.FuncElementFactory
 import org.ton.intellij.func.psi.FuncNamedElement
 import org.ton.intellij.func.stub.FuncNamedStub
 
@@ -12,18 +11,8 @@ abstract class FuncNamedElementImpl<T : FuncNamedStub<*>> : FuncStubbedElementIm
     constructor(node: ASTNode) : super(node)
 
     override fun setName(name: String): PsiElement {
-
-//        val identifier = identifier
-//        if (identifier != null) {
-//            identifier.replace(FuncElementFactory.createIdentifierFromText())
-//        }
-////        PsiElement identifier = getIdentifier();
-////        if (identifier != null) {
-////            identifier.replace(GoElementFactory.createIdentifierFromText(getProject(), newName));
-////        }
-////        return this;
-//        FuncElementFactory
-        TODO("Not yet implemented")
+        println("TODO: set name in func named element")
+        return this
     }
 
     override fun getName(): String? = stub?.name ?: identifier?.text

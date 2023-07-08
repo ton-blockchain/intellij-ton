@@ -15,13 +15,11 @@ class FuncIncludeDefinitionStubElementType(
     debugName
 ) {
     override fun serialize(stub: FuncIncludeDefinitionStub, dataStream: StubOutputStream) {
-//        println("serialize include def: ${stub.path}")
         dataStream.writeUTFFast(stub.path)
     }
 
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>): FuncIncludeDefinitionStub {
         val path = dataStream.readUTFFast()
-//        println("deserialize include def: $path")
         return FuncIncludeDefinitionStub(parentStub, this, path)
     }
 
@@ -29,12 +27,10 @@ class FuncIncludeDefinitionStubElementType(
         psi: FuncIncludeDefinition,
         parentStub: StubElement<out PsiElement>,
     ): FuncIncludeDefinitionStub {
-//        println("create stub include def: ${psi.includePath.stringLiteral.rawString.text}")
         return FuncIncludeDefinitionStub(parentStub, this, psi.includePath.stringLiteral.rawString.text)
     }
 
     override fun createPsi(stub: FuncIncludeDefinitionStub): FuncIncludeDefinition {
-//        println("create psi include def: ${stub.path}")
         return FuncIncludeDefinitionImpl(stub, this)
     }
 

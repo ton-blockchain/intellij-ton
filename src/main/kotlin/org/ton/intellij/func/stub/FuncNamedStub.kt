@@ -6,12 +6,16 @@ import com.intellij.psi.stubs.StubElement
 import com.intellij.util.io.StringRef
 import org.ton.intellij.func.psi.FuncNamedElement
 
-class FuncNamedStub<T : FuncNamedElement>(
+abstract class FuncNamedStub<T : FuncNamedElement>(
     parent: StubElement<*>,
-    elementType: IStubElementType<*,*>,
-    name: StringRef
+    elementType: IStubElementType<*, *>,
+    name: StringRef?,
 ) : NamedStubBase<T>(
     parent, elementType, name
 ) {
-    constructor(parent: StubElement<*>, elementType: IStubElementType<*, *>, name: String) : this(parent, elementType, StringRef.fromString(name))
+    constructor(parent: StubElement<*>, elementType: IStubElementType<*, *>, name: String?) : this(
+        parent,
+        elementType,
+        StringRef.fromString(name)
+    )
 }

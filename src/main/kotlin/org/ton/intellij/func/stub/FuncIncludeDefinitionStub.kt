@@ -18,4 +18,6 @@ class FuncIncludeDefinitionStub(
     private val _path: StringRef = path
 
     val path: String get() = _path.string
+
+    override fun toString(): String = "FuncIncludeDefinitionStub(path='$path')"
 }

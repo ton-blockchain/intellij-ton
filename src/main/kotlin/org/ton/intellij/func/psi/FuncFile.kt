@@ -12,6 +12,7 @@ import com.intellij.util.ArrayFactory
 import org.ton.intellij.func.FuncFileType
 import org.ton.intellij.func.FuncLanguage
 import org.ton.intellij.func.stub.FuncFileStub
+import org.ton.intellij.func.stub.type.FuncFunctionStubElementType
 import org.ton.intellij.func.stub.type.FuncIncludeDefinitionStubElementType
 
 class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncLanguage) {
@@ -28,6 +29,17 @@ class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncL
                 FuncIncludeDefinitionStubElementType.ARRAY_FACTORY
             ) else calcIncludeDefinitions()
             CachedValueProvider.Result.create(childrens, this)
+        }
+
+    val functions: List<FuncFunction>
+        get() = CachedValuesManager.getCachedValue(this) {
+            val stub = stub
+            val functions = if (stub != null) {
+                getChildrenByType(stub, FuncElementTypes.FUNCTION, FuncFunctionStubElementType.ARRAY_FACTORY)
+            } else {
+                findChildrenByClass(FuncFunction::class.java).toList()
+            }
+            CachedValueProvider.Result.create(functions, this)
         }
 
     private fun calcIncludeDefinitions(): List<FuncIncludeDefinition> {

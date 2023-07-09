@@ -7,4 +7,6 @@ class FuncToken(
     debug: String
 ) : IElementType(
     debug, FuncLanguage
-)
+) {
+    override fun toString(): String = "FuncToken($debugName)"
+}

@@ -161,10 +161,7 @@ private FunctionRecover ::= !('{'|'asm')
 Function ::= TypeParameterList? FunctionReturnType FunctionIdentifier FunctionArgumentList 'impure'? ('inline' | 'inline_ref')? MethodIdDefinition? (';' | AsmDefinition | BlockStatement) {
     pin=3
     mixin="org.ton.intellij.func.psi.impl.FuncFunctionMixin"
-    implements=[
-    "org.ton.intellij.func.psi.FuncNamedElement"
-    'org.ton.intellij.func.psi.FuncFunctionSignatureOwner'
-    ]
+    implements=["org.ton.intellij.func.psi.FuncNamedElement"]
     stubClass="org.ton.intellij.func.stub.FuncFunctionStub"
     elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
 }
@@ -268,8 +265,8 @@ ModRExpression ::= Expression '~%' Expression
 AndExpression ::= Expression '&' Expression
 InvExpression ::= '~' Expression
 ReferenceCallExpression ::= Expression ('~' | '.') FunctionCallExpression
-FunctionCallExpression ::= IDENTIFIER FunctionCallArguments {
-//    implements="org.ton.intellij.func.psi.FuncNamedElement"
+FunctionCallExpression ::= ReferenceExpression FunctionCallArguments {
+
 }
 FunctionCallArguments ::=  <<comma_separated_list Expression >>
 
@@ -284,10 +281,11 @@ TupleExpression ::= '[' [ <<comma_separated_list Expression>> ] ']' {
 
 IntegerExpression ::= INTEGER_LITERAL
 StringExpression ::= StringLiteral
-ReferenceExpression ::= IDENTIFIER
+ReferenceExpression ::= IDENTIFIER {
+    mixin="org.ton.intellij.func.psi.impl.FuncReferenceExpressionMixin"
+}
 HoleTypeExpression ::= HoleType
 PrimitiveTypeExpression ::= PrimitiveType
-AtomicTypeExpression ::= AtomicTypeExpression
 
 FunctionArgumentList ::= '(' [ << comma_separated_list FunctionArgument >> ] ')'
 FunctionArgument ::= Type IDENTIFIER?

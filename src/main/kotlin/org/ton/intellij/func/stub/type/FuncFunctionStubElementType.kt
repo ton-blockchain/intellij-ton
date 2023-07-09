@@ -7,6 +7,9 @@ import com.intellij.psi.stubs.StubOutputStream
 import com.intellij.util.ArrayFactory
 import org.ton.intellij.func.psi.FuncFunction
 import org.ton.intellij.func.psi.impl.FuncFunctionImpl
+import org.ton.intellij.func.psi.impl.hasMethodId
+import org.ton.intellij.func.psi.impl.isImpure
+import org.ton.intellij.func.psi.impl.isMutable
 import org.ton.intellij.func.stub.FuncFunctionStub
 
 class FuncFunctionStubElementType(

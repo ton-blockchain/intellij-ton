@@ -15,6 +15,8 @@ abstract class FuncNamedElementImpl<T : FuncNamedStub<*>> : FuncStubbedElementIm
         return this
     }
 
+    override fun getTextOffset(): Int = identifier?.textOffset ?: 0
+
     override fun getName(): String? = stub?.name ?: identifier?.text
 
     override fun getNameIdentifier(): PsiElement? = identifier

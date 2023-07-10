@@ -17,6 +17,17 @@
                                  implementationClass="org.ton.intellij.func.ide.FuncFindUsagesProvider"/>
 
         <stubElementTypeHolder class="org.ton.intellij.func.psi.FuncElementTypes" externalIdPrefix="func."/>
+
+        <annotator language="func" implementationClass="org.ton.intellij.func.highlighting.FuncAnnotator"/>
+
+        <localInspection language="func" displayName="Unused function inspection" groupPath="FunC"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.func.inspection.FuncUnusedFunctionInspection"/>
+
+        <!-- control flow issues -->
+        <localInspection language="func" displayName="Missing return at end of function" groupPath="FunC"
+                         groupName="Control flow issues" enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.func.inspection.FuncMissingReturnInspection"/>
     </extensions>
 
     <actions>

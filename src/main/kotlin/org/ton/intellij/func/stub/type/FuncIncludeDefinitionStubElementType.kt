@@ -7,6 +7,7 @@ import com.intellij.psi.stubs.StubOutputStream
 import com.intellij.util.ArrayFactory
 import org.ton.intellij.func.psi.FuncIncludeDefinition
 import org.ton.intellij.func.psi.impl.FuncIncludeDefinitionImpl
+import org.ton.intellij.func.psi.impl.path
 import org.ton.intellij.func.stub.FuncIncludeDefinitionStub
 
 class FuncIncludeDefinitionStubElementType(
@@ -27,7 +28,7 @@ class FuncIncludeDefinitionStubElementType(
         psi: FuncIncludeDefinition,
         parentStub: StubElement<out PsiElement>,
     ): FuncIncludeDefinitionStub {
-        return FuncIncludeDefinitionStub(parentStub, this, psi.includePath.stringLiteral.rawString.text)
+        return FuncIncludeDefinitionStub(parentStub, this, psi.path)
     }
 
     override fun createPsi(stub: FuncIncludeDefinitionStub): FuncIncludeDefinition {

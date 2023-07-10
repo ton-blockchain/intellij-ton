@@ -23,12 +23,14 @@ class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncL
     val includeDefinitions: List<FuncIncludeDefinition>
         get() = CachedValuesManager.getCachedValue(this) {
             val stub = stub
-            val childrens = if (stub != null) getChildrenByType(
+            val children = if (stub != null) getChildrenByType(
                 stub,
                 FuncElementTypes.INCLUDE_DEFINITION,
                 FuncIncludeDefinitionStubElementType.ARRAY_FACTORY
-            ) else calcIncludeDefinitions()
-            CachedValueProvider.Result.create(childrens, this)
+            ) else {
+                findChildrenByClass(FuncIncludeDefinition::class.java).toList()
+            }
+            CachedValueProvider.Result.create(children, this)
         }
 
     val functions: List<FuncFunction>
@@ -42,12 +44,7 @@ class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncL
             CachedValueProvider.Result.create(functions, this)
         }
 
-    private fun calcIncludeDefinitions(): List<FuncIncludeDefinition> {
-        println("Calculation include definitions...")
-        return findChildrenByClass(FuncIncludeDefinitionList::class.java).flatMap {
-            it.includeDefinitionList
-        }
-    }
+    override fun toString(): String = "FuncFile($name)"
 }
 
 private fun <E : PsiElement> getChildrenByType(

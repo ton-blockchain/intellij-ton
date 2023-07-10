@@ -8,7 +8,6 @@ import com.intellij.psi.tree.IElementType
 import org.ton.intellij.func.parser.FuncParserDefinition
 import org.ton.intellij.func.psi.FuncBlockStatement
 import org.ton.intellij.func.psi.FuncElementTypes
-import org.ton.intellij.func.psi.FuncFunctionBody
 
 class FuncBraceMatcher : PairedBraceMatcher {
     private val pairs = arrayOf(
@@ -34,7 +33,7 @@ class FuncBraceMatcher : PairedBraceMatcher {
         val element = file?.findElementAt(openingBraceOffset)
         if (element == null || element is PsiFile) return openingBraceOffset
         return when (val parent = element.parent) {
-            is FuncFunctionBody, is FuncBlockStatement ->
+            is FuncBlockStatement ->
                 DeclarationRangeUtil.getPossibleDeclarationAtRange(parent.parent)?.startOffset ?: openingBraceOffset
 
             else -> openingBraceOffset

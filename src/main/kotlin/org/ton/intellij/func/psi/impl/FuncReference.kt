@@ -1,14 +1,16 @@
 package org.ton.intellij.func.psi.impl
 
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.util.TextRange
-import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.*
+import com.intellij.psi.PsiElementResolveResult
+import com.intellij.psi.PsiReferenceBase
+import com.intellij.psi.ResolveResult
+import com.intellij.psi.ResolveState
 import com.intellij.psi.impl.source.resolve.ResolveCache
 import com.intellij.psi.scope.PsiScopeProcessor
 import com.intellij.util.containers.OrderedSet
 import org.ton.intellij.func.psi.FuncFile
 import org.ton.intellij.func.psi.FuncNamedElement
+import org.ton.intellij.func.psi.FuncPsiUtil.allowed
 import org.ton.intellij.func.psi.FuncReferenceExpression
 
 class FuncReference<T : FuncReferenceExpression>(
@@ -45,7 +47,19 @@ class FuncReference<T : FuncReferenceExpression>(
         val file = myElement.containingFile
         if (file !is FuncFile) return false
         val state = ResolveState.initial()
-        return processNamedElements(processor, state, file.functions)
+        if (!processFile(file, processor, state)) return false
+        return true
+    }
+
+    private fun processFile(
+        file: FuncFile,
+        processor: PsiScopeProcessor,
+        state: ResolveState,
+    ): Boolean {
+//        println("processing file: ${file.name}")
+        if (!processNamedElements(processor, state, file.functions)) return false
+        if (!processIncludeDefinitions(file, processor, state)) return false
+        return true
     }
 
     private fun <T : FuncNamedElement> processNamedElements(
@@ -54,6 +68,7 @@ class FuncReference<T : FuncReferenceExpression>(
         elements: Collection<T>,
         condition: (T) -> Boolean = { true },
     ): Boolean {
+//        println("processing named elements")
         for (element in elements) {
             if (!condition(element)) continue
             if (!element.isValid || !allowed(element.containingFile, null)) continue
@@ -62,16 +77,26 @@ class FuncReference<T : FuncReferenceExpression>(
         return true
     }
 
-    private fun allowed(declarationFile: PsiFile, referenceFile: PsiFile?, contextModule: Module? = null): Boolean {
-        if (declarationFile !is FuncFile) return false
-        val referenceVirtualFile = referenceFile?.originalFile?.virtualFile
-        if (!allowed(declarationFile.virtualFile, referenceVirtualFile)) return false
-        // TODO: matchedForModuleBuildTarget
+    private val processedFiles = HashSet<String>()
+
+    private fun processIncludeDefinitions(
+        file: FuncFile,
+        processor: PsiScopeProcessor,
+        state: ResolveState,
+    ): Boolean {
+//        println("processing include defs: ${file.includeDefinitions.size}")
+        for (includeDefinition in file.includeDefinitions) {
+//            println("include references: ${includeDefinition.references.size}")
+            val fileReference = includeDefinition.references.lastOrNull()
+            val resolvedFile = fileReference?.resolve()
+            if (resolvedFile !is FuncFile) continue
+//            println("resolved: ${resolvedFile.virtualFile.path}")
+            if (processedFiles.add(resolvedFile.virtualFile.path)) {
+                processFile(resolvedFile, processor, state)
+            }
+        }
         return true
     }
 
-    private fun allowed(declarationFile: VirtualFile?, referenceFile: VirtualFile?): Boolean {
-        if (declarationFile == null) return true
-        return referenceFile == null || referenceFile.parent == declarationFile.parent
-    }
+
 }

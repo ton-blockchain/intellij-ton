@@ -10,8 +10,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
-import com.intellij.psi.xml.XmlTokenType.WHITESPACES
-import groovyjarjarantlr.Token
 import org.ton.intellij.func.FuncFileElementType
 import org.ton.intellij.func.lexer.FuncLexer
 import org.ton.intellij.func.psi.FuncElementTypes
@@ -60,6 +58,8 @@ class FuncParserDefinition : ParserDefinition {
             FuncElementTypes.TUPLE_KEYWORD,
             FuncElementTypes.TYPE_KEYWORD,
             FuncElementTypes.FORALL_KEYWORD,
+            FuncElementTypes.TRUE_KEYWORD,
+            FuncElementTypes.FALSE_KEYWORD,
 
             FuncElementTypes.EXTERN_KEYWORD,
             FuncElementTypes.GLOBAL_KEYWORD,

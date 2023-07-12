@@ -20,7 +20,6 @@ class FuncFindUsagesProvider : FindUsagesProvider {
     )
 
     override fun canFindUsagesFor(psiElement: PsiElement): Boolean {
-        println("canFindUsagesFor: $psiElement")
         return true
     }
 

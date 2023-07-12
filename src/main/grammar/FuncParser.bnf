@@ -95,6 +95,8 @@
             TUPLE_KEYWORD               = 'tuple'
             TYPE_KEYWORD                = 'type'
             FORALL_KEYWORD              = 'forall'
+            TRUE_KEYWORD                = 'true'
+            FALSE_KEYWORD               = 'false'
 
             EXTERN_KEYWORD              = 'extern'
             GLOBAL_KEYWORD              = 'global'
@@ -159,7 +161,7 @@ private PragmaDefinitionPart ::= '#pragma' PragmaKey PragmaValue  {
 }
 
 private FunctionRecover ::= !('{'|'asm')
-Function ::= TypeParameterList? Type FunctionIdentifier FunctionArgumentList 'impure'? ('inline' | 'inline_ref')? MethodIdDefinition? (';' | AsmDefinition | BlockStatement) {
+Function ::= TypeParameterList? Type FunctionIdentifier FunctionParameterList 'impure'? ('inline' | 'inline_ref')? MethodIdDefinition? (';' | AsmDefinition | BlockStatement) {
     pin=3
     mixin="org.ton.intellij.func.psi.impl.FuncFunctionMixin"
     implements=["org.ton.intellij.func.psi.FuncNamedElement"]
@@ -248,6 +250,7 @@ private Expr100_group ::= TensorExpression
  | StringExpression
  | HoleTypeExpression
  | PrimitiveTypeExpression
+ | BoolExpression
  | ReferenceExpression
 
 //private CompositeExpression ::= Expression [ TensorExpression | TupleExpression | ReferenceExpression ]
@@ -296,14 +299,25 @@ TupleExpression ::= '[' [ <<comma_separated_list Expression>> ] ']' {
 
 IntegerExpression ::= INTEGER_LITERAL
 StringExpression ::= StringLiteral
+BoolExpression ::= 'true' | 'false'
 ReferenceExpression ::= IDENTIFIER {
     mixin="org.ton.intellij.func.psi.impl.FuncReferenceExpressionMixin"
+    implements="org.ton.intellij.func.psi.FuncNamedElement"
 }
 HoleTypeExpression ::= HoleType
 PrimitiveTypeExpression ::= PrimitiveType
 
-FunctionArgumentList ::= '(' [ << comma_separated_list FunctionArgument >> ] ')'
-FunctionArgument ::= Type IDENTIFIER?
+FunctionParameterList ::= '(' [ << comma_separated_list FunctionParameter >> ] ')' {
+    pin = 1
+}
+FunctionParameter ::= TypeNamedFunctionParameter | NamedFunctionParameter {
+    mixin="org.ton.intellij.func.psi.impl.FuncFunctionParameterMixin"
+    implements=["org.ton.intellij.func.psi.FuncNamedElement"]
+    stubClass="org.ton.intellij.func.stub.FuncFunctionParameterStub"
+    elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
+}
+private TypeNamedFunctionParameter ::= AtomicType IDENTIFIER
+private NamedFunctionParameter ::= IDENTIFIER
 
 Type ::= MapType | AtomicType
 AtomicType ::= PrimitiveType | HoleType | TypeIdentifier | TensorType | TupleType

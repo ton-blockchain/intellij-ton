@@ -22,3 +22,6 @@ val FuncFunction.isMutable: Boolean
 
 val FuncFunction.hasMethodId: Boolean
     get() = stub?.hasMethodId ?: (methodIdDefinition != null)
+
+val FuncFunction.hasAsm: Boolean
+    get() = stub?.hasAsm ?: (asmDefinition != null)

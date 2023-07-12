@@ -2,6 +2,7 @@ package org.ton.intellij.func.inspection
 
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.openapi.progress.ProgressIndicatorProvider
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.impl.rBrace
 
@@ -23,6 +24,7 @@ class FuncMissingReturnInspection : FuncInspectionBase() {
     }
 
     private fun isTerminating(element: FuncElement?): Boolean {
+        ProgressIndicatorProvider.checkCanceled()
         return when (element) {
             null -> false
             is FuncReturnStatement -> true

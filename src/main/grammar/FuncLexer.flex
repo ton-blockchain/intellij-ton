@@ -215,6 +215,8 @@ LONELY_BACKTICK=`
   "infixl"                 { return INFIXL_KEYWORD; }
   "infixr"                 { return INFIXR_KEYWORD; }
   "const"                  { return CONST_KEYWORD; }
+  "true"                   { return TRUE_KEYWORD; }
+  "false"                  { return FALSE_KEYWORD; }
 
   "#include"               { return INCLUDE_MACRO; }
   "#pragma"                { return PRAGMA_MACRO; }

@@ -29,7 +29,8 @@ enum class FuncSyntaxHighlightingColors(
     CONSTANT("Constant", DefaultLanguageHighlighterColors.CONSTANT),
     GLOBAL_VARIABLE("Global variable", DefaultLanguageHighlighterColors.GLOBAL_VARIABLE),
     LOCAL_VARIABLE("Local variable", DefaultLanguageHighlighterColors.LOCAL_VARIABLE),
-    MACRO("Macro", DefaultLanguageHighlighterColors.METADATA)
+    MACRO("Macro", DefaultLanguageHighlighterColors.METADATA),
+    TYPE_PARAMETER("Type parameter", TextAttributesKey.find("KOTLIN_TYPE_PARAMETER")),
     ;
 
     val textAttributesKey =

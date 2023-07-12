@@ -48,6 +48,11 @@ class FuncReference(
 
         if (!PsiTreeUtil.treeWalkUp(element, null, FuncFunctionProcessor(processor, state))) return false
         if (!processIncludeDefinitions(file, processor, state)) return false
+        val stdlibFile = file.containingDirectory?.findFile("stdlib.fc")
+        if (stdlibFile is FuncFile) {
+            if (!processFile(stdlibFile, processor, state)) return false
+        }
+        if (!processFile(FuncElementFactory[file.project].builtinStdlibFile, processor, state)) return false
         return true
     }
 
@@ -106,6 +111,21 @@ class FuncReference(
     }
 
     companion object {
+        private fun <T : FuncNamedElement> processNamedElements(
+            processor: PsiScopeProcessor,
+            state: ResolveState,
+            elements: Collection<T>,
+            condition: (T) -> Boolean = { true },
+        ): Boolean {
+//        println("processing named elements")
+            for (element in elements) {
+                if (!condition(element)) continue
+                if (!element.isValid || !allowed(element.containingFile, null)) continue
+                if (!processor.execute(element, state)) return false
+            }
+            return true
+        }
+
         fun processStatement(
             statement: FuncStatement,
             processor: PsiScopeProcessor,
@@ -121,42 +141,51 @@ class FuncReference(
             processor: PsiScopeProcessor,
             state: ResolveState,
         ): Boolean {
-            if (expression is FuncAssignExpression) {
-                val left = expression.expressionList.firstOrNull() ?: return true
-                when (left) {
-                    is FuncVarExpression -> {
-                        if (!processVarExpression(left, processor, state)) return false
-                    }
+            when (expression) {
+                null -> return true
+                is FuncAssignExpression -> {
+                    val left = expression.expressionList.firstOrNull() ?: return true
+                    when (left) {
+                        is FuncVarExpression -> {
+                            if (!processVarExpression(left, processor, state)) return false
+                        }
 
-                    is FuncTensorExpression -> {
-                        for (tensorElement in left.expressionList) {
-                            if (tensorElement is FuncVarExpression) {
-                                if (!processVarExpression(tensorElement, processor, state)) return false
+                        is FuncTensorExpression -> {
+                            for (tensorElement in left.expressionList) {
+                                if (tensorElement is FuncVarExpression) {
+                                    if (!processVarExpression(tensorElement, processor, state)) return false
+                                }
+                            }
+                        }
+
+                        is FuncTupleExpression -> {
+                            for (tupleElement in left.expressionList) {
+                                if (tupleElement is FuncVarExpression) {
+                                    if (!processVarExpression(tupleElement, processor, state)) return false
+                                }
+                            }
+                        }
+
+                        is FuncReferenceExpression -> {
+                            if (expression.parent is FuncConstVariable) {
+                                if (!processor.execute(left, state)) return false
                             }
                         }
                     }
-
-                    is FuncTupleExpression -> {
-                        for (tupleElement in left.expressionList) {
-                            if (tupleElement is FuncVarExpression) {
-                                if (!processVarExpression(tupleElement, processor, state)) return false
-                            }
-                        }
-                    }
-
-                    is FuncReferenceExpression -> {
-                        if (expression.parent is FuncConstVariable) {
-                            if (!processor.execute(left, state)) return false
-                        }
-                    }
+                    val right = expression.expressionList.getOrNull(1) ?: return true
+                    if (!processExpression(right, processor, state)) return false
                 }
-                val right = expression.expressionList.getOrNull(1) ?: return true
-                when (right) {
-                    is FuncAssignExpression -> {
-                        if (!processExpression(right, processor, state)) return false
+
+                else -> {
+                    for (funcVarExpression in PsiTreeUtil.findChildrenOfType(
+                        expression,
+                        FuncVarExpression::class.java
+                    )) {
+                        if (!processVarExpression(funcVarExpression, processor, state)) return false
                     }
                 }
             }
+
             return true
         }
 
@@ -201,20 +230,6 @@ class FuncReference(
         return true
     }
 
-    private fun <T : FuncNamedElement> processNamedElements(
-        processor: PsiScopeProcessor,
-        state: ResolveState,
-        elements: Collection<T>,
-        condition: (T) -> Boolean = { true },
-    ): Boolean {
-//        println("processing named elements")
-        for (element in elements) {
-            if (!condition(element)) continue
-            if (!element.isValid || !allowed(element.containingFile, null)) continue
-            if (!processor.execute(element, state)) return false
-        }
-        return true
-    }
 
     private val processedFiles = HashSet<String>()
 

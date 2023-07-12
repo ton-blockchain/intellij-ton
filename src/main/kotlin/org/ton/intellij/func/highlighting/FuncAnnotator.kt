@@ -6,6 +6,8 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.psi.PsiElement
 import org.ton.intellij.func.psi.FuncFunction
+import org.ton.intellij.func.psi.FuncTypeIdentifier
+import org.ton.intellij.func.psi.FuncTypeParameter
 
 class FuncAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
@@ -16,6 +18,14 @@ class FuncAnnotator : Annotator {
                 if (identifier != null) {
                     highlight(identifier, holder, FuncSyntaxHighlightingColors.FUNCTION_DECLARATION.textAttributesKey)
                 }
+            }
+
+            is FuncTypeParameter -> {
+                highlight(element.identifier, holder, FuncSyntaxHighlightingColors.TYPE_PARAMETER.textAttributesKey)
+            }
+
+            is FuncTypeIdentifier -> {
+                highlight(element.identifier, holder, FuncSyntaxHighlightingColors.TYPE_PARAMETER.textAttributesKey)
             }
         }
     }

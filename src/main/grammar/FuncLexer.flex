@@ -217,6 +217,8 @@ LONELY_BACKTICK=`
   "const"                  { return CONST_KEYWORD; }
   "true"                   { return TRUE_KEYWORD; }
   "false"                  { return FALSE_KEYWORD; }
+  "nil"                    { return NULL_KEYWORD; }
+  "Nil"                    { return NIL_KEYWORD; }
 
   "#include"               { return INCLUDE_MACRO; }
   "#pragma"                { return PRAGMA_MACRO; }

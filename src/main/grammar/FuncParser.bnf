@@ -97,6 +97,8 @@
             FORALL_KEYWORD              = 'forall'
             TRUE_KEYWORD                = 'true'
             FALSE_KEYWORD               = 'false'
+            NULL_KEYWORD                = 'nil'
+            NIL_KEYWORD                 = 'Nil'
 
             EXTERN_KEYWORD              = 'extern'
             GLOBAL_KEYWORD              = 'global'
@@ -176,7 +178,12 @@ Function ::= TypeParameterList? Type FunctionIdentifier FunctionParameterList 'i
 TypeParameterList ::= 'forall' << comma_separated_list TypeParameter >> '->' {
     pin=1
 }
-TypeParameter ::= IDENTIFIER
+TypeParameter ::= IDENTIFIER {
+    mixin = "org.ton.intellij.func.psi.impl.FuncTypeParameterMixin"
+    implements=["org.ton.intellij.func.psi.FuncNamedElement"]
+    stubClass="org.ton.intellij.func.stub.FuncTypeParameterStub"
+    elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
+}
 
 AsmDefinition ::= 'asm' AsmParameters? AsmBody ';' {pin=1}
 AsmParameters ::= '(' AsmArgumentList? AsmIndexList? ')' {pin=1}
@@ -255,6 +262,7 @@ private Expr100_group ::= TensorExpression
  | HoleTypeExpression
  | PrimitiveTypeExpression
  | BoolExpression
+ | NilExpression
  | ReferenceExpression
 
 //private CompositeExpression ::= Expression [ TensorExpression | TupleExpression | ReferenceExpression ]
@@ -304,6 +312,7 @@ TupleExpression ::= '[' [ <<comma_separated_list Expression>> ] ']' {
 IntegerExpression ::= INTEGER_LITERAL
 StringExpression ::= StringLiteral
 BoolExpression ::= 'true' | 'false'
+NilExpression ::= 'nil' | 'Nil'
 ReferenceExpression ::= IDENTIFIER {
     mixin="org.ton.intellij.func.psi.impl.FuncReferenceExpressionMixin"
     implements="org.ton.intellij.func.psi.FuncNamedElement"
@@ -314,13 +323,14 @@ PrimitiveTypeExpression ::= PrimitiveType
 FunctionParameterList ::= '(' [ << comma_separated_list FunctionParameter >> ] ')' {
     pin = 1
 }
-FunctionParameter ::= TypeNamedFunctionParameter | NamedFunctionParameter {
+FunctionParameter ::= TypeNamedFunctionParameter | TypeFunctionParameter | NamedFunctionParameter {
     mixin="org.ton.intellij.func.psi.impl.FuncFunctionParameterMixin"
     implements=["org.ton.intellij.func.psi.FuncNamedElement"]
     stubClass="org.ton.intellij.func.stub.FuncFunctionParameterStub"
     elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
 }
 private TypeNamedFunctionParameter ::= AtomicType IDENTIFIER
+private TypeFunctionParameter ::= PrimitiveType
 private NamedFunctionParameter ::= IDENTIFIER
 
 Type ::= MapType | AtomicType
@@ -331,7 +341,9 @@ MapType ::= AtomicType '->' Type {
 
 HoleType ::= 'var' | '_'
 PrimitiveType ::= 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type'
-TypeIdentifier ::= IDENTIFIER
+TypeIdentifier ::= IDENTIFIER {
+    mixin="org.ton.intellij.func.psi.impl.FuncTypeIdentifierMixin"
+}
 
 TensorType ::= '(' [ <<comma_separated_list Type>> ] ')' {
     pin=1

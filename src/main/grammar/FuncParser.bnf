@@ -138,6 +138,10 @@ GlobalVarList ::= 'global' << comma_separated_list GlobalVar >> ';' {
 }
 GlobalVar ::= Type IDENTIFIER {
     pin=1
+    mixin = "org.ton.intellij.func.psi.impl.FuncGlobalVarMixin"
+    implements=["org.ton.intellij.func.psi.FuncNamedElement"]
+    stubClass="org.ton.intellij.func.stub.FuncGlobalVarStub"
+    elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
 }
 
 ConstVariable ::= 'const' <<comma_separated_list AssignExpression>> ';' {

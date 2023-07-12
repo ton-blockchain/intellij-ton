@@ -34,6 +34,12 @@
         <localInspection language="func" displayName="Missing return at end of function" groupPath="FunC"
                          groupName="Control flow issues" enabledByDefault="true" level="ERROR"
                          implementationClass="org.ton.intellij.func.inspection.FuncMissingReturnInspection"/>
+        <!-- control flow issues -->
+
+        <!-- general -->
+        <localInspection language="func" displayName="Unresolved reference inspection" groupPath="FunC"
+                         groupName="General" enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.func.inspection.FuncUnresolvedReferenceInspection"/>
     </extensions>
 
     <actions>

@@ -1,5 +1,6 @@
 package org.ton.intellij.func.psi.impl
 
+import com.github.weisj.jsvg.T
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.resolve.ResolveCache
@@ -10,11 +11,11 @@ import com.intellij.util.containers.OrderedSet
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.FuncPsiUtil.allowed
 
-class FuncReference<T : FuncReferenceExpression>(
-    element: T,
+class FuncReference(
+    element: FuncReferenceExpression,
     rangeInElement: TextRange,
-) : PsiReferenceBase.Poly<T>(element, rangeInElement, false) {
-    private val resolver = ResolveCache.PolyVariantResolver<FuncReference<T>> { t, incompleteCode ->
+) : PsiReferenceBase.Poly<FuncReferenceExpression>(element, rangeInElement, false) {
+    private val resolver = ResolveCache.PolyVariantResolver<FuncReference> { t, incompleteCode ->
         if (!myElement.isValid) return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
         val result = OrderedSet<ResolveResult>()
         val resolveProcessor = createResolveProcessor(result)
@@ -30,7 +31,7 @@ class FuncReference<T : FuncReferenceExpression>(
     private fun createResolveProcessor(result: MutableCollection<ResolveResult>): PsiScopeProcessor {
         return PsiScopeProcessor { element, state ->
             if (element == myElement) return@PsiScopeProcessor !result.add(PsiElementResolveResult(element))
-            val name = (element as? FuncNamedElement)?.name ?: (element as? FuncReferenceExpression)?.identifier?.text
+            val name = (element as? FuncNamedElement)?.name
             if (name != null && myElement.identifier.textMatches(name)) {
                 result.add(PsiElementResolveResult(element))
                 false
@@ -67,15 +68,36 @@ class FuncReference<T : FuncReferenceExpression>(
                 currentStatement = scope
             }
             if (scope is FuncFile) {
-                for (function in scope.functions) {
-                    if (!delegate.execute(function, state)) return false
-                    if (function == currentFunction) return true
+                for (child in scope.children) {
+                    if (child is FuncFunction) {
+                        if (!delegate.execute(child, state)) return false
+                    }
+                    if (child is FuncConstVariable) {
+//                        println("process const: $child")
+                        for (constExpression in child.expressionList) {
+//                            println("process const expr ${constExpression.text}")
+                            if (!processExpression(constExpression, delegate, state)) return false
+                        }
+                    }
+                    if (child is FuncGlobalVarList) {
+                        for (globalVar in child.globalVarList) {
+                            if (!delegate.execute(globalVar, state)) return false
+                        }
+                    }
+                    if (child == prevParent) return true
                 }
             }
             if (scope is FuncVarExpression) return true
             if (scope is FuncBlockStatement) {
                 for (statement in scope.statementList) {
                     if (statement == currentStatement) return true
+                    if (!processStatement(statement, delegate, state)) return false
+                }
+            }
+            if (scope is FuncDoStatement) {
+                val block = scope.blockStatement ?: return true
+                if (prevParent == block) return true
+                for (statement in block.statementList) {
                     if (!processStatement(statement, delegate, state)) return false
                 }
             }
@@ -90,6 +112,15 @@ class FuncReference<T : FuncReferenceExpression>(
             state: ResolveState,
         ): Boolean {
             val expression = statement.expression
+            if (!processExpression(expression, processor, state)) return false
+            return true
+        }
+
+        fun processExpression(
+            expression: FuncExpression?,
+            processor: PsiScopeProcessor,
+            state: ResolveState,
+        ): Boolean {
             if (expression is FuncAssignExpression) {
                 val left = expression.expressionList.firstOrNull() ?: return true
                 when (left) {
@@ -103,6 +134,26 @@ class FuncReference<T : FuncReferenceExpression>(
                                 if (!processVarExpression(tensorElement, processor, state)) return false
                             }
                         }
+                    }
+
+                    is FuncTupleExpression -> {
+                        for (tupleElement in left.expressionList) {
+                            if (tupleElement is FuncVarExpression) {
+                                if (!processVarExpression(tupleElement, processor, state)) return false
+                            }
+                        }
+                    }
+
+                    is FuncReferenceExpression -> {
+                        if (expression.parent is FuncConstVariable) {
+                            if (!processor.execute(left, state)) return false
+                        }
+                    }
+                }
+                val right = expression.expressionList.getOrNull(1) ?: return true
+                when (right) {
+                    is FuncAssignExpression -> {
+                        if (!processExpression(right, processor, state)) return false
                     }
                 }
             }
@@ -119,6 +170,14 @@ class FuncReference<T : FuncReferenceExpression>(
                 if (!processor.execute(right, state)) return false
             }
             if (right is FuncTensorExpression) {
+                for (tensorElement in right.expressionList) {
+                    when (tensorElement) {
+                        is FuncVarExpression -> if (!processVarExpression(tensorElement, processor, state)) return false
+                        is FuncReferenceExpression -> if (!processor.execute(tensorElement, state)) return false
+                    }
+                }
+            }
+            if (right is FuncTupleExpression) {
                 for (tensorElement in right.expressionList) {
                     when (tensorElement) {
                         is FuncVarExpression -> if (!processVarExpression(tensorElement, processor, state)) return false

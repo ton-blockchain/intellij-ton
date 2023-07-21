@@ -16,8 +16,8 @@ class FuncMissingReturnInspection : FuncInspectionBase() {
 
     private fun check(function: FuncFunction, holder: ProblemsHolder) {
         val block = function.blockStatement ?: return
-        val atomicType = function.type.atomicType ?: return
-        val isVoid = atomicType.holeType != null || atomicType.tensorType?.typeList?.isEmpty() == true
+        val atomicType = function.type as? FuncAtomicType ?: return
+        val isVoid = atomicType is FuncHoleType || (atomicType as? FuncTensorType)?.typeList?.isEmpty() == true
         if (isVoid || isTerminating(block)) return
         val brace = block.rBrace
         holder.registerProblem(brace ?: block, "Missing return at end of function")

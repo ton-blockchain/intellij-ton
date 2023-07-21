@@ -1,15 +1,17 @@
 package org.ton.intellij.func.ide
 
+import com.intellij.lang.HelpID
 import com.intellij.lang.cacheBuilder.DefaultWordsScanner
 import com.intellij.lang.cacheBuilder.WordsScanner
 import com.intellij.lang.findUsages.FindUsagesProvider
+import com.intellij.psi.ElementDescriptionUtil
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.tree.TokenSet
+import com.intellij.usageView.UsageViewLongNameLocation
+import com.intellij.usageView.UsageViewShortNameLocation
 import org.ton.intellij.func.lexer.FuncLexer
 import org.ton.intellij.func.parser.FuncParserDefinition
-import org.ton.intellij.func.psi.FuncElementTypes
-import org.ton.intellij.func.psi.FuncFunction
+import org.ton.intellij.func.psi.*
 
 class FuncFindUsagesProvider : FindUsagesProvider {
     override fun getWordsScanner(): WordsScanner = DefaultWordsScanner(
@@ -23,28 +25,21 @@ class FuncFindUsagesProvider : FindUsagesProvider {
         return true
     }
 
-    override fun getHelpId(psiElement: PsiElement): String? {
-        return null
-    }
+    override fun getHelpId(psiElement: PsiElement): String = HelpID.FIND_OTHER_USAGES
 
     override fun getType(element: PsiElement): String {
-        if (element is FuncFunction) {
-            return "function"
+        return when (element) {
+            is FuncFunction -> "function"
+            is FuncConstVariable -> "constant"
+            is FuncGlobalVar -> "global var"
+            is FuncTypeParameter -> "type parameter"
+            else -> return "<TYPE $element>"
         }
-        return ""
     }
 
-    override fun getDescriptiveName(element: PsiElement): String {
-        if (element is PsiNamedElement) {
-            return element.name ?: ""
-        }
-        return ""
-    }
+    override fun getDescriptiveName(element: PsiElement): String =
+        ElementDescriptionUtil.getElementDescription(element, UsageViewLongNameLocation.INSTANCE)
 
-    override fun getNodeText(element: PsiElement, useFullName: Boolean): String {
-        if (element is PsiNamedElement) {
-            return element.name ?: ""
-        }
-        return ""
-    }
+    override fun getNodeText(element: PsiElement, useFullName: Boolean): String =
+        ElementDescriptionUtil.getElementDescription(element, UsageViewShortNameLocation.INSTANCE)
 }

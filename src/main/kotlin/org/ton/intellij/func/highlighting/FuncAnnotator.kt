@@ -11,21 +11,22 @@ import org.ton.intellij.func.psi.FuncTypeParameter
 
 class FuncAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
-        if (!element.isValid) return
-        when (element) {
+        val parent = element.parent
+        when (parent) {
             is FuncFunction -> {
-                val identifier = element.nameIdentifier
-                if (identifier != null) {
-                    highlight(identifier, holder, FuncSyntaxHighlightingColors.FUNCTION_DECLARATION.textAttributesKey)
+                if (element == parent.nameIdentifier) {
+                    highlight(element, holder, FuncSyntaxHighlightingColors.FUNCTION_DECLARATION.textAttributesKey)
                 }
             }
 
-            is FuncTypeParameter -> {
-                highlight(element.identifier, holder, FuncSyntaxHighlightingColors.TYPE_PARAMETER.textAttributesKey)
-            }
+            else -> when (element) {
+                is FuncTypeParameter -> {
+                    highlight(element.identifier, holder, FuncSyntaxHighlightingColors.TYPE_PARAMETER.textAttributesKey)
+                }
 
-            is FuncTypeIdentifier -> {
-                highlight(element.identifier, holder, FuncSyntaxHighlightingColors.TYPE_PARAMETER.textAttributesKey)
+                is FuncTypeIdentifier -> {
+                    highlight(element.identifier, holder, FuncSyntaxHighlightingColors.TYPE_PARAMETER.textAttributesKey)
+                }
             }
         }
     }

@@ -1,6 +1,5 @@
 package org.ton.intellij.func.psi.impl
 
-import com.github.weisj.jsvg.T
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.resolve.ResolveCache
@@ -23,9 +22,16 @@ class FuncReference(
         result.toTypedArray()
     }
 
+    val identifier: PsiElement get() = element.identifier
+
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         if (!myElement.isValid) return ResolveResult.EMPTY_ARRAY
         return ResolveCache.getInstance(myElement.project).resolveWithCaching(this, resolver, false, incompleteCode)
+    }
+
+    override fun handleElementRename(newElementName: String): PsiElement {
+        identifier.replace(FuncElementFactory[element.project].createIdentifierFromText(newElementName))
+        return element
     }
 
     private fun createResolveProcessor(result: MutableCollection<ResolveResult>): PsiScopeProcessor {
@@ -41,18 +47,24 @@ class FuncReference(
         }
     }
 
-    private fun processResolveVariants(processor: PsiScopeProcessor): Boolean {
+    fun processResolveVariants(
+        processor: PsiScopeProcessor,
+        implicitStdlib: Boolean = true,
+    ): Boolean {
         val file = myElement.containingFile
         if (file !is FuncFile) return false
         val state = ResolveState.initial()
+        val processedFiles = HashSet<String>()
 
         if (!PsiTreeUtil.treeWalkUp(element, null, FuncFunctionProcessor(processor, state))) return false
-        if (!processIncludeDefinitions(file, processor, state)) return false
-        val stdlibFile = file.containingDirectory?.findFile("stdlib.fc")
-        if (stdlibFile is FuncFile) {
-            if (!processFile(stdlibFile, processor, state)) return false
+        if (!processIncludeDefinitions(file, processor, state, processedFiles)) return false
+        if (implicitStdlib && processedFiles.none { it.endsWith("stdlib.fc") }) {
+            val stdlibFile = file.originalFile.containingDirectory?.findFile("stdlib.fc")
+            if (stdlibFile is FuncFile) {
+                if (!processFile(stdlibFile, processor, state, processedFiles)) return false
+            }
         }
-        if (!processFile(FuncElementFactory[file.project].builtinStdlibFile, processor, state)) return false
+        if (!processFile(FuncElementFactory[file.project].builtinStdlibFile, processor, state, HashSet())) return false
         return true
     }
 
@@ -78,9 +90,7 @@ class FuncReference(
                         if (!delegate.execute(child, state)) return false
                     }
                     if (child is FuncConstVariable) {
-//                        println("process const: $child")
                         for (constExpression in child.expressionList) {
-//                            println("process const expr ${constExpression.text}")
                             if (!processExpression(constExpression, delegate, state)) return false
                         }
                     }
@@ -91,6 +101,13 @@ class FuncReference(
                     }
                     if (child == prevParent) return true
                 }
+            }
+            if (scope is FuncCatchStatement) {
+                val expression = scope.expression ?: return true
+                val processResult = PsiTreeUtil.processElements(expression) {
+                    delegate.execute(it, state)
+                }
+                if (!processResult) return false
             }
             if (scope is FuncVarExpression) return true
             if (scope is FuncBlockStatement) {
@@ -117,10 +134,11 @@ class FuncReference(
             elements: Collection<T>,
             condition: (T) -> Boolean = { true },
         ): Boolean {
-//        println("processing named elements")
             for (element in elements) {
                 if (!condition(element)) continue
-                if (!element.isValid || !allowed(element.containingFile, null)) continue
+                if (!element.isValid || !allowed(element.containingFile, null)) {
+                    continue
+                }
                 if (!processor.execute(element, state)) return false
             }
             return true
@@ -131,7 +149,7 @@ class FuncReference(
             processor: PsiScopeProcessor,
             state: ResolveState,
         ): Boolean {
-            val expression = statement.expression
+            val expression = (statement as? FuncExpressionStatement)?.expression
             if (!processExpression(expression, processor, state)) return false
             return true
         }
@@ -195,26 +213,10 @@ class FuncReference(
             state: ResolveState,
         ): Boolean {
             val right = varExpression.right ?: return true
-            if (right is FuncReferenceExpression) {
-                if (!processor.execute(right, state)) return false
+            return PsiTreeUtil.processElements(right) {
+                if (!processor.execute(it, state)) return@processElements false
+                true
             }
-            if (right is FuncTensorExpression) {
-                for (tensorElement in right.expressionList) {
-                    when (tensorElement) {
-                        is FuncVarExpression -> if (!processVarExpression(tensorElement, processor, state)) return false
-                        is FuncReferenceExpression -> if (!processor.execute(tensorElement, state)) return false
-                    }
-                }
-            }
-            if (right is FuncTupleExpression) {
-                for (tensorElement in right.expressionList) {
-                    when (tensorElement) {
-                        is FuncVarExpression -> if (!processVarExpression(tensorElement, processor, state)) return false
-                        is FuncReferenceExpression -> if (!processor.execute(tensorElement, state)) return false
-                    }
-                }
-            }
-            return true
         }
     }
 
@@ -222,21 +224,20 @@ class FuncReference(
         file: FuncFile,
         processor: PsiScopeProcessor,
         state: ResolveState,
+        processedFiles: MutableSet<String>,
     ): Boolean {
 //        println("processing file: ${file.name}")
         if (file == element.containingFile) return true
         if (!processNamedElements(processor, state, file.functions)) return false
-        if (!processIncludeDefinitions(file, processor, state)) return false
+        if (!processIncludeDefinitions(file, processor, state, processedFiles)) return false
         return true
     }
-
-
-    private val processedFiles = HashSet<String>()
 
     private fun processIncludeDefinitions(
         file: FuncFile,
         processor: PsiScopeProcessor,
         state: ResolveState,
+        processedFiles: MutableSet<String>,
     ): Boolean {
 //        println("processing include defs: ${file.includeDefinitions.size}")
         for (includeDefinition in file.includeDefinitions) {
@@ -246,9 +247,18 @@ class FuncReference(
             if (resolvedFile !is FuncFile) continue
 //            println("resolved: ${resolvedFile.virtualFile.path}")
             if (processedFiles.add(resolvedFile.virtualFile.path)) {
-                processFile(resolvedFile, processor, state)
+                processFile(resolvedFile, processor, state, processedFiles)
             }
         }
         return true
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is FuncReference) return false
+        if (element != other.element) return false
+        return true
+    }
+
+    override fun hashCode(): Int = element.hashCode()
 }

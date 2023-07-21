@@ -50,16 +50,8 @@ class FuncParserDefinition : ParserDefinition {
             FuncElementTypes.ELSEIF_KEYWORD,
             FuncElementTypes.ELSEIFNOT_KEYWORD,
 
-            FuncElementTypes.INT_KEYWORD,
-            FuncElementTypes.CELL_KEYWORD,
-            FuncElementTypes.SLICE_KEYWORD,
-            FuncElementTypes.BUILDER_KEYWORD,
-            FuncElementTypes.CONT_KEYWORD,
-            FuncElementTypes.TUPLE_KEYWORD,
             FuncElementTypes.TYPE_KEYWORD,
             FuncElementTypes.FORALL_KEYWORD,
-            FuncElementTypes.TRUE_KEYWORD,
-            FuncElementTypes.FALSE_KEYWORD,
 
             FuncElementTypes.EXTERN_KEYWORD,
             FuncElementTypes.GLOBAL_KEYWORD,
@@ -82,12 +74,59 @@ class FuncParserDefinition : ParserDefinition {
             FuncElementTypes.BUILDER_KEYWORD,
             FuncElementTypes.CONT_KEYWORD,
             FuncElementTypes.TUPLE_KEYWORD,
+            FuncElementTypes.TRUE_KEYWORD,
+            FuncElementTypes.FALSE_KEYWORD,
         )
         val WHITESPACES = TokenSet.create(TokenType.WHITE_SPACE)
-        val COMMENTS = TokenSet.create(FuncElementTypes.LINE_COMMENT, FuncElementTypes.BLOCK_COMMENT, FuncElementTypes.DOC_COMMENT)
+        val COMMENTS =
+            TokenSet.create(FuncElementTypes.LINE_COMMENT, FuncElementTypes.BLOCK_COMMENT, FuncElementTypes.DOC_ELEMENT)
         val STRING_LITERALS = TokenSet.create(FuncElementTypes.STRING_LITERAL)
 
         val WHITE_SPACE_OR_COMMENT_BIT_SET = TokenSet.orSet(COMMENTS, WHITESPACES);
-
+        val OPERATORS = TokenSet.create(
+            FuncElementTypes.PLUS,
+            FuncElementTypes.MINUS,
+            FuncElementTypes.TIMES,
+            FuncElementTypes.DIV,
+            FuncElementTypes.MOD,
+            FuncElementTypes.QUEST,
+            FuncElementTypes.COLON,
+            FuncElementTypes.EQ,
+            FuncElementTypes.LT,
+            FuncElementTypes.GT,
+            FuncElementTypes.AND,
+            FuncElementTypes.OR,
+            FuncElementTypes.XOR,
+            FuncElementTypes.EQEQ,
+            FuncElementTypes.NEQ,
+            FuncElementTypes.LEQ,
+            FuncElementTypes.GEQ,
+            FuncElementTypes.SPACESHIP,
+            FuncElementTypes.LSHIFT,
+            FuncElementTypes.RSHIFT,
+            FuncElementTypes.RSHIFTR,
+            FuncElementTypes.RSHIFTC,
+            FuncElementTypes.DIVR,
+            FuncElementTypes.DIVC,
+            FuncElementTypes.MODR,
+            FuncElementTypes.MODC,
+            FuncElementTypes.DIVMOD,
+            FuncElementTypes.PLUSLET,
+            FuncElementTypes.MINUSLET,
+            FuncElementTypes.TIMESLET,
+            FuncElementTypes.DIVLET,
+            FuncElementTypes.DIVCLET,
+            FuncElementTypes.MODLET,
+            FuncElementTypes.MODRLET,
+            FuncElementTypes.MODCLET,
+            FuncElementTypes.LSHIFTLET,
+            FuncElementTypes.RSHIFTLET,
+            FuncElementTypes.RSHIFTRLET,
+            FuncElementTypes.RSHIFTCLET,
+            FuncElementTypes.ANDLET,
+            FuncElementTypes.ORLET,
+            FuncElementTypes.XORLET,
+            FuncElementTypes.MAPSTO
+        )
     }
 }

@@ -2,6 +2,7 @@ package org.ton.intellij.func.psi
 
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
 import org.intellij.lang.annotations.Language
 import org.ton.intellij.func.FuncLanguage
@@ -10,7 +11,7 @@ import org.ton.intellij.func.FuncLanguage
 class FuncElementFactory(val project: Project) {
     val builtinStdlibFile by lazy {
         createFileFromText(
-            "builtin_stdlib.fc", """
+            "builtin.fc", """
                 
             (int, int) divmod(int x, int y) asm "DIVMOD";
                 
@@ -94,12 +95,16 @@ class FuncElementFactory(val project: Project) {
         }
     }
 
+    fun createFileFromText(@Language("FunC") text: String) =
+        createFileFromText(null, text)
+
     fun createFileFromText(name: String?, @Language("FunC") text: String) =
         PsiFileFactory.getInstance(project).createFileFromText(name ?: "dummy.fc", FuncLanguage, text) as FuncFile
 
-    fun createIdentifierFromText(project: Project, text: String) {
-//        val funcFile = createFileFromText(project, "const $text;")
-//        val const = PsiTreeUtil.findChildOfType(funcFile, FuncConstVariable::class.java)
+    fun createIdentifierFromText(text: String): PsiElement {
+        val funcFile = createFileFromText("() $text();")
+        val function = funcFile.functions.first()
+        return function.identifier
     }
 
     companion object {

@@ -15,8 +15,21 @@
         <lang.foldingBuilder language="func" implementationClass="org.ton.intellij.func.ide.FuncFoldingBuilder"/>
         <lang.findUsagesProvider language="func"
                                  implementationClass="org.ton.intellij.func.ide.FuncFindUsagesProvider"/>
+        <lang.implementationTextSelectioner language="func"
+                                            implementationClass="org.ton.intellij.func.ide.FuncImplementationTextSelectioner"/>
+        <!--        <platform.backend.documentation.psiTargetProvider id="FuncDocumentationTargetProvider"-->
+        <!--                                                          implementation="org.ton.intellij.func.ide.quickdoc.FuncPsiDocumentationTargetProvider"/>-->
+        <lang.documentationProvider language="func"
+                                    implementationClass="org.ton.intellij.func.ide.FuncDocumentationProvider"/>
+        <lang.formatter language="func" implementationClass="org.ton.intellij.func.ide.formatter.FuncFormatter"/>
+        <completion.contributor language="func"
+                                implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionContributor"/>
+        <completion.confidence language="func" order="last"
+                               implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionConfidence"/>
 
         <stubElementTypeHolder class="org.ton.intellij.func.psi.FuncElementTypes" externalIdPrefix="func."/>
+        <lang.elementManipulator forClass="org.ton.intellij.func.psi.FuncIncludeDefinition"
+                                 implementationClass="org.ton.intellij.func.psi.impl.FuncIncludePathElementManipulator"/>
 
         <annotator language="func" implementationClass="org.ton.intellij.func.highlighting.FuncAnnotator"/>
 

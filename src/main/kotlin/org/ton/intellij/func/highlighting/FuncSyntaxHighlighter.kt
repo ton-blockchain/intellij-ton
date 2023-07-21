@@ -21,7 +21,7 @@ class FuncSyntaxHighlighter : SyntaxHighlighterBase() {
             FuncElementTypes.DOT -> FuncSyntaxHighlightingColors.DOT
             FuncElementTypes.LINE_COMMENT -> FuncSyntaxHighlightingColors.LINE_COMMENT
             FuncElementTypes.BLOCK_COMMENT -> FuncSyntaxHighlightingColors.BLOCK_COMMENT
-            FuncElementTypes.DOC_COMMENT -> FuncSyntaxHighlightingColors.DOC_COMMENT
+            FuncElementTypes.DOC_ELEMENT -> FuncSyntaxHighlightingColors.DOC_COMMENT
             FuncElementTypes.LBRACE, FuncElementTypes.RBRACE -> FuncSyntaxHighlightingColors.BRACES
             FuncElementTypes.LBRACK, FuncElementTypes.RBRACK -> FuncSyntaxHighlightingColors.BRACKETS
             FuncElementTypes.LPAREN, FuncElementTypes.RPAREN -> FuncSyntaxHighlightingColors.PARENTHESES

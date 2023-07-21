@@ -1,6 +1,7 @@
 package org.ton.intellij.func.highlighting
 
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
+import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.options.colors.AttributesDescriptor
 
@@ -30,10 +31,13 @@ enum class FuncSyntaxHighlightingColors(
     GLOBAL_VARIABLE("Global variable", DefaultLanguageHighlighterColors.GLOBAL_VARIABLE),
     LOCAL_VARIABLE("Local variable", DefaultLanguageHighlighterColors.LOCAL_VARIABLE),
     MACRO("Macro", DefaultLanguageHighlighterColors.METADATA),
-    TYPE_PARAMETER("Type parameter", TextAttributesKey.find("KOTLIN_TYPE_PARAMETER")),
+    TYPE_PARAMETER("Type parameter", TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")),
     ;
 
     val textAttributesKey =
         TextAttributesKey.createTextAttributesKey("org.ton.intellij.func.$name", default)
     val attributesDescriptor = AttributesDescriptor(displayName, textAttributesKey)
+
+    val attributes
+        get() = EditorColorsManager.getInstance().globalScheme.getAttributes(textAttributesKey)
 }

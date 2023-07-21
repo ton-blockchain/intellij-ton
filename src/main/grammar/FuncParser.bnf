@@ -118,7 +118,7 @@
             PRAGMA_MACRO              = "#pragma"
 
             BLOCK_COMMENT = "BLOCK_COMMENT"
-            DOC_COMMENT = "DOC_COMMENT"
+            DOC_ELEMENT = "DOC_ELEMENT"
             LINE_COMMENT = "LINE_COMMENT"
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
@@ -134,6 +134,10 @@ private TopLevelDefinitions ::= macro | GlobalVarList | ConstVariable | Function
 private macro ::= IncludeDefinition | PragmaDefinition
 RawString ::= RAW_STRING_ELEMENT*
 StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE
+Doc ::= DOC_ELEMENT* {
+    mixin = "org.ton.intellij.func.psi.impl.FuncDocMixin"
+    implements = ["com.intellij.psi.PsiDocCommentBase"]
+}
 
 GlobalVarList ::= 'global' << comma_separated_list GlobalVar >> ';' {
     pin=1
@@ -188,7 +192,9 @@ TypeParameter ::= IDENTIFIER {
 AsmDefinition ::= 'asm' AsmParameters? AsmBody ';' {pin=1}
 AsmParameters ::= '(' AsmArgumentList? AsmIndexList? ')' {pin=1}
 AsmArgumentList ::= AsmArgument+
-AsmArgument ::= IDENTIFIER
+AsmArgument ::= IDENTIFIER {
+    mixin = "org.ton.intellij.func.psi.impl.FuncAsmArgumentMixin"
+}
 AsmIndexList ::= '->' AsmIndex+
 AsmIndex ::= IntegerExpression
 AsmBody ::= StringLiteral+
@@ -198,21 +204,19 @@ private MethodIdArgument ::= '(' (StringLiteral | INTEGER_LITERAL) ')' {pin=1}
 
 private FunctionIdentifier ::= ('~'|'.')? IDENTIFIER
 
-Statement ::= ReturnStatement | BlockStatement | RepeatStatement | IfStatement | IfNotStatement | DoStatement | WhileStatement | TryStatement | SemicolonExpression
-private SemicolonExpression ::= Expression ';' {
-//    recoverWhile=SemiciolonRecovery
+Statement ::= ReturnStatement | BlockStatement | RepeatStatement | IfStatement | IfNotStatement | DoStatement | WhileStatement | TryStatement | ExpressionStatement
+ExpressionStatement ::= Expression ';' {
+    pin=1
+    recoverWhile=BlockStatement_recovery
 }
 
 ReturnStatement ::= 'return' Expression ';' {pin=1}
 
-//BlockStatement ::= BlockStatementStart '}'
-//private BlockStatementStart ::= '{' Statement* {pin=1 recoverWhile=BlockStatementRecovery}
-private StatementRecovery ::= 'return' | 'repeat' | 'if' | 'ifnot' | 'else' | 'elseif' | 'elseifnot' | 'do' | 'until' | 'while' | 'try' | 'catch'
-private TypeRecovery ::= 'int' | 'var'
-private BlockStatementRecovery ::= !('}'|IDENTIFIER|StatementRecovery|TypeRecovery)
-BlockStatement ::= '{' Statement* '}'  {
+BlockStatement ::= '{' BlockStatement_element* '}' {
     pin=1
 }
+private BlockStatement_element ::= Statement
+private BlockStatement_recovery ::= !('}' | IDENTIFIER | 'var' | 'return' | '{' | 'repeat' | 'if' | 'ifnot' | 'do' | 'while' | 'try' | '(' | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | ';')
 
 RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
 
@@ -240,7 +244,9 @@ ElseIfNotStatement ::= 'elseifnot' Expression BlockStatement BranchingStatement?
 DoStatement ::= 'do' BlockStatement 'until' Expression ';' {pin=1}
 WhileStatement ::= 'while' Expression BlockStatement {pin=1}
 TryStatement ::= 'try' BlockStatement CatchStatement {pin=1}
-CatchStatement ::= 'catch' Expression BlockStatement {pin=1}
+CatchStatement ::= 'catch' Expression BlockStatement {
+    pin=1
+}
 
 Expression ::= AssignExpression | TernaryExpression | CompExpression_group | BinaryShiftExpression_group | UnaryExpression_group | AddExpression_group | MulExpression_group | InvExpression | ReferenceCallExpression | FunctionCallExpression | VarExpression | Expr100_group
 
@@ -294,11 +300,10 @@ ModCExpression ::= Expression '^%' Expression
 ModRExpression ::= Expression '~%' Expression
 AndExpression ::= Expression '&' Expression
 InvExpression ::= '~' Expression
-ReferenceCallExpression ::= Expression ('~' | '.') FunctionCallExpression
-FunctionCallExpression ::= ReferenceExpression FunctionCallArguments {
-
+ReferenceCallExpression ::= Expression ('~' | '.') FunctionCallExpression {
+    pin=2
 }
-FunctionCallArguments ::=  <<comma_separated_list Expression >>
+FunctionCallExpression ::= ReferenceExpression &(IDENTIFIER | '(' | '[') Expression
 
 TensorExpression ::= '(' [ <<comma_separated_list Expression>> ] ')' {
     pin=1
@@ -334,22 +339,33 @@ private TypeFunctionParameter ::= PrimitiveType
 private NamedFunctionParameter ::= IDENTIFIER
 
 Type ::= MapType | AtomicType
-AtomicType ::= PrimitiveType | HoleType | TypeIdentifier | TensorType | TupleType
+AtomicType ::= PrimitiveType | HoleType | TypeIdentifier | TensorType | TupleType {
+    extends=Type
+}
 MapType ::= AtomicType '->' Type {
     pin=2
+    extends=Type
 }
 
-HoleType ::= 'var' | '_'
-PrimitiveType ::= 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type'
+HoleType ::= 'var' | '_' {
+    extends=AtomicType
+}
+PrimitiveType ::= 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type' {
+    extends=AtomicType
+}
 TypeIdentifier ::= IDENTIFIER {
+    extends=AtomicType
     mixin="org.ton.intellij.func.psi.impl.FuncTypeIdentifierMixin"
 }
 
 TensorType ::= '(' [ <<comma_separated_list Type>> ] ')' {
+    extends=AtomicType
     pin=1
 }
 
-TupleType ::= TupleTypeStart ']'
+TupleType ::= TupleTypeStart ']' {
+    extends=AtomicType
+}
 TupleTypeItem ::= Type ( ','| &']' ) {pin=1}
 private TupleTypeItemRecovery ::= !']'
 private TupleTypeStart ::= '[' TupleTypeItem* {pin=1 recoverWhile=TupleTypeItemRecovery}

@@ -59,7 +59,7 @@ import static org.ton.intellij.func.psi.FuncElementTypes.*;
             case BLOCK_COMMENT:
                 return FuncElementTypes.BLOCK_COMMENT;
             case DOC_COMMENT:
-                return FuncElementTypes.DOC_COMMENT;
+                return FuncElementTypes.DOC_ELEMENT;
             default:
                 throw new IllegalArgumentException("Unexpected state: " + state);
         }
@@ -84,6 +84,7 @@ WHITE_SPACE_CHAR=[\ \n\t\f]
 IDENTIFIER_SYMBOLS=[\?\:\'\$\_]
 IDENTIFIER_PART=[:digit:]|[:letter:]|IDENTIFIER_SYMBOLS
 
+LINE_DOC_COMMENT=;;;[^\n]*
 LINE_COMMENT=;;[^\n]*
 
 INTEGER_LITERAL={DECIMAL_INTEGER_LITERAL}|{HEX_INTEGER_LITERAL}|{BIN_INTEGER_LITERAL}
@@ -176,6 +177,7 @@ LONELY_BACKTICK=`
 
 ({WHITE_SPACE_CHAR})+ { return WHITE_SPACE; }
 
+{LINE_DOC_COMMENT} { return FuncElementTypes.DOC_ELEMENT; }
 {LINE_COMMENT} { return LINE_COMMENT; }
 
 {INTEGER_LITERAL} { return INTEGER_LITERAL; }

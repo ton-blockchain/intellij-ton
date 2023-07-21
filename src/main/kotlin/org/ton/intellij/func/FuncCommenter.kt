@@ -20,7 +20,7 @@ class FuncCommenter : CodeDocumentationAwareCommenter {
 
     override fun getBlockCommentTokenType(): IElementType = FuncElementTypes.BLOCK_COMMENT
 
-    override fun getDocumentationCommentTokenType(): IElementType = FuncElementTypes.DOC_COMMENT
+    override fun getDocumentationCommentTokenType(): IElementType = FuncElementTypes.DOC_ELEMENT
 
     override fun getDocumentationCommentPrefix(): String = "{--"
 
@@ -29,5 +29,5 @@ class FuncCommenter : CodeDocumentationAwareCommenter {
     override fun getDocumentationCommentSuffix(): String = "--}"
 
     override fun isDocumentationComment(element: PsiComment?): Boolean =
-        element?.tokenType == FuncElementTypes.DOC_COMMENT
+        element?.tokenType == FuncElementTypes.DOC_ELEMENT
 }

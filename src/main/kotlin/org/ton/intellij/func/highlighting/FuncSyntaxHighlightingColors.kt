@@ -27,6 +27,7 @@ enum class FuncSyntaxHighlightingColors(
     PRIMITIVE_TYPES("Primitive types", DefaultLanguageHighlighterColors.KEYWORD),
     FUNCTION_DECLARATION("Function declaration", DefaultLanguageHighlighterColors.FUNCTION_DECLARATION),
     FUNCTION_CALL("Function call", DefaultLanguageHighlighterColors.FUNCTION_CALL),
+    FUNCTION_STATIC("Function static", DefaultLanguageHighlighterColors.STATIC_METHOD),
     CONSTANT("Constant", DefaultLanguageHighlighterColors.CONSTANT),
     GLOBAL_VARIABLE("Global variable", DefaultLanguageHighlighterColors.GLOBAL_VARIABLE),
     LOCAL_VARIABLE("Local variable", DefaultLanguageHighlighterColors.LOCAL_VARIABLE),

@@ -1,3 +1,4 @@
+import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -194,7 +195,7 @@ version = pluginVersion
 println("pluginVersion=$version")
 
 plugins {
-    kotlin("jvm") version "1.8.21"
+    kotlin("jvm") version "1.9.0"
     id("org.jetbrains.intellij") version "1.13.3"
         id("org.jetbrains.grammarkit") version "2022.3.1"
 }
@@ -209,6 +210,7 @@ allprojects {
 
     tasks.withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "17"
+        kotlinOptions.freeCompilerArgs += "-Xjvm-default=all"
     }
 
     dependencies {
@@ -232,8 +234,21 @@ intellij {
     version.set(ideaVersion)
 }
 
-val generateFuncParser = generateParser("Func")
+val generateFuncParserInitial = generateParser("Func", "initial")
 val generateFuncLexer = generateLexer("Func")
+val compileKotlin = tasks.named("compileKotlin") {
+    dependsOn(
+        generateFuncParserInitial,
+        generateFuncLexer,
+    )
+}
+val generateFuncParser = generateParser("Func") {
+    dependsOn(compileKotlin)
+    classpath(compileKotlin.get().outputs)
+}
+val compileJava = tasks.named("compileJava") {
+    dependsOn(generateFuncParser)
+}
 
 tasks {
     runIde { enabled = true }
@@ -244,23 +259,20 @@ tasks {
     buildSearchableOptions {
         enabled = prop("enableBuildSearchableOptions").toBoolean()
     }
-        withType<KotlinCompile> {
-        dependsOn(
-                generateFuncParser,
-                generateFuncLexer,
-        )
-    }
+
 }
 
 fun prop(name: String, default: (() -> String?)? = null) = extra.properties[name] as? String
     ?: default?.invoke() ?: error("Property `$name` is not defined in gradle.properties")
 
-fun generateParser(language: String) = task<GenerateParserTask>("generate${language}Parser") {
+fun generateParser(language: String, suffix: String = "", config: GenerateParserTask.() -> Unit = {}) =
+    task<GenerateParserTask>("generate${language.capitalized()}Parser${suffix.capitalized()}") {
     sourceFile.set(file("src/main/grammar/${language}Parser.bnf"))
     targetRoot.set("src/gen")
     pathToParser.set("/org/ton/intellij/${language.toLowerCase()}/parser/${language}Parser.java")
     pathToPsiRoot.set("/org/ton/intellij/${language.toLowerCase()}/psi")
     purgeOldFiles.set(true)
+        config()
 }
 
 fun generateLexer(language: String) = task<GenerateLexerTask>("generate${language}Lexer") {

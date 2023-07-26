@@ -9,7 +9,8 @@
 
         <lang.parserDefinition language="func"
                                implementationClass="org.ton.intellij.func.parser.FuncParserDefinition"/>
-        <lang.syntaxHighlighterFactory language="func" implementationClass="org.ton.intellij.func.highlighting.FuncSyntaxHighlighterFactory"/>
+        <lang.syntaxHighlighterFactory language="func"
+                                       implementationClass="org.ton.intellij.func.highlighting.FuncSyntaxHighlighterFactory"/>
         <lang.commenter language="func" implementationClass="org.ton.intellij.func.FuncCommenter"/>
         <lang.braceMatcher language="func" implementationClass="org.ton.intellij.func.FuncBraceMatcher"/>
         <lang.foldingBuilder language="func" implementationClass="org.ton.intellij.func.ide.FuncFoldingBuilder"/>
@@ -53,6 +54,10 @@
         <localInspection language="func" displayName="Calling function with method-id" groupPath="FunC"
                          groupName="Control flow issues" enabledByDefault="false" level="ERROR"
                          implementationClass="org.ton.intellij.func.inspection.FuncUnexpectedGetMethodCallInspection"/>
+        <localInspection language="func" displayName="`if` condition is not an integer" groupPath="FunC"
+                         groupName="Control flow issues" enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.func.inspection.FuncIfConditionIsNotAnIntegerInspection"/>
+
         <!-- control flow issues -->
 
         <!-- general -->

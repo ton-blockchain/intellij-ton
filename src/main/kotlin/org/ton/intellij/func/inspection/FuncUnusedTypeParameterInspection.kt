@@ -16,7 +16,7 @@ class FuncUnusedTypeParameterInspection : FuncInspectionBase() {
         session: LocalInspectionToolSession,
     ): FuncVisitor = object : FuncVisitor() {
         override fun visitFunction(o: FuncFunction) {
-            val parameters = o.typeParameterList?.typeParameterList ?: return
+            val parameters = o.typeParameterList
             for (parameter in parameters) {
                 ProgressIndicatorProvider.checkCanceled()
                 processParameter(parameter)

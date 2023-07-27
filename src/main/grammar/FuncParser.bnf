@@ -179,7 +179,7 @@ Function ::= TypeParameterList? Type FunctionIdentifier FunctionParameterList 'i
     elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
 }
 
-TypeParameterList ::= 'forall' << comma_separated_list TypeParameter >> '->' {
+private TypeParameterList ::= 'forall' << comma_separated_list TypeParameter >> '->' {
     pin=1
 }
 TypeParameter ::= IDENTIFIER {
@@ -191,11 +191,13 @@ TypeParameter ::= IDENTIFIER {
 
 AsmDefinition ::= 'asm' AsmParameters? AsmBody ';' {pin=1}
 AsmParameters ::= '(' AsmArgumentList? AsmIndexList? ')' {pin=1}
-AsmArgumentList ::= AsmArgument+
+private AsmArgumentList ::= AsmArgument+
 AsmArgument ::= IDENTIFIER {
     mixin = "org.ton.intellij.func.psi.impl.FuncAsmArgumentMixin"
 }
-AsmIndexList ::= '->' AsmIndex+
+private AsmIndexList ::= '->' AsmIndex+ {
+    pin=1
+}
 AsmIndex ::= IntegerExpression
 AsmBody ::= StringLiteral+
 
@@ -325,7 +327,7 @@ ReferenceExpression ::= IDENTIFIER {
 HoleTypeExpression ::= HoleType
 PrimitiveTypeExpression ::= PrimitiveType
 
-FunctionParameterList ::= '(' [ << comma_separated_list FunctionParameter >> ] ')' {
+private FunctionParameterList ::= '(' [ << comma_separated_list FunctionParameter >> ] ')' {
     pin = 1
 }
 FunctionParameter ::= TypeNamedFunctionParameter | TypeFunctionParameter | NamedFunctionParameter {

@@ -20,13 +20,13 @@ abstract class FuncTypeIdentifierMixin(node: ASTNode) : ASTWrapperPsiElement(nod
                 return buildList<ResolveResult> {
                     PsiTreeUtil.treeWalkUp(myElement, null) { scope, _ ->
                         if (scope is FuncFunction) {
-                            val typeParameterList =
-                                scope.typeParameterList?.typeParameterList ?: return@treeWalkUp false
+                            val typeParameterList = scope.typeParameterList
                             for (funcTypeParameter in typeParameterList) {
                                 if (myElement.identifier.textMatches(funcTypeParameter.name ?: continue)) {
                                     add(PsiElementResolveResult(funcTypeParameter))
                                 }
                             }
+                            return@treeWalkUp false
                         }
                         true
                     }

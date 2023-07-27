@@ -106,8 +106,8 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     fun StringBuilder.renderFunction(
         function: FuncFunction,
     ) {
-        val typeParameterList = function.typeParameterList?.typeParameterList
-        if (typeParameterList != null) {
+        val typeParameterList = function.typeParameterList
+        if (typeParameterList.isNotEmpty()) {
             appendStyledSpan(FuncSyntaxHighlightingColors.KEYWORD.attributes, "forall")
             append(NBSP)
             typeParameterList.joinTo(this) {
@@ -126,7 +126,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
         }
         appendStyledSpan(FuncSyntaxHighlightingColors.FUNCTION_DECLARATION.attributes, function.name)
         appendStyledSpan(FuncSyntaxHighlightingColors.PARENTHESES.attributes, "(")
-        function.functionParameterList?.functionParameterList?.joinTo(this) { param ->
+        function.functionParameterList.joinTo(this) { param ->
             buildString {
                 renderFunctionParameter(param)
             }
@@ -208,11 +208,11 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
             if (link == null) return null
             if (context is FuncFunction) {
                 var resolved: PsiElement? =
-                    context.functionParameterList?.functionParameterList?.find {
+                    context.functionParameterList.find {
                         it.name == link
                     }
                 if (resolved == null) {
-                    resolved = context.typeParameterList?.typeParameterList?.find {
+                    resolved = context.typeParameterList.find {
                         it.name == link
                     }
                 }

@@ -18,7 +18,7 @@ class FuncUnusedFunctionParameterInspection : FuncInspectionBase() {
     ): FuncVisitor = object : FuncVisitor() {
         override fun visitFunction(o: FuncFunction) {
             if (o.hasAsm) return
-            val parameters = o.functionParameterList?.functionParameterList ?: return
+            val parameters = o.functionParameterList
             for (parameter in parameters) {
                 ProgressIndicatorProvider.checkCanceled()
                 processParameter(parameter)

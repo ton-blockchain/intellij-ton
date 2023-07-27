@@ -76,7 +76,7 @@ class FuncReference(
         override fun process(scope: PsiElement?, prevParent: PsiElement?): Boolean {
             if (scope is FuncFunction) {
                 currentFunction = scope
-                val parameterList = scope.functionParameterList?.functionParameterList ?: return true
+                val parameterList = scope.functionParameterList
                 for (functionParameter in parameterList) {
                     if (!delegate.execute(functionParameter, state)) return false
                 }

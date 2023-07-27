@@ -76,7 +76,6 @@ class FuncFormatter : FormattingModelBuilder {
             .after(FORALL_KEYWORD).spaces(1)
             .around(MAPSTO).spaces(1)
             .betweenInside(LPAREN, MAPSTO, ASM_PARAMETERS).spaces(1)
-            .after(TYPE_PARAMETER_LIST).spaces(1)
             .betweenInside(
                 TokenSet.create(
                     PRIMITIVE_TYPE,
@@ -91,7 +90,6 @@ class FuncFormatter : FormattingModelBuilder {
             .afterInside(IDENTIFIER, FUNCTION).none()
             .beforeInside(IDENTIFIER, FUNCTION_PARAMETER).spaces(1)
             .after(FUNCTION_PARAMETER).none()
-            .after(FUNCTION_PARAMETER_LIST).spaces(1)
             .beforeInside(TENSOR_EXPRESSION, FUNCTION_CALL_EXPRESSION).none()
             .beforeInside(RPAREN, TokenSet.create(TENSOR_EXPRESSION, TENSOR_TYPE)).none()
             .beforeInside(RBRACK, TokenSet.create(TUPLE_EXPRESSION, TUPLE_TYPE)).none()

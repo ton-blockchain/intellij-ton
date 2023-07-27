@@ -147,8 +147,8 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
     fun StringBuilder.renderFunction(
         function: FuncFunction,
     ) {
-        val typeParameterList = function.typeParameterList?.typeParameterList
-        if (typeParameterList != null) {
+        val typeParameterList = function.typeParameterList
+        if (typeParameterList.isNotEmpty()) {
             appendStyledSpan(FuncSyntaxHighlightingColors.KEYWORD.attributes, "forall")
             append(NBSP)
             typeParameterList.joinTo(this) {
@@ -167,7 +167,7 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
         }
         appendStyledSpan(FuncSyntaxHighlightingColors.FUNCTION_DECLARATION.attributes, function.name)
         appendStyledSpan(FuncSyntaxHighlightingColors.PARENTHESES.attributes, "(")
-        function.functionParameterList?.functionParameterList?.joinTo(this) { param ->
+        function.functionParameterList.joinTo(this) { param ->
             buildString {
                 renderFunctionParameter(param)
             }

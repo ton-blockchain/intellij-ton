@@ -24,7 +24,7 @@ class FuncAsmArgumentReference(element: FuncAsmArgument) :
         if (!r.element.isValid) return@AbstractResolver null
         val function =
             PsiTreeUtil.getParentOfType(myElement, FuncFunction::class.java) ?: return@AbstractResolver null
-        val params = function.functionParameterList?.functionParameterList ?: return@AbstractResolver null
+        val params = function.functionParameterList
         return@AbstractResolver params.find {
             val name = it.name ?: return@AbstractResolver null
             myElement.identifier.textMatches(name)

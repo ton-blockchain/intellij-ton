@@ -14,6 +14,8 @@
     extends(".*Expression")=Expression
     extends(".*Statement")=Statement
 
+    generateTokenAccessors=true
+
     tokens = [
             PLUS                = '+'
             MINUS               = '-'
@@ -314,7 +316,7 @@ ModRExpression ::= Expression '~%' Expression
 AndExpression ::= Expression '&' Expression
 InvExpression ::= '~' Expression
 ReferenceCallExpression ::= Expression &('~'|'.') FunctionCallExpression {
-    rightAssociative=true
+//    rightAssociative=true
 }
 FunctionCallExpression ::= (('~' | '.'))? ReferenceExpression FunctionCallArgument
 private FunctionCallArgument ::= TupleExpression | TensorExpression | ReferenceExpression

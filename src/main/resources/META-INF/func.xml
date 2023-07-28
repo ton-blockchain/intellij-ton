@@ -54,9 +54,12 @@
         <localInspection language="func" displayName="Calling function with method-id" groupPath="FunC"
                          groupName="Control flow issues" enabledByDefault="false" level="ERROR"
                          implementationClass="org.ton.intellij.func.inspection.FuncUnexpectedGetMethodCallInspection"/>
-        <localInspection language="func" displayName="`if` condition is not an integer" groupPath="FunC"
+        <localInspection language="func" displayName="Calling function" groupPath="FunC"
                          groupName="Control flow issues" enabledByDefault="true" level="ERROR"
-                         implementationClass="org.ton.intellij.func.inspection.FuncIfConditionIsNotAnIntegerInspection"/>
+                         implementationClass="org.ton.intellij.func.inspection.FuncFunctionCallInspection"/>
+        <!--        <localInspection language="func" displayName="`if` condition is not an integer" groupPath="FunC"-->
+        <!--                         groupName="Control flow issues" enabledByDefault="true" level="ERROR"-->
+        <!--                         implementationClass="org.ton.intellij.func.inspection.FuncIfConditionIsNotAnIntegerInspection"/>-->
 
         <!-- control flow issues -->
 

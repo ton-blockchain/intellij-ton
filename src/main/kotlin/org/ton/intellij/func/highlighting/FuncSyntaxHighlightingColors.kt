@@ -32,6 +32,7 @@ enum class FuncSyntaxHighlightingColors(
     GLOBAL_VARIABLE("Global variable", DefaultLanguageHighlighterColors.GLOBAL_VARIABLE),
     LOCAL_VARIABLE("Local variable", DefaultLanguageHighlighterColors.LOCAL_VARIABLE),
     MACRO("Macro", DefaultLanguageHighlighterColors.METADATA),
+    PARAMETER("Parameter", DefaultLanguageHighlighterColors.PARAMETER),
     TYPE_PARAMETER("Type parameter", TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")),
     ;
 

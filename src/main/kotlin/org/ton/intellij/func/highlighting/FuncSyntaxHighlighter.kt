@@ -29,6 +29,7 @@ class FuncSyntaxHighlighter : SyntaxHighlighterBase() {
             in FuncParserDefinition.KEYWORDS -> FuncSyntaxHighlightingColors.KEYWORD
             in FuncParserDefinition.STRING_LITERALS -> FuncSyntaxHighlightingColors.STRING
             in FuncParserDefinition.MACRO -> FuncSyntaxHighlightingColors.MACRO
+            in FuncParserDefinition.OPERATORS -> FuncSyntaxHighlightingColors.OPERATION_SIGN
             else -> null
         }.let {
 //            println(" = $it")

@@ -10,8 +10,8 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
         holder: ProblemsHolder,
         session: LocalInspectionToolSession,
     ) = object : FuncVisitor() {
-        override fun visitFunctionCallExpression(o: FuncFunctionCallExpression) {
-            super.visitFunctionCallExpression(o)
+        override fun visitCallExpression(o: FuncCallExpression) {
+            super.visitCallExpression(o)
             val expressionList = o.expressionList
             val function = expressionList.firstOrNull()?.reference?.resolve() as? FuncFunction ?: return
             var arguments = expressionList.getOrNull(1)?.let {
@@ -22,10 +22,9 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
                 }
             } ?: return
             var parameters = function.functionParameterList
-            val isQualified = o.dot != null || o.tilde != null
-            if (isQualified) {
+            if (o.isQualified) {
                 val parent = o.parent
-                if (parent is FuncReferenceCallExpression) {
+                if (parent is FuncQualifiedExpression) {
                     arguments = listOf(parent.expressionList.first()) + arguments
                 } else {
                     if (parameters.isNotEmpty() && parameters.firstOrNull()?.atomicType is FuncTypeIdentifier) {
@@ -44,7 +43,7 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
             if (expectedSize > actualSize) {
                 val highlightArgument =
                     when {
-                        isQualified && arguments.size == 1 && expressionList.isNotEmpty() -> expressionList.last()
+                        o.isQualified && arguments.size == 1 && expressionList.isNotEmpty() -> expressionList.last()
                         arguments.isNotEmpty() -> arguments.last()
                         else -> expressionList.last()
                     }

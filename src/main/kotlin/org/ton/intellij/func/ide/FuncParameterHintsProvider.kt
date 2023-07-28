@@ -10,7 +10,7 @@ class FuncParameterHintsProvider : InlayParameterHintsProvider {
     override fun getDefaultBlackList() = emptySet<String>()
 
     override fun getParameterHints(element: PsiElement): List<InlayInfo> {
-        if (element !is FuncFunctionCallExpression) return emptyList()
+        if (element !is FuncCallExpression) return emptyList()
         val expressionList = element.expressionList
         val function = expressionList.firstOrNull()?.reference?.resolve() as? FuncFunction ?: return emptyList()
         var arguments = expressionList.getOrNull(1)?.let {
@@ -21,10 +21,9 @@ class FuncParameterHintsProvider : InlayParameterHintsProvider {
             }
         } ?: return emptyList()
         var parameters = function.functionParameterList
-        val isQualified = element.dot != null || element.tilde != null
-        if (isQualified) {
+        if (element.isQualified) {
             val parent = element.parent
-            if (parent is FuncReferenceCallExpression) {
+            if (parent is FuncQualifiedExpression) {
                 arguments = listOf(parent.expressionList.first()) + arguments
             } else {
                 if (parameters.isNotEmpty() && parameters.firstOrNull()?.atomicType is FuncTypeIdentifier) {
@@ -34,7 +33,7 @@ class FuncParameterHintsProvider : InlayParameterHintsProvider {
         }
         val result = ArrayList<InlayInfo>()
         for ((index, funcExpression) in arguments.withIndex()) {
-            if (index == 0 && isQualified) continue
+            if (index == 0 && element.isQualified) continue
             val parameter = parameters.getOrNull(index) ?: return result
             val parameterName = parameter.name
             if (parameterName != null) {

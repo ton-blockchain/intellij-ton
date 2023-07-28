@@ -259,8 +259,8 @@ Expression ::= AssignExpression
     | UnaryExpression_group
     | AddExpression_group
     | MulExpression_group
-    | ReferenceCallExpression
-    | FunctionCallExpression
+    | QualifiedExpression
+    | CallExpression
     | InvExpression
     | VarExpression
     | Expr100_group
@@ -315,11 +315,13 @@ ModCExpression ::= Expression '^%' Expression
 ModRExpression ::= Expression '~%' Expression
 AndExpression ::= Expression '&' Expression
 InvExpression ::= '~' Expression
-ReferenceCallExpression ::= Expression &('~'|'.') FunctionCallExpression {
-//    rightAssociative=true
+QualifiedExpression ::= Expression ('~'|'.') CallExpression {
+    pin=2
 }
-FunctionCallExpression ::= (('~' | '.'))? ReferenceExpression FunctionCallArgument
-private FunctionCallArgument ::= TupleExpression | TensorExpression | ReferenceExpression
+CallExpression ::= ReferenceExpression CallArgument {
+
+}
+private CallArgument ::= TupleExpression | TensorExpression | (ReferenceExpression !('('|'['))
 
 TensorExpression ::= '(' [ TensorElements ] ')' {
     pin=1

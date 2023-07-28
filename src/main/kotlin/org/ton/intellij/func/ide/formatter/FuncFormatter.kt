@@ -90,7 +90,7 @@ class FuncFormatter : FormattingModelBuilder {
             .afterInside(IDENTIFIER, FUNCTION).none()
             .beforeInside(IDENTIFIER, FUNCTION_PARAMETER).spaces(1)
             .after(FUNCTION_PARAMETER).none()
-            .beforeInside(TENSOR_EXPRESSION, FUNCTION_CALL_EXPRESSION).none()
+            .beforeInside(TENSOR_EXPRESSION, CALL_EXPRESSION).none()
             .beforeInside(RPAREN, TokenSet.create(TENSOR_EXPRESSION, TENSOR_TYPE)).none()
             .beforeInside(RBRACK, TokenSet.create(TUPLE_EXPRESSION, TUPLE_TYPE)).none()
             .aroundInside(TokenSet.create(QUEST, COLON), TERNARY_EXPRESSION).spaces(1)

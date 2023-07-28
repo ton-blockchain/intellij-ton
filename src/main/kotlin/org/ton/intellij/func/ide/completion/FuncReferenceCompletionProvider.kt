@@ -1,15 +1,13 @@
 package org.ton.intellij.func.ide.completion
 
+import com.intellij.codeInsight.TailType
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionUtil.DUMMY_IDENTIFIER_TRIMMED
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.completion.util.ParenthesesInsertHandler
-import com.intellij.codeInsight.lookup.LookupElement
-import com.intellij.codeInsight.lookup.LookupElementBuilder
-import com.intellij.codeInsight.lookup.LookupElementPresentation
-import com.intellij.codeInsight.lookup.LookupElementRenderer
+import com.intellij.codeInsight.lookup.*
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiReference
@@ -19,10 +17,7 @@ import com.intellij.psi.scope.PsiScopeProcessor
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.func.FuncIcons
-import org.ton.intellij.func.psi.FuncElement
-import org.ton.intellij.func.psi.FuncExpressionStatement
-import org.ton.intellij.func.psi.FuncFunction
-import org.ton.intellij.func.psi.FuncReferenceExpression
+import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.impl.FuncReference
 
 class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>() {
@@ -114,20 +109,57 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
             return when (element) {
                 is FuncFunction -> {
                     val functionName = element.name ?: return null
+
+                    val parameters = element.functionParameterList
+                    val parentOriginalElement = originalElement.parent
+                    if (parameters.isEmpty()) {
+                        if (parentOriginalElement is FuncQualifiedExpression && parentOriginalElement.expressionList.getOrNull(
+                                1
+                            ) == originalElement
+                        ) {
+                            return null
+                        }
+                    }
+
                     PrioritizedLookupElement.withPriority(
                         LookupElementBuilder
                             .createWithSmartPointer(functionName, element)
                             .withRenderer(FunctionRenderer)
                             .withInsertHandler { context, item ->
                                 println(originalElement.text)
-                                ParenthesesInsertHandler.NO_PARAMETERS.handleInsert(context, item)
-                                val parentOriginalElement = originalElement.parent
-                                if (parentOriginalElement is FuncExpressionStatement) {
-
+//                                val parameters = element.functionParameterList
+//                                val parentOriginalElement = originalElement.parent
+                                if (parameters.isEmpty()) {
+                                    ParenthesesInsertHandler.NO_PARAMETERS.handleInsert(context, item)
+                                } else if (parameters.size == 1 && parentOriginalElement is FuncCallExpression) {
+                                    if (parentOriginalElement.isQualified) {
+                                        ParenthesesInsertHandler.NO_PARAMETERS.handleInsert(context, item)
+                                    } else {
+                                        ParenthesesInsertHandler.WITH_PARAMETERS.handleInsert(context, item)
+                                    }
+                                } else {
+                                    ParenthesesInsertHandler.WITH_PARAMETERS.handleInsert(context, item)
                                 }
                             },
                         FUNCTION_PRIORITY
-                    )
+                    ).let {
+                        var result = it
+                        PsiTreeUtil.treeWalkUp(originalElement, null) { scope, _ ->
+//                            println("walking up: ${scope.elementType} | ${scope.text}")
+                            when (scope) {
+                                is FuncBlockStatement -> {
+                                    result = TailTypeDecorator.withTail(result, TailType.SEMICOLON)
+                                    return@treeWalkUp false
+                                }
+
+                                is FuncTensorExpression -> {
+                                    return@treeWalkUp false
+                                }
+                            }
+                            true
+                        }
+                        result
+                    }
                 }
 //                is FuncFunctionParameter -> {
 ////                    val name = element.name ?: return null

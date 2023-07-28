@@ -40,7 +40,7 @@ class FuncAnnotator : Annotator {
             }
 
             is FuncReferenceExpression -> {
-                if (element.node.treeParent.elementType == FuncElementTypes.FUNCTION_CALL_EXPRESSION) {
+                if (element.node.treeParent.elementType == FuncElementTypes.CALL_EXPRESSION) {
                     highlight(
                         element.identifier,
                         holder,

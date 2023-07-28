@@ -8,9 +8,8 @@ object FuncPsiUtil {
     fun allowed(declarationFile: PsiFile, referenceFile: PsiFile?, contextModule: Module? = null): Boolean {
         if (declarationFile !is FuncFile) return false
         val referenceVirtualFile = referenceFile?.originalFile?.virtualFile
-        if (!allowed(declarationFile.virtualFile, referenceVirtualFile)) return false
+        return allowed(declarationFile.virtualFile, referenceVirtualFile)
         // TODO: matchedForModuleBuildTarget
-        return true
     }
 
     fun allowed(declarationFile: VirtualFile?, referenceFile: VirtualFile?): Boolean {
@@ -18,3 +17,11 @@ object FuncPsiUtil {
         return referenceFile == null || referenceFile.parent == declarationFile.parent
     }
 }
+
+val FuncCallExpression.isQualified: Boolean
+    get() {
+        val parent = parent
+        if (parent !is FuncQualifiedExpression) return false
+        val expressionList = parent.expressionList
+        return expressionList.size == 2 && expressionList.last() == this
+    }

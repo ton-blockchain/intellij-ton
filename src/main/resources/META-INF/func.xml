@@ -23,6 +23,8 @@
         <lang.documentationProvider language="func"
                                     implementationClass="org.ton.intellij.func.ide.FuncDocumentationProvider"/>
         <lang.formatter language="func" implementationClass="org.ton.intellij.func.ide.formatter.FuncFormatter"/>
+        <lang.refactoringSupport language="func"
+                                 implementationClass="org.ton.intellij.func.refactor.FuncRefactoringSupportProvider"/>
         <completion.contributor language="func"
                                 implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionContributor"/>
         <completion.confidence language="func" order="last"

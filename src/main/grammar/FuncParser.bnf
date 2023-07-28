@@ -216,9 +216,14 @@ ExpressionStatement ::= Expression ';' {
 
 ReturnStatement ::= 'return' Expression ';' {pin=1}
 
-BlockStatement ::= '{' BlockStatement_element* '}' {
+BlockStatement ::= BlockStart '}' {
     pin=1
 }
+private BlockStart ::= '{' BlockStatement_element* {
+    pin=1
+    recoverWhile=Block_recovery
+}
+private Block_recovery ::= !('}')
 private BlockStatement_element ::= Statement
 private BlockStatement_recovery ::= !('}' | IDENTIFIER | 'var' | 'return' | '{' | 'repeat' | 'if' | 'ifnot' | 'do' | 'while' | 'try' | '(' | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | ';' | '~')
 

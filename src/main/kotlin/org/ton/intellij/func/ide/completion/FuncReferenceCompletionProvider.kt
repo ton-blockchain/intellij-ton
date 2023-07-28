@@ -17,6 +17,7 @@ import com.intellij.psi.scope.PsiScopeProcessor
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.func.FuncIcons
+import org.ton.intellij.func.ide.completion.FuncCompletionContributor.Companion.FUNCTION_PRIORITY
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.impl.FuncReference
 
@@ -49,7 +50,6 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
                     return fillVariantsByReference(originalElement, it.firstOrNull(), file, result)
                 }
             }
-
             is FuncReference -> {
                 reference.processResolveVariants(MyProcessor(originalElement, result), implicitStdlib = false)
             }
@@ -84,11 +84,6 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
     }
 
     companion object {
-        const val KEYWORD_PRIORITY = 20.0
-        const val CONTEXT_KEYWORD_PRIORITY = 25.0
-        const val NOT_IMPORTED_FUNCTION_PRIORITY = 3.0
-        const val FUNCTION_PRIORITY = NOT_IMPORTED_FUNCTION_PRIORITY + 10.0
-
 
         fun addElement(
             element: PsiElement,

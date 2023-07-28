@@ -123,7 +123,7 @@
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
             IDENTIFIER = "regexp:[a-zA-Z_$?:][0-9a-zA-Z_$?:]*"
-            WHITE_SPACE = 'regexp:[\ \n\t\f]'
+//            WHITESPACE = 'regexp:[\ \n\t\f]'
             INTEGER_LITERAL = 'regexp:(0|([1-9]([_0-9])*))'
     ]
 }
@@ -218,7 +218,7 @@ BlockStatement ::= '{' BlockStatement_element* '}' {
     pin=1
 }
 private BlockStatement_element ::= Statement
-private BlockStatement_recovery ::= !('}' | IDENTIFIER | 'var' | 'return' | '{' | 'repeat' | 'if' | 'ifnot' | 'do' | 'while' | 'try' | '(' | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | ';')
+private BlockStatement_recovery ::= !('}' | IDENTIFIER | 'var' | 'return' | '{' | 'repeat' | 'if' | 'ifnot' | 'do' | 'while' | 'try' | '(' | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | ';' | '~')
 
 RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
 
@@ -250,7 +250,18 @@ CatchStatement ::= 'catch' Expression BlockStatement {
     pin=1
 }
 
-Expression ::= AssignExpression | TernaryExpression | CompExpression_group | BinaryShiftExpression_group | UnaryExpression_group | AddExpression_group | MulExpression_group | InvExpression | ReferenceCallExpression | FunctionCallExpression | VarExpression | Expr100_group
+Expression ::= AssignExpression
+    | TernaryExpression
+    | CompExpression_group
+    | BinaryShiftExpression_group
+    | UnaryExpression_group
+    | AddExpression_group
+    | MulExpression_group
+    | InvExpression
+    | ReferenceCallExpression
+    | FunctionCallExpression
+    | VarExpression
+    | Expr100_group
 
 AssignExpression ::= Expression ('=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '^>>=' | '~>>=' | '&=' | '|=' | '^=') Expression {
     rightAssociative=true
@@ -302,10 +313,11 @@ ModCExpression ::= Expression '^%' Expression
 ModRExpression ::= Expression '~%' Expression
 AndExpression ::= Expression '&' Expression
 InvExpression ::= '~' Expression
-ReferenceCallExpression ::= Expression ('~' | '.') FunctionCallExpression {
-    pin=2
+ReferenceCallExpression ::= Expression &('~'|'.') FunctionCallExpression {
+    rightAssociative=true
 }
-FunctionCallExpression ::= ReferenceExpression &(IDENTIFIER | '(' | '[') Expression
+FunctionCallExpression ::= (('~' | '.'))? ReferenceExpression FunctionCallArgument
+private FunctionCallArgument ::= TupleExpression | TensorExpression | ReferenceExpression
 
 TensorExpression ::= '(' [ <<comma_separated_list Expression>> ] ')' {
     pin=1

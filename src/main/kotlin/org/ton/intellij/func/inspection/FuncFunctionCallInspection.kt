@@ -21,14 +21,18 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
                     else -> null
                 }
             } ?: return
+            var parameters = function.functionParameterList
             val isQualified = o.dot != null || o.tilde != null
             if (isQualified) {
                 val parent = o.parent
                 if (parent is FuncReferenceCallExpression) {
                     arguments = listOf(parent.expressionList.first()) + arguments
+                } else {
+                    if (parameters.isNotEmpty() && parameters.firstOrNull()?.atomicType is FuncTypeIdentifier) {
+                        parameters.removeFirst()
+                    }
                 }
             }
-            val parameters = function.functionParameterList
             var actualSize = arguments.size
             var expectedSize = parameters.size
             if (actualSize == expectedSize) return
@@ -39,7 +43,11 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
             }
             if (expectedSize > actualSize) {
                 val highlightArgument =
-                    if (isQualified && arguments.size == 1) expressionList.last() else arguments.last()
+                    when {
+                        isQualified && arguments.size == 1 && expressionList.isNotEmpty() -> expressionList.last()
+                        arguments.isNotEmpty() -> arguments.last()
+                        else -> expressionList.last()
+                    }
                 for (i in actualSize until expectedSize) {
                     noValueForParameter(highlightArgument, parameters[i], holder)
                 }

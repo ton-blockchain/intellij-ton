@@ -259,9 +259,9 @@ Expression ::= AssignExpression
     | UnaryExpression_group
     | AddExpression_group
     | MulExpression_group
-    | InvExpression
     | ReferenceCallExpression
     | FunctionCallExpression
+    | InvExpression
     | VarExpression
     | Expr100_group
 
@@ -321,10 +321,15 @@ ReferenceCallExpression ::= Expression &('~'|'.') FunctionCallExpression {
 FunctionCallExpression ::= (('~' | '.'))? ReferenceExpression FunctionCallArgument
 private FunctionCallArgument ::= TupleExpression | TensorExpression | ReferenceExpression
 
-TensorExpression ::= '(' [ <<comma_separated_list Expression>> ] ')' {
+TensorExpression ::= '(' [ TensorElements ] ')' {
     pin=1
     extends=Expression
 }
+private TensorElements ::= Expression (',' Expression)* {
+    recoverWhile=TensorElements_recovery
+}
+private TensorElements_recovery ::= !(')'|';'|'{'|'}')
+
 TupleExpression ::= '[' [ <<comma_separated_list Expression>> ] ']' {
     pin=1
     extends=Expression

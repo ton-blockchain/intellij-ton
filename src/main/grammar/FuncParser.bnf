@@ -319,11 +319,14 @@ DivRExpression ::= Expression '~/' Expression
 ModCExpression ::= Expression '^%' Expression
 ModRExpression ::= Expression '~%' Expression
 AndExpression ::= Expression '&' Expression
-InvExpression ::= '~' Expression
-QualifiedExpression ::= Expression ('~'|'.') CallExpression {
-    pin=2
+InvExpression ::= '~' Expression {
+    pin=1
 }
-CallExpression ::= ReferenceExpression CallArgument {
+QualifiedExpression ::= Expression (DotQualifiedCall | (&'~' CallExpression))
+private DotQualifiedCall ::= '.' !'~' CallExpression {
+    pin=1
+}
+CallExpression ::= '~'? ReferenceExpression CallArgument {
 
 }
 private CallArgument ::= TupleExpression | TensorExpression | (ReferenceExpression !('('|'['|'~'|'.'))

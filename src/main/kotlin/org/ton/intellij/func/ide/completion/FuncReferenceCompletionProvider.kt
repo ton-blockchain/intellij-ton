@@ -1,12 +1,14 @@
 package org.ton.intellij.func.ide.completion
 
-import com.intellij.codeInsight.TailType
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.completion.util.ParenthesesInsertHandler
-import com.intellij.codeInsight.lookup.*
+import com.intellij.codeInsight.lookup.LookupElement
+import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.codeInsight.lookup.LookupElementPresentation
+import com.intellij.codeInsight.lookup.LookupElementRenderer
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiReference
@@ -187,20 +189,21 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
                         FUNCTION_PRIORITY
                     ).let {
                         var result = it
-                        PsiTreeUtil.treeWalkUp(originalElement, null) { scope, _ ->
-//                            println("walking up: ${scope.elementType} | ${scope.text}")
-                            when (scope) {
-                                is FuncBlockStatement -> {
-                                    result = TailTypeDecorator.withTail(result, TailType.SEMICOLON)
-                                    return@treeWalkUp false
-                                }
-
-                                is FuncTensorExpression -> {
-                                    return@treeWalkUp false
-                                }
-                            }
-                            true
-                        }
+                        // TODO: insert semicolon if void return
+//                        PsiTreeUtil.treeWalkUp(originalElement, null) { scope, _ ->
+////                            println("walking up: ${scope.elementType} | ${scope.text}")
+//                            when (scope) {
+//                                is FuncBlockStatement -> {
+//                                    result = TailTypeDecorator.withTail(result, TailType.SEMICOLON)
+//                                    return@treeWalkUp false
+//                                }
+//
+//                                is FuncTensorExpression -> {
+//                                    return@treeWalkUp false
+//                                }
+//                            }
+//                            true
+//                        }
                         result
                     }
                 }

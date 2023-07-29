@@ -33,7 +33,7 @@ class FuncParameterHintsProvider : InlayParameterHintsProvider {
         }
         val result = ArrayList<InlayInfo>()
         for ((index, funcExpression) in arguments.withIndex()) {
-            if (index == 0 && element.isQualified) continue
+            if (index == 0 && element.isQualified && element.parent is FuncQualifiedExpression) continue
             val parameter = parameters.getOrNull(index) ?: return result
             val parameterName = parameter.name
             if (parameterName != null) {

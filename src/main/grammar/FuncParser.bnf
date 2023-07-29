@@ -326,7 +326,7 @@ QualifiedExpression ::= Expression ('~'|'.') CallExpression {
 CallExpression ::= ReferenceExpression CallArgument {
 
 }
-private CallArgument ::= TupleExpression | TensorExpression | (ReferenceExpression !('('|'['))
+private CallArgument ::= TupleExpression | TensorExpression | (ReferenceExpression !('('|'['|'~'|'.'))
 
 TensorExpression ::= '(' [ TensorElements ] ')' {
     pin=1

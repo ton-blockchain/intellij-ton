@@ -131,7 +131,7 @@
 }
 
 private root ::= TopLevelDefinitions*
-private TopLevelDefinitions ::= macro | GlobalVarList | ConstVariable | Function
+private TopLevelDefinitions ::= macro | GlobalVarList | ConstVarList | Function
 
 private macro ::= IncludeDefinition | PragmaDefinition
 RawString ::= RAW_STRING_ELEMENT*
@@ -152,9 +152,27 @@ GlobalVar ::= Type IDENTIFIER {
     elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
 }
 
-ConstVariable ::= 'const' <<comma_separated_list AssignExpression>> ';' {
+ConstVarList ::= ConstVarList_start ';' {
     pin=1
 }
+private ConstVarList_start ::= 'const' (ConstVar (',' | &';'))+ {
+    pin=1
+    recoverWhile=ConstVar_recovery
+}
+
+ConstVar ::= ('int' | 'slice')? IDENTIFIER '=' Expression {
+    pin=2
+    mixin = "org.ton.intellij.func.psi.impl.FuncConstVarMixin"
+    implements=["org.ton.intellij.func.psi.FuncNamedElement"]
+    stubClass="org.ton.intellij.func.stub.FuncConstVarStub"
+    elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
+}
+private ConstVar_recovery ::= !';'
+
+// TupleTypeItem ::= Type ( ','| &']' ) {pin=1}
+// private TupleTypeItemRecovery ::= !']'
+// private TupleTypeStart ::= '[' TupleTypeItem* {pin=1 recoverWhile=TupleTypeItemRecovery}
+
 
 private UntilSemicolonRecover ::= !(';')
 IncludeDefinition ::= '#include' StringLiteral ';' {

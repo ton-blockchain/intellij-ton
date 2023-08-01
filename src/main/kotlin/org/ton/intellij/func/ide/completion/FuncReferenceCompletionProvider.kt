@@ -109,7 +109,7 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
     }
 
     private class ConstRenderer(
-        val variable: FuncConstVariable,
+        val variable: FuncConstVar,
     ) : LookupElementRenderer<LookupElement>() {
         override fun renderElement(element: LookupElement, presentation: LookupElementPresentation) {
             presentation.apply {
@@ -249,15 +249,15 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
                                         return@treeWalkUp false
                                     }
 
-                                    is FuncConstVariable -> if (scope.expressionList.firstOrNull() == prevParent) {
-                                        lookupElement = PrioritizedLookupElement.withPriority(
-                                            LookupElementBuilder
-                                                .createWithSmartPointer(name, element)
-                                                .withRenderer(ConstRenderer(parentScope)),
-                                            VAR_PRIORITY
-                                        )
-                                        return@treeWalkUp false
-                                    }
+//                                    is FuncConstVariable -> if (scope.expressionList.firstOrNull() == prevParent) {
+//                                        lookupElement = PrioritizedLookupElement.withPriority(
+//                                            LookupElementBuilder
+//                                                .createWithSmartPointer(name, element)
+//                                                .withRenderer(ConstRenderer(parentScope)),
+//                                            VAR_PRIORITY
+//                                        )
+//                                        return@treeWalkUp false
+//                                    }
                                 }
                             }
 

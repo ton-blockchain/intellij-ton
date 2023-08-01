@@ -30,6 +30,15 @@ class FuncAnnotator : Annotator {
                 return
             }
 
+            is FuncConstVar -> {
+                highlight(
+                    element.identifier ?: return,
+                    holder,
+                    FuncSyntaxHighlightingColors.CONSTANT.textAttributesKey
+                )
+                return
+            }
+
             is FuncFunctionParameter -> {
                 highlight(
                     element.identifier ?: return,
@@ -52,7 +61,7 @@ class FuncAnnotator : Annotator {
                     PsiTreeUtil.treeWalkUp(resolved, null) { scope, _ ->
                         color = when (scope) {
                             is FuncBlockStatement -> FuncSyntaxHighlightingColors.LOCAL_VARIABLE.textAttributesKey
-                            is FuncConstVariable -> FuncSyntaxHighlightingColors.CONSTANT.textAttributesKey
+                            is FuncConstVar -> FuncSyntaxHighlightingColors.CONSTANT.textAttributesKey
                             is FuncGlobalVar -> FuncSyntaxHighlightingColors.GLOBAL_VARIABLE.textAttributesKey
                             is FuncFunctionParameter -> FuncSyntaxHighlightingColors.PARAMETER.textAttributesKey
                             else -> null

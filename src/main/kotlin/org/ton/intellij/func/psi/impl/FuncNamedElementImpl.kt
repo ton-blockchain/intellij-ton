@@ -36,7 +36,7 @@ abstract class FuncNamedElementImpl<T : FuncNamedStub<*>> : FuncStubbedElementIm
             override fun getIcon(unused: Boolean): Icon? = when (this@FuncNamedElementImpl) {
                 is FuncFunction -> FuncIcons.FUNCTION
                 is FuncFunctionParameter -> FuncIcons.PARAMETER
-                is FuncConstVariable -> FuncIcons.CONSTANT
+                is FuncConstVar -> FuncIcons.CONSTANT
                 is FuncGlobalVar -> FuncIcons.GLOBAL_VARIABLE
                 else -> null
             }

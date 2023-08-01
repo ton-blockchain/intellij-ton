@@ -27,14 +27,14 @@ class TonBlueprintProjectGenerator : NpmPackageProjectGenerator() {
     override fun getId(): String = "ton-blueprint"
 
     @Suppress("DialogTitleCapitalization")
-    override fun getName(): String = "TON Blueprint"
+    override fun getName(): String = "TON"
 
     override fun getDescription(): String =
         "Create a new <a href='https://github.com/ton-org/blueprint'>TON Blueprint</a> project using CLI"
 
     override fun getIcon(): Icon = BlueprintIcons.BLUEPRINT
 
-    override fun presentablePackageName(): String = "TON Blueprint"
+    override fun presentablePackageName(): String = "TON"
 
     override fun filters(p0: Project, p1: VirtualFile): Array<Filter> = emptyArray()
 
@@ -58,9 +58,9 @@ class TonBlueprintProjectGenerator : NpmPackageProjectGenerator() {
         val workingDir = if (generateInTemp()) dir.name else "."
         val packageName = settings.myPackage.name
         if (packageName.contains(CREATE_TON_PACKAGE_NAME)) {
-            return arrayOf(workingDir)
+            return arrayOf(workingDir, "--type", "func-empty")
         }
-        return arrayOf(CREATE_COMMAND, workingDir)
+        return arrayOf(CREATE_COMMAND, "--type", "func-empty", workingDir)
     }
 
     override fun createPeer(): ProjectGeneratorPeer<Settings> {

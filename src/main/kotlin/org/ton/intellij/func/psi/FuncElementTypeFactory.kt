@@ -10,6 +10,7 @@ object FuncElementTypeFactory {
         "FUNCTION" -> FuncFunctionStubElementType(name)
         "FUNCTION_PARAMETER" -> FuncFunctionParameterStubElementType(name)
         "GLOBAL_VAR" -> FuncGlobalVarStubElementType(name)
+        "CONST_VAR" -> FuncConstVarStubElementType(name)
         "TYPE_PARAMETER" -> FuncTypeParameterStubElementType(name)
         else -> throw RuntimeException("Unknown element type: $name")
     }

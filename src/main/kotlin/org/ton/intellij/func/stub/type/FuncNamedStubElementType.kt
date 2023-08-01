@@ -5,6 +5,7 @@ import com.intellij.psi.stubs.IndexSink
 import com.intellij.psi.stubs.StubIndexKey
 import org.ton.intellij.func.psi.FuncNamedElement
 import org.ton.intellij.func.stub.FuncNamedStub
+import org.ton.intellij.func.stub.index.FuncAllPublicNamesIndex
 
 abstract class FuncNamedStubElementType<S : FuncNamedStub<T>, T : FuncNamedElement>(
     debugName: String
@@ -20,6 +21,8 @@ abstract class FuncNamedStubElementType<S : FuncNamedStub<T>, T : FuncNamedEleme
     override fun indexStub(stub: S, sink: IndexSink) {
         val name = stub.name
         if (name.isNullOrEmpty() || !shouldIndex()) return
+
+        sink.occurrence(FuncAllPublicNamesIndex.ALL_PUBLIC_NAMES, name)
 
         extraIndexKeys.forEach { key ->
             sink.occurrence(key, name)

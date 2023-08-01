@@ -89,9 +89,9 @@ class FuncReference(
                     if (child is FuncFunction) {
                         if (!delegate.execute(child, state)) return false
                     }
-                    if (child is FuncConstVariable) {
-                        for (constExpression in child.expressionList) {
-                            if (!processExpression(constExpression, delegate, state)) return false
+                    if (child is FuncConstVarList) {
+                        for (constVar in child.constVarList) {
+                            if (!delegate.execute(constVar, state)) return false
                         }
                     }
                     if (child is FuncGlobalVarList) {
@@ -167,7 +167,6 @@ class FuncReference(
                         is FuncVarExpression -> {
                             if (!processVarExpression(left, processor, state)) return false
                         }
-
                         is FuncTensorExpression -> {
                             for (tensorElement in left.expressionList) {
                                 if (tensorElement is FuncVarExpression) {
@@ -175,7 +174,6 @@ class FuncReference(
                                 }
                             }
                         }
-
                         is FuncTupleExpression -> {
                             for (tupleElement in left.expressionList) {
                                 if (tupleElement is FuncVarExpression) {
@@ -183,9 +181,8 @@ class FuncReference(
                                 }
                             }
                         }
-
                         is FuncReferenceExpression -> {
-                            if (expression.parent is FuncConstVariable) {
+                            if (expression.parent is FuncConstVar) {
                                 if (!processor.execute(left, state)) return false
                             }
                         }

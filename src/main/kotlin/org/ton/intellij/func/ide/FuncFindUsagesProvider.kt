@@ -30,7 +30,7 @@ class FuncFindUsagesProvider : FindUsagesProvider {
     override fun getType(element: PsiElement): String {
         return when (element) {
             is FuncFunction -> "function"
-            is FuncConstVariable -> "constant"
+            is FuncConstVar -> "constant"
             is FuncGlobalVar -> "global var"
             is FuncTypeParameter -> "type parameter"
             else -> return "<TYPE $element>"

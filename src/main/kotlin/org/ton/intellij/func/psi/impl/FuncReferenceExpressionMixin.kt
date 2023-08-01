@@ -32,7 +32,7 @@ abstract class FuncReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
 
                 is FuncAssignExpression -> {
                     when (scope.parent) {
-                        is FuncVarExpression, is FuncConstVariable -> {
+                        is FuncVarExpression -> {
                             if (scope.expressionList.firstOrNull() == prevParent) return@treeWalkUp false
                         }
                     }

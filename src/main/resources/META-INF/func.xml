@@ -21,7 +21,7 @@
         <!--        <platform.backend.documentation.psiTargetProvider id="FuncDocumentationTargetProvider"-->
         <!--                                                          implementation="org.ton.intellij.func.ide.quickdoc.FuncPsiDocumentationTargetProvider"/>-->
         <lang.documentationProvider language="func"
-                                    implementationClass="org.ton.intellij.func.ide.FuncDocumentationProvider"/>
+                                    implementationClass="org.ton.intellij.func.doc.FuncDocumentationProvider"/>
         <lang.formatter language="func" implementationClass="org.ton.intellij.func.ide.formatter.FuncFormatter"/>
         <lang.refactoringSupport language="func"
                                  implementationClass="org.ton.intellij.func.refactor.FuncRefactoringSupportProvider"/>
@@ -34,6 +34,8 @@
         <lang.elementManipulator forClass="org.ton.intellij.func.psi.FuncIncludeDefinition"
                                  implementationClass="org.ton.intellij.func.psi.impl.FuncIncludePathElementManipulator"/>
 
+        <typedHandler implementation="org.ton.intellij.func.editor.FuncTypedHandler" id="FuncTypedHandler"/>
+
         <liveTemplateContext
                 contextId="func"
                 implementation="org.ton.intellij.func.template.FuncEverywhereContextType"/>
@@ -43,6 +45,7 @@
                                         implementationClass="org.ton.intellij.func.ide.FuncParameterHintsProvider"/>
 
         <annotator language="func" implementationClass="org.ton.intellij.func.highlighting.FuncAnnotator"/>
+        <annotator language="func" implementationClass="org.ton.intellij.func.highlighting.FuncDocAnnotator"/>
 
         <localInspection language="func" displayName="Unused function inspection" groupPath="FunC"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"

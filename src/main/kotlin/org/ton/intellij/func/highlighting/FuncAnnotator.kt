@@ -12,12 +12,12 @@ class FuncAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         when (element) {
             is FuncTypeParameter -> {
-                highlight(element.identifier, holder, FuncSyntaxHighlightingColors.TYPE_PARAMETER.textAttributesKey)
+                highlight(element.identifier, holder, FuncColor.TYPE_PARAMETER.textAttributesKey)
                 return
             }
 
             is FuncTypeIdentifier -> {
-                highlight(element.identifier, holder, FuncSyntaxHighlightingColors.TYPE_PARAMETER.textAttributesKey)
+                highlight(element.identifier, holder, FuncColor.TYPE_PARAMETER.textAttributesKey)
                 return
             }
 
@@ -25,7 +25,7 @@ class FuncAnnotator : Annotator {
                 highlight(
                     element.identifier ?: return,
                     holder,
-                    FuncSyntaxHighlightingColors.GLOBAL_VARIABLE.textAttributesKey
+                    FuncColor.GLOBAL_VARIABLE.textAttributesKey
                 )
                 return
             }
@@ -34,7 +34,7 @@ class FuncAnnotator : Annotator {
                 highlight(
                     element.identifier ?: return,
                     holder,
-                    FuncSyntaxHighlightingColors.CONSTANT.textAttributesKey
+                    FuncColor.CONSTANT.textAttributesKey
                 )
                 return
             }
@@ -43,7 +43,7 @@ class FuncAnnotator : Annotator {
                 highlight(
                     element.identifier ?: return,
                     holder,
-                    FuncSyntaxHighlightingColors.PARAMETER.textAttributesKey
+                    FuncColor.PARAMETER.textAttributesKey
                 )
                 return
             }
@@ -53,17 +53,17 @@ class FuncAnnotator : Annotator {
                     highlight(
                         element.identifier,
                         holder,
-                        FuncSyntaxHighlightingColors.FUNCTION_STATIC.textAttributesKey
+                        FuncColor.FUNCTION_STATIC.textAttributesKey
                     )
                 } else {
                     val resolved = element.reference?.resolve() ?: element
                     var color: TextAttributesKey? = null
                     PsiTreeUtil.treeWalkUp(resolved, null) { scope, _ ->
                         color = when (scope) {
-                            is FuncBlockStatement -> FuncSyntaxHighlightingColors.LOCAL_VARIABLE.textAttributesKey
-                            is FuncConstVar -> FuncSyntaxHighlightingColors.CONSTANT.textAttributesKey
-                            is FuncGlobalVar -> FuncSyntaxHighlightingColors.GLOBAL_VARIABLE.textAttributesKey
-                            is FuncFunctionParameter -> FuncSyntaxHighlightingColors.PARAMETER.textAttributesKey
+                            is FuncBlockStatement -> FuncColor.LOCAL_VARIABLE.textAttributesKey
+                            is FuncConstVar -> FuncColor.CONSTANT.textAttributesKey
+                            is FuncGlobalVar -> FuncColor.GLOBAL_VARIABLE.textAttributesKey
+                            is FuncFunctionParameter -> FuncColor.PARAMETER.textAttributesKey
                             else -> null
                         }
                         color == null
@@ -83,7 +83,7 @@ class FuncAnnotator : Annotator {
         when (parent) {
             is FuncFunction -> {
                 if (element == parent.nameIdentifier) {
-                    highlight(element, holder, FuncSyntaxHighlightingColors.FUNCTION_DECLARATION.textAttributesKey)
+                    highlight(element, holder, FuncColor.FUNCTION_DECLARATION.textAttributesKey)
                 }
             }
         }

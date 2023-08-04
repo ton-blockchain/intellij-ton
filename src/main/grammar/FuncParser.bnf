@@ -1,5 +1,6 @@
 {
     parserClass='org.ton.intellij.func.parser.FuncParser'
+    parserUtilClass='org.ton.intellij.func.parser.FuncParserUtil'
 
     psiClassPrefix='Func'
     psiImplClassSuffix='Impl'
@@ -8,7 +9,7 @@
     implements='org.ton.intellij.func.psi.FuncElement'
 
     elementTypeHolderClass="org.ton.intellij.func.psi.FuncElementTypes"
-    tokenTypeClass="org.ton.intellij.func.psi.FuncToken"
+    tokenTypeClass="org.ton.intellij.func.psi.FuncTokenType"
     elementTypeClass="org.ton.intellij.func.psi.FuncElementType"
 
     extends(".*Expression")=Expression
@@ -119,9 +120,6 @@
             INCLUDE_MACRO             = "#include"
             PRAGMA_MACRO              = "#pragma"
 
-            BLOCK_COMMENT = "BLOCK_COMMENT"
-            DOC_ELEMENT = "DOC_ELEMENT"
-            LINE_COMMENT = "LINE_COMMENT"
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
             IDENTIFIER = "regexp:[a-zA-Z_$?:][0-9a-zA-Z_$?:]*"
@@ -130,16 +128,19 @@
     ]
 }
 
-private root ::= TopLevelDefinitions*
-private TopLevelDefinitions ::= macro | GlobalVarList | ConstVarList | Function
+private root ::= TopLevelDefinition_with_recover*
+
+private TopLevelDefinition ::= (macro | GlobalVarList | ConstVarList | Function)
+private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelDefinition {
+    pin = 1
+    recoverWhile = TopLevelDefinition_recover
+}
+private TopLevelDefinition_recover ::= !TopLevelDefinition_first
+private TopLevelDefinition_first ::= '#include' | '#pragma' | 'global' | 'const' | 'forall' | '_' | '('  | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple'
 
 private macro ::= IncludeDefinition | PragmaDefinition
 RawString ::= RAW_STRING_ELEMENT*
 StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE
-Doc ::= DOC_ELEMENT* {
-    mixin = "org.ton.intellij.func.psi.impl.FuncDocMixin"
-    implements = ["com.intellij.psi.PsiDocCommentBase"]
-}
 
 GlobalVarList ::= 'global' << comma_separated_list GlobalVar >> ';' {
     pin=1
@@ -190,13 +191,13 @@ private PragmaDefinitionPart ::= '#pragma' PragmaKey PragmaValue  {
     recoverWhile = UntilSemicolonRecover
 }
 
-private FunctionRecover ::= !('{'|'asm')
 Function ::= TypeParameterList? Type FunctionIdentifier FunctionParameterList 'impure'? ('inline' | 'inline_ref')? MethodIdDefinition? (';' | AsmDefinition | BlockStatement) {
     pin=3
     mixin="org.ton.intellij.func.psi.impl.FuncFunctionMixin"
     implements=["org.ton.intellij.func.psi.FuncNamedElement"]
     stubClass="org.ton.intellij.func.stub.FuncFunctionStub"
     elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
+    hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
 
 private TypeParameterList ::= 'forall' << comma_separated_list TypeParameter >> '->' {
@@ -374,9 +375,16 @@ ReferenceExpression ::= IDENTIFIER {
 HoleTypeExpression ::= HoleType
 PrimitiveTypeExpression ::= PrimitiveType
 
-private FunctionParameterList ::= '(' [ << comma_separated_list FunctionParameter >> ] ')' {
+private FunctionParameterList ::= FunctionParameterList_start ')' {
     pin = 1
 }
+private FunctionParameterList_start ::= '(' FunctionParameterList_item* {
+    pin = 1
+    recoverWhile=FunctionParameterList_recovery
+}
+private FunctionParameterList_recovery ::= !')'
+private FunctionParameterList_item ::= FunctionParameter ( ','| &')' ) {pin=1}
+
 FunctionParameter ::= TypeNamedFunctionParameter | TypeFunctionParameter | NamedFunctionParameter {
     mixin="org.ton.intellij.func.psi.impl.FuncFunctionParameterMixin"
     implements=["org.ton.intellij.func.psi.FuncNamedElement"]

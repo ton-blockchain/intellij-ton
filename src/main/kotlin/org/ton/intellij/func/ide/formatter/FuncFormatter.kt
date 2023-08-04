@@ -50,7 +50,7 @@ class FuncFormatter : FormattingModelBuilder {
             .before(RBRACE).lineBreakInCode()
             .after(RBRACE).spaces(1)
             .around(UNTIL_KEYWORD).spaces(1)
-            .before(TokenSet.create(LINE_COMMENT, BLOCK_STATEMENT, ASM_BODY)).spaces(1)
+            .before(TokenSet.create(BLOCK_STATEMENT, ASM_BODY)).spaces(1)
             .aroundInside(
                 TokenSet.create(
                     EQ,

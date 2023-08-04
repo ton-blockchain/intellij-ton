@@ -1,21 +1,17 @@
-package org.ton.intellij.func.ide
+package org.ton.intellij.func.doc
 
 import com.intellij.lang.documentation.AbstractDocumentationProvider
 import com.intellij.lang.documentation.DocumentationMarkup
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.editor.richcopy.HtmlSyntaxInfoUtil
 import com.intellij.psi.*
-import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
-import org.intellij.markdown.parser.MarkdownParser
-import org.ton.intellij.func.highlighting.FuncSyntaxHighlightingColors
-import org.ton.intellij.func.ide.quickdoc.MarkdownNode
+import org.ton.intellij.func.doc.psi.FuncDocComment
+import org.ton.intellij.func.highlighting.FuncColor
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.impl.isImpure
 import org.ton.intellij.func.psi.impl.isMutable
-import java.util.*
+import org.ton.intellij.markdown.MarkdownDocAstBuilder
 import java.util.function.Consumer
-
-private const val NBSP = "&nbsp;"
 
 class FuncDocumentationProvider : AbstractDocumentationProvider() {
 
@@ -32,14 +28,17 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     override fun generateDoc(element: PsiElement?, originalElement: PsiElement?): String? {
         if (element == null) return null
         val renderedElement = renderElement(element, originalElement) ?: return null
-        val content = getCommentText(getComments(element), element)
+
         return buildString {
             append(DocumentationMarkup.DEFINITION_START)
             append(renderedElement)
             append(DocumentationMarkup.DEFINITION_END)
-            append(DocumentationMarkup.CONTENT_START)
-            append(content)
-            append(DocumentationMarkup.CONTENT_END)
+            val doc = getComments(element)
+            if (doc != null) {
+                append(DocumentationMarkup.CONTENT_START)
+                append(getCommentText(doc))
+                append(DocumentationMarkup.CONTENT_END)
+            }
         }
     }
 
@@ -53,43 +52,24 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
 
     override fun collectDocComments(file: PsiFile, sink: Consumer<in PsiDocCommentBase>) {
         if (file !is FuncFile) return
-        file.functions.forEach {
-//            val doc = it.doc
-//            if (doc != null) {
-//                println("collected doc: ${doc.text}")
-//                sink.accept(doc)
-//            }
-        }
-    }
-
-    override fun generateRenderedDoc(comment: PsiDocCommentBase): String? {
-        if (comment !is FuncDoc) return null
-        return comment.text
-    }
-
-    private fun getComments(element: PsiElement?): List<PsiComment> {
-        if (element == null) return emptyList()
-        val result = LinkedList<PsiComment>()
-        var e = element
-        while (true) {
-            e = e?.prevSibling
-            when (e) {
-                is PsiWhiteSpace -> {
-                    if (e.text.contains("\n\n")) return result
-                    continue
-                }
-
-                is PsiComment -> result.addFirst(e)
-                else -> return result
+        SyntaxTraverser.psiTraverser(file).forEach {
+            if (it is FuncDocComment) {
+                sink.accept(it)
             }
         }
     }
 
-    private fun getCommentText(comments: List<PsiComment>, element: PsiElement): String {
-        val rawText = comments.joinToString("\n") { it.text.replaceFirst("[!; ]+".toRegex(), "") }
-        val markdownTree = MarkdownParser(GFMFlavourDescriptor()).buildMarkdownTreeFromString(rawText)
-        val markdownNode = MarkdownNode(markdownTree, null, rawText, element)
-        return markdownNode.toHtml()
+    override fun generateRenderedDoc(comment: PsiDocCommentBase): String? {
+        if (comment !is FuncDocComment) return null
+        return MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;")
+    }
+
+    private fun getComments(element: PsiElement?): PsiComment? {
+        return (element as? FuncFunction)?.firstChild as? PsiComment
+    }
+
+    private fun getCommentText(comment: PsiComment): String {
+        return MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;")
     }
 
     fun renderElement(element: PsiElement?, context: PsiElement?): String? {
@@ -108,7 +88,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     ) {
         val typeParameterList = function.typeParameterList
         if (typeParameterList.isNotEmpty()) {
-            appendStyledSpan(FuncSyntaxHighlightingColors.KEYWORD.attributes, "forall")
+            appendStyledSpan(FuncColor.KEYWORD.attributes, "forall")
             append(NBSP)
             typeParameterList.joinTo(this) {
                 buildString {
@@ -124,17 +104,17 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
         if (function.isMutable) {
             append("~")
         }
-        appendStyledSpan(FuncSyntaxHighlightingColors.FUNCTION_DECLARATION.attributes, function.name)
-        appendStyledSpan(FuncSyntaxHighlightingColors.PARENTHESES.attributes, "(")
+        appendStyledSpan(FuncColor.FUNCTION_DECLARATION.attributes, function.name)
+        appendStyledSpan(FuncColor.PARENTHESES.attributes, "(")
         function.functionParameterList.joinTo(this) { param ->
             buildString {
                 renderFunctionParameter(param)
             }
         }
-        appendStyledSpan(FuncSyntaxHighlightingColors.PARENTHESES.attributes, ")")
+        appendStyledSpan(FuncColor.PARENTHESES.attributes, ")")
         if (function.isImpure) {
             append(NBSP)
-            appendStyledSpan(FuncSyntaxHighlightingColors.KEYWORD.attributes, "impure")
+            appendStyledSpan(FuncColor.KEYWORD.attributes, "impure")
         }
     }
 
@@ -157,7 +137,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     private fun StringBuilder.renderTypeParameter(
         typeParameter: FuncTypeParameter,
     ) {
-        appendStyledSpan(FuncSyntaxHighlightingColors.TYPE_PARAMETER.attributes, typeParameter.name)
+        appendStyledSpan(FuncColor.TYPE_PARAMETER.attributes, typeParameter.name)
     }
 
     private fun StringBuilder.renderType(
@@ -165,35 +145,35 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     ) {
         when (type) {
             is FuncTypeIdentifier ->
-                appendStyledSpan(FuncSyntaxHighlightingColors.TYPE_PARAMETER.attributes, type.identifier.text)
+                appendStyledSpan(FuncColor.TYPE_PARAMETER.attributes, type.identifier.text)
 
             is FuncPrimitiveType ->
-                appendStyledSpan(FuncSyntaxHighlightingColors.KEYWORD.attributes, type.text)
+                appendStyledSpan(FuncColor.KEYWORD.attributes, type.text)
 
             is FuncTupleType -> {
-                appendStyledSpan(FuncSyntaxHighlightingColors.BRACKETS.attributes, "[")
+                appendStyledSpan(FuncColor.BRACKETS.attributes, "[")
                 type.tupleTypeItemList.joinTo(this) {
                     buildString {
                         renderType(it.type)
                     }
                 }
-                appendStyledSpan(FuncSyntaxHighlightingColors.BRACKETS.attributes, "]")
+                appendStyledSpan(FuncColor.BRACKETS.attributes, "]")
 
             }
 
             is FuncTensorType -> {
-                appendStyledSpan(FuncSyntaxHighlightingColors.PARENTHESES.attributes, "(")
+                appendStyledSpan(FuncColor.PARENTHESES.attributes, "(")
                 type.typeList.joinTo(this) {
                     buildString {
                         renderType(it)
                     }
                 }
-                appendStyledSpan(FuncSyntaxHighlightingColors.PARENTHESES.attributes, ")")
+                appendStyledSpan(FuncColor.PARENTHESES.attributes, ")")
             }
 
             is FuncHoleType -> {
                 if (type.text == "var") {
-                    appendStyledSpan(FuncSyntaxHighlightingColors.KEYWORD.attributes, "var")
+                    appendStyledSpan(FuncColor.KEYWORD.attributes, "var")
                 } else {
                     append("_")
                 }
@@ -228,6 +208,8 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
         }
     }
 }
+
+private const val NBSP = "&nbsp;"
 
 private fun StringBuilder.appendStyledSpan(
     attributes: TextAttributes,

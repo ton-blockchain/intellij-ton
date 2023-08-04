@@ -21,7 +21,7 @@ import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.flavours.gfm.GFMElementTypes
 import org.intellij.markdown.flavours.gfm.GFMTokenTypes
 import org.ton.intellij.func.FuncLanguage
-import org.ton.intellij.func.ide.FuncDocumentationProvider
+import org.ton.intellij.func.doc.FuncDocumentationProvider
 import org.ton.intellij.func.psi.FuncFunction
 
 class MarkdownNode(

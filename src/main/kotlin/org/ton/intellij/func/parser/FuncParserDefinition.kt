@@ -11,9 +11,12 @@ import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
 import org.ton.intellij.func.FuncFileElementType
+import org.ton.intellij.func.doc.FuncDocCommentElementType
 import org.ton.intellij.func.lexer.FuncLexer
+import org.ton.intellij.func.psi.FUNC_COMMENTS
 import org.ton.intellij.func.psi.FuncElementTypes
 import org.ton.intellij.func.psi.FuncFile
+import org.ton.intellij.func.psi.FuncTokenType
 
 class FuncParserDefinition : ParserDefinition {
     override fun createLexer(project: Project?): Lexer = FuncLexer()
@@ -22,7 +25,7 @@ class FuncParserDefinition : ParserDefinition {
 
     override fun getFileNodeType(): IFileElementType = FuncFileElementType
 
-    override fun getCommentTokens(): TokenSet = COMMENTS
+    override fun getCommentTokens(): TokenSet = FUNC_COMMENTS
 
     override fun getStringLiteralElements(): TokenSet = STRING_LITERALS
 
@@ -33,40 +36,16 @@ class FuncParserDefinition : ParserDefinition {
         FuncFile(viewProvider)
 
     companion object {
+        @JvmField
+        val BLOCK_COMMENT = FuncTokenType("<BLOCK_COMMENT>")
+        @JvmField
+        val EOL_COMMENT = FuncTokenType("<EOL_COMMENT>")
+        @JvmField
+        val BLOCK_DOC_COMMENT = FuncTokenType("<BLOCK_DOC_COMMENT>")
+        @JvmField
+        val EOL_DOC_COMMENT = FuncDocCommentElementType("<EOL_DOC_COMMENT>")
+
         val MACRO = TokenSet.create(FuncElementTypes.INCLUDE_MACRO, FuncElementTypes.PRAGMA_MACRO)
-        val KEYWORDS = TokenSet.create(
-            FuncElementTypes.RETURN_KEYWORD,
-            FuncElementTypes.VAR_KEYWORD,
-            FuncElementTypes.REPEAT_KEYWORD,
-            FuncElementTypes.DO_KEYWORD,
-            FuncElementTypes.WHILE_KEYWORD,
-            FuncElementTypes.UNTIL_KEYWORD,
-            FuncElementTypes.TRY_KEYWORD,
-            FuncElementTypes.CATCH_KEYWORD,
-            FuncElementTypes.IF_KEYWORD,
-            FuncElementTypes.IFNOT_KEYWORD,
-            FuncElementTypes.THEN_KEYWORD,
-            FuncElementTypes.ELSE_KEYWORD,
-            FuncElementTypes.ELSEIF_KEYWORD,
-            FuncElementTypes.ELSEIFNOT_KEYWORD,
-
-            FuncElementTypes.TYPE_KEYWORD,
-            FuncElementTypes.FORALL_KEYWORD,
-
-            FuncElementTypes.EXTERN_KEYWORD,
-            FuncElementTypes.GLOBAL_KEYWORD,
-            FuncElementTypes.ASM_KEYWORD,
-            FuncElementTypes.IMPURE_KEYWORD,
-            FuncElementTypes.INLINE_KEYWORD,
-            FuncElementTypes.INLINE_REF_KEYWORD,
-            FuncElementTypes.AUTO_APPLY_KEYWORD,
-            FuncElementTypes.METHOD_ID_KEYWORD,
-            FuncElementTypes.OPERATOR_KEYWORD,
-            FuncElementTypes.INFIX_KEYWORD,
-            FuncElementTypes.INFIXL_KEYWORD,
-            FuncElementTypes.INFIXR_KEYWORD,
-            FuncElementTypes.CONST_KEYWORD,
-        )
         val PRIMITIVE_TYPES = TokenSet.create(
             FuncElementTypes.INT_KEYWORD,
             FuncElementTypes.CELL_KEYWORD,
@@ -78,11 +57,9 @@ class FuncParserDefinition : ParserDefinition {
             FuncElementTypes.FALSE_KEYWORD,
         )
         val WHITESPACES = TokenSet.create(TokenType.WHITE_SPACE)
-        val COMMENTS =
-            TokenSet.create(FuncElementTypes.LINE_COMMENT, FuncElementTypes.BLOCK_COMMENT, FuncElementTypes.DOC_ELEMENT)
         val STRING_LITERALS = TokenSet.create(FuncElementTypes.STRING_LITERAL)
 
-        val WHITE_SPACE_OR_COMMENT_BIT_SET = TokenSet.orSet(COMMENTS, WHITESPACES);
+        val WHITE_SPACE_OR_COMMENT_BIT_SET = TokenSet.orSet(FUNC_COMMENTS, WHITESPACES);
         val OPERATORS = TokenSet.create(
             FuncElementTypes.PLUS,
             FuncElementTypes.MINUS,

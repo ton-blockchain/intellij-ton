@@ -17,7 +17,7 @@ class FuncFindUsagesProvider : FindUsagesProvider {
     override fun getWordsScanner(): WordsScanner = DefaultWordsScanner(
         FuncLexer(),
         TokenSet.create(FuncElementTypes.IDENTIFIER),
-        FuncParserDefinition.COMMENTS,
+        FUNC_COMMENTS,
         FuncParserDefinition.STRING_LITERALS
     )
 

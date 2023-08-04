@@ -19,7 +19,7 @@ import com.intellij.psi.util.elementType
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
 import org.intellij.markdown.parser.MarkdownParser
 import org.ton.intellij.func.FuncLanguage
-import org.ton.intellij.func.highlighting.FuncSyntaxHighlightingColors
+import org.ton.intellij.func.highlighting.FuncColor
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.impl.isImpure
 import org.ton.intellij.func.psi.impl.isMutable
@@ -86,8 +86,8 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
         if (originalElement !is FuncElement) return ""
         val result = LinkedList<String>()
         var element = originalElement.prevSibling
-        while (element.elementType == FuncElementTypes.DOC_ELEMENT || element is PsiWhiteSpace) {
-            if (element.elementType == FuncElementTypes.DOC_ELEMENT) {
+        while (element.elementType in FUNC_DOC_COMMENTS || element is PsiWhiteSpace) {
+            if (element.elementType in FUNC_DOC_COMMENTS) {
                 val commentText = element.text.replaceFirst("[!; ]+".toRegex(), "")
                 result.add(commentText)
             }
@@ -149,7 +149,7 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
     ) {
         val typeParameterList = function.typeParameterList
         if (typeParameterList.isNotEmpty()) {
-            appendStyledSpan(FuncSyntaxHighlightingColors.KEYWORD.attributes, "forall")
+            appendStyledSpan(FuncColor.KEYWORD.attributes, "forall")
             append(NBSP)
             typeParameterList.joinTo(this) {
                 buildString {
@@ -165,17 +165,17 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
         if (function.isMutable) {
             append("~")
         }
-        appendStyledSpan(FuncSyntaxHighlightingColors.FUNCTION_DECLARATION.attributes, function.name)
-        appendStyledSpan(FuncSyntaxHighlightingColors.PARENTHESES.attributes, "(")
+        appendStyledSpan(FuncColor.FUNCTION_DECLARATION.attributes, function.name)
+        appendStyledSpan(FuncColor.PARENTHESES.attributes, "(")
         function.functionParameterList.joinTo(this) { param ->
             buildString {
                 renderFunctionParameter(param)
             }
         }
-        appendStyledSpan(FuncSyntaxHighlightingColors.PARENTHESES.attributes, ")")
+        appendStyledSpan(FuncColor.PARENTHESES.attributes, ")")
         if (function.isImpure) {
             append(NBSP)
-            appendStyledSpan(FuncSyntaxHighlightingColors.KEYWORD.attributes, "impure")
+            appendStyledSpan(FuncColor.KEYWORD.attributes, "impure")
         }
     }
 
@@ -198,7 +198,7 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
     fun StringBuilder.renderTypeParameter(
         typeParameter: FuncTypeParameter,
     ) {
-        appendStyledSpan(FuncSyntaxHighlightingColors.TYPE_PARAMETER.attributes, typeParameter.name)
+        appendStyledSpan(FuncColor.TYPE_PARAMETER.attributes, typeParameter.name)
     }
 
     fun StringBuilder.renderType(
@@ -206,35 +206,35 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
     ) {
         when (type) {
             is FuncTypeIdentifier ->
-                appendStyledSpan(FuncSyntaxHighlightingColors.TYPE_PARAMETER.attributes, type.identifier.text)
+                appendStyledSpan(FuncColor.TYPE_PARAMETER.attributes, type.identifier.text)
 
             is FuncPrimitiveType ->
-                appendStyledSpan(FuncSyntaxHighlightingColors.KEYWORD.attributes, type.text)
+                appendStyledSpan(FuncColor.KEYWORD.attributes, type.text)
 
             is FuncTupleType -> {
-                appendStyledSpan(FuncSyntaxHighlightingColors.BRACKETS.attributes, "[")
+                appendStyledSpan(FuncColor.BRACKETS.attributes, "[")
                 type.tupleTypeItemList.joinTo(this) {
                     buildString {
                         renderType(it.type)
                     }
                 }
-                appendStyledSpan(FuncSyntaxHighlightingColors.BRACKETS.attributes, "]")
+                appendStyledSpan(FuncColor.BRACKETS.attributes, "]")
 
             }
 
             is FuncTensorType -> {
-                appendStyledSpan(FuncSyntaxHighlightingColors.PARENTHESES.attributes, "(")
+                appendStyledSpan(FuncColor.PARENTHESES.attributes, "(")
                 type.typeList.joinTo(this) {
                     buildString {
                         renderType(it)
                     }
                 }
-                appendStyledSpan(FuncSyntaxHighlightingColors.PARENTHESES.attributes, ")")
+                appendStyledSpan(FuncColor.PARENTHESES.attributes, ")")
             }
 
             is FuncHoleType -> {
                 if (type.text == "var") {
-                    appendStyledSpan(FuncSyntaxHighlightingColors.KEYWORD.attributes, "var")
+                    appendStyledSpan(FuncColor.KEYWORD.attributes, "var")
                 } else {
                     append("_")
                 }

@@ -342,7 +342,7 @@ InvExpression ::= '~' Expression
 
 CallExpression ::= ReferenceExpression &('(' | IDENTIFIER) CallArgument
 DotExpression ::= Expression '.' MethodCall
-ModifyExpression ::= Expression '~' MethodCall
+ModifyExpression ::= Expression MethodCall
 MethodCall ::= ReferenceExpression CallArgument
 
 CallArgument ::= Expr100_group

@@ -143,12 +143,9 @@ HEX_INTEGER_LITERAL=0[Xx]({HEX_DIGIT_OR_UNDERSCORE})*
 BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
 
 
-PLAIN_IDENTIFIER=([a-zA-Z_$?:'][0-9a-zA-Z_$?:']*)
-PLAIN_IDENTIFIER_WITH_MINUS=([a-zA-Z_$?:'][0-9a-zA-Z_$?:']+[-0-9a-zA-Z_$?:']+[0-9a-zA-Z_$?:']+)
-//PLAIN_IDENTIFIER=[.~]?[^\ \n\t\f.~;,()\[\]\"]+
-//PLAIN_IDENTIFIER=[~.]?[^\t\f\n\ .~;,()\[\]\"{}]+
+PLAIN_IDENTIFIER=([a-zA-Z_$?:'][0-9a-zA-Z_$?:'+\-\=\^><&|/%]*)
 ESCAPED_IDENTIFIER = [.~]?`[^`\n]+`
-IDENTIFIER = {PLAIN_IDENTIFIER_WITH_MINUS}|{PLAIN_IDENTIFIER}|{ESCAPED_IDENTIFIER}
+IDENTIFIER = {PLAIN_IDENTIFIER}|{ESCAPED_IDENTIFIER}
 
 // ANY_ESCAPE_SEQUENCE = \\[^]
 THREE_QUO = (\"\"\")
@@ -165,6 +162,8 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
 
 %%
 <YYINITIAL> {
+      {WHITE_SPACE}            { return WHITE_SPACE; }
+
       \"                       { pushState(STRING); return OPEN_QUOTE; }
 
       "+"                      { return PLUS; }
@@ -273,12 +272,13 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
                                  zzPostponedMarkedPos = zzStartRead; }
       ";;" .*                  { return EOL_COMMENT; }
 
-      {IDENTIFIER}             { return IDENTIFIER; }
+      {IDENTIFIER}             {
+          return IDENTIFIER;
+      }
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
       {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }
 
-      {WHITE_SPACE}            { return WHITE_SPACE; }
 }
 
 <RAW_STRING> \n                  { return FuncElementTypes.RAW_STRING_ELEMENT; }

@@ -16,7 +16,11 @@ class FuncParameterHintsProvider : InlayParameterHintsProvider {
         when (element) {
             is FuncCallExpression -> {
                 function = element.referenceExpression.resolveFunction() ?: return emptyList()
-                argumentOffset = 0
+                argumentOffset = if (element.referenceExpression.name?.getOrNull(0) == '~') {
+                    1
+                } else {
+                    0
+                }
                 arguments = element.callArgument.toArgList()
             }
 

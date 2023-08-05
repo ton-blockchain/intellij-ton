@@ -13,7 +13,12 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
         override fun visitCallExpression(o: FuncCallExpression) {
             super.visitCallExpression(o)
             val function = o.referenceExpression.reference?.resolve() as? FuncFunction ?: return
-            holder.check(function, o.callArgument, false)
+            val isMethodCall = if (o.referenceExpression.name?.getOrNull(0) == '~') {
+                true
+            } else {
+                false
+            }
+            holder.check(function, o.callArgument, isMethodCall)
         }
 
         override fun visitMethodCall(o: FuncMethodCall) {

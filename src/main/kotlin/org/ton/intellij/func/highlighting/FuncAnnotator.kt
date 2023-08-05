@@ -49,31 +49,43 @@ class FuncAnnotator : Annotator {
             }
 
             is FuncReferenceExpression -> {
-                if (element.node.treeParent.elementType == FuncElementTypes.CALL_EXPRESSION) {
-                    highlight(
-                        element.identifier,
-                        holder,
-                        FuncColor.FUNCTION_STATIC.textAttributesKey
-                    )
-                } else {
-                    val resolved = element.reference?.resolve() ?: element
-                    var color: TextAttributesKey? = null
-                    PsiTreeUtil.treeWalkUp(resolved, null) { scope, _ ->
-                        color = when (scope) {
-                            is FuncBlockStatement -> FuncColor.LOCAL_VARIABLE.textAttributesKey
-                            is FuncConstVar -> FuncColor.CONSTANT.textAttributesKey
-                            is FuncGlobalVar -> FuncColor.GLOBAL_VARIABLE.textAttributesKey
-                            is FuncFunctionParameter -> FuncColor.PARAMETER.textAttributesKey
-                            else -> null
-                        }
-                        color == null
-                    }
-                    color?.let {
+                when (element.node.treeParent.elementType) {
+                    FuncElementTypes.CALL_EXPRESSION -> {
                         highlight(
                             element.identifier,
                             holder,
-                            it
+                            FuncColor.FUNCTION_STATIC.textAttributesKey
                         )
+                    }
+
+                    FuncElementTypes.METHOD_CALL -> {
+                        highlight(
+                            element.identifier,
+                            holder,
+                            FuncColor.FUNCTION_CALL.textAttributesKey
+                        )
+                    }
+
+                    else -> {
+                        val resolved = element.reference?.resolve() ?: element
+                        var color: TextAttributesKey? = null
+                        PsiTreeUtil.treeWalkUp(resolved, null) { scope, _ ->
+                            color = when (scope) {
+                                is FuncBlockStatement -> FuncColor.LOCAL_VARIABLE.textAttributesKey
+                                is FuncConstVar -> FuncColor.CONSTANT.textAttributesKey
+                                is FuncGlobalVar -> FuncColor.GLOBAL_VARIABLE.textAttributesKey
+                                is FuncFunctionParameter -> FuncColor.PARAMETER.textAttributesKey
+                                else -> null
+                            }
+                            color == null
+                        }
+                        color?.let {
+                            highlight(
+                                element.identifier,
+                                holder,
+                                it
+                            )
+                        }
                     }
                 }
                 return

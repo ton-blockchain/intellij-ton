@@ -10,36 +10,41 @@ class FuncParameterHintsProvider : InlayParameterHintsProvider {
     override fun getDefaultBlackList() = emptySet<String>()
 
     override fun getParameterHints(element: PsiElement): List<InlayInfo> {
-        if (element !is FuncCallExpression) return emptyList()
-        val expressionList = element.expressionList
-        val function = expressionList.firstOrNull()?.reference?.resolve() as? FuncFunction ?: return emptyList()
-        var arguments = expressionList.getOrNull(1)?.let {
-            when (it) {
-                is FuncTensorExpression -> it.expressionList
-                is FuncReferenceExpression, is FuncTupleExpression -> listOf(it)
-                else -> null
+        val function: FuncFunction
+        val argumentOffset: Int
+        val arguments: List<FuncExpression>
+        when (element) {
+            is FuncCallExpression -> {
+                function = element.referenceExpression.resolveFunction() ?: return emptyList()
+                argumentOffset = 0
+                arguments = element.callArgument.toArgList()
             }
-        } ?: return emptyList()
-        var parameters = function.functionParameterList
-        if (element.isQualified) {
-            val parent = element.parent
-            if (parent is FuncQualifiedExpression) {
-                arguments = listOf(parent.expressionList.first()) + arguments
-            } else {
-                if (parameters.isNotEmpty() && parameters.firstOrNull()?.atomicType is FuncTypeIdentifier) {
-                    parameters.removeFirst()
-                }
+
+            is FuncMethodCall -> {
+                function = element.referenceExpression.resolveFunction() ?: return emptyList()
+                argumentOffset = 1
+                arguments = element.callArgument.toArgList()
             }
+
+            else -> return emptyList()
         }
+        val parameters = function.functionParameterList
         val result = ArrayList<InlayInfo>()
-        for ((index, funcExpression) in arguments.withIndex()) {
-            if (index == 0 && element.isQualified && element.parent is FuncQualifiedExpression) continue
-            val parameter = parameters.getOrNull(index) ?: return result
+        arguments.forEachIndexed { index, funcExpression ->
+            val parameter = parameters.getOrNull(index + argumentOffset) ?: return result
             val parameterName = parameter.name
             if (parameterName != null) {
                 result.add(InlayInfo(parameterName, funcExpression.textOffset))
             }
         }
         return result
+    }
+
+    private fun FuncReferenceExpression.resolveFunction() = reference?.resolve() as? FuncFunction
+    private fun FuncCallArgument.toArgList() = expression.toArgList()
+    private fun FuncExpression.toArgList() = if (this is FuncTensorExpression) {
+        this.expressionList
+    } else {
+        listOf(this)
     }
 }

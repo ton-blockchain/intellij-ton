@@ -30,7 +30,7 @@ class FuncReference(
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {
-        identifier.replace(FuncElementFactory[element.project].createIdentifierFromText(newElementName))
+        identifier.replace(FuncPsiFactory[element.project].createIdentifierFromText(newElementName))
         return element
     }
 
@@ -64,7 +64,7 @@ class FuncReference(
                 if (!processFile(stdlibFile, processor, state, processedFiles)) return false
             }
         }
-        if (!processFile(FuncElementFactory[file.project].builtinStdlibFile, processor, state, HashSet())) return false
+        if (!processFile(FuncPsiFactory[file.project].builtinStdlibFile, processor, state, HashSet())) return false
         return true
     }
 
@@ -102,7 +102,7 @@ class FuncReference(
                     if (child == prevParent) return true
                 }
             }
-            if (scope is FuncCatchStatement) {
+            if (scope is FuncCatch) {
                 val expression = scope.expression ?: return true
                 val processResult = PsiTreeUtil.processElements(expression) {
                     delegate.execute(it, state)

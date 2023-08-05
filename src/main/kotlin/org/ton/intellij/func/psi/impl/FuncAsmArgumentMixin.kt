@@ -9,8 +9,8 @@ import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.impl.source.resolve.ResolveCache
 import com.intellij.psi.util.PsiTreeUtil
 import org.ton.intellij.func.psi.FuncAsmArgument
-import org.ton.intellij.func.psi.FuncElementFactory
 import org.ton.intellij.func.psi.FuncFunction
+import org.ton.intellij.func.psi.FuncPsiFactory
 
 abstract class FuncAsmArgumentMixin(node: ASTNode) : ASTWrapperPsiElement(node), FuncAsmArgument {
     override fun getReferences(): Array<PsiReference> = arrayOf(FuncAsmArgumentReference(this))
@@ -37,7 +37,7 @@ class FuncAsmArgumentReference(element: FuncAsmArgument) :
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {
-        myElement.identifier.replace(FuncElementFactory[myElement.project].createIdentifierFromText(newElementName))
+        myElement.identifier.replace(FuncPsiFactory[myElement.project].createIdentifierFromText(newElementName))
         return myElement
     }
 }

@@ -26,7 +26,7 @@ abstract class FuncReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
 //        }
         return PsiTreeUtil.treeWalkUp(this, null) { scope, prevParent ->
             when (scope) {
-                is FuncCatchStatement -> {
+                is FuncCatch -> {
                     if (scope.expression == prevParent) return@treeWalkUp false
                 }
 
@@ -52,7 +52,7 @@ abstract class FuncReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
     override fun getReference(): FuncReference? = references.firstOrNull()
 
     override fun setName(name: String): PsiElement {
-        identifier.replace(FuncElementFactory[project].createIdentifierFromText(name))
+        identifier.replace(FuncPsiFactory[project].createIdentifierFromText(name))
         return this
     }
 

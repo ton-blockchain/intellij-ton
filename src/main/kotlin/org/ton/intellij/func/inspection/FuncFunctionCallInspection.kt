@@ -12,58 +12,56 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
     ) = object : FuncVisitor() {
         override fun visitCallExpression(o: FuncCallExpression) {
             super.visitCallExpression(o)
-            val expressionList = o.expressionList
-            val function = expressionList.firstOrNull()?.reference?.resolve() as? FuncFunction ?: return
-            var arguments = expressionList.getOrNull(1)?.let {
-                when (it) {
-                    is FuncTensorExpression -> it.expressionList
-                    is FuncReferenceExpression, is FuncTupleExpression -> listOf(it)
-                    else -> null
-                }
-            } ?: return
-            var parameters = function.functionParameterList
-            if (o.isQualified) {
-                val parent = o.parent
-                if (parent is FuncQualifiedExpression) {
-                    arguments = listOf(parent.expressionList.first()) + arguments
-                } else {
-                    if (parameters.isNotEmpty() && parameters.firstOrNull()?.atomicType is FuncTypeIdentifier) {
-                        parameters.removeFirst()
-                    }
-                }
+            val function = o.referenceExpression.reference?.resolve() as? FuncFunction ?: return
+            holder.check(function, o.callArgument, false)
+        }
+
+        override fun visitMethodCall(o: FuncMethodCall) {
+            super.visitMethodCall(o)
+            val function = o.referenceExpression.reference?.resolve() as? FuncFunction ?: return
+            holder.check(function, o.callArgument, true)
+        }
+    }
+
+    private fun ProblemsHolder.check(function: FuncFunction, argument: FuncCallArgument, isMethodCall: Boolean) {
+        val arguments = argument.expression.let {
+            if (it is FuncTensorExpression) it.expressionList
+            else listOf(it)
+        }
+        val parameters = function.functionParameterList
+
+        var actualSize = arguments.size
+        var expectedSize = if (isMethodCall) {
+            parameters.size - 1
+        } else {
+            parameters.size
+        }
+        if (actualSize == expectedSize) return
+        if (actualSize > expectedSize) {
+            for (i in expectedSize until actualSize) {
+                tooManyArguments(arguments[i])
             }
-            var actualSize = arguments.size
-            var expectedSize = parameters.size
-            if (actualSize == expectedSize) return
-            if (actualSize > expectedSize) {
-                for (i in expectedSize until actualSize) {
-                    tooManyArguments(arguments[i], holder)
-                }
-            }
-            if (expectedSize > actualSize) {
-                val highlightArgument =
-                    when {
-                        o.isQualified && arguments.size == 1 && expressionList.isNotEmpty() -> expressionList.last()
-                        arguments.isNotEmpty() -> arguments.last()
-                        else -> expressionList.last()
-                    }
-                for (i in actualSize until expectedSize) {
-                    noValueForParameter(highlightArgument, parameters[i], holder)
-                }
+        }
+        if (expectedSize > actualSize) {
+            val highlightArgument = arguments.lastOrNull() ?: argument
+            expectedSize += if (isMethodCall) 1 else 0
+            actualSize += if (isMethodCall) 1 else 0
+            for (i in actualSize until expectedSize) {
+                noValueForParameter(highlightArgument, parameters[i])
             }
         }
     }
 
-    private fun tooManyArguments(element: PsiElement, holder: ProblemsHolder) {
-        holder.registerProblem(element, "Too many arguments")
+    private fun ProblemsHolder.tooManyArguments(element: PsiElement) {
+        registerProblem(element, "Too many arguments")
     }
 
-    private fun noValueForParameter(element: PsiElement, parameter: FuncFunctionParameter, holder: ProblemsHolder) {
+    private fun ProblemsHolder.noValueForParameter(element: PsiElement, parameter: FuncFunctionParameter) {
         val name = parameter.name
         if (name != null) {
-            holder.registerProblem(element, "No value for parameter `$name`")
+            registerProblem(element, "No value for parameter `$name`")
         } else {
-            holder.registerProblem(element, "Not enough arguments")
+            registerProblem(element, "Not enough arguments")
         }
     }
 }

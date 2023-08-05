@@ -8,7 +8,7 @@ import org.intellij.lang.annotations.Language
 import org.ton.intellij.func.FuncLanguage
 
 @Service(Service.Level.PROJECT)
-class FuncElementFactory(val project: Project) {
+class FuncPsiFactory private constructor(val project: Project) {
     val builtinStdlibFile by lazy {
         createFileFromText(
             "builtin.fc", """
@@ -101,6 +101,15 @@ class FuncElementFactory(val project: Project) {
     fun createFileFromText(name: String?, @Language("FunC") text: String) =
         PsiFileFactory.getInstance(project).createFileFromText(name ?: "dummy.fc", FuncLanguage, text) as FuncFile
 
+    fun createStatement(text: String): FuncStatement {
+        val file = createFileFromText("() foo() { $text }")
+        return file.functions.first().blockStatement!!.statementList.first()
+    }
+
+    fun createExpression(text: String): FuncExpression {
+        return (createStatement("$text;") as FuncExpressionStatement).expression
+    }
+
     fun createIdentifierFromText(text: String): PsiElement {
         val funcFile = createFileFromText("() $text();")
         val function = funcFile.functions.first()
@@ -109,6 +118,6 @@ class FuncElementFactory(val project: Project) {
 
     companion object {
         operator fun get(project: Project) =
-            requireNotNull(project.getService(FuncElementFactory::class.java))
+            requireNotNull(project.getService(FuncPsiFactory::class.java))
     }
 }

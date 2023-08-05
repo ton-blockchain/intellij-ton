@@ -2,8 +2,8 @@ package org.ton.intellij.func.psi.impl
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.AbstractElementManipulator
-import org.ton.intellij.func.psi.FuncElementFactory
 import org.ton.intellij.func.psi.FuncIncludeDefinition
+import org.ton.intellij.func.psi.FuncPsiFactory
 
 class FuncIncludePathElementManipulator : AbstractElementManipulator<FuncIncludeDefinition>() {
     override fun handleContentChange(
@@ -13,7 +13,7 @@ class FuncIncludePathElementManipulator : AbstractElementManipulator<FuncInclude
     ): FuncIncludeDefinition {
         val newText = range.replace(element.text, newContent)
         val newStringLiteral =
-            FuncElementFactory[element.project].createFileFromText(newText).includeDefinitions.first().stringLiteral
+            FuncPsiFactory[element.project].createFileFromText(newText).includeDefinitions.first().stringLiteral
         element.stringLiteral.replace(newStringLiteral)
         return element
     }

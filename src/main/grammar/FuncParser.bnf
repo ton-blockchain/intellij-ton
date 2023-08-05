@@ -136,7 +136,7 @@ private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelDefinition {
     recoverWhile = TopLevelDefinition_recover
 }
 private TopLevelDefinition_recover ::= !TopLevelDefinition_first
-private TopLevelDefinition_first ::= '#include' | '#pragma' | 'global' | 'const' | 'forall' | '_' | '('  | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple'
+private TopLevelDefinition_first ::= '#include' | '#pragma' | 'global' | 'const' | 'forall' | '_' | '('  | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'var'
 
 private macro ::= IncludeDefinition | PragmaDefinition
 RawString ::= RAW_STRING_ELEMENT*
@@ -186,10 +186,15 @@ IncludeDefinition ::= '#include' StringLiteral ';' {
 PragmaDefinition ::= PragmaDefinitionPart ';'
 PragmaKey ::= IDENTIFIER
 PragmaValue ::= StringLiteral | IntegerExpression
-private PragmaDefinitionPart ::= '#pragma' PragmaKey PragmaValue  {
+private PragmaDefinitionPart ::= '#pragma' (PragmaVersion | PragmaKeyValue)  {
     pin = 1
     recoverWhile = UntilSemicolonRecover
 }
+PragmaKeyValue ::= PragmaKey PragmaValue
+PragmaVersion ::= ("version" | "not-version") ('^'|'>'|'<'|'='|'<='|'>=')? PragmaSemiVersion {
+    pin=1
+}
+PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
 Function ::= TypeParameterList? Type FunctionIdentifier FunctionParameterList 'impure'? ('inline' | 'inline_ref')? MethodIdDefinition? (';' | AsmDefinition | BlockStatement) {
     pin=3
@@ -227,7 +232,7 @@ private MethodIdArgument ::= '(' (StringLiteral | INTEGER_LITERAL) ')' {pin=1}
 
 private FunctionIdentifier ::= ('~'|'.')? IDENTIFIER
 
-Statement ::= ReturnStatement | BlockStatement | RepeatStatement | IfStatement | IfNotStatement | DoStatement | WhileStatement | TryStatement | ExpressionStatement
+Statement ::= ReturnStatement | BlockStatement | RepeatStatement | IfStatement | DoStatement | WhileStatement | TryStatement | ExpressionStatement
 ExpressionStatement ::= Expression ';' {
     pin=1
     recoverWhile=BlockStatement_recovery
@@ -248,31 +253,23 @@ private BlockStatement_recovery ::= !('}' | IDENTIFIER | 'var' | 'return' | '{' 
 
 RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
 
-IfStatement ::= 'if' Expression BlockStatement BranchingStatement? {
-    pin=1
-}
-IfNotStatement ::= 'ifnot' Expression BlockStatement BranchingStatement? {
+IfStatement ::= ('if' | 'ifnot') Condition BlockStatement (Else | ElseIf)? {
     pin=1
 }
 
-BranchingStatement ::= ElseStatement | ElseIfStatement | ElseIfNotStatement
-ElseStatement ::= 'else' BlockStatement {
+Condition ::= Expression
+
+Else ::= 'else' BlockStatement {
     pin=1
-    extends=BranchingStatement
 }
-ElseIfStatement ::= 'elseif' Expression BlockStatement BranchingStatement? {
+ElseIf ::= ('elseif' | 'elseifnot') Condition BlockStatement (Else | ElseIf)? {
     pin=1
-    extends=BranchingStatement
-}
-ElseIfNotStatement ::= 'elseifnot' Expression BlockStatement BranchingStatement? {
-    pin=1
-    extends=BranchingStatement
 }
 
-DoStatement ::= 'do' BlockStatement 'until' Expression ';' {pin=1}
-WhileStatement ::= 'while' Expression BlockStatement {pin=1}
-TryStatement ::= 'try' BlockStatement CatchStatement {pin=1}
-CatchStatement ::= 'catch' Expression BlockStatement {
+DoStatement ::= 'do' BlockStatement 'until' Condition ';' {pin=1}
+WhileStatement ::= 'while' Condition BlockStatement {pin=1}
+TryStatement ::= 'try' BlockStatement Catch {pin=1}
+Catch ::= 'catch' Expression BlockStatement {
     pin=1
 }
 
@@ -283,7 +280,8 @@ Expression ::= AssignExpression
     | UnaryExpression_group
     | AddExpression_group
     | MulExpression_group
-    | QualifiedExpression
+    | DotExpression
+    | ModifyExpression
     | CallExpression
     | InvExpression
     | VarExpression
@@ -338,23 +336,20 @@ DivRExpression ::= Expression '~/' Expression
 ModCExpression ::= Expression '^%' Expression
 ModRExpression ::= Expression '~%' Expression
 AndExpression ::= Expression '&' Expression
-InvExpression ::= '~' Expression {
-    pin=1
-}
-QualifiedExpression ::= Expression (DotQualifiedCall | (&'~' CallExpression))
-private DotQualifiedCall ::= '.' !'~' CallExpression {
-    pin=1
-}
-CallExpression ::= '~'? ReferenceExpression CallArgument {
+InvExpression ::= '~' Expression
 
-}
-private CallArgument ::= TupleExpression | TensorExpression | (ReferenceExpression !('('|'['|'~'|'.'))
+CallExpression ::= ReferenceExpression &('(' | IDENTIFIER) CallArgument
+DotExpression ::= Expression '.' MethodCall
+ModifyExpression ::= Expression '~' MethodCall
+MethodCall ::= ReferenceExpression CallArgument
+
+CallArgument ::= Expr100_group
 
 TensorExpression ::= '(' [ TensorElements ] ')' {
     pin=1
     extends=Expression
 }
-private TensorElements ::= Expression (',' Expression)* {
+private TensorElements ::= Expression (!'(' ',' Expression)* {
     recoverWhile=TensorElements_recovery
 }
 private TensorElements_recovery ::= !(')'|';'|'{'|'}')

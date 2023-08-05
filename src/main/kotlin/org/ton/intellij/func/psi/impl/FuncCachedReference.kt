@@ -6,7 +6,7 @@ import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.impl.source.resolve.ResolveCache
 import com.intellij.psi.impl.source.resolve.ResolveCache.AbstractResolver
 import com.intellij.util.ArrayUtil
-import org.ton.intellij.func.psi.FuncElementFactory
+import org.ton.intellij.func.psi.FuncPsiFactory
 
 abstract class FuncCachedReference<T : PsiElement>(
     element: T,
@@ -23,7 +23,7 @@ abstract class FuncCachedReference<T : PsiElement>(
     protected abstract fun resolveInner(): PsiElement?
 
     override fun handleElementRename(newElementName: String): PsiElement {
-        myElement.replace(FuncElementFactory[myElement.project].createIdentifierFromText(newElementName))
+        myElement.replace(FuncPsiFactory[myElement.project].createIdentifierFromText(newElementName))
         return myElement
     }
 

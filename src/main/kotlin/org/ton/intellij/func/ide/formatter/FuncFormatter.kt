@@ -119,7 +119,7 @@ class FuncFormatter : FormattingModelBuilder {
             .aroundInside(MODR, MOD_R_EXPRESSION).spaces(1)
             .aroundInside(AND, AND_EXPRESSION).spaces(1)
             .afterInside(MINUS, UNARY_MINUS_EXPRESSION).none()
-            .aroundInside(TokenSet.create(TILDE, DOT), QUALIFIED_EXPRESSION).none()
+//            .aroundInside(TokenSet.create(TILDE, DOT), QUALIFIED_EXPRESSION).none()
             .afterInside(TILDE, INV_EXPRESSION).spaces(1)
             .aroundInside(TokenSet.create(REFERENCE_EXPRESSION), VAR_EXPRESSION).spaces(1)
             .afterInside(

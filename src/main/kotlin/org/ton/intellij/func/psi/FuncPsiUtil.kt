@@ -20,9 +20,10 @@ object FuncPsiUtil {
 
 val FuncCallExpression.isQualified: Boolean
     get() {
-        if (tilde != null) return true
+//        if (tilde != null) return true
         val parent = parent
-        if (parent !is FuncQualifiedExpression) return false
-        val expressionList = parent.expressionList
-        return expressionList.size == 2 && expressionList.last() == this
+//        if (parent !is FuncQualifiedExpression) return false
+//        val expressionList = parent.expressionList
+//        return expressionList.size == 2 && expressionList.last() == this
+        return false
     }

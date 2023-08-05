@@ -129,7 +129,7 @@ class FuncFormattingBlock(
         if (parentType == BLOCK_STATEMENT) return indentIfNotBrace(child)
         if (parentType == TENSOR_EXPRESSION && type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
         if (type == PRIMITIVE_TYPE_EXPRESSION || type == HOLE_TYPE_EXPRESSION) return Indent.getNoneIndent()
-        if (parentType == QUALIFIED_EXPRESSION && (type == DOT || type == TILDE)) return Indent.getContinuationWithoutFirstIndent()
+//        if (parentType == QUALIFIED_EXPRESSION && (type == DOT || type == TILDE)) return Indent.getContinuationWithoutFirstIndent()
 //        if (parentType == ASSIGN_EXPRESSION) return Indent.getContinuationWithoutFirstIndent(true)
 //        if (parentType == QUALIFIED_EXPRESSION && type != QUALIFIED_EXPRESSION) {
 //            return Indent.getContinuationWithoutFirstIndent()
@@ -142,10 +142,10 @@ class FuncFormattingBlock(
     private fun calcWrap(child: ASTNode): Wrap? {
         val type = child.elementType
         val parentType = child.treeParent.elementType
-        if ((type == DOT || type == TILDE) && parentType == QUALIFIED_EXPRESSION) return Wrap.createWrap(
-            WrapType.NORMAL,
-            false
-        )
+//        if ((type == DOT || type == TILDE) && parentType == QUALIFIED_EXPRESSION) return Wrap.createWrap(
+//            WrapType.NORMAL,
+//            false
+//        )
         return null
     }
 

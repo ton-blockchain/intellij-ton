@@ -144,8 +144,10 @@ BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
 
 
 PLAIN_IDENTIFIER=([a-zA-Z_$?:'~][0-9a-zA-Z_$?:'+\-\=\^><&|/%]*)
-ESCAPED_IDENTIFIER = [.~]?`[^`\n]+`
-IDENTIFIER = {PLAIN_IDENTIFIER}|{ESCAPED_IDENTIFIER}
+QUOTE_ESCAPED_IDENTIFIER = [.~]?`[^`\n]+`
+UNDERSCORE_ESCAPED_IDENTIFIER = [.~\^]?_[^\s]+_
+OPERATOR_IDENTIFIER = _\+_|_-_|-_|_\*_|_\/_|_\~\/_|_\^\/_|_%_|_\~%_|_\^%_|_\/%_|_<<_|_>>_|_\~>>_|_\^>>_|_&_|_\|_|_\^_|\~_|\^_\+=_|\^_-=_|\^_\*=_|_==_|_\!=_
+IDENTIFIER = {OPERATOR_IDENTIFIER}|{PLAIN_IDENTIFIER}|{QUOTE_ESCAPED_IDENTIFIER}
 
 // ANY_ESCAPE_SEQUENCE = \\[^]
 THREE_QUO = (\"\"\")
@@ -272,13 +274,13 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
                                  zzPostponedMarkedPos = zzStartRead; }
       ";;" .*                  { return EOL_COMMENT; }
 
-      {IDENTIFIER}             {
-          return IDENTIFIER;
-      }
+
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
       {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }
-
+      {IDENTIFIER}             {
+          return IDENTIFIER;
+      }
 }
 
 <RAW_STRING> \n                  { return FuncElementTypes.RAW_STRING_ELEMENT; }

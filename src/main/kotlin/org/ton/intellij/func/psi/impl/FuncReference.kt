@@ -38,9 +38,21 @@ class FuncReference(
         return PsiScopeProcessor { element, state ->
             if (element == myElement) return@PsiScopeProcessor !result.add(PsiElementResolveResult(element))
             val name = (element as? FuncNamedElement)?.name
-            if (name != null && myElement.identifier.textMatches(name)) {
-                result.add(PsiElementResolveResult(element))
-                false
+            val elementName = myElement.identifier.text
+            if (name != null) {
+                when {
+                    elementName == name -> {
+                        result.add(PsiElementResolveResult(element))
+                        false
+                    }
+
+                    name.firstOrNull() != '~' && elementName == "~$name" -> {
+                        result.add(PsiElementResolveResult(element))
+                        false
+                    }
+
+                    else -> true
+                }
             } else {
                 true
             }

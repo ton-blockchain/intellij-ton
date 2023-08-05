@@ -61,7 +61,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
 
     override fun generateRenderedDoc(comment: PsiDocCommentBase): String? {
         if (comment !is FuncDocComment) return null
-        return MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;")
+        return MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;", FuncDocMarkdownFlavourDescriptor())
     }
 
     private fun getComments(element: PsiElement?): PsiComment? {
@@ -69,7 +69,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     }
 
     private fun getCommentText(comment: PsiComment): String {
-        return MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;")
+        return MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;", FuncDocMarkdownFlavourDescriptor())
     }
 
     fun renderElement(element: PsiElement?, context: PsiElement?): String? {

@@ -52,9 +52,7 @@ class FuncDocCommentElementType(debugName: String) : ILazyParseableElementType(d
             }
         }
 
-        override fun createText(charSequence: CharSequence): LeafPsiElement = when (charSequence) {
-            else -> LeafPsiElement(DOC_TEXT, charSequence)
-        }
+        override fun createText(charSequence: CharSequence): LeafPsiElement = LeafPsiElement(DOC_TEXT, charSequence)
 
         override fun createGap(charSequence: CharSequence) = FuncDocGapImpl(DOC_GAP, charSequence)
 

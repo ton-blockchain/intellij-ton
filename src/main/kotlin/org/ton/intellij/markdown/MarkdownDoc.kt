@@ -10,6 +10,7 @@ import com.intellij.util.CharTable
 import com.intellij.util.text.CharArrayUtil
 import com.intellij.util.text.CharSequenceSubSequence
 import org.intellij.markdown.IElementType
+import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.intellij.markdown.html.HtmlGenerator
 import org.intellij.markdown.parser.MarkdownParser
@@ -92,9 +93,9 @@ class MarkdownDocAstBuilder private constructor(
         fun renderHtml(
             text: CharSequence,
             prefix: String,
+            flavour: MarkdownFlavourDescriptor,
         ): String {
             val textMap = MarkdownDocTextMap(text, prefix)
-            val flavour = CommonMarkFlavourDescriptor()
             val markdownRoot =
                 MarkdownParser(flavour).buildMarkdownTreeFromString(textMap.mappedText)
             return HtmlGenerator(textMap.mappedText, markdownRoot, flavour).generateHtml()

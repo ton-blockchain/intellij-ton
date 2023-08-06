@@ -12,7 +12,8 @@
         <lang.syntaxHighlighterFactory language="func"
                                        implementationClass="org.ton.intellij.func.highlighting.FuncSyntaxHighlighterFactory"/>
         <lang.commenter language="func" implementationClass="org.ton.intellij.func.FuncCommenter"/>
-        <lang.braceMatcher language="func" implementationClass="org.ton.intellij.func.FuncBraceMatcher"/>
+        <lang.braceMatcher language="func" implementationClass="org.ton.intellij.func.ide.FuncBraceMatcher"/>
+        <lang.quoteHandler language="func" implementationClass="org.ton.intellij.func.ide.FuncQuoteHandler"/>
         <lang.foldingBuilder language="func" implementationClass="org.ton.intellij.func.ide.FuncFoldingBuilder"/>
         <lang.findUsagesProvider language="func"
                                  implementationClass="org.ton.intellij.func.ide.FuncFindUsagesProvider"/>

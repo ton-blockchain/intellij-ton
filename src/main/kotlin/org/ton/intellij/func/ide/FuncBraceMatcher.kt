@@ -1,4 +1,4 @@
-package org.ton.intellij.func
+package org.ton.intellij.func.ide
 
 import com.intellij.codeInsight.hint.DeclarationRangeUtil
 import com.intellij.lang.BracePair

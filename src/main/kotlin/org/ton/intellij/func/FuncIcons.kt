@@ -10,4 +10,5 @@ object FuncIcons {
     val CONSTANT = AllIcons.Nodes.Constant
     val VARIABLE = AllIcons.Nodes.Variable
     val GLOBAL_VARIABLE = AllIcons.Nodes.Gvariable
+    val RECURSIVE_CALL = AllIcons.Gutter.RecursiveMethod
 }

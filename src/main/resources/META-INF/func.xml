@@ -11,7 +11,8 @@
                                implementationClass="org.ton.intellij.func.parser.FuncParserDefinition"/>
         <lang.syntaxHighlighterFactory language="func"
                                        implementationClass="org.ton.intellij.func.highlighting.FuncSyntaxHighlighterFactory"/>
-        <lang.commenter language="func" implementationClass="org.ton.intellij.func.FuncCommenter"/>
+        <lang.commenter language="func" implementationClass="org.ton.intellij.func.ide.FuncCommenter"/>
+
         <lang.braceMatcher language="func" implementationClass="org.ton.intellij.func.ide.FuncBraceMatcher"/>
         <lang.quoteHandler language="func" implementationClass="org.ton.intellij.func.ide.FuncQuoteHandler"/>
         <lang.foldingBuilder language="func" implementationClass="org.ton.intellij.func.ide.FuncFoldingBuilder"/>
@@ -47,6 +48,9 @@
 
         <annotator language="func" implementationClass="org.ton.intellij.func.highlighting.FuncAnnotator"/>
         <annotator language="func" implementationClass="org.ton.intellij.func.highlighting.FuncDocAnnotator"/>
+
+        <codeInsight.lineMarkerProvider language="func"
+                                        implementationClass="org.ton.intellij.func.ide.linemarker.FuncRecursiveCallLineMarkerProvider"/>
 
         <localInspection language="func" displayName="Unused function inspection" groupPath="FunC"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"

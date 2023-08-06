@@ -1,15 +1,20 @@
 package org.ton.intellij.util
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 
 val org.intellij.markdown.ast.ASTNode.textRange: TextRange
     get() = TextRange(startOffset, endOffset)
+
+val PsiFile.document: Document?
+    get() = viewProvider.document
 
 inline fun <reified T : PsiElement> PsiElement.ancestorStrict(): T? =
     PsiTreeUtil.getParentOfType(this, T::class.java, /* strict */ true)

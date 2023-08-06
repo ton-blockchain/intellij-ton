@@ -1,4 +1,4 @@
-package org.ton.intellij.func
+package org.ton.intellij.func.ide
 
 import com.intellij.application.options.CodeStyle
 import com.intellij.codeInsight.generation.CommenterDataHolder
@@ -11,6 +11,7 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
 import com.intellij.util.text.CharArrayUtil
+import org.ton.intellij.func.FuncLanguage
 import org.ton.intellij.func.parser.FuncParserDefinition.Companion.BLOCK_COMMENT
 
 data class CommentHolder(val file: PsiFile) : CommenterDataHolder() {

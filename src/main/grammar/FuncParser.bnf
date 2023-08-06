@@ -343,7 +343,9 @@ InvExpression ::= '~' Expression
 CallExpression ::= ReferenceExpression &('(' | IDENTIFIER) CallArgument
 DotExpression ::= Expression '.' MethodCall
 ModifyExpression ::= Expression MethodCall
-MethodCall ::= ReferenceExpression CallArgument
+MethodCall ::= ReferenceExpression CallArgument {
+    pin=1
+}
 
 CallArgument ::= Expr100_group
 

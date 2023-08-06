@@ -23,7 +23,7 @@ class FuncParameterHintsProvider : InlayParameterHintsProvider {
             is FuncMethodCall -> {
                 function = element.referenceExpression.resolveFunction() ?: return emptyList()
                 argumentOffset = 1
-                arguments = element.callArgument.toArgList()
+                arguments = element.callArgument?.toArgList() ?: return emptyList()
             }
 
             else -> return emptyList()

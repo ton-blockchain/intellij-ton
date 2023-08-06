@@ -19,7 +19,7 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
         override fun visitMethodCall(o: FuncMethodCall) {
             super.visitMethodCall(o)
             val function = o.referenceExpression.reference?.resolve() as? FuncFunction ?: return
-            holder.check(function, o.callArgument, true)
+            holder.check(function, o.callArgument ?: return, true)
         }
     }
 
@@ -31,7 +31,12 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
         val parameters = function.functionParameterList
 
         var actualSize = arguments.size
+        // if parameters.size - 1 == -1, this is situation if try call a.foo(), when foo() doesn't have parameters
         var expectedSize = if (isMethodCall) {
+            if (parameters.size == 0) {
+                tooManyArguments(argument)
+                return
+            }
             parameters.size - 1
         } else {
             parameters.size

@@ -139,8 +139,8 @@ class FuncPsiFactory private constructor(val project: Project) {
             ;;; Dump variable [x] to the debug log.
             forall X -> (X, ()) ~dump(X x) impure asm "s0 DUMP";
             
-            ;;; Dump string to the debug log.
-            forall X -> (X, ()) ~strdump(X x, slice str) impure asm "STRDUMP";
+            ;;; Dump string [x] to the debug log.
+            forall X -> (X, ()) ~strdump(X x) impure asm "STRDUMP";
             
             () run_method0(int id) impure asm "0 CALLXARGS";
             

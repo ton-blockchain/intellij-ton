@@ -27,6 +27,10 @@ class FuncCompletionContributor : CompletionContributor() {
         )
     }
 
+    fun extend(provider: FuncCompletionProvider) {
+        extend(CompletionType.BASIC, provider.elementPattern, provider)
+    }
+
     private fun referenceExpression() =
         psiElement().withParent(FuncReferenceExpression::class.java)
 

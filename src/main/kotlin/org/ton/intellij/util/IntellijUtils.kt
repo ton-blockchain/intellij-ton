@@ -8,7 +8,11 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.tree.IElementType
+import com.intellij.psi.tree.TokenSet
 import com.intellij.psi.util.PsiTreeUtil
+
+fun tokenSetOf(vararg tokens: IElementType) = TokenSet.create(*tokens)
 
 val org.intellij.markdown.ast.ASTNode.textRange: TextRange
     get() = TextRange(startOffset, endOffset)

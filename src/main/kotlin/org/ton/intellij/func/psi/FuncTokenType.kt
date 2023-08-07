@@ -7,10 +7,9 @@ import org.ton.intellij.func.parser.FuncParserDefinition.Companion.BLOCK_COMMENT
 import org.ton.intellij.func.parser.FuncParserDefinition.Companion.BLOCK_DOC_COMMENT
 import org.ton.intellij.func.parser.FuncParserDefinition.Companion.EOL_COMMENT
 import org.ton.intellij.func.parser.FuncParserDefinition.Companion.EOL_DOC_COMMENT
+import org.ton.intellij.util.tokenSetOf
 
 open class FuncTokenType(debugName: String) : IElementType(debugName, FuncLanguage)
-
-fun tokenSetOf(vararg tokens: IElementType) = TokenSet.create(*tokens)
 
 val FUNC_REGULAR_COMMENTS = tokenSetOf(BLOCK_COMMENT, EOL_COMMENT)
 val FUNC_DOC_COMMENTS = tokenSetOf(EOL_DOC_COMMENT, BLOCK_DOC_COMMENT)

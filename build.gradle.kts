@@ -240,21 +240,29 @@ intellij {
     )
 }
 
-val generateFuncParserInitial = generateParser("Func", "initial")
+//val generateFuncParserInitial = generateParser("Func", "initial")
 val generateFuncLexer = generateLexer("Func")
+val generateFuncParser = generateParser("Func")
+
+val generateTactLexer = generateLexer("Tact")
+val generateTactParser = generateParser("Tact")
+
 val compileKotlin = tasks.named("compileKotlin") {
-    dependsOn(
-        generateFuncParserInitial,
-        generateFuncLexer,
-    )
+    dependsOn(generateFuncParser, generateFuncLexer, generateTactParser, generateTactLexer)
 }
-val generateFuncParser = generateParser("Func") {
-    dependsOn(compileKotlin)
-    classpath(compileKotlin.get().outputs)
-}
-val compileJava = tasks.named("compileJava") {
-    dependsOn(generateFuncParser)
-}
+
+//{
+//    dependsOn(
+//        generateFuncParserInitial,
+//        generateFuncLexer,
+//    )
+//}
+//{
+//    dependsOn(compileKotlin)
+//    classpath(compileKotlin.get().outputs)
+//}
+
+val compileJava = tasks.named("compileJava")
 
 tasks {
     runIde { enabled = true }

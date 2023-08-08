@@ -37,24 +37,22 @@ class FuncReference(
     private fun createResolveProcessor(result: MutableCollection<ResolveResult>): PsiScopeProcessor {
         return PsiScopeProcessor { element, state ->
             if (element == myElement) return@PsiScopeProcessor !result.add(PsiElementResolveResult(element))
-            val name = (element as? FuncNamedElement)?.name
-            val elementName = myElement.identifier.text
-            if (name != null) {
-                when {
-                    elementName == name -> {
-                        result.add(PsiElementResolveResult(element))
-                        false
-                    }
 
-                    name.firstOrNull() != '~' && elementName == "~$name" -> {
-                        result.add(PsiElementResolveResult(element))
-                        false
-                    }
+            val name = (element as? FuncNamedElement)?.name ?: return@PsiScopeProcessor true
+            val elementName = myElement.identifier
 
-                    else -> true
+            when {
+                elementName.textMatches(name) -> {
+                    result.add(PsiElementResolveResult(element))
+                    false
                 }
-            } else {
-                true
+
+                element is FuncFunction && name.firstOrNull() != '~' && elementName.textMatches("~$name") -> {
+                    result.add(PsiElementResolveResult(element))
+                    false
+                }
+
+                else -> true
             }
         }
     }
@@ -238,6 +236,8 @@ class FuncReference(
 //        println("processing file: ${file.name}")
         if (file == element.containingFile) return true
         if (!processNamedElements(processor, state, file.functions)) return false
+        if (!processNamedElements(processor, state, file.constVars)) return false
+        if (!processNamedElements(processor, state, file.globalVars)) return false
         if (!processIncludeDefinitions(file, processor, state, processedFiles)) return false
         return true
     }

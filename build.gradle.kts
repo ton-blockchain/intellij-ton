@@ -196,7 +196,7 @@ println("pluginVersion=$version")
 
 plugins {
     kotlin("jvm") version "1.9.0"
-    id("org.jetbrains.intellij") version "1.13.3"
+    id("org.jetbrains.intellij") version "1.15.0"
     id("org.jetbrains.grammarkit") version "2022.3.1"
 }
 
@@ -235,7 +235,9 @@ intellij {
     type.set("IU")
     plugins.set(
         listOf(
-            "JavaScript"
+            "JavaScript",
+            "com.google.ide-perf:1.3.1",
+            "izhangzhihao.rainbow.brackets:2023.3.2"
         )
     )
 }

@@ -29,6 +29,6 @@ class FuncNamesValidator : NamesValidator {
     }
 
     companion object {
-        const val BAN_CHARS = ";.().~"
+        private const val BAN_CHARS = ";.().~"
     }
 }

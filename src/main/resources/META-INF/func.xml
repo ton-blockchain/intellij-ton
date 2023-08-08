@@ -27,6 +27,8 @@
         <lang.formatter language="func" implementationClass="org.ton.intellij.func.ide.formatter.FuncFormatter"/>
         <lang.refactoringSupport language="func"
                                  implementationClass="org.ton.intellij.func.refactor.FuncRefactoringSupportProvider"/>
+        <lang.namesValidator language="func"
+                             implementationClass="org.ton.intellij.func.refactor.FuncNamesValidator"/>
         <completion.contributor language="func"
                                 implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionContributor"/>
         <completion.confidence language="func" order="last"

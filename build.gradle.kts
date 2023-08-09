@@ -100,7 +100,6 @@ tasks {
     buildSearchableOptions {
         enabled = prop("enableBuildSearchableOptions").toBoolean()
     }
-
 }
 
 fun prop(name: String, default: (() -> String?)? = null) = extra.properties[name] as? String

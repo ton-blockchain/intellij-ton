@@ -1,0 +1,24 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Fift"
+                  implementationClass="org.ton.intellij.fift.FiftFileType"
+                  fieldName="INSTANCE"
+                  language="Fift"
+                  extensions="fif"/>
+        <lang.parserDefinition language="Fift"
+                               implementationClass="org.ton.intellij.fift.ide.FiftParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="Fift"
+                                       implementationClass="org.ton.intellij.fift.ide.FiftSyntaxHighlighterFactory"/>
+        <annotator language="Fift" implementationClass="org.ton.intellij.fift.ide.FiftAnnotator"/>
+        <lang.commenter language="Fift"
+                        implementationClass="org.ton.intellij.fift.ide.FiftCommenter"/>
+        <lang.braceMatcher language="Fift"
+                           implementationClass="org.ton.intellij.fift.ide.FiftBraceMatcher"/>
+        <completion.contributor language="Fift"
+                                implementationClass="org.ton.intellij.fift.completion.FiftWordCompletionContributor"/>
+        <lang.findUsagesProvider language="Fift"
+                                 implementationClass="org.ton.intellij.fift.ide.FiftFindUsagesProvider"/>
+        <colorSettingsPage implementation="org.ton.intellij.fift.ide.FiftColorSettingsPage"/>
+        <internalFileTemplate name="Fift File"/>
+    </extensions>
+</idea-plugin>

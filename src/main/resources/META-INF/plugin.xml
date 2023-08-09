@@ -6,6 +6,9 @@
 
     <xi:include href="func.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="tact.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <xi:include href="tlb.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <xi:include href="fift.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <xi:include href="boc.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <depends>com.intellij.modules.platform</depends>
     <depends optional="true" config-file="ton-blueprint.xml">JavaScript</depends>
 

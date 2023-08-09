@@ -6,15 +6,15 @@
     </mask>
     <g mask="url(#mask0_17_142)">
         <rect x="-405.823" y="-433.085" width="1163.71" height="1163.71" fill="url(#pattern0)"/>
-        <rect x="-405.823" y="-433.085" width="1163.71" height="1163.71" fill="white"/>
+        <rect x="-405.823" y="-433.085" width="1163.71" height="1163.71" fill="black"/>
     </g>
     <mask id="mask1_17_142" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="25" y="24" width="281" height="281">
         <rect x="25.0142" y="24.0193" width="280.968" height="280.968" rx="76.8017" fill="white"/>
     </mask>
     <g mask="url(#mask1_17_142)">
         <path d="M135.266 187.5L20.7515 313.874L275.064 174.896L189.398 138.076L303.909 11.7074L53.9547 155.034L135.266 187.5Z"
-              fill="white"/>
+              fill="black"/>
         <path d="M135.266 187.5L20.7515 313.874L275.064 174.896L189.398 138.076L303.909 11.7074L53.9547 155.034L135.266 187.5Z"
-              stroke="white"/>
+              stroke="black"/>
     </g>
 </svg>

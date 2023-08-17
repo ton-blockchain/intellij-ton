@@ -10,6 +10,9 @@ import com.intellij.javascript.nodejs.packages.NodePackageUtil
 import com.intellij.lang.javascript.boilerplate.JavaScriptNewTemplatesFactoryBase
 import com.intellij.lang.javascript.boilerplate.NpmPackageProjectGenerator
 import com.intellij.lang.javascript.boilerplate.NpxPackageDescriptor
+import com.intellij.lang.javascript.buildTools.npm.PackageJsonUtil
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ContentEntry
@@ -19,6 +22,8 @@ import com.intellij.platform.ProjectTemplate
 import com.intellij.ui.components.JBList
 import com.intellij.util.PathUtil
 import org.ton.intellij.blueprint.BlueprintIcons
+import org.ton.intellij.blueprint.action.InstallBlueprintAction
+import java.io.File
 import javax.swing.Icon
 import javax.swing.JPanel
 
@@ -43,7 +48,7 @@ class TonBlueprintProjectGenerator : NpmPackageProjectGenerator() {
 
     override fun getNpxCommands(): List<NpxPackageDescriptor.NpxCommand> {
         return listOf(
-            NpxPackageDescriptor.NpxCommand(CREATE_TON_PACKAGE_NAME, CREATE_TON_PACKAGE_NAME)
+            NpxPackageDescriptor.NpxCommand(CREATE_TON_PACKAGE_NAME, CREATE_TON_PACKAGE_NAME),
         )
     }
 
@@ -58,9 +63,20 @@ class TonBlueprintProjectGenerator : NpmPackageProjectGenerator() {
         val workingDir = if (generateInTemp()) dir.name else "."
         val packageName = settings.myPackage.name
         if (packageName.contains(CREATE_TON_PACKAGE_NAME)) {
-            return arrayOf(workingDir, "--type", "func-empty")
+            return arrayOf(workingDir, "--type", "func-empty", "--contractName", "Main")
         }
-        return arrayOf(CREATE_COMMAND, "--type", "func-empty", workingDir)
+        return arrayOf(CREATE_COMMAND, "--type", "func-empty", "--contractName", "Main", workingDir)
+    }
+
+    override fun postInstall(project: Project, baseDir: VirtualFile, workingDir: File?): Runnable = Runnable {
+        super.postInstall(project, baseDir, workingDir)
+
+        val packageJson = PackageJsonUtil.findChildPackageJsonFile(baseDir)
+        if (packageJson != null) {
+            val action = InstallBlueprintAction(project, packageJson)
+            val event = AnActionEvent.createFromDataContext("Dummy", null, DataContext.EMPTY_CONTEXT)
+            action.actionPerformed(event)
+        }
     }
 
     override fun createPeer(): ProjectGeneratorPeer<Settings> {

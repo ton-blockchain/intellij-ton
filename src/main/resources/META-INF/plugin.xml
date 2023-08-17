@@ -3,6 +3,9 @@
     <name>TON</name>
     <category>Languages</category>
     <vendor url="https://github.com/ton-blockchain/intellij-ton">TON Foundation</vendor>
+    <description>TON Development plugin for IntelliJ Platform. Includes support for FunC, Fift, Tact languages and TL-B
+        schemas.
+    </description>
 
     <xi:include href="func.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="tact.xml" xpointer="xpointer(/idea-plugin/*)"/>

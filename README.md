@@ -1,4 +1,4 @@
-# TON Development for the IntelliJ IDEs
+# TON Plugin for the IntelliJ IDEs
 
 [![JetBrains plugins][plugin-version-svg]][plugin-repo]
 [![JetBrains plugins][plugin-downloads-svg]][plugin-repo]
@@ -6,19 +6,20 @@
 
 ### Available on JetBrains Marketplace
 
-https://plugins.jetbrains.com/plugin/18541-ton-development
+https://plugins.jetbrains.com/plugin/18541-ton
 
 ### Languages supported
 
 - FunC
 - Fift
+- Tact
 - TL-B Schemas
 
 ---
 
 ### Installation
 
-- Using IDE built-in plugin system:
+- Using an IDE built-in plugin system:
 
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "TON"</kbd> >
   <kbd>Install Plugin</kbd>

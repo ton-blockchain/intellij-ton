@@ -6,15 +6,15 @@ import com.intellij.openapi.fileTypes.SyntaxHighlighter
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.options.colors.ColorDescriptor
 import com.intellij.openapi.options.colors.ColorSettingsPage
-import org.ton.intellij.loadTextResource
 import org.ton.intellij.tlb.TlbIcons
 import org.ton.intellij.tlb.TlbLanguage
+import org.ton.intellij.util.loadTextResource
 import javax.swing.Icon
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
 enum class TlbColor(
     displayName: String,
-    default: TextAttributesKey
+    default: TextAttributesKey,
 ) {
     COMMENT("Comment", Defaults.LINE_COMMENT),
     DOCUMENTATION("Documentation", Defaults.DOC_COMMENT),

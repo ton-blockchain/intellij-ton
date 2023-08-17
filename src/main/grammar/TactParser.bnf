@@ -1,0 +1,296 @@
+{
+    parserClass='org.ton.intellij.tact.parser.TactParser'
+    parserUtilClass='org.ton.intellij.tact.parser.TactParserUtil'
+
+    psiClassPrefix='Tact'
+    psiImplClassSuffix='Impl'
+    psiPackage='org.ton.intellij.tact.psi'
+    psiImplPackage='org.ton.intellij.tact.psi.impl'
+    implements='org.ton.intellij.tact.psi.TactElement'
+
+    elementTypeHolderClass="org.ton.intellij.tact.psi.TactElementTypes"
+    tokenTypeClass="org.ton.intellij.tact.psi.TactTokenType"
+    elementTypeClass="org.ton.intellij.tact.psi.TactElementType"
+
+    extends(".*Type")=Type
+    extends(".*Expression")=Expression
+    extends(".*Statement")=Statement
+
+    generateTokenAccessors=true
+    tokens = [
+        LBRACE              = '{'
+        RBRACE              = '}'
+        LBRACK              = '['
+        RBRACK              = ']'
+        LPAREN              = '('
+        RPAREN              = ')'
+        COLON               = ':'
+        SEMICOLON           = ';'
+        COMMA               = ','
+        DOT                 = '.'
+
+        PLUS                = '+'
+        MINUS               = '-'
+        MUL                 = '*'
+        DIV                 = '/'
+        REM                 = '%'
+        AND                 = '&'
+        OR                  = '|'
+        XOR                 = '^'
+        LT                  = '<'
+        GT                  = '>'
+        EQ                  = '='
+        Q                   = '?'
+        EXCL                = '!'
+
+        EQEQ                = '=='
+        EXCLEQ              = '!='
+        GTEQ                = '>='
+        LTEQ                = '<='
+        GTGT                = '>>'
+        LTLT                = '<<'
+        OROR                = '||'
+        ANDAND              = '&&'
+        EXCLEXCL            = '!!'
+
+        IF_KEYWORD          = 'if'
+        ELSE_KEYWORD        = 'else'
+        WHILE_KEYWORD       = 'while'
+        DO_KEYWORD          = 'do'
+        UNTIL_KEYWORD       = 'until'
+        REPEAT_KEYWORD      = 'repeat'
+        RETURN_KEYWORD      = 'return'
+        EXTENDS_KEYWORD     = 'extends'
+        MUTATES_KEYWORD     = 'mutates'
+        VIRTUAL_KEYWORD     = 'virtual'
+        OVERRIDE_KEYWORD    = 'override'
+        INLINE_KEYWORD      = 'inline'
+        NATIVE_KEYWORD      = 'native'
+        LET_KEYWORD         = 'let'
+        CONST_KEYWORD       = 'const'
+        FUN_KEYWORD         = 'fun'
+        INIT_OF_KEYWORD     = 'initOf'
+        GET_KEYWORD         = 'get'
+        AS_KEYWORD          = 'as'
+        ABSTRACT_KEYWORD    = 'abstract'
+
+        IMPORT_KEYWORD      = 'import'
+        STRUCT_KEYWORD      = 'struct'
+        MESSAGE_KEYWORD     = 'message'
+        CONTRACT_KEYWORD    = 'contract'
+        TRAIT_KEYWORD       = 'trait'
+        WITH_KEYWORD        = 'with'
+        INIT_KEYWORD        = 'init'
+        RECEIVE_KEYWORD     = 'receive'
+        BOUNCED_KEYWORD     = 'bounced'
+        EXTERNAL_KEYWORD    = 'external'
+
+        INT_OF_KEYWORD      = 'intOf'
+
+        INTERFACE_MACRO     = '@interface'
+        NAME_MACRO          = '@name'
+
+        WHITE_SPACE         = 'regexp:\s+'
+        INTEGER_LITERAL     = 'regexp:(0[xX][0-9a-fA-F][0-9a-fA-F_]*\b)|(\b[0-9]+\b)'
+        STRING_LITERAL      = 'regexp:(\"([^\"\r\n\\]|\\.)*\")'
+        BOOLEAN_LITERAL     = 'regexp:(true|false)'
+        NULL_LITERAL        = 'null'
+        IDENTIFIER          = 'regexp:\p{Alpha}\w*'
+        BLOCK_COMMENT       = 'regexp:/\*(\*(?!/)|[^*])*\*/'
+        LINE_COMMENT        = 'regexp://(.*)'
+    ]
+}
+
+File ::= RootItem_with_recover*
+private RootItem ::= Import | Struct | Message | Contract | Trait | StaticFunction | Constant
+private RootItem_with_recover ::= !<<eof>> RootItem {
+    pin=1
+    recoverWhile=RootItem_recover
+}
+private RootItem_recover ::= !Item_first
+
+private Item_first ::= 'import' | 'struct' | 'message' | '@interface' | 'contract' | 'trait' | 'get' | 'mutates' | 'extends' | 'virtual' | 'override' | 'inline' | 'abstract' | 'fun' | '@name' | 'native' | 'const' | 'init' | 'receive' | 'bounced' | 'external'
+
+private StaticFunction ::= Function | NativeFunction
+NativeFunction ::= NameAttribute FunctionAttribute* 'native' 'fun' IDENTIFIER FunctionParameters FunctionType? FunctionBody {
+    pin=1
+}
+NameAttribute ::= '@name' FunctionId {pin=1}
+FunctionId ::= '(' IDENTIFIER ')' {pin=1}
+
+Import ::= 'import' STRING_LITERAL ';' {pin=1}
+
+// Type
+Type ::= BouncedType | MapType | ReferencedType
+ReferencedType ::= IDENTIFIER
+BouncedType ::= 'bounced' '<' <<comma_separated_list ReferencedType>> '>' {pin=1}
+MapType ::= "map" '<' MapTypeItem ',' MapTypeItem '>' {
+    pin=1
+}
+MapTypeItem ::= ReferencedType As? {
+    pin=1
+}
+As ::= 'as' IDENTIFIER {
+    pin = 1
+}
+
+// Field
+Field ::= IDENTIFIER ':' Type As? Assigment? ';' {pin=1}
+Assigment ::= '=' Expression {
+    pin = 1
+}
+
+// Constant
+ConstantAttribute ::= 'virtual' | 'override' | 'abstract'
+Constant ::= ConstantAttribute* !'fun' 'const' IDENTIFIER ':' Type Assigment? ';' {
+    pin=3
+}
+
+// Struct
+Struct ::= 'struct' IDENTIFIER StructBody {pin=1}
+Message ::= 'message' MessageId? IDENTIFIER StructBody {pin=1}
+MessageId ::= '(' INTEGER_LITERAL ')' {
+    pin=1
+}
+StructBody ::= '{' Field* '}' {pin=1}
+
+// Contract
+WithClause ::= 'with' <<comma_separated_list Type>> {pin=1}
+Contract ::= ContractAttribute* 'contract' IDENTIFIER WithClause? ContractBody
+ContractBody ::= '{' ContractItem_with_recover* '}' {pin=1}
+private ContractItem_with_recover ::= !('}' | <<eof>>) ContractItem {
+    pin=1
+    recoverWhile=ContractItem_recover
+}
+private ContractItem_recover ::= !('}' | Item_first | IDENTIFIER)
+ContractItem ::= Field
+               | ContractInit
+               | ReceiveFunction
+               | BouncedFunction
+               | ExternalFunction
+               | Function
+               | Constant
+
+ContractAttribute ::= '@interface' StringId {pin=1}
+ContractInit ::= 'init' FunctionParameters Block {pin=1}
+
+// Trait
+Trait ::= ContractAttribute* 'trait' IDENTIFIER WithClause? TraitBody
+TraitBody ::= '{' TraitItem* '}'
+TraitItem ::= Field
+            | ReceiveFunction
+            | BouncedFunction
+            | ExternalFunction
+            | Function
+            | Constant
+
+// Function
+FunctionAttribute ::= 'get' | 'mutates' | 'extends' | 'virtual' | 'override' | 'inline' | 'abstract'
+Function ::= FunctionAttribute* 'fun' IDENTIFIER FunctionParameters FunctionType? FunctionBody
+FunctionParameters ::= '(' [ <<comma_separated_list FunctionParameter>> ] ')' {pin=1}
+FunctionParameter ::= IDENTIFIER ':' Type {pin=1}
+private FunctionType ::= ':' Type { pin = 1 }
+FunctionBody ::= ';' | Block
+
+ReceiveFunction ::= 'receive' (StringId|FunctionParameters) Block {pin=1}
+BouncedFunction ::= 'bounced' FunctionParameters Block {pin=1}
+ExternalFunction ::= 'external' (StringId|FunctionParameters) Block {pin=1}
+StringId ::= '(' STRING_LITERAL ')' {pin=2}
+
+// Statements
+Statement ::= LetStatement
+            | BlockStatement
+            | ReturnStatement
+            | ExpressionStatement
+            | AssignStatement
+            | ConditionStatement
+            | WhileStatement
+            | RepeatStatement
+            | UntilStatement
+private Statement_first ::= 'let' | '{' | 'return' | Expression_first | 'if' | 'while' | 'repeat' | 'do'
+
+Block ::= '{' BlockItem* '}' {pin=1}
+private BlockItem ::= !'}' Statement {
+    pin=1
+    recoverWhile=BlockItem_recover
+}
+private BlockItem_recover ::= !('}' | Statement_first | Item_first | ';')
+
+LetStatement ::= 'let' IDENTIFIER ':' Type '=' Expression ';' {
+    pin = 1
+    rightAssociative=true
+}
+BlockStatement ::= Block
+ReturnStatement ::= 'return' Expression ';' { pin = 1 }
+ExpressionStatement ::= Expression ';'
+AssignStatement ::= LValue '=' Expression ';'
+ConditionStatement ::= 'if' Condition Block ConditionElse? {pin=1}
+ConditionElse ::= 'else' (Block | ConditionStatement) {pin=1}
+WhileStatement ::= 'while' Condition Block {pin=1}
+RepeatStatement ::= 'repeat' Condition Block {pin=1}
+UntilStatement ::= 'do' Block 'until' Condition ';' {pin=1}
+
+Condition ::= '(' Expression ')' {
+    pin=1
+}
+
+private LValue ::= IDENTIFIER '.' LValue
+                 | IDENTIFIER
+
+// Expressions
+Expression ::= OrExpression
+             | AndExpression
+             | CompareExpression
+             | BinaryExpression
+             | AddExpression
+             | MulExpression
+             | UnaryExpression
+             | NotNullExpression
+             | CallExpression
+             | FieldExpression
+             | StaticCallExpression
+             | ParenExpression
+             | StructExpression
+             | IntegerExpression
+             | BooleanExpression
+             | ReferenceExpression
+             | NullExpression
+             | IntOfExpression
+             | StringExpression
+private Expression_first ::= '-' | '+' | '!' | IDENTIFIER | '(' | INTEGER_LITERAL | BOOLEAN_LITERAL | 'null' | 'intOf' | STRING_LITERAL
+
+OrExpression ::= Expression '||' Expression
+AndExpression ::= Expression '&&' Expression
+CompareExpression ::= Expression ('!='|'=='|'>'|'>='|'<'|'<=') Expression
+BinaryExpression ::= Expression ('>>'|'<<'|'&'|'|') Expression
+AddExpression ::= Expression (('+' !'+') | ('-' !'-')) Expression
+MulExpression ::= Expression ('*'|'/'|'%') Expression
+UnaryExpression ::= ('-'|'+'|'!') Expression
+NotNullExpression ::= Expression '!!'
+
+CallExpression ::= Expression '.' IDENTIFIER '(' [<<comma_separated_list Expression>>] ')'
+FieldExpression ::= Expression '.' IDENTIFIER !'('
+StaticCallExpression ::= IDENTIFIER '(' [<<comma_separated_list Expression>>] ')'
+ParenExpression ::= '(' ParenExpressionItem ')' {pin=1}
+private ParenExpressionItem ::= Expression
+
+StructExpression ::= IDENTIFIER '{' [<<comma_separated_list StructExpressionField_with_recover>>] '}' {
+    pin=2
+}
+StructExpressionField ::= IDENTIFIER ':' Expression {pin=1}
+private StructExpressionField_with_recover ::= !('}') StructExpressionField {
+    pin=1
+    recoverWhile=StructExpressionField_recover
+}
+private StructExpressionField_recover ::= !(IDENTIFIER | ',' | '}')
+
+
+IntegerExpression ::= INTEGER_LITERAL
+BooleanExpression ::= BOOLEAN_LITERAL
+ReferenceExpression ::= IDENTIFIER
+NullExpression ::= 'null'
+IntOfExpression ::= 'intOf' IDENTIFIER '(' [<<comma_separated_list Expression>>] ')' {pin=1}
+StringExpression ::= STRING_LITERAL
+
+
+private meta comma_separated_list ::= <<param>> ( ',' <<param>> )*

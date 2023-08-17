@@ -1,0 +1,14 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="tact"
+                  implementationClass="org.ton.intellij.tact.TactFileType"
+                  fieldName="INSTANCE"
+                  language="tact"
+                  extensions="tact"
+        />
+        <!--        <lang.parserDefinition language="tact"-->
+        <!--                               implementationClass="org.ton.intellij.tact.parser.TactParserDefinition"/>-->
+        <lang.syntaxHighlighterFactory language="tact"
+                                       implementationClass="org.ton.intellij.tact.highlighting.TactSyntaxHighlighterFactory"/>
+    </extensions>
+</idea-plugin>

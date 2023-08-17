@@ -6,9 +6,9 @@ import com.intellij.lang.cacheBuilder.WordsScanner
 import com.intellij.lang.findUsages.FindUsagesProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
+import org.ton.intellij.fift.lexer.FiftLexerAdapter
 import org.ton.intellij.fift.psi.FiftNamedElement
 import org.ton.intellij.fift.psi.FiftTypes
-import org.ton.intellij.func.lexer.FuncLexerAdapter
 
 class FiftFindUsagesProvider : FindUsagesProvider {
     override fun getWordsScanner(): WordsScanner = FiftWordScanner()
@@ -21,7 +21,7 @@ class FiftFindUsagesProvider : FindUsagesProvider {
 }
 
 class FiftWordScanner : DefaultWordsScanner(
-    FuncLexerAdapter(),
+    FiftLexerAdapter(),
     TokenSet.create(FiftTypes.IDENTIFIER),
     FiftParserDefinition.COMMENTS,
     TokenSet.create(FiftTypes.STRING_LITERAL)

@@ -18,7 +18,7 @@ class FiftCreateFileAction : CreateFileFromTemplateAction(CAPTION, DESCRIPTION, 
     override fun buildDialog(
         project: Project,
         directory: PsiDirectory,
-        builder: CreateFileFromTemplateDialog.Builder
+        builder: CreateFileFromTemplateDialog.Builder,
     ): Unit = builder.run {
         setTitle(CAPTION)
         addKind(CAPTION, FiftIcons.FILE, FIFT_FILE_TEMPLATE)

@@ -1,5 +1,14 @@
 # TON Development Changelog
 
+## [2.0]
+
+### Complete plugin rework
+
+- Documentation rendering
+- Tact support
+- Blueprint project support
+- A lot of bug-fixes and small futures
+
 ## [1.0.3]
 
 ### Added

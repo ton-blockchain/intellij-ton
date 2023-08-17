@@ -13,7 +13,7 @@ interface FiftReference : PsiReference {
 }
 
 abstract class FiftReferenceBase<T : FiftElement>(
-    element: T
+    element: T,
 ) : PsiPolyVariantReferenceBase<T>(element), FiftReference {
     override fun calculateDefaultRangeInElement() = TextRange(0, element.textRange.length)
     override fun getVariants(): Array<Any> = emptyArray()
@@ -23,7 +23,7 @@ abstract class FiftReferenceBase<T : FiftElement>(
 }
 
 class FiftOrdinaryWordReference(
-    element: FiftOrdinaryWord
+    element: FiftOrdinaryWord,
 ) : FiftReferenceBase<FiftOrdinaryWord>(element) {
     override fun multiResolve(): Sequence<PsiElement> {
         val name = element.text

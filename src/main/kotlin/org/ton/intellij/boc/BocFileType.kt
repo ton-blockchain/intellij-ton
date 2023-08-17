@@ -1,7 +1,6 @@
 package org.ton.intellij.boc
 
 import com.intellij.openapi.fileTypes.FileType
-import com.intellij.openapi.vfs.VirtualFile
 
 object BocFileType : FileType {
     override fun getName() = "Bag of Cells"
@@ -10,5 +9,4 @@ object BocFileType : FileType {
     override fun getIcon() = BocIcons.FILE
     override fun isBinary(): Boolean = true
     override fun isReadOnly(): Boolean = true
-    override fun getCharset(file: VirtualFile, content: ByteArray?) = null
 }

@@ -5,7 +5,7 @@ import com.intellij.psi.util.findParentOfType
 import org.ton.intellij.fift.psi.FiftElement
 import org.ton.intellij.fift.psi.FiftFile
 import org.ton.intellij.fift.psi.FiftWordDefStatement
-import org.ton.intellij.psiManager
+import org.ton.intellij.util.psiManager
 
 fun FiftElement.resolveFile() = if (this is FiftFile) this else findParentOfType()!!
 

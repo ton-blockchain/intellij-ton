@@ -1,12 +1,12 @@
 package org.ton.intellij.tlb.resolve
 
 import com.intellij.psi.util.childrenOfType
-import org.ton.intellij.psiManager
 import org.ton.intellij.tlb.TlbFileType
 import org.ton.intellij.tlb.psi.TlbAnonymousConstructor
 import org.ton.intellij.tlb.psi.TlbCombinatorDeclaration
 import org.ton.intellij.tlb.psi.TlbElement
 import org.ton.intellij.tlb.psi.TlbFile
+import org.ton.intellij.util.psiManager
 
 fun TlbElement.resolveFile() = if (this is TlbFile) this else containingFile as TlbFile
 

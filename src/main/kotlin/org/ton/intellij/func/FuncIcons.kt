@@ -6,8 +6,9 @@ import com.intellij.openapi.util.IconLoader
 object FuncIcons {
     val FILE = IconLoader.getIcon("/icons/fc.svg", FuncIcons::class.java)
     val FUNCTION = AllIcons.Nodes.Function
-    val CONSTANT = AllIcons.Nodes.Constant
     val PARAMETER = AllIcons.Nodes.Parameter
+    val CONSTANT = AllIcons.Nodes.Constant
     val VARIABLE = AllIcons.Nodes.Variable
-    val IMPURE_FUNCTION_MARKER = IconLoader.getIcon("/icons/suspendCall.svg", FuncIcons::class.java)
+    val GLOBAL_VARIABLE = AllIcons.Nodes.Gvariable
+    val RECURSIVE_CALL = AllIcons.Gutter.RecursiveMethod
 }

@@ -1,0 +1,8 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Bag of Cells"
+                  implementationClass="org.ton.intellij.boc.BocFileType"
+                  fieldName="INSTANCE"
+                  extensions="boc"/>
+    </extensions>
+</idea-plugin>

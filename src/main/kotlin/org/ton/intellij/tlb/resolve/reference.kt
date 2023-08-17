@@ -13,7 +13,7 @@ interface TlbReference : PsiReference {
 }
 
 abstract class TlbReferenceBase<T : TlbNamedElement>(
-    element: T
+    element: T,
 ) : PsiPolyVariantReferenceBase<T>(element), TlbReference {
     override fun calculateDefaultRangeInElement() = TextRange(0, element.textRange.length)
     override fun getVariants(): Array<Any> = emptyArray()
@@ -35,7 +35,7 @@ abstract class TlbReferenceBase<T : TlbNamedElement>(
 }
 
 class TlbNamedRefReference(
-    element: TlbNamedRef
+    element: TlbNamedRef,
 ) : TlbReferenceBase<TlbNamedRef>(element) {
     override fun multiResolve(): Sequence<TlbElement> {
         if (element.parent !is TlbTypeExpression) return emptySequence()
@@ -85,4 +85,3 @@ class TlbNamedRefReference(
             it.textMatches(element.identifier)
         }
 }
-

@@ -32,7 +32,8 @@ object FiftSyntaxHighlighter : SyntaxHighlighterBase() {
         IF, IFNOT, COND -> FiftColor.KEYWORD
         TRUE, FALSE -> FiftColor.KEYWORD
         DUP, DROP, SWAP, ROT, REV_ROT, OVER, TUCK, NIP, DUP_DUP,
-        DROP_DROP, SWAP_SWAP, PICK, ROLL, REV_ROLL, EXCH, EXCH2, COND_DUP -> FiftColor.KEYWORD
+        DROP_DROP, SWAP_SWAP, PICK, ROLL, REV_ROLL, EXCH, EXCH2, COND_DUP,
+        -> FiftColor.KEYWORD
 
         else -> null
     }.let {

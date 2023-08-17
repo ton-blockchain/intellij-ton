@@ -18,7 +18,7 @@ class TlbCreateFileAction : CreateFileFromTemplateAction(CAPTION, DESCRIPTION, T
     override fun buildDialog(
         project: Project,
         directory: PsiDirectory,
-        builder: CreateFileFromTemplateDialog.Builder
+        builder: CreateFileFromTemplateDialog.Builder,
     ): Unit = builder.run {
         setTitle(CAPTION)
         addKind(CAPTION, TlbIcons.FILE, TLB_FILE_TEMPLATE)

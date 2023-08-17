@@ -7,13 +7,13 @@ import com.intellij.openapi.options.colors.ColorDescriptor
 import com.intellij.openapi.options.colors.ColorSettingsPage
 import org.ton.intellij.fift.FiftIcons
 import org.ton.intellij.fift.FiftLanguage
-import org.ton.intellij.loadTextResource
+import org.ton.intellij.util.loadTextResource
 import javax.swing.Icon
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
 enum class FiftColor(
     displayName: String,
-    default: TextAttributesKey
+    default: TextAttributesKey,
 ) {
     COMMENT("Comment", Defaults.LINE_COMMENT),
     DOCUMENTATION("Documentation", Defaults.DOC_COMMENT),

@@ -2,8 +2,8 @@ package org.ton.intellij.fift.psi
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFileFactory
-import org.ton.intellij.childOfType
 import org.ton.intellij.fift.FiftFileType
+import org.ton.intellij.util.childOfType
 
 val Project.fiftPsiFactory get() = FiftPsiFactory(this)
 

@@ -20,7 +20,7 @@ https://plugins.jetbrains.com/plugin/18541-ton-development
 
 - Using IDE built-in plugin system:
 
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "TON Development"</kbd> >
+  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "TON"</kbd> >
   <kbd>Install Plugin</kbd>
 
 - Manually:

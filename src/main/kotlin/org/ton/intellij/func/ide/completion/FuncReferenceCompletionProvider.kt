@@ -14,6 +14,7 @@ import com.intellij.psi.ResolveState
 import com.intellij.psi.impl.source.resolve.reference.impl.PsiMultiReference
 import com.intellij.psi.scope.PsiScopeProcessor
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.psi.util.elementType
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.func.FuncIcons
 import org.ton.intellij.func.ide.completion.FuncCompletionContributor.Companion.FUNCTION_PRIORITY
@@ -64,7 +65,6 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
         private val processedNames = HashSet<String>()
 
         override fun execute(element: PsiElement, state: ResolveState): Boolean {
-//            println("add to elements: ${element.elementType} | ${element.text}")
             addElement(element, originalElement, processedNames, result)
             return true
         }
@@ -167,11 +167,14 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
         ): LookupElement? {
             return when (element) {
                 is FuncFunction -> {
-                    val functionName = element.name ?: return null
+                    var functionName = element.name ?: return null
                     val parent = originalElement.parent
                     if (parent is FuncMethodCall) {
                         if (parent.parent is FuncDotExpression && functionName.firstOrNull() == '~') {
                             return null
+                        }
+                        if (parent.parent is FuncModifyExpression && functionName.firstOrNull() != '~') {
+                            functionName = "~$functionName"
                         }
                         val parameters = element.functionParameterList
                         if (parameters.isEmpty()) {
@@ -207,6 +210,9 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
                         PsiTreeUtil.treeWalkUp(originalElement, null) { scope, _ ->
 //                            println("walking up: ${scope.elementType} | ${scope.text}")
                             when (scope) {
+                                is FuncDotExpression -> {
+                                    return@treeWalkUp false
+                                }
                                 is FuncBlockStatement -> {
                                     result = TailTypeDecorator.withTail(result, TailType.SEMICOLON)
                                     return@treeWalkUp false

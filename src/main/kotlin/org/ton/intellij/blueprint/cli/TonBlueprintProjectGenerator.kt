@@ -6,12 +6,16 @@ import com.intellij.ide.util.projectWizard.SettingsStep
 import com.intellij.ide.util.projectWizard.WebTemplateNewProjectWizard
 import com.intellij.ide.util.projectWizard.WizardContext
 import com.intellij.ide.wizard.GeneratorNewProjectWizardBuilderAdapter
+import com.intellij.javascript.CreateRunConfigurationUtil
+import com.intellij.javascript.nodejs.PackageJsonData
+import com.intellij.javascript.nodejs.npm.InstallNodeLocalDependenciesAction
 import com.intellij.javascript.nodejs.packages.NodePackageUtil
 import com.intellij.lang.javascript.boilerplate.JavaScriptNewTemplatesFactoryBase
 import com.intellij.lang.javascript.boilerplate.NpmPackageProjectGenerator
 import com.intellij.lang.javascript.boilerplate.NpxPackageDescriptor
 import com.intellij.lang.javascript.buildTools.npm.PackageJsonUtil
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
@@ -68,15 +72,19 @@ class TonBlueprintProjectGenerator : NpmPackageProjectGenerator() {
         return arrayOf(CREATE_COMMAND, "--type", "func-empty", "--contractName", "Main", workingDir)
     }
 
-    override fun postInstall(project: Project, baseDir: VirtualFile, workingDir: File?): Runnable = Runnable {
-        super.postInstall(project, baseDir, workingDir)
+    override fun onGettingSmartAfterProjectGeneration(project: Project, baseDir: VirtualFile) {
+        super.onGettingSmartAfterProjectGeneration(project, baseDir)
+        CreateRunConfigurationUtil.npmConfiguration(project, "build")
+        CreateRunConfigurationUtil.npmConfiguration(project, "start")
+        CreateRunConfigurationUtil.npmConfiguration(project, "test")
 
-        val packageJson = PackageJsonUtil.findChildPackageJsonFile(baseDir)
-        if (packageJson != null) {
-            val action = InstallBlueprintAction(project, packageJson)
-            val event = AnActionEvent.createFromDataContext("Dummy", null, DataContext.EMPTY_CONTEXT)
-            action.actionPerformed(event)
-        }
+//        val packageFile = baseDir.findChild(PackageJsonUtil.FILE_NAME)
+//        if (packageFile != null) {
+//            InstallNodeLocalDependenciesAction.runAndShowConsole(
+//                project,
+//                packageFile
+//            )
+//        }
     }
 
     override fun createPeer(): ProjectGeneratorPeer<Settings> {
@@ -89,34 +97,17 @@ class TonBlueprintProjectGenerator : NpmPackageProjectGenerator() {
 
             override fun buildUI(settingsStep: SettingsStep) {
                 super.buildUI(settingsStep)
-            }
+            }//InstallNodeLocalDependenciesAction
         }
     }
 
-    override fun onProcessHandlerCreated(processHandler: ProcessHandler) {
-//        processHandler.addProcessListener(object : ProcessAdapter() {
-//            override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-//                if (event.text.contains("Project name")) {
-//                    event.processHandler.removeProcessListener(this)
-//                    val processInput = event.processHandler.processInput
-//                    if (processInput != null) {
-//                        try {
-//                            processInput.write()
-//                        } catch (e: IOException) {
-//                            LOG.warn("Failed to write project name to the console.", e)
-//                        }
-//                    }
-//                }
-//            }
-//        })
-    }
 
-    override fun generateInTemp(): Boolean = true
+    override fun generateInTemp(): Boolean = false
 
     companion object {
         private val LOG = Logger.getInstance(TonBlueprintProjectGenerator::class.java)
 
-        const val CREATE_TON_PACKAGE_NAME = "create-ton"
+        const val CREATE_TON_PACKAGE_NAME = "create-ton@latest"
         const val CREATE_COMMAND = "create"
     }
 }

@@ -54,6 +54,11 @@
         <codeInsight.lineMarkerProvider language="func"
                                         implementationClass="org.ton.intellij.func.ide.linemarker.FuncRecursiveCallLineMarkerProvider"/>
 
+        <languageInjectionContributor language="func"
+                                      implementationClass="org.ton.intellij.func.ide.FuncLanguageInjector"/>
+
+        <stubIndex implementation="org.ton.intellij.func.stub.index.FuncAllPublicNamesIndex"/>
+
         <localInspection language="func" displayName="Unused function inspection" groupPath="FunC"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.func.inspection.FuncUnusedFunctionInspection"/>

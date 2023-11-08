@@ -1,6 +1,7 @@
 package org.ton.intellij.func.stub.type
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.stubs.IndexSink
 import com.intellij.psi.stubs.StubElement
 import com.intellij.psi.stubs.StubInputStream
 import com.intellij.psi.stubs.StubOutputStream
@@ -8,6 +9,8 @@ import com.intellij.util.ArrayFactory
 import org.ton.intellij.func.psi.FuncConstVar
 import org.ton.intellij.func.psi.impl.FuncConstVarImpl
 import org.ton.intellij.func.stub.FuncConstVarStub
+import org.ton.intellij.func.stub.FuncGlobalVarStub
+import org.ton.intellij.func.stub.index.FuncAllPublicNamesIndex
 
 class FuncConstVarStubElementType(
     debugName: String,
@@ -30,6 +33,11 @@ class FuncConstVarStubElementType(
 
     override fun createPsi(stub: FuncConstVarStub): FuncConstVar {
         return FuncConstVarImpl(stub, this)
+    }
+
+    override fun indexStub(stub: FuncConstVarStub, sink: IndexSink) {
+        val name = stub.name ?: return
+        sink.occurrence(FuncAllPublicNamesIndex.ALL_PUBLIC_NAMES, name)
     }
 
     companion object {

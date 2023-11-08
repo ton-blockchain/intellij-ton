@@ -139,7 +139,9 @@ private TopLevelDefinition_recover ::= !TopLevelDefinition_first
 private TopLevelDefinition_first ::= '#include' | '#pragma' | 'global' | 'const' | 'forall' | '_' | '('  | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'var'
 
 private macro ::= IncludeDefinition | PragmaDefinition
-RawString ::= RAW_STRING_ELEMENT*
+RawString ::= RAW_STRING_ELEMENT* {
+
+}
 StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE
 
 GlobalVarList ::= 'global' << comma_separated_list GlobalVar >> ';' {

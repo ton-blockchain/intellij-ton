@@ -12,6 +12,6 @@ class FuncAllPublicNamesIndex : StringStubIndexExtension<FuncNamedElement>() {
 
     companion object {
         val ALL_PUBLIC_NAMES: StubIndexKey<String, FuncNamedElement> =
-            StubIndexKey.createIndexKey<String, FuncNamedElement>("func.all.name")
+            StubIndexKey.createIndexKey("func.all.name")
     }
 }

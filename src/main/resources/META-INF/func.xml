@@ -34,6 +34,7 @@
         <completion.confidence language="func" order="last"
                                implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionConfidence"/>
 
+        <stubIndex implementation="org.ton.intellij.func.stub.index.FuncAllPublicNamesIndex"/>
         <stubElementTypeHolder class="org.ton.intellij.func.psi.FuncElementTypes" externalIdPrefix="func."/>
         <lang.elementManipulator forClass="org.ton.intellij.func.psi.FuncIncludeDefinition"
                                  implementationClass="org.ton.intellij.func.psi.impl.FuncIncludePathElementManipulator"/>

@@ -6,7 +6,7 @@ on:
       - main
 jobs:
   generate-build-number:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     outputs:
       build_number: ${{ steps.buildnumber.outputs.build_number }}
     steps:
@@ -18,7 +18,7 @@ jobs:
           prefix: intellij-ton
   build:
     needs: [ generate-build-number ]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     env:
       ORG_GRADLE_PROJECT_buildNumber: ${{ needs.generate-build-number.outputs.build_number }}
       ORG_GRADLE_PROJECT_enableBuildSearchableOptions: true

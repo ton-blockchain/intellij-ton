@@ -12,7 +12,7 @@ https://plugins.jetbrains.com/plugin/18541-ton
 
 - FunC
 - Fift
-- Tact
+- Tact (Only syntax highlighting, more complex support is planned in the future release)
 - TL-B Schemas
 
 ---

@@ -1,12 +1,14 @@
 package org.ton.intellij.func.ide.completion
 
-import com.intellij.codeInsight.TailType
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.completion.util.ParenthesesInsertHandler
-import com.intellij.codeInsight.lookup.*
+import com.intellij.codeInsight.lookup.LookupElement
+import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.codeInsight.lookup.LookupElementPresentation
+import com.intellij.codeInsight.lookup.LookupElementRenderer
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiReference
@@ -14,7 +16,6 @@ import com.intellij.psi.ResolveState
 import com.intellij.psi.impl.source.resolve.reference.impl.PsiMultiReference
 import com.intellij.psi.scope.PsiScopeProcessor
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.elementType
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.func.FuncIcons
 import org.ton.intellij.func.ide.completion.FuncCompletionContributor.Companion.FUNCTION_PRIORITY
@@ -31,8 +32,8 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
         val expression = PsiTreeUtil.getParentOfType(parameters.position, FuncReferenceExpression::class.java)
         val originalFile = parameters.originalFile
         if (expression != null) {
-//            println("parent: '${expression.identifier.text}'")
-//            println("add completion expression: $expression | ${expression.text}")
+            println("parent: ${expression.parent} | '${expression.parent.text}'")
+            println("add completion expression: $expression | ${expression.text}")
             fillVariantsByReference(expression, expression.reference, originalFile, result)
         }
     }
@@ -168,6 +169,9 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
             return when (element) {
                 is FuncFunction -> {
                     var functionName = element.name ?: return null
+                    if (functionName.startsWith("_") && functionName.endsWith("_")) {
+                        return null
+                    }
                     val parent = originalElement.parent
                     if (parent is FuncMethodCall) {
                         if (parent.parent is FuncDotExpression && functionName.firstOrNull() == '~') {
@@ -214,10 +218,8 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
                                     return@treeWalkUp false
                                 }
                                 is FuncBlockStatement -> {
-                                    result = TailTypeDecorator.withTail(result, TailType.SEMICOLON)
                                     return@treeWalkUp false
                                 }
-
                                 is FuncTensorExpression -> {
                                     return@treeWalkUp false
                                 }

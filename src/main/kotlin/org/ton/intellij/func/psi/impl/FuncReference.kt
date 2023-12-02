@@ -59,7 +59,7 @@ class FuncReference(
 
     fun processResolveVariants(
         processor: PsiScopeProcessor,
-        implicitStdlib: Boolean = true,
+        implicitStdlib: Boolean = false,
     ): Boolean {
         val file = myElement.containingFile
         if (file !is FuncFile) return false
@@ -68,7 +68,7 @@ class FuncReference(
 
         if (!PsiTreeUtil.treeWalkUp(element, null, FuncFunctionProcessor(processor, state))) return false
         if (!processIncludeDefinitions(file, processor, state, processedFiles)) return false
-        if (implicitStdlib && processedFiles.none { it.endsWith("stdlib.fc") }) {
+        if (!implicitStdlib && processedFiles.none { it.endsWith("stdlib.fc") }) {
             val stdlibFile = file.originalFile.containingDirectory?.findFile("stdlib.fc")
             if (stdlibFile is FuncFile) {
                 if (!processFile(stdlibFile, processor, state, processedFiles)) return false

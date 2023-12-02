@@ -13,14 +13,10 @@ import org.ton.intellij.func.psi.FuncElementTypes
 class FuncLanguageInjector : LanguageInjectionContributor {
     override fun getInjection(p0: PsiElement): Injection? {
         if (p0.elementType != FuncElementTypes.RAW_STRING) return null
-        println("try: '${p0.text}'")
         PsiTreeUtil.findFirstParent(p0) { it is FuncAsmBody } ?: return null
-        println("find parret!")
 
         return SimpleInjection(
             FiftLanguage, "", "", null
-        ).also {
-            println("injection: '${p0.text}'")
-        }
+        )
     }
 }

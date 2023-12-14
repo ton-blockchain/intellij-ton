@@ -66,8 +66,8 @@ class FuncReplaceGuardClauseWithFunctionCallInspection : FuncAbstractApplicabili
 
     override fun isApplicable(element: FuncIfStatement): Boolean {
         element.condition ?: return false
-        if (element.`else` != null || element.elseIf != null) {
-            return false // TODO: support else/elseif block's statements insert into current scope
+        if (element.elseBranch != null || element.elseIfBranch != null) {
+            return false // TODO: support else/elseIfBranch block's statements insert into current scope
         }
         val call = element.getCallExpression() ?: return false
         val calleeText = call.referenceExpression.text
@@ -79,7 +79,7 @@ class FuncReplaceGuardClauseWithFunctionCallInspection : FuncAbstractApplicabili
     }
 
     override fun applyTo(element: FuncIfStatement, project: Project, editor: Editor?) {
-        if (element.`else` != null || element.elseIf != null) {
+        if (element.elseBranch != null || element.elseIfBranch != null) {
             return
         }
 
@@ -115,10 +115,10 @@ class FuncReplaceGuardClauseWithFunctionCallInspection : FuncAbstractApplicabili
 
     private fun FuncIfStatement.replaceWith(newExpression: FuncStatement, psiFactory: FuncPsiFactory): FuncStatement {
         val parent = parent
-        val elseBranch = `else`
-        val elseIfBranch = elseIf
+        val elseBranch = elseBranch
+        val elseIfBranchBranch = elseIfBranch
 
-        if (elseBranch != null || elseIfBranch != null) {
+        if (elseBranch != null || elseIfBranchBranch != null) {
             TODO()
         } else {
             return replace(newExpression) as FuncStatement

@@ -85,7 +85,7 @@ class FuncFormatter : FormattingModelBuilder {
                     HOLE_TYPE
                 ), TokenSet.create(IDENTIFIER, TILDE, DOT), FUNCTION
             ).spaces(1)
-            .afterInside(TYPE, FUNCTION).spaces(1)
+            .afterInside(TYPE_REFERENCE, FUNCTION).spaces(1)
             .afterInside(TokenSet.create(DOT, TILDE), FUNCTION).none()
             .afterInside(IDENTIFIER, FUNCTION).none()
             .beforeInside(IDENTIFIER, FUNCTION_PARAMETER).spaces(1)

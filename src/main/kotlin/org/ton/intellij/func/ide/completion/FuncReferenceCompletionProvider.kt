@@ -78,7 +78,7 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
                 icon = FuncIcons.PARAMETER
                 itemText = element.lookupString
                 isTypeGrayed = true
-                typeText = psiElement.atomicType?.text
+                typeText = psiElement.typeReference?.text
             }
         }
     }
@@ -130,7 +130,7 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
                 isTypeGrayed = true
                 itemText = element.lookupString
                 presentation.isTypeGrayed = true
-                presentation.typeText = variable.type.text
+                presentation.typeText = variable.typeReference.text
             }
         }
     }
@@ -144,7 +144,7 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
             presentation.tailText =
                 psiElement.functionParameterList.joinToString(", ", prefix = "(", postfix = ")") { it.text }
             presentation.isTypeGrayed = true
-            presentation.typeText = psiElement.type.text
+            presentation.typeText = psiElement.typeReference.text
         }
     }
 

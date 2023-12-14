@@ -42,3 +42,8 @@ fun PsiElement.findExistingEditor(): Editor? {
     val editors = editorFactory.getEditors(document)
     return editors.firstOrNull()
 }
+
+val PsiElement.contexts: Sequence<PsiElement>
+    get() = generateSequence(this) {
+        if (it is PsiFile) null else it.context
+    }

@@ -99,7 +99,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
             append("->")
             append(NBSP)
         }
-        renderType(function.type)
+        renderType(function.typeReference)
         append(NBSP)
         if (function.isMutable) {
             append("~")
@@ -121,7 +121,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     private fun StringBuilder.renderFunctionParameter(
         param: FuncFunctionParameter,
     ) {
-        val type = param.atomicType
+        val type = param.typeReference
         if (type != null) {
             renderType(type)
         }
@@ -141,7 +141,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     }
 
     private fun StringBuilder.renderType(
-        type: FuncType,
+        type: FuncTypeReference,
     ) {
         when (type) {
             is FuncTypeIdentifier ->
@@ -152,9 +152,9 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
 
             is FuncTupleType -> {
                 appendStyledSpan(FuncColor.BRACKETS.attributes, "[")
-                type.tupleTypeItemList.joinTo(this) {
+                type.typeReferenceList.joinTo(this) {
                     buildString {
-                        renderType(it.type)
+                        renderType(it)
                     }
                 }
                 appendStyledSpan(FuncColor.BRACKETS.attributes, "]")
@@ -163,7 +163,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
 
             is FuncTensorType -> {
                 appendStyledSpan(FuncColor.PARENTHESES.attributes, "(")
-                type.typeList.joinTo(this) {
+                type.typeReferenceList.joinTo(this) {
                     buildString {
                         renderType(it)
                     }

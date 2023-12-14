@@ -15,11 +15,12 @@ class FuncMissingReturnInspection : FuncInspectionBase() {
         }
 
     private fun check(function: FuncFunction, holder: ProblemsHolder) {
-        val block = function.blockStatement ?: return
-        val atomicType = function.type as? FuncAtomicType ?: return
-        val isVoid = atomicType is FuncHoleType || (atomicType as? FuncTensorType)?.typeList?.isEmpty() == true
-        if (isVoid) return
-        holder.isTerminating(block)
+        // TODO: fix after type system is implemented
+//        val block = function.blockStatement ?: return
+//        val atomicType = function.typeReference as? FuncAtomicType ?: return
+//        val isVoid = atomicType is FuncHoleType || (atomicType as? FuncTensorType)?.typeReferenceList?.isEmpty() == true
+//        if (isVoid) return
+//        holder.isTerminating(block)
     }
 
     private fun ProblemsHolder.isTerminating(element: FuncElement?): Boolean {
@@ -36,7 +37,7 @@ class FuncMissingReturnInspection : FuncInspectionBase() {
                 result
             }
             is FuncIfStatement -> isTerminating(element.blockStatement) && isTerminating(
-                element.`else` ?: element.elseIf
+                element.elseBranch ?: element.elseIfBranch
             )
             is FuncElse -> isTerminating(element.blockStatement)
             is FuncElseIf ->

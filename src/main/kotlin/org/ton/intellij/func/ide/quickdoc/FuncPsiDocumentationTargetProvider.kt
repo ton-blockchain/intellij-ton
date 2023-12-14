@@ -160,7 +160,7 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
             append("->")
             append(NBSP)
         }
-        renderType(function.type)
+        renderType(function.typeReference)
         append(NBSP)
         if (function.isMutable) {
             append("~")
@@ -182,7 +182,7 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
     fun StringBuilder.renderFunctionParameter(
         param: FuncFunctionParameter,
     ) {
-        val type = param.atomicType
+        val type = param.typeReference
         if (type != null) {
             renderType(type)
         }
@@ -202,7 +202,7 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
     }
 
     fun StringBuilder.renderType(
-        type: FuncType,
+        type: FuncTypeReference,
     ) {
         when (type) {
             is FuncTypeIdentifier ->
@@ -213,9 +213,9 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
 
             is FuncTupleType -> {
                 appendStyledSpan(FuncColor.BRACKETS.attributes, "[")
-                type.tupleTypeItemList.joinTo(this) {
+                type.typeReferenceList.joinTo(this) {
                     buildString {
-                        renderType(it.type)
+                        renderType(it)
                     }
                 }
                 appendStyledSpan(FuncColor.BRACKETS.attributes, "]")
@@ -224,7 +224,7 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
 
             is FuncTensorType -> {
                 appendStyledSpan(FuncColor.PARENTHESES.attributes, "(")
-                type.typeList.joinTo(this) {
+                type.typeReferenceList.joinTo(this) {
                     buildString {
                         renderType(it)
                     }

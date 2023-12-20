@@ -1,6 +1,5 @@
 package org.ton.intellij.func.stub.type
 
-import com.github.weisj.jsvg.T
 import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.stubs.IndexSink

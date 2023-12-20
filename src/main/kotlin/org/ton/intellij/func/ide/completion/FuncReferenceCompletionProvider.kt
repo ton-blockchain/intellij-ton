@@ -208,7 +208,7 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
 //                            println("walking up: ${scope.elementType} | ${scope.text}")
                             when (scope) {
                                 is FuncBlockStatement -> {
-                                    result = TailTypeDecorator.withTail(result, TailType.SEMICOLON)
+                                    result = TailTypeDecorator.withTail(result, TailType.createSimpleTailType(';'))
                                     return@treeWalkUp false
                                 }
 

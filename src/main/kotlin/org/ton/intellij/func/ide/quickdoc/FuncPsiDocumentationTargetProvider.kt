@@ -35,6 +35,7 @@ class FuncPsiDocumentationTargetProvider : PsiDocumentationTargetProvider {
 
 private const val NBSP = "&nbsp;"
 
+@Suppress("UnstableApiUsage")
 class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiElement?) : DocumentationTarget {
     override fun computePresentation(): TargetPresentation =
         targetPresentation(element)

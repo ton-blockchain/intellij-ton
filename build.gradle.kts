@@ -96,6 +96,7 @@ tasks {
     prepareSandbox { enabled = true }
     patchPluginXml {
         sinceBuild.set("231")
+        untilBuild.set("")
     }
     buildSearchableOptions {
         enabled = prop("enableBuildSearchableOptions").toBoolean()

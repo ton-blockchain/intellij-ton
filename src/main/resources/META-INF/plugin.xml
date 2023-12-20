@@ -1,5 +1,5 @@
 <idea-plugin url="https://ton.org" xmlns:xi="http://www.w3.org/2001/XInclude">
-    <id>com.github.andreypfau.intellij-ton</id>
+    <id>org.ton.intellij-ton</id>
     <name>TON</name>
     <category>Languages</category>
     <vendor url="https://github.com/ton-blockchain/intellij-ton">TON Foundation</vendor>

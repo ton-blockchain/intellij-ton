@@ -2,14 +2,42 @@ package org.ton.intellij.func.refactor
 
 import com.intellij.lang.refactoring.NamesValidator
 import com.intellij.openapi.project.Project
-import org.ton.intellij.func.psi.FUNC_KEYWORDS
 
 class FuncNamesValidator : NamesValidator {
     override fun isKeyword(name: String, project: Project?): Boolean {
-        if (name.isBlank()) return false
-        return FUNC_KEYWORDS.types.find {
-            it.debugName == name
-        } != null
+        return when (name) {
+            "return",
+            "var",
+            "repeat",
+            "do",
+            "while",
+            "until",
+            "try",
+            "catch",
+            "if",
+            "ifnot",
+            "then",
+            "else",
+            "elseif",
+            "elseifnot",
+            "type",
+            "forall",
+            "extern",
+            "global",
+            "const",
+            "asm",
+            "impure",
+            "inline",
+            "inline_ref",
+            "method_id",
+            "infix",
+            "infixl",
+            "infixr",
+            "operator",
+            "auto_apply" -> true
+
+            else -> false
+        }
     }
 
     override fun isIdentifier(name: String, project: Project?): Boolean {

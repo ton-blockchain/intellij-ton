@@ -6,7 +6,7 @@
 
 ### Available on JetBrains Marketplace
 
-https://plugins.jetbrains.com/plugin/18541-ton
+[https://plugins.jetbrains.com/plugin/18541-ton](https://plugins.jetbrains.com/plugin/23382-ton)
 
 ### Languages supported
 
@@ -39,11 +39,9 @@ https://plugins.jetbrains.com/plugin/18541-ton
 
 Based on [The Open Network](https://ton.org)
 
-_Built with 💚 by [Andrey Pfau](https://t.me/andreypfau)_
-
 <!-- Badges -->
-[plugin-repo]: https://plugins.jetbrains.com/plugin/18541-ton-development
-[plugin-version-svg]: https://img.shields.io/jetbrains/plugin/v/18541-ton-development.svg
-[plugin-downloads-svg]: https://img.shields.io/jetbrains/plugin/d/18541-ton-development.svg
+[plugin-repo]: https://plugins.jetbrains.com/plugin/23382-ton
+[plugin-version-svg]: https://img.shields.io/jetbrains/plugin/v/23382-ton.svg
+[plugin-downloads-svg]: https://img.shields.io/jetbrains/plugin/d/23382-ton.svg
 [ton-svg]: https://img.shields.io/badge/Based%20on-TON-blue
 [ton]: https://ton.org

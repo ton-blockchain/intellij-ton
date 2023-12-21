@@ -220,6 +220,7 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
                                 is FuncBlockStatement -> {
                                     return@treeWalkUp false
                                 }
+
                                 is FuncTensorExpression -> {
                                     return@treeWalkUp false
                                 }

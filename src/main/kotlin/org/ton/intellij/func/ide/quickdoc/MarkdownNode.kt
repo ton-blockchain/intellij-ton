@@ -11,7 +11,6 @@ import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.editor.richcopy.HtmlSyntaxInfoUtil
-import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
@@ -121,26 +120,22 @@ class MarkdownNode(
                     if (linkLabelContent != null) {
                         val label = linkLabelContent.joinToString(separator = "") { it.text }
                         val linkText = node.child(MarkdownElementTypes.LINK_TEXT)?.toHtml() ?: label
-                        if (DumbService.isDumb(owner.project)) {
-                            sb.append(linkText)
-                        } else {
-                            if (owner is FuncFunction) {
-                                val resolved = FuncDocumentationProvider.resolve(label, owner)
-                                if (resolved != null) {
-                                    println("resolved = $resolved (${resolved.text})")
-                                    val hyperlink = buildString {
-                                        DocumentationManagerUtil.createHyperlink(
-                                            this,
-                                            label,
-                                            linkText,
-                                            false,
-                                            true
-                                        )
-                                    }
-                                    sb.append(hyperlink)
-                                } else {
-                                    sb.append(node.text)
+                        if (owner is FuncFunction) {
+                            val resolved = FuncDocumentationProvider.resolve(label, owner)
+                            if (resolved != null) {
+                                println("resolved = $resolved (${resolved.text})")
+                                val hyperlink = buildString {
+                                    DocumentationManagerUtil.createHyperlink(
+                                        this,
+                                        label,
+                                        linkText,
+                                        false,
+                                        true
+                                    )
                                 }
+                                sb.append(hyperlink)
+                            } else {
+                                sb.append(node.text)
                             }
                         }
                     } else {

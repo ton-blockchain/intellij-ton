@@ -112,7 +112,6 @@ import static org.ton.intellij.func.parser.FuncParserDefinition.*;
 %s IN_BLOCK_COMMENT
 %s IN_EOL_DOC_COMMENT
 
-%unicode
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Whitespaces

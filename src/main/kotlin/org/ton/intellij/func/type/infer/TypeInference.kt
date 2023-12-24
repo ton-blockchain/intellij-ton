@@ -34,7 +34,7 @@ class FuncInferenceContext(
         return exprTypes.containsKey(expression)
     }
 
-    fun <T : FuncTypeFoldable<T>> resolveTypeVarsIfPossible(ty: T): T {
+    fun <T : FuncTyFoldable<T>> resolveTypeVarsIfPossible(ty: T): T {
         TODO("Not yet implemented")
     }
 }

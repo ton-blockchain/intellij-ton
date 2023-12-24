@@ -2,17 +2,17 @@ package org.ton.intellij.tact.psi
 
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.tree.TokenSet
-import org.ton.intellij.func.FuncLanguage
+import org.ton.intellij.tact.TactLanguage
 import org.ton.intellij.tact.psi.TactElementTypes.*
 import org.ton.intellij.util.tokenSetOf
 
-open class TactTokenType(debugName: String) : IElementType(debugName, FuncLanguage)
+open class TactTokenType(debugName: String) : IElementType(debugName, TactLanguage)
 
 val TACT_REGULAR_COMMENTS = tokenSetOf(BLOCK_COMMENT, LINE_COMMENT)
 val TACT_DOC_COMMENTS = tokenSetOf()
 val TACT_COMMENTS = TokenSet.orSet(TACT_REGULAR_COMMENTS, TACT_DOC_COMMENTS)
 
-val TACT_STRING_LITERALS = TokenSet.create(STRING_LITERAL)
+val TACT_STRING_LITERALS = tokenSetOf(STRING_LITERAL)
 val TACT_MACROS = tokenSetOf(NAME_MACRO, INTERFACE_MACRO)
 
 val TACT_KEYWORDS = tokenSetOf(

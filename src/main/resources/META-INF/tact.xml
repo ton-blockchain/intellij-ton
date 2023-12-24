@@ -6,9 +6,23 @@
                   language="tact"
                   extensions="tact"
         />
-        <!--        <lang.parserDefinition language="tact"-->
-        <!--                               implementationClass="org.ton.intellij.tact.parser.TactParserDefinition"/>-->
+        <lang.parserDefinition language="tact"
+                               implementationClass="org.ton.intellij.tact.parser.TactParserDefinition"/>
         <lang.syntaxHighlighterFactory language="tact"
                                        implementationClass="org.ton.intellij.tact.highlighting.TactSyntaxHighlighterFactory"/>
+        <lang.foldingBuilder language="tact"
+                             implementationClass="org.ton.intellij.tact.TactFoldingBuilder"/>
+
+        <lang.commenter language="tact" implementationClass="org.ton.intellij.tact.TactCommenter"/>
+        <lang.braceMatcher language="tact"
+                           implementationClass="org.ton.intellij.tact.TactBraceMatcher"/>
+        <lang.quoteHandler language="tact"
+                           implementationClass="org.ton.intellij.tact.TactQuoteHandler"/>
+        <lang.formatter language="tact"
+                        implementationClass="org.ton.intellij.tact.formatter.TactFormattingModelBuilder"/>
+
+        <stubIndex implementation="org.ton.intellij.tact.stub.index.TactNamedElementIndex"/>
+
+        <annotator language="tact" implementationClass="org.ton.intellij.tact.annotator.TactHighlightingAnnotator"/>
     </extensions>
 </idea-plugin>

@@ -77,51 +77,6 @@ class FuncFormattingBlock(
         )
     }
 
-    private fun Int.example() = this
-
-    private fun a() {
-        val a = 1
-        a.example().example().example().example()
-
-        a.example()
-            .example()
-            .example()
-            .example()
-
-    }
-
-//    private fun createChainingCallBlock(node: FuncQualifiedExpression): ASTBlock {
-//        return object : AbstractFuncBlock(node.node, spacingBuilder) {
-//            override fun buildChildren(): List<Block> = buildList {
-//                val expressions = node.expressionList
-//
-//                val first = expressions.firstOrNull()
-//                if (first is FuncQualifiedExpression) {
-//                    add(createChainingCallBlock(first))
-//                } else if (first != null) {
-//                    createBlock(first.node)?.let {
-//                        add(it)
-//                    }
-//                }
-//
-//                add(
-//                    block(node.node, spacingBuilder, indent = Indent.getNormalIndent(), wrap = Wrap.createChildWrap(Wrap.createWrap(WrapType.NONE, false), WrapType.NORMAL, false)) {
-//                        buildList {
-//                            node.dot?.node?.let {
-//                                add(block(it, spacingBuilder, indent= Indent.getNoneIndent()))
-//                            }
-//                            expressions.getOrNull(1)?.node?.let {
-//                                createBlock(it)
-//                            }?.let {
-//                                add(it)
-//                            }
-//                        }
-//                    }
-//                )
-//            }
-//        }
-//    }
-
     private fun calcIndent(child: ASTNode): Indent? {
         val type = child.elementType
         val parent = child.treeParent

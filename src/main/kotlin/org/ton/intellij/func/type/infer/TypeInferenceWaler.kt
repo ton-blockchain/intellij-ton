@@ -140,7 +140,8 @@ class FuncTypeInferenceWalker(
         expected: Expectation
     ): FuncTy {
         val fields = expected.onlyHasTy(ctx)?.let {
-            (resolveTypeVarsWithObligations(it) as? FuncTyTensor)?.types
+            (it as? FuncTyTensor)?.types
+//            (resolveTypeVarsWithObligations(it) as? FuncTyTensor)?.types TODO implement resolveTypeVarsWithObligations
         }
         return FuncTyTensor(expressionList.inferType(fields))
     }

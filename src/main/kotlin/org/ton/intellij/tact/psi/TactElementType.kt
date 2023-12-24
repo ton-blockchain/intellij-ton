@@ -5,4 +5,6 @@ import org.ton.intellij.tact.TactLanguage
 
 class TactElementType(
     debug: String,
-) : IElementType(debug, TactLanguage)
+) : IElementType(debug, TactLanguage) {
+
+}

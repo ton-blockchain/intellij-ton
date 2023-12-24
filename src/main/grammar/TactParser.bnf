@@ -2,21 +2,24 @@
     parserClass='org.ton.intellij.tact.parser.TactParser'
     parserUtilClass='org.ton.intellij.tact.parser.TactParserUtil'
 
+    implements='org.ton.intellij.tact.psi.TactElement'
+
+    elementTypeHolderClass='org.ton.intellij.tact.psi.TactElementTypes'
+
+    elementTypeClass="org.ton.intellij.tact.psi.TactElementType"
+    tokenTypeClass="org.ton.intellij.tact.psi.TactTokenType"
+
     psiClassPrefix='Tact'
     psiImplClassSuffix='Impl'
     psiPackage='org.ton.intellij.tact.psi'
     psiImplPackage='org.ton.intellij.tact.psi.impl'
-    implements='org.ton.intellij.tact.psi.TactElement'
-
-    elementTypeHolderClass="org.ton.intellij.tact.psi.TactElementTypes"
-    tokenTypeClass="org.ton.intellij.tact.psi.TactTokenType"
-    elementTypeClass="org.ton.intellij.tact.psi.TactElementType"
 
     extends(".*Type")=Type
     extends(".*Expression")=Expression
     extends(".*Statement")=Statement
 
     generateTokenAccessors=true
+
     tokens = [
         LBRACE              = '{'
         RBRACE              = '}'
@@ -102,7 +105,7 @@
 }
 
 File ::= RootItem_with_recover*
-private RootItem ::= Import | Struct | Message | Contract | Trait | StaticFunction | Constant
+private RootItem ::= Import | Struct | Message | Contract | Trait | Function | Constant
 private RootItem_with_recover ::= !<<eof>> RootItem {
     pin=1
     recoverWhile=RootItem_recover
@@ -110,13 +113,6 @@ private RootItem_with_recover ::= !<<eof>> RootItem {
 private RootItem_recover ::= !Item_first
 
 private Item_first ::= 'import' | 'struct' | 'message' | '@interface' | 'contract' | 'trait' | 'get' | 'mutates' | 'extends' | 'virtual' | 'override' | 'inline' | 'abstract' | 'fun' | '@name' | 'native' | 'const' | 'init' | 'receive' | 'bounced' | 'external'
-
-private StaticFunction ::= Function | NativeFunction
-NativeFunction ::= NameAttribute FunctionAttribute* 'native' 'fun' IDENTIFIER FunctionParameters FunctionType? FunctionBody {
-    pin=1
-}
-NameAttribute ::= '@name' FunctionId {pin=1}
-FunctionId ::= '(' IDENTIFIER ')' {pin=1}
 
 Import ::= 'import' STRING_LITERAL ';' {pin=1}
 
@@ -135,66 +131,95 @@ As ::= 'as' IDENTIFIER {
 }
 
 // Field
-Field ::= IDENTIFIER ':' Type As? Assigment? ';' {pin=1}
-Assigment ::= '=' Expression {
+Field ::= IDENTIFIER ':' Type As? Assigment? ';' {
+    pin=1
+}
+private Assigment ::= '=' Expression {
     pin = 1
 }
 
 // Constant
 ConstantAttribute ::= 'virtual' | 'override' | 'abstract'
 Constant ::= ConstantAttribute* !'fun' 'const' IDENTIFIER ':' Type Assigment? ';' {
-    pin=3
+    pin = 3
 }
 
 // Struct
-Struct ::= 'struct' IDENTIFIER StructBody {pin=1}
-Message ::= 'message' MessageId? IDENTIFIER StructBody {pin=1}
+Struct ::= 'struct' IDENTIFIER BlockFields {pin=1}
+Message ::= 'message' MessageId? IDENTIFIER BlockFields {pin=1}
 MessageId ::= '(' INTEGER_LITERAL ')' {
     pin=1
 }
-StructBody ::= '{' Field* '}' {pin=1}
+BlockFields ::= '{' Field* '}' {pin=1}
 
 // Contract
 WithClause ::= 'with' <<comma_separated_list Type>> {pin=1}
-Contract ::= ContractAttribute* 'contract' IDENTIFIER WithClause? ContractBody
+Contract ::= ContractAttribute* 'contract' IDENTIFIER WithClause? ContractBody {
+    pin = 2
+}
 ContractBody ::= '{' ContractItem_with_recover* '}' {pin=1}
 private ContractItem_with_recover ::= !('}' | <<eof>>) ContractItem {
     pin=1
     recoverWhile=ContractItem_recover
 }
 private ContractItem_recover ::= !('}' | Item_first | IDENTIFIER)
-ContractItem ::= Field
+private ContractItem ::= Field
+               | Constant
                | ContractInit
                | ReceiveFunction
                | BouncedFunction
                | ExternalFunction
                | Function
-               | Constant
 
 ContractAttribute ::= '@interface' StringId {pin=1}
-ContractInit ::= 'init' FunctionParameters Block {pin=1}
+ContractInit ::= 'init' FunctionParameters Block {
+    pin=1
+}
 
 // Trait
 Trait ::= ContractAttribute* 'trait' IDENTIFIER WithClause? TraitBody
-TraitBody ::= '{' TraitItem* '}'
-TraitItem ::= Field
+TraitBody ::= '{' TraitItem* '}' {
+    pin=1
+}
+private TraitItem ::= Field
+            | Constant
             | ReceiveFunction
             | BouncedFunction
             | ExternalFunction
             | Function
-            | Constant
 
 // Function
 FunctionAttribute ::= 'get' | 'mutates' | 'extends' | 'virtual' | 'override' | 'inline' | 'abstract'
-Function ::= FunctionAttribute* 'fun' IDENTIFIER FunctionParameters FunctionType? FunctionBody
+Function ::= (NativeFunctionHead | FunctionAttribute*) 'fun' IDENTIFIER FunctionParameters FunctionType? FunctionBody {
+    pin = 3
+    implements = [
+        "org.ton.intellij.tact.psi.TactNameIdentifierOwner"
+    ]
+//    extends = "org.ton.intellij.tact.psi.TactStubbedElementImpl<?>"
+    mixin = "org.ton.intellij.tact.psi.TactFunctionImplMixin"
+    stubClass = "org.ton.intellij.tact.stub.TactFunctionStub"
+    elementTypeFactory = "org.ton.intellij.tact.stub.TactStubKt.factory"
+}
+private NativeFunctionHead ::= NameAttribute FunctionAttribute* 'native' {
+    pin=1
+}
+NameAttribute ::= '@name' FunctionId
+FunctionId ::= '(' IDENTIFIER ')' {pin=2}
+
 FunctionParameters ::= '(' [ <<comma_separated_list FunctionParameter>> ] ')' {pin=1}
 FunctionParameter ::= IDENTIFIER ':' Type {pin=1}
 private FunctionType ::= ':' Type { pin = 1 }
-FunctionBody ::= ';' | Block
+private FunctionBody ::= ';' | Block
 
-ReceiveFunction ::= 'receive' (StringId|FunctionParameters) Block {pin=1}
-BouncedFunction ::= 'bounced' FunctionParameters Block {pin=1}
-ExternalFunction ::= 'external' (StringId|FunctionParameters) Block {pin=1}
+ReceiveFunction ::= 'receive' (StringId|FunctionParameters) Block {
+    pin=1
+}
+BouncedFunction ::= 'bounced' FunctionParameters Block {
+    pin=1
+}
+ExternalFunction ::= 'external' (StringId|FunctionParameters) Block {
+    pin=1
+}
 StringId ::= '(' STRING_LITERAL ')' {pin=2}
 
 // Statements
@@ -206,7 +231,10 @@ Statement ::= LetStatement
             | ConditionStatement
             | WhileStatement
             | RepeatStatement
-            | UntilStatement
+            | UntilStatement {
+//    extends = 'org.ton.intellij.tact.psi.TactStubbedElementImpl<?>'
+//    stubClass = "com.intellij.psi.stubs.StubBase<?>"
+}
 private Statement_first ::= 'let' | '{' | 'return' | Expression_first | 'if' | 'while' | 'repeat' | 'do'
 
 Block ::= '{' BlockItem* '}' {pin=1}
@@ -256,7 +284,10 @@ Expression ::= OrExpression
              | ReferenceExpression
              | NullExpression
              | IntOfExpression
-             | StringExpression
+             | StringExpression {
+//    extends = 'org.ton.intellij.tact.psi.TactStubbedElementImpl<?>'
+//    stubClass = "com.intellij.psi.stubs.StubBase<?>"
+}
 private Expression_first ::= '-' | '+' | '!' | IDENTIFIER | '(' | INTEGER_LITERAL | BOOLEAN_LITERAL | 'null' | 'intOf' | STRING_LITERAL
 
 OrExpression ::= Expression '||' Expression
@@ -291,6 +322,5 @@ ReferenceExpression ::= IDENTIFIER
 NullExpression ::= 'null'
 IntOfExpression ::= 'intOf' IDENTIFIER '(' [<<comma_separated_list Expression>>] ')' {pin=1}
 StringExpression ::= STRING_LITERAL
-
 
 private meta comma_separated_list ::= <<param>> ( ',' <<param>> )*

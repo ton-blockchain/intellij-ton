@@ -25,8 +25,11 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
 
     private fun ProblemsHolder.check(function: FuncFunction, argument: FuncCallArgument, isMethodCall: Boolean) {
         val arguments = argument.expression.let {
-            if (it is FuncTensorExpression) it.expressionList
-            else listOf(it)
+            when (it) {
+                is FuncTensorExpression -> it.expressionList
+                is FuncUnitExpression -> emptyList()
+                else -> listOf(it)
+            }
         }
         val parameters = function.functionParameterList
 

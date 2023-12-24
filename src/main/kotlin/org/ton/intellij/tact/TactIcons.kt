@@ -4,7 +4,7 @@ import com.intellij.icons.AllIcons
 import com.intellij.openapi.util.IconLoader
 
 object TactIcons {
-    val FILE = IconLoader.getIcon("/icons/tact.svg", TactIcons::class.java)
+    val FILE = IconLoader.getIcon("icons/tact.svg", TactIcons::class.java)
     val FUNCTION = AllIcons.Nodes.Function
     val PARAMETER = AllIcons.Nodes.Parameter
     val CONSTANT = AllIcons.Nodes.Constant

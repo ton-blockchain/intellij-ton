@@ -39,9 +39,9 @@ class FuncMissingReturnInspection : FuncInspectionBase() {
             is FuncIfStatement -> isTerminating(element.blockStatement) && isTerminating(
                 element.elseBranch ?: element.elseIfBranch
             )
-            is FuncElse -> isTerminating(element.blockStatement)
-            is FuncElseIf ->
-                isTerminating(element.blockStatement) && isTerminating(element.`else` ?: element.elseIf)
+            is FuncElseBranch -> isTerminating(element.blockStatement)
+            is FuncElseIfBranch ->
+                isTerminating(element.blockStatement) && isTerminating(element.elseBranch ?: element.elseIfBranch)
             is FuncTryStatement -> isTerminating(element.blockStatement) && isTerminating(element.catch)
             is FuncCatch -> isTerminating(element.blockStatement)
             else -> false

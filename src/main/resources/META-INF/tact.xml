@@ -22,6 +22,7 @@
                         implementationClass="org.ton.intellij.tact.formatter.TactFormattingModelBuilder"/>
 
         <stubIndex implementation="org.ton.intellij.tact.stub.index.TactNamedElementIndex"/>
+        <stubElementTypeHolder class="org.ton.intellij.tact.psi.TactElementTypes" externalIdPrefix="tact."/>
 
         <annotator language="tact" implementationClass="org.ton.intellij.tact.annotator.TactHighlightingAnnotator"/>
     </extensions>

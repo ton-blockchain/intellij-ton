@@ -1,6 +1,7 @@
 package org.ton.intellij.func.type.infer
 
 import com.intellij.openapi.progress.ProgressManager
+import com.intellij.psi.PsiElementResolveResult
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.type.ty.*
 import org.ton.intellij.util.infiniteWith
@@ -9,6 +10,9 @@ class FuncTypeInferenceWalker(
     val ctx: FuncInferenceContext,
     private val returnTy: FuncTy
 ) {
+    private val definitions = HashMap<String, FuncElement>()
+    private var variableDeclarationState = false
+
     fun inferFunctionBody(
         block: FuncBlockStatement
     ): FuncTy = block.inferTypeCoercibleTo(returnTy)
@@ -68,6 +72,10 @@ class FuncTypeInferenceWalker(
         val ty = when (this) {
             is FuncLiteralExpression -> inferLiteral(this)
             is FuncTensorExpression -> inferType(expected)
+            is FuncAssignExpression -> inferType(expected)
+            is FuncApplyExpression -> inferType(expected)
+            is FuncSpecialApplyExpression -> inferType(expected)
+            is FuncReferenceExpression -> inferType(expected)
             else -> FuncTyUnknown
         }
 
@@ -139,11 +147,66 @@ class FuncTypeInferenceWalker(
     private fun FuncTensorExpression.inferType(
         expected: Expectation
     ): FuncTy {
-        val fields = expected.onlyHasTy(ctx)?.let {
-            (it as? FuncTyTensor)?.types
-//            (resolveTypeVarsWithObligations(it) as? FuncTyTensor)?.types TODO implement resolveTypeVarsWithObligations
+//        val fields = expected.onlyHasTy(ctx)?.let {
+//            (it as? FuncTyTensor)?.types
+////            (resolveTypeVarsWithObligations(it) as? FuncTyTensor)?.types TODO implement resolveTypeVarsWithObligations
+//        }
+        return FuncTyTensor(expressionList.inferType(null))
+    }
+
+    private fun FuncAssignExpression.inferType(
+        expected: Expectation
+    ): FuncTy {
+        val expressions = expressionList
+        val lhs = expressions.getOrNull(0)
+        val rhs = expressions.getOrNull(1)
+        val lhsTy = lhs?.inferType()
+        val rhsTy = rhs?.inferType()
+//        val rhsTy = rhs?.inferTypeCoercibleTo(lhsTy)
+//        return lhsTy
+        return FuncTyUnit
+    }
+
+    private fun FuncApplyExpression.inferType(
+        expected: Expectation
+    ): FuncTy {
+        val expressions = expressionList
+        val lhs = expressions.getOrNull(0)
+        val rhs = expressions.getOrNull(1)
+
+        val lhsTy = lhs?.inferType()
+        if (lhs is FuncHoleTypeExpression) {
+            variableDeclarationState = true
         }
-        return FuncTyTensor(expressionList.inferType(fields))
+        val rhsTy = rhs?.inferType()
+        variableDeclarationState = false
+
+        return FuncTyUnit
+    }
+
+    private fun FuncSpecialApplyExpression.inferType(
+        expected: Expectation
+    ): FuncTy {
+        val expressions = expressionList
+        val lhs = expressions.getOrNull(0)
+        val rhs = expressions.getOrNull(1)
+        val lhsTy = lhs?.inferType()
+        val rhsTy = rhs?.inferType()
+        return FuncTyUnit
+    }
+
+    private fun FuncReferenceExpression.inferType(
+        expected: Expectation
+    ): FuncTy {
+        println("try infer type for ${this.text} in ${this.parent.text} - state = $variableDeclarationState")
+        if (variableDeclarationState) {
+            ctx.lookup.define(this)
+        } else {
+            ctx.lookup.resolve(this)?.let {
+                ctx.setResolvedRefs(this, listOf(PsiElementResolveResult(it)))
+            }
+        }
+        return FuncTyUnknown
     }
 
     private fun List<FuncExpression>.inferType(

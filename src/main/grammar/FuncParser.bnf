@@ -26,7 +26,6 @@
             MOD                 = '%'
             QUEST               = '?'
             COLON               = ':'
-            DOT                 = '.'
             COMMA               = ','
             SEMICOLON           = ';'
             LBRACE              = '{'
@@ -288,12 +287,10 @@ Expression ::= AssignExpression
     | UnaryExpression_group
     | AddExpression_group
     | MulExpression_group
-    | DotExpression
-    | ModifyExpression
     | InvExpression
-    | CallExpression
-    | VarExpression
-    | Expr100_group
+    | SpecialApplyExpression
+    | ApplyExpression
+    | AtomicExpression
 
 AssignExpression ::= Expression ('=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '^>>=' | '~>>=' | '&=' | '|=' | '^=') Expression {
     rightAssociative=true
@@ -306,7 +303,7 @@ private AddExpression_group ::= PlusExpression | MinusExpression | OrExpression 
 private MulExpression_group ::= MulExpression | DivExpression | ModExpression | DivModExpression | DivCExpression | DivRExpression | ModCExpression | ModRExpression | AndExpression
 
 VarExpression ::= (PrimitiveTypeExpression | HoleTypeExpression | TensorOrParenExpression | TupleExpression) (TensorOrParenExpression|TupleExpression|ReferenceExpression)
-private Expr100_group ::= UnitExpression
+private AtomicExpression ::= UnitExpression
                         | TensorOrParenExpression
                         | TupleExpression
                         | HoleTypeExpression
@@ -350,8 +347,16 @@ ModifyExpression ::= Expression MethodCall
 MethodCall ::= ReferenceExpression CallArgument {
     pin=1
 }
+CallArgument ::= AtomicExpression
 
-CallArgument ::= Expr100_group
+SpecialApplyExpression ::= Expression &<<isSpecialIdentifier>> Expression
+ApplyExpression ::= Expression &('(' | '[' | <<isRegularIdentifier>>) Expression {
+    rightAssociative=true
+    methods=[
+        left="/Expression[0]"
+        right="/Expression[1]"
+    ]
+}
 
 UnitExpression ::= '(' ')'
 

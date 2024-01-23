@@ -8,6 +8,8 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Computable
+import com.intellij.openapi.util.RecursionManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.*
 import com.intellij.psi.impl.PsiDocumentManagerBase
@@ -78,3 +80,6 @@ inline fun <Key : Any, reified Psi : PsiElement> getElements(
     scope: GlobalSearchScope?
 ): Collection<Psi> =
     StubIndex.getElements(indexKey, key, project, scope, Psi::class.java)
+
+fun <T> recursionGuard(key: Any, block: Computable<T>, memoize: Boolean = true): T? =
+    RecursionManager.doPreventingRecursion(key, memoize, block)

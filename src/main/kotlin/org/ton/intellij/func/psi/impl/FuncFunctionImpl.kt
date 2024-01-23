@@ -10,6 +10,8 @@ abstract class FuncFunctionMixin : FuncNamedElementImpl<FuncFunctionStub>, FuncF
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: FuncFunctionStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
+
+    override fun toString(): String = "FuncFunction($containingFile - $name)"
 }
 
 val FuncFunction.isImpure: Boolean

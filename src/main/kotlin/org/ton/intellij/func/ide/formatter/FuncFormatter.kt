@@ -83,10 +83,10 @@ class FuncFormatter : FormattingModelBuilder {
                     TUPLE_TYPE,
                     TYPE_IDENTIFIER,
                     HOLE_TYPE
-                ), TokenSet.create(IDENTIFIER, TILDE, DOT), FUNCTION
+                ), TokenSet.create(IDENTIFIER, TILDE), FUNCTION
             ).spaces(1)
             .afterInside(TYPE_REFERENCE, FUNCTION).spaces(1)
-            .afterInside(TokenSet.create(DOT, TILDE), FUNCTION).none()
+            .afterInside(TokenSet.create(TILDE), FUNCTION).none()
             .afterInside(IDENTIFIER, FUNCTION).none()
             .beforeInside(IDENTIFIER, FUNCTION_PARAMETER).spaces(1)
             .after(FUNCTION_PARAMETER).none()

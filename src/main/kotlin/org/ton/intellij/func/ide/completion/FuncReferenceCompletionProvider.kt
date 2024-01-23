@@ -54,7 +54,7 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
             }
 
             is FuncReference -> {
-                reference.processResolveVariants(MyProcessor(originalElement, result), implicitStdlib = false)
+//                reference.processResolveVariants(MyProcessor(originalElement, result), implicitStdlib = false)
             }
         }
     }

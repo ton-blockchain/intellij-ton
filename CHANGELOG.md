@@ -1,5 +1,9 @@
 # TON Development Changelog
 
+## [2.0.5]
+
+- fixed builtin functions resolving for `load_int`, `load_uint`
+
 ## [2.0]
 
 ### Complete plugin rework

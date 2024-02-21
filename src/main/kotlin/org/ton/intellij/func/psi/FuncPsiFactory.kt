@@ -88,7 +88,13 @@ class FuncPsiFactory private constructor(val project: Project) {
             forall X -> () throw_arg_unless(X x, int excno, int cond) impure asm "THROWARGANYIFNOT";
             
             ;;; Loads a signed [`len`]-bit integer from slice [`s`].
+            (slice, int) load_int(slice s, int len) asm(s len -> 1 0) "LDIX";
+            
+            ;;; Loads a signed [`len`]-bit integer from slice [`s`].
             (slice, int) ~load_int(slice s, int len) asm(s len -> 1 0) "LDIX";
+            
+            ;;; Loads a unsigned [`len`]-bit integer from slice [`s`].
+            (slice, int) load_uint(slice s, int len) asm(s len -> 1 0) "LDUX";
             
             ;;; Loads a unsigned [`len`]-bit integer from slice [`s`].
             (slice, int) ~load_uint(slice s, int len) asm(s len -> 1 0) "LDUX";

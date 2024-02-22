@@ -7,8 +7,11 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.tree.IElementType
 import org.ton.intellij.tact.highlighting.TactColor
-import org.ton.intellij.tact.psi.*
+import org.ton.intellij.tact.psi.TactConstant
+import org.ton.intellij.tact.psi.TactElement
 import org.ton.intellij.tact.psi.TactElementTypes.IDENTIFIER
+import org.ton.intellij.tact.psi.TactField
+import org.ton.intellij.tact.psi.TactFunction
 
 class TactHighlightingAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
@@ -37,7 +40,7 @@ class TactHighlightingAnnotator : Annotator {
     }
 
     fun colorFor(element: TactElement) = when (element) {
-        is TactNativeFunction -> TactColor.FUNCTION_STATIC
+//        is TactNativeFunction -> TactColor.FUNCTION_STATIC
         is TactFunction -> TactColor.FUNCTION_DECLARATION
         is TactField -> TactColor.FIELD
         is TactConstant -> TactColor.CONSTANT

@@ -1,9 +1,9 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
         <!-- works in WebStorm and other SmallIDEs -->
-        <directoryProjectGenerator implementation="org.ton.intellij.blueprint.cli.TonBlueprintProjectGenerator"/>
+        <!--        <directoryProjectGenerator implementation="org.ton.intellij.blueprint.cli.TonBlueprintProjectGenerator"/>-->
         <!-- works in IDEA -->
-        <projectTemplatesFactory implementation="org.ton.intellij.blueprint.cli.TonBlueprintProjectTemplateFactory"/>
+        <!--        <projectTemplatesFactory implementation="org.ton.intellij.blueprint.cli.TonBlueprintProjectTemplateFactory"/>-->
         <!-- works in new IDEA wizard -->
         <moduleBuilder builderClass="org.ton.intellij.blueprint.cli.TonBlueprintProjectModuleBuilder"/>
     </extensions>

@@ -4,7 +4,6 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
-import org.intellij.lang.annotations.Language
 import org.ton.intellij.func.FuncLanguage
 
 @Service(Service.Level.PROJECT)
@@ -162,10 +161,10 @@ class FuncPsiFactory private constructor(val project: Project) {
         }
     }
 
-    fun createFileFromText(@Language("FunC") text: String) =
+    fun createFileFromText(text: String) =
         createFileFromText(null, text)
 
-    fun createFileFromText(name: String?, @Language("FunC") text: String) =
+    fun createFileFromText(name: String?, text: String) =
         PsiFileFactory.getInstance(project).createFileFromText(name ?: "dummy.fc", FuncLanguage, text) as FuncFile
 
     fun createStatement(text: String): FuncStatement {

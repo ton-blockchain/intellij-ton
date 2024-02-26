@@ -33,6 +33,7 @@ allprojects {
     repositories {
         maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
         mavenCentral()
+        maven(url = "https://jitpack.io")
     }
 
     tasks.withType<KotlinCompile> {
@@ -42,6 +43,8 @@ allprojects {
 
     dependencies {
         implementation(kotlin("stdlib-jdk8"))
+        implementation("me.alllex.parsus:parsus-jvm:0.6.1")
+        implementation("com.github.andreypfau.tlb:tlb-jvm:54070d9405")
     }
 }
 

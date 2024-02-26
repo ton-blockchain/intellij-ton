@@ -1,5 +1,6 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="TL-B Generator" displayType="BALLOON"/>
         <fileType name="TL-B"
                   implementationClass="org.ton.intellij.tlb.TlbFileType"
                   fieldName="INSTANCE"
@@ -18,4 +19,15 @@
         <lang.findUsagesProvider language="TL-B"
                                  implementationClass="org.ton.intellij.tlb.ide.TlbFindUsagesProvider"/>
     </extensions>
+    <actions>
+        <group id="ton.file.group">
+            <action id="ton.tlb.GenerateFuncTlb" class="org.ton.intellij.tlb.ide.actions.GenerateFuncTlbAction"
+                    text="Generate FunC TL-B Parser">
+                <keyboard-shortcut first-keystroke="control shift G" keymap="$default"/>
+            </action>
+            <add-to-group group-id="ToolsMenu" anchor="before" relative-to-action="ExternalToolsGroup"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+        </group>
+    </actions>
 </idea-plugin>

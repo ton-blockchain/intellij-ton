@@ -17,13 +17,3 @@ object FuncPsiUtil {
         return referenceFile == null || referenceFile.parent == declarationFile.parent
     }
 }
-
-val FuncCallExpression.isQualified: Boolean
-    get() {
-//        if (tilde != null) return true
-        val parent = parent
-//        if (parent !is FuncQualifiedExpression) return false
-//        val expressionList = parent.expressionList
-//        return expressionList.size == 2 && expressionList.last() == this
-        return false
-    }

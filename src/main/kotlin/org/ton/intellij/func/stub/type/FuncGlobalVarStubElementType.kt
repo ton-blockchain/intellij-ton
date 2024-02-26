@@ -8,9 +8,8 @@ import com.intellij.psi.stubs.StubOutputStream
 import com.intellij.util.ArrayFactory
 import org.ton.intellij.func.psi.FuncGlobalVar
 import org.ton.intellij.func.psi.impl.FuncGlobalVarImpl
-import org.ton.intellij.func.stub.FuncFunctionStub
 import org.ton.intellij.func.stub.FuncGlobalVarStub
-import org.ton.intellij.func.stub.index.FuncAllPublicNamesIndex
+import org.ton.intellij.func.stub.index.FuncNamedElementIndex
 
 class FuncGlobalVarStubElementType(
     debugName: String,
@@ -37,7 +36,7 @@ class FuncGlobalVarStubElementType(
 
     override fun indexStub(stub: FuncGlobalVarStub, sink: IndexSink) {
         val name = stub.name ?: return
-        sink.occurrence(FuncAllPublicNamesIndex.ALL_PUBLIC_NAMES, name)
+        sink.occurrence(FuncNamedElementIndex.KEY, name)
     }
 
     companion object {

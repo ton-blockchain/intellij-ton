@@ -3,10 +3,7 @@ package org.ton.intellij.func.ide.completion
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionProvider
 import com.intellij.codeInsight.completion.CompletionResultSet
-import com.intellij.codeInsight.completion.PrioritizedLookupElement
-import com.intellij.codeInsight.completion.util.ParenthesesInsertHandler
 import com.intellij.codeInsight.lookup.LookupElement
-import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.codeInsight.lookup.LookupElementRenderer
 import com.intellij.psi.PsiElement
@@ -18,8 +15,6 @@ import com.intellij.psi.scope.PsiScopeProcessor
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.func.FuncIcons
-import org.ton.intellij.func.ide.completion.FuncCompletionContributor.Companion.FUNCTION_PRIORITY
-import org.ton.intellij.func.ide.completion.FuncCompletionContributor.Companion.VAR_PRIORITY
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.impl.FuncReference
 
@@ -95,17 +90,17 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
         }
     }
 
-    private class VariableRenderer(
-        val variable: FuncVarExpression,
-    ) : LookupElementRenderer<LookupElement>() {
-        override fun renderElement(element: LookupElement, presentation: LookupElementPresentation) {
-            presentation.apply {
-                icon = FuncIcons.VARIABLE
-                isTypeGrayed = true
-                itemText = element.lookupString
-            }
-        }
-    }
+//    private class VariableRenderer(
+//        val variable: FuncVarExpression,
+//    ) : LookupElementRenderer<LookupElement>() {
+//        override fun renderElement(element: LookupElement, presentation: LookupElementPresentation) {
+//            presentation.apply {
+//                icon = FuncIcons.VARIABLE
+//                isTypeGrayed = true
+//                itemText = element.lookupString
+//            }
+//        }
+//    }
 
     private class ConstRenderer(
         val variable: FuncConstVar,
@@ -156,173 +151,173 @@ class FuncReferenceCompletionProvider : CompletionProvider<CompletionParameters>
             processedNames: MutableSet<String>,
             set: CompletionResultSet,
         ) {
-            val lookup = createLookupElement(element, context) ?: return
-            if (processedNames.add(lookup.lookupString)) {
-                set.addElement(lookup)
-            }
+//            val lookup = createLookupElement(element, context) ?: return
+//            if (processedNames.add(lookup.lookupString)) {
+//                set.addElement(lookup)
+//            }
         }
 
-        fun createLookupElement(
-            element: PsiElement,
-            originalElement: FuncElement,
-        ): LookupElement? {
-            return when (element) {
-                is FuncFunction -> {
-                    var functionName = element.name ?: return null
-                    if (functionName.startsWith("_") && functionName.endsWith("_")) {
-                        return null
-                    }
-                    val parent = originalElement.parent
-                    if (parent is FuncMethodCall) {
-                        if (parent.parent is FuncDotExpression && functionName.firstOrNull() == '~') {
-                            return null
-                        }
-                        if (parent.parent is FuncModifyExpression && functionName.firstOrNull() != '~') {
-                            functionName = "~$functionName"
-                        }
-                        val parameters = element.functionParameterList
-                        if (parameters.isEmpty()) {
-                            return null
-                        }
-                    }
-
-                    PrioritizedLookupElement.withPriority(
-                        LookupElementBuilder
-                            .createWithSmartPointer(functionName, element)
-                            .withRenderer(FunctionRenderer)
-                            .withInsertHandler { context, item ->
-
-                                val parameters = element.functionParameterList
-
-                                if (parameters.isEmpty()) {
-                                    ParenthesesInsertHandler.NO_PARAMETERS.handleInsert(context, item)
-                                } else if (parameters.size == 1 && originalElement.parent is FuncMethodCall) {
-                                    ParenthesesInsertHandler.NO_PARAMETERS.handleInsert(context, item)
-                                } else {
-//                                    println("grand grand parent: ${originalElement.parent.parent.parent.elementType} | ${originalElement.parent.parent.parent.text}")
-//                                    println("grand parent: ${originalElement.parent.parent.elementType} | ${originalElement.parent.parent.text}")
-//                                    println("parent: ${originalElement.parent.elementType} | ${originalElement.parent.text}")
-//                                    println("child: ${originalElement.elementType} | ${originalElement.text}")
-                                    // TODO: handle as NO_PARAMETERS at `a.foo/**caret**/` when `foo` - function with 1 parameter
-                                    ParenthesesInsertHandler.WITH_PARAMETERS.handleInsert(context, item)
-                                }
-                            },
-                        FUNCTION_PRIORITY
-                    ).let {
-                        var result = it
-                        // TODO: insert semicolon if void return
-                        PsiTreeUtil.treeWalkUp(originalElement, null) { scope, _ ->
-//                            println("walking up: ${scope.elementType} | ${scope.text}")
-                            when (scope) {
-                                is FuncDotExpression -> {
-                                    return@treeWalkUp false
-                                }
-                                is FuncBlockStatement -> {
-                                    return@treeWalkUp false
-                                }
-
-                                is FuncTensorExpression -> {
-                                    return@treeWalkUp false
-                                }
-                            }
-                            true
-                        }
-                        result
-                    }
-                }
-
-                is FuncFunctionParameter -> {
-                    val name = element.name ?: return null
-                    if (originalElement.parent is FuncMethodCall) return null
-                    PrioritizedLookupElement.withPriority(
-                        LookupElementBuilder
-                            .createWithSmartPointer(name, element)
-                            .withRenderer(FunctionParameterRenderer),
-                        VAR_PRIORITY
-                    )
-                }
-
-                is FuncConstVar -> {
-                    val name = element.name ?: return null
-                    if (originalElement.parent is FuncMethodCall) return null
-                    PrioritizedLookupElement.withPriority(
-                        LookupElementBuilder
-                            .createWithSmartPointer(name, element)
-                            .withRenderer(ConstRenderer(element)),
-                        VAR_PRIORITY
-                    )
-                }
-
-                is FuncGlobalVar -> {
-                    val name = element.name ?: return null
-                    if (originalElement.parent is FuncMethodCall) return null
-                    PrioritizedLookupElement.withPriority(
-                        LookupElementBuilder
-                            .createWithSmartPointer(name, element)
-                            .withRenderer(GlobalVarRenderer(element)),
-                        VAR_PRIORITY
-                    )
-                }
-
-                is FuncReferenceExpression -> {
-                    val name = element.name ?: return null
-                    val parent = originalElement.parent
-                    if (parent is FuncCallExpression || parent is FuncMethodCall) return null
-                    var lookupElement: LookupElement? = null
-                    PsiTreeUtil.treeWalkUp(element, null) { scope, prevParent ->
-                        when (scope) {
-                            is FuncCatch -> if (scope.expression == prevParent) {
-                                lookupElement = PrioritizedLookupElement.withPriority(
-                                    LookupElementBuilder
-                                        .createWithSmartPointer(name, element)
-                                        .withRenderer(CatchVariableRenderer(scope)),
-                                    VAR_PRIORITY
-                                )
-                                return@treeWalkUp false
-                            }
-
-                            is FuncAssignExpression -> {
-                                when (val parentScope = scope.parent) {
-                                    is FuncVarExpression -> if (scope.expressionList.firstOrNull() == prevParent) {
-                                        lookupElement = PrioritizedLookupElement.withPriority(
-                                            LookupElementBuilder
-                                                .createWithSmartPointer(name, element)
-                                                .withRenderer(VariableRenderer(parentScope)),
-                                            VAR_PRIORITY
-                                        )
-                                        return@treeWalkUp false
-                                    }
-
-//                                    is FuncConstVariable -> if (scope.expressionList.firstOrNull() == prevParent) {
+//        fun createLookupElement(
+//            element: PsiElement,
+//            originalElement: FuncElement,
+//        ): LookupElement? {
+//            return when (element) {
+//                is FuncFunction -> {
+//                    var functionName = element.name ?: return null
+//                    if (functionName.startsWith("_") && functionName.endsWith("_")) {
+//                        return null
+//                    }
+//                    val parent = originalElement.parent
+//                    if (parent is FuncMethodCall) {
+//                        if (parent.parent is FuncDotExpression && functionName.firstOrNull() == '~') {
+//                            return null
+//                        }
+//                        if (parent.parent is FuncModifyExpression && functionName.firstOrNull() != '~') {
+//                            functionName = "~$functionName"
+//                        }
+//                        val parameters = element.functionParameterList
+//                        if (parameters.isEmpty()) {
+//                            return null
+//                        }
+//                    }
+//
+//                    PrioritizedLookupElement.withPriority(
+//                        LookupElementBuilder
+//                            .createWithSmartPointer(functionName, element)
+//                            .withRenderer(FunctionRenderer)
+//                            .withInsertHandler { context, item ->
+//
+//                                val parameters = element.functionParameterList
+//
+//                                if (parameters.isEmpty()) {
+//                                    ParenthesesInsertHandler.NO_PARAMETERS.handleInsert(context, item)
+//                                } else if (parameters.size == 1 && originalElement.parent is FuncMethodCall) {
+//                                    ParenthesesInsertHandler.NO_PARAMETERS.handleInsert(context, item)
+//                                } else {
+////                                    println("grand grand parent: ${originalElement.parent.parent.parent.elementType} | ${originalElement.parent.parent.parent.text}")
+////                                    println("grand parent: ${originalElement.parent.parent.elementType} | ${originalElement.parent.parent.text}")
+////                                    println("parent: ${originalElement.parent.elementType} | ${originalElement.parent.text}")
+////                                    println("child: ${originalElement.elementType} | ${originalElement.text}")
+//                                    // TODO: handle as NO_PARAMETERS at `a.foo/**caret**/` when `foo` - function with 1 parameter
+//                                    ParenthesesInsertHandler.WITH_PARAMETERS.handleInsert(context, item)
+//                                }
+//                            },
+//                        FUNCTION_PRIORITY
+//                    ).let {
+//                        var result = it
+//                        // TODO: insert semicolon if void return
+//                        PsiTreeUtil.treeWalkUp(originalElement, null) { scope, _ ->
+////                            println("walking up: ${scope.elementType} | ${scope.text}")
+//                            when (scope) {
+//                                is FuncDotExpression -> {
+//                                    return@treeWalkUp false
+//                                }
+//                                is FuncBlockStatement -> {
+//                                    return@treeWalkUp false
+//                                }
+//
+//                                is FuncTensorExpression -> {
+//                                    return@treeWalkUp false
+//                                }
+//                            }
+//                            true
+//                        }
+//                        result
+//                    }
+//                }
+//
+//                is FuncFunctionParameter -> {
+//                    val name = element.name ?: return null
+//                    if (originalElement.parent is FuncMethodCall) return null
+//                    PrioritizedLookupElement.withPriority(
+//                        LookupElementBuilder
+//                            .createWithSmartPointer(name, element)
+//                            .withRenderer(FunctionParameterRenderer),
+//                        VAR_PRIORITY
+//                    )
+//                }
+//
+//                is FuncConstVar -> {
+//                    val name = element.name ?: return null
+//                    if (originalElement.parent is FuncMethodCall) return null
+//                    PrioritizedLookupElement.withPriority(
+//                        LookupElementBuilder
+//                            .createWithSmartPointer(name, element)
+//                            .withRenderer(ConstRenderer(element)),
+//                        VAR_PRIORITY
+//                    )
+//                }
+//
+//                is FuncGlobalVar -> {
+//                    val name = element.name ?: return null
+//                    if (originalElement.parent is FuncMethodCall) return null
+//                    PrioritizedLookupElement.withPriority(
+//                        LookupElementBuilder
+//                            .createWithSmartPointer(name, element)
+//                            .withRenderer(GlobalVarRenderer(element)),
+//                        VAR_PRIORITY
+//                    )
+//                }
+//
+//                is FuncReferenceExpression -> {
+//                    val name = element.name ?: return null
+//                    val parent = originalElement.parent
+//                    if (parent is FuncCallExpression || parent is FuncMethodCall) return null
+//                    var lookupElement: LookupElement? = null
+//                    PsiTreeUtil.treeWalkUp(element, null) { scope, prevParent ->
+//                        when (scope) {
+//                            is FuncCatch -> if (scope.expression == prevParent) {
+//                                lookupElement = PrioritizedLookupElement.withPriority(
+//                                    LookupElementBuilder
+//                                        .createWithSmartPointer(name, element)
+//                                        .withRenderer(CatchVariableRenderer(scope)),
+//                                    VAR_PRIORITY
+//                                )
+//                                return@treeWalkUp false
+//                            }
+//
+//                            is FuncAssignExpression -> {
+//                                when (val parentScope = scope.parent) {
+//                                    is FuncVarExpression -> if (scope.expressionList.firstOrNull() == prevParent) {
 //                                        lookupElement = PrioritizedLookupElement.withPriority(
 //                                            LookupElementBuilder
 //                                                .createWithSmartPointer(name, element)
-//                                                .withRenderer(ConstRenderer(parentScope)),
+//                                                .withRenderer(VariableRenderer(parentScope)),
 //                                            VAR_PRIORITY
 //                                        )
 //                                        return@treeWalkUp false
 //                                    }
-                                }
-                            }
-
-                            is FuncVarExpression -> if (scope.expressionList.getOrNull(1) == prevParent) {
-                                lookupElement = PrioritizedLookupElement.withPriority(
-                                    LookupElementBuilder
-                                        .createWithSmartPointer(name, element)
-                                        .withRenderer(VariableRenderer(scope)),
-                                    VAR_PRIORITY
-                                )
-                                return@treeWalkUp false
-                            }
-                        }
-                        return@treeWalkUp true
-                    }
-                    lookupElement
-                }
-
-                else -> null
-            }
-        }
+//
+////                                    is FuncConstVariable -> if (scope.expressionList.firstOrNull() == prevParent) {
+////                                        lookupElement = PrioritizedLookupElement.withPriority(
+////                                            LookupElementBuilder
+////                                                .createWithSmartPointer(name, element)
+////                                                .withRenderer(ConstRenderer(parentScope)),
+////                                            VAR_PRIORITY
+////                                        )
+////                                        return@treeWalkUp false
+////                                    }
+//                                }
+//                            }
+//
+//                            is FuncVarExpression -> if (scope.expressionList.getOrNull(1) == prevParent) {
+//                                lookupElement = PrioritizedLookupElement.withPriority(
+//                                    LookupElementBuilder
+//                                        .createWithSmartPointer(name, element)
+//                                        .withRenderer(VariableRenderer(scope)),
+//                                    VAR_PRIORITY
+//                                )
+//                                return@treeWalkUp false
+//                            }
+//                        }
+//                        return@treeWalkUp true
+//                    }
+//                    lookupElement
+//                }
+//
+//                else -> null
+//            }
+//        }
 //
 
 //

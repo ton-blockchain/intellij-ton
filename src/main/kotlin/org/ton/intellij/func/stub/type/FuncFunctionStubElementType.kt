@@ -9,7 +9,7 @@ import com.intellij.util.ArrayFactory
 import org.ton.intellij.func.psi.FuncFunction
 import org.ton.intellij.func.psi.impl.*
 import org.ton.intellij.func.stub.FuncFunctionStub
-import org.ton.intellij.func.stub.index.FuncAllPublicNamesIndex
+import org.ton.intellij.func.stub.index.FuncNamedElementIndex
 
 class FuncFunctionStubElementType(
     debugName: String,
@@ -44,7 +44,7 @@ class FuncFunctionStubElementType(
 
     override fun indexStub(stub: FuncFunctionStub, sink: IndexSink) {
         val name = stub.name ?: return
-        sink.occurrence(FuncAllPublicNamesIndex.ALL_PUBLIC_NAMES, name)
+        sink.occurrence(FuncNamedElementIndex.KEY, name)
     }
 
     companion object {

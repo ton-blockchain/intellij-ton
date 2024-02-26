@@ -32,7 +32,7 @@ enum class FuncColor(
     FUNCTION_STATIC("Function static", Default.STATIC_METHOD),
     CONSTANT("Constant", Default.CONSTANT),
     GLOBAL_VARIABLE("Global variable", Default.GLOBAL_VARIABLE),
-    LOCAL_VARIABLE("Local variable", Default.LOCAL_VARIABLE),
+    LOCAL_VARIABLE("Local variable", Default.CONSTANT),
     MACRO("Macro", Default.METADATA),
     PARAMETER("Parameter", Default.PARAMETER),
     IDENTIFIER("Identifier", Default.IDENTIFIER),

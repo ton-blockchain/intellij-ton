@@ -26,7 +26,7 @@ class FuncTypeInferenceWalker(
         coerce: Boolean = false
     ): FuncTy {
         for (statement in statementList) {
-            processStatement(statement)
+            statement.inferType()
         }
 
         return if (expected is Expectation.ExpectHasTy) {
@@ -36,16 +36,16 @@ class FuncTypeInferenceWalker(
         }
     }
 
-    private fun processStatement(psi: FuncStatement) {
-        when (psi) {
-            is FuncReturnStatement -> psi.inferType()
-            is FuncBlockStatement -> psi.inferType()
-            is FuncRepeatStatement -> psi.inferType()
-            is FuncIfStatement -> psi.inferType()
-            is FuncDoStatement -> psi.inferType()
-            is FuncWhileStatement -> psi.inferType()
-            is FuncTryStatement -> psi.inferType()
-            is FuncExpressionStatement -> psi.expression.inferType()
+    private fun FuncStatement.inferType() {
+        when (this) {
+            is FuncReturnStatement -> inferType()
+            is FuncBlockStatement -> inferType()
+            is FuncRepeatStatement -> inferType()
+            is FuncIfStatement -> inferType()
+            is FuncDoStatement -> inferType()
+            is FuncWhileStatement -> inferType()
+            is FuncTryStatement -> inferType()
+            is FuncExpressionStatement -> expression.inferType()
             else -> {
             }
         }
@@ -71,8 +71,9 @@ class FuncTypeInferenceWalker(
         }
         val ty = when (this) {
             is FuncLiteralExpression -> inferLiteral(this)
+            is FuncParenExpression -> inferType(expected)
             is FuncTensorExpression -> inferType(expected)
-            is FuncAssignExpression -> inferType(expected)
+            is FuncBinExpression -> inferType(expected)
             is FuncApplyExpression -> inferType(expected)
             is FuncSpecialApplyExpression -> inferType(expected)
             is FuncReferenceExpression -> inferType(expected)
@@ -105,29 +106,20 @@ class FuncTypeInferenceWalker(
     }
 
     private fun FuncIfStatement.inferType(): FuncTy {
-        condition?.expression?.inferType(FuncTyInt)
+        condition?.inferType(FuncTyInt)
         blockStatement?.inferType()
-        elseBranch?.blockStatement?.inferType()
-
-        var elseIfBranch = elseIfBranch
-        while (elseIfBranch != null) {
-            elseIfBranch.condition?.expression?.inferType(FuncTyInt)
-            elseIfBranch.blockStatement?.inferType()
-            elseIfBranch.elseBranch?.blockStatement?.inferType()
-            elseIfBranch = elseIfBranch.elseIfBranch
-        }
-
+        elseBranch?.statement?.inferType()
         return FuncTyUnit
     }
 
     private fun FuncDoStatement.inferType(): FuncTy {
         blockStatement?.inferType()
-        condition?.expression?.inferType(FuncTyInt)
+        condition?.inferType(FuncTyInt)
         return FuncTyUnit
     }
 
     private fun FuncWhileStatement.inferType(): FuncTy {
-        condition?.expression?.inferType(FuncTyInt)
+        condition?.inferType(FuncTyInt)
         blockStatement?.inferType()
         return FuncTyUnit
     }
@@ -154,17 +146,18 @@ class FuncTypeInferenceWalker(
         return FuncTyTensor(expressionList.inferType(null))
     }
 
-    private fun FuncAssignExpression.inferType(
+    private fun FuncParenExpression.inferType(
         expected: Expectation
     ): FuncTy {
-        val expressions = expressionList
-        val lhs = expressions.getOrNull(0)
-        val rhs = expressions.getOrNull(1)
-        val lhsTy = lhs?.inferType()
-        val rhsTy = rhs?.inferType()
-//        val rhsTy = rhs?.inferTypeCoercibleTo(lhsTy)
-//        return lhsTy
-        return FuncTyUnit
+        return expression?.inferType(expected) ?: FuncTyUnknown
+    }
+
+    private fun FuncBinExpression.inferType(
+        expected: Expectation
+    ): FuncTy {
+        val leftTy = left.inferType()
+        val rightTy = right?.inferTypeCoercibleTo(leftTy)
+        return rightTy ?: leftTy
     }
 
     private fun FuncApplyExpression.inferType(
@@ -174,10 +167,10 @@ class FuncTypeInferenceWalker(
         val lhs = expressions.getOrNull(0)
         val rhs = expressions.getOrNull(1)
 
-        val lhsTy = lhs?.inferType()
-        if (lhs is FuncHoleTypeExpression) {
+        if (lhs is FuncPrimitiveTypeExpression || lhs is FuncHoleTypeExpression) {
             variableDeclarationState = true
         }
+        val lhsTy = lhs?.inferType()
         val rhsTy = rhs?.inferType()
         variableDeclarationState = false
 
@@ -198,12 +191,11 @@ class FuncTypeInferenceWalker(
     private fun FuncReferenceExpression.inferType(
         expected: Expectation
     ): FuncTy {
-        println("try infer type for ${this.text} in ${this.parent.text} - state = $variableDeclarationState")
         if (variableDeclarationState) {
             ctx.lookup.define(this)
         } else {
-            ctx.lookup.resolve(this)?.let {
-                ctx.setResolvedRefs(this, listOf(PsiElementResolveResult(it)))
+            ctx.lookup.resolve(this)?.let { resolved ->
+                ctx.setResolvedRefs(this, resolved.map { PsiElementResolveResult(it) })
             }
         }
         return FuncTyUnknown

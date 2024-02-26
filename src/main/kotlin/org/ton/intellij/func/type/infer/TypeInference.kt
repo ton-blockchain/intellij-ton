@@ -61,7 +61,7 @@ class FuncInferenceContext(
         return resolvedRefs[element] ?: EMPTY_RESOLVED_SET
     }
 
-    fun setResolvedRefs(element: FuncReferenceExpression, refs: List<PsiElementResolveResult>) {
+    fun setResolvedRefs(element: FuncReferenceExpression, refs: Collection<PsiElementResolveResult>) {
         resolvedRefs[element] = OrderedSet(refs)
     }
 

@@ -2,12 +2,13 @@ package org.ton.intellij.func.psi.impl
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.impl.source.resolve.ResolveCache
-import com.intellij.util.containers.OrderedSet
 import org.ton.intellij.func.psi.FuncReferenceExpression
 import org.ton.intellij.func.psi.inference
+import org.ton.intellij.func.stub.index.FuncNamedElementIndex
 
 class FuncReference(
     element: FuncReferenceExpression,
@@ -18,7 +19,20 @@ class FuncReference(
 
     private val resolver = ResolveCache.PolyVariantResolver<FuncReference> { t, incompleteCode ->
         if (!myElement.isValid) return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
-        element.inference?.getResolvedRefs(element)?.toTypedArray() ?: ResolveResult.EMPTY_ARRAY
+
+        val inferenceResolved = element.inference?.getResolvedRefs(element)
+        if (!inferenceResolved.isNullOrEmpty()) {
+            return@PolyVariantResolver inferenceResolved.toTypedArray()
+        }
+        val identifier = identifier
+        var text = identifier.text
+        if (text.startsWith('.')) text = text.substring(1)
+
+        val elements = FuncNamedElementIndex.findElementsByName(identifier.project, text)
+        if (elements.isEmpty()) {
+            return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
+        }
+        elements.map { PsiElementResolveResult(it) }.toTypedArray()
     }
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {

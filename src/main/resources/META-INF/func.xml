@@ -34,7 +34,7 @@
         <completion.confidence language="func" order="last"
                                implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionConfidence"/>
 
-        <stubIndex implementation="org.ton.intellij.func.stub.index.FuncAllPublicNamesIndex"/>
+        <stubIndex implementation="org.ton.intellij.func.stub.index.FuncNamedElementIndex"/>
         <stubElementTypeHolder class="org.ton.intellij.func.psi.FuncElementTypes" externalIdPrefix="func."/>
         <lang.elementManipulator forClass="org.ton.intellij.func.psi.FuncIncludeDefinition"
                                  implementationClass="org.ton.intellij.func.psi.impl.FuncIncludePathElementManipulator"/>
@@ -58,7 +58,7 @@
         <languageInjectionContributor language="func"
                                       implementationClass="org.ton.intellij.func.ide.FuncLanguageInjector"/>
 
-        <stubIndex implementation="org.ton.intellij.func.stub.index.FuncAllPublicNamesIndex"/>
+        <stubIndex implementation="org.ton.intellij.func.stub.index.FuncNamedElementIndex"/>
 
         <localInspection language="func" displayName="Unused function inspection" groupPath="FunC"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"

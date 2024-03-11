@@ -38,6 +38,31 @@ data class FuncTyTensor(
     }
 }
 
+data class FuncTyTuple(
+    val types: List<FuncTy>
+) : FuncTy() {
+    constructor(vararg types: FuncTy) : this(types.toList())
+
+    init {
+        assert(types.isNotEmpty()) { "TyTuple should not be empty" }
+    }
+
+    override fun superFoldWith(folder: FuncTyFolder): FuncTy =
+        FuncTyTensor(types.map { it.foldWith(folder) })
+
+    override fun isEquivalentToInner(other: FuncTy): Boolean {
+        if (this === other) return true
+        if (other !is FuncTyTensor) return false
+
+        if (types.size != other.types.size) return false
+        for (i in types.indices) {
+            if (!types[i].isEquivalentTo(other.types[i])) return false
+        }
+
+        return true
+    }
+}
+
 data object FuncTyUnknown : FuncTy()
 
 sealed class FuncTyAtomic : FuncTy() {

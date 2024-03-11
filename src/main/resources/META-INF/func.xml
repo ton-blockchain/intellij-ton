@@ -100,6 +100,10 @@
         <localInspection language="func" displayName="Unresolved type identifier" groupPath="FunC"
                          groupName="General" enabledByDefault="true" level="ERROR"
                          implementationClass="org.ton.intellij.func.inspection.FuncUnresolvedTypeIdentifierInspection"/>
+
+        <!-- Completion -->
+        <completion.contributor language="func"
+                                implementationClass="org.ton.intellij.func.completion.FuncCompletionContributor"/>
     </extensions>
 
     <actions>

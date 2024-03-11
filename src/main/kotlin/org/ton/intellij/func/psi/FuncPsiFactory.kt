@@ -165,6 +165,8 @@ class FuncPsiFactory private constructor(val project: Project) {
     fun createFileFromText(@Language("FunC") text: String) =
         createFileFromText(null, text)
 
+    fun createNewline() = createFileFromText("\n").firstChild
+
     fun createFileFromText(name: String?, @Language("FunC") text: String) =
         PsiFileFactory.getInstance(project).createFileFromText(name ?: "dummy.fc", FuncLanguage, text) as FuncFile
 
@@ -181,6 +183,10 @@ class FuncPsiFactory private constructor(val project: Project) {
         val funcFile = createFileFromText("() $text();")
         val function = funcFile.functions.first()
         return function.identifier
+    }
+
+    fun createIncludeDefinition(text: String): FuncIncludeDefinition {
+        return createFileFromText("#include \"$text\";").includeDefinitions.first()
     }
 
     companion object {

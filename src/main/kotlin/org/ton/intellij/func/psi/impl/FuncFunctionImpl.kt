@@ -2,14 +2,20 @@ package org.ton.intellij.func.psi.impl
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
+import org.ton.intellij.func.FuncIcons
 import org.ton.intellij.func.psi.FuncElementTypes
 import org.ton.intellij.func.psi.FuncFunction
 import org.ton.intellij.func.stub.FuncFunctionStub
+import javax.swing.Icon
 
 abstract class FuncFunctionMixin : FuncNamedElementImpl<FuncFunctionStub>, FuncFunction {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: FuncFunctionStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
+
+    override fun getIcon(flags: Int): Icon? {
+        return FuncIcons.FUNCTION
+    }
 
     override fun toString(): String = "FuncFunction($containingFile - $name)"
 }

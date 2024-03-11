@@ -2,6 +2,7 @@ package org.ton.intellij.func.psi
 
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.StubElement
@@ -16,11 +17,38 @@ import org.ton.intellij.func.stub.type.FuncConstVarStubElementType
 import org.ton.intellij.func.stub.type.FuncFunctionStubElementType
 import org.ton.intellij.func.stub.type.FuncGlobalVarStubElementType
 import org.ton.intellij.func.stub.type.FuncIncludeDefinitionStubElementType
+import org.ton.intellij.util.recursionGuard
 
-class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncLanguage) {
+//private fun processFile(context: FuncElement, file: FuncFile) {
+//    recursionGuard(file, {
+//        for (includeDefinition in file.includeDefinitions) {
+//            val nextFile = includeDefinition.reference?.resolve()
+//            if (nextFile !is FuncFile) continue
+//            processFile(context, nextFile)
+//        }
+
+class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncLanguage), FuncElement {
     override fun getFileType(): FileType = FuncFileType
 
     override fun getStub(): FuncFileStub? = super.getStub() as? FuncFileStub
+
+    fun collectIncludedFiles(includeSelf: Boolean = true): Set<FuncFile> {
+        return collectIncludedFiles(HashSet(), includeSelf)
+    }
+
+    private fun collectIncludedFiles(collection: MutableSet<FuncFile>, includeSelf: Boolean): MutableSet<FuncFile> {
+        recursionGuard(this, {
+            for (includeDefinition in includeDefinitions) {
+                val nextFile = includeDefinition.reference?.resolve()
+                if (nextFile !is FuncFile) continue
+                nextFile.collectIncludedFiles(collection, true)
+            }
+            if (includeSelf) {
+                collection.add(this)
+            }
+        }, false)
+        return collection
+    }
 
     val includeDefinitions: List<FuncIncludeDefinition>
         get() = CachedValuesManager.getCachedValue(this) {
@@ -72,8 +100,32 @@ class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncL
             CachedValueProvider.Result.create(constVars, this)
         }
 
+    fun import(file: FuncFile) {
+        val path = VfsUtil.findRelativePath(virtualFile ?: return, file.virtualFile ?: return, '/') ?: return
+        val needImport = includeDefinitions.none { it.reference?.resolve() == file }
+        if (!needImport) return
+
+        val factory = FuncPsiFactory[project]
+
+        val newInclude = factory.createIncludeDefinition(path)
+
+        addBefore(
+            newInclude,
+            includeDefinitions.lastOrNull() ?: firstChild
+        )
+        addAfter(
+            factory.createNewline(),
+            newInclude
+        )
+    }
+
     override fun toString(): String = "FuncFile($name)"
 }
+
+private val INCLUDE_COMPARE: Comparator<FuncIncludeDefinition> =
+    compareBy {
+        it.stringLiteral.rawString.text.lowercase()
+    }
 
 private fun <E : PsiElement> getChildrenByType(
     stub: StubElement<out PsiElement>,

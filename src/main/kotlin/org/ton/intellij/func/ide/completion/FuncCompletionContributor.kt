@@ -9,7 +9,7 @@ import org.ton.intellij.func.psi.FuncReferenceExpression
 
 class FuncCompletionContributor : CompletionContributor() {
     init {
-        extend(CompletionType.BASIC, referenceExpression(), FuncReferenceCompletionProvider())
+//        extend(CompletionType.BASIC, referenceExpression(), FuncReferenceCompletionProvider())
         extend(
             CompletionType.BASIC,
             inBlock(),

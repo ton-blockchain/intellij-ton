@@ -196,6 +196,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
       "&"                      { return AND; }
       "|"                      { return OR; }
       "^"                      { return XOR; }
+      "~"                      { return TILDE; }
 
       "=="                     { return EQEQ; }
       "!="                     { return NEQ; }

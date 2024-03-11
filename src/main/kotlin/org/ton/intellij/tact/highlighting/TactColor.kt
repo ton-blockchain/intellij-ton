@@ -42,7 +42,7 @@ enum class TactColor(
     ;
 
     val textAttributesKey =
-        TextAttributesKey.createTextAttributesKey("org.ton.intellij.func.$name", default)
+        TextAttributesKey.createTextAttributesKey("org.ton.intellij.tact.$name", default)
     val attributesDescriptor = AttributesDescriptor(displayName, textAttributesKey)
 
     val attributes

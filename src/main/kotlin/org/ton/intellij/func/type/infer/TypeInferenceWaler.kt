@@ -73,6 +73,7 @@ class FuncTypeInferenceWalker(
             is FuncLiteralExpression -> inferLiteral(this)
             is FuncParenExpression -> inferType(expected)
             is FuncTensorExpression -> inferType(expected)
+            is FuncTupleExpression -> inferType(expected)
             is FuncBinExpression -> inferType(expected)
             is FuncApplyExpression -> inferType(expected)
             is FuncSpecialApplyExpression -> inferType(expected)
@@ -146,6 +147,12 @@ class FuncTypeInferenceWalker(
         return FuncTyTensor(expressionList.inferType(null))
     }
 
+    private fun FuncTupleExpression.inferType(
+        expected: Expectation
+    ): FuncTy {
+        return FuncTyTuple(expressionList.inferType(null))
+    }
+
     private fun FuncParenExpression.inferType(
         expected: Expectation
     ): FuncTy {
@@ -164,7 +171,7 @@ class FuncTypeInferenceWalker(
         expected: Expectation
     ): FuncTy {
         val expressions = expressionList
-        val lhs = expressions.getOrNull(0)
+        val lhs = expressions[0]
         val rhs = expressions.getOrNull(1)
 
         if (lhs is FuncPrimitiveTypeExpression || lhs is FuncHoleTypeExpression) {

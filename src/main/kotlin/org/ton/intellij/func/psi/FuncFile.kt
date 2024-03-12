@@ -33,7 +33,7 @@ class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncL
     override fun getStub(): FuncFileStub? = super.getStub() as? FuncFileStub
 
     fun collectIncludedFiles(includeSelf: Boolean = true): Set<FuncFile> {
-        return collectIncludedFiles(HashSet(), includeSelf)
+        return collectIncludedFiles(LinkedHashSet(), includeSelf)
     }
 
     private fun collectIncludedFiles(collection: MutableSet<FuncFile>, includeSelf: Boolean): MutableSet<FuncFile> {

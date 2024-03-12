@@ -30,6 +30,7 @@ class FuncReference(
         if (file != null) {
             val contextFunction = element.parentOfType<FuncFunction>()
             val includes = file.collectIncludedFiles(true)
+            println("Collected includes: ${includes}")
 
             includes.forEach { includedFile ->
                 includedFile.functions.forEach { function ->

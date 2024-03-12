@@ -106,26 +106,50 @@ class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncL
         if (!needImport) return
 
         val factory = FuncPsiFactory[project]
-
         val newInclude = factory.createIncludeDefinition(path)
 
-        addBefore(
-            newInclude,
-            includeDefinitions.lastOrNull() ?: firstChild
-        )
-        addAfter(
-            factory.createNewline(),
-            newInclude
-        )
+        tryIncludeAtCorrectLocation(newInclude)
+    }
+
+    private fun tryIncludeAtCorrectLocation(includeDefinition: FuncIncludeDefinition) {
+        val newline = FuncPsiFactory[project].createNewline()
+        val includes = includeDefinitions
+        if (includes.isEmpty()) {
+            addBefore(includeDefinition, firstChild)
+            addAfter(newline, firstChild)
+            return
+        }
+
+        val (less, greater) = includes.partition { INCLUDE_COMPARE.compare(it, includeDefinition) < 0 }
+        val anchorBefore = less.lastOrNull()
+        val anchorAfter = greater.firstOrNull()
+        when {
+            anchorBefore != null -> {
+                val addedItem = addAfter(includeDefinition, anchorBefore)
+                addBefore(newline, addedItem)
+            }
+
+            anchorAfter != null -> {
+                val addedItem = addBefore(includeDefinition, anchorAfter)
+                addAfter(newline, addedItem)
+            }
+
+            else -> error("unreachable")
+        }
     }
 
     override fun toString(): String = "FuncFile($name)"
 }
 
 private val INCLUDE_COMPARE: Comparator<FuncIncludeDefinition> =
-    compareBy {
-        it.stringLiteral.rawString.text.lowercase()
-    }
+    compareBy(
+        {
+            it.stringLiteral.rawString.text.count { c -> c == '/' }
+        },
+        {
+            it.stringLiteral.rawString.text.lowercase()
+        }
+    )
 
 private fun <E : PsiElement> getChildrenByType(
     stub: StubElement<out PsiElement>,

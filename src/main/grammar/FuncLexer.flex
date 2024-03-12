@@ -146,7 +146,7 @@ BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
 //PLAIN_IDENTIFIER=[.~]?[^\s;,\(\)\[\]\{\},.~\"\+\-\*\/%]+
 //PLAIN_IDENTIFIER=^(?!{\-|;;)[.~]?[^\s;,.~\(\)\[\]\"\{\}]+
 PLAIN_IDENTIFIER=[^\s()\[\],.;~\"\{\}]+
-QUOTE_ESCAPED_IDENTIFIER = `[^`\n]+`
+QUOTE_ESCAPED_IDENTIFIER = (`[^`\n]+`)|(_[^`\n]+_)
 IDENTIFIER = [.~]?({QUOTE_ESCAPED_IDENTIFIER}|{PLAIN_IDENTIFIER})
 
 // ANY_ESCAPE_SEQUENCE = \\[^]

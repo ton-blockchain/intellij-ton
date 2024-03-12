@@ -78,6 +78,7 @@ class FuncTypeInferenceWalker(
             is FuncApplyExpression -> inferType(expected)
             is FuncSpecialApplyExpression -> inferType(expected)
             is FuncReferenceExpression -> inferType(expected)
+            is FuncInvExpression -> inferType(expected)
             else -> FuncTyUnknown
         }
 
@@ -206,6 +207,14 @@ class FuncTypeInferenceWalker(
             }
         }
         return FuncTyUnknown
+    }
+
+    private fun FuncInvExpression.inferType(
+        expected: Expectation
+    ): FuncTy {
+        val expression = expression
+        val ty = expression?.inferType(expected)
+        return ty ?: FuncTyUnknown
     }
 
     private fun List<FuncExpression>.inferType(

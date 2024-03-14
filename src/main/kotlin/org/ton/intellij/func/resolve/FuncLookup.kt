@@ -15,7 +15,7 @@ class FuncLookup(
     private val definitions = HashMap<String, FuncNamedElement>()
 
     init {
-        FuncPsiFactory[project].builtinStdlibFile.functions.forEach { function ->
+        FuncPsiFactory[project].builtinFile.functions.forEach { function ->
             val name = function.name ?: return@forEach
             definitions[name] = function
         }

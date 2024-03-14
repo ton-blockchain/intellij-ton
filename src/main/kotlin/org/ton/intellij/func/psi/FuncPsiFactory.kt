@@ -11,7 +11,7 @@ import org.ton.intellij.util.descendantOfTypeStrict
 
 @Service(Service.Level.PROJECT)
 class FuncPsiFactory private constructor(val project: Project) {
-    val builtinStdlibFile by lazy {
+    val builtinFile by lazy {
         createFile(
             "builtin.fc", """
             

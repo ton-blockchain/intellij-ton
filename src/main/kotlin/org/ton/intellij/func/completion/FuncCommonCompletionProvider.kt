@@ -52,18 +52,27 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
 
         val file = element.containingFile.originalFile as? FuncFile ?: return
         val files = file.collectIncludedFiles()
-        files.forEach { file ->
-            collectFileVariants(file) {
-                val name = it.name ?: return@collectFileVariants true
-                if (processed.put(name, it) != null) return@collectFileVariants true
-                if (it is FuncFunction && !(it.name?.startsWith("~") == true && element.name?.startsWith(".") == true)) {
-                    result.addElement(
-                        PrioritizedLookupElement.withPriority(
-                            it.toLookupElementBuilder(ctx),
-                            FuncCompletionContributor.FUNCTION_PRIORITY
-                        )
+
+        fun collectVariant(it: FuncNamedElement) {
+            val name = it.name ?: return
+            if (processed.put(name, it) != null) return
+            if (it is FuncFunction && !(it.name?.startsWith("~") == true && element.name?.startsWith(".") == true)) {
+                result.addElement(
+                    PrioritizedLookupElement.withPriority(
+                        it.toLookupElementBuilder(ctx),
+                        FuncCompletionContributor.FUNCTION_PRIORITY
                     )
-                }
+                )
+            }
+        }
+
+        collectFileVariants(FuncPsiFactory[file.project].builtinFile) {
+            collectVariant(it)
+            true
+        }
+        files.forEach { f ->
+            collectFileVariants(f) {
+                collectVariant(it)
                 true
             }
         }
@@ -138,10 +147,7 @@ fun FuncNamedElement.toLookupElementBuilder(
                 .withTypeText(this.typeReference.text)
                 .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
                 .withInsertHandler { context, item ->
-                    val insertFile = context.file as? FuncFile ?: return@withInsertHandler
-                    val includeCandidateFile = file as? FuncFile ?: return@withInsertHandler
                     val paramType = this.rawParamType
-
                     val isExtensionFunction = name.startsWith("~") || name.startsWith(".")
                     val offset = if (
                         (isExtensionFunction && paramType is FuncTyAtomic) || paramType == FuncTyUnit
@@ -150,6 +156,8 @@ fun FuncNamedElement.toLookupElementBuilder(
                     context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
                     context.commitDocument()
 
+                    val insertFile = context.file as? FuncFile ?: return@withInsertHandler
+                    val includeCandidateFile = file as? FuncFile ?: return@withInsertHandler
                     insertFile.import(includeCandidateFile)
                 }
         }

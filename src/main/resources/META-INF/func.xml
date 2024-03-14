@@ -46,8 +46,12 @@
                 implementation="org.ton.intellij.func.template.FuncEverywhereContextType"/>
         <defaultLiveTemplates file="/liveTemplates/funcHidden.xml" hidden="true"/>
 
+        <!-- Hints -->
+        <codeInsight.parameterInfo language="func"
+                                   implementationClass="org.ton.intellij.func.ide.hints.FuncParameterInfoHandler"/>
         <codeInsight.parameterNameHints language="func"
-                                        implementationClass="org.ton.intellij.func.ide.FuncParameterHintsProvider"/>
+                                        implementationClass="org.ton.intellij.func.ide.hints.FuncParameterHintsProvider"/>
+
 
         <annotator language="func" implementationClass="org.ton.intellij.func.highlighting.FuncAnnotator"/>
         <annotator language="func" implementationClass="org.ton.intellij.func.highlighting.FuncDocAnnotator"/>

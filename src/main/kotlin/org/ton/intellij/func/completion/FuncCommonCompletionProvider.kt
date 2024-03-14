@@ -44,7 +44,7 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
             result.addElement(
                 PrioritizedLookupElement.withPriority(
                     variant.toLookupElementBuilder(ctx),
-                    FuncCompletionContributor.FUNCTION_PRIORITY
+                    FuncCompletionContributor.VAR_PRIORITY
                 )
             )
             true

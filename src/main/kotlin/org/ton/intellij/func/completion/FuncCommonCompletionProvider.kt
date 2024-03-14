@@ -12,7 +12,10 @@ import com.intellij.psi.search.PsiElementProcessor
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.impl.isVariableDefinition
+import org.ton.intellij.func.psi.impl.rawParamType
 import org.ton.intellij.func.stub.index.FuncNamedElementIndex
+import org.ton.intellij.func.type.ty.FuncTyAtomic
+import org.ton.intellij.func.type.ty.FuncTyUnit
 import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.processAllKeys
 import org.ton.intellij.util.psiElement
@@ -137,7 +140,16 @@ fun FuncNamedElement.toLookupElementBuilder(
                 .withInsertHandler { context, item ->
                     val insertFile = context.file as? FuncFile ?: return@withInsertHandler
                     val includeCandidateFile = file as? FuncFile ?: return@withInsertHandler
+                    val paramType = this.rawParamType
+
+                    val isExtensionFunction = name.startsWith("~") || name.startsWith(".")
+                    val offset = if (
+                        (isExtensionFunction && paramType is FuncTyAtomic) || paramType == FuncTyUnit
+                    ) 2 else 1
+                    context.editor.document.insertString(context.editor.caretModel.offset, "()")
+                    context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
                     context.commitDocument()
+
                     insertFile.import(includeCandidateFile)
                 }
         }

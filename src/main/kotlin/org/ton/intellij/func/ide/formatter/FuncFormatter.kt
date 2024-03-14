@@ -7,6 +7,7 @@ import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.tree.TokenSet
 import org.ton.intellij.func.FuncLanguage
 import org.ton.intellij.func.psi.FuncElementTypes.*
+import org.ton.intellij.util.tokenSetOf
 
 class FuncFormatter : FormattingModelBuilder {
     override fun createModel(formattingContext: FormattingContext): FormattingModel {
@@ -56,6 +57,7 @@ class FuncFormatter : FormattingModelBuilder {
             .around(BINARY_OP).spaces(1)
             .after(FORALL_KEYWORD).spaces(1)
             .around(MAPSTO).spaces(1)
+            .afterInside(tokenSetOf(PRIMITIVE_TYPE_EXPRESSION, HOLE_TYPE_EXPRESSION), APPLY_EXPRESSION).spaces(1)
             .betweenInside(LPAREN, MAPSTO, ASM_PARAMETERS).spaces(1)
             .betweenInside(
                 TokenSet.create(
@@ -84,7 +86,6 @@ class FuncFormatter : FormattingModelBuilder {
             .aroundInside(MINUS, MINUS_EXPRESSION).spaces(1)
             .aroundInside(AND, BIN_EXPRESSION).spaces(1)
             .afterInside(MINUS, UNARY_MINUS_EXPRESSION).none()
-//            .aroundInside(TokenSet.create(TILDE, DOT), QUALIFIED_EXPRESSION).none()
             .afterInside(TILDE, INV_EXPRESSION).spaces(1)
             .around(TokenSet.create(IMPURE_KEYWORD, INLINE_KEYWORD, INLINE_REF_KEYWORD, METHOD_ID_KEYWORD)).spaces(1)
     }

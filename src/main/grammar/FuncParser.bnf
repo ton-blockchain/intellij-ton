@@ -463,8 +463,11 @@ TupleType ::= '[' !']' <<comma_separated_list TypeReference>> ']' {
 
 MapType ::= TensorOrParenType '->' TypeReference {
     pin = 2
+    methods=[
+        from="/TypeReference[0]"
+        to="/TypeReference[1]"
+    ]
 }
-
 
 HoleType ::= 'var' | '_'
 PrimitiveType ::= 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type'

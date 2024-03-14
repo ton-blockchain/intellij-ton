@@ -18,9 +18,6 @@ class FuncLookup(
         FuncPsiFactory[project].builtinStdlibFile.functions.forEach { function ->
             val name = function.name ?: return@forEach
             definitions[name] = function
-//            if (!name.startsWith('~')) {
-//                definitions[".$name"] = function
-//            }
         }
         if (context is FuncFunction) {
             context.functionParameterList.forEach {
@@ -28,28 +25,6 @@ class FuncLookup(
             }
         }
     }
-
-//    private fun processFile(context: FuncElement, file: FuncFile) {
-////        println("LOOKUP: processing file: $file by $context")
-//        file.collectIncludedFiles().toList().also {
-////            println("Collected included files: $it")
-//        }.forEach {
-//            for (constant in it.constVars) {
-//                define(constant)
-//            }
-//            for (globalVar in it.globalVars) {
-//                define(globalVar)
-//            }
-//            for (function in it.functions) {
-////                println("defining: $function")
-//                define(function)
-//                if (function == context) {
-//                    return
-//                }
-//            }
-//        }
-//        println("===============")
-//    }
 
     fun define(element: FuncNamedElement) {
         val name = element.name ?: return

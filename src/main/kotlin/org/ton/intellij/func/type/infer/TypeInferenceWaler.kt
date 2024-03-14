@@ -151,7 +151,7 @@ class FuncTypeInferenceWalker(
     private fun FuncTupleExpression.inferType(
         expected: Expectation
     ): FuncTy {
-        return FuncTyTuple(expressionList.inferType(null))
+        return FuncTy(expressionList.inferType(null))
     }
 
     private fun FuncParenExpression.inferType(

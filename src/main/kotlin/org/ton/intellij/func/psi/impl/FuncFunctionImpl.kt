@@ -6,6 +6,10 @@ import org.ton.intellij.func.FuncIcons
 import org.ton.intellij.func.psi.FuncElementTypes
 import org.ton.intellij.func.psi.FuncFunction
 import org.ton.intellij.func.stub.FuncFunctionStub
+import org.ton.intellij.func.type.ty.FuncTy
+import org.ton.intellij.func.type.ty.FuncTyMap
+import org.ton.intellij.func.type.ty.FuncTyUnknown
+import org.ton.intellij.func.type.ty.rawType
 import javax.swing.Icon
 
 abstract class FuncFunctionMixin : FuncNamedElementImpl<FuncFunctionStub>, FuncFunction {
@@ -31,3 +35,17 @@ val FuncFunction.hasMethodId: Boolean
 
 val FuncFunction.hasAsm: Boolean
     get() = stub?.hasAsm ?: (asmDefinition != null)
+
+val FuncFunction.rawReturnType: FuncTy
+    get() = typeReference.rawType
+
+val FuncFunction.rawParamType: FuncTy
+    get() = FuncTy(functionParameterList.map {
+        it.typeReference?.rawType ?: FuncTyUnknown
+    })
+
+val FuncFunction.rawType: FuncTyMap
+    get() = FuncTyMap(
+        rawParamType,
+        rawReturnType
+    )

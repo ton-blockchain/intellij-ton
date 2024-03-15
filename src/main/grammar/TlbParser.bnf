@@ -13,7 +13,7 @@
     tokenTypeClass="org.ton.intellij.tlb.psi.TlbTokenType"
 
     tokens = [
-        HEX_TAG='regexp:#([0-9a-f]+_?|_)'
+        HEX_TAG='regexp:#([0-9a-fA-F]+_?|_)'
         BINARY_TAG='regexp:\$[01]*_?'
 
         PLUS='+'

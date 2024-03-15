@@ -4,6 +4,7 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.editor.colors.TextAttributesKey
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import org.ton.intellij.func.psi.*
 
@@ -14,9 +15,15 @@ class FuncAnnotator : Annotator {
                 highlight(element.identifier, holder, FuncColor.TYPE_PARAMETER.textAttributesKey)
                 return
             }
-
             is FuncTypeIdentifier -> {
                 highlight(element.identifier, holder, FuncColor.TYPE_PARAMETER.textAttributesKey)
+                return
+            }
+            is FuncIncludeDefinition, is FuncPragmaDefinition -> {
+                val sha = element.node.firstChildNode
+                val macroName = sha.treeNext
+
+                highlight(macroName.textRange, holder, FuncColor.MACRO.textAttributesKey)
                 return
             }
 
@@ -84,9 +91,12 @@ class FuncAnnotator : Annotator {
         }
     }
 
-    private fun highlight(element: PsiElement, holder: AnnotationHolder, key: TextAttributesKey) {
+    private fun highlight(element: PsiElement, holder: AnnotationHolder, key: TextAttributesKey) =
+        highlight(element.textRange, holder, key)
+
+    private fun highlight(textRange: TextRange, holder: AnnotationHolder, key: TextAttributesKey) {
         holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-            .range(element.textRange)
+            .range(textRange)
             .textAttributes(key)
             .create()
     }

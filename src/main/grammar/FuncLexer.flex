@@ -145,7 +145,7 @@ BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
 //PLAIN_IDENTIFIER=([a-zA-Z_$?:'~][0-9a-zA-Z_$?:'+\-\=\^><&|/%]*)
 //PLAIN_IDENTIFIER=[.~]?[^\s;,\(\)\[\]\{\},.~\"\+\-\*\/%]+
 //PLAIN_IDENTIFIER=^(?!{\-|;;)[.~]?[^\s;,.~\(\)\[\]\"\{\}]+
-PLAIN_IDENTIFIER=[^\s()\[\],.;~\"\{\}]+
+PLAIN_IDENTIFIER=[^\s()\[\],.;~\"\{\}#]+
 QUOTE_ESCAPED_IDENTIFIER = (`[^`\n]+`)|(_[^_\n\w]+_)
 IDENTIFIER = [.~]?({QUOTE_ESCAPED_IDENTIFIER}|{PLAIN_IDENTIFIER})
 
@@ -197,6 +197,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
       "|"                      { return OR; }
       "^"                      { return XOR; }
       "~"                      { return TILDE; }
+      "#"                      { return SHA; }
 
       "=="                     { return EQEQ; }
       "!="                     { return NEQ; }
@@ -269,9 +270,6 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
       "false"                  { return FALSE_KEYWORD; }
       "nil"                    { return NULL_KEYWORD; }
       "Nil"                    { return NIL_KEYWORD; }
-
-      "#include"               { return INCLUDE_MACRO; }
-      "#pragma"                { return PRAGMA_MACRO; }
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
       {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }

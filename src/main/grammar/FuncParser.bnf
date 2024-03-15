@@ -44,6 +44,7 @@
             OR                  = '|'
             XOR                 = '^'
             TILDE               = '~'
+            SHA                 = '#'
 
             EQEQ                = '=='
             NEQ                 = '!='
@@ -119,9 +120,6 @@
             INFIXR_KEYWORD              = 'infixr'
             CONST_KEYWORD               = 'const'
 
-            INCLUDE_MACRO             = "#include"
-            PRAGMA_MACRO              = "#pragma"
-
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
             IDENTIFIER = "regexp:[a-zA-Z_$?:][0-9a-zA-Z_$?:]*"
@@ -178,8 +176,8 @@ private ConstVar_recovery ::= !';'
 
 
 private UntilSemicolonRecover ::= !(';')
-IncludeDefinition ::= '#include' StringLiteral ';' {
-    pin=2
+IncludeDefinition ::= "#include" StringLiteral ';' {
+    pin=1
     mixin="org.ton.intellij.func.psi.impl.FuncIncludeDefinitionMixin"
     stubClass="org.ton.intellij.func.stub.FuncIncludeDefinitionStub"
     elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
@@ -188,7 +186,7 @@ IncludeDefinition ::= '#include' StringLiteral ';' {
 PragmaDefinition ::= PragmaDefinitionPart ';'
 PragmaKey ::= IDENTIFIER
 PragmaValue ::= StringLiteral | IntegerExpression
-private PragmaDefinitionPart ::= '#pragma' (PragmaVersion | PragmaKeyValue)  {
+private PragmaDefinitionPart ::= "#pragma" (PragmaVersion | PragmaKeyValue)  {
     pin = 1
     recoverWhile = UntilSemicolonRecover
 }
@@ -200,7 +198,7 @@ PragmaVersion ::= ("version" | "not-version") ('^'|'>'|'<'|'='|'<='|'>=')? Pragm
 }
 PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
-Function ::= TypeParameterList? TypeReference FunctionIdentifier FunctionParameterList 'impure'? ('inline' | 'inline_ref')? MethodIdDefinition? (';' | AsmDefinition | BlockStatement) {
+Function ::= TypeParameterList? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
     pin = 3
     implements = [
         "org.ton.intellij.func.psi.FuncNamedElement"
@@ -212,7 +210,15 @@ Function ::= TypeParameterList? TypeReference FunctionIdentifier FunctionParamet
     hooks = [
         leftBinder = "ADJACENT_LINE_COMMENTS"
     ]
+    recoverWhile = TopLevelDefinition_recover
 }
+
+private FunctionAttributes ::= 'impure'? ('inline' | 'inline_ref')? MethodIdDefinition? {
+    recoverWhile = FunctionBody_recovery
+}
+
+private FunctionBody ::= ';' | AsmDefinition | BlockStatement
+private FunctionBody_recovery ::= !(';' | 'asm' | '{')
 
 private TypeParameterList ::= 'forall' << comma_separated_list TypeParameter >> '->' {
     pin=1

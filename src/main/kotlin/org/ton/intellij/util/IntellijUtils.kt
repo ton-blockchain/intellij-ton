@@ -98,3 +98,21 @@ fun <T> recursionGuard(key: Any, block: Computable<T>, memoize: Boolean = true):
 inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> {
     return PlatformPatterns.psiElement(I::class.java)
 }
+
+val PsiElement.leftLeaves: Sequence<PsiElement>
+    get() = generateSequence(this, PsiTreeUtil::prevLeaf).drop(1)
+
+val PsiElement.rightSiblings: Sequence<PsiElement>
+    get() = generateSequence(this.nextSibling) { it.nextSibling }
+
+val PsiElement.leftSiblings: Sequence<PsiElement>
+    get() = generateSequence(this.prevSibling) { it.prevSibling }
+
+val PsiElement.childrenWithLeaves: Sequence<PsiElement>
+    get() = generateSequence(this.firstChild) { it.nextSibling }
+
+val PsiElement.prevVisibleOrNewLine: PsiElement?
+    get() = leftLeaves
+        .filterNot { it is PsiComment || it is PsiErrorElement }
+        .filter { it !is PsiWhiteSpace || it.textContains('\n') }
+        .firstOrNull()

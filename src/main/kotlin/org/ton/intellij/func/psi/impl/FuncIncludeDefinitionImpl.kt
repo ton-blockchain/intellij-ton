@@ -20,8 +20,15 @@ abstract class FuncIncludeDefinitionMixin : StubBasedPsiElementBase<FuncIncludeD
 
     override fun getReference(): PsiReference? = references.lastOrNull()
 
-    override fun getTextOffset(): Int = stringLiteral.startOffsetInParent + stringLiteral.rawString.startOffsetInParent
+    override fun getTextOffset(): Int {
+        val stringLiteral = stringLiteral
+        return if (stringLiteral != null) {
+            stringLiteral.startOffsetInParent + stringLiteral.rawString.startOffsetInParent
+        } else {
+            super.getTextOffset()
+        }
+    }
 }
 
 val FuncIncludeDefinition.path: String
-    get() = stub?.path ?: stringLiteral.rawString.text
+    get() = stub?.path ?: stringLiteral?.rawString?.text ?: ""

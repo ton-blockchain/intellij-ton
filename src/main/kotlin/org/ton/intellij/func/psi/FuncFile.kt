@@ -144,10 +144,10 @@ class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncL
 private val INCLUDE_COMPARE: Comparator<FuncIncludeDefinition> =
     compareBy(
         {
-            it.stringLiteral.rawString.text.count { c -> c == '/' }
+            it.stringLiteral?.rawString?.text?.count { c -> c == '/' }
         },
         {
-            it.stringLiteral.rawString.text.lowercase()
+            it.stringLiteral?.rawString?.text?.lowercase()
         }
     )
 

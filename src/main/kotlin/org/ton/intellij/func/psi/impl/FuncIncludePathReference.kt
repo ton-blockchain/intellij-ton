@@ -8,7 +8,7 @@ class FuncIncludePathReference(
 ) : FileReferenceSet(
     element.path,
     element,
-    element.stringLiteral.rawString.startOffsetInParent + element.stringLiteral.startOffsetInParent,
+    element.textOffset,
     null,
     true
 ) {

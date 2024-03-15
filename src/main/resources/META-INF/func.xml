@@ -107,7 +107,7 @@
 
         <!-- Completion -->
         <completion.contributor language="func"
-                                implementationClass="org.ton.intellij.func.completion.FuncCompletionContributor"/>
+                                implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionContributor"/>
     </extensions>
 
     <actions>

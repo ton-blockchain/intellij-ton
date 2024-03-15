@@ -14,7 +14,9 @@ class FuncIncludePathElementManipulator : AbstractElementManipulator<FuncInclude
         val newText = range.replace(element.text, newContent)
         val newStringLiteral =
             FuncPsiFactory[element.project].createFile(newText).includeDefinitions.first().stringLiteral
-        element.stringLiteral.replace(newStringLiteral)
+        if (newStringLiteral != null) {
+            element.stringLiteral?.replace(newStringLiteral)
+        }
         return element
     }
 }

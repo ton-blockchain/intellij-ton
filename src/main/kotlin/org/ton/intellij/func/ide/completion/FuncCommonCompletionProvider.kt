@@ -1,4 +1,4 @@
-package org.ton.intellij.func.completion
+package org.ton.intellij.func.ide.completion
 
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet

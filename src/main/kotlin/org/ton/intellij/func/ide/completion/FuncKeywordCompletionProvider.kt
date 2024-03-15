@@ -12,6 +12,7 @@ class FuncKeywordCompletionProvider(
     val priority: Double,
     val keywords: List<String> = emptyList(),
     val insertHandler: InsertHandler<LookupElement>? = null,
+    val insertSpace: Boolean = true
 ) : CompletionProvider<CompletionParameters>() {
     constructor(priority: Double, vararg keywords: String) : this(priority, keywords.toList(), null)
 
@@ -44,10 +45,9 @@ class FuncKeywordCompletionProvider(
             } else {
                 val currentOffset = editor.caretModel.offset
                 val documentText = editor.document.immutableCharSequence
-                if (documentText.length <= currentOffset || documentText[currentOffset] != ' ') {
+                if (insertSpace && (documentText.length <= currentOffset || documentText[currentOffset] != ' ')) {
                     EditorModificationUtil.insertStringAtCaret(editor, " ")
                 }
-
             }
         }
 }

@@ -32,11 +32,10 @@ class FuncSyntaxHighlighter : SyntaxHighlighterBase() {
             in FuncParserDefinition.PRIMITIVE_TYPES -> FuncColor.PRIMITIVE_TYPES
             in FUNC_KEYWORDS -> FuncColor.KEYWORD
             in FuncParserDefinition.STRING_LITERALS -> FuncColor.STRING
-            in FuncParserDefinition.MACRO -> FuncColor.MACRO
+            FuncElementTypes.SHA -> FuncColor.MACRO
             in FuncParserDefinition.OPERATORS -> FuncColor.OPERATION_SIGN
             else -> null
         }.let {
-//            println(" = $it")
             pack(it?.textAttributesKey)
         }
 }

@@ -45,7 +45,6 @@ class FuncParserDefinition : ParserDefinition {
         @JvmField
         val EOL_DOC_COMMENT = FuncDocCommentElementType("<EOL_DOC_COMMENT>")
 
-        val MACRO = TokenSet.create(FuncElementTypes.INCLUDE_MACRO, FuncElementTypes.PRAGMA_MACRO)
         val PRIMITIVE_TYPES = TokenSet.create(
             FuncElementTypes.INT_KEYWORD,
             FuncElementTypes.CELL_KEYWORD,

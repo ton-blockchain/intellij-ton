@@ -456,9 +456,13 @@ TypeReference ::= TupleType
 
 //private TypeReference_first ::= '[' | '(' | 'var' | '_' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type' | IDENTIFIER
 
-TupleType ::= '[' !']' <<comma_separated_list TypeReference>> ']' {
-    pin = 2
+TupleType ::= '[' TypeReference TupleTypeValue* ']' {
+    pin = 1
 }
+private TupleTypeValue ::= ',' TypeReference {
+    recoverWhile=TupleTypeValueRecovery
+}
+private TupleTypeValueRecovery ::= !(']'|IDENTIFIER|',')
 
 MapType ::= TensorOrParenType '->' TypeReference {
     pin = 2

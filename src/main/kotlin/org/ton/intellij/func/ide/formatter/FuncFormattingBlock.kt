@@ -88,7 +88,8 @@ class FuncFormattingBlock(
         when (parentType) {
             BLOCK_STATEMENT -> return indentIfNotBrace(child)
             SPECIAL_APPLY_EXPRESSION -> if (parent.lastChildNode == child) return Indent.getNormalIndent()
-            TENSOR_EXPRESSION, PAREN_EXPRESSION -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
+            TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE, PAREN_TYPE -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
+            TUPLE_TYPE, TUPLE_EXPRESSION -> if (type != LBRACK && type != RBRACK) return Indent.getNormalIndent()
         }
         if (type == PRIMITIVE_TYPE_EXPRESSION || type == HOLE_TYPE_EXPRESSION) return Indent.getNoneIndent()
         return Indent.getNoneIndent()

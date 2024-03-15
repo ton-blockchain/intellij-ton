@@ -1,4 +1,21 @@
-# TON Development Changelog
+# TON Plugin for the IntelliJ IDEs Changelog
+
+## [2.1.0]
+
+- Added language selection in project template ([#148](https://github.com/ton-blockchain/intellij-ton/issues/148))
+- Added empty and example project templates ([#147](https://github.com/ton-blockchain/intellij-ton/issues/147))
+
+- Fixed negative method IDs are considered a syntax
+  error ([#157](https://github.com/ton-blockchain/intellij-ton/issues/157))
+- Fixed non-ASCII characters in FunC identifiers ([#156](https://github.com/ton-blockchain/intellij-ton/issues/156))
+- Fixed unresolved reference to uninitialized
+  variable ([#151](https://github.com/ton-blockchain/intellij-ton/issues/151))
+- Fixed auto-complete not work on `slice~` [#149](https://github.com/ton-blockchain/intellij-ton/issues/149)
+- Fixed `method_id` completion ([#126](https://github.com/ton-blockchain/intellij-ton/issues/126))
+- Fixed reference resolving with identifiers containing non-letter
+  characters ([#107](https://github.com/ton-blockchain/intellij-ton/issues/107))
+- Fixed uppercase HEX in TL-B ([#100](https://github.com/ton-blockchain/intellij-ton/issues/100))
+- Fixed indent in chain calls ([#38](https://github.com/ton-blockchain/intellij-ton/issues/38))
 
 ## [2.0.5]
 

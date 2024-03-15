@@ -101,6 +101,7 @@ class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncL
         }
 
     fun import(file: FuncFile) {
+        if (file == this) return
         val path = VfsUtil.findRelativePath(virtualFile ?: return, file.virtualFile ?: return, '/') ?: return
         val needImport = includeDefinitions.none { it.reference?.resolve() == file }
         if (!needImport) return

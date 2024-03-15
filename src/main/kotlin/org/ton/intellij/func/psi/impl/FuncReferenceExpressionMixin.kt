@@ -20,7 +20,7 @@ abstract class FuncReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
     override fun getReference(): FuncReference? = references.firstOrNull()
 
     override fun setName(name: String): PsiElement {
-        identifier.replace(FuncPsiFactory[project].createIdentifierFromText(name))
+        identifier.replace(FuncPsiFactory[project].createIdentifier(name))
         return this
     }
 

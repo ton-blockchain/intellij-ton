@@ -81,6 +81,21 @@ class FuncCompletionContributor : CompletionContributor() {
                 "method_id",
             )
         )
+        extend(
+            CompletionType.BASIC,
+            psiElement().afterLeaf(
+                psiElement(FuncElementTypes.RBRACE).withAncestor(
+                    2,
+                    psiElement(FuncElementTypes.IF_STATEMENT)
+                )
+            ),
+            FuncKeywordCompletionProvider(
+                CONTEXT_KEYWORD_PRIORITY,
+                "else",
+                "elseif",
+                "elseifnot"
+            )
+        )
         extend(FuncCommonCompletionProvider)
     }
 

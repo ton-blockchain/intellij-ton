@@ -184,7 +184,7 @@ class FuncPsiFactory private constructor(val project: Project) {
         return (createStatement("$text;") as FuncExpressionStatement).expression
     }
 
-    fun createIdentifierFromText(text: String): PsiElement {
+    fun createIdentifier(text: String): PsiElement {
         val funcFile = createFile("() $text();")
         val function = funcFile.functions.first()
         return function.identifier

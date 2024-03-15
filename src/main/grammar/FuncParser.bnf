@@ -397,19 +397,12 @@ TensorOrParenExpression ::= '(' Expression (TensorExpression_upper | ')') {
     pin = 1
     elementType = ParenExpression
 }
-upper TensorExpression_upper ::= ',' Expression (',' Expression)* ')' {
-    pin = 1
+upper TensorExpression_upper ::= TensorExpressionValue* ')' {
     elementType = TensorExpression
 }
-
-//TensorExpression ::= '(' [ TensorElements ] ')' {
-//    pin=1
-//    extends=Expression
-//}
-//private TensorElements ::= Expression (!'(' ',' Expression)* {
-//    recoverWhile=TensorElements_recovery
-//}
-//private TensorElements_recovery ::= !(')'|';'|'{'|'}')
+private TensorExpressionValue ::= ',' Expression {
+    pin=1
+}
 
 TupleExpression ::= '[' [ <<comma_separated_list Expression>> ] ']' {
     pin=1

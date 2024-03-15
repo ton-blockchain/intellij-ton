@@ -68,4 +68,8 @@ class FuncReference(
         if (!myElement.isValid) return ResolveResult.EMPTY_ARRAY
         return ResolveCache.getInstance(myElement.project).resolveWithCaching(this, resolver, false, incompleteCode)
     }
+
+    override fun handleElementRename(newElementName: String): PsiElement {
+        return element.identifier.replace(FuncPsiFactory[element.project].createIdentifier(newElementName))
+    }
 }

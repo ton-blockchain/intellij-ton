@@ -1,8 +1,6 @@
 package org.ton.intellij.func.ide.formatter
 
 import com.intellij.formatting.*
-import com.intellij.jsonpath.psi.JsonPathTypes.MINUS_EXPRESSION
-import com.intellij.jsonpath.psi.JsonPathTypes.PLUS_EXPRESSION
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.tree.TokenSet
 import org.ton.intellij.func.FuncLanguage
@@ -80,11 +78,14 @@ class FuncFormatter : FormattingModelBuilder {
             .beforeInside(RPAREN, TokenSet.create(TENSOR_EXPRESSION, TENSOR_TYPE)).none()
             .beforeInside(RBRACK, TokenSet.create(TUPLE_EXPRESSION, TUPLE_TYPE)).none()
             .aroundInside(TokenSet.create(QUEST, COLON), TERNARY_EXPRESSION).spaces(1)
-            .aroundInside(EQEQ, BIN_EXPRESSION).spaces(1)
-            .aroundInside(LT, BIN_EXPRESSION).spaces(1)
-            .aroundInside(PLUS, PLUS_EXPRESSION).spaces(1)
-            .aroundInside(MINUS, MINUS_EXPRESSION).spaces(1)
-            .aroundInside(AND, BIN_EXPRESSION).spaces(1)
+            .aroundInside(
+                tokenSetOf(
+                    EQ, PLUSLET, MINUSLET, TIMESLET, DIVLET, DIVCLET, DIVRLET, MODLET, MODCLET, MODRLET,
+                    LSHIFTLET, RSHIFTLET, RSHIFTCLET, RSHIFTRLET, ANDLET, ORLET, XORLET, EQEQ, NEQ, LEQ,
+                    GEQ, GT, LT, SPACESHIP, LSHIFT, RSHIFTR, RSHIFTC, MINUS, PLUS, OR, XOR, TIMES, DIV, MOD,
+                    DIVMOD, DIVC, DIVR, MODR, MODC, AND
+                ), BIN_EXPRESSION
+            ).spaces(1)
             .afterInside(MINUS, UNARY_MINUS_EXPRESSION).none()
             .afterInside(TILDE, INV_EXPRESSION).spaces(1)
             .around(TokenSet.create(IMPURE_KEYWORD, INLINE_KEYWORD, INLINE_REF_KEYWORD, METHOD_ID_KEYWORD)).spaces(1)

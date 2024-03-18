@@ -3,6 +3,7 @@ package org.ton.intellij.func.ide.completion
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
+import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.patterns.ElementPattern
@@ -13,12 +14,14 @@ import com.intellij.util.ProcessingContext
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.impl.isVariableDefinition
 import org.ton.intellij.func.psi.impl.rawParamType
+import org.ton.intellij.func.psi.impl.rawReturnType
 import org.ton.intellij.func.stub.index.FuncNamedElementIndex
 import org.ton.intellij.func.type.ty.FuncTyAtomic
+import org.ton.intellij.func.type.ty.FuncTyTensor
 import org.ton.intellij.func.type.ty.FuncTyUnit
-import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.processAllKeys
 import org.ton.intellij.util.psiElement
+import java.util.*
 
 object FuncCommonCompletionProvider : FuncCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
@@ -32,76 +35,73 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
         val position = parameters.position
         val element = position.parent as FuncReferenceExpression
         if (element.isVariableDefinition()) return
+        val elementName = element.name ?: return
 
         val ctx = FuncCompletionContext(
             element
         )
 
         val processed = HashMap<String, FuncNamedElement>()
-        collectVariants(element) { variant ->
-            val variantName = variant.name ?: return@collectVariants true
-            if (processed.put(variantName, variant) != null) return@collectVariants true
-            result.addElement(
-                PrioritizedLookupElement.withPriority(
-                    variant.toLookupElementBuilder(ctx),
-                    FuncCompletionContributor.VAR_PRIORITY
-                )
-            )
-            true
-        }
 
         val file = element.containingFile.originalFile as? FuncFile ?: return
-        val files = file.collectIncludedFiles()
 
-        fun collectVariant(it: FuncNamedElement) {
-            val name = it.name ?: return
-            if (processed.put(name, it) != null) return
-            if (it is FuncFunction && !(it.name?.startsWith("~") == true && element.name?.startsWith(".") == true)) {
-                result.addElement(
-                    PrioritizedLookupElement.withPriority(
-                        it.toLookupElementBuilder(ctx),
-                        FuncCompletionContributor.FUNCTION_PRIORITY
-                    )
-                )
+        fun collectVariant(resolvedElement: FuncNamedElement): Boolean {
+            val resolvedName = resolvedElement.name ?: return false
+            if (processed.put(resolvedName, resolvedElement) != null) return false
+            if (resolvedElement is FuncFunction) {
+                println("element name: $elementName | resolvedName: $resolvedName")
+                if (elementName.startsWith(".") && !resolvedName.startsWith("~")) {
+                    return true
+                }
+                if (elementName.startsWith("~")) {
+                    return if (resolvedName.startsWith("~")) {
+                        true
+                    } else {
+                        val returnType = resolvedElement.rawReturnType
+
+                        if (returnType is FuncTyTensor && returnType.types.size == 2) {
+                            val retModifyType = returnType.types.first()
+                            val argType = resolvedElement.rawParamType
+                            argType == retModifyType ||
+                                    (argType is FuncTyTensor && argType.types.first() == retModifyType)
+                        } else {
+                            false
+                        }
+                    }
+                }
+                return true
             }
+            return false
         }
 
-        collectFileVariants(FuncPsiFactory[file.project].builtinFile) {
-            collectVariant(it)
-            true
-        }
+        val files = setOf(FuncPsiFactory[file.project].builtinFile) + file.collectIncludedFiles()
         files.forEach { f ->
             collectFileVariants(f) {
-                collectVariant(it)
+                if (collectVariant(it)) {
+                    result.addElement(it.toLookupElementBuilder(ctx, true))
+                } else {
+                    println("skipped: ${it.name}")
+                }
                 true
             }
         }
-        val functions = ArrayList<FuncFunction>()
-        processAllKeys(FuncNamedElementIndex.KEY, element.project) { key ->
-            FuncNamedElementIndex.findElementsByName(element.project, key).forEach {
-                if (it is FuncFunction && !(it.name?.startsWith("~") == true && element.name?.startsWith(".") == true)) {
-                    functions.add(it)
-                }
+        val globalNamedElements = sequence {
+            val keys = LinkedList<String>()
+            processAllKeys(FuncNamedElementIndex.KEY, element.project) { key ->
+                keys.add(key)
+                true
             }
-            true
-        }
-        functions.asSequence().sortedBy {
+            keys.forEach { key ->
+                yieldAll(FuncNamedElementIndex.findElementsByName(element.project, key))
+            }
+        }.toList()
+
+        globalNamedElements.sortedBy {
             VfsUtilCore.findRelativePath(file.virtualFile, it.containingFile.virtualFile, '/')?.count { c -> c == '/' }
-        }.distinctBy { it.name }.forEach {
-            result.addElement(
-                PrioritizedLookupElement.withPriority(
-                    it.toLookupElementBuilder(ctx),
-                    FuncCompletionContributor.NOT_IMPORTED_FUNCTION_PRIORITY
-                )
-            )
-        }
-
-    }
-
-    private fun collectVariants(element: FuncReferenceExpression, processor: PsiElementProcessor<FuncNamedElement>) {
-        val function = element.parentOfType<FuncFunction>()
-        function?.functionParameterList?.forEach {
-            processor.execute(it)
+        }.forEach {
+            if (collectVariant(it)) {
+                result.addElement(it.toLookupElementBuilder(ctx, false))
+            }
         }
     }
 
@@ -123,8 +123,9 @@ data class FuncCompletionContext(
 )
 
 fun FuncNamedElement.toLookupElementBuilder(
-    context: FuncCompletionContext
-): LookupElementBuilder {
+    context: FuncCompletionContext,
+    isImported: Boolean
+): LookupElement {
     val startWithDot = context.context?.text?.startsWith('.') ?: false
     val name = if (startWithDot) "." + this.name else this.name.toString()
     val base = LookupElementBuilder.create(name).withIcon(this.getIcon(0))
@@ -143,23 +144,27 @@ fun FuncNamedElement.toLookupElementBuilder(
 
     return when (this) {
         is FuncFunction -> {
-            base
-                .withTypeText(this.typeReference.text)
-                .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
-                .withInsertHandler { context, item ->
-                    val paramType = this.rawParamType
-                    val isExtensionFunction = name.startsWith("~") || name.startsWith(".")
-                    val offset = if (
-                        (isExtensionFunction && paramType is FuncTyAtomic) || paramType == FuncTyUnit
-                    ) 2 else 1
-                    context.editor.document.insertString(context.editor.caretModel.offset, "()")
-                    context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
-                    context.commitDocument()
+            PrioritizedLookupElement.withPriority(
+                base
+                    .withTypeText(this.typeReference.text)
+                    .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
+                    .withInsertHandler { context, item ->
+                        val paramType = this.rawParamType
+                        val isExtensionFunction = name.startsWith("~") || name.startsWith(".")
+                        val offset = if (
+                            (isExtensionFunction && paramType is FuncTyAtomic) || paramType == FuncTyUnit
+                        ) 2 else 1
+                        context.editor.document.insertString(context.editor.caretModel.offset, "()")
+                        context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
+                        context.commitDocument()
 
-                    val insertFile = context.file as? FuncFile ?: return@withInsertHandler
-                    val includeCandidateFile = file as? FuncFile ?: return@withInsertHandler
-                    insertFile.import(includeCandidateFile)
-                }
+                        val insertFile = context.file as? FuncFile ?: return@withInsertHandler
+                        val includeCandidateFile = file as? FuncFile ?: return@withInsertHandler
+                        insertFile.import(includeCandidateFile)
+                    },
+                if (isImported) FuncCompletionContributor.FUNCTION_PRIORITY
+                else FuncCompletionContributor.NOT_IMPORTED_FUNCTION_PRIORITY
+            )
         }
 
         else -> LookupElementBuilder.create(this.name.toString()).withIcon(this.getIcon(0))

@@ -5,7 +5,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiParserFacade
-import org.intellij.lang.annotations.Language
 import org.ton.intellij.func.FuncLanguage
 import org.ton.intellij.util.descendantOfTypeStrict
 
@@ -164,10 +163,10 @@ class FuncPsiFactory private constructor(val project: Project) {
         }
     }
 
-    fun createFile(@Language("FunC") text: CharSequence) =
+    fun createFile(text: CharSequence) =
         createFile(null, text)
 
-    fun createFile(name: String?, @Language("FunC") text: CharSequence) =
+    fun createFile(name: String?, text: CharSequence) =
         PsiFileFactory.getInstance(project).createFileFromText(name ?: "dummy.fc", FuncLanguage, text) as FuncFile
 
     fun createNewline(): PsiElement = createWhitespace("\n")
@@ -195,7 +194,7 @@ class FuncPsiFactory private constructor(val project: Project) {
             ?: error("Failed to create include definition from text: `$text`")
 
     private inline fun <reified T : FuncElement> createFromText(
-        @Language("FunC") code: CharSequence
+        code: CharSequence
     ): T? = createFile(code).descendantOfTypeStrict()
 
     companion object {

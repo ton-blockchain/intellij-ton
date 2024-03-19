@@ -14,7 +14,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.SmartPointerManager
 import com.intellij.psi.SmartPsiElementPointer
-import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
 import org.intellij.markdown.parser.MarkdownParser
@@ -106,21 +105,21 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
     ): Pair<PsiElement, String>? = element to buildString {
         when (element) {
             is FuncReferenceExpression -> {
-                val resolved = element.reference?.resolve()
-                if (resolved != null) {
-                    return renderElement(resolved, originalElement)
-                } else {
-                    val varExpr = PsiTreeUtil.getParentOfType(element, FuncVarExpression::class.java) ?: return null
-                    val left = varExpr.expressionList[0]
-                    val right = varExpr.expressionList[1]
-                    when (left) {
-                        is FuncPrimitiveTypeExpression -> renderType(left.primitiveType)
-                        is FuncHoleTypeExpression -> renderType(left.holeType)
-                        else -> append(left.text)
-                    }
-                    append(NBSP)
-                    append(right.text)
-                }
+//                val resolved = element.reference?.resolve()
+//                if (resolved != null) {
+//                    return renderElement(resolved, originalElement)
+//                } else {
+//                    val varExpr = PsiTreeUtil.getParentOfType(element, FuncVarExpression::class.java) ?: return null
+//                    val left = varExpr.expressionList[0]
+//                    val right = varExpr.expressionList[1]
+//                    when (left) {
+//                        is FuncPrimitiveTypeExpression -> renderType(left.primitiveType)
+//                        is FuncHoleTypeExpression -> renderType(left.holeType)
+//                        else -> append(left.text)
+//                    }
+//                    append(NBSP)
+//                    append(right.text)
+//                }
             }
 
             is FuncFunction -> {

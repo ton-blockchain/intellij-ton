@@ -5,6 +5,7 @@ import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.tree.TokenSet
 import org.ton.intellij.func.FuncLanguage
 import org.ton.intellij.func.psi.FuncElementTypes.*
+import org.ton.intellij.util.tokenSetOf
 
 class FuncFormatter : FormattingModelBuilder {
     override fun createModel(formattingContext: FormattingContext): FormattingModel {
@@ -51,30 +52,10 @@ class FuncFormatter : FormattingModelBuilder {
             .after(RBRACE).spaces(1)
             .around(UNTIL_KEYWORD).spaces(1)
             .before(TokenSet.create(BLOCK_STATEMENT, ASM_BODY)).spaces(1)
-            .aroundInside(
-                TokenSet.create(
-                    EQ,
-                    PLUSLET,
-                    MINUSLET,
-                    TIMESLET,
-                    DIVLET,
-                    DIVRLET,
-                    DIVCLET,
-                    MODLET,
-                    MODRLET,
-                    MODCLET,
-                    LSHIFTLET,
-                    RSHIFTLET,
-                    RSHIFTCLET,
-                    RSHIFTRLET,
-                    ANDLET,
-                    ORLET,
-                    XORLET
-                ),
-                ASSIGN_EXPRESSION
-            ).spaces(1)
+            .around(BINARY_OP).spaces(1)
             .after(FORALL_KEYWORD).spaces(1)
             .around(MAPSTO).spaces(1)
+            .afterInside(tokenSetOf(PRIMITIVE_TYPE_EXPRESSION, HOLE_TYPE_EXPRESSION), APPLY_EXPRESSION).spaces(1)
             .betweenInside(LPAREN, MAPSTO, ASM_PARAMETERS).spaces(1)
             .betweenInside(
                 TokenSet.create(
@@ -83,49 +64,30 @@ class FuncFormatter : FormattingModelBuilder {
                     TUPLE_TYPE,
                     TYPE_IDENTIFIER,
                     HOLE_TYPE
-                ), TokenSet.create(IDENTIFIER, TILDE, DOT), FUNCTION
+                ), TokenSet.create(IDENTIFIER, TILDE), FUNCTION
             ).spaces(1)
             .afterInside(TYPE_REFERENCE, FUNCTION).spaces(1)
-            .afterInside(TokenSet.create(DOT, TILDE), FUNCTION).none()
+            .afterInside(TokenSet.create(TILDE), FUNCTION).none()
             .afterInside(IDENTIFIER, FUNCTION).none()
             .beforeInside(IDENTIFIER, FUNCTION_PARAMETER).spaces(1)
             .after(FUNCTION_PARAMETER).none()
-            .beforeInside(TENSOR_EXPRESSION, CALL_EXPRESSION).none()
+            .beforeInside(TENSOR_EXPRESSION, APPLY_EXPRESSION).none()
+            .beforeInside(UNIT_EXPRESSION, APPLY_EXPRESSION).none()
+            .beforeInside(TENSOR_EXPRESSION, SPECIAL_APPLY_EXPRESSION).none()
+            .beforeInside(UNIT_EXPRESSION, SPECIAL_APPLY_EXPRESSION).none()
             .beforeInside(RPAREN, TokenSet.create(TENSOR_EXPRESSION, TENSOR_TYPE)).none()
             .beforeInside(RBRACK, TokenSet.create(TUPLE_EXPRESSION, TUPLE_TYPE)).none()
             .aroundInside(TokenSet.create(QUEST, COLON), TERNARY_EXPRESSION).spaces(1)
-            .aroundInside(EQEQ, EQ_EXPRESSION).spaces(1)
-            .aroundInside(LT, LT_EXPRESSION).spaces(1)
-            .aroundInside(GT, GT_EXPRESSION).spaces(1)
-            .aroundInside(LEQ, LEQ_EXPRESSION).spaces(1)
-            .aroundInside(GEQ, GEQ_EXPRESSION).spaces(1)
-            .aroundInside(NEQ, NEQ_EXPRESSION).spaces(1)
-            .aroundInside(SPACESHIP, SPACESHIP_EXPRESSION).spaces(1)
-            .aroundInside(LSHIFT, L_SHIFT_EXPRESSION).spaces(1)
-            .aroundInside(RSHIFT, R_SHIFT_EXPRESSION).spaces(1)
-            .aroundInside(RSHIFTC, R_SHIFT_C_EXPRESSION).spaces(1)
-            .aroundInside(RSHIFTR, R_SHIFT_R_EXPRESSION).spaces(1)
-            .aroundInside(PLUS, PLUS_EXPRESSION).spaces(1)
-            .aroundInside(MINUS, MINUS_EXPRESSION).spaces(1)
-            .aroundInside(OR, OR_EXPRESSION).spaces(1)
-            .aroundInside(XOR, XOR_EXPRESSION).spaces(1)
-            .aroundInside(TIMES, MUL_EXPRESSION).spaces(1)
-            .aroundInside(DIV, DIV_EXPRESSION).spaces(1)
-            .aroundInside(MOD, MOD_EXPRESSION).spaces(1)
-            .aroundInside(DIVMOD, DIV_MOD_EXPRESSION).spaces(1)
-            .aroundInside(DIVC, DIV_C_EXPRESSION).spaces(1)
-            .aroundInside(DIVR, DIV_R_EXPRESSION).spaces(1)
-            .aroundInside(MODC, MOD_C_EXPRESSION).spaces(1)
-            .aroundInside(MODR, MOD_R_EXPRESSION).spaces(1)
-            .aroundInside(AND, AND_EXPRESSION).spaces(1)
-            .afterInside(MINUS, UNARY_MINUS_EXPRESSION).none()
-//            .aroundInside(TokenSet.create(TILDE, DOT), QUALIFIED_EXPRESSION).none()
-            .afterInside(TILDE, INV_EXPRESSION).spaces(1)
-            .aroundInside(TokenSet.create(REFERENCE_EXPRESSION), VAR_EXPRESSION).spaces(1)
-            .afterInside(
-                TokenSet.create(PRIMITIVE_TYPE_EXPRESSION, HOLE_TYPE_EXPRESSION, TENSOR_EXPRESSION),
-                VAR_EXPRESSION
+            .aroundInside(
+                tokenSetOf(
+                    EQ, PLUSLET, MINUSLET, TIMESLET, DIVLET, DIVCLET, DIVRLET, MODLET, MODCLET, MODRLET,
+                    LSHIFTLET, RSHIFTLET, RSHIFTCLET, RSHIFTRLET, ANDLET, ORLET, XORLET, EQEQ, NEQ, LEQ,
+                    GEQ, GT, LT, SPACESHIP, LSHIFT, RSHIFTR, RSHIFTC, MINUS, PLUS, OR, XOR, TIMES, DIV, MOD,
+                    DIVMOD, DIVC, DIVR, MODR, MODC, AND
+                ), BIN_EXPRESSION
             ).spaces(1)
+            .afterInside(MINUS, UNARY_MINUS_EXPRESSION).none()
+            .afterInside(TILDE, INV_EXPRESSION).spaces(1)
             .around(TokenSet.create(IMPURE_KEYWORD, INLINE_KEYWORD, INLINE_REF_KEYWORD, METHOD_ID_KEYWORD)).spaces(1)
     }
 }

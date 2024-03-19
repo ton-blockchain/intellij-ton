@@ -5,10 +5,10 @@ import com.intellij.codeInsight.daemon.LineMarkerProviderDescriptor
 import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.psi.PsiElement
 import org.ton.intellij.func.FuncIcons
-import org.ton.intellij.func.psi.FuncCallExpression
+import org.ton.intellij.func.psi.FuncApplyExpression
 import org.ton.intellij.func.psi.FuncFunction
-import org.ton.intellij.func.psi.FuncMethodCall
 import org.ton.intellij.func.psi.FuncReferenceExpression
+import org.ton.intellij.func.psi.FuncSpecialApplyExpression
 import org.ton.intellij.util.ancestorStrict
 import org.ton.intellij.util.document
 import javax.swing.Icon
@@ -30,8 +30,8 @@ class FuncRecursiveCallLineMarkerProvider : LineMarkerProviderDescriptor() {
             if (element !is FuncReferenceExpression) continue
             val parent = element.parent
             val isRecursive = when {
-                parent is FuncMethodCall && element == parent.referenceExpression && parent.referenceExpression.isRecursive -> true
-                parent is FuncCallExpression && element == parent.referenceExpression && parent.referenceExpression.isRecursive -> true
+                parent is FuncApplyExpression && (parent.left as? FuncReferenceExpression).isRecursive -> true
+                parent is FuncSpecialApplyExpression && (parent.left as? FuncReferenceExpression).isRecursive -> true
                 else -> false
             }
             if (!isRecursive) continue
@@ -54,9 +54,9 @@ class FuncRecursiveCallLineMarkerProvider : LineMarkerProviderDescriptor() {
         }
     }
 
-    private val FuncReferenceExpression.isRecursive: Boolean
+    private val FuncReferenceExpression?.isRecursive: Boolean
         get() {
-            val reference = reference ?: return false
+            val reference = this?.reference ?: return false
             val def = reference.resolve()
             return def != null && reference.element.ancestorStrict<FuncFunction>() == def
         }

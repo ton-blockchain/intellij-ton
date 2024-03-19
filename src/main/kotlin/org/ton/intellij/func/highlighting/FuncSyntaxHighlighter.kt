@@ -22,7 +22,7 @@ class FuncSyntaxHighlighter : SyntaxHighlighterBase() {
             FuncElementTypes.INTEGER_LITERAL -> FuncColor.NUMBER
             FuncElementTypes.SEMICOLON -> FuncColor.SEMICOLON
             FuncElementTypes.COMMA -> FuncColor.COMMA
-            FuncElementTypes.DOT -> FuncColor.DOT
+//            FuncElementTypes.DOT -> FuncColor.DOT
             FuncParserDefinition.EOL_COMMENT -> FuncColor.LINE_COMMENT
             FuncParserDefinition.BLOCK_COMMENT -> FuncColor.BLOCK_COMMENT
             in FUNC_DOC_COMMENTS -> FuncColor.DOC_COMMENT
@@ -32,11 +32,10 @@ class FuncSyntaxHighlighter : SyntaxHighlighterBase() {
             in FuncParserDefinition.PRIMITIVE_TYPES -> FuncColor.PRIMITIVE_TYPES
             in FUNC_KEYWORDS -> FuncColor.KEYWORD
             in FuncParserDefinition.STRING_LITERALS -> FuncColor.STRING
-            in FuncParserDefinition.MACRO -> FuncColor.MACRO
+            FuncElementTypes.SHA -> FuncColor.MACRO
             in FuncParserDefinition.OPERATORS -> FuncColor.OPERATION_SIGN
             else -> null
         }.let {
-//            println(" = $it")
             pack(it?.textAttributesKey)
         }
 }

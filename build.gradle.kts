@@ -114,13 +114,13 @@ fun prop(name: String, default: (() -> String?)? = null) = extra.properties[name
 
 fun generateParser(language: String, suffix: String = "", config: GenerateParserTask.() -> Unit = {}) =
     task<GenerateParserTask>("generate${language.capitalized()}Parser${suffix.capitalized()}") {
-    sourceFile.set(file("src/main/grammar/${language}Parser.bnf"))
-    targetRoot.set("src/gen")
+        sourceFile.set(file("src/main/grammar/${language}Parser.bnf"))
+        targetRoot.set("src/gen")
         pathToParser.set("/org/ton/intellij/${language.lowercase()}/parser/${language}Parser.java")
         pathToPsiRoot.set("/org/ton/intellij/${language.lowercase()}/psi")
-    purgeOldFiles.set(true)
+        purgeOldFiles.set(true)
         config()
-}
+    }
 
 fun generateLexer(language: String) = task<GenerateLexerTask>("generate${language}Lexer") {
     sourceFile.set(file("src/main/grammar/${language}Lexer.flex"))

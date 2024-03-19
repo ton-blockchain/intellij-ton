@@ -14,7 +14,7 @@ abstract class FuncNamedElementImpl<T : FuncNamedStub<*>> : FuncStubbedElementIm
     constructor(node: ASTNode) : super(node)
 
     override fun setName(name: String): PsiElement {
-        identifier?.replace(FuncPsiFactory[project].createIdentifierFromText(name))
+        identifier?.replace(FuncPsiFactory[project].createIdentifier(name))
         return this
     }
 

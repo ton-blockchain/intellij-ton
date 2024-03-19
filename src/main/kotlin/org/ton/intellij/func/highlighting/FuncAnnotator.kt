@@ -4,8 +4,8 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.editor.colors.TextAttributesKey
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.PsiTreeUtil
 import org.ton.intellij.func.psi.*
 
 class FuncAnnotator : Annotator {
@@ -15,9 +15,15 @@ class FuncAnnotator : Annotator {
                 highlight(element.identifier, holder, FuncColor.TYPE_PARAMETER.textAttributesKey)
                 return
             }
-
             is FuncTypeIdentifier -> {
                 highlight(element.identifier, holder, FuncColor.TYPE_PARAMETER.textAttributesKey)
+                return
+            }
+            is FuncIncludeDefinition, is FuncPragmaDefinition -> {
+                val sha = element.node.firstChildNode
+                val macroName = sha.treeNext
+
+                highlight(macroName.textRange, holder, FuncColor.MACRO.textAttributesKey)
                 return
             }
 
@@ -49,44 +55,28 @@ class FuncAnnotator : Annotator {
             }
 
             is FuncReferenceExpression -> {
-                when (element.node.treeParent.elementType) {
-                    FuncElementTypes.CALL_EXPRESSION -> {
-                        highlight(
-                            element.identifier,
-                            holder,
-                            FuncColor.FUNCTION_STATIC.textAttributesKey
-                        )
-                    }
-
-                    FuncElementTypes.METHOD_CALL -> {
-                        highlight(
-                            element.identifier,
-                            holder,
-                            FuncColor.FUNCTION_CALL.textAttributesKey
-                        )
-                    }
-
-                    else -> {
-                        val resolved = element.reference?.resolve() ?: element
-                        var color: TextAttributesKey? = null
-                        PsiTreeUtil.treeWalkUp(resolved, null) { scope, _ ->
-                            color = when (scope) {
-                                is FuncBlockStatement -> FuncColor.LOCAL_VARIABLE.textAttributesKey
-                                is FuncConstVar -> FuncColor.CONSTANT.textAttributesKey
-                                is FuncGlobalVar -> FuncColor.GLOBAL_VARIABLE.textAttributesKey
-                                is FuncFunctionParameter -> FuncColor.PARAMETER.textAttributesKey
-                                else -> null
-                            }
-                            color == null
+                val reference = element.reference
+                if (reference == null) {
+                    highlight(
+                        element.identifier,
+                        holder,
+                        FuncColor.LOCAL_VARIABLE.textAttributesKey
+                    )
+                } else {
+                    val resolved = reference.resolve() ?: return
+                    val color = when (resolved) {
+                        is FuncFunction -> FuncColor.FUNCTION_CALL
+                        is FuncGlobalVar -> FuncColor.GLOBAL_VARIABLE
+                        is FuncConstVar -> FuncColor.CONSTANT
+                        is FuncFunctionParameter -> FuncColor.PARAMETER
+                        is FuncReferenceExpression -> {
+                            if (resolved.reference != null) return
+                            FuncColor.LOCAL_VARIABLE
                         }
-                        color?.let {
-                            highlight(
-                                element.identifier,
-                                holder,
-                                it
-                            )
-                        }
+
+                        else -> return
                     }
+                    highlight(element.identifier, holder, color.textAttributesKey)
                 }
                 return
             }
@@ -101,9 +91,12 @@ class FuncAnnotator : Annotator {
         }
     }
 
-    private fun highlight(element: PsiElement, holder: AnnotationHolder, key: TextAttributesKey) {
+    private fun highlight(element: PsiElement, holder: AnnotationHolder, key: TextAttributesKey) =
+        highlight(element.textRange, holder, key)
+
+    private fun highlight(textRange: TextRange, holder: AnnotationHolder, key: TextAttributesKey) {
         holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-            .range(element.textRange)
+            .range(textRange)
             .textAttributes(key)
             .create()
     }

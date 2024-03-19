@@ -3,7 +3,8 @@ package org.ton.intellij.func.lexer;
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.Stack;
-import org.ton.intellij.func.parser.FuncParserDefinition;import org.ton.intellij.func.psi.FuncElementTypes;
+import org.ton.intellij.func.parser.FuncParserDefinition;
+import org.ton.intellij.func.psi.FuncElementTypes;
 
 import static com.intellij.psi.TokenType.*;
 import static org.ton.intellij.func.psi.FuncElementTypes.*;
@@ -137,16 +138,16 @@ LINE_DOC_COMMENT=;;;[^\n]*
 LINE_COMMENT=;;[^\n]*
 
 INTEGER_LITERAL={DECIMAL_INTEGER_LITERAL}|{HEX_INTEGER_LITERAL}|{BIN_INTEGER_LITERAL}
-DECIMAL_INTEGER_LITERAL=(0|([1-9]({DIGIT_OR_UNDERSCORE})*))
+DECIMAL_INTEGER_LITERAL=-?(0|([1-9]({DIGIT_OR_UNDERSCORE})*))
 HEX_INTEGER_LITERAL=0[Xx]({HEX_DIGIT_OR_UNDERSCORE})*
 BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
 
-
-PLAIN_IDENTIFIER=([a-zA-Z_$?:'~][0-9a-zA-Z_$?:'+\-\=\^><&|/%]*)
-QUOTE_ESCAPED_IDENTIFIER = [.~]?`[^`\n]+`
-UNDERSCORE_ESCAPED_IDENTIFIER = [.~\^]?_[^\s]+_
-OPERATOR_IDENTIFIER = _\+_|_-_|-_|_\*_|_\/_|_\~\/_|_\^\/_|_%_|_\~%_|_\^%_|_\/%_|_<<_|_>>_|_\~>>_|_\^>>_|_&_|_\|_|_\^_|\~_|\^_\+=_|\^_-=_|\^_\*=_|_==_|_\!=_
-IDENTIFIER = {OPERATOR_IDENTIFIER}|{PLAIN_IDENTIFIER}|{QUOTE_ESCAPED_IDENTIFIER}
+//PLAIN_IDENTIFIER=([a-zA-Z_$?:'~][0-9a-zA-Z_$?:'+\-\=\^><&|/%]*)
+//PLAIN_IDENTIFIER=[.~]?[^\s;,\(\)\[\]\{\},.~\"\+\-\*\/%]+
+//PLAIN_IDENTIFIER=^(?!{\-|;;)[.~]?[^\s;,.~\(\)\[\]\"\{\}]+
+PLAIN_IDENTIFIER=[^\s()\[\],.;~\"\{\}#]+
+QUOTE_ESCAPED_IDENTIFIER = (`[^`\n]+`)|(_[^_\n\w]+_)
+IDENTIFIER = [.~]?({QUOTE_ESCAPED_IDENTIFIER}|{PLAIN_IDENTIFIER})
 
 // ANY_ESCAPE_SEQUENCE = \\[^]
 THREE_QUO = (\"\"\")
@@ -167,6 +168,12 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
 
       \"                       { pushState(STRING); return OPEN_QUOTE; }
 
+      "{-"                     { yybegin(IN_BLOCK_COMMENT); yypushback(2); }
+      ";;;;" .*                { return EOL_COMMENT; }
+      {EOL_DOC_LINE}           { yybegin(IN_EOL_DOC_COMMENT);
+                                 zzPostponedMarkedPos = zzStartRead; }
+      ";;" .*                  { return EOL_COMMENT; }
+
       "+"                      { return PLUS; }
       "-"                      { return MINUS; }
       "*"                      { return TIMES; }
@@ -174,7 +181,6 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
       "%"                      { return MOD; }
       "?"                      { return QUEST; }
       ":"                      { return COLON; }
-      "."                      { return DOT; }
       ","                      { return COMMA; }
       ";"                      { return SEMICOLON; }
       "{"                      { return LBRACE; }
@@ -191,6 +197,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
       "|"                      { return OR; }
       "^"                      { return XOR; }
       "~"                      { return TILDE; }
+      "#"                      { return SHA; }
 
       "=="                     { return EQEQ; }
       "!="                     { return NEQ; }
@@ -264,22 +271,9 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
       "nil"                    { return NULL_KEYWORD; }
       "Nil"                    { return NIL_KEYWORD; }
 
-      "#include"               { return INCLUDE_MACRO; }
-      "#pragma"                { return PRAGMA_MACRO; }
-
-      "{-"                     { yybegin(IN_BLOCK_COMMENT); yypushback(2); }
-      ";;;;" .*                { return EOL_COMMENT; }
-      {EOL_DOC_LINE}           { yybegin(IN_EOL_DOC_COMMENT);
-                                 zzPostponedMarkedPos = zzStartRead; }
-      ";;" .*                  { return EOL_COMMENT; }
-
-
-
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
       {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }
-      {IDENTIFIER}             {
-          return IDENTIFIER;
-      }
+      {IDENTIFIER}             { return IDENTIFIER; }
 }
 
 <RAW_STRING> \n                  { return FuncElementTypes.RAW_STRING_ELEMENT; }
@@ -303,31 +297,8 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
 
 <STRING, RAW_STRING> {REGULAR_STRING_PART}         { return FuncElementTypes.RAW_STRING_ELEMENT; }
 
-//"{--}" {
-//    return BLOCK_COMMENT;
-//}
-//
-//"{--" {
-//    pushState(DOC_COMMENT);
-//    commentDepth = 0;
-//    commentStart = getTokenStart();
-//}
-//
-//"{-" {
-//    pushState(IN_BLOCK_COMMENT);
-//    commentDepth = 0;
-//    commentStart = getTokenStart();
-//}
-//
-//";;;;" .* { return EOL_COMMENT; }
-//{EOL_DOC_LINE} {
-//          pushState(IN_EOL_DOC_COMMENT);
-//          zzPostponedMarkedPos = zzStartRead;
-//}
-//";;".* { return EOL_COMMENT; }
-
 <IN_BLOCK_COMMENT> {
-  "{-"    { if (zzNestedCommentLevel++ == 0)
+  "{-"  { if (zzNestedCommentLevel++ == 0)
               zzPostponedMarkedPos = zzStartRead;
           }
 
@@ -352,13 +323,3 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
 }
 
 [^] { return BAD_CHARACTER; }
-
-//({WHITE_SPACE_CHAR})+ { return WHITE_SPACE; }
-//
-//
-//{IDENTIFIER} { return IDENTIFIER; }
-//
-//[\s\S]       { return BAD_CHARACTER; }
-//
-//<STRING, RAW_STRING, IN_BLOCK_COMMENT, DOC_COMMENT> .
-//             { return BAD_CHARACTER; }

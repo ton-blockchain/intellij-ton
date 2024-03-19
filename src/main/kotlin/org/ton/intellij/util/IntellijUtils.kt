@@ -8,7 +8,11 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Computable
+import com.intellij.openapi.util.RecursionManager
 import com.intellij.openapi.util.TextRange
+import com.intellij.patterns.PlatformPatterns
+import com.intellij.patterns.PsiElementPattern
 import com.intellij.psi.*
 import com.intellij.psi.impl.PsiDocumentManagerBase
 import com.intellij.psi.search.GlobalSearchScope
@@ -75,6 +79,40 @@ fun checkCommitIsNotInProgress(project: Project) {
 inline fun <Key : Any, reified Psi : PsiElement> getElements(
     indexKey: StubIndexKey<Key, Psi>,
     key: Key, project: Project,
-    scope: GlobalSearchScope?
+    scope: GlobalSearchScope? = null
 ): Collection<Psi> =
     StubIndex.getElements(indexKey, key, project, scope, Psi::class.java)
+
+inline fun <Key : Any> processAllKeys(
+    indexKey: StubIndexKey<Key, *>,
+    project: Project,
+    scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
+    noinline processor: (Key) -> Boolean
+) {
+    StubIndex.getInstance().processAllKeys(indexKey, processor, scope)
+}
+
+fun <T> recursionGuard(key: Any, block: Computable<T>, memoize: Boolean = true): T? =
+    RecursionManager.doPreventingRecursion(key, memoize, block)
+
+inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> {
+    return PlatformPatterns.psiElement(I::class.java)
+}
+
+val PsiElement.leftLeaves: Sequence<PsiElement>
+    get() = generateSequence(this, PsiTreeUtil::prevLeaf).drop(1)
+
+val PsiElement.rightSiblings: Sequence<PsiElement>
+    get() = generateSequence(this.nextSibling) { it.nextSibling }
+
+val PsiElement.leftSiblings: Sequence<PsiElement>
+    get() = generateSequence(this.prevSibling) { it.prevSibling }
+
+val PsiElement.childrenWithLeaves: Sequence<PsiElement>
+    get() = generateSequence(this.firstChild) { it.nextSibling }
+
+val PsiElement.prevVisibleOrNewLine: PsiElement?
+    get() = leftLeaves
+        .filterNot { it is PsiComment || it is PsiErrorElement }
+        .filter { it !is PsiWhiteSpace || it.textContains('\n') }
+        .firstOrNull()

@@ -9,8 +9,7 @@ import com.intellij.util.ArrayFactory
 import org.ton.intellij.func.psi.FuncConstVar
 import org.ton.intellij.func.psi.impl.FuncConstVarImpl
 import org.ton.intellij.func.stub.FuncConstVarStub
-import org.ton.intellij.func.stub.FuncGlobalVarStub
-import org.ton.intellij.func.stub.index.FuncAllPublicNamesIndex
+import org.ton.intellij.func.stub.index.FuncNamedElementIndex
 
 class FuncConstVarStubElementType(
     debugName: String,
@@ -37,7 +36,7 @@ class FuncConstVarStubElementType(
 
     override fun indexStub(stub: FuncConstVarStub, sink: IndexSink) {
         val name = stub.name ?: return
-        sink.occurrence(FuncAllPublicNamesIndex.ALL_PUBLIC_NAMES, name)
+        sink.occurrence(FuncNamedElementIndex.KEY, name)
     }
 
     companion object {

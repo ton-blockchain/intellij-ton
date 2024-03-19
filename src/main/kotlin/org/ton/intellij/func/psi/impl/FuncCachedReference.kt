@@ -23,7 +23,7 @@ abstract class FuncCachedReference<T : PsiElement>(
     protected abstract fun resolveInner(): PsiElement?
 
     override fun handleElementRename(newElementName: String): PsiElement {
-        myElement.replace(FuncPsiFactory[myElement.project].createIdentifierFromText(newElementName))
+        myElement.replace(FuncPsiFactory[myElement.project].createIdentifier(newElementName))
         return myElement
     }
 

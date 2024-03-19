@@ -6,7 +6,6 @@ import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.util.TextRange
 import org.ton.intellij.func.psi.FuncReferenceExpression
 import org.ton.intellij.func.psi.FuncVisitor
-import org.ton.intellij.func.psi.impl.FuncReferenceExpressionImpl
 
 class FuncUnresolvedReferenceInspection : FuncInspectionBase() {
     override fun buildFuncVisitor(
@@ -15,19 +14,23 @@ class FuncUnresolvedReferenceInspection : FuncInspectionBase() {
     ): FuncVisitor = object : FuncVisitor() {
         override fun visitReferenceExpression(o: FuncReferenceExpression) {
             super.visitReferenceExpression(o)
-            if (o !is FuncReferenceExpressionImpl) return
-            val reference = o.reference ?: return
-
-            if (reference.resolve() == null) {
-                val id = o.identifier
-                val range = TextRange.from(id.startOffsetInParent, id.textLength)
-                holder.registerProblem(
-                    o,
-                    "Unresolved reference <code>#ref</code>",
-                    ProblemHighlightType.LIKE_UNKNOWN_SYMBOL,
-                    range
-                )
+//            println("unresolved inspection, reference: ${o.text}")
+            val reference = o.reference ?: kotlin.run {
+//                println("unresolved inspection, no reference")
+                return
             }
+            val resolved = reference.resolve()
+//            println("unresolved inspection, resolved: $resolved")
+            if (resolved != null) return
+
+            val id = o.identifier
+            val range = TextRange.from(id.startOffsetInParent, id.textLength)
+            holder.registerProblem(
+                o,
+                "Unresolved reference <code>#ref</code>",
+                ProblemHighlightType.LIKE_UNKNOWN_SYMBOL,
+                range
+            )
         }
     }
 }

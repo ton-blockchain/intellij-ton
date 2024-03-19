@@ -1,0 +1,279 @@
+{
+    tokens = [
+                WHITESPACE          = 'regexp:[ \t\f\n]'
+
+                PLUS                = '+'
+                MINUS               = '-'
+                TIMES               = '*'
+                DIV                 = '/'
+                MOD                 = '%'
+                QUEST               = '?'
+                COLON               = ':'
+                DOT                 = '.'
+                COMMA               = ','
+                SEMICOLON           = ';'
+                LBRACE              = '{'
+                RBRACE              = '}'
+                LBRACK              = '['
+                RBRACK              = ']'
+                LPAREN              = '('
+                RPAREN              = ')'
+                EQ                  = '='
+                UNDERSCORE          = '_'
+                LT                  = '<'
+                GT                  = '>'
+                AND                 = '&'
+                OR                  = '|'
+                XOR                 = '^'
+                TILDE               = '~'
+
+                EQEQ                = '=='
+                NEQ                 = '!='
+                LEQ                 = '<='
+                GEQ                 = '>='
+                SPACESHIP           = '<=>'
+                LSHIFT              = '<<'
+                RSHIFT              = '>>'
+                RSHIFTR             = '~>>'
+                RSHIFTC             = '^>>'
+                DIVR                = '~/'
+                DIVC                = '^/'
+                MODR                = '~%'
+                MODC                = '^%'
+                DIVMOD              = '/%'
+                PLUSLET             = '+='
+                MINUSLET            = '-='
+                TIMESLET            = '*='
+                DIVLET              = '/='
+                DIVRLET             = '~/='
+                DIVCLET             = '^/='
+                MODLET              = '%='
+                MODRLET             = '~%='
+                MODCLET             = '^%='
+                LSHIFTLET           = '<<='
+                RSHIFTLET           = '>>='
+                RSHIFTRLET          = '~>>='
+                RSHIFTCLET          = '^>>='
+                ANDLET              = '&='
+                ORLET               = '|='
+                XORLET              = '^='
+                MAPSTO              = '->'
+
+                RETURN_KEYWORD              = 'return'
+                VAR_KEYWORD                 = 'var'
+                REPEAT_KEYWORD              = 'repeat'
+                DO_KEYWORD                  = 'do'
+                WHILE_KEYWORD               = 'while'
+                UNTIL_KEYWORD               = 'until'
+                TRY_KEYWORD                 = 'try'
+                CATCH_KEYWORD               = 'catch'
+                IF_KEYWORD                  = 'if'
+                IFNOT_KEYWORD               = 'ifnot'
+                THEN_KEYWORD                = 'then'
+                ELSE_KEYWORD                = 'else'
+                ELSEIF_KEYWORD              = 'elseif'
+                ELSEIFNOT_KEYWORD           = 'elseifnot'
+
+                INT_KEYWORD                 = 'int'
+                CELL_KEYWORD                = 'cell'
+                SLICE_KEYWORD               = 'slice'
+                BUILDER_KEYWORD             = 'builder'
+                CONT_KEYWORD                = 'cont'
+                TUPLE_KEYWORD               = 'tuple'
+                TYPE_KEYWORD                = 'type'
+                FORALL_KEYWORD              = 'forall'
+                TRUE_KEYWORD                = 'true'
+                FALSE_KEYWORD               = 'false'
+                NULL_KEYWORD                = 'nil'
+                NIL_KEYWORD                 = 'Nil'
+
+                EXTERN_KEYWORD              = 'extern'
+                GLOBAL_KEYWORD              = 'global'
+                ASM_KEYWORD                 = 'asm'
+                IMPURE_KEYWORD              = 'impure'
+                INLINE_KEYWORD              = 'inline'
+                INLINE_REF_KEYWORD          = 'inline_ref'
+                AUTO_APPLY_KEYWORD          = 'auto_apply'
+                METHOD_ID_KEYWORD           = 'method_id'
+                OPERATOR_KEYWORD            = 'operator'
+                INFIX_KEYWORD               = 'infix'
+                INFIXL_KEYWORD              = 'infixl'
+                INFIXR_KEYWORD              = 'infixr'
+                CONST_KEYWORD               = 'const'
+
+                INCLUDE_MACRO             = "#include"
+                PRAGMA_MACRO              = "#pragma"
+
+
+                ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
+                DANGLING_NEWLINE = "DANGLING_NEWLINE"
+                IDENTIFIER = "regexp:[a-zA-Z_$?:][0-9a-zA-Z_$?:]*"
+//                SPECIAL_IDENTIFIER = "regexp:[~.][a-zA-Z_$?:][0-9a-zA-Z_$?:]*"
+                INTEGER_LITERAL = 'regexp:(0|([1-9]([_0-9])*))'
+        ]
+
+    extends("(.+Expr)") = Expr
+    extends("(.+Stmt)") = Stmt
+    elementType(".+BinExpr") = BinaryExpr
+    elementType(".+BinOp") = BinaryOp
+
+    generateTokenAccessors=true
+
+    parserClass='org.ton.intellij.func2.parser.FuncParser'
+    parserUtilClass='org.ton.intellij.func2.parser.FuncParserUtil'
+
+    psiClassPrefix='Func'
+    psiImplClassSuffix='Impl'
+    psiPackage='org.ton.intellij.func2.psi'
+    psiImplPackage='org.ton.intellij.func2.psi.impl'
+
+    elementTypeHolderClass='org.ton.intellij.func2.psi.FuncElementTypes'
+    tokenTypeClass='org.ton.intellij.func2.FuncTokenType'
+}
+
+root ::= Stmt
+
+Stmt ::= ReturnStmt
+| BlockStmt
+| EmptyStmt
+| RepeatStmt
+| (&('if' | 'ifnot') IfStmt)
+| DoStmt
+| WhileStmt
+| TryStmt
+| ExprStmt {
+    name = "statement"
+}
+ExprStmt ::= Expr ';'
+EmptyStmt ::= ';'
+ReturnStmt ::= 'return' Expr ';' {
+    pin = 1
+}
+BlockStmt ::= &'{' Block
+RepeatStmt ::= 'repeat' Condition Block {
+    pin = 1
+}
+
+IfStmt ::= ('if' | 'ifnot' | 'elseif' | 'elseifnot') Condition Block (ElseBranch | (&('elseif' | 'elseifnot') IfStmt))? {
+    pin = 1
+}
+ElseBranch ::= 'else' Block {
+    pin = 1
+}
+
+DoStmt ::= 'do' Block 'until' Condition {
+    pin = 1
+}
+WhileStmt ::= 'while' Condition Block {
+    pin = 1
+}
+TryStmt ::= 'try' Block CatchClause {
+    pin = 1
+}
+CatchClause ::= 'catch' TensorOrParenExpr Block {
+    pin = 1
+}
+
+Condition ::= Expr
+
+Block ::= '{' BlockElement* '}' {
+    pin = 1
+}
+private BlockElement ::= !'}' Stmt {
+    pin = 1
+    recoverWhile = BlockElement_recover
+}
+private BlockElement_recover ::= !('}' | Expr_first | Stmt_first | ';')
+private Stmt_first ::= ';' | 'return' | 'repeat' | 'do' | 'while' | 'try' | 'if' | 'ifnot' | '{'
+private Expr_first ::= '(' | '-' | 'builder' | 'cell' | 'cont' | 'int' | 'slice' | 'tuple' | 'type' | 'var' | '~' | IDENTIFIER | SPECIAL_IDENTIFIER
+
+Expr ::= AssignBinExpr
+ | CompBinExpr
+ | RelCompBinExpr
+ | ShiftBinExpr
+ | NegExpr
+ | AddBinExpr
+ | OrBinExpr
+ | XorBinExpr
+ | MulBinExpr
+ | AndBinExpr
+ | InvExpr
+ | ModifyExpr
+ | ApplyExpr
+ | AtomExpr
+
+fake BinaryExpr ::= Expr BinaryOp Expr {
+    methods=[
+        left="/Expr[0]"
+        right="/Expr[1]"
+    ]
+}
+
+//noinspection BnfUnusedRule
+fake BinaryOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '^>>=' | '~>>=' | '&=' | '|=' | '^='
+| '==' | '!='
+| '<' | '>' | '<=' | '>=' | '<=>'
+| '<<' | '>>' | '~>>' | '^>>'
+| '-' | '+'
+| '|'
+| '^'
+| '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%'
+| '&'
+
+AssignBinExpr ::= Expr AssignBinOp Expr {
+    rightAssociative = true
+}
+
+CompBinExpr ::= Expr CompBinOp Expr
+RelCompBinExpr ::= Expr RelCompBinOp Expr
+ShiftBinExpr ::= Expr ShiftBinOp Expr
+NegExpr ::= '-' Expr
+AddBinExpr ::= Expr AddBinOp Expr
+OrBinExpr ::= Expr OrBinOp Expr
+XorBinExpr ::= Expr XorBinOp Expr
+MulBinExpr ::= Expr MulBinOp Expr
+AndBinExpr ::= Expr AndBinOp Expr
+InvExpr ::= '~' Expr
+
+AssignBinOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '^>>=' | '~>>=' | '&=' | '|=' | '^=' {
+    name = "operator"
+}
+
+CompBinOp ::= '==' | '!=' { name = "operator" }
+RelCompBinOp ::= '<' | '>' | '<=' | '>=' | '<=>' { name = "operator" }
+ShiftBinOp ::= '<<' | '>>' | '~>>' | '^>>' { name = "operator" }
+AddBinOp ::= '-' | '+' { name = "operator" }
+OrBinOp ::= '|' { name = "operator" }
+XorBinOp ::= '^' { name = "operator" }
+MulBinOp  ::= '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%' { name = "operator" }
+AndBinOp ::= '&' { name = "operator" }
+
+ModifyExpr ::= Expr &SPECIAL_IDENTIFIER Expr
+ApplyExpr ::= Expr &('(' | '[' | IDENTIFIER) Expr
+
+private AtomExpr ::= UnitExpr | TensorOrParenExpr | LitExpr | TypeExpr | RefExpr
+
+UnitExpr ::= '(' ')'
+
+fake TensorExpr ::= '(' Expr+ ')' {
+    pin = 1
+}
+fake ParenExpr ::= '(' Expr ')' {
+    pin = 1
+}
+
+TensorOrParenExpr ::= '(' Expr (TensorExprUpper | ')') {
+    pin=1
+    elementType = ParenExpr
+}
+upper TensorExprUpper ::= ',' [Expr (',' Expr)*] ')' {
+    pin=1
+    elementType = TensorExpr
+}
+
+LitExpr ::= INTEGER_LITERAL | TRUE_KEYWORD | FALSE_KEYWORD | NULL_KEYWORD | NIL_KEYWORD | StringLiteral
+StringLiteral ::= OPEN_QUOTE RAW_STRING_ELEMENT* CLOSING_QUOTE
+
+TypeExpr ::= 'var' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'type' | 'tuple'
+
+RefExpr ::= IDENTIFIER | SPECIAL_IDENTIFIER

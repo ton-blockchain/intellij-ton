@@ -33,6 +33,7 @@
                                 implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionContributor"/>
         <completion.confidence language="func" order="last"
                                implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionConfidence"/>
+        <lookup.charFilter implementation="org.ton.intellij.func.ide.completion.FuncCharFilter"/>
 
         <stubIndex implementation="org.ton.intellij.func.stub.index.FuncNamedElementIndex"/>
         <stubElementTypeHolder class="org.ton.intellij.func.psi.FuncElementTypes" externalIdPrefix="func."/>

@@ -18,7 +18,6 @@ class FuncDocCommentImpl(
 
     override fun getOwner(): FuncDocOwner? = PsiTreeUtil.getParentOfType(this, FuncDocOwner::class.java, true)
 
-
     override fun getReferences(): Array<PsiReference> = ReferenceProvidersRegistry.getReferencesFromProviders(this)
 
     override fun accept(visitor: PsiElementVisitor) {

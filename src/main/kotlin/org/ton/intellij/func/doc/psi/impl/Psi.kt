@@ -1,11 +1,15 @@
 package org.ton.intellij.func.doc.psi.impl
 
+import com.intellij.psi.LiteralTextEscaper
+import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.impl.source.tree.AstBufferUtil
 import com.intellij.psi.impl.source.tree.CompositePsiElement
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.psi.util.childrenOfType
 import org.ton.intellij.func.doc.psi.*
+import org.ton.intellij.util.SimpleMultiLineTextEscaper
 import org.ton.intellij.util.childOfType
 
 abstract class FuncDocElementImpl(type: IElementType) : CompositePsiElement(type), FuncDocElement {
@@ -64,3 +68,26 @@ class FuncDocLinkDestinationImpl(type: IElementType) : FuncDocElementImpl(type),
 
 
 class FuncDocCodeSpanImpl(type: IElementType) : FuncDocElementImpl(type), FuncDocCodeSpan
+class FuncDocCodeBlockImpl(type: IElementType) : FuncDocElementImpl(type), FuncDocCodeBlock
+class FuncDocCodeFenceStartEndImpl(type: IElementType) : FuncDocElementImpl(type), FuncDocCodeFenceStartEnd
+class FuncDocCodeFenceLangImpl(type: IElementType) : FuncDocElementImpl(type), FuncDocCodeFenceLang
+
+class FuncDocCodeFenceImpl(type: IElementType) : FuncDocElementImpl(type), FuncDocCodeFence {
+
+    override val start: FuncDocCodeFenceStartEnd
+        get() = notNullChild(childOfType())
+    override val lang: FuncDocCodeFenceLang?
+        get() = childOfType()
+    override val end: FuncDocCodeFenceStartEnd?
+        get() = childrenOfType<FuncDocCodeFenceStartEnd>().getOrNull(1)
+
+    override fun isValidHost(): Boolean = true
+
+    override fun createLiteralTextEscaper(): LiteralTextEscaper<out PsiLanguageInjectionHost> {
+        return SimpleMultiLineTextEscaper(this)
+    }
+
+    override fun updateText(text: String): PsiLanguageInjectionHost {
+        return this
+    }
+}

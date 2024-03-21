@@ -10,7 +10,9 @@ import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.PsiElementProcessor
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
+import org.ton.intellij.func.FuncIcons
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.impl.isVariableDefinition
 import org.ton.intellij.func.psi.impl.rawParamType
@@ -34,7 +36,10 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
     ) {
         val position = parameters.position
         val element = position.parent as FuncReferenceExpression
-        if (element.isVariableDefinition()) return
+        if (element.isVariableDefinition()) {
+            println("isVariableDefinition")
+            return
+        }
         val elementName = element.name ?: return
 
         val ctx = FuncCompletionContext(
@@ -48,30 +53,38 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
         fun collectVariant(resolvedElement: FuncNamedElement): Boolean {
             val resolvedName = resolvedElement.name ?: return false
             if (processed.put(resolvedName, resolvedElement) != null) return false
-            if (resolvedElement is FuncFunction) {
-                println("element name: $elementName | resolvedName: $resolvedName")
-                if (elementName.startsWith(".") && !resolvedName.startsWith("~")) {
-                    return true
-                }
-                if (elementName.startsWith("~")) {
-                    return if (resolvedName.startsWith("~")) {
-                        true
-                    } else {
-                        val returnType = resolvedElement.rawReturnType
-
-                        if (returnType is FuncTyTensor && returnType.types.size == 2) {
-                            val retModifyType = returnType.types.first()
-                            val argType = resolvedElement.rawParamType
-                            argType == retModifyType ||
-                                    (argType is FuncTyTensor && argType.types.first() == retModifyType)
-                        } else {
-                            false
-                        }
+            when (resolvedElement) {
+                is FuncFunction -> {
+                    if (!elementName.startsWith("~") && !resolvedName.startsWith("~")) {
+                        return true
                     }
+                    if (elementName.startsWith("~")) {
+                        return (if (resolvedName.startsWith("~")) {
+                            true
+                        } else {
+                            val returnType = resolvedElement.rawReturnType
+
+                            if (returnType is FuncTyTensor && returnType.types.size == 2) {
+                                val retModifyType = returnType.types.first()
+                                val argType = resolvedElement.rawParamType
+                                argType == retModifyType ||
+                                        (argType is FuncTyTensor && argType.types.first() == retModifyType)
+                            } else {
+                                false
+                            }
+                        })
+                    }
+                    return false
                 }
-                return true
+
+                else -> return true
             }
-            return false
+        }
+
+        collectLocalVariants(element) {
+            if (collectVariant(it)) {
+                result.addElement(it.toLookupElementBuilder(ctx, true))
+            }
         }
 
         val files = setOf(FuncPsiFactory[file.project].builtinFile) + file.collectIncludedFiles()
@@ -79,8 +92,6 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
             collectFileVariants(f) {
                 if (collectVariant(it)) {
                     result.addElement(it.toLookupElementBuilder(ctx, true))
-                } else {
-                    println("skipped: ${it.name}")
                 }
                 true
             }
@@ -116,6 +127,63 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
             processor.execute(it)
         }
     }
+
+    private fun collectLocalVariants(element: FuncReferenceExpression, processor: (FuncNamedElement) -> Unit) {
+        fun processExpression(expression: FuncExpression) {
+            println("processing: $expression `${expression.text}`")
+            when {
+                expression is FuncReferenceExpression && expression.isVariableDefinition() -> {
+                    println("added: ${expression} `${expression.text}")
+                    processor(expression)
+                }
+
+                expression is FuncBinExpression -> {
+                    val left = expression.left
+                    processExpression(left)
+                }
+
+                expression is FuncApplyExpression -> {
+                    expression.right?.let { processExpression(it) }
+                }
+
+                expression is FuncTensorExpression -> {
+                    expression.expressionList.forEach { processExpression(it) }
+                }
+
+                expression is FuncTupleExpression -> {
+                    expression.expressionList.forEach { processExpression(it) }
+                }
+            }
+        }
+
+        fun processStatement(statement: FuncStatement) {
+            when (statement) {
+                is FuncExpressionStatement -> {
+                    val expression = statement.expression
+                    processExpression(expression)
+                }
+            }
+        }
+
+        PsiTreeUtil.treeWalkUp(element, null) { scope, prevParent ->
+            when (scope) {
+                is FuncFunction -> {
+                    scope.functionParameterList.forEach {
+                        processor(it)
+                    }
+                    return@treeWalkUp false
+                }
+
+                is FuncBlockStatement -> {
+                    for (funcStatement in scope.statementList) {
+                        if (funcStatement == prevParent) break
+                        processStatement(funcStatement)
+                    }
+                }
+            }
+            true
+        }
+    }
 }
 
 data class FuncCompletionContext(
@@ -126,9 +194,13 @@ fun FuncNamedElement.toLookupElementBuilder(
     context: FuncCompletionContext,
     isImported: Boolean
 ): LookupElement {
-    val startWithDot = context.context?.text?.startsWith('.') ?: false
-    val name = if (startWithDot) "." + this.name else this.name.toString()
-    val base = LookupElementBuilder.create(name).withIcon(this.getIcon(0))
+    val contextText = context.context?.text ?: ""
+    var name = this.name ?: ""
+    name = when {
+        contextText.startsWith('.') -> ".${this.name}"
+        contextText.startsWith('~') && !name.startsWith("~") -> "~${this.name}"
+        else -> name
+    }
     val file = this.containingFile.originalFile
     val contextFile = context.context?.containingFile?.originalFile
     val includePath = if (file == contextFile || contextFile == null) ""
@@ -141,13 +213,15 @@ fun FuncNamedElement.toLookupElementBuilder(
             this.containingFile.name
         }
     }
+    val base = LookupElementBuilder.create(name)
+        .withIcon(this.getIcon(0))
+        .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
 
     return when (this) {
         is FuncFunction -> {
             PrioritizedLookupElement.withPriority(
                 base
-                    .withTypeText(this.typeReference.text)
-                    .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
+                    .withTypeText(this.rawReturnType.toString())
                     .withInsertHandler { context, item ->
                         val paramType = this.rawParamType
                         val isExtensionFunction = name.startsWith("~") || name.startsWith(".")
@@ -164,6 +238,58 @@ fun FuncNamedElement.toLookupElementBuilder(
                     },
                 if (isImported) FuncCompletionContributor.FUNCTION_PRIORITY
                 else FuncCompletionContributor.NOT_IMPORTED_FUNCTION_PRIORITY
+            )
+        }
+
+        is FuncConstVar -> {
+            PrioritizedLookupElement.withPriority(
+                base
+                    .withTypeText(intKeyword?.text ?: sliceKeyword?.text ?: "")
+                    .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
+                    .withInsertHandler { context, item ->
+                        context.commitDocument()
+
+                        val insertFile = context.file as? FuncFile ?: return@withInsertHandler
+                        val includeCandidateFile = file as? FuncFile ?: return@withInsertHandler
+                        insertFile.import(includeCandidateFile)
+                    },
+                if (isImported) FuncCompletionContributor.VAR_PRIORITY
+                else FuncCompletionContributor.NOT_IMPORTED_VAR_PRIORITY
+            )
+        }
+
+        is FuncGlobalVar -> {
+            PrioritizedLookupElement.withPriority(
+                base
+                    .withTypeText(typeReference.text)
+                    .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
+                    .withInsertHandler { context, item ->
+                        context.commitDocument()
+
+                        val insertFile = context.file as? FuncFile ?: return@withInsertHandler
+                        val includeCandidateFile = file as? FuncFile ?: return@withInsertHandler
+                        insertFile.import(includeCandidateFile)
+                    },
+                if (isImported) FuncCompletionContributor.VAR_PRIORITY
+                else FuncCompletionContributor.NOT_IMPORTED_VAR_PRIORITY
+            )
+        }
+
+        is FuncReferenceExpression -> {
+            PrioritizedLookupElement.withPriority(
+                base
+                    .withIcon(FuncIcons.VARIABLE)
+                    .withTypeText((parent as? FuncApplyExpression)?.left?.text ?: ""),
+                FuncCompletionContributor.VAR_PRIORITY
+            )
+        }
+
+        is FuncFunctionParameter -> {
+            PrioritizedLookupElement.withPriority(
+                base
+                    .withIcon(FuncIcons.PARAMETER)
+                    .withTypeText(typeReference?.text ?: ""),
+                FuncCompletionContributor.VAR_PRIORITY
             )
         }
 

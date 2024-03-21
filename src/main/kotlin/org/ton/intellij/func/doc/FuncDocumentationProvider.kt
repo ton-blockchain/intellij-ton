@@ -59,9 +59,14 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
         }
     }
 
+    /**
+     * test
+     * ```tlb
+     * foo#_ a:int32 = Foo;
+     * ```
+     */
     override fun generateRenderedDoc(comment: PsiDocCommentBase): String? {
-        if (comment !is FuncDocComment) return null
-        return MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;", FuncDocMarkdownFlavourDescriptor())
+        return (comment as? FuncDocComment)?.renderHtml()
     }
 
     private fun getComments(element: PsiElement?): PsiComment? {

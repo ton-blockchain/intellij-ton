@@ -123,7 +123,6 @@ class MarkdownNode(
                         if (owner is FuncFunction) {
                             val resolved = FuncDocumentationProvider.resolve(label, owner)
                             if (resolved != null) {
-                                println("resolved = $resolved (${resolved.text})")
                                 val hyperlink = buildString {
                                     DocumentationManagerUtil.createHyperlink(
                                         this,

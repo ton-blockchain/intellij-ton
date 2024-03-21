@@ -32,6 +32,16 @@ class FuncReference(
             val includes = file.collectIncludedFiles(true)
 
             includes.forEach { includedFile ->
+                includedFile.constVars.forEach { constVar ->
+                    if (constVar.name == name) {
+                        return@PolyVariantResolver arrayOf(PsiElementResolveResult(constVar))
+                    }
+                }
+                includedFile.globalVars.forEach { globalVar ->
+                    if (globalVar.name == name) {
+                        return@PolyVariantResolver arrayOf(PsiElementResolveResult(globalVar))
+                    }
+                }
                 includedFile.functions.forEach { function ->
                     val functionName = function.name
                     if (functionName == name) {
@@ -46,16 +56,6 @@ class FuncReference(
 
                     if (function == contextFunction) {
                         return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
-                    }
-                }
-                includedFile.constVars.forEach { constVar ->
-                    if (constVar.name == name) {
-                        return@PolyVariantResolver arrayOf(PsiElementResolveResult(constVar))
-                    }
-                }
-                includedFile.globalVars.forEach { globalVar ->
-                    if (globalVar.name == name) {
-                        return@PolyVariantResolver arrayOf(PsiElementResolveResult(globalVar))
                     }
                 }
             }

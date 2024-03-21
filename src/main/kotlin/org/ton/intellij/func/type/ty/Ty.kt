@@ -77,7 +77,11 @@ fun FuncTy(types: List<FuncTy>): FuncTy {
     }
 }
 
-data object FuncTyUnknown : FuncTy()
+data object FuncTyUnknown : FuncTy() {
+    override fun toString(): String {
+        return "???"
+    }
+}
 
 data class FuncTyMap(
     val from: FuncTy,
@@ -107,30 +111,44 @@ data object FuncTyUnit : FuncTyAtomic() {
         if (this === other) return true
         return other is FuncTyTensor && other.types.isEmpty()
     }
+
+    override fun toString(): String = "()"
 }
 
 data object FuncTyInt : FuncTyAtomic() {
     override val name: String = "int"
+
+    override fun toString(): String = "int"
 }
 
 data object FuncTyCell : FuncTyAtomic() {
     override val name: String = "cell"
+
+    override fun toString(): String = "cell"
 }
 
 data object FuncTySlice : FuncTyAtomic() {
     override val name: String = "slice"
+
+    override fun toString(): String = "slice"
 }
 
 data object FuncTyBuilder : FuncTyAtomic() {
     override val name: String = "builder"
+
+    override fun toString(): String = "builder"
 }
 
 data object FuncTyCont : FuncTyAtomic() {
     override val name: String = "cont"
+
+    override fun toString(): String = "cont"
 }
 
 data object FuncTyAtomicTuple : FuncTyAtomic() {
     override val name: String = "tuple"
+
+    override fun toString(): String = "tuple"
 }
 
 class FuncTyVar : FuncTy()

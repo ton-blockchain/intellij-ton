@@ -334,7 +334,13 @@ fake BinaryOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%='
 | '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%'
 | '&'
 
-TernaryExpression ::= Expression '?' Expression ':' Expression
+TernaryExpression ::= Expression '?' Expression ':' Expression {
+    methods=[
+        condition="/Expression[0]"
+        thenBranch="/Expression[1]"
+        elseBranch="/Expression[2]"
+    ]
+}
 AssignBinExpression ::= Expression AssignBinOp Expression {
     rightAssociative=true
 }

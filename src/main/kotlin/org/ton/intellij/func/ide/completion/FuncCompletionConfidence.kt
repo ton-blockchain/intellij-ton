@@ -8,6 +8,8 @@ import org.ton.intellij.func.psi.FuncNamedElement
 
 class FuncCompletionConfidence : CompletionConfidence() {
     override fun shouldSkipAutopopup(contextElement: PsiElement, psiFile: PsiFile, offset: Int): ThreeState {
-        return if (contextElement is FuncNamedElement && contextElement.name == "_") ThreeState.YES else ThreeState.UNSURE
+        return if (contextElement is FuncNamedElement && contextElement.name == "_") {
+            ThreeState.YES
+        } else ThreeState.UNSURE
     }
 }

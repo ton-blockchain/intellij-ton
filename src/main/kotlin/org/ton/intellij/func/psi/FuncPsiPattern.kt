@@ -38,7 +38,6 @@ object FuncPsiPattern {
 
     private class TestPattern() : PatternCondition<PsiElement>("testPattern") {
         override fun accepts(t: PsiElement, context: ProcessingContext?): Boolean {
-            println("t: $t - `${t.text}` | parent: ${t.parent}")
             return true
         }
     }

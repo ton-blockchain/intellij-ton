@@ -148,6 +148,7 @@ BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
 PLAIN_IDENTIFIER=[^\s()\[\],.;~\"\{\}#]+
 QUOTE_ESCAPED_IDENTIFIER = (`[^`\n]+`)|(_[^_\n\w,]+_)
 IDENTIFIER = [.~]?({QUOTE_ESCAPED_IDENTIFIER}|{PLAIN_IDENTIFIER})
+VERSION_VALUE = (=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?
 
 // ANY_ESCAPE_SEQUENCE = \\[^]
 THREE_QUO = (\"\"\")
@@ -273,6 +274,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
       {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }
+      {VERSION_VALUE}          { return VERSION_VALUE; }
       {IDENTIFIER}             { return IDENTIFIER; }
 }
 

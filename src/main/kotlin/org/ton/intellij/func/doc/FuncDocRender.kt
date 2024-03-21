@@ -20,6 +20,6 @@ fun FuncDocComment.renderHtml(): String {
         )
     val markdownNode = MarkdownNode(markdownRoot, null, rawText, this)
     return markdownNode.toHtml().also {
-        println("rendered = $it")
+//        println("rendered = $it")
     }
 }

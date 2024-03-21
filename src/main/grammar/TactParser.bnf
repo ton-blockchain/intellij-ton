@@ -94,7 +94,7 @@
         NAME_MACRO          = '@name'
 
         WHITE_SPACE         = 'regexp:\s+'
-        INTEGER_LITERAL     = 'regexp:(0[xX][0-9a-fA-F][0-9a-fA-F_]*\b)|(\b[0-9]+\b)'
+        INTEGER_LITERAL     = 'regexp:(0[xX][0-9a-fA-F][0-9a-fA-F_]*\b)|(\b[0-9_]+\b)'
         STRING_LITERAL      = 'regexp:(\"([^\"\r\n\\]|\\.)*\")'
         BOOLEAN_LITERAL     = 'regexp:(true|false)'
         NULL_LITERAL        = 'null'
@@ -251,7 +251,7 @@ LetStatement ::= 'let' IDENTIFIER ':' Type '=' Expression ';' {
 BlockStatement ::= Block
 ReturnStatement ::= 'return' Expression ';' { pin = 1 }
 ExpressionStatement ::= Expression ';'
-AssignStatement ::= LValue '=' Expression ';'
+AssignStatement ::= LValue ('='|'+='|'-='|'*='|'/='|'%=') Expression ';'
 ConditionStatement ::= 'if' Condition Block ConditionElse? {pin=1}
 ConditionElse ::= 'else' (Block | ConditionStatement) {pin=1}
 WhileStatement ::= 'while' Condition Block {pin=1}
@@ -266,7 +266,8 @@ private LValue ::= IDENTIFIER '.' LValue
                  | IDENTIFIER
 
 // Expressions
-Expression ::= OrExpression
+Expression ::= TernaryExpression
+             | OrExpression
              | AndExpression
              | CompareExpression
              | BinaryExpression
@@ -290,6 +291,14 @@ Expression ::= OrExpression
 }
 private Expression_first ::= '-' | '+' | '!' | IDENTIFIER | '(' | INTEGER_LITERAL | BOOLEAN_LITERAL | 'null' | 'intOf' | STRING_LITERAL
 
+TernaryExpression ::= Expression '?' Expression ':' Expression {
+    pin=2
+    methods=[
+        condition="/Expression[0]"
+        thenBranch="/Expression[1]"
+        elseBranch="/Expression[2]"
+    ]
+}
 OrExpression ::= Expression '||' Expression
 AndExpression ::= Expression '&&' Expression
 CompareExpression ::= Expression ('!='|'=='|'>'|'>='|'<'|'<=') Expression

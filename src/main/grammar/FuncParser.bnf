@@ -122,6 +122,7 @@
 
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
+            VERSION_VALUE = "regexp:((=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?)"
             IDENTIFIER = "regexp:[a-zA-Z_$?:][0-9a-zA-Z_$?:]*"
 //            WHITESPACE = 'regexp:[\ \n\t\f]'
             INTEGER_LITERAL = 'regexp:(0|([1-9]([_0-9])*))'
@@ -193,10 +194,10 @@ private PragmaDefinitionPart ::= "#pragma" (PragmaVersion | PragmaKeyValue)  {
 PragmaKeyValue ::= PragmaKey PragmaValue? {
     pin=1
 }
-PragmaVersion ::= ("version" | "not-version") ('^'|'>'|'<'|'='|'<='|'>=')? PragmaSemiVersion {
+PragmaVersion ::= ("version" | "not-version") VERSION_VALUE {
     pin=1
 }
-PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
+//PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
 Function ::= TypeParameterList? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
     pin = 3
@@ -335,6 +336,7 @@ fake BinaryOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%='
 | '&'
 
 TernaryExpression ::= Expression '?' Expression ':' Expression {
+    pin=2
     methods=[
         condition="/Expression[0]"
         thenBranch="/Expression[1]"

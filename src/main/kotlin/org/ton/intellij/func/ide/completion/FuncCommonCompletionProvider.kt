@@ -37,7 +37,6 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
         val position = parameters.position
         val element = position.parent as FuncReferenceExpression
         if (element.isVariableDefinition()) {
-            println("isVariableDefinition")
             return
         }
         val elementName = element.name ?: return
@@ -130,10 +129,8 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
 
     private fun collectLocalVariants(element: FuncReferenceExpression, processor: (FuncNamedElement) -> Unit) {
         fun processExpression(expression: FuncExpression) {
-            println("processing: $expression `${expression.text}`")
             when {
                 expression is FuncReferenceExpression && expression.isVariableDefinition() -> {
-                    println("added: ${expression} `${expression.text}")
                     processor(expression)
                 }
 
@@ -196,10 +193,12 @@ fun FuncNamedElement.toLookupElementBuilder(
 ): LookupElement {
     val contextText = context.context?.text ?: ""
     var name = this.name ?: ""
-    name = when {
-        contextText.startsWith('.') -> ".${this.name}"
-        contextText.startsWith('~') && !name.startsWith("~") -> "~${this.name}"
-        else -> name
+    if (this is FuncFunction) {
+        name = when {
+            contextText.startsWith('.') -> ".${this.name}"
+            contextText.startsWith('~') && !name.startsWith("~") -> "~${this.name}"
+            else -> name
+        }
     }
     val file = this.containingFile.originalFile
     val contextFile = context.context?.containingFile?.originalFile

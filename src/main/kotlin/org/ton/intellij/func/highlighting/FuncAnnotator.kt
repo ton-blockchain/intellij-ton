@@ -23,6 +23,7 @@ class FuncAnnotator : Annotator {
                 val sha = element.node.firstChildNode
                 val macroName = sha.treeNext
 
+
                 highlight(macroName.textRange, holder, FuncColor.MACRO.textAttributesKey)
                 return
             }

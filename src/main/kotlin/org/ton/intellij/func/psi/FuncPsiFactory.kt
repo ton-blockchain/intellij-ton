@@ -184,7 +184,7 @@ class FuncPsiFactory private constructor(val project: Project) {
     }
 
     fun createIdentifier(text: String): PsiElement {
-        val funcFile = createFile("() $text();")
+        val funcFile = createFile("() $text() {}")
         val function = funcFile.functions.first()
         return function.identifier
     }

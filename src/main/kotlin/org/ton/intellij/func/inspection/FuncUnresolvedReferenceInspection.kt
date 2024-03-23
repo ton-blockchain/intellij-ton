@@ -14,13 +14,8 @@ class FuncUnresolvedReferenceInspection : FuncInspectionBase() {
     ): FuncVisitor = object : FuncVisitor() {
         override fun visitReferenceExpression(o: FuncReferenceExpression) {
             super.visitReferenceExpression(o)
-//            println("unresolved inspection, reference: ${o.text}")
-            val reference = o.reference ?: kotlin.run {
-//                println("unresolved inspection, no reference")
-                return
-            }
+            val reference = o.reference ?: return
             val resolved = reference.resolve()
-//            println("unresolved inspection, resolved: $resolved")
             if (resolved != null) return
 
             val id = o.identifier

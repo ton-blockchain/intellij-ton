@@ -8,5 +8,5 @@ import org.ton.intellij.tlb.TlbLanguage
 
 class TlbFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TlbLanguage), TlbElement {
     override fun getFileType(): FileType = TlbFileType
-    override fun toString(): String = "TL-B"
+    override fun toString(): String = "TLB"
 }

@@ -35,11 +35,21 @@ abstract class FuncReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
     }
 }
 
+private fun FuncExpression.isTypeExpression(): Boolean =
+    when (this) {
+        is FuncTensorExpression -> this.expressionList.all { it.isTypeExpression() }
+        is FuncTupleExpression -> this.expressionList.all { it.isTypeExpression() }
+        is FuncHoleTypeExpression,
+        is FuncPrimitiveTypeExpression -> true
+
+        else -> false
+    }
+
 fun FuncReferenceExpression.isVariableDefinition(): Boolean = CachedValuesManager.getCachedValue(this) {
     val result = !PsiTreeUtil.treeWalkUp(this, null) { scope, lastParent ->
         if (scope is FuncApplyExpression && scope.right == lastParent) { // `var |foo|` <-- last parent
             val left = scope.left // type definition -> `|var| foo`
-            if (left is FuncHoleTypeExpression || left is FuncPrimitiveTypeExpression) {
+            if (left.isTypeExpression()) {
                 return@treeWalkUp false
             }
         }

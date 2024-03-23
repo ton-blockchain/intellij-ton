@@ -59,12 +59,6 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
         }
     }
 
-    /**
-     * test
-     * ```tlb
-     * foo#_ a:int32 = Foo;
-     * ```
-     */
     override fun generateRenderedDoc(comment: PsiDocCommentBase): String? {
         return (comment as? FuncDocComment)?.renderHtml()
     }
@@ -74,7 +68,8 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     }
 
     private fun getCommentText(comment: PsiComment): String {
-        return MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;", FuncDocMarkdownFlavourDescriptor())
+        return (comment as? FuncDocComment)?.renderHtml()
+            ?: MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;", FuncDocMarkdownFlavourDescriptor())
     }
 
     fun renderElement(element: PsiElement?, context: PsiElement?): String? {
@@ -184,7 +179,36 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
                 }
             }
 
-            else -> append(type)
+            is FuncParenType -> {
+                appendStyledSpan(FuncColor.PARENTHESES.attributes, "(")
+                type.typeReference?.let {
+                    renderType(it)
+                }
+                appendStyledSpan(FuncColor.PARENTHESES.attributes, ")")
+            }
+
+            is FuncMapType -> {
+                type.from?.let {
+                    renderType(it)
+                }
+                append(" ")
+                appendStyledSpan(FuncColor.OPERATION_SIGN.attributes, "->")
+                append(" ")
+                type.to?.let {
+                    renderType(it)
+                }
+            }
+
+            is FuncUnitType -> appendStyledSpan(FuncColor.PARENTHESES.attributes, "()")
+
+            else -> {
+                val typeIdentifier = type.typeIdentifier?.text
+                if (typeIdentifier != null) {
+                    appendStyledSpan(FuncColor.TYPE_PARAMETER.attributes, typeIdentifier)
+                } else {
+                    append(type)
+                }
+            }
         }
     }
 

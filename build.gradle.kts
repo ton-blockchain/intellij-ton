@@ -24,6 +24,7 @@ plugins {
     kotlin("jvm") version "1.9.0"
     id("org.jetbrains.intellij") version "1.16.0"
     id("org.jetbrains.grammarkit") version "2022.3.2"
+    id("org.jetbrains.changelog") version "1.3.1"
     idea
 }
 
@@ -55,7 +56,6 @@ sourceSets {
 }
 
 idea {
-
     module {
         isDownloadSources = true
         generatedSourceDirs.add(file("src/gen"))
@@ -97,12 +97,27 @@ val compileKotlin = tasks.named("compileKotlin") {
 
 val compileJava = tasks.named("compileJava")
 
+changelog {
+    version.set(version)
+    path.set("${project.projectDir}/CHANGELOG.md")
+    header.set(provider { "[${version.get()}]" })
+    itemPrefix.set("-")
+    keepUnreleasedSection.set(true)
+    unreleasedTerm.set("[Unreleased]")
+    groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"))
+}
+
 tasks {
     runIde { enabled = true }
     prepareSandbox { enabled = true }
     patchPluginXml {
         sinceBuild.set("231")
         untilBuild.set("")
+        changeNotes.set(provider {
+            changelog.run {
+                getLatest()
+            }.toHTML()
+        })
     }
     buildSearchableOptions {
         enabled = prop("enableBuildSearchableOptions").toBoolean()

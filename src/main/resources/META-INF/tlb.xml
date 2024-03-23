@@ -4,19 +4,19 @@
         <fileType name="TLB"
                   implementationClass="org.ton.intellij.tlb.TlbFileType"
                   fieldName="INSTANCE"
-                  language="TL-B"
+                  language="tlb"
                   extensions="tlb"/>
-        <lang.parserDefinition language="TLB"
+        <lang.parserDefinition language="tlb"
                                implementationClass="org.ton.intellij.tlb.ide.TlbParserDefinition"/>
-        <lang.syntaxHighlighterFactory language="TLB"
+        <lang.syntaxHighlighterFactory language="tlb"
                                        implementationClass="org.ton.intellij.tlb.ide.TlbSyntaxHighlighterFactory"/>
-        <annotator language="TLB" implementationClass="org.ton.intellij.tlb.ide.TlbAnnotator"/>
+        <annotator language="tlb" implementationClass="org.ton.intellij.tlb.ide.TlbAnnotator"/>
         <colorSettingsPage implementation="org.ton.intellij.tlb.ide.TlbColorSettingsPage"/>
-        <lang.commenter language="TLB"
+        <lang.commenter language="tlb"
                         implementationClass="org.ton.intellij.tlb.ide.TlbCommenter"/>
-        <lang.braceMatcher language="TLB"
+        <lang.braceMatcher language="tlb"
                            implementationClass="org.ton.intellij.tlb.ide.TlbBraceMatcher"/>
-        <lang.findUsagesProvider language="TLB"
+        <lang.findUsagesProvider language="tlb"
                                  implementationClass="org.ton.intellij.tlb.ide.TlbFindUsagesProvider"/>
     </extensions>
     <actions>

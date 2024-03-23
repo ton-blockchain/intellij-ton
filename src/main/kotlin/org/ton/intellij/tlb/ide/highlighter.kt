@@ -14,15 +14,20 @@ class TlbSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
 
 object TlbSyntaxHighlighter : SyntaxHighlighterBase() {
     override fun getHighlightingLexer() = TlbLexerAdapter()
+
     override fun getTokenHighlights(tokenType: IElementType) = when (tokenType) {
         in TlbParserDefinition.DOCUMENTATION -> TlbColor.DOCUMENTATION
         in TlbParserDefinition.COMMENTS -> TlbColor.COMMENT
         in TlbParserDefinition.BRACES -> TlbColor.BRACES
         in TlbParserDefinition.BRACKETS -> TlbColor.BRACKETS
         in TlbParserDefinition.PARENTHESES -> TlbColor.PARENTHESES
+        SEMICOLUMN -> TlbColor.SEMICOLON
         NUMBER -> TlbColor.NUMBER
         HEX_TAG -> TlbColor.HEX_TAG
         BINARY_TAG -> TlbColor.BINARY_TAG
+        PREDIFINED_TYPE -> TlbColor.TYPE
+        IDENTIFIER -> TlbColor.FIELD_NAME
+        CIRCUMFLEX, COLUMN, EQ -> TlbColor.OPERATION_SIGN
         in TlbParserDefinition.BUILTIN_TYPES -> TlbColor.TYPE
         else -> null
     }.let {

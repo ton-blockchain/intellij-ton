@@ -47,6 +47,7 @@
         WHITE_SPACE='regexp:\s+'
         COMMENT='regexp:(//.*)'
         NUMBER='regexp:[0-9]+'
+        PREDIFINED_TYPE='PREDIFINED_TYPE'
         IDENTIFIER='regexp:[a-zA-Z_][0-9a-zA-Z0-9_]*'
     ]
 }
@@ -99,6 +100,6 @@ named_ref ::= IDENTIFIER {
     mixin = "org.ton.intellij.tlb.psi.TlbNamedRefMixin"
 }
 private paren_expression ::= "(" expression ')' {pin=1}
-builtin_type ::= '#<' | '#<=' | '##' | '#'
+builtin_type ::= '#<' | '#<=' | '##' | '#' | PREDIFINED_TYPE
 //noinspection BnfUnusedRule
 private unused_in_bnf ::= LINE_COMMENT | BLOCK_COMMENT | LINE_DOCUMENTATION | BLOCK_DOCUMENTATION

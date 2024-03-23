@@ -180,7 +180,7 @@ val FuncTypeReference.rawType: FuncTy
             )
 
             is FuncMapType -> FuncTyMap(
-                from.rawType,
+                from?.rawType ?: FuncTyUnknown,
                 to?.rawType ?: return FuncTyUnknown
             )
 

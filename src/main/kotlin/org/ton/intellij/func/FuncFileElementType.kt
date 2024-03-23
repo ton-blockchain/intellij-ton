@@ -7,7 +7,7 @@ import com.intellij.psi.tree.IStubFileElementType
 import org.ton.intellij.func.psi.FuncFile
 import org.ton.intellij.func.stub.FuncFileStub
 
-private const val STUB_VERSION = 4 and 0xFFFFFFF
+private const val STUB_VERSION = 5 and 0xFFFFFFF
 
 object FuncFileElementType : IStubFileElementType<FuncFileStub>("FUNC_FILE", FuncLanguage) {
     override fun getStubVersion(): Int = STUB_VERSION

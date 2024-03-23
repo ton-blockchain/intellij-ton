@@ -454,13 +454,13 @@ private NamedFunctionParameter ::= IDENTIFIER
 // Types
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TypeReference ::= TupleType
-                | MapType
-                | UnitType
-                | TensorOrParenType
-                | HoleType
-                | PrimitiveType
-                | TypeIdentifier
+TypeReference ::= MapType | TypeReferenceWithoutMap
+private TypeReferenceWithoutMap ::= TupleType
+                                                    | UnitType
+                                                    | TensorOrParenType
+                                                    | HoleType
+                                                    | PrimitiveType
+                                                    | TypeIdentifier
 
 //private TypeReference_first ::= '[' | '(' | 'var' | '_' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type' | IDENTIFIER
 
@@ -472,7 +472,7 @@ private TupleTypeValue ::= ',' TypeReference {
 }
 private TupleTypeValueRecovery ::= !(']'|IDENTIFIER|',')
 
-MapType ::= TensorOrParenType '->' TypeReference {
+MapType ::= TypeReferenceWithoutMap '->' TypeReference {
     pin = 2
     methods=[
         from="/TypeReference[0]"

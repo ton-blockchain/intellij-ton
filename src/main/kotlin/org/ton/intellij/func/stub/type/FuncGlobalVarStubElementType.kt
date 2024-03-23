@@ -1,6 +1,7 @@
 package org.ton.intellij.func.stub.type
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.stubs.IndexSink
 import com.intellij.psi.stubs.StubElement
 import com.intellij.psi.stubs.StubInputStream
 import com.intellij.psi.stubs.StubOutputStream
@@ -8,6 +9,7 @@ import com.intellij.util.ArrayFactory
 import org.ton.intellij.func.psi.FuncGlobalVar
 import org.ton.intellij.func.psi.impl.FuncGlobalVarImpl
 import org.ton.intellij.func.stub.FuncGlobalVarStub
+import org.ton.intellij.func.stub.index.FuncNamedElementIndex
 
 class FuncGlobalVarStubElementType(
     debugName: String,
@@ -30,6 +32,11 @@ class FuncGlobalVarStubElementType(
 
     override fun createPsi(stub: FuncGlobalVarStub): FuncGlobalVar {
         return FuncGlobalVarImpl(stub, this)
+    }
+
+    override fun indexStub(stub: FuncGlobalVarStub, sink: IndexSink) {
+        val name = stub.name ?: return
+        sink.occurrence(FuncNamedElementIndex.KEY, name)
     }
 
     companion object {

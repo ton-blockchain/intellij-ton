@@ -8,6 +8,7 @@ import com.intellij.psi.PsiElement
 import org.ton.intellij.tlb.psi.*
 
 class TlbAnnotator : Annotator {
+
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         when (element) {
             is TlbConstructorName -> holder.annotateInfo(element, TlbColor.CONSTRUCTOR_NAME)

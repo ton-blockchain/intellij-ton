@@ -21,7 +21,8 @@ class FuncUnusedFunctionInspection : FuncInspectionBase() {
             if (name == "recv_internal") return
             if (name == "recv_external") return
             if (name == "run_ticktock") return
-            if (o.containingFile.name == "stdlib.fc") return
+            val fileName = o.containingFile.name
+            if (fileName == "stdlib.fc" || fileName == "stdlib.func") return
             if (ReferencesSearch.search(o, o.useScope).findFirst() == null) {
                 val id = o.identifier
                 val range = TextRange.from(id.startOffsetInParent, id.textLength)

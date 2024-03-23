@@ -11,6 +11,10 @@ import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.ton.intellij.func.FuncLanguage
+import org.ton.intellij.func.doc.psi.FuncDocElementTypes.DOC_CODE_BLOCK
+import org.ton.intellij.func.doc.psi.FuncDocElementTypes.DOC_CODE_FENCE
+import org.ton.intellij.func.doc.psi.FuncDocElementTypes.DOC_CODE_FENCE_LANG
+import org.ton.intellij.func.doc.psi.FuncDocElementTypes.DOC_CODE_FENCE_START_END
 import org.ton.intellij.func.doc.psi.FuncDocElementTypes.DOC_CODE_SPAN
 import org.ton.intellij.func.doc.psi.FuncDocElementTypes.DOC_FULL_REFERENCE_LINK
 import org.ton.intellij.func.doc.psi.FuncDocElementTypes.DOC_GAP
@@ -32,6 +36,11 @@ class FuncDocCommentElementType(debugName: String) : ILazyParseableElementType(d
     val factory = object : MarkdownPsiFactory {
         override fun buildComposite(markdownElementType: IElementType): TreeElement? = when (markdownElementType) {
             MarkdownElementTypes.CODE_SPAN -> DOC_CODE_SPAN.createCompositeNode()
+            MarkdownElementTypes.CODE_FENCE -> DOC_CODE_FENCE.createCompositeNode()
+            MarkdownElementTypes.CODE_BLOCK -> DOC_CODE_BLOCK.createCompositeNode()
+            MarkdownTokenTypes.FENCE_LANG -> DOC_CODE_FENCE_LANG.createCompositeNode()
+            MarkdownTokenTypes.CODE_FENCE_START,
+            MarkdownTokenTypes.CODE_FENCE_END -> DOC_CODE_FENCE_START_END.createCompositeNode()
 
             MarkdownElementTypes.INLINE_LINK -> DOC_INLINE_LINK.createCompositeNode()
             MarkdownElementTypes.SHORT_REFERENCE_LINK -> DOC_SHORT_REFERENCE_LINK.createCompositeNode()
@@ -47,7 +56,6 @@ class FuncDocCommentElementType(debugName: String) : ILazyParseableElementType(d
             MarkdownTokenTypes.LPAREN -> LeafPsiElement(FuncElementTypes.LPAREN, "(")
             MarkdownTokenTypes.RPAREN -> LeafPsiElement(FuncElementTypes.LPAREN, ")")
             else -> {
-//                println("build markdown: $markdownElementType")
                 null
             }
         }

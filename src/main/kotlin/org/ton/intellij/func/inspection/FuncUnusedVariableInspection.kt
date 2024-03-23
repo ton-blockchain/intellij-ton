@@ -1,49 +1,53 @@
 package org.ton.intellij.func.inspection
 
 import com.intellij.codeInspection.LocalInspectionToolSession
+import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
-import com.intellij.openapi.progress.ProgressIndicatorProvider
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.search.searches.ReferencesSearch
+import org.ton.intellij.func.ide.fixes.RemoveElementFix
+import org.ton.intellij.func.ide.fixes.RenameUnderscoreFix
 import org.ton.intellij.func.psi.*
-import org.ton.intellij.func.psi.impl.right
+import org.ton.intellij.func.psi.impl.isVariableDefinition
+import org.ton.intellij.util.ancestorStrict
 
 class FuncUnusedVariableInspection : FuncInspectionBase() {
     override fun buildFuncVisitor(
         holder: ProblemsHolder,
         session: LocalInspectionToolSession,
     ): FuncVisitor = object : FuncVisitor() {
-        override fun visitVarExpression(o: FuncVarExpression) {
-            val right = o.right ?: return
-            if (right is FuncReferenceExpression) {
-                processVarExpression(right, holder)
-            }
-            if (right is FuncTensorExpression) {
-                for (tensorElement in right.expressionList) {
-                    ProgressIndicatorProvider.checkCanceled()
-                    when (tensorElement) {
-                        is FuncVarExpression -> visitVarExpression(tensorElement)
-                        is FuncReferenceExpression -> processVarExpression(tensorElement, holder)
+        override fun visitReferenceExpression(o: FuncReferenceExpression) {
+            super.visitReferenceExpression(o)
+            if (!o.isVariableDefinition()) return
+            val id = o.identifier
+            if (id.text == "_") return
+            if (ReferencesSearch.search(o, o.useScope).findFirst() == null) {
+                val range = TextRange.from(id.startOffsetInParent, id.textLength)
+                val parent = o.parent
+                val fixes = mutableListOf<LocalQuickFix>()
+
+                if (parent is FuncTensorExpression || parent is FuncTupleExpression) {
+                    fixes.add(RenameUnderscoreFix(o))
+                }
+                if (parent is FuncApplyExpression) {
+                    val grandParent = parent.parent
+                    if (grandParent is FuncBinExpression && grandParent.left == parent) {
+                        val stmt = grandParent.ancestorStrict<FuncExpressionStatement>()
+                        if (stmt != null) {
+                            fixes.add(RemoveElementFix(stmt))
+                        }
                     }
                 }
-            }
-        }
-    }
 
-    private fun processVarExpression(
-        element: FuncNamedElement,
-        holder: ProblemsHolder,
-    ) {
-        val id = element.identifier ?: return
-        if (ReferencesSearch.search(element, element.useScope).findFirst() == null) {
-            val range = TextRange.from(id.startOffsetInParent, id.textLength)
-            holder.registerProblem(
-                element,
-                "Unused variable <code>#ref</code> #loc",
-                ProblemHighlightType.LIKE_UNUSED_SYMBOL,
-                range
-            )
+                holder.registerProblem(
+                    o,
+                    "Unused variable <code>#ref</code> #loc",
+                    ProblemHighlightType.LIKE_UNUSED_SYMBOL,
+                    range,
+                    *fixes.toTypedArray()
+                )
+            }
         }
     }
 }

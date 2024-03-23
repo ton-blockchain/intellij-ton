@@ -14,6 +14,9 @@
 
     extends(".*Expression")=Expression
     extends(".*Statement")=Statement
+    extends(".*Type")=TypeReference
+    elementType(".+BinExpression")=BinExpression
+    elementType(".+BinOp")=BinaryOp
 
     generateTokenAccessors=true
 
@@ -25,7 +28,6 @@
             MOD                 = '%'
             QUEST               = '?'
             COLON               = ':'
-            DOT                 = '.'
             COMMA               = ','
             SEMICOLON           = ';'
             LBRACE              = '{'
@@ -42,6 +44,7 @@
             OR                  = '|'
             XOR                 = '^'
             TILDE               = '~'
+            SHA                 = '#'
 
             EQEQ                = '=='
             NEQ                 = '!='
@@ -117,11 +120,9 @@
             INFIXR_KEYWORD              = 'infixr'
             CONST_KEYWORD               = 'const'
 
-            INCLUDE_MACRO             = "#include"
-            PRAGMA_MACRO              = "#pragma"
-
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
+            VERSION_VALUE = "regexp:((=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?)"
             IDENTIFIER = "regexp:[a-zA-Z_$?:][0-9a-zA-Z_$?:]*"
 //            WHITESPACE = 'regexp:[\ \n\t\f]'
             INTEGER_LITERAL = 'regexp:(0|([1-9]([_0-9])*))'
@@ -145,7 +146,7 @@ StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE
 GlobalVarList ::= 'global' << comma_separated_list GlobalVar >> ';' {
     pin=1
 }
-GlobalVar ::= Type IDENTIFIER {
+GlobalVar ::= TypeReference IDENTIFIER {
     pin=1
     mixin = "org.ton.intellij.func.psi.impl.FuncGlobalVarMixin"
     implements=["org.ton.intellij.func.psi.FuncNamedElement"]
@@ -176,8 +177,8 @@ private ConstVar_recovery ::= !';'
 
 
 private UntilSemicolonRecover ::= !(';')
-IncludeDefinition ::= '#include' StringLiteral ';' {
-    pin=2
+IncludeDefinition ::= "#include" StringLiteral ';' {
+    pin=1
     mixin="org.ton.intellij.func.psi.impl.FuncIncludeDefinitionMixin"
     stubClass="org.ton.intellij.func.stub.FuncIncludeDefinitionStub"
     elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
@@ -186,26 +187,39 @@ IncludeDefinition ::= '#include' StringLiteral ';' {
 PragmaDefinition ::= PragmaDefinitionPart ';'
 PragmaKey ::= IDENTIFIER
 PragmaValue ::= StringLiteral | IntegerExpression
-private PragmaDefinitionPart ::= '#pragma' (PragmaVersion | PragmaKeyValue)  {
+private PragmaDefinitionPart ::= "#pragma" (PragmaVersion | PragmaKeyValue)  {
     pin = 1
     recoverWhile = UntilSemicolonRecover
 }
 PragmaKeyValue ::= PragmaKey PragmaValue? {
     pin=1
 }
-PragmaVersion ::= ("version" | "not-version") ('^'|'>'|'<'|'='|'<='|'>=')? PragmaSemiVersion {
+PragmaVersion ::= ("version" | "not-version") VERSION_VALUE {
     pin=1
 }
-PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
+//PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
-Function ::= TypeParameterList? Type FunctionIdentifier FunctionParameterList 'impure'? ('inline' | 'inline_ref')? MethodIdDefinition? (';' | AsmDefinition | BlockStatement) {
-    pin=3
-    mixin="org.ton.intellij.func.psi.impl.FuncFunctionMixin"
-    implements=["org.ton.intellij.func.psi.FuncNamedElement"]
-    stubClass="org.ton.intellij.func.stub.FuncFunctionStub"
-    elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
-    hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
+Function ::= TypeParameterList? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
+    pin = 3
+    implements = [
+        "org.ton.intellij.func.psi.FuncNamedElement"
+        "org.ton.intellij.func.psi.FuncInferenceContextOwner"
+    ]
+    mixin = "org.ton.intellij.func.psi.impl.FuncFunctionMixin"
+    stubClass = "org.ton.intellij.func.stub.FuncFunctionStub"
+    elementTypeFactory = "org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
+    hooks = [
+        leftBinder = "ADJACENT_LINE_COMMENTS"
+    ]
+    recoverWhile = TopLevelDefinition_recover
 }
+
+private FunctionAttributes ::= 'impure'? ('inline' | 'inline_ref')? MethodIdDefinition? {
+    recoverWhile = FunctionBody_recovery
+}
+
+private FunctionBody ::= ';' | AsmDefinition | BlockStatement
+private FunctionBody_recovery ::= !(';' | 'asm' | '{')
 
 private TypeParameterList ::= 'forall' << comma_separated_list TypeParameter >> '->' {
     pin=1
@@ -255,118 +269,160 @@ private BlockStatement_recovery ::= !('}' | IDENTIFIER | 'var' | 'return' | '{' 
 
 RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
 
-IfStatement ::= ('if' | 'ifnot') Condition BlockStatement (Else | ElseIf)? {
+IfStatement ::= ('if' | 'ifnot' | 'elseif' | 'elseifnot') Expression BlockStatement ElseBranch? {
     pin=1
+    methods=[
+        condition="/Expression"
+    ]
 }
 
-Condition ::= Expression
-
-Else ::= 'else' BlockStatement {
-    pin=1
+ElseBranch ::= SimpleElseBranch | ConditionalElseBranch
+private SimpleElseBranch ::= 'else' BlockStatement {
+    pin = 1
 }
-ElseIf ::= ('elseif' | 'elseifnot') Condition BlockStatement (Else | ElseIf)? {
-    pin=1
+private ConditionalElseBranch ::= &('elseif' | 'elseifnot') IfStatement {
+    pin = 1
 }
 
-DoStatement ::= 'do' BlockStatement 'until' Condition ';' {pin=1}
-WhileStatement ::= 'while' Condition BlockStatement {pin=1}
+DoStatement ::= 'do' BlockStatement 'until' Expression ';' {
+    pin=1
+    methods=[
+        condition="/Expression"
+    ]
+}
+WhileStatement ::= 'while' Expression BlockStatement {
+    pin=1
+    methods=[
+        condition="/Expression"
+    ]
+}
 TryStatement ::= 'try' BlockStatement Catch {pin=1}
 Catch ::= 'catch' Expression BlockStatement {
     pin=1
 }
 
-Expression ::= AssignExpression
+Expression ::= AssignBinExpression
     | TernaryExpression
-    | CompExpression_group
-    | BinaryShiftExpression_group
-    | UnaryExpression_group
-    | AddExpression_group
-    | MulExpression_group
-    | DotExpression
-    | ModifyExpression
+    | CompBinExpression
+    | RelCompBinExpression
+    | ShiftBinExpression
+    | UnaryMinusExpression
+    | AddBinExpression
+    | OrBinExpression
+    | XorBinExpression
+    | MulBinExpression
+    | AndBinExpression
     | InvExpression
-    | CallExpression
-    | VarExpression
-    | Expr100_group
+    | SpecialApplyExpression
+    | ApplyExpression
+    | AtomicExpression
 
-AssignExpression ::= Expression ('=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '^>>=' | '~>>=' | '&=' | '|=' | '^=') Expression {
+fake BinExpression ::= Expression BinaryOp Expression {
+    methods=[
+        left="/Expression[0]"
+        right="/Expression[1]"
+    ]
+}
+
+//noinspection BnfUnusedRule
+fake BinaryOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '^>>=' | '~>>=' | '&=' | '|=' | '^='
+| '==' | '!='
+| '<' | '>' | '<=' | '>=' | '<=>'
+| '<<' | '>>' | '~>>' | '^>>'
+| '-' | '+'
+| '|'
+| '^'
+| '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%'
+| '&'
+
+TernaryExpression ::= Expression '?' Expression ':' Expression {
+    pin=2
+    methods=[
+        condition="/Expression[0]"
+        thenBranch="/Expression[1]"
+        elseBranch="/Expression[2]"
+    ]
+}
+AssignBinExpression ::= Expression AssignBinOp Expression {
     rightAssociative=true
 }
-
-private CompExpression_group ::= EqExpression | LtExpression | GtExpression | LeqExpression | GeqExpression | NeqExpression | SpaceshipExpression
-private BinaryShiftExpression_group ::= LShiftExpression | RShiftExpression | RShiftCExpression | RShiftRExpression
-private UnaryExpression_group ::= UnaryMinusExpression
-private AddExpression_group ::= PlusExpression | MinusExpression | OrExpression | XorExpression
-private MulExpression_group ::= MulExpression | DivExpression | ModExpression | DivModExpression | DivCExpression | DivRExpression | ModCExpression | ModRExpression | AndExpression
-
-VarExpression ::= (PrimitiveTypeExpression | HoleTypeExpression | TensorExpression | TupleExpression) (TensorExpression|TupleExpression|ReferenceExpression)
-private Expr100_group ::= TensorExpression
- | TupleExpression
- | IntegerExpression
- | StringExpression
- | HoleTypeExpression
- | PrimitiveTypeExpression
- | BoolExpression
- | NilExpression
- | ReferenceExpression
-
-//private CompositeExpression ::= Expression [ TensorExpression | TupleExpression | ReferenceExpression ]
-
-TernaryExpression ::= Expression '?' Expression ':' Expression
-EqExpression ::= Expression '==' Expression
-LtExpression ::= Expression '<' Expression
-GtExpression ::= Expression '>' Expression
-LeqExpression ::= Expression '<=' Expression
-GeqExpression ::= Expression '>=' Expression
-NeqExpression ::= Expression '!=' Expression
-SpaceshipExpression ::= Expression '<=>' Expression
-LShiftExpression ::= Expression '<<' Expression
-RShiftExpression ::= Expression '>>' Expression
-RShiftCExpression ::= Expression '^>>' Expression
-RShiftRExpression ::= Expression '~>>' Expression
+CompBinExpression ::= Expression CompBinOp Expression
+RelCompBinExpression ::= Expression RelCompBinOp Expression
+ShiftBinExpression ::= Expression ShiftBinOp Expression
 UnaryMinusExpression ::= '-' Expression
-PlusExpression ::= Expression '+' Expression
-MinusExpression ::= Expression '-' Expression
-OrExpression ::= Expression '|' Expression
-XorExpression ::= Expression '^' Expression
-MulExpression ::= Expression '*' Expression
-DivExpression ::= Expression '/' Expression
-ModExpression ::= Expression '%' Expression
-DivModExpression ::= Expression '/%' Expression
-DivCExpression ::= Expression '^/' Expression
-DivRExpression ::= Expression '~/' Expression
-ModCExpression ::= Expression '^%' Expression
-ModRExpression ::= Expression '~%' Expression
-AndExpression ::= Expression '&' Expression
+AddBinExpression ::= Expression AddBinOp Expression
+OrBinExpression ::= Expression OrBinOp Expression
+XorBinExpression ::= Expression XorBinOp Expression
+MulBinExpression ::= Expression MulBinOp Expression
+AndBinExpression ::= Expression AndBinOp Expression
 InvExpression ::= '~' Expression
 
-CallExpression ::= ReferenceExpression &('(' | IDENTIFIER) CallArgument
-DotExpression ::= Expression '.' MethodCall
-ModifyExpression ::= Expression MethodCall
-MethodCall ::= ReferenceExpression CallArgument {
-    pin=1
+AssignBinOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '^>>=' | '~>>=' | '&=' | '|=' | '^=' {
+    name = "operator"
 }
 
-CallArgument ::= Expr100_group
+CompBinOp ::= '==' | '!=' { name = "operator" }
+RelCompBinOp ::= '<' | '>' | '<=' | '>=' | '<=>' { name = "operator" }
+ShiftBinOp ::= '<<' | '>>' | '~>>' | '^>>' { name = "operator" }
+AddBinOp ::= '-' | '+' { name = "operator" }
+OrBinOp ::= '|' { name = "operator" }
+XorBinOp ::= '^' { name = "operator" }
+MulBinOp  ::= '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%' { name = "operator" }
+AndBinOp ::= '&' { name = "operator" }
 
-TensorExpression ::= '(' [ TensorElements ] ')' {
+SpecialApplyExpression ::= Expression &<<isSpecialIdentifier>> Expression {
+    methods=[
+        left="/Expression[0]"
+        right="/Expression[1]"
+    ]
+}
+ApplyExpression ::= Expression &('(' | '[' | <<isRegularIdentifier>>) Expression {
+    rightAssociative=true
+    methods=[
+        left="/Expression[0]"
+        right="/Expression[1]"
+    ]
+}
+
+private AtomicExpression ::= UnitExpression
+                        | TensorOrParenExpression
+                        | TupleExpression
+                        | HoleTypeExpression
+                        | PrimitiveTypeExpression
+                        | LiteralExpression
+                        | ReferenceExpression
+
+UnitExpression ::= '(' ')'
+
+fake TensorExpression ::= '(' <<comma_separated_list Expression>> ')' {
+    pin = 2
+}
+fake ParenExpression ::= '(' Expression ')' {
+    pin = 1
+}
+
+TensorOrParenExpression ::= '(' Expression (TensorExpression_upper | ')') {
+    pin = 1
+    elementType = ParenExpression
+}
+upper TensorExpression_upper ::= TensorExpressionValue* ')' {
+    elementType = TensorExpression
+}
+private TensorExpressionValue ::= ',' Expression {
     pin=1
-    extends=Expression
 }
-private TensorElements ::= Expression (!'(' ',' Expression)* {
-    recoverWhile=TensorElements_recovery
-}
-private TensorElements_recovery ::= !(')'|';'|'{'|'}')
 
 TupleExpression ::= '[' [ <<comma_separated_list Expression>> ] ']' {
     pin=1
     extends=Expression
 }
 
-IntegerExpression ::= INTEGER_LITERAL
-StringExpression ::= StringLiteral
-BoolExpression ::= 'true' | 'false'
-NilExpression ::= 'nil' | 'Nil'
+private IntegerExpression ::= INTEGER_LITERAL
+private BoolExpression ::= 'true' | 'false'
+private NilExpression ::= 'nil' | 'Nil'
+
+LiteralExpression ::= INTEGER_LITERAL | BoolExpression | NilExpression | StringLiteral
+
 ReferenceExpression ::= IDENTIFIER {
     mixin="org.ton.intellij.func.psi.impl.FuncReferenceExpressionMixin"
     implements="org.ton.intellij.func.psi.FuncNamedElement"
@@ -390,40 +446,59 @@ FunctionParameter ::= TypeNamedFunctionParameter | TypeFunctionParameter | Named
     stubClass="org.ton.intellij.func.stub.FuncFunctionParameterStub"
     elementTypeFactory="org.ton.intellij.func.psi.FuncElementTypeFactory.stubFactory"
 }
-private TypeNamedFunctionParameter ::= AtomicType IDENTIFIER
+private TypeNamedFunctionParameter ::= TypeReference IDENTIFIER
 private TypeFunctionParameter ::= PrimitiveType
 private NamedFunctionParameter ::= IDENTIFIER
 
-Type ::= MapType | AtomicType
-AtomicType ::= PrimitiveType | HoleType | TypeIdentifier | TensorType | TupleType {
-    extends=Type
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Types
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+TypeReference ::= MapType | TypeReferenceWithoutMap
+private TypeReferenceWithoutMap ::= TupleType
+                                                    | UnitType
+                                                    | TensorOrParenType
+                                                    | HoleType
+                                                    | PrimitiveType
+                                                    | TypeIdentifier
+
+//private TypeReference_first ::= '[' | '(' | 'var' | '_' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type' | IDENTIFIER
+
+TupleType ::= '[' TypeReference TupleTypeValue* ']' {
+    pin = 1
 }
-MapType ::= AtomicType '->' Type {
-    pin=2
-    extends=Type
+private TupleTypeValue ::= ',' TypeReference {
+    recoverWhile=TupleTypeValueRecovery
+}
+private TupleTypeValueRecovery ::= !(']'|IDENTIFIER|',')
+
+MapType ::= TypeReferenceWithoutMap '->' TypeReference {
+    pin = 2
+    methods=[
+        from="/TypeReference[0]"
+        to="/TypeReference[1]"
+    ]
 }
 
-HoleType ::= 'var' | '_' {
-    extends=AtomicType
-}
-PrimitiveType ::= 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type' {
-    extends=AtomicType
-}
+HoleType ::= 'var' | '_'
+PrimitiveType ::= 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type'
 TypeIdentifier ::= IDENTIFIER {
-    extends=AtomicType
     mixin="org.ton.intellij.func.psi.impl.FuncTypeIdentifierMixin"
 }
+UnitType ::= '(' ')'
 
-TensorType ::= '(' [ <<comma_separated_list Type>> ] ')' {
-    extends=AtomicType
-    pin=1
+fake TensorType ::= '(' [ <<comma_separated_list TypeReference>> ] ')'
+fake ParenType ::= '(' TypeReference ')' {
+    pin = 1
 }
 
-TupleType ::= TupleTypeStart ']' {
-    extends=AtomicType
+TensorOrParenType ::= '(' !')' TypeReference (TensorType_upper | ')') {
+    pin = 2
+    elementType = ParenType
 }
-TupleTypeItem ::= Type ( ','| &']' ) {pin=1}
-private TupleTypeItemRecovery ::= !']'
-private TupleTypeStart ::= '[' TupleTypeItem* {pin=1 recoverWhile=TupleTypeItemRecovery}
+upper TensorType_upper ::= ',' [ TypeReference (',' TypeReference)* ] ')' {
+    pin = 1
+    elementType = TensorType
+}
 
 private meta comma_separated_list ::= <<param>> (',' <<param>>)*

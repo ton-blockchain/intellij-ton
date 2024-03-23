@@ -7,14 +7,18 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
-import org.ton.intellij.tact.psi.*
+import org.ton.intellij.tact.psi.TACT_COMMENTS
+import org.ton.intellij.tact.psi.TACT_STRING_LITERALS
+import org.ton.intellij.tact.psi.TactElementTypes
+import org.ton.intellij.tact.psi.TactFile
+import org.ton.intellij.tact.stub.TactFileStub
 
 class TactParserDefinition : ParserDefinition {
     override fun createLexer(project: Project) = FlexAdapter(org.ton.intellij.tact.parser._TactLexer())
 
     override fun createParser(project: Project?) = TactParser()
 
-    override fun getFileNodeType() = TactFileElementType
+    override fun getFileNodeType() = TactFileStub.Type
 
     override fun getCommentTokens(): TokenSet = TACT_COMMENTS
 

@@ -15,8 +15,7 @@ abstract class TlbNamedElementImpl(node: ASTNode) : TlbElementImpl(node), TlbNam
     override fun getNameIdentifier(): PsiElement? = findChildByType(TlbTypes.IDENTIFIER)
     override fun getName(): String? = nameIdentifier?.text
     override fun setName(name: String): PsiElement = apply {
-        TODO()
-//        nameIdentifier?.replace(project.TlbPsiFactory.createIdentifier(name))
+        nameIdentifier?.replace(project.tlbPsiFactory.createIdentifier(name))
     }
 
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()

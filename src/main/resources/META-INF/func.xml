@@ -33,8 +33,9 @@
                                 implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionContributor"/>
         <completion.confidence language="func" order="last"
                                implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionConfidence"/>
+        <lookup.charFilter implementation="org.ton.intellij.func.ide.completion.FuncCharFilter"/>
 
-        <stubIndex implementation="org.ton.intellij.func.stub.index.FuncAllPublicNamesIndex"/>
+        <stubIndex implementation="org.ton.intellij.func.stub.index.FuncNamedElementIndex"/>
         <stubElementTypeHolder class="org.ton.intellij.func.psi.FuncElementTypes" externalIdPrefix="func."/>
         <lang.elementManipulator forClass="org.ton.intellij.func.psi.FuncIncludeDefinition"
                                  implementationClass="org.ton.intellij.func.psi.impl.FuncIncludePathElementManipulator"/>
@@ -46,14 +47,23 @@
                 implementation="org.ton.intellij.func.template.FuncEverywhereContextType"/>
         <defaultLiveTemplates file="/liveTemplates/funcHidden.xml" hidden="true"/>
 
+        <!-- Hints -->
+        <codeInsight.parameterInfo language="func"
+                                   implementationClass="org.ton.intellij.func.ide.hints.FuncParameterInfoHandler"/>
         <codeInsight.parameterNameHints language="func"
-                                        implementationClass="org.ton.intellij.func.ide.FuncParameterHintsProvider"/>
+                                        implementationClass="org.ton.intellij.func.ide.hints.FuncParameterHintsProvider"/>
+
 
         <annotator language="func" implementationClass="org.ton.intellij.func.highlighting.FuncAnnotator"/>
         <annotator language="func" implementationClass="org.ton.intellij.func.highlighting.FuncDocAnnotator"/>
 
         <codeInsight.lineMarkerProvider language="func"
                                         implementationClass="org.ton.intellij.func.ide.linemarker.FuncRecursiveCallLineMarkerProvider"/>
+
+        <languageInjectionContributor language="func"
+                                      implementationClass="org.ton.intellij.func.ide.FuncLanguageInjector"/>
+
+        <stubIndex implementation="org.ton.intellij.func.stub.index.FuncNamedElementIndex"/>
 
         <localInspection language="func" displayName="Unused function inspection" groupPath="FunC"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
@@ -95,6 +105,10 @@
         <localInspection language="func" displayName="Unresolved type identifier" groupPath="FunC"
                          groupName="General" enabledByDefault="true" level="ERROR"
                          implementationClass="org.ton.intellij.func.inspection.FuncUnresolvedTypeIdentifierInspection"/>
+
+        <!-- Completion -->
+        <completion.contributor language="func"
+                                implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionContributor"/>
     </extensions>
 
     <actions>

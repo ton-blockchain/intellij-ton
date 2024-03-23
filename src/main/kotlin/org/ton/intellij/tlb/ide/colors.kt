@@ -23,6 +23,7 @@ enum class TlbColor(
     BRACKETS("Brackets", Defaults.BRACKETS),
     PARENTHESES("Parentheses", Defaults.PARENTHESES),
     SEMICOLON("Semicolon", Defaults.SEMICOLON),
+    OPERATION_SIGN("Operation Sign", Defaults.OPERATION_SIGN),
 
     NUMBER("Number", Defaults.NUMBER),
     CONSTRUCTOR_NAME("Constructor name", Defaults.STATIC_METHOD),

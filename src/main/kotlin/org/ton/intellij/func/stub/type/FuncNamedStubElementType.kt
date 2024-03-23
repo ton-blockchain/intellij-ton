@@ -21,8 +21,6 @@ abstract class FuncNamedStubElementType<S : FuncNamedStub<T>, T : FuncNamedEleme
         val name = stub.name
         if (name.isNullOrEmpty() || !shouldIndex()) return
 
-//        sink.occurrence(FuncAllPublicNamesIndex.ALL_PUBLIC_NAMES, name)
-
         extraIndexKeys.forEach { key ->
             sink.occurrence(key, name)
         }

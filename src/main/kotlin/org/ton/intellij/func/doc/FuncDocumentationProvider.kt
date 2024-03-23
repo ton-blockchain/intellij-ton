@@ -60,8 +60,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     }
 
     override fun generateRenderedDoc(comment: PsiDocCommentBase): String? {
-        if (comment !is FuncDocComment) return null
-        return MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;", FuncDocMarkdownFlavourDescriptor())
+        return (comment as? FuncDocComment)?.renderHtml()
     }
 
     private fun getComments(element: PsiElement?): PsiComment? {
@@ -69,7 +68,8 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     }
 
     private fun getCommentText(comment: PsiComment): String {
-        return MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;", FuncDocMarkdownFlavourDescriptor())
+        return (comment as? FuncDocComment)?.renderHtml()
+            ?: MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;", FuncDocMarkdownFlavourDescriptor())
     }
 
     fun renderElement(element: PsiElement?, context: PsiElement?): String? {
@@ -99,7 +99,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
             append("->")
             append(NBSP)
         }
-        renderType(function.type)
+        renderType(function.typeReference)
         append(NBSP)
         if (function.isMutable) {
             append("~")
@@ -121,7 +121,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     private fun StringBuilder.renderFunctionParameter(
         param: FuncFunctionParameter,
     ) {
-        val type = param.atomicType
+        val type = param.typeReference
         if (type != null) {
             renderType(type)
         }
@@ -141,7 +141,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
     }
 
     private fun StringBuilder.renderType(
-        type: FuncType,
+        type: FuncTypeReference,
     ) {
         when (type) {
             is FuncTypeIdentifier ->
@@ -152,9 +152,9 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
 
             is FuncTupleType -> {
                 appendStyledSpan(FuncColor.BRACKETS.attributes, "[")
-                type.tupleTypeItemList.joinTo(this) {
+                type.typeReferenceList.joinTo(this) {
                     buildString {
-                        renderType(it.type)
+                        renderType(it)
                     }
                 }
                 appendStyledSpan(FuncColor.BRACKETS.attributes, "]")
@@ -163,7 +163,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
 
             is FuncTensorType -> {
                 appendStyledSpan(FuncColor.PARENTHESES.attributes, "(")
-                type.typeList.joinTo(this) {
+                type.typeReferenceList.joinTo(this) {
                     buildString {
                         renderType(it)
                     }
@@ -179,7 +179,36 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
                 }
             }
 
-            else -> append(type)
+            is FuncParenType -> {
+                appendStyledSpan(FuncColor.PARENTHESES.attributes, "(")
+                type.typeReference?.let {
+                    renderType(it)
+                }
+                appendStyledSpan(FuncColor.PARENTHESES.attributes, ")")
+            }
+
+            is FuncMapType -> {
+                type.from?.let {
+                    renderType(it)
+                }
+                append(" ")
+                appendStyledSpan(FuncColor.OPERATION_SIGN.attributes, "->")
+                append(" ")
+                type.to?.let {
+                    renderType(it)
+                }
+            }
+
+            is FuncUnitType -> appendStyledSpan(FuncColor.PARENTHESES.attributes, "()")
+
+            else -> {
+                val typeIdentifier = type.typeIdentifier?.text
+                if (typeIdentifier != null) {
+                    appendStyledSpan(FuncColor.TYPE_PARAMETER.attributes, typeIdentifier)
+                } else {
+                    append(type)
+                }
+            }
         }
     }
 

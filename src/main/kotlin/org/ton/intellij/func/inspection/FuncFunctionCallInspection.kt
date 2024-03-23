@@ -10,23 +10,26 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
         holder: ProblemsHolder,
         session: LocalInspectionToolSession,
     ) = object : FuncVisitor() {
-        override fun visitCallExpression(o: FuncCallExpression) {
-            super.visitCallExpression(o)
-            val function = o.referenceExpression.reference?.resolve() as? FuncFunction ?: return
-            holder.check(function, o.callArgument, false)
-        }
-
-        override fun visitMethodCall(o: FuncMethodCall) {
-            super.visitMethodCall(o)
-            val function = o.referenceExpression.reference?.resolve() as? FuncFunction ?: return
-            holder.check(function, o.callArgument ?: return, true)
-        }
+//        override fun visitSpecialApplyExpression(o: FuncSpecialApplyExpression) {
+//            super.visitSpecialApplyExpression(o)
+//            val function = o.left.reference?.resolve() as? FuncFunction ?: return
+//            holder.check(function, o.right ?: return, true)
+//        }
+//
+//        override fun visitApplyExpression(o: FuncApplyExpression) {
+//            super.visitApplyExpression(o)
+//            val function = o.left.reference?.resolve() as? FuncFunction ?: return
+//            holder.check(function, o.right ?: return, false)
+//        }
     }
 
-    private fun ProblemsHolder.check(function: FuncFunction, argument: FuncCallArgument, isMethodCall: Boolean) {
-        val arguments = argument.expression.let {
-            if (it is FuncTensorExpression) it.expressionList
-            else listOf(it)
+    private fun ProblemsHolder.check(function: FuncFunction, argument: FuncExpression, isMethodCall: Boolean) {
+        val arguments = argument.let {
+            when (it) {
+                is FuncTensorExpression -> it.expressionList
+                is FuncUnitExpression -> emptyList()
+                else -> listOf(it)
+            }
         }
         val parameters = function.functionParameterList
 

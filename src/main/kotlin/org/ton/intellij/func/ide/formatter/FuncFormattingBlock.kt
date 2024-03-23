@@ -13,12 +13,12 @@ abstract class AbstractFuncBlock(
     val spacingBuilder: SpacingBuilder,
     wrap: Wrap? = null,
     alignment: Alignment? = null,
-    private val indent: Indent? = null,
+    private val indent: Indent? = Indent.getNoneIndent(),
     private val childIndent: Indent? = null,
 ) : AbstractBlock(node, wrap, alignment) {
     override fun getSpacing(child1: Block?, child2: Block): Spacing? = spacingBuilder.getSpacing(this, child1, child2)
 
-    override fun isLeaf(): Boolean = myNode.firstChildNode != null
+    override fun isLeaf(): Boolean = myNode.firstChildNode == null
 
     override fun getIndent(): Indent? = indent
 
@@ -64,7 +64,11 @@ class FuncFormattingBlock(
     private fun createBlock(node: ASTNode): ASTBlock? {
         if (node.elementType == TokenType.WHITE_SPACE) return null
         val indent = calcIndent(node) ?: return null
-        val childIndent = if (node.elementType == BLOCK_STATEMENT) Indent.getNormalIndent() else null
+        val childIndent =
+            when (node.elementType) {
+                BLOCK_STATEMENT -> Indent.getNormalIndent()
+                else -> Indent.getNormalIndent()
+            }
         val wrap = calcWrap(node)
 
         return FuncFormattingBlock(
@@ -77,65 +81,17 @@ class FuncFormattingBlock(
         )
     }
 
-    private fun Int.example() = this
-
-    private fun a() {
-        val a = 1
-        a.example().example().example().example()
-
-        a.example()
-            .example()
-            .example()
-            .example()
-
-    }
-
-//    private fun createChainingCallBlock(node: FuncQualifiedExpression): ASTBlock {
-//        return object : AbstractFuncBlock(node.node, spacingBuilder) {
-//            override fun buildChildren(): List<Block> = buildList {
-//                val expressions = node.expressionList
-//
-//                val first = expressions.firstOrNull()
-//                if (first is FuncQualifiedExpression) {
-//                    add(createChainingCallBlock(first))
-//                } else if (first != null) {
-//                    createBlock(first.node)?.let {
-//                        add(it)
-//                    }
-//                }
-//
-//                add(
-//                    block(node.node, spacingBuilder, indent = Indent.getNormalIndent(), wrap = Wrap.createChildWrap(Wrap.createWrap(WrapType.NONE, false), WrapType.NORMAL, false)) {
-//                        buildList {
-//                            node.dot?.node?.let {
-//                                add(block(it, spacingBuilder, indent= Indent.getNoneIndent()))
-//                            }
-//                            expressions.getOrNull(1)?.node?.let {
-//                                createBlock(it)
-//                            }?.let {
-//                                add(it)
-//                            }
-//                        }
-//                    }
-//                )
-//            }
-//        }
-//    }
-
     private fun calcIndent(child: ASTNode): Indent? {
         val type = child.elementType
         val parent = child.treeParent
         val parentType = parent.elementType
-        if (parentType == BLOCK_STATEMENT) return indentIfNotBrace(child)
-        if (parentType == TENSOR_EXPRESSION && type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
+        when (parentType) {
+            BLOCK_STATEMENT -> return indentIfNotBrace(child)
+            SPECIAL_APPLY_EXPRESSION -> if (parent.lastChildNode == child) return Indent.getNormalIndent()
+            TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE, PAREN_TYPE -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
+            TUPLE_TYPE, TUPLE_EXPRESSION -> if (type != LBRACK && type != RBRACK) return Indent.getNormalIndent()
+        }
         if (type == PRIMITIVE_TYPE_EXPRESSION || type == HOLE_TYPE_EXPRESSION) return Indent.getNoneIndent()
-//        if (parentType == QUALIFIED_EXPRESSION && (type == DOT || type == TILDE)) return Indent.getContinuationWithoutFirstIndent()
-//        if (parentType == ASSIGN_EXPRESSION) return Indent.getContinuationWithoutFirstIndent(true)
-//        if (parentType == QUALIFIED_EXPRESSION && type != QUALIFIED_EXPRESSION) {
-//            return Indent.getContinuationWithoutFirstIndent()
-//        }
-//        if (parentType == QUALIFIED_EXPRESSION && type == QUALIFIED_EXPRESSION) return Indent.getNormalIndent()
-//        if (child.psi is FuncExpression) return Indent.getContinuationWithoutFirstIndent()
         return Indent.getNoneIndent()
     }
 

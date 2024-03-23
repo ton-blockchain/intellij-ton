@@ -2,6 +2,7 @@ package org.ton.intellij.func.psi.impl
 
 import com.intellij.extapi.psi.StubBasedPsiElementBase
 import com.intellij.lang.ASTNode
+import com.intellij.psi.PsiReference
 import com.intellij.psi.impl.source.resolve.reference.impl.providers.FileReference
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.tree.IElementType
@@ -17,8 +18,17 @@ abstract class FuncIncludeDefinitionMixin : StubBasedPsiElementBase<FuncIncludeD
         return FuncIncludePathReference(this).allReferences
     }
 
-    override fun getTextOffset(): Int = stringLiteral.startOffsetInParent + stringLiteral.rawString.startOffsetInParent
+    override fun getReference(): PsiReference? = references.lastOrNull()
+
+    override fun getTextOffset(): Int {
+        val stringLiteral = stringLiteral
+        return if (stringLiteral != null) {
+            stringLiteral.startOffsetInParent + stringLiteral.rawString.startOffsetInParent
+        } else {
+            super.getTextOffset()
+        }
+    }
 }
 
 val FuncIncludeDefinition.path: String
-    get() = stub?.path ?: stringLiteral.rawString.text
+    get() = stub?.path ?: stringLiteral?.rawString?.text ?: ""

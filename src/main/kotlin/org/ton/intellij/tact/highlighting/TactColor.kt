@@ -30,7 +30,9 @@ enum class TactColor(
     FUNCTION_DECLARATION("Function declaration", Default.FUNCTION_DECLARATION),
     FUNCTION_CALL("Function call", Default.FUNCTION_CALL),
     FUNCTION_STATIC("Function static", Default.STATIC_METHOD),
-    CONSTANT("Constant", Default.CONSTANT),
+    FIELD("Variables//Field", Default.INSTANCE_FIELD),
+    CONSTANT("Variables//Constant", Default.CONSTANT),
+    SELF_PARAMETER("Parameters//Self parameter", Default.KEYWORD),
     GLOBAL_VARIABLE("Global variable", Default.GLOBAL_VARIABLE),
     LOCAL_VARIABLE("Local variable", Default.LOCAL_VARIABLE),
     MACRO("Macro", Default.METADATA),
@@ -40,7 +42,7 @@ enum class TactColor(
     ;
 
     val textAttributesKey =
-        TextAttributesKey.createTextAttributesKey("org.ton.intellij.func.$name", default)
+        TextAttributesKey.createTextAttributesKey("org.ton.intellij.tact.$name", default)
     val attributesDescriptor = AttributesDescriptor(displayName, textAttributesKey)
 
     val attributes

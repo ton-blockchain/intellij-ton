@@ -37,7 +37,7 @@ class FuncAsmArgumentReference(element: FuncAsmArgument) :
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {
-        myElement.identifier.replace(FuncPsiFactory[myElement.project].createIdentifierFromText(newElementName))
+        myElement.identifier.replace(FuncPsiFactory[myElement.project].createIdentifier(newElementName))
         return myElement
     }
 }

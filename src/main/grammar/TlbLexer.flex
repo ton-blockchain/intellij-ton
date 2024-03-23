@@ -75,7 +75,7 @@ import static org.ton.intellij.tlb.psi.TlbTypes.*;
 EOL=\R
 
 WHITE_SPACE_CHAR = [\ \n\t\f\r]
-HEX_TAG=#([0-9a-f]+_?|_)
+HEX_TAG=#([0-9a-fA-F]+_?|_)
 BINARY_TAG=\$([01]*|_)
 
 LINE_DOCUMENTATION = "/""/""/"[^\n]*
@@ -83,6 +83,7 @@ LINE_COMMENT = "/""/"[^\n]*
 
 NUMBER=[0-9]+
 IDENTIFIER=[a-zA-Z_][0-9a-zA-Z0-9_]*
+PREDIFINED_TYPE=u?int[0-9]+|Cell
 
 %xstate BLOCK_COMMENT_STATE, DOC_COMMENT_STATE
 
@@ -132,6 +133,7 @@ IDENTIFIER=[a-zA-Z_][0-9a-zA-Z0-9_]*
 {LINE_COMMENT} { return LINE_COMMENT; }
 
 {NUMBER} { return NUMBER; }
+{PREDIFINED_TYPE} { return PREDIFINED_TYPE; }
 {IDENTIFIER} { return IDENTIFIER; }
 
 "+" { return PLUS; }

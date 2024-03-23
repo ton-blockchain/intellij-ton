@@ -6,7 +6,7 @@ import org.ton.intellij.tact.TactFileType
 import org.ton.intellij.tact.TactLanguage
 import org.ton.intellij.tact.stub.TactFileStub
 
-class TactFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TactLanguage) {
+class TactFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TactLanguage), TactElement {
     override fun getFileType() = TactFileType
 
     override fun getStub() = super.getStub() as? TactFileStub

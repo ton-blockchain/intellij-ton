@@ -4,13 +4,14 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
-import org.intellij.lang.annotations.Language
+import com.intellij.psi.PsiParserFacade
 import org.ton.intellij.func.FuncLanguage
+import org.ton.intellij.util.descendantOfTypeStrict
 
 @Service(Service.Level.PROJECT)
 class FuncPsiFactory private constructor(val project: Project) {
-    val builtinStdlibFile by lazy {
-        createFileFromText(
+    val builtinFile by lazy {
+        createFile(
             "builtin.fc", """
             
             int _+_(int x, int y) asm "ADD";
@@ -162,14 +163,19 @@ class FuncPsiFactory private constructor(val project: Project) {
         }
     }
 
-    fun createFileFromText(@Language("FunC") text: String) =
-        createFileFromText(null, text)
+    fun createFile(text: CharSequence) =
+        createFile(null, text)
 
-    fun createFileFromText(name: String?, @Language("FunC") text: String) =
+    fun createFile(name: String?, text: CharSequence) =
         PsiFileFactory.getInstance(project).createFileFromText(name ?: "dummy.fc", FuncLanguage, text) as FuncFile
 
+    fun createNewline(): PsiElement = createWhitespace("\n")
+
+    fun createWhitespace(ws: String): PsiElement =
+        PsiParserFacade.getInstance(project).createWhiteSpaceFromText(ws)
+
     fun createStatement(text: String): FuncStatement {
-        val file = createFileFromText("() foo() { $text }")
+        val file = createFile("() foo() { $text }")
         return file.functions.first().blockStatement!!.statementList.first()
     }
 
@@ -177,11 +183,19 @@ class FuncPsiFactory private constructor(val project: Project) {
         return (createStatement("$text;") as FuncExpressionStatement).expression
     }
 
-    fun createIdentifierFromText(text: String): PsiElement {
-        val funcFile = createFileFromText("() $text();")
+    fun createIdentifier(text: String): PsiElement {
+        val funcFile = createFile("() $text() {}")
         val function = funcFile.functions.first()
         return function.identifier
     }
+
+    fun createIncludeDefinition(text: String): FuncIncludeDefinition =
+        createFromText("#include \"$text\";")
+            ?: error("Failed to create include definition from text: `$text`")
+
+    private inline fun <reified T : FuncElement> createFromText(
+        code: CharSequence
+    ): T? = createFile(code).descendantOfTypeStrict()
 
     companion object {
         operator fun get(project: Project) =

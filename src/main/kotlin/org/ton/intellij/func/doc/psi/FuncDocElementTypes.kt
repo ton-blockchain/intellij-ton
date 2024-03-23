@@ -7,6 +7,8 @@ object FuncDocElementTypes {
     val DOC_TEXT = FuncDocTokenType("<DOC_TEXT>")
 
     val DOC_CODE_SPAN = FuncDocCompositeTokenType("<DOC_CODE_SPAN>", ::FuncDocCodeSpanImpl)
+    val DOC_CODE_FENCE = FuncDocCompositeTokenType("<DOC_CODE_FENCE>", ::FuncDocCodeFenceImpl)
+    val DOC_CODE_BLOCK = FuncDocCompositeTokenType("<DOC_CODE_BLOCK>", ::FuncDocCodeBlockImpl)
 
     val DOC_INLINE_LINK = FuncDocCompositeTokenType("<DOC_INLINE_LINK>", ::FuncDocInlineLinkImpl)
     val DOC_SHORT_REFERENCE_LINK =
@@ -18,4 +20,8 @@ object FuncDocElementTypes {
     val DOC_LINK_LABEL = FuncDocCompositeTokenType("<DOC_LINK_LABEL>", ::FuncDocLinkLabelImpl)
     val DOC_LINK_TITLE = FuncDocCompositeTokenType("<DOC_LINK_TITLE>", ::FuncDocLinkTitleImpl)
     val DOC_LINK_DESTINATION = FuncDocCompositeTokenType("<DOC_LINK_DESTINATION>", ::FuncDocLinkDestinationImpl)
+
+    val DOC_CODE_FENCE_START_END =
+        FuncDocCompositeTokenType("<DOC_CODE_FENCE_START_END>", ::FuncDocCodeFenceStartEndImpl)
+    val DOC_CODE_FENCE_LANG = FuncDocCompositeTokenType("<DOC_CODE_FENCE_LANG>", ::FuncDocCodeFenceLangImpl)
 }

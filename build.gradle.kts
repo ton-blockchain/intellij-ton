@@ -43,7 +43,6 @@ allprojects {
     }
 
     dependencies {
-        implementation(kotlin("stdlib-jdk8"))
         implementation("me.alllex.parsus:parsus-jvm:0.6.1")
         implementation("com.github.andreypfau.tlb:tlb-jvm:54070d9405")
     }
@@ -121,6 +120,20 @@ tasks {
     }
     buildSearchableOptions {
         enabled = prop("enableBuildSearchableOptions").toBoolean()
+    }
+    configurations.runtimeClasspath.get().forEach {
+        println(it)
+    }
+    jar {
+        from({
+            configurations.runtimeClasspath.get().filter { file ->
+                !file.nameWithoutExtension.startsWith("kotlin-stdlib") &&
+                        !file.nameWithoutExtension.startsWith("annotations")
+            }.map {
+                if (it.isDirectory) it
+                else zipTree(it)
+            }
+        })
     }
 }
 

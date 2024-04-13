@@ -26,6 +26,9 @@ import static org.ton.intellij.tact.psi.TactElementTypes.*;
     * Dedicated nested-comment level counter
     */
   private int zzNestedCommentLevel = 0;
+
+  private int zzBlockDepth = 0;
+  private int zzParenDepth = 0;
 %}
 
 %{
@@ -55,6 +58,7 @@ import static org.ton.intellij.tact.psi.TactElementTypes.*;
 %type IElementType
 
 %s IN_BLOCK_COMMENT
+%s IN_NAME_ATTRIBUTE
 
 %unicode
 
@@ -64,18 +68,22 @@ WHITE_SPACE=\s+
 WHITE_SPACE=[ \t\n\x0B\f\r]+
 INTEGER_LITERAL=(0[xX][0-9a-fA-F][0-9a-fA-F_]*)|([0-9]+)
 STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")
-IDENTIFIER=[:letter:]\w*
+IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_]*
+FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
 
 %%
 <YYINITIAL> {
   {WHITE_SPACE}           { return WHITE_SPACE; }
 
-  "{"                     { return LBRACE; }
-  "}"                     { return RBRACE; }
+  "/*"                    { yybegin(IN_BLOCK_COMMENT); yypushback(2); }
+  "//".*                  { return LINE_COMMENT; }
+
+  "{"                     { zzBlockDepth++; return LBRACE; }
+  "}"                     { zzBlockDepth--; return RBRACE; }
   "["                     { return LBRACK; }
   "]"                     { return RBRACK; }
-  "("                     { return LPAREN; }
-  ")"                     { return RPAREN; }
+  "("                     { zzParenDepth++; return LPAREN; }
+  ")"                     { zzParenDepth--; return RPAREN; }
   ":"                     { return COLON; }
   ";"                     { return SEMICOLON; }
   ","                     { return COMMA; }
@@ -119,7 +127,6 @@ IDENTIFIER=[:letter:]\w*
   "const"                 { return CONST_KEYWORD; }
   "fun"                   { return FUN_KEYWORD; }
   "initOf"                { return INIT_OF_KEYWORD; }
-  "get"                   { return GET_KEYWORD; }
   "as"                    { return AS_KEYWORD; }
   "abstract"              { return ABSTRACT_KEYWORD; }
   "import"                { return IMPORT_KEYWORD; }
@@ -128,20 +135,18 @@ IDENTIFIER=[:letter:]\w*
   "contract"              { return CONTRACT_KEYWORD; }
   "trait"                 { return TRAIT_KEYWORD; }
   "with"                  { return WITH_KEYWORD; }
-  "init"                  { return INIT_KEYWORD; }
   "receive"               { return RECEIVE_KEYWORD; }
-  "bounced"               { return BOUNCED_KEYWORD; }
   "external"              { return EXTERNAL_KEYWORD; }
   "true"                  { return BOOLEAN_LITERAL; }
   "false"                 { return BOOLEAN_LITERAL; }
   "null"                  { return NULL_LITERAL; }
-  "intOf"                 { return INT_OF_KEYWORD; }
+  "primitive"             { return PRIMITIVE_KEYWORD; }
+  "self"                  { return SELF_KEYWORD; }
+  "bounced"               { return zzBlockDepth == 1 ? BOUNCED_KEYWORD : IDENTIFIER; }
+  "init"                  { return zzBlockDepth == 1 ? INIT_KEYWORD : IDENTIFIER; }
+  "get"                   { return zzBlockDepth <= 1 ? GET_KEYWORD : IDENTIFIER; }
   "@interface"            { return INTERFACE_MACRO; }
-  "@name"                 { return NAME_MACRO; }
-
-  "/*"                    { yybegin(IN_BLOCK_COMMENT); yypushback(2); }
-  "////".*                { return LINE_COMMENT; }
-  "//".*                  { return LINE_COMMENT; }
+  "@name"                 { yybegin(IN_NAME_ATTRIBUTE); yypushback(5); }
 
   {INTEGER_LITERAL}       { return INTEGER_LITERAL; }
   {STRING_LITERAL}        { return STRING_LITERAL; }
@@ -160,6 +165,14 @@ IDENTIFIER=[:letter:]\w*
   <<EOF>> { zzNestedCommentLevel = 0; return imbueBlockComment(); }
 
   [^]     { }
+}
+
+<IN_NAME_ATTRIBUTE> {
+   "@name" { return NAME_MACRO; }
+   "("    { zzParenDepth++; return LPAREN; }
+   ")"    { zzParenDepth--; yybegin(YYINITIAL); return RPAREN; }
+   {FUNC_IDENTIFIER} { yybegin(YYINITIAL); return FUNC_IDENTIFIER; }
+   [^]    { yybegin(YYINITIAL); yypushback(1); }
 }
 
 [^] { return BAD_CHARACTER; }

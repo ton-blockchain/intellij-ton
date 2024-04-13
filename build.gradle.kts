@@ -21,10 +21,10 @@ version = pluginVersion
 println("pluginVersion=$version")
 
 plugins {
-    kotlin("jvm") version "1.9.0"
-    id("org.jetbrains.intellij") version "1.16.0"
-    id("org.jetbrains.grammarkit") version "2022.3.2"
-    id("org.jetbrains.changelog") version "1.3.1"
+    kotlin("jvm") version "1.9.22"
+    id("org.jetbrains.intellij") version "1.17.3"
+    id("org.jetbrains.grammarkit") version "2022.3.2.2"
+    id("org.jetbrains.changelog") version "2.2.0"
     idea
 }
 
@@ -143,7 +143,7 @@ fun prop(name: String, default: (() -> String?)? = null) = extra.properties[name
 fun generateParser(language: String, suffix: String = "", config: GenerateParserTask.() -> Unit = {}) =
     task<GenerateParserTask>("generate${language.capitalized()}Parser${suffix.capitalized()}") {
         sourceFile.set(file("src/main/grammar/${language}Parser.bnf"))
-        targetRoot.set("src/gen")
+        targetRootOutputDir.set(file("src/gen"))
         pathToParser.set("/org/ton/intellij/${language.lowercase()}/parser/${language}Parser.java")
         pathToPsiRoot.set("/org/ton/intellij/${language.lowercase()}/psi")
         purgeOldFiles.set(true)
@@ -152,7 +152,6 @@ fun generateParser(language: String, suffix: String = "", config: GenerateParser
 
 fun generateLexer(language: String) = task<GenerateLexerTask>("generate${language}Lexer") {
     sourceFile.set(file("src/main/grammar/${language}Lexer.flex"))
-    targetDir.set("src/gen/org/ton/intellij/${language.lowercase()}/lexer")
-    targetClass.set("_${language}Lexer")
+    targetOutputDir.set(file("src/gen/org/ton/intellij/${language.lowercase()}/lexer"))
     purgeOldFiles.set(true)
 }

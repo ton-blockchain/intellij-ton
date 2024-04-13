@@ -177,7 +177,18 @@ class FuncTypeInferenceWalker(
         val lhs = expressions[0]
         val rhs = expressions.getOrNull(1)
 
-        if (lhs is FuncPrimitiveTypeExpression || lhs is FuncHoleTypeExpression) {
+        fun FuncExpression.isTypeExpression(): Boolean {
+            return when (this) {
+                is FuncPrimitiveTypeExpression,
+                is FuncHoleTypeExpression -> true
+
+                is FuncTupleExpression -> expressionList.all { it.isTypeExpression() }
+                is FuncTensorExpression -> expressionList.all { it.isTypeExpression() }
+                else -> false
+            }
+        }
+
+        if (lhs.isTypeExpression()) {
             variableDeclarationState = true
         }
         val lhsTy = lhs?.inferType()

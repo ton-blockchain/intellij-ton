@@ -32,7 +32,7 @@ class InstallBlueprintAction(
         val parent = packageJson.parent
         notification?.hideBalloon()
 
-        ProgressManager.getInstance().run(object : Task.Backgroundable(project, "") {
+        ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Installing TON-Blueprint") {
             override fun run(indicator: ProgressIndicator) {
                 val listener = InstallNodeModuleQuickFix.createListener(project, packageJson, BLUEPRINT_PKG)
                 val extraOptions = InstallNodeModuleQuickFix.buildExtraOptions(project, true)

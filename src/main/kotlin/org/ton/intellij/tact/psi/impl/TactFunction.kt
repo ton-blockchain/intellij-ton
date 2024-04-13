@@ -1,14 +1,19 @@
-package org.ton.intellij.tact.psi
+package org.ton.intellij.tact.psi.impl
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
+import org.ton.intellij.tact.psi.TactFunction
+import org.ton.intellij.tact.psi.TactInferenceContextOwner
+import org.ton.intellij.tact.psi.TactNamedElementImpl
 import org.ton.intellij.tact.stub.TactFunctionStub
 import org.ton.intellij.util.greenStub
 
-abstract class TactFunctionImplMixin : TactNamedElementImpl<TactFunctionStub>, TactFunction {
+abstract class TactFunctionImplMixin : TactNamedElementImpl<TactFunctionStub>, TactFunction, TactInferenceContextOwner {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TactFunctionStub, type: IStubElementType<*, *>) : super(stub, type)
+
+    override val body get() = block
 }
 
 val TactFunction.isNative get() = greenStub?.isNative ?: (nativeKeyword != null)

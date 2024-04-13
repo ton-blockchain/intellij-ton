@@ -29,7 +29,7 @@ class FuncParameterHintsProvider : InlayParameterHintsProvider {
         arguments.forEachIndexed { index, arg ->
             val param = params.getOrNull(index + offset) ?: return result
             val paramName = param.name
-            if (paramName != null) {
+            if (paramName != null && !(arg is FuncReferenceExpression && arg.name == paramName)) {
                 result.add(InlayInfo(paramName, arg.textOffset))
             }
         }

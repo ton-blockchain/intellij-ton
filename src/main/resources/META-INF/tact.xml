@@ -21,7 +21,11 @@
         <lang.formatter language="tact"
                         implementationClass="org.ton.intellij.tact.formatter.TactFormattingModelBuilder"/>
 
+        <lang.findUsagesProvider language="tact"
+                                 implementationClass="org.ton.intellij.tact.ide.TactFindUsagesProvider"/>
+
         <stubIndex implementation="org.ton.intellij.tact.stub.index.TactNamedElementIndex"/>
+        <stubIndex implementation="org.ton.intellij.tact.stub.index.TactTypesIndex"/>
         <stubElementTypeHolder class="org.ton.intellij.tact.psi.TactElementTypes" externalIdPrefix="tact."/>
 
         <annotator language="tact" implementationClass="org.ton.intellij.tact.annotator.TactHighlightingAnnotator"/>

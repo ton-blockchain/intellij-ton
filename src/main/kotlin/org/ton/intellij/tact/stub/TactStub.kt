@@ -4,13 +4,11 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.StubBuilder
 import com.intellij.psi.stubs.*
 import com.intellij.psi.tree.IStubFileElementType
-import com.intellij.util.BitUtil
 import com.intellij.util.io.StringRef
 import org.ton.intellij.tact.TactLanguage
-import org.ton.intellij.tact.psi.*
-import org.ton.intellij.tact.psi.impl.*
-import org.ton.intellij.tact.stub.index.indexFunction
-import org.ton.intellij.util.BitFlagsBuilder
+import org.ton.intellij.tact.psi.TactElement
+import org.ton.intellij.tact.psi.TactFile
+import org.ton.intellij.tact.psi.TactNamedElement
 
 abstract class TactNamedStub<T : TactNamedElement>(
     parent: StubElement<*>?,
@@ -43,7 +41,7 @@ class TactFileStub(
     override fun getType() = Type
 
     object Type : IStubFileElementType<TactFileStub>(TactLanguage) {
-        private const val STUB_VERSION = 3
+        private const val STUB_VERSION = 4
 
         override fun getStubVersion(): Int = STUB_VERSION
 
@@ -78,6 +76,7 @@ fun factory(name: String): TactStubElementType<*, *> {
         "CONTRACT" -> TactContractStub.Type
         "PRIMITIVE" -> TactPrimitiveStub.Type
         "FIELD" -> TactFieldStub.Type
+        "CONSTANT" -> TactConstantStub.Type
         else -> error("Unknown element type: $name")
     }
 }

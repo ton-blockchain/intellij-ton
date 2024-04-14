@@ -22,6 +22,7 @@ import com.intellij.psi.stubs.StubIndexKey
 import com.intellij.psi.tree.IElementType
 import com.intellij.psi.tree.TokenSet
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.util.ArrayFactory
 
 fun tokenSetOf(vararg tokens: IElementType) = TokenSet.create(*tokens)
 
@@ -116,3 +117,12 @@ val PsiElement.prevVisibleOrNewLine: PsiElement?
         .filterNot { it is PsiComment || it is PsiErrorElement }
         .filter { it !is PsiWhiteSpace || it.textContains('\n') }
         .firstOrNull()
+
+
+public fun <E : PsiElement> getChildrenByType(
+    stub: StubElement<out PsiElement>,
+    elementType: IElementType,
+    f: ArrayFactory<E?>,
+): List<E> {
+    return stub.getChildrenByType(elementType, f).toList() as List<E>
+}

@@ -18,6 +18,7 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
 
         override fun visitApplyExpression(o: FuncApplyExpression) {
             super.visitApplyExpression(o)
+            if (o.parent is FuncSpecialApplyExpression) return
             val function = o.left.reference?.resolve() as? FuncFunction ?: return
             holder.check(function, o.right ?: return, false)
         }

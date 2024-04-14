@@ -64,3 +64,9 @@ data class TactTyAdt(
 ) : TactTy() {
     override fun toString(): String = item.name ?: item.toString()
 }
+
+data class TactTyNullable(
+    val inner: TactTy
+) : TactTy() {
+    override fun toString(): String = "$inner?"
+}

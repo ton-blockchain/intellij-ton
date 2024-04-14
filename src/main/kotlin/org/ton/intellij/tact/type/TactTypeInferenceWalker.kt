@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.containers.OrderedSet
 import org.ton.intellij.tact.psi.*
+import org.ton.intellij.tact.psi.impl.ty
 import org.ton.intellij.util.ancestorStrict
 import org.ton.intellij.util.parentOfType
 
@@ -33,21 +34,37 @@ class TactTypeInferenceWalker(
             is TactExpressionStatement -> expression.inferType()
             is TactReturnStatement -> expression?.inferType()
             is TactAssignStatement -> expressionList.forEach { it.inferType() }
+            is TactWhileStatement -> {
+                condition?.expression?.inferType()
+                block?.inferType()
+            }
+
+            is TactConditionStatement -> {
+                condition?.expression?.inferType()
+                block?.inferType()
+                elseBranch?.conditionStatement?.inferType()
+                elseBranch?.block?.inferType()
+            }
         }
     }
 
     private fun TactExpression.inferType(): TactTy {
         ProgressManager.checkCanceled()
-        check(!ctx.isTypeInferred(this)) {
-            "Type already inferred for $this"
+        var ty = ctx.getExprTy(this)
+        if (ty != TactTyUnknown) {
+            return ty
         }
-
-        val ty = when (this) {
+        ty = when (this) {
             is TactBinExpression -> inferType()
             is TactParenExpression -> inferType()
             is TactDotExpression -> inferType()
             is TactReferenceExpression -> inferType()
             is TactCallExpression -> inferType()
+            is TactInitOfExpression -> inferType()
+            is TactStructExpression -> inferType()
+            is TactSelfExpression -> inferType()
+            is TactUnaryExpression -> inferType()
+            is TactNotNullExpression -> inferType()
             else -> TactTyUnknown
         }
         ctx.setExprTy(this, ty)
@@ -60,36 +77,58 @@ class TactTypeInferenceWalker(
         }.firstOrNull() ?: TactTyUnknown
     }
 
+    private fun TactSelfExpression.inferType(): TactTy = getParentFunction()?.selfType ?: TactTyUnknown
     private fun TactParenExpression.inferType(): TactTy = expression?.inferType() ?: TactTyUnknown
+    private fun TactUnaryExpression.inferType(): TactTy = expression?.inferType() ?: TactTyUnknown
+
+    private fun TactInitOfExpression.inferType(): TactTy {
+        val type = (reference?.resolve() as? TactTypeDeclarationElement)?.declaredType
+        expressionList.forEach {
+            it.inferType()
+        }
+        return type ?: TactTyUnknown
+    }
 
     private fun TactDotExpression.inferType(): TactTy {
         val expressions = expressionList
         val left = expressions.getOrNull(0)
         val right = expressions.getOrNull(1)
 
-        val leftType = if (left is TactSelfExpression) {
-            left.getParentFunction()?.selfType
-        } else {
-            left?.inferType()
-        } ?: return TactTyUnknown
+        val leftType = left?.inferType()
+        println("Dot expression: ${this.text} leftType: $leftType")
 
-        if (right is TactFieldExpression) {
-            if (leftType is TactTyAdt) {
-                val typeItem = leftType.item
-                val fields = when (typeItem) {
-                    is TactStruct -> typeItem.blockFields?.fieldList
-                    is TactContract -> typeItem.contractBody?.fieldList
-                    is TactMessage -> typeItem.blockFields?.fieldList
-                    is TactTrait -> typeItem.traitBody?.fieldList
-                    else -> null
-                }
-                val resolvedField = fields?.find { it.name == right.identifier.text }
-                if (resolvedField != null) {
-                    ctx.setResolvedRefs(right, OrderedSet(listOf(PsiElementResolveResult(resolvedField))))
-                    (resolvedField.type?.reference?.resolve() as? TactTypeDeclarationElement)?.let {
-                        return it.declaredType
+        when (right) {
+            is TactFieldExpression -> {
+                if (leftType is TactTyAdt) {
+                    val name = right.identifier.text
+                    val members = leftType.item.members
+                    val resolvedField = members.find { it.name == name }
+                    if (resolvedField != null) {
+                        ctx.setResolvedRefs(right, OrderedSet(listOf(PsiElementResolveResult(resolvedField))))
+                        return when (resolvedField) {
+                            is TactField -> resolvedField.type?.ty
+                            is TactConstant -> resolvedField.type?.ty
+                            else -> null
+                        } ?: TactTyUnknown
                     }
                 }
+            }
+
+            is TactCallExpression -> {
+                var returnTy: TactTy = TactTyUnknown
+                if (leftType is TactTyAdt) {
+                    val name = right.identifier.text
+                    val members = leftType.item.members
+                    val resolvedFunction = members.find { it.name == name } as? TactFunction
+                    if (resolvedFunction != null) {
+                        ctx.setResolvedRefs(right, OrderedSet(listOf(PsiElementResolveResult(resolvedFunction))))
+                        returnTy = resolvedFunction.type?.ty ?: TactTyUnknown
+                    }
+                }
+                right.expressionList.forEach {
+                    it.inferType()
+                }
+                return returnTy
             }
         }
 
@@ -102,9 +141,14 @@ class TactTypeInferenceWalker(
         if (candidates.isNotEmpty()) {
             ctx.setResolvedRefs(this, OrderedSet(candidates.map { PsiElementResolveResult(it) }))
         }
+        println("reference $referenceName candidate: ${candidates.firstOrNull()}")
         return when (val candidate = candidates.firstOrNull()) {
-            is TactFunctionParameter -> (candidate.type?.reference?.resolve() as? TactTypeDeclarationElement)?.declaredType
-            is TactLetStatement -> (candidate.type?.reference?.resolve() as? TactTypeDeclarationElement)?.declaredType
+            is TactFunctionParameter -> {
+                val resolved = candidate.type?.reference?.resolve()
+                (resolved as? TactTypeDeclarationElement)?.declaredType
+            }
+
+            is TactLetStatement -> candidate.type?.ty
             else -> null
         } ?: TactTyUnknown
     }
@@ -112,6 +156,23 @@ class TactTypeInferenceWalker(
     private fun TactCallExpression.inferType(): TactTy {
         expressionList.forEach { it.inferType() }
         return TactTyUnknown
+    }
+
+    private fun TactStructExpression.inferType(): TactTy {
+        val type = (reference?.resolve() as? TactTypeDeclarationElement)?.declaredType
+        structExpressionFieldList.forEach { field ->
+            field.expression?.inferType()
+        }
+        return type ?: TactTyUnknown
+    }
+
+    private fun TactNotNullExpression.inferType(): TactTy {
+        val inferType = expression.inferType()
+        return if (inferType is TactTyNullable) {
+            inferType.inner
+        } else {
+            inferType
+        }
     }
 }
 
@@ -122,8 +183,8 @@ fun TactElement.getParentFunction(): TactInferenceContextOwner? {
 val TactInferenceContextOwner.selfType: TactTy?
     get() = parentOfType<TactTypeDeclarationElement>()?.declaredType ?: if (this is TactFunction) {
         functionParameters?.selfParameter?.let {
-            it.type?.reference?.resolve() as? TactTypeDeclarationElement
-        }?.declaredType
+            it.type?.ty
+        }
     } else null
 
 private fun collectVariableCandidates(element: TactReferenceExpression): Collection<TactNamedElement> {
@@ -141,7 +202,7 @@ private fun collectVariableCandidates(element: TactReferenceExpression): Collect
                 }
             }
 
-            is TactFunction -> {
+            is TactFunctionLike -> {
                 scope.functionParameters?.functionParameterList?.forEach { param ->
                     variableCandidates.add(param)
                 }

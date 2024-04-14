@@ -1,11 +1,11 @@
 package org.ton.intellij.tact.stub
 
 import com.intellij.psi.stubs.*
+import com.intellij.util.ArrayFactory
 import com.intellij.util.io.StringRef
 import org.ton.intellij.tact.psi.TactField
 import org.ton.intellij.tact.psi.impl.TactFieldImpl
 import org.ton.intellij.tact.stub.index.indexField
-import org.ton.intellij.tact.stub.index.indexPrimitive
 
 class TactFieldStub(
     parent: StubElement<*>,
@@ -40,5 +40,10 @@ class TactFieldStub(
         }
 
         override fun indexStub(stub: TactFieldStub, sink: IndexSink) = sink.indexField(stub)
+
+        val EMPTY_ARRAY = emptyArray<TactField>()
+        val ARRAY_FACTORY: ArrayFactory<TactField?> = ArrayFactory {
+            if (it == 0) EMPTY_ARRAY else arrayOfNulls(it)
+        }
     }
 }

@@ -29,6 +29,8 @@ import static org.ton.intellij.tact.psi.TactElementTypes.*;
 
   private int zzBlockDepth = 0;
   private int zzParenDepth = 0;
+  private boolean zzStructScope = false;
+  private boolean zzContractScope = false;
 %}
 
 %{
@@ -79,7 +81,13 @@ FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
   "//".*                  { return LINE_COMMENT; }
 
   "{"                     { zzBlockDepth++; return LBRACE; }
-  "}"                     { zzBlockDepth--; return RBRACE; }
+  "}"                     {
+          if (zzBlockDepth-- == 0) {
+              zzStructScope = false;
+              zzContractScope = false;
+          }
+          return RBRACE;
+      }
   "["                     { return LBRACK; }
   "]"                     { return RBRACK; }
   "("                     { zzParenDepth++; return LPAREN; }
@@ -130,9 +138,9 @@ FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
   "as"                    { return AS_KEYWORD; }
   "abstract"              { return ABSTRACT_KEYWORD; }
   "import"                { return IMPORT_KEYWORD; }
-  "struct"                { return STRUCT_KEYWORD; }
+  "struct"                { zzStructScope = true; return STRUCT_KEYWORD; }
   "message"               { return MESSAGE_KEYWORD; }
-  "contract"              { return CONTRACT_KEYWORD; }
+  "contract"              { zzContractScope = true; return CONTRACT_KEYWORD; }
   "trait"                 { return TRAIT_KEYWORD; }
   "with"                  { return WITH_KEYWORD; }
   "receive"               { return RECEIVE_KEYWORD; }
@@ -142,8 +150,9 @@ FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
   "null"                  { return NULL_LITERAL; }
   "primitive"             { return PRIMITIVE_KEYWORD; }
   "self"                  { return SELF_KEYWORD; }
-  "bounced"               { return zzBlockDepth == 1 ? BOUNCED_KEYWORD : IDENTIFIER; }
-  "init"                  { return zzBlockDepth == 1 ? INIT_KEYWORD : IDENTIFIER; }
+  "map"                   { return MAP_KEYWORD; }
+  "bounced"               { return zzBlockDepth == 1 && zzContractScope ? BOUNCED_KEYWORD : IDENTIFIER; }
+  "init"                  { return zzBlockDepth == 1 && zzParenDepth == 0 ? INIT_KEYWORD : IDENTIFIER; }
   "get"                   { return zzBlockDepth <= 1 ? GET_KEYWORD : IDENTIFIER; }
   "@interface"            { return INTERFACE_MACRO; }
   "@name"                 { yybegin(IN_NAME_ATTRIBUTE); yypushback(5); }

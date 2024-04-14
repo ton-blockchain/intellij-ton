@@ -45,5 +45,13 @@ fun IndexSink.indexPrimitive(stub: TactPrimitiveStub) {
 }
 
 fun IndexSink.indexField(stub: TactFieldStub) {
+    stub.name?.let {
+        occurrence(TactNamedElementIndex.KEY, it)
+    }
+}
 
+fun IndexSink.indexConstant(stub: TactConstantStub) {
+    stub.name?.let {
+        occurrence(TactNamedElementIndex.KEY, it)
+    }
 }

@@ -8,7 +8,12 @@ class TactTypeReference<T : TactElement>(element: T, range: TextRange) : TactRef
     element, range
 ) {
     override fun multiResolve(): Collection<TactElement> {
+        val currentFile = element.containingFile
         val result = TactTypesIndex.findElementsByName(element.project, value)
+        val localType = result.find { it.containingFile == currentFile }
+        if (localType != null) {
+            return listOf(localType)
+        }
         return result
     }
 }

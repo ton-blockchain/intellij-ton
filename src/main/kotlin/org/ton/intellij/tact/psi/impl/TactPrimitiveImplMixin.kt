@@ -2,6 +2,7 @@ package org.ton.intellij.tact.psi.impl
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
+import org.ton.intellij.tact.psi.TactNamedElement
 import org.ton.intellij.tact.psi.TactNamedElementImpl
 import org.ton.intellij.tact.psi.TactPrimitive
 import org.ton.intellij.tact.stub.TactPrimitiveStub
@@ -24,4 +25,6 @@ abstract class TactPrimitiveImplMixin : TactNamedElementImpl<TactPrimitiveStub>,
             "StringBuilder" -> TactTyStringBuilder
             else -> TactTyUnknown
         }
+
+    override val members: Sequence<TactNamedElement> get() = emptySequence()
 }

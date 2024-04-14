@@ -1,6 +1,7 @@
 package org.ton.intellij.tact.stub
 
 import com.intellij.psi.stubs.*
+import com.intellij.util.ArrayFactory
 import com.intellij.util.BitUtil
 import com.intellij.util.io.StringRef
 import org.ton.intellij.tact.psi.TactFunction
@@ -63,6 +64,11 @@ class TactFunctionStub(
         }
 
         override fun indexStub(stub: TactFunctionStub, sink: IndexSink) = sink.indexFunction(stub)
+
+        val EMPTY_ARRAY = emptyArray<TactFunction>()
+        val ARRAY_FACTORY: ArrayFactory<TactFunction?> = ArrayFactory {
+            if (it == 0) EMPTY_ARRAY else arrayOfNulls(it)
+        }
     }
 
     private object Flags : BitFlagsBuilder(Limit.INT) {

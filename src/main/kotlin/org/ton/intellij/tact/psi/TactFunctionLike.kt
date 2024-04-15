@@ -1,5 +1,5 @@
 package org.ton.intellij.tact.psi
 
-interface TactFunctionLike : TactElement {
+interface TactFunctionLike : TactInferenceContextOwner {
     val functionParameters: TactFunctionParameters?
 }

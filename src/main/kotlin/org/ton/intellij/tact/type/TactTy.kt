@@ -1,72 +1,85 @@
 package org.ton.intellij.tact.type
 
+import org.ton.intellij.tact.psi.TactReferencedType
+import org.ton.intellij.tact.psi.TactType
 import org.ton.intellij.tact.psi.TactTypeDeclarationElement
 
-sealed class TactTy {
+sealed interface TactTy {
     abstract override fun toString(): String
+
+    fun isAssignable(other: TactTy): Boolean
 }
 
-data object TactTyUnknown : TactTy() {
+val TactType.ty: TactTy?
+    get() {
+        val type = reference?.resolve() as? TactTypeDeclarationElement ?: return null
+        val declaredTy = type.declaredTy
+        if (this is TactReferencedType && this.q != null) {
+            return TactTyNullable(declaredTy)
+        }
+        return declaredTy
+    }
+
+sealed interface TactTyRuntime : TactTy
+
+data object TactTyUnknown : TactTy {
     override fun toString(): String {
         return "???"
     }
+
+    override fun isAssignable(other: TactTy): Boolean {
+        return false
+    }
 }
 
-sealed class TactTyPrimitive : TactTy() {
-    abstract val name: String
-
-    override fun toString(): String = name
-}
-
-object TactTyInt : TactTyPrimitive() {
-    override val name: String
-        get() = "Int"
-}
-
-object TactTyBool : TactTyPrimitive() {
-    override val name: String
-        get() = "Bool"
-}
-
-object TactTyBuilder : TactTyPrimitive() {
-    override val name: String
-        get() = "Builder"
-}
-
-object TactTySlice : TactTyPrimitive() {
-    override val name: String
-        get() = "Slice"
-}
-
-object TactTyCell : TactTyPrimitive() {
-    override val name: String
-        get() = "Cell"
-}
-
-object TactTyAddress : TactTyPrimitive() {
-    override val name: String
-        get() = "Address"
-}
-
-object TactTyString : TactTyPrimitive() {
-    override val name: String
-        get() = "String"
-}
-
-object TactTyStringBuilder : TactTyPrimitive() {
-    override val name: String
-        get() = "StringBuilder"
-}
-
-
-data class TactTyAdt(
+data class TactTyRef(
     val item: TactTypeDeclarationElement
-) : TactTy() {
+) : TactTy {
     override fun toString(): String = item.name ?: item.toString()
+
+    override fun isAssignable(other: TactTy): Boolean {
+        return other is TactTyRef && item == other.item
+    }
 }
 
 data class TactTyNullable(
     val inner: TactTy
-) : TactTy() {
+) : TactTy {
     override fun toString(): String = "$inner?"
+
+    override fun isAssignable(other: TactTy): Boolean {
+        return other is TactTyNullable && inner.isAssignable(other.inner)
+    }
+}
+
+data class TactTyMap(
+    val key: TactTy,
+    val value: TactTy
+) : TactTy {
+    override fun toString(): String = "map<$key, $value>"
+
+    override fun isAssignable(other: TactTy): Boolean {
+        return other is TactTyMap && key.isAssignable(other.key) && value.isAssignable(other.value)
+    }
+}
+
+data class TactBounced(
+    val inner: TactTy
+) : TactTy, TactTyRuntime {
+    override fun toString(): String = "bounced<$inner>"
+
+    override fun isAssignable(other: TactTy): Boolean {
+        return other is TactBounced && inner.isAssignable(other.inner)
+    }
+}
+
+object TactTyVoid : TactTy {
+    override fun toString(): String = "<void>"
+    override fun isAssignable(other: TactTy): Boolean = false
+}
+
+object TactTyNull : TactTy, TactTyRuntime {
+    override fun toString(): String = "<null>"
+
+    override fun isAssignable(other: TactTy): Boolean = other == TactTyNull || other is TactTyNullable
 }

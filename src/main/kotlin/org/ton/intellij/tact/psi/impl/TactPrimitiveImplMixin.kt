@@ -6,25 +6,15 @@ import org.ton.intellij.tact.psi.TactNamedElement
 import org.ton.intellij.tact.psi.TactNamedElementImpl
 import org.ton.intellij.tact.psi.TactPrimitive
 import org.ton.intellij.tact.stub.TactPrimitiveStub
-import org.ton.intellij.tact.type.*
+import org.ton.intellij.tact.type.TactTyRef
 
 abstract class TactPrimitiveImplMixin : TactNamedElementImpl<TactPrimitiveStub>, TactPrimitive {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TactPrimitiveStub, type: IStubElementType<*, *>) : super(stub, type)
 
-    override val declaredType
-        get() = when (name) {
-            "Int" -> TactTyInt
-            "Bool" -> TactTyBool
-            "Builder" -> TactTyBuilder
-            "Slice" -> TactTySlice
-            "Cell" -> TactTyCell
-            "Address" -> TactTyAddress
-            "String" -> TactTyString
-            "StringBuilder" -> TactTyStringBuilder
-            else -> TactTyUnknown
-        }
+    override val declaredTy
+        get() = TactTyRef(this)
 
     override val members: Sequence<TactNamedElement> get() = emptySequence()
 }

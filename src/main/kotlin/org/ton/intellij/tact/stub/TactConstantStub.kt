@@ -46,15 +46,13 @@ class TactConstantStub(
 
         override fun createStub(psi: TactConstant, parentStub: StubElement<*>): TactConstantStub {
             var flags = 0.toByte()
+            flags = BitUtil.set(flags, Flags.ABSTRACT, psi.isAbstract)
             psi.constantAttributeList.forEach {
                 if (it.virtualKeyword != null) {
                     flags = BitUtil.set(flags, Flags.VIRTUAL, true)
                 }
                 if (it.overrideKeyword != null) {
                     flags = BitUtil.set(flags, Flags.OVERRIDE, true)
-                }
-                if (it.abstractKeyword != null) {
-                    flags = BitUtil.set(flags, Flags.ABSTRACT, true)
                 }
             }
             return TactConstantStub(parentStub, this, psi.name, flags)

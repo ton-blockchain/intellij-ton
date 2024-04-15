@@ -4,6 +4,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.containers.OrderedSet
+import org.ton.intellij.tact.diagnostics.TactDiagnostic
 import org.ton.intellij.tact.psi.*
 import org.ton.intellij.tact.psi.impl.ty
 import org.ton.intellij.util.ancestorStrict
@@ -13,8 +14,14 @@ class TactTypeInferenceWalker(
     val ctx: TactInferenceContext,
     private val returnTy: TactTy
 ) {
+    private val variables = HashMap<String, Pair<TactNamedElement, TactTy>>()
+
     fun walk(block: TactBlock) {
         block.inferType()
+    }
+
+    private fun addVariable(name: String, element: TactNamedElement, ty: TactTy) {
+        variables[name] = element to ty
     }
 
     private fun TactBlock.inferType() {
@@ -27,10 +34,21 @@ class TactTypeInferenceWalker(
     private fun TactStatement.inferType() {
         when (this) {
             is TactLetStatement -> {
-                val expression = expression
-                expression?.inferType()
+                val variableTy = type?.ty
+                val expressionTy = expression?.inferType()
+                if (variableTy != null && expressionTy != null && !expressionTy.isAssignable(variableTy)) {
+                    ctx.reportTypeMismatch(this, variableTy, expressionTy)
+                }
+                val name = name
+                val definedVariable = variables[name]
+                if (name != null) {
+                    if (definedVariable != null) {
+                        ctx.addDiagnostic(TactDiagnostic.VariableAlreadyExists(this, definedVariable.first))
+                    } else if (variableTy != null) {
+                        addVariable(name, this, variableTy)
+                    }
+                }
             }
-
             is TactExpressionStatement -> expression.inferType()
             is TactReturnStatement -> expression?.inferType()
             is TactAssignStatement -> expressionList.forEach { it.inferType() }
@@ -38,7 +56,6 @@ class TactTypeInferenceWalker(
                 condition?.expression?.inferType()
                 block?.inferType()
             }
-
             is TactConditionStatement -> {
                 condition?.expression?.inferType()
                 block?.inferType()
@@ -48,10 +65,10 @@ class TactTypeInferenceWalker(
         }
     }
 
-    private fun TactExpression.inferType(): TactTy {
+    private fun TactExpression.inferType(): TactTy? {
         ProgressManager.checkCanceled()
         var ty = ctx.getExprTy(this)
-        if (ty != TactTyUnknown) {
+        if (ty != null) {
             return ty
         }
         ty = when (this) {
@@ -65,9 +82,11 @@ class TactTypeInferenceWalker(
             is TactSelfExpression -> inferType()
             is TactUnaryExpression -> inferType()
             is TactNotNullExpression -> inferType()
-            else -> TactTyUnknown
+            else -> null
         }
-        ctx.setExprTy(this, ty)
+        if (ty != null) {
+            ctx.setExprTy(this, ty)
+        }
         return ty
     }
 
@@ -82,24 +101,23 @@ class TactTypeInferenceWalker(
     private fun TactUnaryExpression.inferType(): TactTy = expression?.inferType() ?: TactTyUnknown
 
     private fun TactInitOfExpression.inferType(): TactTy {
-        val type = (reference?.resolve() as? TactTypeDeclarationElement)?.declaredType
+        val type = (reference?.resolve() as? TactTypeDeclarationElement)?.declaredTy
         expressionList.forEach {
             it.inferType()
         }
         return type ?: TactTyUnknown
     }
 
-    private fun TactDotExpression.inferType(): TactTy {
+    private fun TactDotExpression.inferType(): TactTy? {
         val expressions = expressionList
         val left = expressions.getOrNull(0)
         val right = expressions.getOrNull(1)
 
         val leftType = left?.inferType()
-        println("Dot expression: ${this.text} leftType: $leftType")
 
         when (right) {
             is TactFieldExpression -> {
-                if (leftType is TactTyAdt) {
+                if (leftType is TactTyRef) {
                     val name = right.identifier.text
                     val members = leftType.item.members
                     val resolvedField = members.find { it.name == name }
@@ -109,20 +127,20 @@ class TactTypeInferenceWalker(
                             is TactField -> resolvedField.type?.ty
                             is TactConstant -> resolvedField.type?.ty
                             else -> null
-                        } ?: TactTyUnknown
+                        }
                     }
                 }
             }
 
             is TactCallExpression -> {
-                var returnTy: TactTy = TactTyUnknown
-                if (leftType is TactTyAdt) {
+                var returnTy: TactTy? = null
+                if (leftType is TactTyRef) {
                     val name = right.identifier.text
                     val members = leftType.item.members
                     val resolvedFunction = members.find { it.name == name } as? TactFunction
                     if (resolvedFunction != null) {
                         ctx.setResolvedRefs(right, OrderedSet(listOf(PsiElementResolveResult(resolvedFunction))))
-                        returnTy = resolvedFunction.type?.ty ?: TactTyUnknown
+                        returnTy = resolvedFunction.type?.ty
                     }
                 }
                 right.expressionList.forEach {
@@ -132,7 +150,7 @@ class TactTypeInferenceWalker(
             }
         }
 
-        return TactTyUnknown
+        return null
     }
 
     private fun TactReferenceExpression.inferType(): TactTy {
@@ -141,13 +159,11 @@ class TactTypeInferenceWalker(
         if (candidates.isNotEmpty()) {
             ctx.setResolvedRefs(this, OrderedSet(candidates.map { PsiElementResolveResult(it) }))
         }
-        println("reference $referenceName candidate: ${candidates.firstOrNull()}")
         return when (val candidate = candidates.firstOrNull()) {
             is TactFunctionParameter -> {
                 val resolved = candidate.type?.reference?.resolve()
-                (resolved as? TactTypeDeclarationElement)?.declaredType
+                (resolved as? TactTypeDeclarationElement)?.declaredTy
             }
-
             is TactLetStatement -> candidate.type?.ty
             else -> null
         } ?: TactTyUnknown
@@ -159,14 +175,14 @@ class TactTypeInferenceWalker(
     }
 
     private fun TactStructExpression.inferType(): TactTy {
-        val type = (reference?.resolve() as? TactTypeDeclarationElement)?.declaredType
+        val type = (reference?.resolve() as? TactTypeDeclarationElement)?.declaredTy
         structExpressionFieldList.forEach { field ->
             field.expression?.inferType()
         }
         return type ?: TactTyUnknown
     }
 
-    private fun TactNotNullExpression.inferType(): TactTy {
+    private fun TactNotNullExpression.inferType(): TactTy? {
         val inferType = expression.inferType()
         return if (inferType is TactTyNullable) {
             inferType.inner
@@ -181,7 +197,7 @@ fun TactElement.getParentFunction(): TactInferenceContextOwner? {
 }
 
 val TactInferenceContextOwner.selfType: TactTy?
-    get() = parentOfType<TactTypeDeclarationElement>()?.declaredType ?: if (this is TactFunction) {
+    get() = parentOfType<TactTypeDeclarationElement>()?.declaredTy ?: if (this is TactFunction) {
         functionParameters?.selfParameter?.let {
             it.type?.ty
         }

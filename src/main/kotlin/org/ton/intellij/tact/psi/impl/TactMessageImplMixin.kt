@@ -8,7 +8,7 @@ import org.ton.intellij.tact.psi.*
 import org.ton.intellij.tact.stub.TactFieldStub
 import org.ton.intellij.tact.stub.TactMessageStub
 import org.ton.intellij.tact.type.TactTy
-import org.ton.intellij.tact.type.TactTyAdt
+import org.ton.intellij.tact.type.TactTyRef
 import org.ton.intellij.util.getChildrenByType
 
 abstract class TactMessageImplMixin : TactNamedElementImpl<TactMessageStub>, TactMessage {
@@ -16,8 +16,8 @@ abstract class TactMessageImplMixin : TactNamedElementImpl<TactMessageStub>, Tac
 
     constructor(stub: TactMessageStub, type: IStubElementType<*, *>) : super(stub, type)
 
-    override val declaredType: TactTy
-        get() = TactTyAdt(this)
+    override val declaredTy: TactTy
+        get() = TactTyRef(this)
 
     val fields: List<TactField>
         get() = CachedValuesManager.getCachedValue(this) {

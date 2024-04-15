@@ -10,7 +10,7 @@ import org.ton.intellij.tact.stub.TactFieldStub
 import org.ton.intellij.tact.stub.TactFunctionStub
 import org.ton.intellij.tact.stub.TactTraitStub
 import org.ton.intellij.tact.type.TactTy
-import org.ton.intellij.tact.type.TactTyAdt
+import org.ton.intellij.tact.type.TactTyRef
 import org.ton.intellij.util.getChildrenByType
 import org.ton.intellij.util.recursionGuard
 
@@ -19,8 +19,8 @@ abstract class TactTraitImplMixin : TactNamedElementImpl<TactTraitStub>, TactTra
 
     constructor(stub: TactTraitStub, type: IStubElementType<*, *>) : super(stub, type)
 
-    override val declaredType: TactTy
-        get() = TactTyAdt(this)
+    override val declaredTy: TactTy
+        get() = TactTyRef(this)
 
     override val superTraits: Sequence<TactTypeDeclarationElement>
         get() = recursionGuard(this, {

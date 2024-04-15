@@ -16,6 +16,10 @@ abstract class TactReferencedTypeImplMixin(
 }
 
 val TactType.ty: TactTy?
-    get() = (reference?.resolve() as? TactTypeDeclarationElement)?.declaredType?.let {
-        if (this is TactReferencedType && q != null) TactTyNullable(it) else it
+    get() {
+        val reference = reference ?: return null
+        val typeDeclaration = reference.resolve() as? TactTypeDeclarationElement ?: return null
+        val declaredTy = typeDeclaration.declaredTy
+        if (this is TactReferencedType && q != null) return TactTyNullable(declaredTy)
+        return declaredTy
     }

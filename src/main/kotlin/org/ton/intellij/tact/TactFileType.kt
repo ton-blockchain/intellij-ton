@@ -4,7 +4,7 @@ import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.openapi.vfs.VirtualFile
 
 object TactFileType : LanguageFileType(TactLanguage) {
-    override fun getName() = "tact"
+    override fun getName() = "Tact"
     override fun getDescription() = "Tact files"
     override fun getDefaultExtension() = "tact"
     override fun getIcon() = TactIcons.FILE

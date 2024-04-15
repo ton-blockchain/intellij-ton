@@ -176,6 +176,7 @@ Constant ::= ConstantAttribute* !'fun' 'const' IDENTIFIER TypeAscription Assigme
     pin = 4
     implements = [
         "org.ton.intellij.tact.psi.TactNameIdentifierOwner"
+        "org.ton.intellij.tact.psi.TactAbstractable"
     ]
     mixin = "org.ton.intellij.tact.psi.impl.TactConstantImplMixin"
     stubClass = "org.ton.intellij.tact.stub.TactConstantStub"
@@ -272,6 +273,7 @@ Function ::= (NativeFunctionHead | FunctionAttribute*) (!'native' 'fun')? IDENTI
         "org.ton.intellij.tact.psi.TactNameIdentifierOwner"
         "org.ton.intellij.tact.psi.TactInferenceContextOwner"
         "org.ton.intellij.tact.psi.TactFunctionLike"
+        "org.ton.intellij.tact.psi.TactAbstractable"
     ]
     mixin = "org.ton.intellij.tact.psi.impl.TactFunctionImplMixin"
     stubClass = "org.ton.intellij.tact.stub.TactFunctionStub"

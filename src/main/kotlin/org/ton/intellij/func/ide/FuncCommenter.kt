@@ -5,6 +5,7 @@ import com.intellij.codeInsight.generation.CommenterDataHolder
 import com.intellij.codeInsight.generation.SelfManagingCommenter
 import com.intellij.codeInsight.generation.SelfManagingCommenterUtil
 import com.intellij.lang.CodeDocumentationAwareCommenter
+import com.intellij.lang.Commenter
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiComment
@@ -18,7 +19,7 @@ data class CommentHolder(val file: PsiFile) : CommenterDataHolder() {
     fun useSpaceAfterLineComment(): Boolean = CodeStyle.getLanguageSettings(file, FuncLanguage).LINE_COMMENT_ADD_SPACE
 }
 
-class FuncCommenter : CodeDocumentationAwareCommenter, SelfManagingCommenter<CommentHolder> {
+class FuncCommenter : Commenter, CodeDocumentationAwareCommenter, SelfManagingCommenter<CommentHolder> {
     override fun isDocumentationComment(element: PsiComment?) = false
     override fun getDocumentationCommentTokenType(): IElementType? = null
     override fun getDocumentationCommentLinePrefix(): String? = null
@@ -96,7 +97,7 @@ class FuncCommenter : CodeDocumentationAwareCommenter, SelfManagingCommenter<Com
 
     override fun commentLine(line: Int, offset: Int, document: Document, data: CommentHolder) {
         val addSpace = data.useSpaceAfterLineComment()
-        document.insertString(offset, lineCommentPrefix + if (addSpace) " " else "")
+        document.insertString(offset, ";;" + if (addSpace) " " else "")
     }
 
     override fun uncommentLine(line: Int, offset: Int, document: Document, data: CommentHolder) {

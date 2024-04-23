@@ -109,6 +109,10 @@
         <!-- Completion -->
         <completion.contributor language="func"
                                 implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionContributor"/>
+
+        <!-- Code Style -->
+        <langCodeStyleSettingsProvider
+                implementation="org.ton.intellij.func.ide.formatter.FuncLanguageCodeStyleSettingsProvider"/>
     </extensions>
 
     <actions>

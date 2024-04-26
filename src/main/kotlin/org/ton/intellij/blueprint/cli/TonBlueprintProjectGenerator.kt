@@ -93,17 +93,12 @@ class TonBlueprintProjectGenerator(
     override fun createPeer(): ProjectGeneratorPeer<Settings> {
         return object : NpmPackageGeneratorPeer() {
             private lateinit var sampleCode: JBCheckBox
-            private var newCamelCaseCodeStyle: JBCheckBox? = null
+//            private var newCamelCaseCodeStyle: JBCheckBox? = null
 
             override fun createPanel(): JPanel {
                 return super.createPanel().apply {
                     sampleCode = JBCheckBox("Add sample code").also {
                         add(it)
-                    }
-                    if (projectType == ProjectType.FUNC) {
-                        newCamelCaseCodeStyle = JBCheckBox("Use new camelCase code style").also {
-                            add(it)
-                        }
                     }
                 }
             }
@@ -111,13 +106,11 @@ class TonBlueprintProjectGenerator(
             override fun buildUI(settingsStep: SettingsStep) {
                 super.buildUI(settingsStep)
                 settingsStep.addSettingsComponent(sampleCode)
-                newCamelCaseCodeStyle?.let { settingsStep.addSettingsComponent(it) }
             }
 
             override fun getSettings(): Settings {
                 return super.getSettings().apply {
                     putUserData(ADD_SAMPLE_CODE, sampleCode.isSelected)
-                    putUserData(ADD_NEW_CAMEL_CASE_CODE_STYLE, newCamelCaseCodeStyle?.isSelected ?: false)
                 }
             }
         }

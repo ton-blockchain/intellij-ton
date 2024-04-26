@@ -12,7 +12,7 @@
 
 - FunC
 - Fift
-- Tact (Only syntax highlighting, more complex support is planned in the future release)
+- Tact
 - TL-B Schemas
 
 ---

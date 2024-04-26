@@ -1,5 +1,18 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [2.2.0]
+
+### Added
+
+- Full support latest Tact 1.2.0 version ([#166](https://github.com/ton-blockchain/intellij-ton/issues/166))
+
+### Fixed
+
+- A bug with comment/uncomment already commented
+  lines ([#169](https://github.com/ton-blockchain/intellij-ton/issues/169))
+- Function parameter name hints for var arguments of same
+  name ([#167](https://github.com/ton-blockchain/intellij-ton/issues/167))
+
 ## [2.1.0]
 
 ### Added

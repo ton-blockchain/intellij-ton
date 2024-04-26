@@ -14,7 +14,7 @@ import org.ton.intellij.tact.psi.TactFile
 import org.ton.intellij.tact.stub.TactFileStub
 
 class TactParserDefinition : ParserDefinition {
-    override fun createLexer(project: Project) = FlexAdapter(org.ton.intellij.tact.parser._TactLexer())
+    override fun createLexer(project: Project) = TactLexer()
 
     override fun createParser(project: Project?) = TactParser()
 
@@ -28,3 +28,5 @@ class TactParserDefinition : ParserDefinition {
 
     override fun createFile(viewProvider: FileViewProvider) = TactFile(viewProvider)
 }
+
+class TactLexer : FlexAdapter(org.ton.intellij.tact.parser._TactLexer())

@@ -11,6 +11,7 @@ import org.ton.intellij.tact.psi.TactConstant
 import org.ton.intellij.tact.psi.TactElement
 import org.ton.intellij.tact.psi.TactElementTypes.IDENTIFIER
 import org.ton.intellij.tact.psi.TactField
+import org.ton.intellij.tact.psi.TactFieldExpression
 import org.ton.intellij.tact.psi.TactFunction
 
 class TactHighlightingAnnotator : Annotator {
@@ -40,7 +41,13 @@ class TactHighlightingAnnotator : Annotator {
     }
 
     fun colorFor(element: TactElement) = when (element) {
-//        is TactNativeFunction -> TactColor.FUNCTION_STATIC
+        is TactFieldExpression -> {
+            if (element.reference?.resolve() != null) {
+                TactColor.FIELD
+            } else {
+                null
+            }
+        }
         is TactFunction -> TactColor.FUNCTION_DECLARATION
         is TactField -> TactColor.FIELD
         is TactConstant -> TactColor.CONSTANT

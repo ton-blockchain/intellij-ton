@@ -10,17 +10,18 @@ class FuncFunctionCallInspection : FuncInspectionBase() {
         holder: ProblemsHolder,
         session: LocalInspectionToolSession,
     ) = object : FuncVisitor() {
-//        override fun visitSpecialApplyExpression(o: FuncSpecialApplyExpression) {
-//            super.visitSpecialApplyExpression(o)
-//            val function = o.left.reference?.resolve() as? FuncFunction ?: return
-//            holder.check(function, o.right ?: return, true)
-//        }
-//
-//        override fun visitApplyExpression(o: FuncApplyExpression) {
-//            super.visitApplyExpression(o)
-//            val function = o.left.reference?.resolve() as? FuncFunction ?: return
-//            holder.check(function, o.right ?: return, false)
-//        }
+        override fun visitSpecialApplyExpression(o: FuncSpecialApplyExpression) {
+            super.visitSpecialApplyExpression(o)
+            val function = o.left.reference?.resolve() as? FuncFunction ?: return
+            holder.check(function, o.right ?: return, true)
+        }
+
+        override fun visitApplyExpression(o: FuncApplyExpression) {
+            super.visitApplyExpression(o)
+            if (o.parent is FuncSpecialApplyExpression) return
+            val function = o.left.reference?.resolve() as? FuncFunction ?: return
+            holder.check(function, o.right ?: return, false)
+        }
     }
 
     private fun ProblemsHolder.check(function: FuncFunction, argument: FuncExpression, isMethodCall: Boolean) {

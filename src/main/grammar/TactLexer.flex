@@ -26,6 +26,11 @@ import static org.ton.intellij.tact.psi.TactElementTypes.*;
     * Dedicated nested-comment level counter
     */
   private int zzNestedCommentLevel = 0;
+
+  private int zzBlockDepth = 0;
+  private int zzParenDepth = 0;
+  private boolean zzStructScope = false;
+  private boolean zzContractScope = false;
 %}
 
 %{
@@ -55,6 +60,7 @@ import static org.ton.intellij.tact.psi.TactElementTypes.*;
 %type IElementType
 
 %s IN_BLOCK_COMMENT
+%s IN_NAME_ATTRIBUTE
 
 %unicode
 
@@ -62,20 +68,39 @@ EOL=\R
 WHITE_SPACE=\s+
 
 WHITE_SPACE=[ \t\n\x0B\f\r]+
-INTEGER_LITERAL=(0[xX][0-9a-fA-F][0-9a-fA-F_]*)|([0-9]+)
+NON_ZERO_DIGIT=[1-9]
+HEX_DIGIT=[0-9a-fA-F]
+DIGIT=[0-9]
+BIN_DIGIT=[01]
+OCT_DIGIT=[0-7]
+INTEGER_LITERAL_DEC = ({NON_ZERO_DIGIT}(_?{DIGIT})*) | 0{DIGIT}*
+INTEGER_LITERAL_HEX = 0[xX] {HEX_DIGIT} (_?{HEX_DIGIT})*
+INTEGER_LITERAL_BIN = 0[bB] {BIN_DIGIT} (_?{BIN_DIGIT})*
+INTEGER_LITERAL_OCT = 0[oO] {OCT_DIGIT} (_?{OCT_DIGIT})*
+INTEGER_LITERAL= {INTEGER_LITERAL_HEX} | {INTEGER_LITERAL_BIN} | {INTEGER_LITERAL_OCT} | {INTEGER_LITERAL_DEC}
 STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")
-IDENTIFIER=[:letter:]\w*
+IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_]*
+FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
 
 %%
 <YYINITIAL> {
   {WHITE_SPACE}           { return WHITE_SPACE; }
 
-  "{"                     { return LBRACE; }
-  "}"                     { return RBRACE; }
+  "/*"                    { yybegin(IN_BLOCK_COMMENT); yypushback(2); }
+  "//".*                  { return LINE_COMMENT; }
+
+  "{"                     { zzBlockDepth++; return LBRACE; }
+  "}"                     {
+          if (zzBlockDepth-- == 0) {
+              zzStructScope = false;
+              zzContractScope = false;
+          }
+          return RBRACE;
+      }
   "["                     { return LBRACK; }
   "]"                     { return RBRACK; }
-  "("                     { return LPAREN; }
-  ")"                     { return RPAREN; }
+  "("                     { zzParenDepth++; return LPAREN; }
+  ")"                     { zzParenDepth--; return RPAREN; }
   ":"                     { return COLON; }
   ";"                     { return SEMICOLON; }
   ","                     { return COMMA; }
@@ -93,6 +118,11 @@ IDENTIFIER=[:letter:]\w*
   "="                     { return EQ; }
   "?"                     { return Q; }
   "!"                     { return EXCL; }
+  "+="                    { return PLUSLET; }
+  "-="                    { return MINUSLET; }
+  "*="                    { return TIMESLET; }
+  "/="                    { return DIVLET; }
+  "%="                    { return MODLET; }
   "=="                    { return EQEQ; }
   "!="                    { return EXCLEQ; }
   ">="                    { return GTEQ; }
@@ -119,29 +149,27 @@ IDENTIFIER=[:letter:]\w*
   "const"                 { return CONST_KEYWORD; }
   "fun"                   { return FUN_KEYWORD; }
   "initOf"                { return INIT_OF_KEYWORD; }
-  "get"                   { return GET_KEYWORD; }
   "as"                    { return AS_KEYWORD; }
   "abstract"              { return ABSTRACT_KEYWORD; }
   "import"                { return IMPORT_KEYWORD; }
-  "struct"                { return STRUCT_KEYWORD; }
-  "message"               { return MESSAGE_KEYWORD; }
-  "contract"              { return CONTRACT_KEYWORD; }
+  "struct"                { zzStructScope = true; return STRUCT_KEYWORD; }
+  "message"               { return zzBlockDepth == 0 ? MESSAGE_KEYWORD : IDENTIFIER; }
+  "contract"              { zzContractScope = true; return CONTRACT_KEYWORD; }
   "trait"                 { return TRAIT_KEYWORD; }
   "with"                  { return WITH_KEYWORD; }
-  "init"                  { return INIT_KEYWORD; }
   "receive"               { return RECEIVE_KEYWORD; }
-  "bounced"               { return BOUNCED_KEYWORD; }
   "external"              { return EXTERNAL_KEYWORD; }
   "true"                  { return BOOLEAN_LITERAL; }
   "false"                 { return BOOLEAN_LITERAL; }
   "null"                  { return NULL_LITERAL; }
-  "intOf"                 { return INT_OF_KEYWORD; }
+  "primitive"             { return PRIMITIVE_KEYWORD; }
+  "self"                  { return SELF_KEYWORD; }
+  "map"                   { return MAP_KEYWORD; }
+  "bounced"               { return zzBlockDepth == 1 && zzContractScope ? BOUNCED_KEYWORD : IDENTIFIER; }
+  "init"                  { return zzBlockDepth == 1 && zzParenDepth == 0 ? INIT_KEYWORD : IDENTIFIER; }
+  "get"                   { return zzBlockDepth <= 1 ? GET_KEYWORD : IDENTIFIER; }
   "@interface"            { return INTERFACE_MACRO; }
-  "@name"                 { return NAME_MACRO; }
-
-  "/*"                    { yybegin(IN_BLOCK_COMMENT); yypushback(2); }
-  "////".*                { return LINE_COMMENT; }
-  "//".*                  { return LINE_COMMENT; }
+  "@name"                 { yybegin(IN_NAME_ATTRIBUTE); yypushback(5); }
 
   {INTEGER_LITERAL}       { return INTEGER_LITERAL; }
   {STRING_LITERAL}        { return STRING_LITERAL; }
@@ -160,6 +188,14 @@ IDENTIFIER=[:letter:]\w*
   <<EOF>> { zzNestedCommentLevel = 0; return imbueBlockComment(); }
 
   [^]     { }
+}
+
+<IN_NAME_ATTRIBUTE> {
+   "@name" { return NAME_MACRO; }
+   "("    { zzParenDepth++; return LPAREN; }
+   ")"    { zzParenDepth--; yybegin(YYINITIAL); return RPAREN; }
+   {FUNC_IDENTIFIER} { yybegin(YYINITIAL); return FUNC_IDENTIFIER; }
+   [^]    { yybegin(YYINITIAL); yypushback(1); }
 }
 
 [^] { return BAD_CHARACTER; }

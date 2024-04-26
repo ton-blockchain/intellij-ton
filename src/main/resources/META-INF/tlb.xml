@@ -20,7 +20,7 @@
                                  implementationClass="org.ton.intellij.tlb.ide.TlbFindUsagesProvider"/>
     </extensions>
     <actions>
-        <group id="ton.file.group">
+        <group id="ton.file.group.tlb">
             <action id="ton.tlb.GenerateFuncTlb" class="org.ton.intellij.tlb.ide.actions.GenerateFuncTlbAction"
                     text="Generate FunC TL-B Parser">
                 <keyboard-shortcut first-keystroke="control shift G" keymap="$default"/>

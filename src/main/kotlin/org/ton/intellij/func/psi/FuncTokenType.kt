@@ -11,9 +11,9 @@ import org.ton.intellij.util.tokenSetOf
 
 open class FuncTokenType(val name: String) : IElementType(name, FuncLanguage)
 
-val FUNC_REGULAR_COMMENTS = tokenSetOf(BLOCK_COMMENT, EOL_COMMENT)
-val FUNC_DOC_COMMENTS = tokenSetOf(EOL_DOC_COMMENT, BLOCK_DOC_COMMENT)
-val FUNC_COMMENTS = TokenSet.orSet(FUNC_REGULAR_COMMENTS, FUNC_DOC_COMMENTS)
+val FUNC_REGULAR_COMMENTS get() = tokenSetOf(BLOCK_COMMENT, EOL_COMMENT)
+val FUNC_DOC_COMMENTS get() = tokenSetOf(EOL_DOC_COMMENT, BLOCK_DOC_COMMENT)
+val FUNC_COMMENTS get() = TokenSet.orSet(FUNC_REGULAR_COMMENTS, FUNC_DOC_COMMENTS)
 
 val FUNC_KEYWORDS = tokenSetOf(
     FuncElementTypes.RETURN_KEYWORD,

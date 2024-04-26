@@ -1,29 +1,56 @@
 <idea-plugin>
+    <resource-bundle>messages.TactBundle</resource-bundle>
+
     <extensions defaultExtensionNs="com.intellij">
-        <fileType name="tact"
+        <fileType name="Tact"
                   implementationClass="org.ton.intellij.tact.TactFileType"
                   fieldName="INSTANCE"
-                  language="tact"
+                  language="Tact"
                   extensions="tact"
         />
-        <lang.parserDefinition language="tact"
+        <lang.parserDefinition language="Tact"
                                implementationClass="org.ton.intellij.tact.parser.TactParserDefinition"/>
-        <lang.syntaxHighlighterFactory language="tact"
+        <lang.syntaxHighlighterFactory language="Tact"
                                        implementationClass="org.ton.intellij.tact.highlighting.TactSyntaxHighlighterFactory"/>
-        <lang.foldingBuilder language="tact"
+        <lang.foldingBuilder language="Tact"
                              implementationClass="org.ton.intellij.tact.TactFoldingBuilder"/>
 
-        <lang.commenter language="tact" implementationClass="org.ton.intellij.tact.TactCommenter"/>
-        <lang.braceMatcher language="tact"
+        <lang.commenter language="Tact" implementationClass="org.ton.intellij.tact.TactCommenter"/>
+        <lang.braceMatcher language="Tact"
                            implementationClass="org.ton.intellij.tact.TactBraceMatcher"/>
-        <lang.quoteHandler language="tact"
+        <lang.quoteHandler language="Tact"
                            implementationClass="org.ton.intellij.tact.TactQuoteHandler"/>
-        <lang.formatter language="tact"
+        <lang.formatter language="Tact"
                         implementationClass="org.ton.intellij.tact.formatter.TactFormattingModelBuilder"/>
 
+        <lang.findUsagesProvider language="Tact"
+                                 implementationClass="org.ton.intellij.tact.ide.TactFindUsagesProvider"/>
+
         <stubIndex implementation="org.ton.intellij.tact.stub.index.TactNamedElementIndex"/>
+        <stubIndex implementation="org.ton.intellij.tact.stub.index.TactTypesIndex"/>
+        <stubIndex implementation="org.ton.intellij.tact.stub.index.TactFunctionIndex"/>
+        <stubIndex implementation="org.ton.intellij.tact.stub.index.TactConstantIndex"/>
         <stubElementTypeHolder class="org.ton.intellij.tact.psi.TactElementTypes" externalIdPrefix="tact."/>
 
-        <annotator language="tact" implementationClass="org.ton.intellij.tact.annotator.TactHighlightingAnnotator"/>
+        <annotator language="Tact" implementationClass="org.ton.intellij.tact.annotator.TactHighlightingAnnotator"/>
+
+        <!-- Line Marker Providers -->
+        <codeInsight.lineMarkerProvider language="Tact"
+                                        implementationClass="org.ton.intellij.tact.linemarkers.TactImplLineMarkerProvider"/>
+
+        <localInspection language="Tact" groupKey="tact"
+                         enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tact.inspections.TactTypeCheckInspection"
+                         key="inspection.tact.type.check.display.name"/>
+        <localInspection language="Tact" groupKey="tact"
+                         enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tact.inspections.TactUnresolvedReferenceInspection"
+                         key="inspection.tact.unresolved.reference.display.name"/>
+
+        <additionalLibraryRootsProvider
+                implementation="org.ton.intellij.tact.project.TactAdditionalLibraryRootsProvider"/>
+
+        <completion.contributor language="Tact"
+                                implementationClass="org.ton.intellij.tact.ide.completion.TactCompletionContributor"/>
     </extensions>
 </idea-plugin>

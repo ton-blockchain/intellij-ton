@@ -109,6 +109,10 @@
         <!-- Completion -->
         <completion.contributor language="func"
                                 implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionContributor"/>
+
+        <!-- Code Style -->
+        <langCodeStyleSettingsProvider
+                implementation="org.ton.intellij.func.ide.formatter.FuncLanguageCodeStyleSettingsProvider"/>
     </extensions>
 
     <actions>
@@ -116,5 +120,14 @@
                 text="FunC File" description="Create new FunC file">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewXml"/>
         </action>
+        <group id="ton.file.group.func">
+            <action id="ton.func.ToCamelCase" class="org.ton.intellij.func.action.file.FuncToCamelCaseAction"
+                    text="Convert to CamelCase FunC">
+                <keyboard-shortcut first-keystroke="control shift K" keymap="$default"/>
+            </action>
+            <add-to-group group-id="ToolsMenu" anchor="before" relative-to-action="ExternalToolsGroup"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+        </group>
     </actions>
 </idea-plugin>

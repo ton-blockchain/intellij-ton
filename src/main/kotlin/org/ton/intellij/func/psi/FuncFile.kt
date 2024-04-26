@@ -4,12 +4,8 @@ import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.FileViewProvider
-import com.intellij.psi.PsiElement
-import com.intellij.psi.stubs.StubElement
-import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
-import com.intellij.util.ArrayFactory
 import org.ton.intellij.func.FuncFileType
 import org.ton.intellij.func.FuncLanguage
 import org.ton.intellij.func.stub.FuncFileStub
@@ -17,6 +13,7 @@ import org.ton.intellij.func.stub.type.FuncConstVarStubElementType
 import org.ton.intellij.func.stub.type.FuncFunctionStubElementType
 import org.ton.intellij.func.stub.type.FuncGlobalVarStubElementType
 import org.ton.intellij.func.stub.type.FuncIncludeDefinitionStubElementType
+import org.ton.intellij.util.getChildrenByType
 import org.ton.intellij.util.recursionGuard
 
 //private fun processFile(context: FuncElement, file: FuncFile) {
@@ -151,11 +148,3 @@ private val INCLUDE_COMPARE: Comparator<FuncIncludeDefinition> =
             it.stringLiteral?.rawString?.text?.lowercase()
         }
     )
-
-private fun <E : PsiElement> getChildrenByType(
-    stub: StubElement<out PsiElement>,
-    elementType: IElementType,
-    f: ArrayFactory<E?>,
-): List<E> {
-    return stub.getChildrenByType(elementType, f).toList() as List<E>
-}

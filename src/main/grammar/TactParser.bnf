@@ -17,6 +17,8 @@
     extends(".*Type")=Type
     extends(".*Expression")=Expression
     extends(".*Statement")=Statement
+    elementType(".+BinExpression") = BinExpression
+    elementType(".+BinOp") = BinOp
 
     generateTokenAccessors=true
 
@@ -55,6 +57,11 @@
         OROR                = '||'
         ANDAND              = '&&'
         EXCLEXCL            = '!!'
+        PLUSLET             = '+='
+        MINUSLET            = '-='
+        TIMESLET            = '*='
+        DIVLET              = '/='
+        MODLET              = '%='
 
         IF_KEYWORD          = 'if'
         ELSE_KEYWORD        = 'else'
@@ -73,9 +80,10 @@
         CONST_KEYWORD       = 'const'
         FUN_KEYWORD         = 'fun'
         INIT_OF_KEYWORD     = 'initOf'
-        GET_KEYWORD         = 'get'
         AS_KEYWORD          = 'as'
         ABSTRACT_KEYWORD    = 'abstract'
+        PRIMITIVE_KEYWORD   = 'primitive'
+        MAP_KEYWORD         = 'map'
 
         IMPORT_KEYWORD      = 'import'
         STRUCT_KEYWORD      = 'struct'
@@ -85,10 +93,10 @@
         WITH_KEYWORD        = 'with'
         INIT_KEYWORD        = 'init'
         RECEIVE_KEYWORD     = 'receive'
-        BOUNCED_KEYWORD     = 'bounced'
         EXTERNAL_KEYWORD    = 'external'
-
-        INT_OF_KEYWORD      = 'intOf'
+        GET_KEYWORD         = 'get'
+        SELF_KEYWORD        = 'self'
+        BOUNCED_KEYWORD     = 'bounced'
 
         INTERFACE_MACRO     = '@interface'
         NAME_MACRO          = '@name'
@@ -99,28 +107,51 @@
         BOOLEAN_LITERAL     = 'regexp:(true|false)'
         NULL_LITERAL        = 'null'
         IDENTIFIER          = 'regexp:\p{Alpha}\w*'
+        FUNC_IDENTIFIER     = 'regexp:\p{Alpha}\w*'
         BLOCK_COMMENT       = 'regexp:/\*(\*(?!/)|[^*])*\*/'
         LINE_COMMENT        = 'regexp://(.*)'
     ]
 }
 
-File ::= RootItem_with_recover*
-private RootItem ::= Import | Struct | Message | Contract | Trait | Function | Constant
-private RootItem_with_recover ::= !<<eof>> RootItem {
+File ::= ProgramItem_with_recover*
+private ProgramItem ::= Struct
+                      | Message
+                      | Contract
+                      | Primitive
+                      | Function
+                      | Import
+                      | Trait
+                      | Constant
+private ProgramItem_with_recover ::= !<<eof>> ProgramItem {
     pin=1
-    recoverWhile=RootItem_recover
+//    recoverWhile=RootItem_recover
 }
 private RootItem_recover ::= !Item_first
 
-private Item_first ::= 'import' | 'struct' | 'message' | '@interface' | 'contract' | 'trait' | 'get' | 'mutates' | 'extends' | 'virtual' | 'override' | 'inline' | 'abstract' | 'fun' | '@name' | 'native' | 'const' | 'init' | 'receive' | 'bounced' | 'external'
+private Item_first ::= 'import' | 'struct' | 'message' | '@interface' | 'contract' | 'trait' | 'get' | 'mutates' | 'extends' | 'virtual' | 'override' | 'inline' | 'abstract' | 'fun' | '@name' | 'native' | 'const' | 'receive' | 'bounced' | 'external'
 
 Import ::= 'import' STRING_LITERAL ';' {pin=1}
 
+Primitive ::= 'primitive' IDENTIFIER !'?' ';' {
+    pin=2
+    implements = [
+        "org.ton.intellij.tact.psi.TactNameIdentifierOwner"
+        "org.ton.intellij.tact.psi.TactTypeDeclarationElement"
+    ]
+    mixin = "org.ton.intellij.tact.psi.impl.TactPrimitiveImplMixin"
+    stubClass = "org.ton.intellij.tact.stub.TactPrimitiveStub"
+    elementTypeFactory = "org.ton.intellij.tact.stub.TactStubKt.factory"
+}
+
 // Type
 Type ::= BouncedType | MapType | ReferencedType
-ReferencedType ::= IDENTIFIER
+ReferencedType ::= IDENTIFIER '?'? {
+    pin=1
+    mixin = "org.ton.intellij.tact.psi.impl.TactReferencedTypeImplMixin"
+}
+
 BouncedType ::= 'bounced' '<' <<comma_separated_list ReferencedType>> '>' {pin=1}
-MapType ::= "map" '<' MapTypeItem ',' MapTypeItem '>' {
+MapType ::= 'map' '<' MapTypeItem ',' MapTypeItem '>' {
     pin=1
 }
 MapTypeItem ::= ReferencedType As? {
@@ -131,8 +162,14 @@ As ::= 'as' IDENTIFIER {
 }
 
 // Field
-Field ::= IDENTIFIER ':' Type As? Assigment? ';' {
+Field ::= IDENTIFIER TypeAscription As? Assigment? ';' {
     pin=1
+    implements = [
+        "org.ton.intellij.tact.psi.TactNameIdentifierOwner"
+    ]
+    mixin = "org.ton.intellij.tact.psi.impl.TactFieldImplMixin"
+    stubClass = "org.ton.intellij.tact.stub.TactFieldStub"
+    elementTypeFactory = "org.ton.intellij.tact.stub.TactStubKt.factory"
 }
 private Assigment ::= '=' Expression {
     pin = 1
@@ -140,13 +177,39 @@ private Assigment ::= '=' Expression {
 
 // Constant
 ConstantAttribute ::= 'virtual' | 'override' | 'abstract'
-Constant ::= ConstantAttribute* !'fun' 'const' IDENTIFIER ':' Type Assigment? ';' {
-    pin = 3
+Constant ::= ConstantAttribute* !'fun' 'const' IDENTIFIER TypeAscription Assigment? ';' {
+    pin = 4
+    implements = [
+        "org.ton.intellij.tact.psi.TactNameIdentifierOwner"
+        "org.ton.intellij.tact.psi.TactAbstractable"
+    ]
+    mixin = "org.ton.intellij.tact.psi.impl.TactConstantImplMixin"
+    stubClass = "org.ton.intellij.tact.stub.TactConstantStub"
+    elementTypeFactory = "org.ton.intellij.tact.stub.TactStubKt.factory"
 }
 
 // Struct
-Struct ::= 'struct' IDENTIFIER BlockFields {pin=1}
-Message ::= 'message' MessageId? IDENTIFIER BlockFields {pin=1}
+Struct ::= 'struct' IDENTIFIER BlockFields {
+    pin = 2
+    implements = [
+        "org.ton.intellij.tact.psi.TactNameIdentifierOwner"
+        "org.ton.intellij.tact.psi.TactTypeDeclarationElement"
+    ]
+    mixin = "org.ton.intellij.tact.psi.impl.TactStructImplMixin"
+    stubClass = "org.ton.intellij.tact.stub.TactStructStub"
+    elementTypeFactory = "org.ton.intellij.tact.stub.TactStubKt.factory"
+}
+
+Message ::= 'message' MessageId? IDENTIFIER BlockFields {
+    pin = 1
+    implements = [
+        "org.ton.intellij.tact.psi.TactNameIdentifierOwner"
+        "org.ton.intellij.tact.psi.TactTypeDeclarationElement"
+    ]
+    mixin = "org.ton.intellij.tact.psi.impl.TactMessageImplMixin"
+    stubClass = "org.ton.intellij.tact.stub.TactMessageStub"
+    elementTypeFactory = "org.ton.intellij.tact.stub.TactStubKt.factory"
+}
 MessageId ::= '(' INTEGER_LITERAL ')' {
     pin=1
 }
@@ -156,11 +219,18 @@ BlockFields ::= '{' Field* '}' {pin=1}
 WithClause ::= 'with' <<comma_separated_list Type>> {pin=1}
 Contract ::= ContractAttribute* 'contract' IDENTIFIER WithClause? ContractBody {
     pin = 2
+    implements = [
+        "org.ton.intellij.tact.psi.TactNameIdentifierOwner"
+        "org.ton.intellij.tact.psi.TactTypeDeclarationElement"
+    ]
+    mixin = "org.ton.intellij.tact.psi.impl.TactContractImplMixin"
+    stubClass = "org.ton.intellij.tact.stub.TactContractStub"
+    elementTypeFactory = "org.ton.intellij.tact.stub.TactStubKt.factory"
 }
 ContractBody ::= '{' ContractItem_with_recover* '}' {pin=1}
 private ContractItem_with_recover ::= !('}' | <<eof>>) ContractItem {
     pin=1
-    recoverWhile=ContractItem_recover
+//    recoverWhile=ContractItem_recover
 }
 private ContractItem_recover ::= !('}' | Item_first | IDENTIFIER)
 private ContractItem ::= Field
@@ -174,12 +244,25 @@ private ContractItem ::= Field
 ContractAttribute ::= '@interface' StringId {pin=1}
 ContractInit ::= 'init' FunctionParameters Block {
     pin=1
+    implements=[
+        "org.ton.intellij.tact.psi.TactFunctionLike"
+    ]
+    mixin = "org.ton.intellij.tact.psi.impl.TactContractInitImplMixin"
 }
 
 // Trait
-Trait ::= ContractAttribute* 'trait' IDENTIFIER WithClause? TraitBody
+Trait ::= ContractAttribute* 'trait' IDENTIFIER WithClause? TraitBody {
+    pin = 2
+    implements = [
+        "org.ton.intellij.tact.psi.TactNameIdentifierOwner"
+        "org.ton.intellij.tact.psi.TactTypeDeclarationElement"
+    ]
+    mixin = "org.ton.intellij.tact.psi.impl.TactTraitImplMixin"
+    stubClass = "org.ton.intellij.tact.stub.TactTraitStub"
+    elementTypeFactory = "org.ton.intellij.tact.stub.TactStubKt.factory"
+}
 TraitBody ::= '{' TraitItem* '}' {
-    pin=1
+    pin = 1
 }
 private TraitItem ::= Field
             | Constant
@@ -189,45 +272,68 @@ private TraitItem ::= Field
             | Function
 
 // Function
-FunctionAttribute ::= 'get' | 'mutates' | 'extends' | 'virtual' | 'override' | 'inline' | 'abstract'
-Function ::= (NativeFunctionHead | FunctionAttribute*) 'fun' IDENTIFIER FunctionParameters FunctionType? FunctionBody {
-    pin = 3
+FunctionAttribute ::= "get" | 'mutates' | 'extends' | 'virtual' | 'override' | 'inline' | 'abstract'
+Function ::= (NativeFunctionHead | FunctionAttribute*) (!'native' 'fun')? IDENTIFIER FunctionParameters TypeAscription? FunctionBody {
     implements = [
         "org.ton.intellij.tact.psi.TactNameIdentifierOwner"
+        "org.ton.intellij.tact.psi.TactInferenceContextOwner"
+        "org.ton.intellij.tact.psi.TactFunctionLike"
+        "org.ton.intellij.tact.psi.TactAbstractable"
     ]
-//    extends = "org.ton.intellij.tact.psi.TactStubbedElementImpl<?>"
-    mixin = "org.ton.intellij.tact.psi.TactFunctionImplMixin"
+    mixin = "org.ton.intellij.tact.psi.impl.TactFunctionImplMixin"
     stubClass = "org.ton.intellij.tact.stub.TactFunctionStub"
     elementTypeFactory = "org.ton.intellij.tact.stub.TactStubKt.factory"
+    pin=3
 }
 private NativeFunctionHead ::= NameAttribute FunctionAttribute* 'native' {
+//    pin=2
+}
+
+NameAttribute ::= '@name' '(' FUNC_IDENTIFIER ')' {
     pin=1
 }
-NameAttribute ::= '@name' FunctionId
-FunctionId ::= '(' IDENTIFIER ')' {pin=2}
 
-FunctionParameters ::= '(' [ <<comma_separated_list FunctionParameter>> ] ')' {pin=1}
-FunctionParameter ::= IDENTIFIER ':' Type {pin=1}
-private FunctionType ::= ':' Type { pin = 1 }
+FunctionParameters ::= '(' [ (SelfParameter ',' <<comma_separated_list FunctionParameter>>) | (SelfParameter) | <<comma_separated_list FunctionParameter>> ] ')' {pin=1}
+FunctionParameter ::= IDENTIFIER TypeAscription {
+    pin=1
+    implements=[
+        "org.ton.intellij.tact.psi.TactNamedElement"
+    ]
+    mixin="org.ton.intellij.tact.psi.impl.TactFunctionParameterImplMixin"
+}
+SelfParameter ::= 'self' TypeAscription {pin=1}
+
 private FunctionBody ::= ';' | Block
 
 ReceiveFunction ::= 'receive' (StringId|FunctionParameters) Block {
     pin=1
+    implements=[
+        "org.ton.intellij.tact.psi.TactFunctionLike"
+    ]
+    mixin="org.ton.intellij.tact.psi.impl.TactReceiveFunctionImplMixin"
 }
 BouncedFunction ::= 'bounced' FunctionParameters Block {
     pin=1
+    implements=[
+        "org.ton.intellij.tact.psi.TactFunctionLike"
+    ]
+    mixin="org.ton.intellij.tact.psi.impl.TactBouncedFunctionImplMixin"
 }
 ExternalFunction ::= 'external' (StringId|FunctionParameters) Block {
     pin=1
+    implements=[
+        "org.ton.intellij.tact.psi.TactFunctionLike"
+    ]
+    mixin="org.ton.intellij.tact.psi.impl.TactExternalFunctionImplMixin"
 }
 StringId ::= '(' STRING_LITERAL ')' {pin=2}
 
 // Statements
-Statement ::= LetStatement
+Statement ::= AssignStatement
+            | LetStatement
             | BlockStatement
             | ReturnStatement
             | ExpressionStatement
-            | AssignStatement
             | ConditionStatement
             | WhileStatement
             | RepeatStatement
@@ -240,20 +346,37 @@ private Statement_first ::= 'let' | '{' | 'return' | Expression_first | 'if' | '
 Block ::= '{' BlockItem* '}' {pin=1}
 private BlockItem ::= !'}' Statement {
     pin=1
-    recoverWhile=BlockItem_recover
+//    recoverWhile=BlockItem_recover
 }
 private BlockItem_recover ::= !('}' | Statement_first | Item_first | ';')
 
-LetStatement ::= 'let' IDENTIFIER ':' Type '=' Expression ';' {
+LetStatement ::= 'let' IDENTIFIER TypeAscription '=' Expression ';' {
     pin = 1
     rightAssociative=true
+    implements=[
+        "org.ton.intellij.tact.psi.TactNamedElement"
+    ]
+        mixin="org.ton.intellij.tact.psi.impl.TactLetStatementImplMixin"
 }
+private TypeAscription ::= ':' Type {
+    pin = 1
+}
+
 BlockStatement ::= Block
-ReturnStatement ::= 'return' Expression ';' { pin = 1 }
-ExpressionStatement ::= Expression ';'
-AssignStatement ::= LValue ('='|'+='|'-='|'*='|'/='|'%=') Expression ';'
-ConditionStatement ::= 'if' Condition Block ConditionElse? {pin=1}
-ConditionElse ::= 'else' (Block | ConditionStatement) {pin=1}
+ReturnStatement ::= 'return' Expression? ';' { pin = 1 }
+ExpressionStatement ::= Expression ';' {
+    pin=1
+}
+AssignStatement ::= Expression AssignBinOp Expression ';' {
+    rightAssociative = true
+}
+
+AssignBinOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '%=' {
+    name = "operator"
+}
+
+ConditionStatement ::= 'if' Condition Block ElseBranch? {pin=1}
+ElseBranch ::= 'else' (Block | ConditionStatement) {pin=1}
 WhileStatement ::= 'while' Condition Block {pin=1}
 RepeatStatement ::= 'repeat' Condition Block {pin=1}
 UntilStatement ::= 'do' Block 'until' Condition ';' {pin=1}
@@ -262,29 +385,29 @@ Condition ::= '(' Expression ')' {
     pin=1
 }
 
-private LValue ::= IDENTIFIER '.' LValue
-                 | IDENTIFIER
-
 // Expressions
 Expression ::= TernaryExpression
-             | OrExpression
-             | AndExpression
-             | CompareExpression
-             | BinaryExpression
-             | AddExpression
-             | MulExpression
+             | BoolOrBinExpression
+             | BoolAndBinExpression
+             | CompBinExpression
+             | RelCompBinExpression
+             | BitShiftBinExpression
+             | BitAndBinExpression
+             | BitOrBinExpression
+             | AddBinExpression
+             | MulBinExpression
              | UnaryExpression
              | NotNullExpression
-             | CallExpression
-             | FieldExpression
-             | StaticCallExpression
+             | DotExpression
              | ParenExpression
              | StructExpression
              | IntegerExpression
              | BooleanExpression
-             | ReferenceExpression
+             | CallExpression
+             | ReferenceExpression !'('
              | NullExpression
-             | IntOfExpression
+             | SelfExpression
+             | InitOfExpression
              | StringExpression {
 //    extends = 'org.ton.intellij.tact.psi.TactStubbedElementImpl<?>'
 //    stubClass = "com.intellij.psi.stubs.StubBase<?>"
@@ -299,37 +422,84 @@ TernaryExpression ::= Expression '?' Expression ':' Expression {
         elseBranch="/Expression[2]"
     ]
 }
-OrExpression ::= Expression '||' Expression
-AndExpression ::= Expression '&&' Expression
-CompareExpression ::= Expression ('!='|'=='|'>'|'>='|'<'|'<=') Expression
-BinaryExpression ::= Expression ('>>'|'<<'|'&'|'|') Expression
-AddExpression ::= Expression (('+' !'+') | ('-' !'-')) Expression
-MulExpression ::= Expression ('*'|'/'|'%') Expression
+
+fake BinExpression ::= Expression BinOp Expression {
+    methods=[
+        left="/Expression[0]"
+        right="/Expression[1]"
+    ]
+}
+fake BinOp ::= '||' | '&&'
+    | '!=' | '=='
+    | '>' | '>=' | '<' | '<='
+    | '>>' | '<<'
+    | '&' | '|'
+    | '+' | '-'
+    | '*' | '/' | '%'
+
+BoolOrBinExpression ::= Expression BoolOrBinOp Expression
+BoolAndBinExpression ::= Expression BoolAndBinOp Expression
+CompBinExpression ::= Expression CompBinOp Expression
+RelCompBinExpression ::= Expression RelCompBinOp Expression
+BitShiftBinExpression ::= Expression BitShiftBinOp Expression
+BitAndBinExpression ::= Expression BitAndBinOp Expression
+BitOrBinExpression ::= Expression BitOrBinOp Expression
+AddBinExpression ::= Expression AddBinOp Expression
+MulBinExpression ::= Expression MulBinOp Expression
+
+BoolOrBinOp ::= '||' { name = "operator" }
+BoolAndBinOp ::= '&&' { name = "operator" }
+CompBinOp ::= '==' | '!=' { name = "operator" }
+RelCompBinOp ::= '>' | '>=' | '<' | '<=' { name = "operator" }
+BitShiftBinOp ::= '>>' | '<<' { name = "operator" }
+BitAndBinOp ::= '&' { name = "operator" }
+BitOrBinOp ::= '|' { name = "operator" }
+AddBinOp ::= ('+'  !'+') | ('-' !'-') { name = "operator" }
+MulBinOp ::= '*' | '/' | '%' { name = "operator" }
+
 UnaryExpression ::= ('-'|'+'|'!') Expression
 NotNullExpression ::= Expression '!!'
 
-CallExpression ::= Expression '.' IDENTIFIER '(' [<<comma_separated_list Expression>>] ')'
-FieldExpression ::= Expression '.' IDENTIFIER !'('
+DotExpression ::= Expression '.' CallOrField
+private CallOrField ::= () (CallExpression | FieldExpression) {
+    pin=1
+}
+CallExpression ::= IDENTIFIER '(' [<<comma_separated_list Expression>>] ')' {
+    pin=2
+    mixin="org.ton.intellij.tact.psi.impl.TactCallExpressionImplMixin"
+}
+FieldExpression ::= IDENTIFIER !'(' {
+    pin=2
+    mixin="org.ton.intellij.tact.psi.impl.TactFieldExpressionImplMixin"
+}
+
 StaticCallExpression ::= IDENTIFIER '(' [<<comma_separated_list Expression>>] ')'
 ParenExpression ::= '(' ParenExpressionItem ')' {pin=1}
 private ParenExpressionItem ::= Expression
 
 StructExpression ::= IDENTIFIER '{' [<<comma_separated_list StructExpressionField_with_recover>>] '}' {
     pin=2
+    mixin = "org.ton.intellij.tact.psi.impl.TactStructExpressionImplMixin"
 }
 StructExpressionField ::= IDENTIFIER ':' Expression {pin=1}
 private StructExpressionField_with_recover ::= !('}') StructExpressionField {
     pin=1
-    recoverWhile=StructExpressionField_recover
+//    recoverWhile=StructExpressionField_recover
 }
 private StructExpressionField_recover ::= !(IDENTIFIER | ',' | '}')
 
 
 IntegerExpression ::= INTEGER_LITERAL
 BooleanExpression ::= BOOLEAN_LITERAL
-ReferenceExpression ::= IDENTIFIER
+ReferenceExpression ::= IDENTIFIER {
+    mixin = "org.ton.intellij.tact.psi.impl.TactReferenceExpressionImplMixin"
+}
 NullExpression ::= 'null'
-IntOfExpression ::= 'intOf' IDENTIFIER '(' [<<comma_separated_list Expression>>] ')' {pin=1}
+SelfExpression ::= 'self'
+InitOfExpression ::= 'initOf' IDENTIFIER '(' [<<comma_separated_list Expression>>] ')' {
+    pin = 1
+    mixin = "org.ton.intellij.tact.psi.impl.TactInitOfExpressionImplMixin"
+}
 StringExpression ::= STRING_LITERAL
 
 private meta comma_separated_list ::= <<param>> ( ',' <<param>> )*

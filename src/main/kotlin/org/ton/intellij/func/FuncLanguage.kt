@@ -5,4 +5,6 @@ import com.intellij.lang.Language
 
 object FuncLanguage : Language(
     "func", "func", "text/func", "text/x-func", "application/x-func"
-), InjectableLanguage
+), InjectableLanguage {
+    override fun isCaseSensitive(): Boolean = false
+}

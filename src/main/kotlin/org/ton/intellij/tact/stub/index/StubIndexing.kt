@@ -6,6 +6,7 @@ import org.ton.intellij.tact.stub.*
 fun IndexSink.indexFunction(stub: TactFunctionStub) {
     stub.name?.let {
         occurrence(TactNamedElementIndex.KEY, it)
+        occurrence(TactFunctionIndex.KEY, it)
     }
 }
 
@@ -53,5 +54,6 @@ fun IndexSink.indexField(stub: TactFieldStub) {
 fun IndexSink.indexConstant(stub: TactConstantStub) {
     stub.name?.let {
         occurrence(TactNamedElementIndex.KEY, it)
+        occurrence(TactConstantIndex.KEY, it)
     }
 }

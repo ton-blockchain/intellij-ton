@@ -68,7 +68,16 @@ EOL=\R
 WHITE_SPACE=\s+
 
 WHITE_SPACE=[ \t\n\x0B\f\r]+
-INTEGER_LITERAL=(0[xX][0-9a-fA-F][0-9a-fA-F_]*)|([0-9]+)
+NON_ZERO_DIGIT=[1-9]
+HEX_DIGIT=[0-9a-fA-F]
+DIGIT=[0-9]
+BIN_DIGIT=[01]
+OCT_DIGIT=[0-7]
+INTEGER_LITERAL_DEC = ({NON_ZERO_DIGIT}(_?{DIGIT})*) | 0{DIGIT}*
+INTEGER_LITERAL_HEX = 0[xX] {HEX_DIGIT} (_?{HEX_DIGIT})*
+INTEGER_LITERAL_BIN = 0[bB] {BIN_DIGIT} (_?{BIN_DIGIT})*
+INTEGER_LITERAL_OCT = 0[oO] {OCT_DIGIT} (_?{OCT_DIGIT})*
+INTEGER_LITERAL= {INTEGER_LITERAL_HEX} | {INTEGER_LITERAL_BIN} | {INTEGER_LITERAL_OCT} | {INTEGER_LITERAL_DEC}
 STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")
 IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_]*
 FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
@@ -109,6 +118,11 @@ FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
   "="                     { return EQ; }
   "?"                     { return Q; }
   "!"                     { return EXCL; }
+  "+="                    { return PLUSLET; }
+  "-="                    { return MINUSLET; }
+  "*="                    { return TIMESLET; }
+  "/="                    { return DIVLET; }
+  "%="                    { return MODLET; }
   "=="                    { return EQEQ; }
   "!="                    { return EXCLEQ; }
   ">="                    { return GTEQ; }
@@ -139,7 +153,7 @@ FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
   "abstract"              { return ABSTRACT_KEYWORD; }
   "import"                { return IMPORT_KEYWORD; }
   "struct"                { zzStructScope = true; return STRUCT_KEYWORD; }
-  "message"               { return MESSAGE_KEYWORD; }
+  "message"               { return zzBlockDepth == 0 ? MESSAGE_KEYWORD : IDENTIFIER; }
   "contract"              { zzContractScope = true; return CONTRACT_KEYWORD; }
   "trait"                 { return TRAIT_KEYWORD; }
   "with"                  { return WITH_KEYWORD; }

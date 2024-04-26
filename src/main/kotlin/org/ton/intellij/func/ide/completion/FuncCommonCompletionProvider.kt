@@ -191,7 +191,8 @@ fun FuncNamedElement.toLookupElementBuilder(
     context: FuncCompletionContext,
     isImported: Boolean
 ): LookupElement {
-    val contextText = context.context?.text ?: ""
+    val contextElement = context.context
+    val contextText = contextElement?.text ?: ""
     var name = this.name ?: ""
     if (this is FuncFunction) {
         name = when {
@@ -227,9 +228,11 @@ fun FuncNamedElement.toLookupElementBuilder(
                         val offset = if (
                             (isExtensionFunction && paramType is FuncTyAtomic) || paramType == FuncTyUnit
                         ) 2 else 1
-                        context.editor.document.insertString(context.editor.caretModel.offset, "()")
                         context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
-                        context.commitDocument()
+                        if (contextElement?.parent !is FuncApplyExpression) {
+                            context.editor.document.insertString(context.editor.caretModel.offset, "()")
+                            context.commitDocument()
+                        }
 
                         val insertFile = context.file as? FuncFile ?: return@withInsertHandler
                         val includeCandidateFile = file as? FuncFile ?: return@withInsertHandler

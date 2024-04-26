@@ -41,7 +41,7 @@ class TactFileStub(
     override fun getType() = Type
 
     object Type : IStubFileElementType<TactFileStub>(TactLanguage) {
-        private const val STUB_VERSION = 4
+        private const val STUB_VERSION = 7
 
         override fun getStubVersion(): Int = STUB_VERSION
 

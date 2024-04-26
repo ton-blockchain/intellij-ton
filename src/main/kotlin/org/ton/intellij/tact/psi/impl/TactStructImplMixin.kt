@@ -4,12 +4,14 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
+import org.ton.intellij.tact.TactIcons
 import org.ton.intellij.tact.psi.*
 import org.ton.intellij.tact.stub.TactFieldStub
 import org.ton.intellij.tact.stub.TactStructStub
 import org.ton.intellij.tact.type.TactTy
 import org.ton.intellij.tact.type.TactTyRef
 import org.ton.intellij.util.getChildrenByType
+import javax.swing.Icon
 
 abstract class TactStructImplMixin : TactNamedElementImpl<TactStructStub>, TactStruct {
     constructor(node: ASTNode) : super(node)
@@ -31,4 +33,6 @@ abstract class TactStructImplMixin : TactNamedElementImpl<TactStructStub>, TactS
 
     override val members: Sequence<TactNamedElement>
         get() = fields.asSequence()
+
+    override fun getIcon(flags: Int): Icon = TactIcons.STRUCT
 }

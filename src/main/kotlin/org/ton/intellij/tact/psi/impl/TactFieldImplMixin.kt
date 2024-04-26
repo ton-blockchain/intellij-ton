@@ -15,4 +15,8 @@ abstract class TactFieldImplMixin : TactNamedElementImpl<TactFieldStub>, TactFie
     override fun getReference(): PsiReference? {
         return super.getReference()
     }
+
+    override fun toString(): String {
+        return "TactField(name=$name)"
+    }
 }

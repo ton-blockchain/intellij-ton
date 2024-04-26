@@ -28,6 +28,8 @@
 
         <stubIndex implementation="org.ton.intellij.tact.stub.index.TactNamedElementIndex"/>
         <stubIndex implementation="org.ton.intellij.tact.stub.index.TactTypesIndex"/>
+        <stubIndex implementation="org.ton.intellij.tact.stub.index.TactFunctionIndex"/>
+        <stubIndex implementation="org.ton.intellij.tact.stub.index.TactConstantIndex"/>
         <stubElementTypeHolder class="org.ton.intellij.tact.psi.TactElementTypes" externalIdPrefix="tact."/>
 
         <annotator language="Tact" implementationClass="org.ton.intellij.tact.annotator.TactHighlightingAnnotator"/>
@@ -45,5 +47,10 @@
                          implementationClass="org.ton.intellij.tact.inspections.TactUnresolvedReferenceInspection"
                          key="inspection.tact.unresolved.reference.display.name"/>
 
+        <additionalLibraryRootsProvider
+                implementation="org.ton.intellij.tact.project.TactAdditionalLibraryRootsProvider"/>
+
+        <completion.contributor language="Tact"
+                                implementationClass="org.ton.intellij.tact.ide.completion.TactCompletionContributor"/>
     </extensions>
 </idea-plugin>

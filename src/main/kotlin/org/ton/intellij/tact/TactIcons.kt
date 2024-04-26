@@ -14,4 +14,9 @@ object TactIcons {
     val IMPLEMENTED_METHOD = AllIcons.Gutter.ImplementedMethod
     val IMPLEMENTING_METHOD = AllIcons.Gutter.ImplementingMethod
     val OVERRIDING_METHOD = AllIcons.Gutter.OverridingMethod
+    val CONTRACT = AllIcons.Nodes.Controller
+    val TRAIT = AllIcons.Nodes.Interface
+    val STRUCT = AllIcons.Nodes.Record
+    val MESSAGE = AllIcons.Nodes.Record
+    val PRIMITIVE = AllIcons.Nodes.Type
 }

@@ -21,6 +21,10 @@ abstract class TactFunctionImplMixin : TactNamedElementImpl<TactFunctionStub>, T
         get() = greenStub?.isAbstract ?: functionAttributeList.any { it.abstractKeyword != null }
 
     override fun getIcon(flags: Int): Icon = TactIcons.FUNCTION
+
+    override fun toString(): String {
+        return "TactFunction(name=$name)"
+    }
 }
 
 val TactFunction.isNative get() = greenStub?.isNative ?: (nativeKeyword != null)

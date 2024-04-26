@@ -4,6 +4,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
+import org.ton.intellij.tact.TactIcons
 import org.ton.intellij.tact.psi.*
 import org.ton.intellij.tact.stub.TactConstantStub
 import org.ton.intellij.tact.stub.TactContractStub
@@ -13,6 +14,7 @@ import org.ton.intellij.tact.type.TactTy
 import org.ton.intellij.tact.type.TactTyRef
 import org.ton.intellij.util.getChildrenByType
 import org.ton.intellij.util.recursionGuard
+import javax.swing.Icon
 
 abstract class TactContractImplMixin : TactNamedElementImpl<TactContractStub>, TactContract {
     constructor(node: ASTNode) : super(node)
@@ -78,4 +80,6 @@ abstract class TactContractImplMixin : TactNamedElementImpl<TactContractStub>, T
                 }
             }
         }, memoize = false) ?: emptySequence()
+
+    override fun getIcon(flags: Int): Icon = TactIcons.CONTRACT
 }

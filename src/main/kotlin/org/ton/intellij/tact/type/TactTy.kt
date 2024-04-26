@@ -1,13 +1,23 @@
 package org.ton.intellij.tact.type
 
+import com.intellij.openapi.project.Project
 import org.ton.intellij.tact.psi.TactReferencedType
 import org.ton.intellij.tact.psi.TactType
 import org.ton.intellij.tact.psi.TactTypeDeclarationElement
+import org.ton.intellij.tact.stub.index.TactTypesIndex
 
-sealed interface TactTy {
-    abstract override fun toString(): String
+interface TactTy {
+    override fun toString(): String
 
     fun isAssignable(other: TactTy): Boolean
+
+    companion object {
+        fun search(project: Project, name: String): List<TactTy> {
+            return TactTypesIndex.findElementsByName(project, name).map {
+                it.declaredTy
+            }
+        }
+    }
 }
 
 val TactType.ty: TactTy?
@@ -48,7 +58,7 @@ data class TactTyNullable(
     override fun toString(): String = "$inner?"
 
     override fun isAssignable(other: TactTy): Boolean {
-        return other is TactTyNullable && inner.isAssignable(other.inner)
+        return (other is TactTyNullable && inner.isAssignable(other.inner)) || inner.isAssignable(other)
     }
 }
 

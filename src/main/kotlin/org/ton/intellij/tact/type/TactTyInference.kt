@@ -4,15 +4,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementResolveResult
-import com.intellij.psi.util.CachedValue
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
-import com.intellij.psi.util.PsiModificationTracker
+import com.intellij.psi.util.*
 import com.intellij.util.containers.OrderedSet
 import org.ton.intellij.tact.diagnostics.TactDiagnostic
-import org.ton.intellij.tact.psi.TactExpression
-import org.ton.intellij.tact.psi.TactInferenceContextOwner
+import org.ton.intellij.tact.psi.*
+import org.ton.intellij.tact.stub.index.TactConstantIndex
+import org.ton.intellij.util.processAllKeys
 import org.ton.intellij.util.recursionGuard
+import java.util.*
 
 private val TACT_INFERENCE_KEY: Key<CachedValue<TactInferenceResult>> = Key.create("TACT_INFERENCE_KEY")
 
@@ -101,5 +100,40 @@ class TactInferenceContext(
             walker.walk(block)
         }
         return TactInferenceResult(exprTypes, resolvedRefs, diagnostics)
+    }
+
+    public fun collectVariableCandidates(element: TactReferenceExpression): Collection<TactNamedElement> {
+        val variableCandidates = LinkedList<TactNamedElement>()
+        PsiTreeUtil.treeWalkUp(element, null) { scope, prevParent ->
+            when (scope) {
+                is TactBlock -> {
+                    scope.statementList.forEach { stmt ->
+                        if (stmt == prevParent) return@forEach
+                        when (stmt) {
+                            is TactLetStatement -> {
+                                variableCandidates.add(stmt)
+                            }
+                        }
+                    }
+                }
+
+                is TactFunctionLike -> {
+                    scope.functionParameters?.functionParameterList?.forEach { param ->
+                        variableCandidates.add(param)
+                    }
+                    return@treeWalkUp false
+                }
+            }
+            true
+        }
+        processAllKeys(TactConstantIndex.KEY, element.project) { key ->
+            TactConstantIndex.findElementsByName(element.project, key).forEach {
+                if (it.parent is TactFile) {
+                    variableCandidates.add(it)
+                }
+            }
+            true
+        }
+        return variableCandidates
     }
 }

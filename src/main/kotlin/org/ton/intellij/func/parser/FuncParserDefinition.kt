@@ -58,7 +58,7 @@ class FuncParserDefinition : ParserDefinition {
         val WHITESPACES = TokenSet.create(TokenType.WHITE_SPACE)
         val STRING_LITERALS = TokenSet.create(FuncElementTypes.STRING_LITERAL)
 
-        val WHITE_SPACE_OR_COMMENT_BIT_SET = TokenSet.orSet(FUNC_COMMENTS, WHITESPACES);
+        val WHITE_SPACE_OR_COMMENT_BIT_SET = TokenSet.orSet(FUNC_COMMENTS, WHITESPACES)
         val OPERATORS = TokenSet.create(
             FuncElementTypes.PLUS,
             FuncElementTypes.MINUS,

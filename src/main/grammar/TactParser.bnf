@@ -57,6 +57,11 @@
         OROR                = '||'
         ANDAND              = '&&'
         EXCLEXCL            = '!!'
+        PLUSLET             = '+='
+        MINUSLET            = '-='
+        TIMESLET            = '*='
+        DIVLET              = '/='
+        MODLET              = '%='
 
         IF_KEYWORD          = 'if'
         ELSE_KEYWORD        = 'else'

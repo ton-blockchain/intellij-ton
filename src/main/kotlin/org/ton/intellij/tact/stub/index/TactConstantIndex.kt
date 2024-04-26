@@ -4,25 +4,25 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StringStubIndexExtension
 import com.intellij.psi.stubs.StubIndexKey
-import org.ton.intellij.tact.psi.TactTypeDeclarationElement
+import org.ton.intellij.tact.psi.TactConstant
 import org.ton.intellij.tact.stub.TactFileStub
 import org.ton.intellij.util.checkCommitIsNotInProgress
 import org.ton.intellij.util.getElements
 
-class TactTypesIndex : StringStubIndexExtension<TactTypeDeclarationElement>() {
+class TactConstantIndex : StringStubIndexExtension<TactConstant>() {
     override fun getVersion(): Int = TactFileStub.Type.stubVersion
 
-    override fun getKey(): StubIndexKey<String, TactTypeDeclarationElement> = KEY
+    override fun getKey(): StubIndexKey<String, TactConstant> = KEY
 
     companion object {
         val KEY =
-            StubIndexKey.createIndexKey<String, TactTypeDeclarationElement>("org.ton.intellij.tact.stub.index.TactTypesIndex")
+            StubIndexKey.createIndexKey<String, TactConstant>("org.ton.intellij.tact.stub.index.TactConstantIndex")
 
         fun findElementsByName(
             project: Project,
             target: String,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project)
-        ): Collection<TactTypeDeclarationElement> {
+        ): Collection<TactConstant> {
             checkCommitIsNotInProgress(project)
             return getElements(KEY, target, project, scope)
         }

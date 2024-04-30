@@ -61,7 +61,7 @@ class TactDotCompletionProvider : TactCompletionProvider() {
             if (function != null) {
                 result.addElement(
                     LookupElementBuilder.createWithIcon(function)
-                        .withTypeText(function.selfType?.toString() ?: "")
+                        .withTypeText(function.type?.ty?.toString() ?: "")
                         .withInsertHandler { context, item ->
                             context.editor.document.insertString(context.editor.caretModel.offset, "()")
                             context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + 2)

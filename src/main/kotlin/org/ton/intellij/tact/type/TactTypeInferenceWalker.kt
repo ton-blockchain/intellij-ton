@@ -6,6 +6,7 @@ import com.intellij.util.containers.OrderedSet
 import org.ton.intellij.tact.diagnostics.TactDiagnostic
 import org.ton.intellij.tact.psi.*
 import org.ton.intellij.tact.psi.impl.isGet
+import org.ton.intellij.tact.psi.impl.isStaticCall
 import org.ton.intellij.tact.psi.impl.ty
 import org.ton.intellij.tact.stub.index.TactFunctionIndex
 import org.ton.intellij.tact.stub.index.TactTypesIndex
@@ -60,15 +61,16 @@ class TactTypeInferenceWalker(
                 val lValueTy = lValue?.inferType()
                 val rValueTy = rValue?.inferType()
                 if (lValueTy != null && rValueTy != null && !lValueTy.isAssignable(rValueTy)) {
-                    ctx.reportTypeMismatch(this, lValueTy, rValueTy)
+                    ctx.reportTypeMismatch(rValue, lValueTy, rValueTy)
                 }
             }
 
             is TactExpressionStatement -> expression.inferType()
             is TactConditionStatement -> {
+                val condition = condition
                 val conditionTy = condition?.expression?.inferType()
                 if (conditionTy != null && (conditionTy !is TactTyRef || conditionTy.item.name != "Bool")) {
-                    ctx.reportTypeMismatch(this, object : TactTy {
+                    ctx.reportTypeMismatch(condition, object : TactTy {
                         override fun toString(): String = "Bool"
                         override fun isAssignable(other: TactTy): Boolean = false
                     }, conditionTy)
@@ -80,9 +82,10 @@ class TactTypeInferenceWalker(
 
             is TactReturnStatement -> expression?.inferType()
             is TactWhileStatement -> {
+                val condition = condition
                 val conditionTy = condition?.expression?.inferType()
                 if (conditionTy != null && (conditionTy !is TactTyRef || conditionTy.item.name != "Bool")) {
-                    ctx.reportTypeMismatch(this, object : TactTy {
+                    ctx.reportTypeMismatch(condition, object : TactTy {
                         override fun toString(): String = "Bool"
                         override fun isAssignable(other: TactTy): Boolean = false
                     }, conditionTy)
@@ -92,9 +95,10 @@ class TactTypeInferenceWalker(
 
             is TactUntilStatement -> {
                 block?.inferType()
+                val condition = condition
                 val conditionTy = condition?.expression?.inferType()
                 if (conditionTy != null && (conditionTy !is TactTyRef || conditionTy.item.name != "Bool")) {
-                    ctx.reportTypeMismatch(this, object : TactTy {
+                    ctx.reportTypeMismatch(condition, object : TactTy {
                         override fun toString(): String = "Bool"
                         override fun isAssignable(other: TactTy): Boolean = false
                     }, conditionTy)
@@ -102,9 +106,10 @@ class TactTypeInferenceWalker(
             }
 
             is TactRepeatStatement -> {
+                val condition = condition
                 val conditionTy = condition?.expression?.inferType()
                 if (conditionTy != null && (conditionTy !is TactTyRef || conditionTy.item.name != "Int")) {
-                    ctx.reportTypeMismatch(this, object : TactTy {
+                    ctx.reportTypeMismatch(condition, object : TactTy {
                         override fun toString(): String = "Int"
                         override fun isAssignable(other: TactTy): Boolean = false
                     }, conditionTy)
@@ -166,9 +171,45 @@ class TactTypeInferenceWalker(
     }
 
     private fun TactBinExpression.inferType(): TactTy? {
-        return expressionList.map {
-            it.inferType()
-        }.firstOrNull()
+        val expressions = expressionList
+        val operator = binOp
+        val left = expressions.getOrNull(0)
+        val right = expressions.getOrNull(1)
+        val leftTy = left?.inferType()
+        val rightTy = right?.inferType()
+
+        var binTy: TactTy? = null
+        var exprTy: TactTy? = null
+        when (operator.text) {
+            ">", ">=", "<", "<=" -> {
+                binTy = TactTy.search(project, "Bool").firstOrNull()
+                exprTy = TactTy.search(project, "Int").firstOrNull()
+            }
+
+            "==", "!=" -> {
+                binTy = TactTy.search(project, "Bool").firstOrNull()
+            }
+
+            "||", "&&" -> {
+                binTy = TactTy.search(project, "Bool").firstOrNull()
+                exprTy = binTy
+            }
+
+            ">>", "<<", "&", "|", "+", "-", "*", "/", "%" -> {
+                binTy = TactTy.search(project, "Int").firstOrNull()
+                exprTy = binTy
+            }
+        }
+        if (leftTy != null && rightTy != null && exprTy != null) {
+            if (!leftTy.isAssignable(exprTy)) {
+                ctx.reportTypeMismatch(this, exprTy, leftTy)
+            }
+            if (!rightTy.isAssignable(exprTy)) {
+                ctx.reportTypeMismatch(this, exprTy, rightTy)
+            }
+        }
+
+        return binTy
     }
 
     private fun TactSelfExpression.inferType(): TactTy? = getParentFunction()?.selfType
@@ -212,33 +253,61 @@ class TactTypeInferenceWalker(
             }
 
             is TactCallExpression -> {
-                var returnTy: TactTy? = null
-                if (leftType is TactTyRef) {
-                    val name = right.identifier.text
-
-                    val function = TactFunctionIndex.findElementsByName(project, name).find {
-                        it.selfType?.isAssignable(leftType) == true
-                    }
-
-                    if (function != null) {
-                        ctx.setResolvedRefs(right, OrderedSet(listOf(PsiElementResolveResult(function))))
-                        returnTy = function.type?.ty
-                    } else {
-                        val members = leftType.item.members.toList()
-                        val resolvedFunction = members.find { it.name == name } as? TactFunction
-                        if (resolvedFunction != null) {
-                            ctx.setResolvedRefs(right, OrderedSet(listOf(PsiElementResolveResult(resolvedFunction))))
-                            returnTy = resolvedFunction.type?.ty
-                        }
-                    }
-                }
                 right.expressionList.forEach {
                     it.inferType()
                 }
-                return returnTy
+                when (leftType) {
+                    is TactTyRef -> {
+                        val name = right.identifier.text
+
+                        if (name == "toCell" && (leftType.item is TactStruct || leftType.item is TactMessage)) {
+                            return TactTy.search(project, "Cell").firstOrNull()
+                        }
+
+                        val function = TactFunctionIndex.findElementsByName(project, name).find {
+                            it.selfType?.isAssignable(leftType) == true
+                        }
+
+                        if (function != null) {
+                            ctx.setResolvedRefs(right, OrderedSet(listOf(PsiElementResolveResult(function))))
+                            return function.type?.ty
+                        } else {
+                            val members = leftType.item.members.toList()
+                            val resolvedFunction = members.find { it.name == name } as? TactFunction
+                            if (resolvedFunction != null) {
+                                ctx.setResolvedRefs(
+                                    right,
+                                    OrderedSet(listOf(PsiElementResolveResult(resolvedFunction)))
+                                )
+                                return resolvedFunction.type?.ty
+                            }
+                        }
+                    }
+
+                    is TactTyMap -> {
+                        val name = right.identifier.text
+                        when (name) {
+                            "set" -> {
+                                return TactTyVoid
+                            }
+
+                            "get" -> {
+                                return leftType.value.let {
+                                    if (it is TactTyNullable) it
+                                    else TactTyNullable(it)
+                                }
+                            }
+
+                            "asCell" -> {
+                                return TactTy.search(project, "Cell").firstOrNull()?.let {
+                                    TactTyNullable(it)
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
-
         return null
     }
 
@@ -259,6 +328,20 @@ class TactTypeInferenceWalker(
         expressionList.forEach { it.inferType() }
 
         val name = identifier.text
+
+        if (isStaticCall()) {
+            when (name) {
+                "ton" -> return TactTy.search(project, "Int").firstOrNull()
+                "pow" -> return TactTy.search(project, "Int").firstOrNull()
+                "require" -> return TactTyVoid
+                "address" -> return TactTy.search(project, "Address").firstOrNull()
+                "cell" -> return TactTy.search(project, "Cell").firstOrNull()
+                "dump" -> return TactTyVoid
+                "emptyMap" -> return TactTyNull
+                "sha256" -> return TactTy.search(project, "Int").firstOrNull()
+            }
+        }
+
         var candidates = TactFunctionIndex.findElementsByName(project, name)
         if (candidates.isNotEmpty()) {
             if (candidates.size > 1) {

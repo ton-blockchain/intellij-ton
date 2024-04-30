@@ -1,4 +1,5 @@
 import org.gradle.configurationcache.extensions.capitalized
+import org.jetbrains.changelog.Changelog
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -113,9 +114,9 @@ tasks {
         sinceBuild.set("231")
         untilBuild.set("")
         changeNotes.set(provider {
-            changelog.run {
+            changelog.renderItem(changelog.run {
                 getLatest()
-            }.toHTML()
+            }, Changelog.OutputType.HTML)
         })
     }
     buildSearchableOptions {

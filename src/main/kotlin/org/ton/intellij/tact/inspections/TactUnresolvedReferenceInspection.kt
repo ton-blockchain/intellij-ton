@@ -11,12 +11,12 @@ import org.ton.intellij.tact.psi.TactVisitor
 class TactUnresolvedReferenceInspection : TactLocalInspectionTool() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor = object : TactVisitor() {
         override fun visitReferenceExpression(o: TactReferenceExpression) {
-            val reference = o.reference ?: return holder.registerProblem(o)
+            val reference = o.reference ?: return
             reference.resolve() ?: return holder.registerProblem(o)
         }
 
         override fun visitCallExpression(o: TactCallExpression) {
-            val reference = o.reference ?: return holder.registerProblem(o)
+            val reference = o.reference ?: return
             reference.resolve() ?: return holder.registerProblem(o)
         }
     }

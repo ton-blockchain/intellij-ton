@@ -11,12 +11,10 @@ class TactTypeReference<T : TactElement>(element: T, range: TextRange) : TactRef
     override fun multiResolve(): Collection<TactTypeDeclarationElement> {
         val currentFile = element.containingFile
         val result = TactTypesIndex.findElementsByName(element.project, value)
-        val localType = result.asSequence()
-            .filterIsInstance<TactTypeDeclarationElement>()
-            .find { it.containingFile == currentFile }
+        val localType = result.find { it.containingFile == currentFile }
         if (localType != null) {
             return listOf(localType)
         }
-        return listOf(result.firstOrNull() as? TactTypeDeclarationElement ?: return emptyList())
+        return listOf(result.firstOrNull() ?: return emptyList())
     }
 }

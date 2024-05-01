@@ -69,7 +69,7 @@ data class TactTyMap(
     override fun toString(): String = "map<$key, $value>"
 
     override fun isAssignable(other: TactTy): Boolean {
-        return other is TactTyMap && key.isAssignable(other.key) && value.isAssignable(other.value)
+        return other is TactTyNull || (other is TactTyMap && key.isAssignable(other.key) && value.isAssignable(other.value))
     }
 }
 

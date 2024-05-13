@@ -130,6 +130,15 @@ class FuncTypeInferenceWalker(
 
     private fun FuncTryStatement.inferType(): FuncTy {
         blockStatement?.inferType()
+
+        (catch?.expression as? FuncTensorExpression)?.let { tensor ->
+            tensor.expressionList.forEach { tensorElement ->
+                if (tensorElement is FuncReferenceExpression) {
+                    ctx.lookup.define(tensorElement)
+                }
+            }
+        }
+
         catch?.expression?.inferType(
             FuncTyTensor(
                 FuncTyVar(),

@@ -53,6 +53,9 @@ fun FuncReferenceExpression.isVariableDefinition(): Boolean = CachedValuesManage
                 return@treeWalkUp false
             }
         }
+        if (scope is FuncCatch && scope.expression == lastParent) {
+            return@treeWalkUp false
+        }
         true
     }
     Result(result, this)

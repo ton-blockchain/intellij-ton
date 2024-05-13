@@ -228,11 +228,16 @@ fun FuncNamedElement.toLookupElementBuilder(
                         val offset = if (
                             (isExtensionFunction && paramType is FuncTyAtomic) || paramType == FuncTyUnit
                         ) 2 else 1
-                        context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
-                        if (contextElement?.parent !is FuncApplyExpression) {
+                        val parent = contextElement?.parent
+                        if (parent is FuncApplyExpression && parent.left == contextElement && (parent.right is FuncTensorExpression || parent.right is FuncUnitExpression)) {
+                            context.editor.caretModel.moveToOffset(
+                                context.editor.caretModel.offset + ((parent.right?.textLength) ?: 0)
+                            )
+                        } else {
                             context.editor.document.insertString(context.editor.caretModel.offset, "()")
-                            context.commitDocument()
+                            context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
                         }
+                        context.commitDocument()
 
                         val insertFile = context.file as? FuncFile ?: return@withInsertHandler
                         val includeCandidateFile = file as? FuncFile ?: return@withInsertHandler

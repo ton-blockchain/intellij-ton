@@ -10,6 +10,7 @@ import org.ton.intellij.tact.psi.TactReferenceExpression
 import org.ton.intellij.tact.psi.impl.isGet
 import org.ton.intellij.tact.stub.index.TactFunctionIndex
 import org.ton.intellij.tact.type.TactLookup
+import org.ton.intellij.tact.type.ty
 import org.ton.intellij.util.ancestorStrict
 import org.ton.intellij.util.processAllKeys
 
@@ -34,8 +35,12 @@ class TactReferenceCompletionProvider : TactCompletionProvider() {
             TactFunctionIndex.findElementsByName(project, key).asSequence()
                 .filter { !it.isGet }
                 .distinctBy { it.name }
-                .forEach {
-                    result.addElement(LookupElementBuilder.createWithIcon(it))
+                .forEach { function ->
+                    result.addElement(
+                        LookupElementBuilder
+                            .createWithIcon(function)
+                            .withTypeText(function.type?.ty?.toString() ?: "")
+                    )
                 }
             true
         }

@@ -92,6 +92,11 @@
                          level="INFORMATION"
                          implementationClass="org.ton.intellij.func.inspection.FuncReplaceGuardClauseWithFunctionCallInspection"
                          displayName="Replace guard clause with function call"/>
+        <localInspection language="func" groupPath="FunC" groupName="Language level" enabledByDefault="true"
+                         level="ERROR"
+                         implementationClass="org.ton.intellij.func.inspection.FuncLanguageLevelInspection"
+                         displayName="Language level issues"
+        />
         <!--        <localInspection language="func" displayName="`if` condition is not an integer" groupPath="FunC"-->
         <!--                         groupName="Control flow issues" enabledByDefault="true" level="ERROR"-->
         <!--                         implementationClass="org.ton.intellij.func.inspection.FuncIfConditionIsNotAnIntegerInspection"/>-->
@@ -126,10 +131,6 @@
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewXml"/>
         </action>
         <group id="ton.file.group.func">
-            <action id="ton.func.ToCamelCase" class="org.ton.intellij.func.action.file.FuncToCamelCaseAction"
-                    text="Convert to CamelCase FunC">
-                <keyboard-shortcut first-keystroke="control shift K" keymap="$default"/>
-            </action>
             <add-to-group group-id="ToolsMenu" anchor="before" relative-to-action="ExternalToolsGroup"/>
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>

@@ -110,9 +110,11 @@
             GLOBAL_KEYWORD              = 'global'
             ASM_KEYWORD                 = 'asm'
             IMPURE_KEYWORD              = 'impure'
+            PURE_KEYWORD                = 'pure'
             INLINE_KEYWORD              = 'inline'
             INLINE_REF_KEYWORD          = 'inline_ref'
             AUTO_APPLY_KEYWORD          = 'auto_apply'
+            GET_KEYWORD                 = 'get'
             METHOD_ID_KEYWORD           = 'method_id'
             OPERATOR_KEYWORD            = 'operator'
             INFIX_KEYWORD               = 'infix'
@@ -137,7 +139,7 @@ private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelDefinition {
     recoverWhile = TopLevelDefinition_recover
 }
 private TopLevelDefinition_recover ::= !TopLevelDefinition_first
-private TopLevelDefinition_first ::= '#include' | '#pragma' | 'global' | 'const' | 'forall' | '_' | '('  | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'var'
+private TopLevelDefinition_first ::= '#include' | '#pragma' | 'global' | 'const' | 'get' | 'forall' | '_' | '('  | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'var'
 
 private macro ::= IncludeDefinition | PragmaDefinition
 RawString ::= RAW_STRING_ELEMENT*
@@ -199,8 +201,8 @@ PragmaVersion ::= ("version" | "not-version") VERSION_VALUE {
 }
 //PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
-Function ::= TypeParameterList? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
-    pin = 3
+Function ::= 'get'? TypeParameterList? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
+    pin = FunctionIdentifier
     implements = [
         "org.ton.intellij.func.psi.FuncNamedElement"
         "org.ton.intellij.func.psi.FuncInferenceContextOwner"
@@ -214,7 +216,7 @@ Function ::= TypeParameterList? TypeReference FunctionIdentifier FunctionParamet
     recoverWhile = TopLevelDefinition_recover
 }
 
-private FunctionAttributes ::= 'impure'? ('inline' | 'inline_ref')? MethodIdDefinition? {
+private FunctionAttributes ::= ('impure'|'pure')? ('inline' | 'inline_ref')? MethodIdDefinition? {
     recoverWhile = FunctionBody_recovery
 }
 

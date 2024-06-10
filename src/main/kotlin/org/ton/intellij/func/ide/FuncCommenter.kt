@@ -13,6 +13,8 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
 import com.intellij.util.text.CharArrayUtil
 import org.ton.intellij.func.FuncLanguage
+import org.ton.intellij.func.FuncLanguageLevel
+import org.ton.intellij.func.ide.settings.funcSettings
 import org.ton.intellij.func.parser.FuncParserDefinition.Companion.BLOCK_COMMENT
 
 data class CommentHolder(val file: PsiFile) : CommenterDataHolder() {
@@ -42,13 +44,27 @@ class FuncCommenter : Commenter, CodeDocumentationAwareCommenter, SelfManagingCo
         selectionStart: Int,
         document: Document,
         data: CommentHolder,
-    ): String = blockCommentPrefix
+    ): String {
+        val languageLevel = data.file.project.funcSettings.state.languageLevel
+        return if (languageLevel >= FuncLanguageLevel.FUNC_0_5_0) {
+            "/*"
+        } else {
+            "{-"
+        }
+    }
 
     override fun getBlockCommentSuffix(
         selectionEnd: Int,
         document: Document,
         data: CommentHolder,
-    ): String = blockCommentSuffix
+    ): String {
+        val languageLevel = data.file.project.funcSettings.state.languageLevel
+        return if (languageLevel >= FuncLanguageLevel.FUNC_0_5_0) {
+            "*/"
+        } else {
+            "-}"
+        }
+    }
 
     override fun getBlockCommentRange(
         selectionStart: Int,
@@ -97,7 +113,12 @@ class FuncCommenter : Commenter, CodeDocumentationAwareCommenter, SelfManagingCo
 
     override fun commentLine(line: Int, offset: Int, document: Document, data: CommentHolder) {
         val addSpace = data.useSpaceAfterLineComment()
-        document.insertString(offset, ";;" + if (addSpace) " " else "")
+        val languageLevel = data.file.project.funcSettings.state.languageLevel
+        if (languageLevel >= FuncLanguageLevel.FUNC_0_5_0) {
+            document.insertString(offset, "//" + if (addSpace) " " else "")
+        } else {
+            document.insertString(offset, ";;" + if (addSpace) " " else "")
+        }
     }
 
     override fun uncommentLine(line: Int, offset: Int, document: Document, data: CommentHolder) {
@@ -108,7 +129,14 @@ class FuncCommenter : Commenter, CodeDocumentationAwareCommenter, SelfManagingCo
         document.deleteString(offset, offset + prefixLen + if (hasSpace) 1 else 0)
     }
 
-    override fun getCommentPrefix(line: Int, document: Document, data: CommentHolder): String = lineCommentPrefix
+    override fun getCommentPrefix(line: Int, document: Document, data: CommentHolder): String {
+        val languageLevel = data.file.project.funcSettings.state.languageLevel
+        return if (languageLevel >= FuncLanguageLevel.FUNC_0_5_0) {
+            "//"
+        } else {
+            ";;"
+        }
+    }
 
     override fun createBlockCommentingState(
         selectionStart: Int,
@@ -125,6 +153,6 @@ class FuncCommenter : Commenter, CodeDocumentationAwareCommenter, SelfManagingCo
     ): CommentHolder = CommentHolder(file)
 
     companion object {
-        private val LINE_PREFIXES: List<String> = listOf(";;;", ";;")
+        private val LINE_PREFIXES: List<String> = listOf(";;;", ";;", "///", "//")
     }
 }

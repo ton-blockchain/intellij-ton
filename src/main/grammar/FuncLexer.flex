@@ -161,7 +161,8 @@ CLOSING_QUOTE=\"{QUOTE_SUFFIX}?
 REGULAR_STRING_PART=[^\\\"\n]+
 
 // !(!a|b) is a (set) difference between a and b.
-EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
+EOL_SEMICOLON_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
+EOL_SLASH_DOC_LINE  = {LINE_WS}*!(!("///".*)|("////".*))
 
 %%
 <YYINITIAL> {
@@ -170,10 +171,15 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
       \"                       { pushState(STRING); return OPEN_QUOTE; }
 
       "{-"                     { yybegin(IN_BLOCK_COMMENT); yypushback(2); }
+      "/*"                     { yybegin(IN_BLOCK_COMMENT); yypushback(2); }
       ";;;;" .*                { return EOL_COMMENT; }
-      {EOL_DOC_LINE}           { yybegin(IN_EOL_DOC_COMMENT);
+      "////" .*                { return EOL_COMMENT; }
+      {EOL_SEMICOLON_DOC_LINE}           { yybegin(IN_EOL_DOC_COMMENT);
+                                 zzPostponedMarkedPos = zzStartRead; }
+      {EOL_SLASH_DOC_LINE}           { yybegin(IN_EOL_DOC_COMMENT);
                                  zzPostponedMarkedPos = zzStartRead; }
       ";;" .*                  { return EOL_COMMENT; }
+      "//" .*                  { return EOL_COMMENT; }
 
       "+"                      { return PLUS; }
       "-"                      { return MINUS; }
@@ -258,8 +264,10 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
       "global"                 { return GLOBAL_KEYWORD; }
       "asm"                    { return ASM_KEYWORD; }
       "impure"                 { return IMPURE_KEYWORD; }
+      "pure"                   { return PURE_KEYWORD; }
       "inline"                 { return INLINE_KEYWORD; }
       "inline_ref"             { return INLINE_REF_KEYWORD; }
+      "get"                    { return GET_KEYWORD; }
       "auto_apply"             { return AUTO_APPLY_KEYWORD; }
       "method_id"              { return METHOD_ID_KEYWORD; }
       "operator"               { return OPERATOR_KEYWORD; }
@@ -307,6 +315,13 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
   "-}"    { if (--zzNestedCommentLevel == 0)
               return imbueBlockComment();
           }
+  "/*"  { if (zzNestedCommentLevel++ == 0)
+              zzPostponedMarkedPos = zzStartRead;
+          }
+
+  "*/"    { if (--zzNestedCommentLevel == 0)
+              return imbueBlockComment();
+          }
 
   <<EOF>> { zzNestedCommentLevel = 0; return imbueBlockComment(); }
 
@@ -317,7 +332,11 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(";;;".*)|(";;;;".*))
   {EOL_WS}{LINE_WS}*";;;;"   { yybegin(YYINITIAL);
                                yypushback(yylength());
                                return imbueOuterEolComment();}
-  {EOL_WS}{EOL_DOC_LINE}     {}
+  {EOL_WS}{LINE_WS}*"////"   { yybegin(YYINITIAL);
+                               yypushback(yylength());
+                               return imbueOuterEolComment();}
+  {EOL_WS}{EOL_SEMICOLON_DOC_LINE}     {}
+  {EOL_WS}{EOL_SLASH_DOC_LINE}     {}
   <<EOF>>                    { return imbueOuterEolComment(); }
   [^]                        { yybegin(YYINITIAL);
                                yypushback(1);

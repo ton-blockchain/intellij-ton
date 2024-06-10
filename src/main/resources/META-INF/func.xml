@@ -65,8 +65,6 @@
         <languageInjectionContributor language="func"
                                       implementationClass="org.ton.intellij.func.ide.FuncLanguageInjector"/>
 
-        <stubIndex implementation="org.ton.intellij.func.stub.index.FuncNamedElementIndex"/>
-
         <localInspection language="func" displayName="Unused function inspection" groupPath="FunC"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.func.inspection.FuncUnusedFunctionInspection"/>

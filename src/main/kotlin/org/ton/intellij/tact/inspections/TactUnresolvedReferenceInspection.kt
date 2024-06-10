@@ -25,7 +25,7 @@ class TactUnresolvedReferenceInspection : TactLocalInspectionTool() {
         element: TactReferenceExpression,
     ) {
         val referenceName = element.identifier.text
-        val description = TactBundle.message("inspection.message.unresolved.reference", referenceName)
+        val description = TactBundle.message("inspection.tact.message.unresolved.reference", referenceName)
         val highlightedElement = element.identifier
         registerProblem(highlightedElement, description, ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
     }
@@ -34,7 +34,7 @@ class TactUnresolvedReferenceInspection : TactLocalInspectionTool() {
         element: TactCallExpression,
     ) {
         val referenceName = element.identifier.text
-        val description = TactBundle.message("inspection.message.unresolved.reference", referenceName)
+        val description = TactBundle.message("inspection.tact.message.unresolved.reference", referenceName)
         val highlightedElement = element.identifier
         registerProblem(highlightedElement, description, ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
     }

@@ -234,8 +234,10 @@ fun FuncNamedElement.toLookupElementBuilder(
                                 context.editor.caretModel.offset + ((parent.right?.textLength) ?: 0)
                             )
                         } else {
-                            context.editor.document.insertString(context.editor.caretModel.offset, "()")
-                            context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
+                            if (parent !is FuncApplyExpression || parent.left != contextElement || parent.right !is FuncApplyExpression) {
+                                context.editor.document.insertString(context.editor.caretModel.offset, "()")
+                                context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
+                            }
                         }
                         context.commitDocument()
 

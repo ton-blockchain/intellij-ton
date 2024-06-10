@@ -1,4 +1,6 @@
 <idea-plugin>
+    <resource-bundle>messages.FuncBundle</resource-bundle>
+
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="func"
                   implementationClass="org.ton.intellij.func.FuncFileType"
@@ -113,6 +115,11 @@
         <!-- Code Style -->
         <langCodeStyleSettingsProvider
                 implementation="org.ton.intellij.func.ide.formatter.FuncLanguageCodeStyleSettingsProvider"/>
+
+        <projectConfigurable instance="org.ton.intellij.func.ide.configurable.FuncProjectConfigurable"
+                             groupId="language"
+                             id="language.func"
+                             bundle="messages.FuncBundle" key="func.name"/>
     </extensions>
 
     <actions>

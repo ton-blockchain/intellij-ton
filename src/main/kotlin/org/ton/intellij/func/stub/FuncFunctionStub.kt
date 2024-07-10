@@ -13,8 +13,6 @@ class FuncFunctionStub(
     val isImpure: Boolean,
     val hasMethodId: Boolean,
     val hasAsm: Boolean,
-    val hasGet: Boolean,
-    val hasPure: Boolean,
 ) : FuncNamedStub<FuncFunction>(parent, elementType, name) {
     constructor(
         parent: StubElement<*>, elementType: IStubElementType<*, *>,
@@ -23,18 +21,14 @@ class FuncFunctionStub(
         isImpure: Boolean,
         hasMethodId: Boolean,
         hasAsm: Boolean,
-        hasGet: Boolean,
-        hasPure: Boolean
     ) : this(
-        parent = parent,
-        elementType = elementType,
-        name = StringRef.fromString(name),
-        isMutable = isMutable,
-        isImpure = isImpure,
-        hasMethodId = hasMethodId,
-        hasAsm = hasAsm,
-        hasGet = hasGet,
-        hasPure = hasPure
+        parent,
+        elementType,
+        StringRef.fromString(name),
+        isMutable,
+        isImpure,
+        hasMethodId,
+        hasAsm
     )
 
     override fun toString(): String = buildString {
@@ -43,9 +37,7 @@ class FuncFunctionStub(
         append("isMutable=").append(isMutable).append(", ")
         append("isImpure=").append(isImpure).append(", ")
         append("hasMethodId=").append(hasMethodId).append(", ")
-        append("hasAsm=").append(hasAsm).append(", ")
-        append("hasGet=").append(hasGet).append(", ")
-        append("hasPure=").append(hasPure)
+        append("hasAsm=").append(hasAsm)
         append(")")
     }
 }

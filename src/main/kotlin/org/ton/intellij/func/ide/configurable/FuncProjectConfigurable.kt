@@ -5,9 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.SimpleListCellRenderer
-import com.intellij.ui.dsl.builder.bindItem
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.builder.toNullableProperty
 import org.ton.intellij.func.FuncBundle
 import org.ton.intellij.func.FuncLanguageLevel
 import org.ton.intellij.func.ide.settings.funcSettings
@@ -18,12 +16,11 @@ class FuncProjectConfigurable(
     override fun createPanel(): DialogPanel = panel {
         val settings = project.funcSettings
         val state = settings.state.copy()
+
         row {
-            label(FuncBundle.message("func.settings.language_level.label"))
             comboBox(EnumComboBoxModel(FuncLanguageLevel::class.java).apply {
                 this.setSelectedItem(state.languageLevel)
             }, SimpleListCellRenderer.create("") { it.displayName })
-                .bindItem(state::languageLevel.toNullableProperty())
         }
 
         onApply {

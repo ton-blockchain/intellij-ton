@@ -27,12 +27,6 @@ abstract class FuncFunctionMixin : FuncNamedElementImpl<FuncFunctionStub>, FuncF
 val FuncFunction.isImpure: Boolean
     get() = stub?.isImpure ?: (node.findChildByType(FuncElementTypes.IMPURE_KEYWORD) != null)
 
-val FuncFunction.hasPure: Boolean
-    get() = stub?.hasPure ?: (node.findChildByType(FuncElementTypes.PURE_KEYWORD) != null)
-
-val FuncFunction.hasGet: Boolean
-    get() = stub?.hasGet ?: (node.findChildByType(FuncElementTypes.GET_KEYWORD) != null)
-
 val FuncFunction.isMutable: Boolean
     get() = stub?.isMutable ?: (node.findChildByType(FuncElementTypes.TILDE) != null)
 

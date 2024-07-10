@@ -33,13 +33,11 @@ val FUNC_KEYWORDS = tokenSetOf(
 
     FuncElementTypes.TYPE_KEYWORD,
     FuncElementTypes.FORALL_KEYWORD,
-    FuncElementTypes.GET_KEYWORD,
 
     FuncElementTypes.EXTERN_KEYWORD,
     FuncElementTypes.GLOBAL_KEYWORD,
     FuncElementTypes.ASM_KEYWORD,
     FuncElementTypes.IMPURE_KEYWORD,
-    FuncElementTypes.PURE_KEYWORD,
     FuncElementTypes.INLINE_KEYWORD,
     FuncElementTypes.INLINE_REF_KEYWORD,
     FuncElementTypes.AUTO_APPLY_KEYWORD,

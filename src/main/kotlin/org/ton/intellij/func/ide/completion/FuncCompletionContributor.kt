@@ -54,7 +54,6 @@ class FuncCompletionContributor : CompletionContributor() {
             FuncKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
                 "impure",
-                "pure"
             )
         )
         extend(

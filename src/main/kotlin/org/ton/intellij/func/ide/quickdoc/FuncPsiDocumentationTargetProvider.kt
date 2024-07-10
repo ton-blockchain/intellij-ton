@@ -20,8 +20,6 @@ import org.intellij.markdown.parser.MarkdownParser
 import org.ton.intellij.func.FuncLanguage
 import org.ton.intellij.func.highlighting.FuncColor
 import org.ton.intellij.func.psi.*
-import org.ton.intellij.func.psi.impl.hasGet
-import org.ton.intellij.func.psi.impl.hasPure
 import org.ton.intellij.func.psi.impl.isImpure
 import org.ton.intellij.func.psi.impl.isMutable
 import java.util.*
@@ -149,10 +147,6 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
     fun StringBuilder.renderFunction(
         function: FuncFunction,
     ) {
-        if (function.hasGet) {
-            appendStyledSpan(FuncColor.KEYWORD.attributes, "get")
-            append(NBSP)
-        }
         val typeParameterList = function.typeParameterList
         if (typeParameterList.isNotEmpty()) {
             appendStyledSpan(FuncColor.KEYWORD.attributes, "forall")
@@ -179,10 +173,6 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
             }
         }
         appendStyledSpan(FuncColor.PARENTHESES.attributes, ")")
-        if (function.hasPure) {
-            appendStyledSpan(FuncColor.KEYWORD.attributes, "pure")
-            append(NBSP)
-        }
         if (function.isImpure) {
             append(NBSP)
             appendStyledSpan(FuncColor.KEYWORD.attributes, "impure")

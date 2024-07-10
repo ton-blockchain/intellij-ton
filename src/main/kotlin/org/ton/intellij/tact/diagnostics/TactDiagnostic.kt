@@ -7,6 +7,7 @@ import org.ton.intellij.tact.inspections.TactLocalInspectionTool
 import org.ton.intellij.tact.inspections.TactTypeCheckInspection
 import org.ton.intellij.tact.psi.TactNamedElement
 import org.ton.intellij.tact.type.TactTy
+import org.ton.intellij.tact.type.TactTyRef
 import org.ton.intellij.util.PreparedAnnotation
 
 sealed class TactDiagnostic(
@@ -48,7 +49,23 @@ sealed class TactDiagnostic(
         override fun prepare(): PreparedAnnotation = PreparedAnnotation(
             ProblemHighlightType.GENERIC_ERROR,
             "Type mismatch",
-            "expected `$expectedTy`, found `$actualTy`",
+            buildString {
+                val expectedName = expectedTy.toString()
+                val actualName = actualTy.toString()
+                if (expectedTy is TactTyRef && actualTy is TactTyRef && expectedName == actualName) {
+                    append("expected: `")
+                    append(expectedName)
+                    append("` [")
+                    append(expectedTy.item.containingFile.virtualFile.path)
+                    append("], found: `")
+                    append(actualName)
+                    append("` [")
+                    append(actualTy.item.containingFile.virtualFile.path)
+                    append("]")
+                } else {
+                    append("expected `$expectedName`, found `$actualName`")
+                }
+            },
             fixes = buildList {
 
             }

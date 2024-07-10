@@ -63,6 +63,9 @@
         TIMESLET            = '*='
         DIVLET              = '/='
         MODLET              = '%='
+        ANDLET              = '&='
+        ORLET               = '|='
+        XORLET              = '^='
 
         IF_KEYWORD          = 'if'
         ELSE_KEYWORD        = 'else'
@@ -174,7 +177,7 @@ As ::= 'as' IDENTIFIER {
 }
 
 // Field
-Field ::= IDENTIFIER TypeAscription As? Assigment? ';' {
+Field ::= IDENTIFIER TypeAscription As? Assigment? {
     pin=1
     implements = [
         "org.ton.intellij.tact.psi.TactNameIdentifierOwner"
@@ -225,7 +228,7 @@ Message ::= 'message' MessageId? IDENTIFIER BlockFields {
 MessageId ::= '(' INTEGER_LITERAL ')' {
     pin=1
 }
-BlockFields ::= '{' Field* '}' {pin=1}
+BlockFields ::= '{' [<<trailing_semicolon_separated_list Field>>] '}' {pin=1}
 
 // Contract
 WithClause ::= 'with' <<trailing_comma_separated_list Type>> {pin=1}
@@ -245,13 +248,15 @@ private ContractItem_with_recover ::= !('}' | <<eof>>) ContractItem {
 //    recoverWhile=ContractItem_recover
 }
 private ContractItem_recover ::= !('}' | Item_first | IDENTIFIER)
-private ContractItem ::= Field
+private ContractItem ::= StorageVariable
                | Constant
                | ContractInit
                | ReceiveFunction
                | BouncedFunction
                | ExternalFunction
                | Function
+
+private StorageVariable ::= Field ';'
 
 ContractAttribute ::= '@interface' StringId {pin=1}
 ContractInit ::= 'init' FunctionParameters Block {
@@ -276,7 +281,7 @@ Trait ::= ContractAttribute* 'trait' IDENTIFIER WithClause? TraitBody {
 TraitBody ::= '{' TraitItem* '}' {
     pin = 1
 }
-private TraitItem ::= Field
+private TraitItem ::= StorageVariable
             | Constant
             | ReceiveFunction
             | BouncedFunction
@@ -365,28 +370,28 @@ private BlockItem ::= !'}' Statement {
 }
 private BlockItem_recover ::= !('}' | Statement_first | Item_first | ';')
 
-LetStatement ::= 'let' IDENTIFIER TypeAscription '=' Expression ';' {
+LetStatement ::= 'let' (IDENTIFIER|'_') TypeAscription? '=' Expression ';' {
     pin = 1
     rightAssociative=true
     implements=[
         "org.ton.intellij.tact.psi.TactNamedElement"
     ]
-        mixin="org.ton.intellij.tact.psi.impl.TactLetStatementImplMixin"
+    mixin="org.ton.intellij.tact.psi.impl.TactLetStatementImplMixin"
 }
 private TypeAscription ::= ':' Type {
     pin = 1
 }
 
 BlockStatement ::= Block
-ReturnStatement ::= 'return' Expression? ';' { pin = 1 }
-ExpressionStatement ::= Expression ';' {
+ReturnStatement ::= 'return' Expression? ';'? { pin = 1 }
+ExpressionStatement ::= Expression (';' | &'}') {
     pin=1
 }
 AssignStatement ::= Expression AssignBinOp Expression ';' {
     rightAssociative = true
 }
 
-AssignBinOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '%=' {
+AssignBinOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' {
     name = "operator"
 }
 
@@ -396,12 +401,28 @@ WhileStatement ::= 'while' Condition Block {pin=1}
 RepeatStatement ::= 'repeat' Condition Block {pin=1}
 UntilStatement ::= 'do' Block 'until' Condition ';' {pin=1}
 TryStatement ::= 'try' Block CatchClause? {pin=1}
-CatchClause ::= 'catch' '(' IDENTIFIER ')' Block {pin=1}
-ForEachStatement ::= 'foreach' '(' IDENTIFIER ',' IDENTIFIER 'in' Expression ')' Block {pin=1}
-
-Condition ::= '(' Expression ')' {
-    pin=1
+CatchClause ::= 'catch' '(' CatchParameter ')' Block {pin=1}
+CatchParameter ::= IDENTIFIER {
+    mixin = "org.ton.intellij.tact.psi.impl.TactCatchParameterMixin"
+    implements = [
+        "org.ton.intellij.tact.psi.TactNamedElement"
+    ]
 }
+ForEachStatement ::= 'foreach' '(' ForEachKey ',' ForEachValue 'in' Expression ')' Block {pin=1}
+ForEachKey ::= IDENTIFIER {
+    mixin = "org.ton.intellij.tact.psi.impl.TactForEachKeyMixin"
+    implements = [
+        "org.ton.intellij.tact.psi.TactNamedElement"
+    ]
+}
+ForEachValue ::= IDENTIFIER {
+    mixin = "org.ton.intellij.tact.psi.impl.TactForEachValueMixin"
+    implements = [
+        "org.ton.intellij.tact.psi.TactNamedElement"
+    ]
+}
+
+Condition ::= Expression
 
 // Expressions
 Expression ::= TernaryExpression
@@ -497,10 +518,14 @@ FieldExpression ::= IDENTIFIER !'(' {
 ParenExpression ::= '(' ParenExpressionItem ')' {pin=1}
 private ParenExpressionItem ::= Expression
 
-StructExpression ::= IDENTIFIER '{' [<<trailing_comma_separated_list StructExpressionField_with_recover>>] '}' {
-    pin=2
+StructExpression ::= IDENTIFIER '{' StructExpressionFields '}' {
     mixin = "org.ton.intellij.tact.psi.impl.TactStructExpressionImplMixin"
 }
+
+private StructExpressionFields ::= <<trailing_comma_separated_list StructExpressionField_with_recover>> {
+
+}
+
 StructExpressionField ::= IDENTIFIER (':' Expression)? {pin=1}
 private StructExpressionField_with_recover ::= !('}') StructExpressionField {
     pin=1
@@ -523,4 +548,5 @@ InitOfExpression ::= 'initOf' IDENTIFIER '(' [<<trailing_comma_separated_list Ex
 StringExpression ::= StringLiteral
 
 //private meta comma_separated_list ::= <<param>> ( ',' <<param>> )*
-private meta trailing_comma_separated_list ::= <<param>> (',' (<<param>> | &')'))*
+private meta trailing_comma_separated_list ::= <<param>> (',' (<<param>> | &')' | &'}'))*
+private meta trailing_semicolon_separated_list ::= <<param>> (';' (<<param>> | &'}'))*

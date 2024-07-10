@@ -116,12 +116,19 @@ class TactInferenceContext(
                         }
                     }
                 }
-
+                is TactForEachStatement -> {
+                    scope.forEachKey?.let { variableCandidates.add(it) }
+                    scope.forEachValue?.let { variableCandidates.add(it) }
+                }
                 is TactFunctionLike -> {
                     scope.functionParameters?.functionParameterList?.forEach { param ->
                         variableCandidates.add(param)
                     }
                     return@treeWalkUp false
+                }
+
+                is TactCatchClause -> {
+                    scope.catchParameter?.let { variableCandidates.add(it) }
                 }
             }
             true

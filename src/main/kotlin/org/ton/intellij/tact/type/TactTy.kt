@@ -1,6 +1,6 @@
 package org.ton.intellij.tact.type
 
-import com.intellij.openapi.project.Project
+import org.ton.intellij.tact.psi.TactElement
 import org.ton.intellij.tact.psi.TactReferencedType
 import org.ton.intellij.tact.psi.TactType
 import org.ton.intellij.tact.psi.TactTypeDeclarationElement
@@ -12,10 +12,18 @@ interface TactTy {
     fun isAssignable(other: TactTy): Boolean
 
     companion object {
-        fun search(project: Project, name: String): List<TactTy> {
-            return TactTypesIndex.findElementsByName(project, name).map {
-                it.declaredTy
+        fun search(element: TactElement, name: String): List<TactTy> {
+            return searchDeclarations(element, name).map { it.declaredTy }
+        }
+
+        fun searchDeclarations(element: TactElement, name: String): List<TactTypeDeclarationElement> {
+            val types = TactTypesIndex.findElementsByName(element.project, name)
+            val currentFile = element.containingFile
+            val localType = types.find { it.containingFile == currentFile }
+            if (localType != null) {
+                return listOf(localType)
             }
+            return types.toList()
         }
     }
 }

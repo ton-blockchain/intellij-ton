@@ -139,6 +139,9 @@ ESCAPE_SEQUENCE=\\\\ // backslash
   "*="                    { return TIMESLET; }
   "/="                    { return DIVLET; }
   "%="                    { return MODLET; }
+  "&="                    { return ANDLET; }
+  "|="                    { return ORLET; }
+  "^="                    { return XORLET; }
   "=="                    { return EQEQ; }
   "!="                    { return EXCLEQ; }
   ">="                    { return GTEQ; }
@@ -185,7 +188,7 @@ ESCAPE_SEQUENCE=\\\\ // backslash
   "catch"                 { return CATCH_KEYWORD; }
   "foreach"               { return FOREACH_KEYWORD; }
   "in"                    { return IN_KEYWORD; }
-  "bounced"               { return zzBlockDepth == 1 && zzContractScope ? BOUNCED_KEYWORD : IDENTIFIER; }
+  "bounced"               { return BOUNCED_KEYWORD; }
   "init"                  { return zzBlockDepth == 1 && zzParenDepth == 0 ? INIT_KEYWORD : IDENTIFIER; }
   "get"                   { return zzBlockDepth <= 1 ? GET_KEYWORD : IDENTIFIER; }
   "@interface"            { return INTERFACE_MACRO; }

@@ -61,6 +61,7 @@ import static org.ton.intellij.tact.psi.TactElementTypes.*;
 
 %s IN_BLOCK_COMMENT
 %s IN_NAME_ATTRIBUTE
+%s STRING
 
 %unicode
 
@@ -78,13 +79,27 @@ INTEGER_LITERAL_HEX = 0[xX] {HEX_DIGIT} (_?{HEX_DIGIT})*
 INTEGER_LITERAL_BIN = 0[bB] {BIN_DIGIT} (_?{BIN_DIGIT})*
 INTEGER_LITERAL_OCT = 0[oO] {OCT_DIGIT} (_?{OCT_DIGIT})*
 INTEGER_LITERAL= {INTEGER_LITERAL_HEX} | {INTEGER_LITERAL_BIN} | {INTEGER_LITERAL_OCT} | {INTEGER_LITERAL_DEC}
-STRING_LITERAL=(\"([^\"\r\n\\]|\\.)*\")
 IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_]*
 FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
+
+REGULAR_STRING_PART=[^\\\"]+
+ESCAPE_SEQUENCE=\\\\ // backslash
+| \\\" // double quote
+| \\n // newline
+| \\r // carriage return
+| \\t // tab
+| \\v // vertical tab
+| \\b // backspace
+| \\f // form feed
+| \\u\{ {HEX_DIGIT} {HEX_DIGIT}? {HEX_DIGIT}? {HEX_DIGIT}? {HEX_DIGIT}? {HEX_DIGIT}? \} // unicode escape
+| \\u {HEX_DIGIT} {HEX_DIGIT} {HEX_DIGIT} {HEX_DIGIT} // hex escape
+| \\x {HEX_DIGIT} {HEX_DIGIT} // hex escape
+| \\[^\n] // any other character
 
 %%
 <YYINITIAL> {
   {WHITE_SPACE}           { return WHITE_SPACE; }
+  \"                      { yybegin(STRING); return OPEN_QUOTE; }
 
   "/*"                    { yybegin(IN_BLOCK_COMMENT); yypushback(2); }
   "//".*                  { return LINE_COMMENT; }
@@ -118,6 +133,7 @@ FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
   "="                     { return EQ; }
   "?"                     { return Q; }
   "!"                     { return EXCL; }
+  "~"                     { return TILDE; }
   "+="                    { return PLUSLET; }
   "-="                    { return MINUSLET; }
   "*="                    { return TIMESLET; }
@@ -165,6 +181,10 @@ FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
   "primitive"             { return PRIMITIVE_KEYWORD; }
   "self"                  { return SELF_KEYWORD; }
   "map"                   { return MAP_KEYWORD; }
+  "try"                   { return TRY_KEYWORD; }
+  "catch"                 { return CATCH_KEYWORD; }
+  "foreach"               { return FOREACH_KEYWORD; }
+  "in"                    { return IN_KEYWORD; }
   "bounced"               { return zzBlockDepth == 1 && zzContractScope ? BOUNCED_KEYWORD : IDENTIFIER; }
   "init"                  { return zzBlockDepth == 1 && zzParenDepth == 0 ? INIT_KEYWORD : IDENTIFIER; }
   "get"                   { return zzBlockDepth <= 1 ? GET_KEYWORD : IDENTIFIER; }
@@ -172,7 +192,6 @@ FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
   "@name"                 { yybegin(IN_NAME_ATTRIBUTE); yypushback(5); }
 
   {INTEGER_LITERAL}       { return INTEGER_LITERAL; }
-  {STRING_LITERAL}        { return STRING_LITERAL; }
   {IDENTIFIER}            { return IDENTIFIER; }
 }
 
@@ -188,6 +207,13 @@ FUNC_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_?!:&']*
   <<EOF>> { zzNestedCommentLevel = 0; return imbueBlockComment(); }
 
   [^]     { }
+}
+
+<STRING> {
+    {REGULAR_STRING_PART} { return REGULAR_STRING_PART; }
+    {ESCAPE_SEQUENCE}     { return ESCAPE_SEQUENCE; }
+    \"                    { yybegin(YYINITIAL); return CLOSE_QUOTE; }
+    [^]                   { yybegin(YYINITIAL); yypushback(1); }
 }
 
 <IN_NAME_ATTRIBUTE> {

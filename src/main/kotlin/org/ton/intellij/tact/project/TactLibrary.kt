@@ -53,6 +53,7 @@ private fun makeStdlibLibrary(project: Project): TactLibrary? {
             }
             return TactLibrary("stdlib", sourceRoots, version)
         }
+        return TactLibrary("stdlib", sourceRoots)
     }
-    return TactLibrary("stdlib", sourceRoots)
+    return null
 }

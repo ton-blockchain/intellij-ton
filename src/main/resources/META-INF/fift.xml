@@ -19,6 +19,5 @@
         <lang.findUsagesProvider language="Fift"
                                  implementationClass="org.ton.intellij.fift.ide.FiftFindUsagesProvider"/>
         <colorSettingsPage implementation="org.ton.intellij.fift.ide.FiftColorSettingsPage"/>
-        <internalFileTemplate name="Fift File"/>
     </extensions>
 </idea-plugin>

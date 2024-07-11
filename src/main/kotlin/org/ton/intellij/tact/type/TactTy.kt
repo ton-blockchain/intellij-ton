@@ -81,13 +81,13 @@ data class TactTyMap(
     }
 }
 
-data class TactBounced(
+data class TactTyBounced(
     val inner: TactTy
 ) : TactTy, TactTyRuntime {
     override fun toString(): String = "bounced<$inner>"
 
     override fun isAssignable(other: TactTy): Boolean {
-        return other is TactBounced && inner.isAssignable(other.inner)
+        return other is TactTyBounced && inner.isAssignable(other.inner)
     }
 }
 

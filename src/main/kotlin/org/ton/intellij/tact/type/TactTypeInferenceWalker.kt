@@ -283,17 +283,27 @@ class TactTypeInferenceWalker(
 
         when (right) {
             is TactFieldExpression -> {
-                if (leftType is TactTyRef) {
-                    val name = right.identifier.text
-                    val members = leftType.item.members
-                    val resolvedField = members.find { it.name == name }
-                    if (resolvedField != null) {
-                        ctx.setResolvedRefs(right, OrderedSet(listOf(PsiElementResolveResult(resolvedField))))
-                        return when (resolvedField) {
-                            is TactField -> resolvedField.type?.ty
-                            is TactConstant -> resolvedField.type?.ty
-                            else -> null
+                val name = right.identifier.text
+                val members = when (leftType) {
+                    is TactTyRef -> leftType.item.members
+                    is TactTyBounced -> {
+                        val inner = leftType.inner
+                        if (inner is TactTyRef) {
+                            inner.item.members
+                        } else {
+                            emptySequence()
                         }
+                    }
+
+                    else -> emptySequence()
+                }
+                val resolvedField = members.find { it.name == name }
+                if (resolvedField != null) {
+                    ctx.setResolvedRefs(right, OrderedSet(listOf(PsiElementResolveResult(resolvedField))))
+                    return when (resolvedField) {
+                        is TactField -> resolvedField.type?.ty
+                        is TactConstant -> resolvedField.type?.ty
+                        else -> null
                     }
                 }
             }

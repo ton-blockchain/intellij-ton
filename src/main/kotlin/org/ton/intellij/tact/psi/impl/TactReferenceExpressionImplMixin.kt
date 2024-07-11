@@ -9,7 +9,10 @@ import org.ton.intellij.tact.resolve.TactFieldReference
 abstract class TactReferenceExpressionImplMixin(
     node: ASTNode
 ) : ASTWrapperPsiElement(node), TactReferenceExpression {
-    override fun getReference(): PsiReference {
+    override fun getReference(): PsiReference? {
+        if (name == "_") {
+            return null
+        }
         return TactFieldReference(this, identifier.textRangeInParent)
     }
 }

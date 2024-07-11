@@ -2,15 +2,9 @@ package org.ton.intellij.tact.psi.impl
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiReference
-import org.ton.intellij.tact.psi.TactMapType
-import org.ton.intellij.tact.psi.TactReferencedType
-import org.ton.intellij.tact.psi.TactType
-import org.ton.intellij.tact.psi.TactTypeDeclarationElement
+import org.ton.intellij.tact.psi.*
 import org.ton.intellij.tact.resolve.TactTypeReference
-import org.ton.intellij.tact.type.TactTy
-import org.ton.intellij.tact.type.TactTyMap
-import org.ton.intellij.tact.type.TactTyNullable
-import org.ton.intellij.tact.type.TactTyUnknown
+import org.ton.intellij.tact.type.*
 
 abstract class TactReferencedTypeImplMixin(
     node: ASTNode
@@ -27,6 +21,9 @@ private fun getType(tactType: TactType): TactTy? {
         val keyType = mapTypeItemList.getOrNull(0)?.referencedType?.ty ?: TactTyUnknown
         val valueType = mapTypeItemList.getOrNull(1)?.referencedType?.ty ?: TactTyUnknown
         return TactTyMap(keyType, valueType)
+    }
+    if (tactType is TactBouncedType) {
+        return tactType.referencedType?.ty?.let { return TactTyBounced(it) }
     }
     val reference = tactType.reference ?: return null
     val typeDeclaration = reference.resolve() as? TactTypeDeclarationElement ?: return null

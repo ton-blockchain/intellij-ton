@@ -277,7 +277,7 @@ ESCAPE_SEQUENCE=\\\\ // backslash
               return IDENTIFIER;
           }
           return BOUNCED_KEYWORD;
-      }
+}
 "init"       { return zzBlockDepth == 1 && zzParenDepth == 0 ? INIT_KEYWORD : IDENTIFIER; }
 "get"        { return zzBlockDepth <= 1 ? GET_KEYWORD : IDENTIFIER; }
 "@interface" { return INTERFACE_MACRO; }

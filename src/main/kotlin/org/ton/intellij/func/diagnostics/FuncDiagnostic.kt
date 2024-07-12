@@ -15,7 +15,6 @@ sealed class FuncDiagnostic(
 
     fun addToHolder(holder: ProblemsHolder) {
         val prepared = prepare()
-        0 / 0
         val fixes = prepared.fixes.map { it.fix }.toTypedArray()
         if (element == endElement) {
             holder.registerProblem(

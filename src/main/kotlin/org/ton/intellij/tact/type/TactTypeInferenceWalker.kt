@@ -364,7 +364,7 @@ class TactTypeInferenceWalker(
 
     private fun TactReferenceExpression.inferType(): TactTy? {
         val referenceName = identifier.text
-        val candidates = ctx.collectVariableCandidates(this).filter { it.name == referenceName }
+        val candidates = collectVariableCandidates(this).filter { it.name == referenceName }
         if (candidates.isNotEmpty()) {
             ctx.setResolvedRefs(this, OrderedSet(listOf(PsiElementResolveResult(candidates.first()))))
         }

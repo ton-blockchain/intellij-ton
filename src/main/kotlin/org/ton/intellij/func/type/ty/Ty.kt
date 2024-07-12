@@ -5,7 +5,15 @@ import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.type.infer.FuncTyFoldable
 import org.ton.intellij.func.type.infer.FuncTyFolder
 
-sealed class FuncTy : FuncTyFoldable<FuncTy> {
+interface FuncTyProvider {
+    fun getFuncTy(): FuncTy
+}
+
+sealed class FuncTy : FuncTyFoldable<FuncTy>, FuncTyProvider {
+    override fun getFuncTy(): FuncTy {
+        return this
+    }
+
     override fun foldWith(folder: FuncTyFolder): FuncTy = folder.foldTy(this)
 
     override fun superFoldWith(folder: FuncTyFolder): FuncTy = this

@@ -25,7 +25,7 @@ val TactInferenceContextOwner.selfInferenceResult: TactInferenceResult
 
 fun inferTypesIn(element: TactInferenceContextOwner): TactInferenceResult {
     val lookup = TactLookup(element.project, element)
-    return recursionGuard(element, { lookup.ctx.infer(element) }, memoize = false)
+    return recursionGuard(element, memoize = false) { lookup.ctx.infer(element) }
         ?: error("Can not run nested type inference")
 }
 
@@ -101,46 +101,48 @@ class TactInferenceContext(
         }
         return TactInferenceResult(exprTypes, resolvedRefs, diagnostics)
     }
+}
 
-    public fun collectVariableCandidates(element: TactReferenceExpression): Collection<TactNamedElement> {
-        val variableCandidates = LinkedList<TactNamedElement>()
-        PsiTreeUtil.treeWalkUp(element, null) { scope, prevParent ->
-            when (scope) {
-                is TactBlock -> {
-                    scope.statementList.forEach { stmt ->
-                        if (stmt == prevParent) return@forEach
-                        when (stmt) {
-                            is TactLetStatement -> {
-                                variableCandidates.add(stmt)
-                            }
+fun collectVariableCandidates(element: TactReferenceExpression): Collection<TactNamedElement> {
+    val variableCandidates = LinkedList<TactNamedElement>()
+    PsiTreeUtil.treeWalkUp(element, null) { scope, prevParent ->
+        when (scope) {
+            is TactBlock -> {
+                scope.statementList.forEach { stmt ->
+                    if (stmt == prevParent) return@forEach
+                    when (stmt) {
+                        is TactLetStatement -> {
+                            variableCandidates.add(stmt)
                         }
                     }
                 }
-                is TactForEachStatement -> {
-                    scope.forEachKey?.let { variableCandidates.add(it) }
-                    scope.forEachValue?.let { variableCandidates.add(it) }
-                }
-                is TactFunctionLike -> {
-                    scope.functionParameters?.functionParameterList?.forEach { param ->
-                        variableCandidates.add(param)
-                    }
-                    return@treeWalkUp false
-                }
+            }
 
-                is TactCatchClause -> {
-                    scope.catchParameter?.let { variableCandidates.add(it) }
-                }
+            is TactForEachStatement -> {
+                scope.forEachKey?.let { variableCandidates.add(it) }
+                scope.forEachValue?.let { variableCandidates.add(it) }
             }
-            true
-        }
-        processAllKeys(TactConstantIndex.KEY, element.project) { key ->
-            TactConstantIndex.findElementsByName(element.project, key).forEach {
-                if (it.parent is TactFile) {
-                    variableCandidates.add(it)
+
+            is TactFunctionLike -> {
+                scope.functionParameters?.functionParameterList?.forEach { param ->
+                    variableCandidates.add(param)
                 }
+                return@treeWalkUp false
             }
-            true
+
+            is TactCatchClause -> {
+                scope.catchParameter?.let { variableCandidates.add(it) }
+            }
         }
-        return variableCandidates
+        true
     }
+    processAllKeys(TactConstantIndex.KEY, element.project) { key ->
+        TactConstantIndex.findElementsByName(element.project, key).forEach {
+            if (it.parent is TactFile) {
+                variableCandidates.add(it)
+            }
+        }
+        true
+    }
+    return variableCandidates
 }

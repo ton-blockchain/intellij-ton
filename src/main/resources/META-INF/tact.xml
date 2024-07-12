@@ -47,6 +47,18 @@
                          implementationClass="org.ton.intellij.tact.inspections.TactUnresolvedReferenceInspection"
                          key="inspection.tact.unresolved.reference.display.name"/>
 
+        <localInspection language="Tact" groupPath="Tact"
+                         enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tact.inspections.numeric.TactDivideByZeroInspection"/>
+
+        <codeInsight.declarativeInlayProvider language="Tact"
+                                              bundle="messages.FuncBundle"
+                                              nameKey="numeric.constant.values"
+                                              group="VALUES_GROUP"
+                                              implementationClass="org.ton.intellij.tact.ide.hints.TactConstantHintsProvider"
+                                              isEnabledByDefault="true"
+                                              providerId="tact.constant.hints"/>
+
         <additionalLibraryRootsProvider
                 implementation="org.ton.intellij.tact.project.TactAdditionalLibraryRootsProvider"/>
 

@@ -3,6 +3,7 @@ package org.ton.intellij.func.type.infer
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.util.containers.OrderedSet
+import org.ton.intellij.func.diagnostics.FuncDiagnostic
 import org.ton.intellij.func.psi.FuncExpression
 import org.ton.intellij.func.psi.FuncFunction
 import org.ton.intellij.func.psi.FuncInferenceContextOwner
@@ -14,7 +15,7 @@ import org.ton.intellij.util.recursionGuard
 
 fun inferTypesIn(element: FuncInferenceContextOwner): FuncInferenceResult {
     val lookup = FuncLookup(element.project, element)
-    return recursionGuard(element, { lookup.ctx.infer(element) }, memoize = false)
+    return recursionGuard(element, memoize = false) { lookup.ctx.infer(element) }
         ?: error("Can not run nested type inference")
 }
 
@@ -49,6 +50,7 @@ class FuncInferenceContext(
 ) : FuncInferenceData {
     private val exprTypes = HashMap<FuncExpression, FuncTy>()
     private val resolvedRefs = HashMap<FuncReferenceExpression, OrderedSet<PsiElementResolveResult>>()
+    private val diagnostics = ArrayList<FuncDiagnostic>()
 
     override fun getExprTy(expr: FuncExpression): FuncTy =
         exprTypes[expr] ?: FuncTyUnknown
@@ -67,6 +69,12 @@ class FuncInferenceContext(
 
     fun isTypeInferred(expression: FuncExpression): Boolean {
         return exprTypes.containsKey(expression)
+    }
+
+    fun addDiagnostic(diagnostic: FuncDiagnostic) {
+        if (diagnostic.element.containingFile.isPhysical) {
+            diagnostics.add(diagnostic)
+        }
     }
 
     fun <T : FuncTyFoldable<T>> resolveTypeVarsIfPossible(ty: T): T {

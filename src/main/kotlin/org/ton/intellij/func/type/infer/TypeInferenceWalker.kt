@@ -82,21 +82,21 @@ class FuncTypeInferenceWalker(
             is FuncTernaryExpression -> inferType(expected)
             is FuncUnaryMinusExpression -> inferType(expected)
             else -> FuncTyUnknown
-        }
+        }?.getFuncTy() ?: FuncTyUnknown
 
         ctx.setExprTy(this, ty)
 
         return ty
     }
 
-    private fun inferLiteral(expr: FuncLiteralExpression): FuncTy {
+    private fun inferLiteral(expr: FuncLiteralExpression): FuncTy? {
         // TODO: optimize via stubs
         if (expr.integerLiteral != null || expr.trueKeyword != null || expr.falseKeyword != null) {
             return FuncTyInt
         } else if (expr.stringLiteral != null) {
             return FuncTySlice
         }
-        return FuncTyUnknown
+        return null
     }
 
     private fun FuncReturnStatement.inferType(): FuncTy {

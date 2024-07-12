@@ -25,7 +25,7 @@ abstract class TactContractImplMixin : TactNamedElementImpl<TactContractStub>, T
         get() = TactTyRef(this)
 
     override val superTraits: Sequence<TactTypeDeclarationElement>
-        get() = recursionGuard(this, {
+        get() = recursionGuard(this, memoize = false) {
             sequence {
                 withClause?.typeList?.forEach {
                     val typeDeclaration = (it.reference?.resolve() as? TactTypeDeclarationElement) ?: return@forEach
@@ -33,7 +33,7 @@ abstract class TactContractImplMixin : TactNamedElementImpl<TactContractStub>, T
                     yieldAll(typeDeclaration.superTraits)
                 }
             }
-        }, memoize = false) ?: emptySequence()
+        } ?: emptySequence()
 
     val constants: List<TactConstant>
         get() = CachedValuesManager.getCachedValue(this) {
@@ -69,7 +69,7 @@ abstract class TactContractImplMixin : TactNamedElementImpl<TactContractStub>, T
         }
 
     override val members: Sequence<TactNamedElement>
-        get() = recursionGuard(this, {
+        get() = recursionGuard(this, memoize = false) {
             sequence {
                 yieldAll(constants.asSequence())
                 yieldAll(fields.asSequence())
@@ -79,7 +79,7 @@ abstract class TactContractImplMixin : TactNamedElementImpl<TactContractStub>, T
                     yieldAll(it.members)
                 }
             }
-        }, memoize = false) ?: emptySequence()
+        } ?: emptySequence()
 
     override fun getIcon(flags: Int): Icon = TactIcons.CONTRACT
 }

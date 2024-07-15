@@ -34,7 +34,7 @@ class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncL
     }
 
     private fun collectIncludedFiles(collection: MutableSet<FuncFile>, includeSelf: Boolean): MutableSet<FuncFile> {
-        recursionGuard(this, {
+        recursionGuard(this, false) {
             for (includeDefinition in includeDefinitions) {
                 val nextFile = includeDefinition.reference?.resolve()
                 if (nextFile !is FuncFile) continue
@@ -43,7 +43,7 @@ class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncL
             if (includeSelf) {
                 collection.add(this)
             }
-        }, false)
+        }
         return collection
     }
 

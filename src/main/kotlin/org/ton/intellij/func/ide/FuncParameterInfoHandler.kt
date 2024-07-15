@@ -1,4 +1,4 @@
-package org.ton.intellij.func.ide.hints
+package org.ton.intellij.func.ide
 
 import com.intellij.lang.parameterInfo.*
 import com.intellij.openapi.util.TextRange

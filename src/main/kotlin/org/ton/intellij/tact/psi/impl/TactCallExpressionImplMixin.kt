@@ -30,6 +30,7 @@ abstract class TactCallExpressionImplMixin(node: ASTNode) : ASTWrapperPsiElement
 
             "get",
             "set",
+            "del",
             "asCell" -> {
                 val parent = parent
                 if (parent is TactDotExpression) {

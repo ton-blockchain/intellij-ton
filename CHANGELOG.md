@@ -1,5 +1,23 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [2.3.0]
+
+### Added
+
+- Support for the latest Tact
+  1.4.0 ([#177](https://github.com/ton-blockchain/intellij-ton/issues/177), [#180](https://github.com/ton-blockchain/intellij-ton/issues/180))
+- Inspections for out of range integer values in FunC and Tact
+- Inspections for integer division by zero in FunC and Tact
+- Inspections for integer overflow in FunC
+- Constant expression evaluation in FunC and Tact (with inline
+  hints!) ([#22](https://github.com/ton-blockchain/intellij-ton/issues/22))
+
+### Fixed
+
+- `message` and `bounced` highlight not working in Tact ([#174](https://github.com/ton-blockchain/intellij-ton/issues/174))
+- `com.intellij.diagnostic.PluginException: Template not found: Fift File` ([#182](https://github.com/ton-blockchain/intellij-ton/issues/182))
+- `Storage for FuncNamedElementIndex.storage is already registered` ([#181](https://github.com/ton-blockchain/intellij-ton/issues/181))
+
 ## [2.2.0]
 
 ### Added
@@ -54,6 +72,7 @@
 ## [1.0.3]
 
 ### Added
+
 - Support try-catch statements
 
 ## [1.0.2]

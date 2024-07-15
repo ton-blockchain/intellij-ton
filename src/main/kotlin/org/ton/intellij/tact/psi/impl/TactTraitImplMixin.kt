@@ -26,7 +26,7 @@ abstract class TactTraitImplMixin : TactNamedElementImpl<TactTraitStub>, TactTra
         get() = TactTyRef(this)
 
     override val superTraits: Sequence<TactTypeDeclarationElement>
-        get() = recursionGuard(this, {
+        get() = recursionGuard(this, memoize = false) {
             sequence {
                 withClause?.typeList?.forEach {
                     val typeDeclaration = (it.reference?.resolve() as? TactTypeDeclarationElement) ?: return@forEach
@@ -42,7 +42,7 @@ abstract class TactTraitImplMixin : TactNamedElementImpl<TactTraitStub>, TactTra
                     }
                 }
             }
-        }, memoize = false) ?: emptySequence()
+        } ?: emptySequence()
 
     val constants: List<TactConstant>
         get() = CachedValuesManager.getCachedValue(this) {
@@ -78,7 +78,7 @@ abstract class TactTraitImplMixin : TactNamedElementImpl<TactTraitStub>, TactTra
         }
 
     override val members: Sequence<TactNamedElement>
-        get() = recursionGuard(this, {
+        get() = recursionGuard(this, memoize = false) {
             sequence {
                 yieldAll(constants.asSequence())
                 yieldAll(fields.asSequence())
@@ -88,7 +88,7 @@ abstract class TactTraitImplMixin : TactNamedElementImpl<TactTraitStub>, TactTra
                     yieldAll(it.members)
                 }
             }
-        }, memoize = false) ?: emptySequence()
+        } ?: emptySequence()
 
     override fun toString(): String = "TactTrait(name=$name)"
 

@@ -38,8 +38,9 @@ private fun makeStdlibLibrary(project: Project): TactLibrary? {
     val sourceRoots = mutableSetOf<VirtualFile>()
 
     val projectFile = project.getBaseDirectories().firstOrNull() ?: return null
-    val stdlibSrc = projectFile.findDirectory("node_modules/@tact-lang/compiler/stdlib")
-    if (stdlibSrc != null) {
+    val stdlibSrc =
+        projectFile.findDirectory("node_modules/@tact-lang/compiler/stdlib") ?: projectFile.findDirectory("stdlib")
+    if (stdlibSrc != null && stdlibSrc.children.any { it.name == "stdlib.tact" }) {
         sourceRoots.addAll(stdlibSrc.children)
         val packageJson = stdlibSrc.parent.findFile("package.json")
         if (packageJson != null) {
@@ -53,6 +54,7 @@ private fun makeStdlibLibrary(project: Project): TactLibrary? {
             }
             return TactLibrary("stdlib", sourceRoots, version)
         }
+        return TactLibrary("stdlib", sourceRoots)
     }
-    return TactLibrary("stdlib", sourceRoots)
+    return null
 }

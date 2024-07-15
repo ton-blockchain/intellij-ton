@@ -25,6 +25,7 @@ enum class TactColor(
 
     NUMBER("Number", Default.NUMBER),
     STRING("String", Default.STRING),
+    STRING_ESCAPE("String Escape", Default.VALID_STRING_ESCAPE),
     KEYWORD("Keyword", Default.KEYWORD),
     PRIMITIVE_TYPES("Primitive types", Default.KEYWORD),
     FUNCTION_DECLARATION("Function declaration", Default.FUNCTION_DECLARATION),
@@ -36,6 +37,7 @@ enum class TactColor(
     GLOBAL_VARIABLE("Global variable", Default.GLOBAL_VARIABLE),
     LOCAL_VARIABLE("Local variable", Default.LOCAL_VARIABLE),
     MACRO("Macro", Default.METADATA),
+
     PARAMETER("Parameter", Default.PARAMETER),
     IDENTIFIER("Identifier", Default.IDENTIFIER),
     TYPE_PARAMETER("Type parameter", TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")),

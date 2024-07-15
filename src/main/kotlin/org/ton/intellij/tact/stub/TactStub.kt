@@ -38,7 +38,7 @@ abstract class TactStubElementType<StubT : StubElement<*>, PsiT : TactElement>(
 class TactFileStub(
     file: TactFile?,
 ) : PsiFileStubImpl<TactFile>(file) {
-    override fun getType() = Type
+    override fun getType(): Type = Type
 
     object Type : IStubFileElementType<TactFileStub>(TactLanguage) {
         private const val STUB_VERSION = 7

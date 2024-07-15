@@ -2,10 +2,11 @@ package org.ton.intellij.tact.resolve
 
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.*
+import com.intellij.psi.PsiElementResolveResult
+import com.intellij.psi.PsiPolyVariantReference
+import com.intellij.psi.PsiPolyVariantReferenceBase
+import com.intellij.psi.ResolveResult
 import com.intellij.psi.impl.source.resolve.ResolveCache
-import org.apache.xml.resolver.apps.resolver
-import org.ton.intellij.func.psi.impl.FuncReference
 import org.ton.intellij.tact.psi.TactElement
 
 interface TactReference : PsiPolyVariantReference {

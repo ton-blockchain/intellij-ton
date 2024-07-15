@@ -4,7 +4,7 @@ import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.openapi.vfs.VirtualFile
 
 object FuncFileType : LanguageFileType(FuncLanguage) {
-    override fun getName() = "func"
+    override fun getName() = "FunC"
     override fun getDescription() = "FunC files"
     override fun getDefaultExtension() = "fc"
     val extensions = setOf("func", "fc")

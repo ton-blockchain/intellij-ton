@@ -93,7 +93,7 @@ inline fun <Key : Any> processAllKeys(
     StubIndex.getInstance().processAllKeys(indexKey, processor, scope)
 }
 
-fun <T> recursionGuard(key: Any, block: Computable<T>, memoize: Boolean = true): T? =
+fun <T> recursionGuard(key: Any, memoize: Boolean = true, block: Computable<T>): T? =
     RecursionManager.doPreventingRecursion(key, memoize, block)
 
 inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> {

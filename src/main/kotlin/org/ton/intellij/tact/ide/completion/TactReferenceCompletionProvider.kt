@@ -10,6 +10,7 @@ import org.ton.intellij.tact.psi.TactReferenceExpression
 import org.ton.intellij.tact.psi.impl.isGet
 import org.ton.intellij.tact.stub.index.TactFunctionIndex
 import org.ton.intellij.tact.type.TactLookup
+import org.ton.intellij.tact.type.collectVariableCandidates
 import org.ton.intellij.tact.type.ty
 import org.ton.intellij.util.ancestorStrict
 import org.ton.intellij.util.processAllKeys
@@ -27,7 +28,7 @@ class TactReferenceCompletionProvider : TactCompletionProvider() {
         val project = position.project
         val lookup = TactLookup(project, inferenceContextOwner)
 
-        lookup.ctx.collectVariableCandidates(position).distinctBy { it.name }.forEach {
+        collectVariableCandidates(position).distinctBy { it.name }.forEach {
             result.addElement(LookupElementBuilder.createWithIcon(it))
         }
 

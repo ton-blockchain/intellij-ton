@@ -1,0 +1,12 @@
+<html>
+<body>
+Reports expressions that overflow during computation.
+Usually, this happens by accident and indicates a bug.
+<p><b>Examples:</b></p>
+<pre><code>
+  ;; (2 ** 256 - 1) + 1
+  const int a = 115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1;
+  const int b = 1 << 256;
+</code></pre>
+</body>
+</html>

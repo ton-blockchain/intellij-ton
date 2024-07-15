@@ -1,11 +1,10 @@
 package org.ton.intellij.tact.stub
 
 import com.intellij.psi.stubs.*
+import com.intellij.util.ArrayFactory
 import com.intellij.util.io.StringRef
 import org.ton.intellij.tact.psi.TactTrait
 import org.ton.intellij.tact.psi.impl.TactTraitImpl
-import org.ton.intellij.tact.stub.index.indexMessage
-import org.ton.intellij.tact.stub.index.indexStruct
 import org.ton.intellij.tact.stub.index.indexTrait
 
 class TactTraitStub(
@@ -27,6 +26,11 @@ class TactTraitStub(
     )
 
     object Type : TactStubElementType<TactTraitStub, TactTrait>("TRAIT") {
+        val EMPTY_ARRAY = emptyArray<TactTrait>()
+        val ARRAY_FACTORY: ArrayFactory<TactTrait?> = ArrayFactory {
+            if (it == 0) EMPTY_ARRAY else arrayOfNulls(it)
+        }
+
         override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>): TactTraitStub {
             return TactTraitStub(
                 parentStub,

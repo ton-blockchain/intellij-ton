@@ -87,6 +87,14 @@
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.func.inspection.FuncUnusedTypeParameterInspection"/>
 
+        <!-- style issues -->
+        <localInspection language="FunC" groupPath="FunC"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.constant.expression.name"
+                         groupKey="group.style.name"
+                         enabledByDefault="true" level="INFORMATION"
+                         implementationClass="org.ton.intellij.func.inspection.style.FuncConstantExpressionInspection"/>
+
         <!-- numeric issues -->
         <localInspection language="FunC" groupPath="FunC"
                          enabledByDefault="true" level="WARNING"

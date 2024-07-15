@@ -51,6 +51,12 @@
                          enabledByDefault="true" level="ERROR"
                          implementationClass="org.ton.intellij.tact.inspections.numeric.TactDivideByZeroInspection"/>
 
+        <localInspection language="Tact" groupPath="Tact" bundle="messages.InspectionBundle"
+                         key="inspection.constant.expression.name" groupKey="group.style.name"
+                         enabledByDefault="true" level="INFORMATION"
+                         implementationClass="org.ton.intellij.tact.inspections.style.TactConstantExpressionInspection"
+        />
+
         <codeInsight.declarativeInlayProvider language="Tact"
                                               bundle="messages.FuncBundle"
                                               nameKey="numeric.constant.values"

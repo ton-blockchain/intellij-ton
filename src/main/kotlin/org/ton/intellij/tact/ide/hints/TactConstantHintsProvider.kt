@@ -5,7 +5,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.refactoring.suggested.endOffset
-import org.ton.intellij.tact.eval.evaluate
+import org.ton.intellij.tact.eval.TactConstantExpressionEvaluator
 import org.ton.intellij.tact.psi.TactConstant
 import org.ton.intellij.tact.psi.TactIntegerExpression
 
@@ -24,7 +24,9 @@ class TactConstantHintsProvider : InlayHintsProvider {
             if (expression is TactIntegerExpression) {
                 return
             }
-            val value = constant.expression?.evaluate() ?: return
+            val value = constant.expression?.let {
+                TactConstantExpressionEvaluator.compute(it.project, it)
+            } ?: return
             sink.addPresentation(InlineInlayPosition(constant.identifier.endOffset, true), hasBackground = true) {
                 val text = buildString {
                     append("= ")

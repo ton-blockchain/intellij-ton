@@ -35,6 +35,7 @@ data class FuncTensorValue(val values: List<FuncValue?>) : FuncValue {
     }
 }
 
+@OptIn(ExperimentalUnsignedTypes::class)
 val FuncLiteralExpression.value: FuncValue
     get() {
         if (trueKeyword != null) {
@@ -50,18 +51,21 @@ val FuncLiteralExpression.value: FuncValue
             if (isNegative) {
                 text = text.substring(1)
             }
-            val integer = try {
+            var integer = try {
                 if (text.startsWith("0x") || text.startsWith("0X")) {
                     BigInteger(text.substring(2), 16)
                 } else if (text.startsWith("0b") || text.startsWith("0B")) {
                     BigInteger(text.substring(2), 2)
                 } else {
-                    BigInteger(integerLiteral.text)
+                    BigInteger(text)
                 }
             } catch (e: NumberFormatException) {
                 return FuncIntValue(BigInteger.ZERO)
             }
-            return if (isNegative) FuncIntValue(-integer) else FuncIntValue(integer)
+            if (isNegative) {
+                integer = integer.negate()
+            }
+            return FuncIntValue(integer)
         }
         val stringLiteral = stringLiteral
         if (stringLiteral != null) {
@@ -72,6 +76,13 @@ val FuncLiteralExpression.value: FuncValue
                 return FuncIntValue(BigInteger.ZERO) // TODO: Slice type
             }
             when (tag) {
+                'u' -> {
+                    if (text.length <= 3) return FuncIntValue(BigInteger.ZERO)
+                    val rawValue = text.substring(1, text.length - 2)
+                    val intValue = BigInteger(Hex.encodeHexString(rawValue.encodeToByteArray()), 16)
+                    return FuncIntValue(intValue)
+                }
+
                 'h' -> {
                     if (text.length <= 3) return FuncIntValue(BigInteger.ZERO)
                     val rawValue = text.substring(1, text.length - 2)

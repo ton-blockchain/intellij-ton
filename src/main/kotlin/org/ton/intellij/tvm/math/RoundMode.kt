@@ -25,11 +25,11 @@ enum class RoundMode {
 
 fun BigInteger.divModFloor(other: BigInteger): Pair<BigInteger, BigInteger> {
     val (d, r) = this.divideAndRemainder(other)
-    if (d.signum() == r.signum()) {
+    if (this.signum() == other.signum()) {
         return d to r
     }
     return if (r == BigInteger.ZERO) {
-        -d to r
+        d to r
     } else {
         d - BigInteger.ONE to other - r
     }

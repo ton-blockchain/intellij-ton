@@ -1,8 +1,9 @@
 package org.ton.intellij.tact.inspections.numeric
 
 import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.openapi.project.Project
+import org.ton.intellij.tact.eval.TactConstantExpressionEvaluator
 import org.ton.intellij.tact.eval.TactIntValue
-import org.ton.intellij.tact.eval.evaluate
 import org.ton.intellij.tact.inspections.TactLocalInspectionTool
 import org.ton.intellij.tact.psi.TactBinExpression
 import org.ton.intellij.tact.psi.TactExpression
@@ -30,14 +31,14 @@ class TactDivideByZeroInspection : TactLocalInspectionTool() {
             if (binaryOp.div == null) {
                 return
             }
-            if (o.right?.isZero() == true) {
+            if (o.right?.isZero(holder.project) == true) {
                 holder.registerProblem(o, InspectionBundle.message("numeric.divide_by_zero"))
             }
         }
     }
 
-    private fun TactExpression.isZero(): Boolean {
-        val value = evaluate()
+    private fun TactExpression.isZero(project: Project): Boolean {
+        val value = TactConstantExpressionEvaluator.compute(project, this)
         return value is TactIntValue && value.value == BigInteger.ZERO
     }
 }

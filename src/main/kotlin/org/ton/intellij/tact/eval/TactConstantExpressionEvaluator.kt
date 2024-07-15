@@ -1,22 +1,25 @@
 package org.ton.intellij.tact.eval
 
+import com.intellij.openapi.project.Project
 import org.ton.intellij.tact.psi.*
 import org.ton.intellij.tvm.math.divModFloor
 import org.ton.intellij.util.recursionGuard
 import java.math.BigInteger
 
-fun TactExpression.evaluate(): TactValue? = TactEvaluator.evaluate(this)
 
-object TactEvaluator {
-    fun evaluate(expression: TactExpression): TactValue? {
+object TactConstantExpressionEvaluator {
+    fun compute(project: Project, expression: TactExpression): TactValue? {
         return when (expression) {
             is TactIntegerExpression -> expression.eval()
             is TactUnaryExpression -> expression.eval()
             is TactBinExpression -> expression.eval()
             is TactReferenceExpression -> expression.eval()
+            is TactParenExpression -> compute(project, expression.expression ?: return null)
             else -> null
         }
     }
+
+    private fun TactExpression.compute(): TactValue? = compute(this.project, this)
 
     @Suppress("HardCodedStringLiteral")
     private fun TactIntegerExpression.eval(): TactValue? {
@@ -37,7 +40,7 @@ object TactEvaluator {
     }
 
     private fun TactUnaryExpression.eval(): TactValue? {
-        val value = expression?.evaluate() ?: return null
+        val value = expression?.compute() ?: return null
         when (value) {
             is TactIntValue -> when {
                 plus != null -> return value
@@ -55,8 +58,8 @@ object TactEvaluator {
     }
 
     private fun TactBinExpression.eval(): TactValue? {
-        val rightValue = right?.evaluate() ?: return null
-        val leftValue = left.evaluate() ?: return null
+        val rightValue = right?.compute() ?: return null
+        val leftValue = left.compute() ?: return null
         val op = binOp
         when {
             op.plus != null -> {
@@ -179,8 +182,8 @@ object TactEvaluator {
     private fun TactReferenceExpression.eval(): TactValue? = recursionGuard(this, memoize = false) {
         val resolved = reference?.resolve() ?: return@recursionGuard null
         when (resolved) {
-            is TactLetStatement -> resolved.expression?.evaluate()
-            is TactConstant -> resolved.expression?.evaluate()
+            is TactLetStatement -> resolved.expression?.compute()
+            is TactConstant -> resolved.expression?.compute()
             else -> null
         }
     }

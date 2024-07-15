@@ -19,6 +19,9 @@
 -
 `com.intellij.diagnostic.PluginException: Template not found: Fift File` ([#182](https://github.com/ton-blockchain/intellij-ton/issues/182))
 
+-
+`Storage for FuncNamedElementIndex.storage is already registered` ([#181](https://github.com/ton-blockchain/intellij-ton/issues/181))
+
 ## [2.2.0]
 
 ### Added

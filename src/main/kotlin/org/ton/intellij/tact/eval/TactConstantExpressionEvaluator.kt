@@ -6,7 +6,6 @@ import org.ton.intellij.tvm.math.divModFloor
 import org.ton.intellij.util.recursionGuard
 import java.math.BigInteger
 
-
 object TactConstantExpressionEvaluator {
     fun compute(project: Project, expression: TactExpression): TactValue? {
         return when (expression) {

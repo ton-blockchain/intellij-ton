@@ -7,12 +7,15 @@ import com.intellij.lang.findUsages.FindUsagesProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.tree.TokenSet
 import org.ton.intellij.tlb.lexer.TlbLexerAdapter
+import org.ton.intellij.tlb.psi.TlbConstructor
+import org.ton.intellij.tlb.psi.TlbElementTypes
 import org.ton.intellij.tlb.psi.TlbNamedElement
-import org.ton.intellij.tlb.psi.TlbTypes
 
 class TlbFindUsagesProvider : FindUsagesProvider {
     override fun getWordsScanner(): WordsScanner = TlbWordScanner()
-    override fun canFindUsagesFor(element: PsiElement) = element is TlbNamedElement
+    override fun canFindUsagesFor(element: PsiElement): Boolean {
+        return element is TlbNamedElement && element !is TlbConstructor
+    }
 
     override fun getHelpId(element: PsiElement) = HelpID.FIND_OTHER_USAGES
     override fun getType(element: PsiElement) = ""
@@ -22,7 +25,7 @@ class TlbFindUsagesProvider : FindUsagesProvider {
 
 class TlbWordScanner : DefaultWordsScanner(
     TlbLexerAdapter(),
-    TokenSet.create(TlbTypes.IDENTIFIER),
+    TokenSet.create(TlbElementTypes.IDENTIFIER),
     TlbParserDefinition.COMMENTS,
     TokenSet.EMPTY
 )

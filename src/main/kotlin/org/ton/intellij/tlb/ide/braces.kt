@@ -4,7 +4,7 @@ import com.intellij.lang.BracePair
 import com.intellij.lang.PairedBraceMatcher
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
-import org.ton.intellij.tlb.psi.TlbTypes.*
+import org.ton.intellij.tlb.psi.TlbElementTypes.*
 
 class TlbBraceMatcher : PairedBraceMatcher {
     override fun getPairs(): Array<BracePair> = BRACE_PAIRS

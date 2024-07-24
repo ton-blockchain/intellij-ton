@@ -11,27 +11,33 @@ class TlbAnnotator : Annotator {
 
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         when (element) {
-            is TlbConstructorName -> holder.annotateInfo(element, TlbColor.CONSTRUCTOR_NAME)
-            is TlbFieldName -> holder.annotateInfo(element, TlbColor.FIELD_NAME)
-            is TlbImplicitFieldName -> holder.annotateInfo(element, TlbColor.IMPLICIT_FIELD_NAME)
-            is TlbImplicitFieldType -> holder.annotateInfo(element, TlbColor.TYPE)
-            is TlbCombinatorName -> holder.annotateInfo(element, TlbColor.COMBINATOR_NAME)
-            is TlbNamedRefMixin -> {
-                when (element.reference.multiResolve().firstOrNull()) {
-                    is TlbFieldName -> holder.annotateInfo(element, TlbColor.FIELD_NAME)
-                    is TlbNamedField -> holder.annotateInfo(element, TlbColor.FIELD_NAME)
-                    is TlbImplicitFieldName -> holder.annotateInfo(element, TlbColor.IMPLICIT_FIELD_NAME)
-                    is TlbImplicitField -> holder.annotateInfo(element, TlbColor.IMPLICIT_FIELD_NAME)
-                    is TlbCombinatorName -> holder.annotateInfo(element, TlbColor.TYPE)
-                    else -> {
-                        if (element.name in TlbParserDefinition.INBUILT_TYPE_NAMES) {
-                            holder.annotateInfo(element, TlbColor.TYPE)
-                        } else if (element.containingFile.isPhysical) {
-                            holder.annotateUnknown(element)
-                        }
-                    }
-                }
+            is TlbConstructor -> {
+                holder.annotateInfo(element.identifier, TlbColor.CONSTRUCTOR_NAME)
             }
+            is TlbField -> {
+
+            }
+//            is TlbConstructorName -> holder.annotateInfo(element, TlbColor.CONSTRUCTOR_NAME)
+//            is TlbFieldName -> holder.annotateInfo(element, TlbColor.FIELD_NAME)
+//            is TlbImplicitFieldName -> holder.annotateInfo(element, TlbColor.IMPLICIT_FIELD_NAME)
+//            is TlbImplicitFieldType -> holder.annotateInfo(element, TlbColor.TYPE)
+//            is TlbCombinatorName -> holder.annotateInfo(element, TlbColor.COMBINATOR_NAME)
+//            is TlbNamedRefMixin -> {
+//                when (element.reference.multiResolve().firstOrNull()) {
+//                    is TlbFieldName -> holder.annotateInfo(element, TlbColor.FIELD_NAME)
+//                    is TlbNamedField -> holder.annotateInfo(element, TlbColor.FIELD_NAME)
+//                    is TlbImplicitFieldName -> holder.annotateInfo(element, TlbColor.IMPLICIT_FIELD_NAME)
+//                    is TlbImplicitField -> holder.annotateInfo(element, TlbColor.IMPLICIT_FIELD_NAME)
+//                    is TlbCombinatorName -> holder.annotateInfo(element, TlbColor.TYPE)
+//                    else -> {
+//                        if (element.name in TlbParserDefinition.INBUILT_TYPE_NAMES) {
+//                            holder.annotateInfo(element, TlbColor.TYPE)
+//                        } else if (element.containingFile.isPhysical) {
+//                            holder.annotateUnknown(element)
+//                        }
+//                    }
+//                }
+//            }
         }
     }
 

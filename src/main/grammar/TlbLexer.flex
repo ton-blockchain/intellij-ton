@@ -4,9 +4,8 @@ import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.Stack;
 
-import static com.intellij.psi.TokenType.BAD_CHARACTER;
-import static com.intellij.psi.TokenType.WHITE_SPACE;
-import static org.ton.intellij.tlb.psi.TlbTypes.*;
+import static com.intellij.psi.TokenType.*;
+import static org.ton.intellij.tlb.psi.TlbElementTypes.*;
 
 %%
 %unicode
@@ -75,15 +74,15 @@ import static org.ton.intellij.tlb.psi.TlbTypes.*;
 EOL=\R
 
 WHITE_SPACE_CHAR = [\ \n\t\f\r]
-HEX_TAG=#([0-9a-fA-F]+_?|_)
-BINARY_TAG=\$([01]*|_)
 
 LINE_DOCUMENTATION = "/""/""/"[^\n]*
 LINE_COMMENT = "/""/"[^\n]*
 
 NUMBER=[0-9]+
-IDENTIFIER=[a-zA-Z_][0-9a-zA-Z0-9_]*
-PREDIFINED_TYPE=u?int[0-9]+|Cell
+IDENTIFIER=[^(){}:;?#$.\^~#\s]+
+BITSTRING=(#[0-9a-fA-F]+_?)|(\$[01]*_?)
+UINT=uint[0-9]*
+BITS=bits[0-9]+
 
 %xstate BLOCK_COMMENT_STATE, DOC_COMMENT_STATE
 
@@ -128,13 +127,10 @@ PREDIFINED_TYPE=u?int[0-9]+|Cell
     [\s\S] {}
 }
 
-({WHITE_SPACE_CHAR})+ { return WHITE_SPACE; }
+\s+ { return WHITE_SPACE; }
 {LINE_DOCUMENTATION} { return LINE_DOCUMENTATION; }
 {LINE_COMMENT} { return LINE_COMMENT; }
-
-{NUMBER} { return NUMBER; }
-{PREDIFINED_TYPE} { return PREDIFINED_TYPE; }
-{IDENTIFIER} { return IDENTIFIER; }
+{BITSTRING} { return BITSTRING; }
 
 "+" { return PLUS; }
 "-" { return MINUS; }
@@ -152,19 +148,26 @@ PREDIFINED_TYPE=u?int[0-9]+|Cell
 "." { return DOT; }
 "~" { return TILDE; }
 "^" { return CIRCUMFLEX; }
-"==" { return EQ; }
-"<" { return LESS; }
-">" { return GREATER; }
+
 "<=" { return LEQ; }
 ">=" { return GEQ; }
+"<" { return LESS; }
+">" { return GREATER; }
+"==" { return EQ; }
 "!=" { return NEQ; }
 
-{HEX_TAG} { return HEX_TAG; }
-{BINARY_TAG} { return BINARY_TAG; }
-
-"##" { return DOUBLE_TAG; }
+"##" { return NAT_WIDTH; }
 "#<" { return NAT_LESS; }
 "#<=" { return NAT_LEQ; }
-"#" { return TAG; }
+"#" { return NAT; }
+"Any" { return ANY_KEYWORD; }
+"Type" { return TYPE_KEYWORD; }
+"Cell" { return CELL_KEYWORD; }
+"int" { return INT_KEYWORD; }
+{UINT} { return UINT_KEYWORD; }
+{BITS} { return BITS_KEYWORD; }
+
+{NUMBER} { return NUMBER; }
+{IDENTIFIER} { return IDENTIFIER; }
 
 [^] { return BAD_CHARACTER; }

@@ -8,14 +8,17 @@
     psiImplPackage="org.ton.intellij.tlb.psi.impl"
     implements="org.ton.intellij.tlb.psi.TlbElement"
 
-    elementTypeHolderClass="org.ton.intellij.tlb.psi.TlbTypes"
+    elementTypeHolderClass="org.ton.intellij.tlb.psi.TlbElementTypes"
     elementTypeClass="org.ton.intellij.tlb.psi.TlbElementType"
     tokenTypeClass="org.ton.intellij.tlb.psi.TlbTokenType"
 
-    tokens = [
-        HEX_TAG='regexp:#([0-9a-fA-F]+_?|_)'
-        BINARY_TAG='regexp:\$[01]*_?'
+    extends(".*Expression")=Expression
+    extends(".*Field")=Field
 
+    generateTokenAccessors=true
+
+    tokens = [
+        IDENTIFIER = "regexp:[a-zA-Z_$?:][0-9a-zA-Z_$?:]*"
         PLUS='+'
         MINUS='-'
         TIMES='*'
@@ -32,8 +35,6 @@
         QUESTION='?'
         DOT='.'
         TILDE='~'
-        DOUBLE_TAG='##'
-        TAG='#'
         CIRCUMFLEX='^'
         DOLLAR='$'
         EQ='=='
@@ -44,62 +45,119 @@
         NEQ='!='
         NAT_LESS='#<'
         NAT_LEQ='#<='
+        NAT='#'
+        NAT_WIDTH='##'
+        NAT_LESS='#<'
+        NAT_LEQ='#<='
+        ANY_KEYWORD='Any'
+        CELL_KEYWORD='Cell'
+        TYPE_KEYWORD='Type'
+        INT_KEYWORD='int'
+        UINT_KEYWORD='uint'
+        BITS_KEYWORD='bits'
+        BITSTRING='regexp:#[0-9a-fA-F]+_?|$[01]*_?'
         WHITE_SPACE='regexp:\s+'
-        COMMENT='regexp:(//.*)'
+        LINE_COMMENT='LINE_COMMENT'
+        BLOCK_COMMENT='BLOCK_COMMENT'
+        BLOCK_DOCUMENTATION='BLOCK_DOCUMENTATION'
+        LINE_DOCUMENTATION='LINE_DOCUMENTATION'
         NUMBER='regexp:[0-9]+'
-        PREDIFINED_TYPE='PREDIFINED_TYPE'
-        IDENTIFIER='regexp:[a-zA-Z_][0-9a-zA-Z0-9_]*'
     ]
 }
 
-root ::= combinator_declaration*
+file ::= TypeDef*
+TypeDef ::= !<<eof>> TypeDef_with_recovery ';'{
+    pin=1
+}
+private TypeDef_with_recovery ::= Constructor '=' IDENTIFIER TypeParam* {
+    recoverWhile=TypeDef_recover
+    pin=2
+}
+private TypeDef_recover ::= !(';')
 
-combinator_declaration ::= [ '!' ] constructor [ constructor_prefix ] field_definition_list '=' combinator ';' {pin=2}
-
-constructor ::= ( '_' | constructor_name )
-constructor_name ::= IDENTIFIER
-constructor_prefix ::= HEX_TAG | BINARY_TAG
-combinator ::= combinator_name type_expression* {pin=1}
-combinator_name ::= IDENTIFIER {
-    implements = "org.ton.intellij.tlb.psi.TlbNamedElement"
-    mixin = "org.ton.intellij.tlb.psi.TlbNamedElementImpl"
+Constructor ::= IDENTIFIER ConstructorTag? ConstructorFieldList {
+    pin=1
+    implements="org.ton.intellij.tlb.psi.TlbNamedElement"
+    mixin = "org.ton.intellij.tlb.psi.impl.TlbConstructorImplMixin"
+    stubClass = "org.ton.intellij.tlb.stub.TlbConstructorStub"
+    elementTypeFactory = "org.ton.intellij.tlb.stub.TlbStubKt.factory"
 }
 
-private field_definition_list_recovery ::= !( '=' | ']' )
-field_definition_list ::= field_definition* {recoverWhile=field_definition_list_recovery}
-field_definition ::= implicit_definition | named_field | cell_ref | paren_expression | expr95
-implicit_definition ::= '{' ( implicit_field | expression ) '}' {pin=1}
-named_field ::= field_name ':' expr95 {pin=2}
-field_name ::= '_' | IDENTIFIER {
-    implements = "org.ton.intellij.tlb.psi.TlbNamedElement"
-    mixin = "org.ton.intellij.tlb.psi.TlbNamedElementImpl"
+ConstructorTag ::= BITSTRING
+ConstructorFieldList ::= Field*
+
+Field ::= ImplicitField | ConstraintField | ExplicitField
+ImplicitField ::= '{' ImplicitField_def '}' {
+    pin=2
 }
-implicit_field ::= implicit_field_name ':' implicit_field_type {pin=2}
-implicit_field_type ::= '#' | 'Type'
-implicit_field_name ::= IDENTIFIER {
-    implements = "org.ton.intellij.tlb.psi.TlbNamedElement"
-    mixin = "org.ton.intellij.tlb.psi.TlbNamedElementImpl"
+private ImplicitField_def ::= IDENTIFIER ':' ('Type' | '#') {
+    pin=2
+    recoverWhile=ImplicitField_recovery
+}
+private ImplicitField_recovery ::= !('}'|'{'|'('|')'|'='|';')
+
+ConstraintField ::= '{' Expression '}' {
+    pin=2
+}
+ExplicitField ::= [ ( IDENTIFIER | '_') ':' ] expr95 {
 }
 
-anonymous_constructor ::= '[' field_definition_list ']' {pin=1}
+TypeParam ::= '~'? TerminateExpression
 
-cell_ref ::= '^' type_expression {pin=1}
+Expression ::= RelCompBinExpression // parse_expr10
+    | AddExpression // parse_expr20
+    | MulExpression // parse_expr30
+    | ApplyExpression
+    | expr95
 
-expression ::= expr10
-private expr10 ::= expr20 '=' expr20 | expr20 '<=' expr20 | expr20 '<' expr20 | expr20 '>=' expr20 | expr20 '>' expr20 | expr20
-private expr20 ::= expr30 ( '+' expr30 )*
-private expr30 ::= expr90 ( '*' expr90 )*
-private expr90 ::= expr95+
-private expr95 ::= expr97 [ cond_type ]
-private cond_type ::= '?' type_expression {pin=1}
-private expr97 ::= type_expression [ '.' type_expression ]
-
-type_expression ::= [ '~' ] ( paren_expression | anonymous_constructor | cell_ref | builtin_type | NUMBER | named_ref )
-named_ref ::= IDENTIFIER {
-    implements = "org.ton.intellij.tlb.psi.TlbNamedElement"
-    mixin = "org.ton.intellij.tlb.psi.TlbNamedRefMixin"
+ApplyExpression ::= Expression &('('|IDENTIFIER|NUMBER|'~'|'^'|'['|BuiltInTypeExpression) Expression {
+    rightAssociative=true
 }
-private paren_expression ::= "(" expression ')' {pin=1}
-builtin_type ::= '#<' | '#<=' | '##' | '#' | PREDIFINED_TYPE
-//noinspection BnfUnusedRule
-private unused_in_bnf ::= LINE_COMMENT | BLOCK_COMMENT | LINE_DOCUMENTATION | BLOCK_DOCUMENTATION
+
+private expr95 ::= ConditionalExpression | GetBitExpression | TerminateExpression
+
+RelCompBinExpression ::= Expression RelCompBinOp Expression
+AddExpression ::= Expression AddBinOp Expression
+MulExpression ::= Expression MulBinOp Expression
+ConditionalExpression ::= Expression '?' Expression {
+    pin=2
+    methods=[
+        condition="/Expression[0]"
+        thenBranch="/Expression[1]"
+    ]
+}
+GetBitExpression ::= Expression '.' Expression {
+    pin = 2
+}
+
+TerminateExpression ::= ParenExpression
+    | IntegerExpression
+    | AnonConstructorExpression
+    | CellRefExpression
+    | ReferenceExpression
+    | BuiltInTypeExpression
+
+RelCompBinOp ::= '>' | '>=' | '<' | '<=' | '=' { name = "operator" }
+AddBinOp ::= '+' { name = "operator" }
+MulBinOp ::= '*' { name = "operator" }
+
+ParenExpression ::= '(' Expression ')' {
+    pin = 1
+}
+IntegerExpression ::= NUMBER
+AnonConstructorExpression ::= '[' ConstructorFieldList ']' {
+    pin = 1
+}
+CellRefExpression ::= '^' TerminateExpression {
+    pin = 1
+}
+ReferenceExpression ::= '~'? IDENTIFIER
+BuiltInTypeExpression ::= ANY_KEYWORD
+    | CELL_KEYWORD
+    | INT_KEYWORD
+    | UINT_KEYWORD
+    | BITS_KEYWORD
+    | NAT
+    | NAT_LESS
+    | NAT_LEQ
+    | NAT_WIDTH

@@ -6,7 +6,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.tree.IElementType
 import org.ton.intellij.tlb.lexer.TlbLexerAdapter
-import org.ton.intellij.tlb.psi.TlbTypes.*
 
 class TlbSyntaxHighlighterFactory : SyntaxHighlighterFactory() {
     override fun getSyntaxHighlighter(project: Project?, virtualFile: VirtualFile?) = TlbSyntaxHighlighter
@@ -21,14 +20,14 @@ object TlbSyntaxHighlighter : SyntaxHighlighterBase() {
         in TlbParserDefinition.BRACES -> TlbColor.BRACES
         in TlbParserDefinition.BRACKETS -> TlbColor.BRACKETS
         in TlbParserDefinition.PARENTHESES -> TlbColor.PARENTHESES
-        SEMICOLUMN -> TlbColor.SEMICOLON
-        NUMBER -> TlbColor.NUMBER
-        HEX_TAG -> TlbColor.HEX_TAG
-        BINARY_TAG -> TlbColor.BINARY_TAG
-        PREDIFINED_TYPE -> TlbColor.TYPE
-        IDENTIFIER -> TlbColor.FIELD_NAME
-        CIRCUMFLEX, COLUMN, EQ -> TlbColor.OPERATION_SIGN
-        in TlbParserDefinition.BUILTIN_TYPES -> TlbColor.TYPE
+//        SEMICOLUMN -> TlbColor.SEMICOLON
+//        NUMBER -> TlbColor.NUMBER
+//        HEX_TAG -> TlbColor.HEX_TAG
+//        BINARY_TAG -> TlbColor.BINARY_TAG
+//        PREDIFINED_TYPE -> TlbColor.TYPE
+//        IDENTIFIER -> TlbColor.FIELD_NAME
+//        CIRCUMFLEX, COLUMN, EQ -> TlbColor.OPERATION_SIGN
+//        in TlbParserDefinition.BUILTIN_TYPES -> TlbColor.TYPE
         else -> null
     }.let {
         pack(it?.textAttributesKey)

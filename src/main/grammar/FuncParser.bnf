@@ -141,7 +141,11 @@ private TopLevelDefinition_first ::= '#include' | '#pragma' | 'global' | 'const'
 
 private macro ::= IncludeDefinition | PragmaDefinition
 RawString ::= RAW_STRING_ELEMENT*
-StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE
+StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE {
+    pin=1
+    implements=["com.intellij.psi.PsiLanguageInjectionHost"]
+    mixin="org.ton.intellij.func.psi.impl.FuncStringLiteralMixin"
+}
 
 GlobalVarList ::= 'global' << comma_separated_list GlobalVar >> ';' {
     pin=1

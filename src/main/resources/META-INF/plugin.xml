@@ -8,6 +8,7 @@
         Ideal for Web3 developers working within the TON ecosystem.
     </description>
 
+    <xi:include href="asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="func.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="tact.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="tlb.xml" xpointer="xpointer(/idea-plugin/*)"/>

@@ -74,6 +74,8 @@
         <languageInjectionContributor language="FunC"
                                       implementationClass="org.ton.intellij.func.ide.FuncLanguageInjector"/>
 
+        <languageInjector implementation="org.ton.intellij.func.psi.FuncStringAsmInjector"/>
+
         <localInspection language="FunC" displayName="Unused function inspection" groupPath="FunC"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.func.inspection.FuncUnusedFunctionInspection"/>

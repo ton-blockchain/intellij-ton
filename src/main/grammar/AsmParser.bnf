@@ -1,0 +1,203 @@
+{
+    parserClass='org.ton.intellij.asm.parser.AsmParser'
+
+    psiClassPrefix='Asm'
+    psiImplClassSuffix='Impl'
+    psiPackage='org.ton.intellij.asm.psi'
+    psiImplPackage='org.ton.intellij.asm.psi.impl'
+    implements='org.ton.intellij.asm.psi.AsmElement'
+
+    elementTypeHolderClass="org.ton.intellij.asm.AsmElementTypes"
+    elementTypeClass="org.ton.intellij.asm.psi.AsmElementType"
+
+    generateTokenAccessors=true
+
+    tokens = [
+        INTEGER='regexp:[0-9]+'
+        STACK_REGISTER='regexp:s[0-9]+|s\(-[0-9]+\)'
+        CONTROL_REGISTER='regexp:c[0-7]'
+        UNKNOWN_IDENTIFIER='regexp:[a-zA-Z_][a-zA-Z0-9_]*'
+    ]
+}
+root ::= instruction*
+private instruction ::= StackPrimitives | CompoundStackPrimitives | NullPrimitives | TuplePrimitives | UNKNOWN_IDENTIFIER
+
+private StackPrimitives ::= nop_op
+    | swap_op
+    | xch0_op
+    | xchg_op
+    | pushctr_op
+    | popctr_op
+    | push_op
+    | dup_op
+    | over_op
+    | pop_op
+    | drop_op
+    | nip_op
+
+
+nop_op ::= NOP
+swap_op ::= SWAP
+xch0_op ::= STACK_REGISTER XCHG0
+xchg_op ::= STACK_REGISTER STACK_REGISTER XCHG
+pushctr_op ::= CONTROL_REGISTER PUSHCTR
+popctr_op ::= CONTROL_REGISTER POPCTR
+push_op ::= (STACK_REGISTER|CONTROL_REGISTER) PUSH
+dup_op ::= DUP
+over_op ::= OVER
+pop_op ::= (STACK_REGISTER|CONTROL_REGISTER) POP
+drop_op ::= DROP
+nip_op ::= NIP
+
+private CompoundStackPrimitives ::= xchg3_op
+    | xchg2_op
+    | xcpu_op
+    | puxc_op
+    | push2_op
+    | xchg3_l_op
+    | xc2pu_op
+    | xcpuxc_op
+    | xcpu2_op
+    | puxc2_op
+    | puxcpu_op
+    | pu2xc_op
+    | push3_op
+    | blkswap_op
+    | roll_op
+    | rollrev_op
+    | rot2_op
+
+xchg3_op ::= STACK_REGISTER STACK_REGISTER STACK_REGISTER XCHG3
+xchg2_op ::= STACK_REGISTER STACK_REGISTER XCHG2
+xcpu_op  ::= STACK_REGISTER STACK_REGISTER XCPU
+puxc_op  ::= STACK_REGISTER STACK_REGISTER PUXC
+push2_op ::= STACK_REGISTER STACK_REGISTER PUSH2
+//noinspection BnfSuspiciousToken
+xchg3_l_op ::= STACK_REGISTER STACK_REGISTER STACK_REGISTER XCHG3_l
+xc2pu_op ::= STACK_REGISTER STACK_REGISTER XC2PU
+xcpuxc_op ::= STACK_REGISTER STACK_REGISTER STACK_REGISTER XCPUXC
+xcpu2_op ::= STACK_REGISTER STACK_REGISTER STACK_REGISTER XCPU2
+puxc2_op ::= STACK_REGISTER STACK_REGISTER STACK_REGISTER PUXC2
+puxcpu_op ::= STACK_REGISTER STACK_REGISTER STACK_REGISTER PUXCPU
+pu2xc_op ::= STACK_REGISTER STACK_REGISTER STACK_REGISTER PU2XC
+push3_op ::= STACK_REGISTER STACK_REGISTER STACK_REGISTER PUSH3
+blkswap_op ::= INTEGER INTEGER BLKSWAP
+roll_op ::= INTEGER ROLL
+rollrev_op ::= INTEGER (ROLLREV|'-ROLL')
+rot2_op ::= ROT2 | '2ROT'
+
+private NullPrimitives ::= ISNULL | NULL | PUSHNULL
+
+private TuplePrimitives ::= TUPLE_op
+    | NIL_op
+    | SINGLE_op
+    | PAIR_op
+    | TRIPLE_op
+    | INDEX_op
+    | FIRST_op
+    | SECOND_op
+    | THIRD_op
+    | UNTUPLE_op
+    | UNSINGLE_op
+    | UNPAIR_op
+    | UNTRIPLE_op
+    | UNPACKFIRST_op
+    | CHKTUPLE_op
+    | EXPLODE_op
+    | SETINDEX_op
+    | SETFIRST_op
+    | SETSECOND_op
+    | SETTHIRD_op
+    | INDEXQ_op
+    | FIRSTQ_op
+    | SECONDQ_op
+    | THIRDQ_op
+    | SETINDEXQ_op
+    | SETFIRSTQ_op
+    | SETSECONDQ_op
+    | SETTHIRDQ_op
+    | TUPLEVAR_op
+    | INDEXVAR_op
+    | UNTUPLEVAR_op
+    | UNPACKFIRSTVAR_op
+    | EXPLODEVAR_op
+    | SETINDEXVAR_op
+    | INDEXVARQ_op
+    | SETINDEXVARQ_op
+    | TLEN_op
+    | QTLEN_op
+    | ISTUPLE_op
+    | LAST_op
+    | TPUSH_op
+    | TPOP_op
+    | NULLSWAPIF_op
+    | NULLSWAPIFNOT_op
+    | NULLROTRIF_op
+    | NULLROTRIFNOT_op
+    | NULLSWAPIF2_op
+    | NULLSWAPIFNOT2_op
+    | NULLROTRIF2_op
+    | NULLROTRIFNOT2_op
+    | INDEX2_op
+    | CADR_op
+    | cddr_op
+    | index3_op
+    | caddr_op
+    | cdddr_op
+
+TUPLE_op ::= INTEGER TUPLE
+NIL_op ::= NIL
+SINGLE_op ::= SINGLE
+PAIR_op ::= PAIR | CONS
+TRIPLE_op ::= TRIPLE
+INDEX_op ::= INTEGER INDEX // 4u
+FIRST_op ::= FIRST | CAR
+SECOND_op ::= SECOND | CDR
+THIRD_op ::= THIRD
+UNTUPLE_op ::= INTEGER UNTUPLE // 4u
+UNSINGLE_op ::= UNSINGLE
+UNPAIR_op ::= UNPAIR | UNCONS
+UNTRIPLE_op ::= UNTRIPLE
+UNPACKFIRST_op ::= INTEGER UNPACKFIRST // 4u
+CHKTUPLE_op ::= CHKTUPLE
+EXPLODE_op ::= INTEGER EXPLODE // 4u
+SETINDEX_op ::= INTEGER SETINDEX // 4u
+SETFIRST_op ::= SETFIRST
+SETSECOND_op ::= SETSECOND
+SETTHIRD_op ::= SETTHIRD
+INDEXQ_op ::= INTEGER INDEXQ // 4u
+FIRSTQ_op ::= FIRSTQ | CARQ
+SECONDQ_op ::= SECONDQ | CDRQ
+THIRDQ_op ::= THIRDQ
+SETINDEXQ_op ::= INTEGER SETINDEXQ // 4u
+SETFIRSTQ_op ::= SETFIRSTQ
+SETSECONDQ_op ::= SETSECONDQ
+SETTHIRDQ_op ::= SETTHIRDQ
+TUPLEVAR_op ::= TUPLEVAR
+INDEXVAR_op ::= INDEXVAR
+UNTUPLEVAR_op ::= UNTUPLEVAR
+UNPACKFIRSTVAR_op ::= UNPACKFIRSTVAR
+EXPLODEVAR_op ::= EXPLODEVAR
+SETINDEXVAR_op ::= SETINDEXVAR
+INDEXVARQ_op ::= INDEXVARQ
+SETINDEXVARQ_op ::= SETINDEXVARQ
+TLEN_op ::= TLEN
+QTLEN_op ::= QTLEN
+ISTUPLE_op ::= ISTUPLE
+LAST_op ::= LAST
+TPUSH_op ::= TPUSH | COMMA
+TPOP_op ::= TPOP
+NULLSWAPIF_op ::= NULLSWAPIF
+NULLSWAPIFNOT_op ::= NULLSWAPIFNOT
+NULLROTRIF_op ::= NULLROTRIF
+NULLROTRIFNOT_op ::= NULLROTRIFNOT
+NULLSWAPIF2_op ::= NULLSWAPIF2
+NULLSWAPIFNOT2_op ::= NULLSWAPIFNOT2
+NULLROTRIF2_op ::= NULLROTRIF2
+NULLROTRIFNOT2_op ::= NULLROTRIFNOT2
+INDEX2_op ::= INTEGER INTEGER INDEX2
+CADR_op ::= CADR
+cddr_op ::= CDDR
+index3_op ::= INTEGER INTEGER INTEGER INDEX3
+caddr_op ::= CADDR
+cdddr_op ::= CDDDR

@@ -141,10 +141,10 @@
         <langCodeStyleSettingsProvider
                 implementation="org.ton.intellij.func.ide.formatter.FuncLanguageCodeStyleSettingsProvider"/>
 
-        <projectConfigurable instance="org.ton.intellij.func.ide.configurable.FuncProjectConfigurable"
-                             groupId="language"
-                             id="language.func"
-                             bundle="messages.FuncBundle" key="func.name"/>
+<!--        <projectConfigurable instance="org.ton.intellij.func.ide.configurable.FuncProjectConfigurable"-->
+<!--                             groupId="language"-->
+<!--                             id="language.func"-->
+<!--                             bundle="messages.FuncBundle" key="func.name"/>-->
     </extensions>
 
     <actions>

@@ -89,6 +89,9 @@ val generateTlbParser = generateParser("Tlb")
 val generateAsmLexer = generateLexer("Asm")
 val generateAsmParser = generateParser("Asm")
 
+val generateTolkLexer = generateLexer("Tolk")
+val generateTolkParser = generateParser("Tolk")
+
 val compileKotlin = tasks.named("compileKotlin") {
     dependsOn(
         generateFuncParser, generateFuncLexer,
@@ -96,6 +99,7 @@ val compileKotlin = tasks.named("compileKotlin") {
         generateFiftParser, generateFiftLexer,
         generateTlbParser, generateTlbLexer,
         generateAsmParser, generateAsmLexer,
+        generateTolkParser, generateTolkLexer,
     )
 }
 

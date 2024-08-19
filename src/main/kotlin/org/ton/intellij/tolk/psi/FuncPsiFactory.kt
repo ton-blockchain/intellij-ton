@@ -167,7 +167,7 @@ class TolkPsiFactory private constructor(val project: Project) {
         createFile(null, text)
 
     fun createFile(name: String?, text: CharSequence) =
-        PsiFileFactory.getInstance(project).createFileFromText(name ?: "dummy.fc", TolkLanguage, text) as TolkFile
+        PsiFileFactory.getInstance(project).createFileFromText(name ?: "dummy.tolk", TolkLanguage, text) as TolkFile
 
     fun createNewline(): PsiElement = createWhitespace("\n")
 

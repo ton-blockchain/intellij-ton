@@ -120,6 +120,8 @@
             INFIXR_KEYWORD              = 'infixr'
             CONST_KEYWORD               = 'const'
             PURE_KEYWORD                = 'pure'
+            BUILTIN_KEYWORD             = 'builtin'
+            GET_KEYWORD                 = 'get'
 
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
@@ -138,7 +140,7 @@ private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelDefinition {
     recoverWhile = TopLevelDefinition_recover
 }
 private TopLevelDefinition_recover ::= !TopLevelDefinition_first
-private TopLevelDefinition_first ::= '#include' | '#pragma' | 'global' | 'const' | 'forall' | '_' | '('  | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'var'
+private TopLevelDefinition_first ::= '#include' | '#pragma' | 'global' | 'const' | 'forall' | '_' | '('  | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'var' | 'get'
 
 private macro ::= IncludeDefinition | PragmaDefinition
 RawString ::= RAW_STRING_ELEMENT*
@@ -204,7 +206,7 @@ PragmaVersion ::= ("version" | "not-version") VERSION_VALUE {
 }
 //PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
-Function ::= TypeParameterList? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
+Function ::= (TypeParameterList|'get')? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
     pin = 3
     implements = [
         "org.ton.intellij.tolk.psi.TolkNamedElement"
@@ -223,8 +225,8 @@ private FunctionAttributes ::= ('impure'|'pure')? ('inline' | 'inline_ref')? Met
     recoverWhile = FunctionBody_recovery
 }
 
-private FunctionBody ::= ';' | AsmDefinition | BlockStatement
-private FunctionBody_recovery ::= !(';' | 'asm' | '{')
+private FunctionBody ::= ';' | AsmDefinition | BlockStatement | ('builtin' ';')
+private FunctionBody_recovery ::= !(';' | 'asm' | '{' | 'builtin')
 
 private TypeParameterList ::= 'forall' << comma_separated_list TypeParameter >> '->' {
     pin=1

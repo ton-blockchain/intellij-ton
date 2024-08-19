@@ -48,6 +48,9 @@ import static org.ton.intellij.tolk.parser.TolkParserDefinition.*;
           if (yycharat(2) == '-' && (yylength() == 3 || yycharat(3) != '-' && yycharat(3) != '}')) {
               return BLOCK_DOC_COMMENT;
           }
+          if (yycharat(2) == '*' && (yylength() == 3 || yycharat(3) != '*' && yycharat(3) != '/')) {
+              return BLOCK_DOC_COMMENT;
+          }
       }
 
       return BLOCK_COMMENT;
@@ -145,7 +148,7 @@ BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
 //PLAIN_IDENTIFIER=([a-zA-Z_$?:'~][0-9a-zA-Z_$?:'+\-\=\^><&|/%]*)
 //PLAIN_IDENTIFIER=[.~]?[^\s;,\(\)\[\]\{\},.~\"\+\-\*\/%]+
 //PLAIN_IDENTIFIER=^(?!{\-|;;)[.~]?[^\s;,.~\(\)\[\]\"\{\}]+
-PLAIN_IDENTIFIER=[^\s()\[\],.;~\"\{\}#]+
+PLAIN_IDENTIFIER=([a-zA-Z_$][0-9a-zA-Z_$:?]*)
 QUOTE_ESCAPED_IDENTIFIER = (`[^`\n]+`)|(_[^_\n\w,]+_)
 IDENTIFIER = [.~]?({QUOTE_ESCAPED_IDENTIFIER}|{PLAIN_IDENTIFIER})
 VERSION_VALUE = (=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?
@@ -169,7 +172,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!((";;;"|"///").*)|((";;;;"|"////").*))
 
       \"                       { pushState(STRING); return OPEN_QUOTE; }
 
-      "{-"|"/*"                { yybegin(IN_BLOCK_COMMENT); yypushback(2); }
+      "/*"|"{-"               { yybegin(IN_BLOCK_COMMENT); yypushback(2); }
       (";;;;"|"////") .*                { return EOL_COMMENT; }
       {EOL_DOC_LINE}           { yybegin(IN_EOL_DOC_COMMENT);
                                  zzPostponedMarkedPos = zzStartRead; }
@@ -271,6 +274,8 @@ EOL_DOC_LINE  = {LINE_WS}*!(!((";;;"|"///").*)|((";;;;"|"////").*))
       "false"                  { return FALSE_KEYWORD; }
       "nil"                    { return NULL_KEYWORD; }
       "pure"                   { return PURE_KEYWORD; }
+      "builtin"                { return BUILTIN_KEYWORD; }
+      "get"                    { return GET_KEYWORD; }
       "Nil"                    { return NIL_KEYWORD; }
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
@@ -301,9 +306,11 @@ EOL_DOC_LINE  = {LINE_WS}*!(!((";;;"|"///").*)|((";;;;"|"////").*))
 <STRING, RAW_STRING> {REGULAR_STRING_PART}         { return TolkElementTypes.RAW_STRING_ELEMENT; }
 
 <IN_BLOCK_COMMENT> {
-  "{-"|"/*"  { if (zzNestedCommentLevel++ == 0)
+  "/*"|"{-"  {
+          if (zzNestedCommentLevel++ == 0) {
               zzPostponedMarkedPos = zzStartRead;
-          }
+              }
+        }
 
   "*/"|"-}"
       { if (--zzNestedCommentLevel == 0)

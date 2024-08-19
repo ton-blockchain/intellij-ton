@@ -1,11 +1,19 @@
 package org.ton.intellij.tolk.highlighting
 
+import com.intellij.codeInsight.CodeInsightBundle
+import com.intellij.codeInspection.LocalQuickFixAndIntentionActionOnPsiElement
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.TextAttributesKey
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
+import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
+import com.intellij.refactoring.suggested.startOffset
+import org.ton.intellij.func.psi.*
 import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.tolk.eval.TolkIntValue
 import org.ton.intellij.tolk.eval.value
@@ -20,10 +28,12 @@ class TolkAnnotator : Annotator {
                 highlight(element.identifier, holder, TolkColor.TYPE_PARAMETER.textAttributesKey)
                 return
             }
+
             is TolkTypeIdentifier -> {
                 highlight(element.identifier, holder, TolkColor.TYPE_PARAMETER.textAttributesKey)
                 return
             }
+
             is TolkIncludeDefinition, is TolkPragmaDefinition -> {
                 val sha = element.node.firstChildNode
                 val macroName = sha.treeNext
@@ -96,6 +106,23 @@ class TolkAnnotator : Annotator {
                     ).range(element).create()
                 }
             }
+
+            is PsiComment -> {
+                val text = element.text
+                if (text.startsWith("/*") && text.endsWith("*/")) {
+                    val commentValue = text.substring(2, text.length - 2)
+                    val nestedStart = commentValue.indexOf("/*")
+                    val nestedEnd = commentValue.lastIndexOf("*/")
+                    if (nestedStart != -1 && nestedEnd != -1) {
+                        val nestedRange =
+                            TextRange(element.startOffset + 2 + nestedStart, element.startOffset + 4 + nestedEnd)
+                        holder.newAnnotation(HighlightSeverity.ERROR, TolkBundle.message("nested_comment.description"))
+                            .range(nestedRange)
+                            .withFix(RemoveNestedComments(element, nestedRange))
+                            .create()
+                    }
+                }
+            }
         }
         val parent = element.parent
         when (parent) {
@@ -115,5 +142,31 @@ class TolkAnnotator : Annotator {
             .range(textRange)
             .textAttributes(key)
             .create()
+    }
+
+    class RemoveNestedComments(
+        element: PsiComment,
+        val range: TextRange
+    ) : LocalQuickFixAndIntentionActionOnPsiElement(element) {
+        override fun getFamilyName(): String =
+            TolkBundle.message("remove.nested.comment.description")
+
+        override fun getText(): String =
+            TolkBundle.message("remove.nested.comment.description")
+
+        override fun invoke(
+            project: Project,
+            file: PsiFile,
+            editor: Editor?,
+            startElement: PsiElement,
+            endElement: PsiElement
+        ) {
+            val text = startElement.text
+            var newText = text.substring(2, text.length - 2)
+                .replace("/*", "  ")
+                .replace("*/", "  ")
+            newText = "/*$newText*/"
+            startElement.replace(TolkPsiFactory[project].createFile(newText).findChildByClass(PsiComment::class.java)!!)
+        }
     }
 }

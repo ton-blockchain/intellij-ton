@@ -21,6 +21,6 @@ class FuncCreateFileAction : CreateFileFromTemplateAction(
 
     companion object {
         const val FILE_TEMPLATE = "FunC File"
-        const val NEW_FUNC_FILE = "New FunC File"
+        const val NEW_FUNC_FILE = "FunC File"
     }
 }

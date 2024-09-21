@@ -50,4 +50,5 @@ val FUNC_KEYWORDS = tokenSetOf(
     TolkElementTypes.PURE_KEYWORD,
     TolkElementTypes.BUILTIN_KEYWORD,
     TolkElementTypes.GET_KEYWORD,
+    TolkElementTypes.IMPORT_KEYWORD,
 )

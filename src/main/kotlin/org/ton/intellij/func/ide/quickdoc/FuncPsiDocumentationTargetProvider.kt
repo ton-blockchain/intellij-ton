@@ -3,12 +3,12 @@ package org.ton.intellij.func.ide.quickdoc
 import com.intellij.codeInsight.navigation.targetPresentation
 import com.intellij.lang.documentation.DocumentationMarkup
 import com.intellij.model.Pointer
+import com.intellij.navigation.TargetPresentation
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.editor.richcopy.HtmlSyntaxInfoUtil
 import com.intellij.platform.backend.documentation.DocumentationResult
 import com.intellij.platform.backend.documentation.DocumentationTarget
 import com.intellij.platform.backend.documentation.PsiDocumentationTargetProvider
-import com.intellij.platform.backend.presentation.TargetPresentation
 import com.intellij.pom.Navigatable
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace

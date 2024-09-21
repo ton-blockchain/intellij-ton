@@ -32,6 +32,8 @@ import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.markdown.MarkdownDocAstBuilder
 import org.ton.intellij.markdown.MarkdownPsiFactory
 
+
+;
 class TolkDocCommentElementType(debugName: String) : ILazyParseableElementType(debugName, TolkLanguage) {
     val factory = object : MarkdownPsiFactory {
         override fun buildComposite(markdownElementType: IElementType): TreeElement? = when (markdownElementType) {
@@ -72,7 +74,7 @@ class TolkDocCommentElementType(debugName: String) : ILazyParseableElementType(d
         return MarkdownDocAstBuilder.build(
             chameleon.chars,
             charTable,
-            ";;;",
+            "///",
             factory
         )
     }

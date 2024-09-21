@@ -12,7 +12,7 @@ import org.ton.intellij.util.removeEolDecoration
  * @sample removeEolDecoration
  */
 fun TolkDocComment.renderHtml(): String {
-    val rawText = DocLine.splitLines(text).removeEolDecoration(";;;").content().joinToString("\n")
+    val rawText = DocLine.splitLines(text).removeEolDecoration("///").content().joinToString("\n")
 
     val markdownRoot =
         MarkdownParser(TolkDocMarkdownFlavourDescriptor()).buildMarkdownTreeFromString(

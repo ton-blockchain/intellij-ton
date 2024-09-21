@@ -15,10 +15,10 @@ class TolkLookup(
     private val definitions = HashMap<String, TolkNamedElement>()
 
     init {
-        TolkPsiFactory[project].builtinFile.functions.forEach { function ->
-            val name = function.name ?: return@forEach
-            definitions[name] = function
-        }
+//        TolkPsiFactory[project].builtinFile.functions.forEach { function ->
+//            val name = function.name ?: return@forEach
+//            definitions[name] = function
+//        }
         if (context is TolkFunction) {
             context.functionParameterList.forEach {
                 define(it)
@@ -32,7 +32,7 @@ class TolkLookup(
     }
 
     fun resolve(element: TolkNamedElement): Collection<TolkNamedElement>? {
-        val name = element.identifier?.text ?: return null
+        val name = element.identifier?.text?.removeBackTicks() ?: return null
         val parent = element.parent
         if (parent is TolkApplyExpression && parent.left == element) {
             val grandParent = parent.parent
@@ -49,4 +49,10 @@ class TolkLookup(
     }
 
     fun resolve(name: String): Collection<TolkNamedElement>? = definitions[name]?.let { listOf(it) }
+
+    private fun String.removeBackTicks(): String = if (startsWith('`') && endsWith('`')) {
+        substring(1, length - 1)
+    } else {
+        this
+    }
 }

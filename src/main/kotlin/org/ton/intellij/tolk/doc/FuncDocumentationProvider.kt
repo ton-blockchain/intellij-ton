@@ -69,7 +69,7 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
 
     private fun getCommentText(comment: PsiComment): String {
         return (comment as? TolkDocComment)?.renderHtml()
-            ?: MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;", TolkDocMarkdownFlavourDescriptor())
+            ?: MarkdownDocAstBuilder.renderHtml(comment.node.chars, "///", TolkDocMarkdownFlavourDescriptor())
     }
 
     fun renderElement(element: PsiElement?, context: PsiElement?): String? {

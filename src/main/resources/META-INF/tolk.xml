@@ -143,6 +143,9 @@
                              groupId="language"
                              id="language.tolk"
                              bundle="messages.TolkBundle" key="tolk.name"/>
+
+        <additionalLibraryRootsProvider
+                implementation="org.ton.intellij.tolk.sdk.TolkSdkSyntheticLibraryProvider"/>
     </extensions>
 
 <!--    <actions>-->

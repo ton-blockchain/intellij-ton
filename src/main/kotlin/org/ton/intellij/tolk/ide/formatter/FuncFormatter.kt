@@ -86,7 +86,7 @@ class TolkFormatter : FormattingModelBuilder {
                     DIVMOD, DIVC, DIVR, MODR, MODC, AND
                 ), BIN_EXPRESSION
             ).spaces(1)
-            .afterInside(MINUS, UNARY_MINUS_EXPRESSION).none()
+            .afterInside(MINUS, UNARY_EXPRESSION).none()
             .afterInside(TILDE, INV_EXPRESSION).spaces(1)
             .around(TokenSet.create(IMPURE_KEYWORD, INLINE_KEYWORD, INLINE_REF_KEYWORD, METHOD_ID_KEYWORD)).spaces(1)
     }

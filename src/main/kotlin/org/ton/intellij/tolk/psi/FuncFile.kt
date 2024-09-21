@@ -3,11 +3,13 @@ package org.ton.intellij.tolk.psi
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.TolkLanguage
+import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.stub.TolkFileStub
 import org.ton.intellij.tolk.stub.type.TolkConstVarStubElementType
 import org.ton.intellij.tolk.stub.type.TolkFunctionStubElementType
@@ -30,7 +32,11 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
     override fun getStub(): TolkFileStub? = super.getStub() as? TolkFileStub
 
     fun collectIncludedFiles(includeSelf: Boolean = true): Set<TolkFile> {
-        return collectIncludedFiles(LinkedHashSet(), includeSelf)
+        val sdk = TolkSdkManager[project].getSdkRef().resolve(project)?.library?.sourceRoots?.mapNotNull {
+            it.findPsiFile(project) as? TolkFile
+        }?.toMutableSet() ?: mutableSetOf()
+        sdk.remove(this)
+        return collectIncludedFiles(sdk, includeSelf)
     }
 
     private fun collectIncludedFiles(collection: MutableSet<TolkFile>, includeSelf: Boolean): MutableSet<TolkFile> {
@@ -38,7 +44,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             for (includeDefinition in includeDefinitions) {
                 val nextFile = includeDefinition.reference?.resolve()
                 if (nextFile !is TolkFile) continue
-                nextFile.collectIncludedFiles(collection, true)
+                collection.add(nextFile)
             }
             if (includeSelf) {
                 collection.add(this)

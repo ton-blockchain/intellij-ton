@@ -6,6 +6,7 @@ import com.intellij.lang.injection.general.SimpleInjection
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
+import org.ton.intellij.asm.AsmLanguage
 import org.ton.intellij.fift.FiftLanguage
 import org.ton.intellij.tolk.psi.TolkAsmBody
 import org.ton.intellij.tolk.psi.TolkElementTypes
@@ -16,7 +17,7 @@ class TolkLanguageInjector : LanguageInjectionContributor {
         PsiTreeUtil.findFirstParent(p0) { it is TolkAsmBody } ?: return null
 
         return SimpleInjection(
-            FiftLanguage, "", "", null
+            AsmLanguage, "", "", null
         )
     }
 }

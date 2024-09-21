@@ -20,9 +20,9 @@ object TolkMacroCompletionProvider : TolkCompletionProvider(), DumbAware {
         result: CompletionResultSet
     ) {
         result.addElement(
-            LookupElementBuilder.create("include").bold().withInsertHandler { context, item ->
-                context.document.insertString(context.selectionEndOffset, " \"\";")
-                context.editor.caretModel.moveToOffset(context.selectionEndOffset - 2)
+            LookupElementBuilder.create("import").bold().withInsertHandler { context, item ->
+                context.document.insertString(context.selectionEndOffset, " \"\"")
+                context.editor.caretModel.moveToOffset(context.selectionEndOffset - 1)
                 AutoPopupController.getInstance(context.project).scheduleAutoPopup(context.editor)
             }
         )

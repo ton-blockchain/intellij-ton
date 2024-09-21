@@ -80,7 +80,7 @@ class TolkTypeInferenceWalker(
             is TolkReferenceExpression -> inferType(expected)
             is TolkInvExpression -> inferType(expected)
             is TolkTernaryExpression -> inferType(expected)
-            is TolkUnaryMinusExpression -> inferType(expected)
+            is TolkUnaryExpression -> inferType(expected)
             else -> TolkTyUnknown
         }?.getTolkTy() ?: TolkTyUnknown
 
@@ -239,6 +239,7 @@ class TolkTypeInferenceWalker(
         return ty ?: TolkTyUnknown
     }
 
+
     private fun TolkTernaryExpression.inferType(
         expected: Expectation
     ): TolkTy {
@@ -248,7 +249,7 @@ class TolkTypeInferenceWalker(
         return thenTy ?: elseTy ?: TolkTyUnknown
     }
 
-    private fun TolkUnaryMinusExpression.inferType(
+    private fun TolkUnaryExpression.inferType(
         expected: Expectation
     ): TolkTy {
         val expression = expression

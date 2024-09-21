@@ -151,7 +151,7 @@ BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
 PLAIN_IDENTIFIER=([a-zA-Z_$][0-9a-zA-Z_$:?]*)
 QUOTE_ESCAPED_IDENTIFIER = (`[^`\n]+`)|(_[^_\n\w,]+_)
 IDENTIFIER = [.~]?({QUOTE_ESCAPED_IDENTIFIER}|{PLAIN_IDENTIFIER})
-VERSION_VALUE = (=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?
+//VERSION_VALUE = (=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?
 
 // ANY_ESCAPE_SEQUENCE = \\[^]
 THREE_QUO = (\"\"\")
@@ -164,7 +164,7 @@ CLOSING_QUOTE=\"{QUOTE_SUFFIX}?
 REGULAR_STRING_PART=[^\\\"\n]+
 
 // !(!a|b) is a (set) difference between a and b.
-EOL_DOC_LINE  = {LINE_WS}*!(!((";;;"|"///").*)|((";;;;"|"////").*))
+EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
 
 %%
 <YYINITIAL> {
@@ -172,11 +172,11 @@ EOL_DOC_LINE  = {LINE_WS}*!(!((";;;"|"///").*)|((";;;;"|"////").*))
 
       \"                       { pushState(STRING); return OPEN_QUOTE; }
 
-      "/*"|"{-"               { yybegin(IN_BLOCK_COMMENT); yypushback(2); }
-      (";;;;"|"////") .*                { return EOL_COMMENT; }
+      "/*"([^*]|\*+[^*/])*\*+"/"      { return BLOCK_COMMENT; }
+      ("////") .*                { return EOL_COMMENT; }
       {EOL_DOC_LINE}           { yybegin(IN_EOL_DOC_COMMENT);
                                  zzPostponedMarkedPos = zzStartRead; }
-      (";;"|"//") .*                  { return EOL_COMMENT; }
+      ("//") .*                  { return EOL_COMMENT; }
 
       "+"                      { return PLUS; }
       "-"                      { return MINUS; }
@@ -277,10 +277,10 @@ EOL_DOC_LINE  = {LINE_WS}*!(!((";;;"|"///").*)|((";;;;"|"////").*))
       "builtin"                { return BUILTIN_KEYWORD; }
       "get"                    { return GET_KEYWORD; }
       "Nil"                    { return NIL_KEYWORD; }
+      "import"                 { return IMPORT_KEYWORD; }
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
       {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }
-      {VERSION_VALUE}          { return VERSION_VALUE; }
       {IDENTIFIER}             { return IDENTIFIER; }
 }
 

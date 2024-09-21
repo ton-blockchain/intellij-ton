@@ -22,7 +22,7 @@ class TolkUnusedFunctionInspection : TolkInspectionBase() {
             if (name == "recv_external") return
             if (name == "run_ticktock") return
             val fileName = o.containingFile.name
-            if (fileName == "stdlib.fc" || fileName == "stdlib.func") return
+            if (fileName == "stdlib.tolk") return
             if (ReferencesSearch.search(o, o.useScope).findFirst() == null) {
                 val id = o.identifier
                 val range = TextRange.from(id.startOffsetInParent, id.textLength)

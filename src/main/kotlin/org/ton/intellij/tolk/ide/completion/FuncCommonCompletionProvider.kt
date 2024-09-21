@@ -86,7 +86,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             }
         }
 
-        val files = setOf(TolkPsiFactory[file.project].builtinFile) + file.collectIncludedFiles()
+        val files = file.collectIncludedFiles()
         files.forEach { f ->
             collectFileVariants(f) {
                 if (collectVariant(it)) {

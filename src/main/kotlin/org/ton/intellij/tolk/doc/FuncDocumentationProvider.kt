@@ -8,7 +8,6 @@ import com.intellij.psi.*
 import org.ton.intellij.tolk.doc.psi.TolkDocComment
 import org.ton.intellij.tolk.highlighting.TolkColor
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.psi.impl.isImpure
 import org.ton.intellij.tolk.psi.impl.isMutable
 import org.ton.intellij.markdown.MarkdownDocAstBuilder
 import java.util.function.Consumer
@@ -99,7 +98,9 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
             append("->")
             append(NBSP)
         }
-        renderType(function.typeReference)
+        function.typeReference?.let {
+            renderType(it)
+        }
         append(NBSP)
         if (function.isMutable) {
             append("~")
@@ -112,10 +113,6 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
             }
         }
         appendStyledSpan(TolkColor.PARENTHESES.attributes, ")")
-        if (function.isImpure) {
-            append(NBSP)
-            appendStyledSpan(TolkColor.KEYWORD.attributes, "impure")
-        }
     }
 
     private fun StringBuilder.renderFunctionParameter(

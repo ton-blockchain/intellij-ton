@@ -24,6 +24,7 @@ class TolkFormatter : FormattingModelBuilder {
         return FormattingModelProvider.createFormattingModelForPsiFile(containingFile, block, settings)
     }
 
+    // TODO: remake space builder for new tolk syntax
     private fun createSpacingBuilder(codeStyleSettings: CodeStyleSettings): SpacingBuilder {
         return SpacingBuilder(codeStyleSettings, TolkLanguage)
             .after(TokenSet.create(LPAREN, LBRACK)).none()
@@ -71,6 +72,7 @@ class TolkFormatter : FormattingModelBuilder {
             .afterInside(IDENTIFIER, FUNCTION).none()
             .beforeInside(IDENTIFIER, FUNCTION_PARAMETER).spaces(1)
             .after(FUNCTION_PARAMETER).none()
+            .between(FUNCTION, FUNCTION).blankLines(1)
             .beforeInside(TENSOR_EXPRESSION, APPLY_EXPRESSION).none()
             .beforeInside(UNIT_EXPRESSION, APPLY_EXPRESSION).none()
             .beforeInside(TENSOR_EXPRESSION, SPECIAL_APPLY_EXPRESSION).none()
@@ -88,6 +90,6 @@ class TolkFormatter : FormattingModelBuilder {
             ).spaces(1)
             .afterInside(MINUS, UNARY_EXPRESSION).none()
             .afterInside(TILDE, INV_EXPRESSION).spaces(1)
-            .around(TokenSet.create(IMPURE_KEYWORD, INLINE_KEYWORD, INLINE_REF_KEYWORD, METHOD_ID_KEYWORD)).spaces(1)
+//            .around(TokenSet.create(IMPURE_KEYWORD, INLINE_KEYWORD, INLINE_REF_KEYWORD, METHOD_ID_KEYWORD)).spaces(1)
     }
 }

@@ -34,6 +34,7 @@ enum class TolkColor(
     GLOBAL_VARIABLE("Global variable", Default.GLOBAL_VARIABLE),
     LOCAL_VARIABLE("Local variable", Default.LOCAL_VARIABLE),
     MACRO("Macro", Default.METADATA),
+    ANNOTATION("Annotation", Default.METADATA),
     PARAMETER("Parameter", Default.PARAMETER),
     IDENTIFIER("Identifier", Default.IDENTIFIER),
     TYPE_PARAMETER("Type parameter", TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")),

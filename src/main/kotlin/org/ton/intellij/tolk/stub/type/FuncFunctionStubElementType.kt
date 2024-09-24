@@ -18,9 +18,10 @@ class TolkFunctionStubElementType(
         dataStream.writeName(stub.name)
         var flags = 0
         if (stub.isMutable) flags = flags or IS_MUTABLE_FLAG
-        if (stub.isImpure) flags = flags or IS_IMPURE_FLAG
         if (stub.hasMethodId) flags = flags or HAS_METHOD_ID_FLAG
         if (stub.hasAsm) flags = flags or HAS_ASM
+        if (stub.isBuiltin) flags = flags or IS_BUILTIN
+        if (stub.isDeprecated) flags = flags or IS_DEPRECATED
         dataStream.writeByte(flags)
     }
 
@@ -28,14 +29,24 @@ class TolkFunctionStubElementType(
         val name = dataStream.readName()
         val flags = dataStream.readByte().toInt()
         val isMutable = flags and IS_MUTABLE_FLAG != 0
-        val isImpure = flags and IS_IMPURE_FLAG != 0
         val hasMethodId = flags and HAS_METHOD_ID_FLAG != 0
         val hasAsm = flags and HAS_ASM != 0
-        return TolkFunctionStub(parentStub, this, name, isMutable, isImpure, hasMethodId, hasAsm)
+        val isBuiltin = flags and IS_BUILTIN != 0
+        val isDeprecated = flags and IS_DEPRECATED != 0
+        return TolkFunctionStub(parentStub, this, name, isMutable, hasMethodId, hasAsm, isBuiltin, isDeprecated)
     }
 
     override fun createStub(psi: TolkFunction, parentStub: StubElement<out PsiElement>): TolkFunctionStub {
-        return TolkFunctionStub(parentStub, this, psi.name, psi.isMutable, psi.isImpure, psi.hasMethodId, psi.hasAsm)
+        return TolkFunctionStub(
+            parentStub,
+            this,
+            psi.name,
+            psi.isMutable,
+            psi.hasMethodId,
+            psi.hasAsm,
+            psi.isBuiltin,
+            psi.isDeprecated
+        )
     }
 
     override fun createPsi(stub: TolkFunctionStub): TolkFunction {
@@ -48,10 +59,11 @@ class TolkFunctionStubElementType(
     }
 
     companion object {
-        private const val IS_MUTABLE_FLAG = 0x1
-        private const val IS_IMPURE_FLAG = 0x2
-        private const val HAS_METHOD_ID_FLAG = 0x4
-        private const val HAS_ASM = 0x8
+        private const val IS_MUTABLE_FLAG = 1 shl 0
+        private const val HAS_METHOD_ID_FLAG = 1 shl 1
+        private const val HAS_ASM = 1 shl 2
+        private const val IS_BUILTIN = 1 shl 3
+        private const val IS_DEPRECATED = 1 shl 4
 
         val EMPTY_ARRAY = emptyArray<TolkFunction>()
         val ARRAY_FACTORY: ArrayFactory<TolkFunction?> = ArrayFactory {

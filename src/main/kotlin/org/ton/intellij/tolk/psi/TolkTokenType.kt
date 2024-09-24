@@ -11,11 +11,11 @@ import org.ton.intellij.util.tokenSetOf
 
 open class TolkTokenType(val name: String) : IElementType(name, TolkLanguage)
 
-val FUNC_REGULAR_COMMENTS get() = tokenSetOf(BLOCK_COMMENT, EOL_COMMENT)
-val FUNC_DOC_COMMENTS get() = tokenSetOf(EOL_DOC_COMMENT, BLOCK_DOC_COMMENT)
-val FUNC_COMMENTS get() = TokenSet.orSet(FUNC_REGULAR_COMMENTS, FUNC_DOC_COMMENTS)
+val TOLK_REGULAR_COMMENTS get() = tokenSetOf(BLOCK_COMMENT, EOL_COMMENT)
+val TOLK_DOC_COMMENTS get() = tokenSetOf(EOL_DOC_COMMENT, BLOCK_DOC_COMMENT)
+val TOLK_COMMENTS get() = TokenSet.orSet(TOLK_REGULAR_COMMENTS, TOLK_DOC_COMMENTS)
 
-val FUNC_KEYWORDS = tokenSetOf(
+val TOLK_KEYWORDS = tokenSetOf(
     TolkElementTypes.RETURN_KEYWORD,
     TolkElementTypes.VAR_KEYWORD,
     TolkElementTypes.REPEAT_KEYWORD,
@@ -37,9 +37,6 @@ val FUNC_KEYWORDS = tokenSetOf(
     TolkElementTypes.EXTERN_KEYWORD,
     TolkElementTypes.GLOBAL_KEYWORD,
     TolkElementTypes.ASM_KEYWORD,
-    TolkElementTypes.IMPURE_KEYWORD,
-    TolkElementTypes.INLINE_KEYWORD,
-    TolkElementTypes.INLINE_REF_KEYWORD,
     TolkElementTypes.AUTO_APPLY_KEYWORD,
     TolkElementTypes.METHOD_ID_KEYWORD,
     TolkElementTypes.OPERATOR_KEYWORD,
@@ -47,8 +44,11 @@ val FUNC_KEYWORDS = tokenSetOf(
     TolkElementTypes.INFIXL_KEYWORD,
     TolkElementTypes.INFIXR_KEYWORD,
     TolkElementTypes.CONST_KEYWORD,
-    TolkElementTypes.PURE_KEYWORD,
     TolkElementTypes.BUILTIN_KEYWORD,
     TolkElementTypes.GET_KEYWORD,
     TolkElementTypes.IMPORT_KEYWORD,
+    TolkElementTypes.FUN_KEYWORD,
+    TolkElementTypes.REDEF_KEYWORD,
+    TolkElementTypes.AUTO_KEYWORD,
+    TolkElementTypes.VARRR_KEYWORD,
 )

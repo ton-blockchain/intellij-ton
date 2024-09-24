@@ -10,34 +10,38 @@ class TolkFunctionStub(
     elementType: IStubElementType<*, *>,
     name: StringRef?,
     val isMutable: Boolean,
-    val isImpure: Boolean,
     val hasMethodId: Boolean,
     val hasAsm: Boolean,
+    val isBuiltin: Boolean,
+    val isDeprecated: Boolean,
 ) : TolkNamedStub<TolkFunction>(parent, elementType, name) {
     constructor(
         parent: StubElement<*>, elementType: IStubElementType<*, *>,
         name: String?,
         isMutable: Boolean,
-        isImpure: Boolean,
         hasMethodId: Boolean,
         hasAsm: Boolean,
+        isBuiltin: Boolean,
+        isDeprecated: Boolean,
     ) : this(
         parent,
         elementType,
         StringRef.fromString(name),
         isMutable,
-        isImpure,
         hasMethodId,
-        hasAsm
+        hasAsm,
+        isBuiltin,
+        isDeprecated
     )
 
     override fun toString(): String = buildString {
         append("TolkFunctionStub(")
         append("name=").append(name).append(", ")
         append("isMutable=").append(isMutable).append(", ")
-        append("isImpure=").append(isImpure).append(", ")
         append("hasMethodId=").append(hasMethodId).append(", ")
         append("hasAsm=").append(hasAsm)
+        append("isBuiltin=").append(isBuiltin)
+        append("isDeprecated=").append(isDeprecated)
         append(")")
     }
 }

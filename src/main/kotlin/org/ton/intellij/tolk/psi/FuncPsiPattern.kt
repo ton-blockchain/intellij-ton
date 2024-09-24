@@ -21,7 +21,7 @@ object TolkPsiPattern {
         PlatformPatterns.psiElement(TolkElementTypes.IDENTIFIER).and(onStatementBeginning(*startWords))
 
     fun macroPattern(): PsiElementPattern.Capture<PsiElement> =
-        baseDeclarationPattern()
+        baseDeclarationPattern().andNot(psiElement<PsiElement>().withElementType(TOLK_COMMENTS))
 
     private class OnStatementBeginning(vararg startWords: String) :
         PatternCondition<PsiElement>("onStatementBeginning") {

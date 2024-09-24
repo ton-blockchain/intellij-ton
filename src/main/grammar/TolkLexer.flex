@@ -148,9 +148,10 @@ BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
 //PLAIN_IDENTIFIER=([a-zA-Z_$?:'~][0-9a-zA-Z_$?:'+\-\=\^><&|/%]*)
 //PLAIN_IDENTIFIER=[.~]?[^\s;,\(\)\[\]\{\},.~\"\+\-\*\/%]+
 //PLAIN_IDENTIFIER=^(?!{\-|;;)[.~]?[^\s;,.~\(\)\[\]\"\{\}]+
-PLAIN_IDENTIFIER=([a-zA-Z_$][0-9a-zA-Z_$:?]*)
+PLAIN_IDENTIFIER=([a-zA-Z_$][0-9a-zA-Z_$?]*)
 QUOTE_ESCAPED_IDENTIFIER = (`[^`\n]+`)|(_[^_\n\w,]+_)
 IDENTIFIER = [.~]?({QUOTE_ESCAPED_IDENTIFIER}|{PLAIN_IDENTIFIER})
+ANNOTATION = @{PLAIN_IDENTIFIER}
 //VERSION_VALUE = (=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?
 
 // ANY_ESCAPE_SEQUENCE = \\[^]
@@ -253,18 +254,19 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "cell"                   { return CELL_KEYWORD; }
       "slice"                  { return SLICE_KEYWORD; }
       "builder"                { return BUILDER_KEYWORD; }
-      "cont"                   { return CONT_KEYWORD; }
+      "continuation"           { return CONT_KEYWORD; }
       "tuple"                  { return TUPLE_KEYWORD; }
       "type"                   { return TYPE_KEYWORD; }
       "forall"                 { return FORALL_KEYWORD; }
       "extern"                 { return EXTERN_KEYWORD; }
       "global"                 { return GLOBAL_KEYWORD; }
       "asm"                    { return ASM_KEYWORD; }
-      "impure"                 { return IMPURE_KEYWORD; }
-      "inline"                 { return INLINE_KEYWORD; }
-      "inline_ref"             { return INLINE_REF_KEYWORD; }
+//      "@impure"                { return IMPURE; }
+//      "@inline"                { return INLINE; }
+//      "@inline_ref"            { return INLINE_REF; }
       "auto_apply"             { return AUTO_APPLY_KEYWORD; }
-      "method_id"              { return METHOD_ID_KEYWORD; }
+      "@method_id"             { return METHOD_ID_KEYWORD; }
+//      "@pure"                  { return PURE; }
       "operator"               { return OPERATOR_KEYWORD; }
       "infix"                  { return INFIX_KEYWORD; }
       "infixl"                 { return INFIXL_KEYWORD; }
@@ -273,14 +275,18 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "true"                   { return TRUE_KEYWORD; }
       "false"                  { return FALSE_KEYWORD; }
       "nil"                    { return NULL_KEYWORD; }
-      "pure"                   { return PURE_KEYWORD; }
       "builtin"                { return BUILTIN_KEYWORD; }
       "get"                    { return GET_KEYWORD; }
       "Nil"                    { return NIL_KEYWORD; }
       "import"                 { return IMPORT_KEYWORD; }
+      "fun"                    { return FUN_KEYWORD; }
+      "redef"                  { return REDEF_KEYWORD; }
+      "auto"                   { return AUTO_KEYWORD; }
+      "varrr"                  { return VARRR_KEYWORD; }
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
       {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }
+      {ANNOTATION}             { return ANNOTATION; }
       {IDENTIFIER}             { return IDENTIFIER; }
 }
 

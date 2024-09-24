@@ -20,7 +20,7 @@
     ]
 }
 root ::= instruction*
-private instruction ::= StackPrimitives | CompoundStackPrimitives | NullPrimitives | TuplePrimitives | UNKNOWN_IDENTIFIER
+private instruction ::= INTEGER | STACK_REGISTER | CONTROL_REGISTER | UNKNOWN_IDENTIFIER
 
 private StackPrimitives ::= nop_op
     | swap_op

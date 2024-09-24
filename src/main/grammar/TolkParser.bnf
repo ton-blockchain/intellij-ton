@@ -97,7 +97,7 @@
             CELL_KEYWORD                = 'cell'
             SLICE_KEYWORD               = 'slice'
             BUILDER_KEYWORD             = 'builder'
-            CONT_KEYWORD                = 'cont'
+            CONT_KEYWORD                = 'continuation'
             TUPLE_KEYWORD               = 'tuple'
             TYPE_KEYWORD                = 'type'
             FORALL_KEYWORD              = 'forall'
@@ -105,24 +105,29 @@
             FALSE_KEYWORD               = 'false'
             NULL_KEYWORD                = 'nil'
             NIL_KEYWORD                 = 'Nil'
+            REDEF_KEYWORD               = 'redef'
+            FUN_KEYWORD                 = 'fun'
+            AUTO_KEYWORD                = 'auto'
+            VARRR_KEYWORD               = 'varrr'
 
             EXTERN_KEYWORD              = 'extern'
             GLOBAL_KEYWORD              = 'global'
             ASM_KEYWORD                 = 'asm'
-            IMPURE_KEYWORD              = 'impure'
-            INLINE_KEYWORD              = 'inline'
-            INLINE_REF_KEYWORD          = 'inline_ref'
+//            IMPURE                      = '@impure'
+//            INLINE                      = '@inline'
+//            INLINE_REF                  = '@inline_ref'
             AUTO_APPLY_KEYWORD          = 'auto_apply'
-            METHOD_ID_KEYWORD           = 'method_id'
+            METHOD_ID_KEYWORD           = '@method_id'
             OPERATOR_KEYWORD            = 'operator'
             INFIX_KEYWORD               = 'infix'
             INFIXL_KEYWORD              = 'infixl'
             INFIXR_KEYWORD              = 'infixr'
             CONST_KEYWORD               = 'const'
-            PURE_KEYWORD                = 'pure'
+//            PURE                        = '@pure'
             BUILTIN_KEYWORD             = 'builtin'
             GET_KEYWORD                 = 'get'
             IMPORT_KEYWORD              = 'import'
+            ANNOTATION                  = '@annotation'
 
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
@@ -141,7 +146,9 @@ private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelDefinition {
     recoverWhile = TopLevelDefinition_recover
 }
 private TopLevelDefinition_recover ::= !TopLevelDefinition_first
-private TopLevelDefinition_first ::= 'import' | 'pragma' | 'global' | 'const' | 'forall' | '_' | '('  | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'var' | 'get' | ';'
+private TopLevelDefinition_first ::= 'fun' | 'import' | 'pragma' | 'global' | 'const' | 'forall' | '_' | '('  | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'var' | 'get' | ';'
+| '@method_id'
+| ANNOTATION
 
 private macro ::= IncludeDefinition | PragmaDefinition
 RawString ::= RAW_STRING_ELEMENT*
@@ -170,8 +177,8 @@ private ConstVarList_start ::= 'const' (ConstVar (',' | &';'))+ {
     recoverWhile=ConstVar_recovery
 }
 
-ConstVar ::= ('int' | 'slice')? IDENTIFIER '=' Expression {
-    pin=2
+ConstVar ::= IDENTIFIER (':' ('int' | 'slice'))? '=' Expression {
+    pin=1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkConstVarMixin"
     implements=["org.ton.intellij.tolk.psi.TolkNamedElement"]
     stubClass="org.ton.intellij.tolk.stub.TolkConstVarStub"
@@ -197,7 +204,6 @@ PragmaKey ::= IDENTIFIER
 PragmaValue ::= StringLiteral | IntegerExpression
 private PragmaDefinitionPart ::= "pragma" (PragmaVersion | PragmaKeyValue)  {
     pin = 1
-    recoverWhile = UntilSemicolonRecover
 }
 PragmaKeyValue ::= PragmaKey PragmaValue? {
     pin=1
@@ -207,8 +213,9 @@ PragmaVersion ::= ("version" | "not-version") ('='|'>'|'>='|'<'|'<='|'^')? INTEG
 }
 //PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
-Function ::= (TypeParameterList|'get')? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
-    pin = 3
+//Function ::= (TypeParameterList|'get')? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
+Function ::= FunctionAttributes? 'fun' FunctionIdentifier TypeParameterList? FunctionParameterList FunctionReturnType? FunctionBody {
+    pin = 2
     implements = [
         "org.ton.intellij.tolk.psi.TolkNamedElement"
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
@@ -221,15 +228,18 @@ Function ::= (TypeParameterList|'get')? TypeReference FunctionIdentifier Functio
     ]
     recoverWhile = TopLevelDefinition_recover
 }
-
-private FunctionAttributes ::= ('impure'|'pure')? ('inline' | 'inline_ref')? MethodIdDefinition? {
-    recoverWhile = FunctionBody_recovery
+private FunctionReturnType ::= ':' TypeReference {
+    pin = 1
 }
+
+private FunctionAttributes ::= FunctionAnnotation* MethodIdDefinition*
+
+FunctionAnnotation ::= ANNOTATION
 
 private FunctionBody ::= ';' | AsmDefinition | BlockStatement | ('builtin' ';')
 private FunctionBody_recovery ::= !(';' | 'asm' | '{' | 'builtin')
 
-private TypeParameterList ::= 'forall' << comma_separated_list TypeParameter >> '->' {
+private TypeParameterList ::= '<' << comma_separated_list TypeParameter >> '>' {
     pin=1
 }
 TypeParameter ::= IDENTIFIER {
@@ -251,12 +261,21 @@ private AsmIndexList ::= '->' AsmIndex+ {
 AsmIndex ::= IntegerExpression
 AsmBody ::= StringLiteral+
 
-MethodIdDefinition ::= 'method_id' MethodIdArgument? {pin=1}
+MethodIdDefinition ::= '@method_id' MethodIdArgument? {pin=1}
 private MethodIdArgument ::= '(' (StringLiteral | INTEGER_LITERAL) ')' {pin=1}
 
 private FunctionIdentifier ::= ('~'|'.')? IDENTIFIER
 
-Statement ::= ReturnStatement | BlockStatement | RepeatStatement | IfStatement | DoStatement | WhileStatement | TryStatement | ExpressionStatement | EmptyStatement
+Statement ::= ReturnStatement
+            | BlockStatement
+            | RepeatStatement
+            | IfStatement
+            | DoStatement
+            | WhileStatement
+            | TryStatement
+            | VarStatement
+            | ExpressionStatement
+            | EmptyStatement
 ExpressionStatement ::= Expression ';' {
     pin=1
     recoverWhile=BlockStatement_recovery
@@ -274,7 +293,7 @@ private BlockStart ::= '{' BlockStatement_element* {
 }
 private Block_recovery ::= !('}')
 private BlockStatement_element ::= Statement
-private BlockStatement_recovery ::= !('}' | IDENTIFIER | 'var' | 'return' | '{' | 'repeat' | 'if' | 'ifnot' | 'do' | 'while' | 'try' | '(' | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | ';' | '~')
+private BlockStatement_recovery ::= !('}' | IDENTIFIER | 'var' | 'varrr' | 'return' | '{' | 'repeat' | 'if' | 'ifnot' | 'do' | 'while' | 'try' | 'redef' | '(' | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'continuation' | 'tuple' | ';' | '~')
 
 RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
 
@@ -381,6 +400,17 @@ XorBinOp ::= '^' { name = "operator" }
 MulBinOp  ::= '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%' { name = "operator" }
 AndBinOp ::= '&' { name = "operator" }
 
+VarStatement ::= 'varrr' (VariableList | Var | '_') '=' Expression ';' {
+    pin = 1
+}
+
+private VariableList ::= '(' <<comma_separated_list (Var | VariableList | '_')>> ')'
+
+Var ::= IDENTIFIER ('redef' | (':' TypeReference)?) {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkVariableMixin"
+    implements="org.ton.intellij.tolk.psi.TolkNamedElement"
+}
+
 SpecialApplyExpression ::= Expression &<<isSpecialIdentifier>> Expression {
     methods=[
         left="/Expression[0]"
@@ -451,13 +481,15 @@ private FunctionParameterList_start ::= '(' FunctionParameterList_item* {
 private FunctionParameterList_recovery ::= !')'
 private FunctionParameterList_item ::= FunctionParameter ( ','| &')' ) {pin=1}
 
-FunctionParameter ::= TypeNamedFunctionParameter | TypeFunctionParameter | NamedFunctionParameter {
+FunctionParameter ::= TypeNamedFunctionParameter {
     mixin="org.ton.intellij.tolk.psi.impl.TolkFunctionParameterMixin"
     implements=["org.ton.intellij.tolk.psi.TolkNamedElement"]
     stubClass="org.ton.intellij.tolk.stub.TolkFunctionParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
-private TypeNamedFunctionParameter ::= TypeReference IDENTIFIER
+private TypeNamedFunctionParameter ::=  IDENTIFIER ':' TypeReference {
+    pin = 1
+}
 private TypeFunctionParameter ::= PrimitiveType
 private NamedFunctionParameter ::= IDENTIFIER
 
@@ -492,7 +524,7 @@ MapType ::= TypeReferenceWithoutMap '->' TypeReference {
 }
 
 HoleType ::= 'var' | '_'
-PrimitiveType ::= 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type'
+PrimitiveType ::= 'int' | 'cell' | 'slice' | 'builder' | 'continuation' | 'tuple' | 'type' | 'auto'
 TypeIdentifier ::= IDENTIFIER {
     mixin="org.ton.intellij.tolk.psi.impl.TolkTypeIdentifierMixin"
 }

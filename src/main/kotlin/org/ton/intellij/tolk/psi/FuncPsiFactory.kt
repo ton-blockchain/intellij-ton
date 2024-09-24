@@ -31,9 +31,9 @@ class TolkPsiFactory private constructor(val project: Project) {
     }
 
     fun createIdentifier(text: String): PsiElement {
-        val funcFile = createFile("() $text() {}")
+        val funcFile = createFile("fun $text() {}")
         val function = funcFile.functions.first()
-        return function.identifier
+        return function.identifier!!
     }
 
     fun createIncludeDefinition(text: String): TolkIncludeDefinition =

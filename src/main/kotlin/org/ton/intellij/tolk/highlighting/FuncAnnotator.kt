@@ -1,11 +1,12 @@
 package org.ton.intellij.tolk.highlighting
 
-import com.intellij.codeInsight.CodeInsightBundle
 import com.intellij.codeInspection.LocalQuickFixAndIntentionActionOnPsiElement
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
@@ -13,11 +14,11 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.refactoring.suggested.startOffset
-import org.ton.intellij.func.psi.*
 import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.tolk.eval.TolkIntValue
 import org.ton.intellij.tolk.eval.value
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.impl.isDeprecated
 import org.ton.intellij.tvm.math.TVM_INT_MAX_VALUE
 import org.ton.intellij.tvm.math.TVM_INT_MIN_VALUE
 
@@ -92,7 +93,11 @@ class TolkAnnotator : Annotator {
 
                         else -> return
                     }
+                    DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE
                     highlight(element.identifier, holder, color.textAttributesKey)
+                    if (resolved is TolkFunction && resolved.isDeprecated) {
+                        highlight(element.identifier, holder, CodeInsightColors.DEPRECATED_ATTRIBUTES)
+                    }
                 }
                 return
             }

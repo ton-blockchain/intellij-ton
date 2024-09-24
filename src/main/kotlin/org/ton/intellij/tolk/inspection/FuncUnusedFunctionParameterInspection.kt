@@ -10,6 +10,7 @@ import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkFunctionParameter
 import org.ton.intellij.tolk.psi.TolkVisitor
 import org.ton.intellij.tolk.psi.impl.hasAsm
+import org.ton.intellij.tolk.psi.impl.isBuiltin
 
 class TolkUnusedFunctionParameterInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(
@@ -18,6 +19,7 @@ class TolkUnusedFunctionParameterInspection : TolkInspectionBase() {
     ): TolkVisitor = object : TolkVisitor() {
         override fun visitFunction(o: TolkFunction) {
             if (o.hasAsm) return
+            if (o.isBuiltin) return
             val parameters = o.functionParameterList
             for (parameter in parameters) {
                 ProgressIndicatorProvider.checkCanceled()
@@ -26,7 +28,7 @@ class TolkUnusedFunctionParameterInspection : TolkInspectionBase() {
         }
 
         private fun processParameter(parameter: TolkFunctionParameter) {
-            val id = parameter.identifier ?: return
+            val id = parameter.identifier
             if (ReferencesSearch.search(parameter, parameter.useScope).findFirst() == null) {
                 val range = TextRange.from(id.startOffsetInParent, id.textLength)
                 holder.registerProblem(

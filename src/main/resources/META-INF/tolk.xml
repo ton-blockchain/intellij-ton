@@ -40,7 +40,6 @@
         <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkIncludeDefinition"
                                  implementationClass="org.ton.intellij.tolk.psi.impl.TolkIncludePathElementManipulator"/>
 
-        <typedHandler implementation="org.ton.intellij.tolk.editor.TolkTypedHandler" id="TolkTypedHandler"/>
 
         <liveTemplateContext
                 contextId="tolk"
@@ -107,9 +106,6 @@
         <localInspection language="Tolk" displayName="Missing return at end of function" groupPath="Tolk"
                          groupName="Control flow issues" enabledByDefault="true" level="ERROR"
                          implementationClass="org.ton.intellij.tolk.inspection.TolkMissingReturnInspection"/>
-        <localInspection language="Tolk" displayName="Calling function with method-id" groupPath="Tolk"
-                         groupName="Control flow issues" enabledByDefault="false" level="ERROR"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnexpectedGetMethodCallInspection"/>
         <localInspection language="Tolk" displayName="Calling function" groupPath="Tolk"
                          groupName="Control flow issues" enabledByDefault="true" level="ERROR"
                          implementationClass="org.ton.intellij.tolk.inspection.TolkFunctionCallInspection"/>

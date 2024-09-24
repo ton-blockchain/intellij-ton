@@ -45,6 +45,7 @@ class TolkTypeInferenceWalker(
             is TolkDoStatement -> inferType()
             is TolkWhileStatement -> inferType()
             is TolkTryStatement -> inferType()
+            is TolkVarStatement -> inferType()
             is TolkExpressionStatement -> expression.inferType()
             else -> {
             }
@@ -147,6 +148,14 @@ class TolkTypeInferenceWalker(
         )
         catch?.blockStatement?.inferType()
         return TolkTyUnit
+    }
+
+    private fun TolkVarStatement.inferType(): TolkTy {
+        val expressionTy = expression?.inferType() ?: TolkTyUnknown
+        varList.forEach {
+            ctx.lookup.define(it)
+        }
+        return expressionTy
     }
 
     private fun TolkTensorExpression.inferType(

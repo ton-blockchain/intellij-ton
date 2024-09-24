@@ -2,6 +2,7 @@ package org.ton.intellij.tolk.psi.impl
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
+import com.intellij.psi.util.PsiTreeUtil
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFunction
@@ -24,20 +25,23 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
     override fun toString(): String = "TolkFunction($containingFile - $name)"
 }
 
-val TolkFunction.isImpure: Boolean
-    get() = stub?.isImpure ?: (node.findChildByType(TolkElementTypes.IMPURE_KEYWORD) != null)
-
 val TolkFunction.isMutable: Boolean
     get() = stub?.isMutable ?: (node.findChildByType(TolkElementTypes.TILDE) != null)
 
+val TolkFunction.isDeprecated: Boolean
+    get() = stub?.isDeprecated ?: functionAnnotationList.any { it.textMatches("@deprecated") }
+
 val TolkFunction.hasMethodId: Boolean
-    get() = stub?.hasMethodId ?: (methodIdDefinition != null)
+    get() = stub?.hasMethodId ?: methodIdDefinitionList.isNotEmpty()
 
 val TolkFunction.hasAsm: Boolean
     get() = stub?.hasAsm ?: (asmDefinition != null)
 
+val TolkFunction.isBuiltin: Boolean
+    get() = stub?.isBuiltin ?: (builtinKeyword != null)
+
 val TolkFunction.rawReturnType: TolkTy
-    get() = typeReference.rawType
+    get() = typeReference?.rawType ?: TolkTyUnknown
 
 val TolkFunction.rawParamType: TolkTy
     get() = TolkTy(functionParameterList.map {

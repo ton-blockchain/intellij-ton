@@ -13,7 +13,7 @@ import com.intellij.psi.tree.TokenSet
 import org.ton.intellij.tolk.TolkFileElementType
 import org.ton.intellij.tolk.doc.TolkDocCommentElementType
 import org.ton.intellij.tolk.lexer.TolkLexer
-import org.ton.intellij.tolk.psi.FUNC_COMMENTS
+import org.ton.intellij.tolk.psi.TOLK_COMMENTS
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkTokenType
@@ -25,7 +25,7 @@ class TolkParserDefinition : ParserDefinition {
 
     override fun getFileNodeType(): IFileElementType = TolkFileElementType
 
-    override fun getCommentTokens(): TokenSet = FUNC_COMMENTS
+    override fun getCommentTokens(): TokenSet = TOLK_COMMENTS
 
     override fun getStringLiteralElements(): TokenSet = STRING_LITERALS
 
@@ -58,7 +58,11 @@ class TolkParserDefinition : ParserDefinition {
         val WHITESPACES = TokenSet.create(TokenType.WHITE_SPACE)
         val STRING_LITERALS = TokenSet.create(TolkElementTypes.STRING_LITERAL)
 
-        val WHITE_SPACE_OR_COMMENT_BIT_SET = TokenSet.orSet(FUNC_COMMENTS, WHITESPACES)
+        val WHITE_SPACE_OR_COMMENT_BIT_SET = TokenSet.orSet(TOLK_COMMENTS, WHITESPACES)
+        val ANNOTATIONS = TokenSet.create(
+            TolkElementTypes.ANNOTATION,
+            TolkElementTypes.METHOD_ID_KEYWORD,
+            )
         val OPERATORS = TokenSet.create(
             TolkElementTypes.PLUS,
             TolkElementTypes.MINUS,

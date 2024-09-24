@@ -17,7 +17,7 @@ class TolkFindUsagesProvider : FindUsagesProvider {
     override fun getWordsScanner(): WordsScanner = DefaultWordsScanner(
         TolkLexer(),
         TokenSet.create(TolkElementTypes.IDENTIFIER),
-        FUNC_COMMENTS,
+        TOLK_COMMENTS,
         TolkParserDefinition.STRING_LITERALS
     )
 

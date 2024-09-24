@@ -20,7 +20,6 @@ import org.intellij.markdown.parser.MarkdownParser
 import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.highlighting.TolkColor
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.psi.impl.isImpure
 import org.ton.intellij.tolk.psi.impl.isMutable
 import java.util.*
 
@@ -86,8 +85,8 @@ class TolkDocumentationTarget(val element: PsiElement, val originalElement: PsiE
         if (originalElement !is TolkElement) return ""
         val result = LinkedList<String>()
         var element = originalElement.prevSibling
-        while (element.elementType in FUNC_DOC_COMMENTS || element is PsiWhiteSpace) {
-            if (element.elementType in FUNC_DOC_COMMENTS) {
+        while (element.elementType in TOLK_DOC_COMMENTS || element is PsiWhiteSpace) {
+            if (element.elementType in TOLK_DOC_COMMENTS) {
                 val commentText = element.text.replaceFirst("[!; ]+".toRegex(), "")
                 result.add(commentText)
             }
@@ -160,7 +159,9 @@ class TolkDocumentationTarget(val element: PsiElement, val originalElement: PsiE
             append("->")
             append(NBSP)
         }
-        renderType(function.typeReference)
+        function.typeReference?.let {
+            renderType(it)
+        }
         append(NBSP)
         if (function.isMutable) {
             append("~")
@@ -173,10 +174,6 @@ class TolkDocumentationTarget(val element: PsiElement, val originalElement: PsiE
             }
         }
         appendStyledSpan(TolkColor.PARENTHESES.attributes, ")")
-        if (function.isImpure) {
-            append(NBSP)
-            appendStyledSpan(TolkColor.KEYWORD.attributes, "impure")
-        }
     }
 
     fun StringBuilder.renderFunctionParameter(

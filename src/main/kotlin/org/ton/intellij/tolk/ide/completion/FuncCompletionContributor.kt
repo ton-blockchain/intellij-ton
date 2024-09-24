@@ -46,41 +46,41 @@ class TolkCompletionContributor : CompletionContributor() {
                 insertSpace = false
             )
         )
-        extend(
-            CompletionType.BASIC,
-            baseFunctionAttributePattern(
-                psiElement(TolkElementTypes.RPAREN)
-            ),
-            TolkKeywordCompletionProvider(
-                CONTEXT_KEYWORD_PRIORITY,
-                "pure",
-            )
-        )
-        extend(
-            CompletionType.BASIC,
-            baseFunctionAttributePattern(
-                psiElement(TolkElementTypes.RPAREN),
-                psiElement(TolkElementTypes.IMPURE_KEYWORD),
-            ),
-            TolkKeywordCompletionProvider(
-                CONTEXT_KEYWORD_PRIORITY,
-                "inline",
-                "inline_ref",
-            )
-        )
-        extend(
-            CompletionType.BASIC,
-            baseFunctionAttributePattern(
-                psiElement(TolkElementTypes.RPAREN),
-                psiElement(TolkElementTypes.IMPURE_KEYWORD),
-                psiElement(TolkElementTypes.INLINE_KEYWORD),
-                psiElement(TolkElementTypes.INLINE_REF_KEYWORD),
-            ),
-            TolkKeywordCompletionProvider(
-                CONTEXT_KEYWORD_PRIORITY,
-                "method_id",
-            )
-        )
+//        extend(
+//            CompletionType.BASIC,
+//            baseFunctionAttributePattern(
+//                psiElement(TolkElementTypes.RPAREN)
+//            ),
+//            TolkKeywordCompletionProvider(
+//                CONTEXT_KEYWORD_PRIORITY,
+//                "pure",
+//            )
+//        )
+//        extend(
+//            CompletionType.BASIC,
+//            baseFunctionAttributePattern(
+//                psiElement(TolkElementTypes.RPAREN),
+//                psiElement(TolkElementTypes.IMPURE_KEYWORD),
+//            ),
+//            TolkKeywordCompletionProvider(
+//                CONTEXT_KEYWORD_PRIORITY,
+//                "inline",
+//                "inline_ref",
+//            )
+//        )
+//        extend(
+//            CompletionType.BASIC,
+//            baseFunctionAttributePattern(
+//                psiElement(TolkElementTypes.RPAREN),
+//                psiElement(TolkElementTypes.IMPURE_KEYWORD),
+//                psiElement(TolkElementTypes.INLINE_KEYWORD),
+//                psiElement(TolkElementTypes.INLINE_REF_KEYWORD),
+//            ),
+//            TolkKeywordCompletionProvider(
+//                CONTEXT_KEYWORD_PRIORITY,
+//                "method_id",
+//            )
+//        )
         extend(
             CompletionType.BASIC,
             psiElement().afterLeaf(

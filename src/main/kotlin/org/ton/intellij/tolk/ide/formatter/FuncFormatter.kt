@@ -3,6 +3,7 @@ package org.ton.intellij.tolk.ide.formatter
 import com.intellij.formatting.*
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.tree.TokenSet
+import org.ton.intellij.func.psi.FuncElementTypes.PRIMITIVE_TYPE_EXPRESSION
 import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.psi.TolkElementTypes.*
 import org.ton.intellij.util.tokenSetOf
@@ -35,15 +36,10 @@ class TolkFormatter : FormattingModelBuilder {
                     REPEAT_KEYWORD,
                     DO_KEYWORD,
                     WHILE_KEYWORD,
-                    UNTIL_KEYWORD,
                     TRY_KEYWORD,
                     CATCH_KEYWORD,
                     IF_KEYWORD,
-                    IFNOT_KEYWORD,
-                    THEN_KEYWORD,
                     ELSE_KEYWORD,
-                    ELSEIF_KEYWORD,
-                    ELSEIFNOT_KEYWORD,
                 )
             ).spaces(1)
             .before(TokenSet.create(COMMA, SEMICOLON)).none()
@@ -51,12 +47,11 @@ class TolkFormatter : FormattingModelBuilder {
             .after(TokenSet.create(STATEMENT, LBRACE)).lineBreakInCode()
             .before(RBRACE).lineBreakInCode()
             .after(RBRACE).spaces(1)
-            .around(UNTIL_KEYWORD).spaces(1)
+//            .around(UNTIL_KEYWORD).spaces(1)
             .before(TokenSet.create(BLOCK_STATEMENT, ASM_BODY)).spaces(1)
             .around(BINARY_OP).spaces(1)
-            .after(FORALL_KEYWORD).spaces(1)
+//            .after(FORALL_KEYWORD).spaces(1)
             .around(MAPSTO).spaces(1)
-            .afterInside(tokenSetOf(PRIMITIVE_TYPE_EXPRESSION, HOLE_TYPE_EXPRESSION), APPLY_EXPRESSION).spaces(1)
             .betweenInside(LPAREN, MAPSTO, ASM_PARAMETERS).spaces(1)
             .betweenInside(
                 TokenSet.create(
@@ -64,7 +59,6 @@ class TolkFormatter : FormattingModelBuilder {
                     TENSOR_TYPE,
                     TUPLE_TYPE,
                     TYPE_IDENTIFIER,
-                    HOLE_TYPE
                 ), TokenSet.create(IDENTIFIER, TILDE), FUNCTION
             ).spaces(1)
             .afterInside(TYPE_REFERENCE, FUNCTION).spaces(1)

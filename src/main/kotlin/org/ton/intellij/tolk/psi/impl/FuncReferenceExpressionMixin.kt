@@ -10,10 +10,12 @@ import com.intellij.psi.util.PsiTreeUtil
 import org.ton.intellij.tolk.psi.*
 
 
+// TODO: fix
 abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceExpression {
 
     override fun getReferences(): Array<TolkReference> {
-        if (isVariableDefinition()) return EMPTY_ARRAY
+        return emptyArray()
+//        if (isVariableDefinition()) return EMPTY_ARRAY
         return arrayOf(TolkReference(this, TextRange(0, textLength)))
     }
 
@@ -45,18 +47,18 @@ private fun TolkExpression.isTypeExpression(): Boolean =
         else -> false
     }
 
-fun TolkReferenceExpression.isVariableDefinition(): Boolean = CachedValuesManager.getCachedValue(this) {
-    val result = !PsiTreeUtil.treeWalkUp(this, null) { scope, lastParent ->
-        if (scope is TolkApplyExpression && scope.right == lastParent) { // `var |foo|` <-- last parent
-            val left = scope.left // type definition -> `|var| foo`
-            if (left.isTypeExpression()) {
-                return@treeWalkUp false
-            }
-        }
-        if (scope is TolkCatch && scope.expression == lastParent) {
-            return@treeWalkUp false
-        }
-        true
-    }
-    Result(result, this)
-}
+//fun TolkReferenceExpression.isVariableDefinition(): Boolean = CachedValuesManager.getCachedValue(this) {
+//    val result = !PsiTreeUtil.treeWalkUp(this, null) { scope, lastParent ->
+//        if (scope is TolkApplyExpression && scope.right == lastParent) { // `var |foo|` <-- last parent
+//            val left = scope.left // type definition -> `|var| foo`
+//            if (left.isTypeExpression()) {
+//                return@treeWalkUp false
+//            }
+//        }
+//        if (scope is TolkCatch && lastParent in scope.referenceExpressionList) {
+//            return@treeWalkUp false
+//        }
+//        true
+//    }
+//    Result(result, this)
+//}

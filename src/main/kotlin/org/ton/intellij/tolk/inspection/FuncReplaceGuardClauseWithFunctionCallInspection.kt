@@ -56,7 +56,7 @@ class TolkReplaceGuardClauseWithFunctionCallInspection : TolkAbstractApplicabili
 
     override fun fixText(element: TolkIfStatement): String = when {
         element.ifKeyword != null -> "Replace with 'throw_if()' call"
-        element.ifnotKeyword != null -> "Replace with 'throw_unless()' call"
+//        element.ifnotKeyword != null -> "Replace with 'throw_unless()' call"
         else -> super.fixText(element)
     }
 

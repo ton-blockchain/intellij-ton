@@ -2,7 +2,6 @@ package org.ton.intellij.tolk.psi.impl
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
-import com.intellij.psi.util.PsiTreeUtil
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFunction
@@ -29,10 +28,11 @@ val TolkFunction.isMutable: Boolean
     get() = stub?.isMutable ?: (node.findChildByType(TolkElementTypes.TILDE) != null)
 
 val TolkFunction.isDeprecated: Boolean
-    get() = stub?.isDeprecated ?: functionAnnotationList.any { it.textMatches("@deprecated") }
+    get() = stub?.isDeprecated ?: functionAnnotationList.any { it.annotation.textMatches("@deprecated") }
 
-val TolkFunction.hasMethodId: Boolean
-    get() = stub?.hasMethodId ?: methodIdDefinitionList.isNotEmpty()
+val TolkFunction.isGetMethod: Boolean
+    get() = stub?.isGetMethod
+        ?: (getKeyword != null || functionAnnotationList.any { it.annotation.textMatches("@method_id") })
 
 val TolkFunction.hasAsm: Boolean
     get() = stub?.hasAsm ?: (asmDefinition != null)

@@ -20,6 +20,7 @@ class TolkConstantHintsProvider : InlayHintsProvider {
             if (file !is TolkFile) return
 
             file.constVars.forEach { const ->
+                val constIdentifier = const.identifier ?: return
                 val expression = const.expression ?: return@forEach
                 if (expression is TolkLiteralExpression && !expression.showHint()) {
                     return@forEach
@@ -31,7 +32,7 @@ class TolkConstantHintsProvider : InlayHintsProvider {
                         return@forEach
                     }
                 } ?: return@forEach
-                sink.addPresentation(InlineInlayPosition(const.identifier.endOffset, true), hasBackground = true) {
+                sink.addPresentation(InlineInlayPosition(constIdentifier.endOffset, true), hasBackground = true) {
                     val text = buildString {
                         append("= ")
                         if (value is TolkIntValue &&

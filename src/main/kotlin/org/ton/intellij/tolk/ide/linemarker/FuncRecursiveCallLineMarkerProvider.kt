@@ -24,13 +24,14 @@ class TolkRecursiveCallLineMarkerProvider : LineMarkerProviderDescriptor() {
         elements: MutableList<out PsiElement>,
         result: MutableCollection<in LineMarkerInfo<*>>,
     ) {
+        return // TODO: fix
         val lines = HashSet<Int>()  // To prevent several markers on one line
 
         for (element in elements) {
             if (element !is TolkReferenceExpression) continue
             val parent = element.parent
             val isRecursive = when {
-                parent is TolkApplyExpression && (parent.left as? TolkReferenceExpression).isRecursive -> true
+//                parent is TolkApplyExpression && (parent.left as? TolkReferenceExpression).isRecursive -> true
                 parent is TolkSpecialApplyExpression && (parent.left as? TolkReferenceExpression).isRecursive -> true
                 else -> false
             }

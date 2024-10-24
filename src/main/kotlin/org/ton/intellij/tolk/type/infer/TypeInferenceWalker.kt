@@ -10,24 +10,56 @@ class TolkTypeInferenceWalker(
     val ctx: TolkInferenceContext,
     private val returnTy: TolkTy
 ) {
-    private val definitions = HashMap<String, TolkElement>()
     private var variableDeclarationState = false
+    private val definedVariables = ArrayDeque<HashMap<String, MutableList<TolkNamedElement>>>()
+
+    private fun define(vararg namedElements: TolkNamedElement) {
+        definedVariables.firstOrNull()?.let {
+            val name = namedElements.firstOrNull()?.name?.removeSurrounding("`") ?: return
+            it.getOrPut(name) {
+                ArrayList()
+            }.addAll(namedElements)
+        }
+    }
+
+    private fun resolve(name: String): List<TolkNamedElement>? {
+        val formatted = name.removeSurrounding("`")
+        definedVariables.forEach {
+            val variable = it[formatted] ?: return@forEach
+            return variable
+        }
+        return null
+    }
 
     fun inferFunctionBody(
-        block: TolkBlockStatement
-    ): TolkTy = block.inferTypeCoercibleTo(returnTy)
+        block: TolkBlockStatement,
+        functionParameterList: MutableList<TolkFunctionParameter>,
+    ): TolkTy {
+        definedVariables.addFirst(HashMap())
+        functionParameterList.forEach { param ->
+            define(param)
+        }
+        return block.inferTypeCoercibleTo(returnTy)
+    }
 
     private fun TolkBlockStatement.inferTypeCoercibleTo(
         expected: TolkTy
-    ): TolkTy = inferType(Expectation.ExpectHasTy(expected), coerce = true)
+    ): TolkTy {
+        val type = inferType(Expectation.ExpectHasTy(expected), coerce = true)
+        return type
+    }
 
     private fun TolkBlockStatement.inferType(
         expected: Expectation = Expectation.NoExpectation,
         coerce: Boolean = false
     ): TolkTy {
-        for (statement in statementList) {
+        if (!isValid) return TolkTyUnknown
+        definedVariables.addFirst(HashMap())
+        val statements = statementList
+        for (statement in statements) {
             statement.inferType()
         }
+        definedVariables.removeFirst()
 
         return if (expected is Expectation.ExpectHasTy) {
             expected.ty
@@ -76,7 +108,7 @@ class TolkTypeInferenceWalker(
             is TolkTensorExpression -> inferType(expected)
             is TolkTupleExpression -> inferType(expected)
             is TolkBinExpression -> inferType(expected)
-            is TolkApplyExpression -> inferType(expected)
+//            is TolkApplyExpression -> inferType(expected) // TODO: fix
             is TolkSpecialApplyExpression -> inferType(expected)
             is TolkReferenceExpression -> inferType(expected)
             is TolkInvExpression -> inferType(expected)
@@ -129,34 +161,20 @@ class TolkTypeInferenceWalker(
         return TolkTyUnit
     }
 
-    private fun TolkTryStatement.inferType(): TolkTy {
-        blockStatement?.inferType()
-
-        (catch?.expression as? TolkTensorExpression)?.let { tensor ->
-            tensor.expressionList.forEach { tensorElement ->
-                if (tensorElement is TolkReferenceExpression) {
-                    ctx.lookup.define(tensorElement)
-                }
-            }
-        }
-
-        catch?.expression?.inferType(
-            TolkTyTensor(
-                TolkTyVar(),
-                TolkTyInt
-            )
-        )
-        catch?.blockStatement?.inferType()
-        return TolkTyUnit
-    }
-
-    private fun TolkVarStatement.inferType(): TolkTy {
-        val expressionTy = expression?.inferType() ?: TolkTyUnknown
-        varList.forEach {
-            ctx.lookup.define(it)
-        }
-        return expressionTy
-    }
+//    private fun TolkTryStatement.inferType(): TolkTy {
+//        blockStatement?.inferType()
+//
+//        definedVariables.addFirst(HashMap())
+//        catch?.referenceExpressionList?.forEachIndexed { index, tolkReferenceExpression ->
+//            if (index == 1) {
+//                ctx.setExprTy(tolkReferenceExpression, TolkTyInt)
+//            }
+//            define(tolkReferenceExpression)
+//        }
+//        catch?.blockStatement?.inferType()
+//        definedVariables.removeFirst()
+//        return TolkTyUnit
+//    }
 
     private fun TolkTensorExpression.inferType(
         expected: Expectation
@@ -188,33 +206,33 @@ class TolkTypeInferenceWalker(
         return rightTy ?: leftTy
     }
 
-    private fun TolkApplyExpression.inferType(
-        expected: Expectation
-    ): TolkTy {
-        val expressions = expressionList
-        val lhs = expressions[0]
-        val rhs = expressions.getOrNull(1)
-
-        fun TolkExpression.isTypeExpression(): Boolean {
-            return when (this) {
-                is TolkPrimitiveTypeExpression,
-                is TolkHoleTypeExpression -> true
-
-                is TolkTupleExpression -> expressionList.all { it.isTypeExpression() }
-                is TolkTensorExpression -> expressionList.all { it.isTypeExpression() }
-                else -> false
-            }
-        }
-
-        if (lhs.isTypeExpression()) {
-            variableDeclarationState = true
-        }
-        val lhsTy = lhs?.inferType()
-        val rhsTy = rhs?.inferType()
-        variableDeclarationState = false
-
-        return TolkTyUnit
-    }
+//    private fun TolkApplyExpression.inferType(
+//        expected: Expectation
+//    ): TolkTy {
+//        val expressions = expressionList
+//        val lhs = expressions[0]
+//        val rhs = expressions.getOrNull(1)
+//
+//        fun TolkExpression.isTypeExpression(): Boolean {
+//            return when (this) {
+//                is TolkPrimitiveTypeExpression,
+//                is TolkHoleTypeExpression -> true
+//
+//                is TolkTupleExpression -> expressionList.all { it.isTypeExpression() }
+//                is TolkTensorExpression -> expressionList.all { it.isTypeExpression() }
+//                else -> false
+//            }
+//        }
+//
+//        if (lhs.isTypeExpression()) {
+//            variableDeclarationState = true
+//        }
+//        val lhsTy = lhs?.inferType()
+//        val rhsTy = rhs?.inferType()
+//        variableDeclarationState = false
+//
+//        return TolkTyUnit
+//    }
 
     private fun TolkSpecialApplyExpression.inferType(
         expected: Expectation
@@ -231,9 +249,9 @@ class TolkTypeInferenceWalker(
         expected: Expectation
     ): TolkTy {
         if (variableDeclarationState) {
-            ctx.lookup.define(this)
+            define(this)
         } else {
-            ctx.lookup.resolve(this)?.let { resolved ->
+            resolve(this.name ?: return TolkTyUnknown)?.let { resolved ->
                 ctx.setResolvedRefs(this, resolved.map { PsiElementResolveResult(it) })
             }
         }

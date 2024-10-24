@@ -5,23 +5,24 @@ import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.*
 
+// TODO fix
 class TolkFunctionCallInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(
         holder: ProblemsHolder,
         session: LocalInspectionToolSession,
     ) = object : TolkVisitor() {
         override fun visitSpecialApplyExpression(o: TolkSpecialApplyExpression) {
-            super.visitSpecialApplyExpression(o)
-            val function = o.left.reference?.resolve() as? TolkFunction ?: return
-            holder.check(function, o.right ?: return, true)
+//            super.visitSpecialApplyExpression(o)
+//            val function = o.left.reference?.resolve() as? TolkFunction ?: return
+//            holder.check(function, o.right ?: return, true)
         }
 
-        override fun visitApplyExpression(o: TolkApplyExpression) {
-            super.visitApplyExpression(o)
-            if (o.parent is TolkSpecialApplyExpression) return
-            val function = o.left.reference?.resolve() as? TolkFunction ?: return
-            holder.check(function, o.right ?: return, false)
-        }
+//        override fun visitApplyExpression(o: TolkApplyExpression) {
+//            super.visitApplyExpression(o)
+//            if (o.parent is TolkSpecialApplyExpression) return
+//            val function = o.left.reference?.resolve() as? TolkFunction ?: return
+//            holder.check(function, o.right ?: return, false)
+//        }
     }
 
     private fun ProblemsHolder.check(function: TolkFunction, argument: TolkExpression, isMethodCall: Boolean) {

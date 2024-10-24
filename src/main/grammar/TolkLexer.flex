@@ -167,6 +167,9 @@ REGULAR_STRING_PART=[^\\\"\n]+
 // !(!a|b) is a (set) difference between a and b.
 EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
 
+// TODO: tolk, val, bool, enum, struct, export
+//
+
 %%
 <YYINITIAL> {
       {WHITE_SPACE}            { return WHITE_SPACE; }
@@ -195,10 +198,11 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "("                      { return LPAREN; }
       ")"                      { return RPAREN; }
       "="                      { return EQ; }
-      "_"                      { return UNDERSCORE; }
       "<"                      { return LT; }
       ">"                      { return GT; }
+      "&&"                     { return ANDAND; }
       "&"                      { return AND; }
+      "||"                     { return OROR; }
       "|"                      { return OR; }
       "^"                      { return XOR; }
       "~"                      { return TILDE; }
@@ -241,15 +245,10 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "repeat"                 { return REPEAT_KEYWORD; }
       "do"                     { return DO_KEYWORD; }
       "while"                  { return WHILE_KEYWORD; }
-      "until"                  { return UNTIL_KEYWORD; }
       "try"                    { return TRY_KEYWORD; }
       "catch"                  { return CATCH_KEYWORD; }
       "if"                     { return IF_KEYWORD; }
-      "ifnot"                  { return IFNOT_KEYWORD; }
-      "then"                   { return THEN_KEYWORD; }
       "else"                   { return ELSE_KEYWORD; }
-      "elseif"                 { return ELSEIF_KEYWORD; }
-      "elseifnot"              { return ELSEIFNOT_KEYWORD; }
       "int"                    { return INT_KEYWORD; }
       "cell"                   { return CELL_KEYWORD; }
       "slice"                  { return SLICE_KEYWORD; }
@@ -257,32 +256,34 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "continuation"           { return CONT_KEYWORD; }
       "tuple"                  { return TUPLE_KEYWORD; }
       "type"                   { return TYPE_KEYWORD; }
-      "forall"                 { return FORALL_KEYWORD; }
-      "extern"                 { return EXTERN_KEYWORD; }
       "global"                 { return GLOBAL_KEYWORD; }
       "asm"                    { return ASM_KEYWORD; }
-//      "@impure"                { return IMPURE; }
-//      "@inline"                { return INLINE; }
-//      "@inline_ref"            { return INLINE_REF; }
-      "auto_apply"             { return AUTO_APPLY_KEYWORD; }
-      "@method_id"             { return METHOD_ID_KEYWORD; }
-//      "@pure"                  { return PURE; }
       "operator"               { return OPERATOR_KEYWORD; }
       "infix"                  { return INFIX_KEYWORD; }
-      "infixl"                 { return INFIXL_KEYWORD; }
-      "infixr"                 { return INFIXR_KEYWORD; }
       "const"                  { return CONST_KEYWORD; }
       "true"                   { return TRUE_KEYWORD; }
       "false"                  { return FALSE_KEYWORD; }
-      "nil"                    { return NULL_KEYWORD; }
+      "null"                   { return NULL_KEYWORD; }
       "builtin"                { return BUILTIN_KEYWORD; }
       "get"                    { return GET_KEYWORD; }
-      "Nil"                    { return NIL_KEYWORD; }
       "import"                 { return IMPORT_KEYWORD; }
       "fun"                    { return FUN_KEYWORD; }
       "redef"                  { return REDEF_KEYWORD; }
       "auto"                   { return AUTO_KEYWORD; }
+      "mutate"                 { return MUTATE_KEYWORD; }
+      "assert"                 { return ASSERT_KEYWORD; }
       "varrr"                  { return VARRR_KEYWORD; }
+      "throw"                  { return THROW_KEYWORD; }
+      "void"                   { return VOID_KEYWORD; }
+      "self"                   { return SELF_KEYWORD; }
+      "tolk"                   { return TOLK_KEYWORD; }
+      "val"                    { return VAL_KEYWORD; }
+      "bool"                   { return BOOL_KEYWORD; }
+      "enum"                   { return ENUM_KEYWORD; }
+      "struct"                 { return STRUCT_KEYWORD; }
+      "export"                 { return EXPORT_KEYWORD; }
+      "break"                  { return BREAK_KEYWORD; }
+      "continue"               { return CONTINUE_KEYWORD; }
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
       {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }

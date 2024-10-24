@@ -86,7 +86,7 @@ class TolkInferenceContext(
             is TolkFunction -> {
                 val walker = TolkTypeInferenceWalker(this, TolkTyUnknown)
                 element.blockStatement?.let {
-                    walker.inferFunctionBody(it)
+//                    walker.inferFunctionBody(it, element.functionParameterList)
                 }
             }
         }

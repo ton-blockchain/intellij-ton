@@ -8,6 +8,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import org.ton.intellij.tolk.psi.*
 
+// TODO: fix apply expressions
 class RenameUnderscoreFix(
     val element: TolkReferenceExpression
 ) : LocalQuickFixAndIntentionActionOnPsiElement(element) {
@@ -24,8 +25,8 @@ class RenameUnderscoreFix(
         startElement: PsiElement,
         endElement: PsiElement
     ) {
-        val expression = TolkPsiFactory[project].createExpression("var (_) = 1") as TolkBinExpression
-        val newElement = ((expression.left as TolkApplyExpression).right as TolkTensorExpression).expressionList.first()
-        startElement.replace(newElement)
+//        val expression = TolkPsiFactory[project].createExpression("var (_) = 1") as TolkBinExpression
+//        val newElement = ((expression.left as TolkApplyExpression).right as TolkTensorExpression).expressionList.first()
+//        startElement.replace(newElement)
     }
 }

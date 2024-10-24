@@ -61,7 +61,6 @@ class TolkParserDefinition : ParserDefinition {
         val WHITE_SPACE_OR_COMMENT_BIT_SET = TokenSet.orSet(TOLK_COMMENTS, WHITESPACES)
         val ANNOTATIONS = TokenSet.create(
             TolkElementTypes.ANNOTATION,
-            TolkElementTypes.METHOD_ID_KEYWORD,
             )
         val OPERATORS = TokenSet.create(
             TolkElementTypes.PLUS,

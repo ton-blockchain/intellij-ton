@@ -47,8 +47,9 @@
         <defaultLiveTemplates file="/liveTemplates/tolkHidden.xml" hidden="true"/>
 
         <!-- Hints -->
-        <codeInsight.parameterInfo language="Tolk"
-                                   implementationClass="org.ton.intellij.tolk.ide.TolkParameterInfoHandler"/>
+<!--        TODO: fix-->
+<!--        <codeInsight.parameterInfo language="Tolk"-->
+<!--                                   implementationClass="org.ton.intellij.tolk.ide.TolkParameterInfoHandler"/>-->
         <codeInsight.parameterNameHints language="Tolk"
                                         implementationClass="org.ton.intellij.tolk.ide.hints.TolkParameterHintsProvider"/>
 

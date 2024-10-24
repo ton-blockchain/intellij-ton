@@ -4,9 +4,9 @@ import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.TolkPsiFactory
-import org.ton.intellij.tolk.psi.TolkVariable
+import org.ton.intellij.tolk.psi.TolkVar
 
-abstract class TolkVariableMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkVariable {
+abstract class TolkVarMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkVar {
     override fun getName(): String = identifier.text
 
     override fun setName(name: String): PsiElement {

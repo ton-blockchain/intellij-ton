@@ -7,7 +7,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.search.searches.ReferencesSearch
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkVisitor
-import org.ton.intellij.tolk.psi.impl.hasMethodId
+import org.ton.intellij.tolk.psi.impl.isGetMethod
 
 class TolkUnusedFunctionInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(
@@ -16,7 +16,7 @@ class TolkUnusedFunctionInspection : TolkInspectionBase() {
     ): TolkVisitor = object : TolkVisitor() {
         override fun visitFunction(o: TolkFunction) {
             val name = o.name ?: return
-            if (o.hasMethodId) return
+            if (o.isGetMethod) return
             if (name == "main") return
             if (name == "recv_internal") return
             if (name == "recv_external") return

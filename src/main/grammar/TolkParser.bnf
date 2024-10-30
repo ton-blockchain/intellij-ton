@@ -44,8 +44,9 @@
             OR                  = '|'
             OROR                = '||'
             XOR                 = '^'
-            TILDE               = '~'
             SHA                 = '#'
+            EXCL                = '!'
+            DOT                 = '.'
 
             EQEQ                = '=='
             NEQ                 = '!='
@@ -78,6 +79,7 @@
             ORLET               = '|='
             XORLET              = '^='
             MAPSTO              = '->'
+            TILDE               = '~'
 
             RETURN_KEYWORD              = 'return'
             VAR_KEYWORD                 = 'var'
@@ -102,7 +104,6 @@
             REDEF_KEYWORD               = 'redef'
             FUN_KEYWORD                 = 'fun'
             AUTO_KEYWORD                = 'auto'
-            VARRR_KEYWORD               = 'varrr'
             VOID_KEYWORD                = 'void'
             SELF_KEYWORD                = 'self'
             VAL_KEYWORD                 = 'val'
@@ -111,7 +112,7 @@
             STRUCT_KEYWORD              = 'struct'
             EXPORT_KEYWORD              = 'export'
             BREAK_KEYWORD               = 'break'
-            CONTUNUE_KEYWORD            = 'continue'
+            CONTINUE_KEYWORD            = 'continue'
             THROW_KEYWORD               = 'throw'
             ASSERT_KEYWORD              = 'assert'
             MUTATE_KEYWORD              = 'mutate'
@@ -203,7 +204,7 @@ VersionValue ::= ('='|'>'|'>='|'<'|'<='|'^')? INTEGER_LITERAL ('.' INTEGER_LITER
 //PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
 //Function ::= (TypeParameterList|'get')? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
-Function ::= FunctionAnnotation* ('get'? 'fun') FunctionIdentifier TypeParameterList? FunctionParameterList FunctionReturnType? FunctionBody {
+Function ::= FunctionAnnotation* ('get'? 'fun') IDENTIFIER TypeParameterList? FunctionParameterList FunctionReturnType? FunctionBody {
     pin = 2
     implements = [
         "org.ton.intellij.tolk.psi.TolkNamedElement"
@@ -245,7 +246,7 @@ TypeParameter ::= IDENTIFIER {
 AsmDefinition ::= 'asm' AsmParameters? AsmBody ';' {pin=1}
 AsmParameters ::= '(' AsmArgumentList? AsmIndexList? ')' {pin=1}
 private AsmArgumentList ::= AsmArgument+
-AsmArgument ::= IDENTIFIER {
+AsmArgument ::= 'self'|IDENTIFIER {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkAsmArgumentMixin"
 }
 private AsmIndexList ::= '->' AsmIndex+ {
@@ -254,16 +255,14 @@ private AsmIndexList ::= '->' AsmIndex+ {
 AsmIndex ::= IntegerExpression
 AsmBody ::= StringLiteral+
 
-private FunctionIdentifier ::= ('~'|'.')? IDENTIFIER
-
 Statement ::= ReturnStatement
             | BlockStatement
             | RepeatStatement
             | IfStatement
             | DoStatement
             | WhileStatement
-            | ThrowStatement
             | AssertStatement
+            | ThrowStatement
             | TryStatement
             | VarStatement
             | ExpressionStatement
@@ -285,7 +284,13 @@ private BlockStart ::= '{' BlockStatement_element* {
 }
 private Block_recovery ::= !('}')
 private BlockStatement_element ::= Statement
-private BlockStatement_recovery ::= !('}' | IDENTIFIER | 'var' | 'varrr' | 'return' | '{' | 'repeat' | 'if' | 'do' | 'while' | 'try' | 'redef' | '(' | '[' | 'int' | 'cell' | 'slice' | 'builder' | 'continuation' | 'tuple' | ';' | '~')
+private BlockStatement_recovery ::= !('}' | IDENTIFIER
+| 'var' | 'val'
+| 'return' | '{' | 'repeat'
+| 'if' | 'do' | 'while' | 'try' | 'redef'
+| '(' | '['
+| 'int' | 'cell' | 'slice' | 'builder' | 'continuation' | 'tuple'
+| 'assert' | 'throw' | ';')
 
 RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
 
@@ -320,11 +325,13 @@ ThrowStatement ::= 'throw' Expression ';' {
     pin = 1
 }
 
-AssertStatement ::= 'assert' AssertBody ';'
+AssertStatement ::= 'assert' AssertBody ';' {
+    pin = 1
+}
 private AssertBody ::= '(' AssertCondition (AssertWithThrow | AssertWithoutThrow) {
     pin = 1
 }
-private AssertWithThrow ::= ')' 'throw' AssertExcNo {
+private AssertWithThrow ::= ')' 'throw' Expression {
     pin = 1
 }
 private AssertWithoutThrow ::= ',' AssertExcNo ')' {
@@ -338,7 +345,7 @@ TryStatement ::= 'try' BlockStatement Catch {pin=1}
 Catch ::= 'catch' CatchParameterList? BlockStatement {
     pin = 1
 }
-CatchParameterList ::= '(' CatchParameter (',' CatchParameter)? ')' {
+private CatchParameterList ::= '(' CatchParameter (',' CatchParameter)? ')' {
     pin = 1
 }
 CatchParameter ::= IDENTIFIER
@@ -354,10 +361,9 @@ Expression ::= AssignBinExpression
     | ShiftBinExpression
     | AddBinExpression
     | MulBinExpression
-    | UnaryExpression
-    | InvExpression
-    | SpecialApplyExpression
-    | ApplyExpression
+    | PrefixExpression
+    | DotExpression
+    | CallExpression
     | AtomicExpression
 
 fake BinExpression ::= Expression BinaryOp Expression {
@@ -403,8 +409,7 @@ ShiftBinExpression ::= Expression ShiftBinOp Expression
 
 AddBinExpression ::= Expression AddBinOp Expression
 MulBinExpression ::= Expression MulBinOp Expression
-UnaryExpression ::= ('-'|'+') Expression
-InvExpression ::= '~' Expression
+PrefixExpression ::= ('!'|'~'|'-'|'+') Expression
 
 AssignBinOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '^>>=' | '~>>=' | '&=' | '|=' | '^=' {
     name = "operator"
@@ -420,17 +425,17 @@ ShiftBinOp ::= '<<' | '>>' | '~>>' | '^>>' { name = "operator" }
 AddBinOp ::= '-' | '+' { name = "operator" }
 MulBinOp  ::= '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%' { name = "operator" }
 
-VarStatement ::= ('varrr') VarDefinition '=' Expression ';' {
+VarStatement ::= ('var'|'val') VarDefinition '=' Expression ';' {
     pin = 1
 }
 
 VarDefinition ::= VarTensor | VarTuple | Var
 
-VarTensor ::= '(' <<comma_separated_list VarDefinition>> ')' {
+VarTensor ::= '(' <<list_with_recover VarDefinition>> ')' {
     pin = 1
 }
 
-VarTuple ::= '[' <<comma_separated_list VarDefinition>> ']' {
+VarTuple ::= '[' <<list_with_recover VarDefinition>> ']' {
     pin = 1
 }
 
@@ -440,18 +445,29 @@ Var ::= (IDENTIFIER) ['redef' | (':' TypeReference) ] {
     implements = "org.ton.intellij.tolk.psi.TolkNamedElement"
 }
 
-SpecialApplyExpression ::= Expression &<<isSpecialIdentifier>> ApplyExpression {
+DotExpression ::= Expression '.' CallExpression {
+    pin = 2
     methods=[
         left="/Expression[0]"
         right="/Expression[1]"
     ]
 }
-ApplyExpression ::= Expression ArgumentList {
-    rightAssociative=true
+CallExpression ::= Expression ArgumentList {
+    rightAssociative = true
 }
-ArgumentList ::= '(' [ <<comma_separated_list Argument>> ] ')' {
+ArgumentList ::= '(' [<<list_with_recover Argument>>] ')' {
     pin = 1
 }
+//private args ::= <<comma_separated_list Argument>> {
+//    recoverWhile = recoverArgs
+//}
+//private recoverArgs ::= !(')'|';')
+
+private expressionWithRecoverUntilParen ::= Expression {recoverWhile="not_paren_recover"}
+private expressionWithRecoverUntilParenOrComma ::= Expression {recoverWhile="not_paren_or_comma_recover"}
+private not_paren_recover ::= !')'
+private not_paren_or_comma_recover ::= !(')' | ',')
+
 Argument ::= 'mutate'? Expression
 
 private AtomicExpression ::= UnitExpression
@@ -461,7 +477,9 @@ private AtomicExpression ::= UnitExpression
 //                        | PrimitiveTypeExpression
                         | LiteralExpression
                         | ReferenceExpression
+                        | SelfExpression
 
+SelfExpression ::= 'self'
 UnitExpression ::= '(' ')'
 
 fake TensorExpression ::= '(' <<comma_separated_list Expression>> ')' {
@@ -475,12 +493,14 @@ TensorOrParenExpression ::= '(' Expression (TensorExpression_upper | ')') {
     pin = 1
     elementType = ParenExpression
 }
-upper TensorExpression_upper ::= TensorExpressionValue* ')' {
+upper TensorExpression_upper ::= (',' TensorExpressionValue)* ')' {
     elementType = TensorExpression
 }
-private TensorExpressionValue ::= ',' Expression {
-    pin=1
+
+private TensorExpressionValue ::=Expression {
+    recoverWhile=TensorExpressionValue_recovery
 }
+private TensorExpressionValue_recovery ::= !(','|')'|';')
 
 TupleExpression ::= '[' [ <<comma_separated_list Expression>> ] ']' {
     pin=1
@@ -505,7 +525,7 @@ private FunctionParameterList_start ::= '(' FunctionParameterList_item* {
     pin = 1
     recoverWhile=FunctionParameterList_recovery
 }
-private FunctionParameterList_recovery ::= !')'
+private FunctionParameterList_recovery ::= !')'|'asm'|'{'
 private FunctionParameterList_item ::= FunctionParameter ( ','| &')' ) {pin=1}
 
 FunctionParameter ::= 'mutate'? TypeNamedFunctionParameter {
@@ -514,7 +534,7 @@ FunctionParameter ::= 'mutate'? TypeNamedFunctionParameter {
     stubClass="org.ton.intellij.tolk.stub.TolkFunctionParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
-private TypeNamedFunctionParameter ::= ('self'|IDENTIFIER) ':' TypeReference {
+private TypeNamedFunctionParameter ::= ('self'|IDENTIFIER) ':' !'self' TypeReference {
     pin = 1
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -567,3 +587,7 @@ upper TensorType_upper ::= ',' [ TypeReference (',' TypeReference)* ] ')' {
 }
 
 private meta comma_separated_list ::= <<param>> (',' <<param>>)*
+private meta list_with_recover ::= <<comma_separated_list <<param>>>> {
+    recoverWhile=paren_list_element_recover
+}
+private paren_list_element_recover ::= !(')'|']'|';')

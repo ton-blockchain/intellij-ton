@@ -35,7 +35,7 @@ class TolkAnnotator : Annotator {
                 return
             }
 
-            is TolkIncludeDefinition, is TolkPragmaDefinition -> {
+            is TolkIncludeDefinition -> {
                 val sha = element.node.firstChildNode
                 val macroName = sha.treeNext
 

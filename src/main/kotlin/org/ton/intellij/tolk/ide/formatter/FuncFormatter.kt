@@ -4,6 +4,7 @@ import com.intellij.formatting.*
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.tree.TokenSet
 import org.ton.intellij.func.psi.FuncElementTypes.PRIMITIVE_TYPE_EXPRESSION
+import org.ton.intellij.func.psi.FuncElementTypes.SPECIAL_APPLY_EXPRESSION
 import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.psi.TolkElementTypes.*
 import org.ton.intellij.util.tokenSetOf
@@ -67,10 +68,10 @@ class TolkFormatter : FormattingModelBuilder {
             .beforeInside(IDENTIFIER, FUNCTION_PARAMETER).spaces(1)
             .after(FUNCTION_PARAMETER).none()
             .between(FUNCTION, FUNCTION).blankLines(1)
-            .beforeInside(TENSOR_EXPRESSION, APPLY_EXPRESSION).none()
-            .beforeInside(UNIT_EXPRESSION, APPLY_EXPRESSION).none()
-            .beforeInside(TENSOR_EXPRESSION, SPECIAL_APPLY_EXPRESSION).none()
-            .beforeInside(UNIT_EXPRESSION, SPECIAL_APPLY_EXPRESSION).none()
+            .beforeInside(TENSOR_EXPRESSION, CALL_EXPRESSION).none()
+            .beforeInside(UNIT_EXPRESSION, CALL_EXPRESSION).none()
+            .beforeInside(TENSOR_EXPRESSION, DOT_EXPRESSION).none()
+            .beforeInside(UNIT_EXPRESSION, DOT_EXPRESSION).none()
             .beforeInside(RPAREN, TokenSet.create(TENSOR_EXPRESSION, TENSOR_TYPE)).none()
             .beforeInside(RBRACK, TokenSet.create(TUPLE_EXPRESSION, TUPLE_TYPE)).none()
             .aroundInside(TokenSet.create(QUEST, COLON), TERNARY_EXPRESSION).spaces(1)
@@ -82,8 +83,7 @@ class TolkFormatter : FormattingModelBuilder {
                     DIVMOD, DIVC, DIVR, MODR, MODC, AND
                 ), BIN_EXPRESSION
             ).spaces(1)
-            .afterInside(MINUS, UNARY_EXPRESSION).none()
-            .afterInside(TILDE, INV_EXPRESSION).spaces(1)
+            .afterInside(tokenSetOf(EXCL, TILDE, MINUS, PLUS), PREFIX_EXPRESSION).none()
 //            .around(TokenSet.create(IMPURE_KEYWORD, INLINE_KEYWORD, INLINE_REF_KEYWORD, METHOD_ID_KEYWORD)).spaces(1)
     }
 }

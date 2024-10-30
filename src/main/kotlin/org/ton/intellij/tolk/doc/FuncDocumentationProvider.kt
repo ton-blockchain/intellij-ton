@@ -168,14 +168,6 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
                 appendStyledSpan(TolkColor.PARENTHESES.attributes, ")")
             }
 
-            is TolkHoleType -> {
-                if (type.text == "var") {
-                    appendStyledSpan(TolkColor.KEYWORD.attributes, "var")
-                } else {
-                    append("_")
-                }
-            }
-
             is TolkParenType -> {
                 appendStyledSpan(TolkColor.PARENTHESES.attributes, "(")
                 type.typeReference?.let {
@@ -195,8 +187,6 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
                     renderType(it)
                 }
             }
-
-            is TolkUnitType -> appendStyledSpan(TolkColor.PARENTHESES.attributes, "()")
 
             else -> {
                 val typeIdentifier = type.typeIdentifier?.text

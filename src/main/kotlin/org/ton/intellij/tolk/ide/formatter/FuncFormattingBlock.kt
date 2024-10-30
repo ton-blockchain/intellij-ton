@@ -87,7 +87,7 @@ class TolkFormattingBlock(
         val parentType = parent.elementType
         when (parentType) {
             BLOCK_STATEMENT -> return indentIfNotBrace(child)
-            SPECIAL_APPLY_EXPRESSION -> if (parent.lastChildNode == child) return Indent.getNormalIndent()
+            DOT_EXPRESSION -> if (parent.lastChildNode == child) return Indent.getNormalIndent()
             TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE, PAREN_TYPE -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
             TUPLE_TYPE, TUPLE_EXPRESSION -> if (type != LBRACK && type != RBRACK) return Indent.getNormalIndent()
             FUNCTION -> if (type == BUILTIN_KEYWORD || type == ASM_DEFINITION) return Indent.getNormalIndent()

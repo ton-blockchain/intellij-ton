@@ -83,9 +83,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             val constVars = if (stub != null) {
                 getChildrenByType(stub, TolkElementTypes.CONST_VAR, TolkConstVarStubElementType.ARRAY_FACTORY)
             } else {
-                findChildrenByClass(TolkConstVarList::class.java).flatMap {
-                    it.constVarList
-                }
+                findChildrenByClass(TolkConstVar::class.java).toList()
             }
             CachedValueProvider.Result.create(constVars, this)
         }
@@ -96,9 +94,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             val constVars = if (stub != null) {
                 getChildrenByType(stub, TolkElementTypes.GLOBAL_VAR, TolkGlobalVarStubElementType.ARRAY_FACTORY)
             } else {
-                findChildrenByClass(TolkGlobalVarList::class.java).flatMap {
-                    it.globalVarList
-                }
+                findChildrenByClass(TolkGlobalVar::class.java).toList()
             }
             CachedValueProvider.Result.create(constVars, this)
         }

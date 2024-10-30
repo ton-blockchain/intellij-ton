@@ -145,12 +145,9 @@ DECIMAL_INTEGER_LITERAL=(0|([1-9]({DIGIT_OR_UNDERSCORE})*))
 HEX_INTEGER_LITERAL=0[Xx]({HEX_DIGIT_OR_UNDERSCORE})*
 BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
 
-//PLAIN_IDENTIFIER=([a-zA-Z_$?:'~][0-9a-zA-Z_$?:'+\-\=\^><&|/%]*)
-//PLAIN_IDENTIFIER=[.~]?[^\s;,\(\)\[\]\{\},.~\"\+\-\*\/%]+
-//PLAIN_IDENTIFIER=^(?!{\-|;;)[.~]?[^\s;,.~\(\)\[\]\"\{\}]+
-PLAIN_IDENTIFIER=([a-zA-Z_$][0-9a-zA-Z_$?]*)
+PLAIN_IDENTIFIER=[a-zA-Z$_][a-zA-Z0-9$_]*
 QUOTE_ESCAPED_IDENTIFIER = (`[^`\n]+`)|(_[^_\n\w,]+_)
-IDENTIFIER = [.~]?({QUOTE_ESCAPED_IDENTIFIER}|{PLAIN_IDENTIFIER})
+IDENTIFIER = {QUOTE_ESCAPED_IDENTIFIER}|{PLAIN_IDENTIFIER}
 ANNOTATION = @{PLAIN_IDENTIFIER}
 //VERSION_VALUE = (=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?
 
@@ -205,8 +202,9 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "||"                     { return OROR; }
       "|"                      { return OR; }
       "^"                      { return XOR; }
-      "~"                      { return TILDE; }
       "#"                      { return SHA; }
+      "!"                      { return EXCL; }
+      "."                      { return DOT; }
 
       "=="                     { return EQEQ; }
       "!="                     { return NEQ; }
@@ -239,6 +237,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "|="                     { return ORLET; }
       "^="                     { return XORLET; }
       "->"                     { return MAPSTO; }
+      "~"                      { return TILDE; }
 
       "return"                 { return RETURN_KEYWORD; }
       "var"                    { return VAR_KEYWORD; }
@@ -272,7 +271,6 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "auto"                   { return AUTO_KEYWORD; }
       "mutate"                 { return MUTATE_KEYWORD; }
       "assert"                 { return ASSERT_KEYWORD; }
-      "varrr"                  { return VARRR_KEYWORD; }
       "throw"                  { return THROW_KEYWORD; }
       "void"                   { return VOID_KEYWORD; }
       "self"                   { return SELF_KEYWORD; }

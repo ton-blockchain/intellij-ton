@@ -5,7 +5,6 @@ import com.intellij.codeInsight.daemon.LineMarkerProviderDescriptor
 import com.intellij.openapi.editor.markup.GutterIconRenderer
 import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.TolkIcons
-import org.ton.intellij.tolk.psi.TolkApplyExpression
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.TolkSpecialApplyExpression

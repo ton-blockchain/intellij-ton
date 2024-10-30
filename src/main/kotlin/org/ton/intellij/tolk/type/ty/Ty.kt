@@ -174,7 +174,6 @@ val TolkTypeReference.rawType: TolkTy
                 else -> TolkTyUnknown
             }
 
-            is TolkUnitType -> TolkTyUnit
             is TolkTensorType -> TolkTy(
                 typeReferenceList.map {
                     it.rawType

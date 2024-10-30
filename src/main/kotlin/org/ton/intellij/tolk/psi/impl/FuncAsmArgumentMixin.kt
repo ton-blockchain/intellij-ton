@@ -26,8 +26,8 @@ class TolkAsmArgumentReference(element: TolkAsmArgument) :
             PsiTreeUtil.getParentOfType(myElement, TolkFunction::class.java) ?: return@AbstractResolver null
         val params = function.functionParameterList
         return@AbstractResolver params.find {
-            val name = it.name ?: return@AbstractResolver null
-            myElement.identifier.textMatches(name)
+            val name = it.name ?: return@find false
+            myElement.identifier?.textMatches(name) ?: false
         }
     }
 
@@ -37,7 +37,7 @@ class TolkAsmArgumentReference(element: TolkAsmArgument) :
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {
-        myElement.identifier.replace(TolkPsiFactory[myElement.project].createIdentifier(newElementName))
+        myElement.identifier?.replace(TolkPsiFactory[myElement.project].createIdentifier(newElementName))
         return myElement
     }
 }

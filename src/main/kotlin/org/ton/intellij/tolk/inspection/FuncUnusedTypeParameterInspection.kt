@@ -24,7 +24,7 @@ class TolkUnusedTypeParameterInspection : TolkInspectionBase() {
         }
 
         private fun processParameter(parameter: TolkTypeParameter) {
-            if (ReferencesSearch.search(parameter, parameter.useScope).findFirst() == null) {
+            if (ReferencesSearch.search(parameter).any()) {
                 val id = parameter.identifier
                 val range = TextRange.from(id.startOffsetInParent, id.textLength)
                 holder.registerProblem(

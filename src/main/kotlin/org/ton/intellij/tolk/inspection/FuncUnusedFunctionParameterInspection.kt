@@ -29,6 +29,7 @@ class TolkUnusedFunctionParameterInspection : TolkInspectionBase() {
 
         private fun processParameter(parameter: TolkFunctionParameter) {
             val id = parameter.identifier ?: return
+            if (id.textMatches("_")) return
             if (ReferencesSearch.search(parameter, parameter.useScope).findFirst() == null) {
                 val range = TextRange.from(id.startOffsetInParent, id.textLength)
                 holder.registerProblem(

@@ -14,7 +14,6 @@ import org.ton.intellij.tolk.psi.*
 abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceExpression {
 
     override fun getReferences(): Array<TolkReference> {
-        return emptyArray()
 //        if (isVariableDefinition()) return EMPTY_ARRAY
         return arrayOf(TolkReference(this, TextRange(0, textLength)))
     }
@@ -37,15 +36,7 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
     }
 }
 
-private fun TolkExpression.isTypeExpression(): Boolean =
-    when (this) {
-        is TolkTensorExpression -> this.expressionList.all { it.isTypeExpression() }
-        is TolkTupleExpression -> this.expressionList.all { it.isTypeExpression() }
-        is TolkHoleTypeExpression,
-        is TolkPrimitiveTypeExpression -> true
 
-        else -> false
-    }
 
 //fun TolkReferenceExpression.isVariableDefinition(): Boolean = CachedValuesManager.getCachedValue(this) {
 //    val result = !PsiTreeUtil.treeWalkUp(this, null) { scope, lastParent ->

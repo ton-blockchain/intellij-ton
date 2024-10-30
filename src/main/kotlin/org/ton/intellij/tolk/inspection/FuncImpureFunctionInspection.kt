@@ -2,7 +2,6 @@ package org.ton.intellij.tolk.inspection
 
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemsHolder
-import org.ton.intellij.tolk.psi.TolkApplyExpression
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkVisitor
 
@@ -16,10 +15,7 @@ class TolkImpureFunctionInspection : TolkInspectionBase() {
                 super.visitFunction(o)
             }
 
-            override fun visitApplyExpression(o: TolkApplyExpression) {
-                println("Apply: ${o.text} in ${currentFunction?.name}")
-                super.visitApplyExpression(o)
-            }
+
         }
     }
 }

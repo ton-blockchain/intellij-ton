@@ -229,14 +229,6 @@ class TolkDocumentationTarget(val element: PsiElement, val originalElement: PsiE
                 appendStyledSpan(TolkColor.PARENTHESES.attributes, ")")
             }
 
-            is TolkHoleType -> {
-                if (type.text == "var") {
-                    appendStyledSpan(TolkColor.KEYWORD.attributes, "var")
-                } else {
-                    append("_")
-                }
-            }
-
             else -> append(type)
         }
     }

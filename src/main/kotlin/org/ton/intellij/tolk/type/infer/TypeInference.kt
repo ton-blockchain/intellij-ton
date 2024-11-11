@@ -1,11 +1,14 @@
 package org.ton.intellij.tolk.type.infer
 
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.util.containers.OrderedSet
 import org.ton.intellij.tolk.diagnostics.TolkDiagnostic
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.impl.TolkIncludeDefinitionMixin
+import org.ton.intellij.tolk.psi.impl.resolveFile
 import org.ton.intellij.tolk.type.ty.TolkTy
 import org.ton.intellij.tolk.type.ty.TolkTyUnknown
 import org.ton.intellij.util.recursionGuard
@@ -82,8 +85,18 @@ class TolkInferenceContext(
             is TolkFunction -> {
                 val walker = TolkInferenceWalker(this)
                 val tolkFile = element.containingFile as? TolkFile
+
+
                 tolkFile?.let {
-                    walker.inferFile(it)
+                    val commonStdlib =
+                        TolkIncludeDefinitionMixin.resolveTolkImport(element.project, tolkFile, "@stdlib/common")
+                    if (commonStdlib != null) {
+                        val tolkCommonStdlib = commonStdlib.findPsiFile(element.project) as? TolkFile
+                        if (tolkCommonStdlib != null && tolkFile != tolkCommonStdlib) {
+                            walker.inferFile(tolkCommonStdlib, false)
+                        }
+                    }
+                    walker.inferFile(tolkFile)
                 }
                 walker.inferFunction(element)
             }
@@ -99,7 +112,8 @@ class TolkInferenceWalker(
 ) {
     private val symbolDefinitions = HashMap<String, PsiElement>()
 
-    fun inferFile(element: TolkFile) {
+    fun inferFile(element: TolkFile, useIncludes: Boolean = true) {
+        val project = element.project
         element.functions.forEach { function ->
             symbolDefinitions[function.name?.removeSurrounding("`") ?: return@forEach] = function
         }
@@ -108,6 +122,15 @@ class TolkInferenceWalker(
         }
         element.constVars.forEach { constVar ->
             symbolDefinitions[constVar.name?.removeSurrounding("`") ?: return@forEach] = constVar
+        }
+        element.includeDefinitions.forEach {
+            val resolvedFile = it.resolveFile(project)
+            if (resolvedFile != null) {
+                val resolvedTolkFile = resolvedFile.findPsiFile(element.project) as? TolkFile
+                if (resolvedTolkFile != null) {
+                    inferFile(resolvedTolkFile, false)
+                }
+            }
         }
     }
 
@@ -196,10 +219,11 @@ class TolkInferenceWalker(
 
     private fun infer(element: TolkDoStatement) {
         element.blockStatement?.let { blockStatement ->
-            TolkInferenceWalker(ctx, this).infer(blockStatement)
-        }
-        element.expression?.let { expression ->
-            infer(expression)
+            val walker = TolkInferenceWalker(ctx, this)
+            walker.infer(blockStatement)
+            element.expression?.let { expression ->
+                walker.infer(expression)
+            }
         }
     }
 

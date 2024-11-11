@@ -18,10 +18,13 @@ class TolkUnusedFunctionInspection : TolkInspectionBase() {
             val name = o.name ?: return
             if (o.isGetMethod) return
             if (name == "main") return
-            if (name == "recv_internal") return
-            if (name == "recv_external") return
-            if (name == "run_ticktock") return
-            if(o.containingFile.containingDirectory.name.startsWith("tolk-stdlib")) return
+            if (name == "onInternalMessage") return
+            if (name == "onExternalMessage") return
+            if (name == "onTickTock") return
+            if (name == "onSplitPrepare") return
+            if (name == "onSplitInstall") return
+            val containingDirectory = o.containingFile.containingDirectory ?: return
+            if(containingDirectory.name.startsWith("tolk-stdlib")) return
             if (ReferencesSearch.search(o, o.useScope).findFirst() == null) {
                 val id = o.identifier ?: return
                 val range = TextRange.from(id.startOffsetInParent, id.textLength)

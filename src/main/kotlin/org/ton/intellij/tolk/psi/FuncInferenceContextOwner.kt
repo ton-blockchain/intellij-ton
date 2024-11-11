@@ -22,7 +22,7 @@ val TolkInferenceContextOwner.selfInferenceResult: TolkInferenceResult
             val (inferred,time) = measureTimedValue {
                 inferTypesIn(this)
             }
-            println("${(this as? TolkNamedElement)?.name} - infer $time")
+//            println("${(this as? TolkNamedElement)?.name} - infer $time")
             CachedValueProvider.Result.create(inferred, PsiModificationTracker.MODIFICATION_COUNT)
         }
     }

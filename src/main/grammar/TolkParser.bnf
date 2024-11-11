@@ -204,7 +204,7 @@ VersionValue ::= ('='|'>'|'>='|'<'|'<='|'^')? INTEGER_LITERAL ('.' INTEGER_LITER
 //PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
 //Function ::= (TypeParameterList|'get')? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
-Function ::= FunctionAnnotation* ('get'? 'fun') IDENTIFIER TypeParameterList? FunctionParameterList FunctionReturnType? FunctionBody {
+Function ::= FunctionAnnotation* (('get'? 'fun') | ('get')) IDENTIFIER TypeParameterList? FunctionParameterList FunctionReturnType? FunctionBody {
     pin = 2
     implements = [
         "org.ton.intellij.tolk.psi.TolkNamedElement"
@@ -287,6 +287,7 @@ private BlockStatement_element ::= Statement
 private BlockStatement_recovery ::= !('}' | IDENTIFIER
 | 'var' | 'val'
 | 'return' | '{' | 'repeat'
+| 'break' | 'continue'
 | 'if' | 'do' | 'while' | 'try' | 'redef'
 | '(' | '['
 | 'int' | 'cell' | 'slice' | 'builder' | 'continuation' | 'tuple'

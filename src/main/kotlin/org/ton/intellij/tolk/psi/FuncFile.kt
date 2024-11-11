@@ -3,12 +3,14 @@ package org.ton.intellij.tolk.psi
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.findFile
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.TolkLanguage
+import org.ton.intellij.tolk.psi.impl.resolveFile
 import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.stub.TolkFileStub
 import org.ton.intellij.tolk.stub.type.TolkConstVarStubElementType
@@ -101,11 +103,16 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
 
     fun import(file: TolkFile) {
         if (file == this) return
-        val path = VfsUtil.findRelativePath(virtualFile ?: return, file.virtualFile ?: return, '/') ?: return
-        val needImport = includeDefinitions.none { it.reference?.resolve() == file }
+        var path = VfsUtil.findRelativePath(virtualFile ?: return, file.virtualFile ?: return, '/') ?: return
+        val needImport = includeDefinitions.none { it.resolveFile(it.project) == file.virtualFile }
         if (!needImport) return
 
         val factory = TolkPsiFactory[project]
+        val sdk = TolkSdkManager[project].getSdkRef().resolve(project)
+        if (sdk != null && VfsUtil.isAncestor(sdk.stdlibFile, file.virtualFile, false)) {
+            val sdkPath = sdk.stdlibFile.path
+            path = file.virtualFile.path.replace(sdkPath, "@stdlib")
+        }
         val newInclude = factory.createIncludeDefinition(path)
 
         tryIncludeAtCorrectLocation(newInclude)
@@ -143,6 +150,13 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
 
 private val INCLUDE_COMPARE: Comparator<TolkIncludeDefinition> =
     compareBy(
+        {
+            if (it.stringLiteral?.rawString?.text?.startsWith("@stdlib") == true) {
+                0
+            } else {
+                1
+            }
+        },
         {
             it.stringLiteral?.rawString?.text?.count { c -> c == '/' }
         },

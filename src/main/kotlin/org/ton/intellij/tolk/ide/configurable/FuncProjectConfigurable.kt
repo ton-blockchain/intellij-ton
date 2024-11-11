@@ -7,7 +7,7 @@ import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
 import org.ton.intellij.tolk.TolkBundle
-import org.ton.intellij.tolk.ide.settings.funcSettings
+import org.ton.intellij.tolk.ide.settings.tolkSettings
 import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.sdk.TolkSdkRef
 
@@ -15,7 +15,7 @@ class TolkProjectConfigurable(
     val project: Project,
 ) : BoundConfigurable(TolkBundle.message("tolk.name")) {
     override fun createPanel(): DialogPanel = panel {
-        val settings = project.funcSettings
+        val settings = project.tolkSettings
         val state = settings.state.copy()
         var sdkRef = TolkSdkManager[project].getSdkRef()
 
@@ -25,7 +25,7 @@ class TolkProjectConfigurable(
 //            }, SimpleListCellRenderer.create("") { it.displayName })
 //        }
         row("Tolk stdlib:") {
-            textFieldWithBrowseButton("path", null, FileChooserDescriptorFactory.createSingleFileDescriptor("tolk"))
+            textFieldWithBrowseButton("path", null, FileChooserDescriptorFactory.createSingleFolderDescriptor())
                 .bindText({
                     sdkRef.toString()
                 }, {

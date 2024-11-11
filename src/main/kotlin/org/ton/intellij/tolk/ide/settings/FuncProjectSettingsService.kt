@@ -4,8 +4,8 @@ import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import org.ton.intellij.tolk.TolkLanguageLevel
 
-val Project.funcSettings: TolkProjectSettingsService
-    get() = service<TolkProjectSettingsService>()
+val Project.tolkSettings: TolkProjectSettingsService
+    get() = getService<TolkProjectSettingsService>(TolkProjectSettingsService::class.java)
 
 private const val SERVICE_NAME: String = "TolkProjectSettings"
 

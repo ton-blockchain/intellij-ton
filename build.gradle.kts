@@ -119,7 +119,7 @@ tasks {
     runIde { enabled = true }
     prepareSandbox { enabled = true }
     patchPluginXml {
-        sinceBuild.set("231")
+        sinceBuild.set("232")
         untilBuild.set("")
         changeNotes.set(provider {
             changelog.renderItem(changelog.run {

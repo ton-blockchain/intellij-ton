@@ -145,10 +145,10 @@
                 implementation="org.ton.intellij.tolk.sdk.TolkSdkSyntheticLibraryProvider"/>
     </extensions>
 
-<!--    <actions>-->
-<!--        <action id="tolk.new_func_file" class="org.ton.intellij.tolk.action.file.TolkCreateFileAction"-->
-<!--                text="Tolk File" description="Create new Tolk file">-->
-<!--            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewXml"/>-->
-<!--        </action>-->
-<!--    </actions>-->
+    <actions>
+        <action id="NewTolk" class="org.ton.intellij.tolk.action.file.TolkCreateFileAction"
+                text="Tolk File" description="Create new Tolk file">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFunc"/>
+        </action>
+    </actions>
 </idea-plugin>

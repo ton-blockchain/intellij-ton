@@ -26,8 +26,5 @@ object TolkMacroCompletionProvider : TolkCompletionProvider(), DumbAware {
                 AutoPopupController.getInstance(context.project).scheduleAutoPopup(context.editor)
             }
         )
-        result.addElement(
-            LookupElementBuilder.create("pragma").bold()
-        )
     }
 }

@@ -17,8 +17,8 @@ class TolkCompletionContributor : CompletionContributor() {
             TolkKeywordCompletionProvider(
                 KEYWORD_PRIORITY,
                 "var",
+                "val",
                 "if",
-                "ifnot",
                 "return",
                 "repeat",
                 "do",
@@ -46,41 +46,6 @@ class TolkCompletionContributor : CompletionContributor() {
                 insertSpace = false
             )
         )
-//        extend(
-//            CompletionType.BASIC,
-//            baseFunctionAttributePattern(
-//                psiElement(TolkElementTypes.RPAREN)
-//            ),
-//            TolkKeywordCompletionProvider(
-//                CONTEXT_KEYWORD_PRIORITY,
-//                "pure",
-//            )
-//        )
-//        extend(
-//            CompletionType.BASIC,
-//            baseFunctionAttributePattern(
-//                psiElement(TolkElementTypes.RPAREN),
-//                psiElement(TolkElementTypes.IMPURE_KEYWORD),
-//            ),
-//            TolkKeywordCompletionProvider(
-//                CONTEXT_KEYWORD_PRIORITY,
-//                "inline",
-//                "inline_ref",
-//            )
-//        )
-//        extend(
-//            CompletionType.BASIC,
-//            baseFunctionAttributePattern(
-//                psiElement(TolkElementTypes.RPAREN),
-//                psiElement(TolkElementTypes.IMPURE_KEYWORD),
-//                psiElement(TolkElementTypes.INLINE_KEYWORD),
-//                psiElement(TolkElementTypes.INLINE_REF_KEYWORD),
-//            ),
-//            TolkKeywordCompletionProvider(
-//                CONTEXT_KEYWORD_PRIORITY,
-//                "method_id",
-//            )
-//        )
         extend(
             CompletionType.BASIC,
             psiElement().afterLeaf(
@@ -92,8 +57,19 @@ class TolkCompletionContributor : CompletionContributor() {
             TolkKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
                 "else",
-                "elseif",
-                "elseifnot"
+            )
+        )
+        extend(
+            CompletionType.BASIC,
+            psiElement().afterLeaf(
+                psiElement(TolkElementTypes.RBRACE).withAncestor(
+                    2,
+                    psiElement(TolkElementTypes.DO_STATEMENT)
+                )
+            ),
+            TolkKeywordCompletionProvider(
+                CONTEXT_KEYWORD_PRIORITY,
+                "else",
             )
         )
         extend(TolkCommonCompletionProvider)
@@ -139,7 +115,7 @@ class TolkCompletionContributor : CompletionContributor() {
                 "slice",
                 "int",
                 "tuple",
-                "cont"
+                "continuation"
             )
     }
 }

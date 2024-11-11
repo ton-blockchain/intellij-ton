@@ -6,23 +6,17 @@ import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.vfs.VfsUtilCore
+import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
-import com.intellij.psi.search.PsiElementProcessor
-import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.psi.impl.rawParamType
 import org.ton.intellij.tolk.psi.impl.rawReturnType
-import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
-import org.ton.intellij.tolk.type.ty.TolkTyAtomic
-import org.ton.intellij.tolk.type.ty.TolkTyTensor
-import org.ton.intellij.tolk.type.ty.TolkTyUnit
-import org.ton.intellij.util.processAllKeys
+import org.ton.intellij.tolk.psi.impl.resolveFile
+import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.util.psiElement
-import java.util.*
 
 // TODO fix apply expressions
 object TolkCommonCompletionProvider : TolkCompletionProvider() {
@@ -34,10 +28,65 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         context: ProcessingContext,
         result: CompletionResultSet
     ) {
+        val project = parameters.position.project
+        val position = parameters.position
+        val element = position.parent as TolkReferenceExpression
+        val file = element.containingFile.originalFile as? TolkFile ?: return
 
+        val ctx = TolkCompletionContext(element)
+        file.constVars.forEach {
+            result.addElement(
+                it.toLookupElementBuilder(ctx, true)
+            )
+        }
+        file.globalVars.forEach {
+            result.addElement(
+                it.toLookupElementBuilder(ctx, true)
+            )
+        }
+        file.functions.forEach {
+            result.addElement(
+                it.toLookupElementBuilder(ctx, true)
+            )
+        }
+        file.includeDefinitions.forEach { includeDef ->
+            val includedTolkFile = includeDef.resolveFile(project)?.findPsiFile(project) as? TolkFile
+            if (includedTolkFile != null) {
+                includedTolkFile.constVars.forEach {
+                    result.addElement(it.toLookupElementBuilder(ctx, true))
+                }
+                includedTolkFile.globalVars.forEach {
+                    result.addElement(it.toLookupElementBuilder(ctx, true))
+                }
+                includedTolkFile.functions.forEach {
+                    result.addElement(it.toLookupElementBuilder(ctx, true))
+                }
+            }
+        }
+        val tolkSdk = TolkSdkManager[project].getSdkRef().resolve(project)
+        if (tolkSdk != null) {
+            println("iterate sdk")
+            VfsUtilCore.iterateChildrenRecursively(tolkSdk.stdlibFile, null) {
+                val isCommon = it.name.endsWith("common.tolk")
+                println("file: ${it.name} - $isCommon")
+                val tolkFile = it.findPsiFile(project) as? TolkFile
+                if (tolkFile != null) {
+                    tolkFile.constVars.forEach {
+                        result.addElement(it.toLookupElementBuilder(ctx, isCommon))
+                    }
+                    tolkFile.globalVars.forEach {
+                        result.addElement(it.toLookupElementBuilder(ctx, isCommon))
+                    }
+                    tolkFile.functions.forEach {
+                        result.addElement(it.toLookupElementBuilder(ctx, isCommon))
+                    }
+                }
+                true
+            }
+        }
     }
 
-//    override fun addCompletions(
+    //    override fun addCompletions(
 //        parameters: CompletionParameters,
 //        context: ProcessingContext,
 //        result: CompletionResultSet
@@ -53,8 +102,9 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
 //            element
 //        )
 //
-//        val processed = HashMap<String, TolkNamedElement>()
-//
+    val processed = HashMap<String, TolkNamedElement>()
+
+    //
 //        val file = element.containingFile.originalFile as? TolkFile ?: return
 //
 //        fun collectVariant(resolvedElement: TolkNamedElement): Boolean {
@@ -191,125 +241,109 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
 //    }
 //}
 //
-//data class TolkCompletionContext(
-//    val context: TolkElement?
-//)
-//
-//fun TolkNamedElement.toLookupElementBuilder(
-//    context: TolkCompletionContext,
-//    isImported: Boolean
-//): LookupElement {
-//    val contextElement = context.context
-//    val contextText = contextElement?.text ?: ""
-//    var name = this.name ?: ""
-//    if (this is TolkFunction) {
-//        name = when {
-//            contextText.startsWith('.') -> ".${this.name}"
-//            contextText.startsWith('~') && !name.startsWith("~") -> "~${this.name}"
-//            else -> name
-//        }
-//    }
-//    val file = this.containingFile.originalFile
-//    val contextFile = context.context?.containingFile?.originalFile
-//    val includePath = if (file == contextFile || contextFile == null) ""
-//    else {
-//        val contextVirtualFile = contextFile.virtualFile
-//        val elementVirtualFile = file.virtualFile
-//        if (contextVirtualFile != null && elementVirtualFile != null) {
-//            VfsUtilCore.findRelativePath(contextVirtualFile, elementVirtualFile, '/') ?: ""
-//        } else {
-//            this.containingFile.name
-//        }
-//    }
-//    val base = LookupElementBuilder.create(name)
-//        .withIcon(this.getIcon(0))
-//        .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
-//
-//    return when (this) {
-////        is TolkFunction -> {
-////            PrioritizedLookupElement.withPriority(
-////                base
-////                    .withTypeText(this.rawReturnType.toString())
-////                    .withInsertHandler { context, item ->
-////                        val paramType = this.rawParamType
-////                        val isExtensionFunction = name.startsWith("~") || name.startsWith(".")
-////                        val offset = if (
-////                            (isExtensionFunction && paramType is TolkTyAtomic) || paramType == TolkTyUnit
-////                        ) 2 else 1
-////                        val parent = contextElement?.parent
-////                        if (parent is TolkApplyExpression && parent.left == contextElement && (parent.right is TolkTensorExpression || parent.right is TolkUnitExpression)) {
-////                            context.editor.caretModel.moveToOffset(
-////                                context.editor.caretModel.offset + ((parent.right?.textLength) ?: 0)
-////                            )
-////                        } else {
-////                            if (parent !is TolkApplyExpression || parent.left != contextElement || parent.right !is TolkApplyExpression) {
-////                                context.editor.document.insertString(context.editor.caretModel.offset, "()")
-////                                context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
-////                            }
-////                        }
-////                        context.commitDocument()
-////
-////                        val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-////                        val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-////                        insertFile.import(includeCandidateFile)
-////                    },
-////                if (isImported) TolkCompletionContributor.FUNCTION_PRIORITY
-////                else TolkCompletionContributor.NOT_IMPORTED_FUNCTION_PRIORITY
-////            )
-////        }
-//
-//        is TolkConstVar -> {
-//            PrioritizedLookupElement.withPriority(
-//                base
-//                    .withTypeText(intKeyword?.text ?: sliceKeyword?.text ?: "")
-//                    .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
-//                    .withInsertHandler { context, item ->
-//                        context.commitDocument()
-//
-//                        val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-//                        val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-//                        insertFile.import(includeCandidateFile)
-//                    },
-//                if (isImported) TolkCompletionContributor.VAR_PRIORITY
-//                else TolkCompletionContributor.NOT_IMPORTED_VAR_PRIORITY
-//            )
-//        }
-//
-//        is TolkGlobalVar -> {
-//            PrioritizedLookupElement.withPriority(
-//                base
-//                    .withTypeText(typeReference?.text)
-//                    .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
-//                    .withInsertHandler { context, item ->
-//                        context.commitDocument()
-//
-//                        val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-//                        val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-//                        insertFile.import(includeCandidateFile)
-//                    },
-//                if (isImported) TolkCompletionContributor.VAR_PRIORITY
-//                else TolkCompletionContributor.NOT_IMPORTED_VAR_PRIORITY
-//            )
-//        }
-//
-////        is TolkReferenceExpression -> {
-////            PrioritizedLookupElement.withPriority(
-////                base
-////                    .withIcon(TolkIcons.VARIABLE)
-////                    .withTypeText((parent as? TolkApplyExpression)?.left?.text ?: ""),
-////                TolkCompletionContributor.VAR_PRIORITY
-////            )
-////        }
-//
-//        is TolkFunctionParameter -> {
-//            PrioritizedLookupElement.withPriority(
-//                base
-//                    .withIcon(TolkIcons.PARAMETER)
-//                    .withTypeText(typeReference?.text ?: ""),
-//                TolkCompletionContributor.VAR_PRIORITY
-//            )
-//        }
-//
-//        else -> LookupElementBuilder.create(this.name.toString()).withIcon(this.getIcon(0))
-//    }
+    data class TolkCompletionContext(
+        val context: TolkElement?
+    )
+
+    //
+    fun TolkNamedElement.toLookupElementBuilder(
+        context: TolkCompletionContext,
+        isImported: Boolean
+    ): LookupElement {
+        val contextElement = context.context
+        var name = this.name ?: ""
+        val file = this.containingFile.originalFile
+        val contextFile = context.context?.containingFile?.originalFile
+        val includePath = if (file == contextFile || contextFile == null) ""
+        else {
+            val contextVirtualFile = contextFile.virtualFile
+            val elementVirtualFile = file.virtualFile
+            if (contextVirtualFile != null && elementVirtualFile != null) {
+                VfsUtilCore.findRelativePath(contextVirtualFile, elementVirtualFile, '/') ?: ""
+            } else {
+                this.containingFile.name
+            }
+        }
+        val base = LookupElementBuilder.create(name)
+            .withIcon(this.getIcon(0))
+            .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
+
+        return when (this) {
+            is TolkFunction -> {
+                PrioritizedLookupElement.withPriority(
+                    base
+                        .withTypeText(this.rawReturnType.toString())
+                        .withInsertHandler { context, item ->
+                            if (contextElement?.parent !is TolkCallExpression) {
+                                context.editor.document.insertString(context.editor.caretModel.offset, "()")
+                                context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + 2)
+                                context.commitDocument()
+                            }
+
+                            if (!isImported) {
+                                val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+                                val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
+                                insertFile.import(includeCandidateFile)
+                            }
+                        },
+                    if (isImported) TolkCompletionContributor.FUNCTION_PRIORITY
+                    else TolkCompletionContributor.NOT_IMPORTED_FUNCTION_PRIORITY
+                )
+            }
+
+            is TolkConstVar -> {
+                PrioritizedLookupElement.withPriority(
+                    base
+                        .withTypeText(typeReference?.text)
+                        .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
+                        .withInsertHandler { context, item ->
+                            context.commitDocument()
+
+                            val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+                            val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
+                            insertFile.import(includeCandidateFile)
+                        },
+                    if (isImported) TolkCompletionContributor.VAR_PRIORITY
+                    else TolkCompletionContributor.NOT_IMPORTED_VAR_PRIORITY
+                )
+            }
+
+            is TolkGlobalVar -> {
+                PrioritizedLookupElement.withPriority(
+                    base
+                        .withTypeText(typeReference?.text)
+                        .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
+                        .withInsertHandler { context, item ->
+                            context.commitDocument()
+
+                            val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+                            val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
+                            insertFile.import(includeCandidateFile)
+                        },
+                    if (isImported) TolkCompletionContributor.VAR_PRIORITY
+                    else TolkCompletionContributor.NOT_IMPORTED_VAR_PRIORITY
+                )
+            }
+
+            is TolkVar -> {
+                PrioritizedLookupElement.withPriority(
+                    base
+                        .withIcon(TolkIcons.VARIABLE)
+                        .withTypeText(typeReference?.text),
+                    TolkCompletionContributor.VAR_PRIORITY
+                )
+            }
+
+            is TolkFunctionParameter -> {
+                PrioritizedLookupElement.withPriority(
+                    base
+                        .withIcon(TolkIcons.PARAMETER)
+                        .withTypeText(typeReference?.text ?: ""),
+                    TolkCompletionContributor.VAR_PRIORITY
+                )
+            }
+
+            else -> LookupElementBuilder.create(this.name.toString()).withIcon(this.getIcon(0))
+        }
+    }
 }

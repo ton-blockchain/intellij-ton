@@ -22,7 +22,7 @@ class TolkSdkRef(
                 if (!distDir.isDirectory) {
                     return@forEach
                 }
-                val stdlib = distDir.findChild("stdlib.tolk") ?: return@forEach
+                val stdlib = distDir.findChild("tolk-stdlib") ?: return@forEach
                 return TolkSdk(stdlib)
             }
         } else {

@@ -25,10 +25,14 @@ import static org.ton.intellij.asm.AsmElementTypes.*;
 EOL=\R
 WHITE_SPACE=\s+
 
-INTEGER=[0-9]+
 STACK_REGISTER=s[0-9]+|s\(-[0-9]+\)
 CONTROL_REGISTER=c[0-7]
 UNKNOWN_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_#]*
+NUMBER_DIGIT_LITERAL=(-?[0-9]+("/"-?[0-9]+)?)
+NUMBER_HEX_LITERAL=(0[xX][0-9a-fA-F]+)
+NUMBER_BINARY_LITERAL=(0[bB][01]+)
+SLICE_BINARY_LITERAL=(b\{[01]+})
+SLICE_HEX_LITERAL=(x\{[0-9a-fA-F_]+})
 
 %%
 <YYINITIAL> {
@@ -130,7 +134,11 @@ UNKNOWN_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_#]*
 //  "CADDR"                    { return CADDR; }
 //  "CDDDR"                    { return CDDDR; }
 
-  {INTEGER}                  { return INTEGER; }
+  {NUMBER_DIGIT_LITERAL}                  { return INTEGER; }
+  {NUMBER_BINARY_LITERAL}                 { return INTEGER; }
+  {NUMBER_HEX_LITERAL}                    { return INTEGER; }
+  {SLICE_BINARY_LITERAL}                  { return SLICE; }
+  {SLICE_HEX_LITERAL}                     { return SLICE; }
   {STACK_REGISTER}           { return STACK_REGISTER; }
   {CONTROL_REGISTER}         { return CONTROL_REGISTER; }
   {UNKNOWN_IDENTIFIER}       { return UNKNOWN_IDENTIFIER; }

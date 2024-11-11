@@ -71,35 +71,31 @@ class TolkAnnotator : Annotator {
                 return
             }
 
-            is TolkReferenceExpression -> {
-                val reference = element.reference
-                if (reference == null) {
-                    highlight(
-                        element.identifier,
-                        holder,
-                        TolkColor.LOCAL_VARIABLE.textAttributesKey
-                    )
-                } else {
-                    val resolved = reference.resolve() ?: return
-                    val color = when (resolved) {
-                        is TolkFunction -> TolkColor.FUNCTION_CALL
-                        is TolkGlobalVar -> TolkColor.GLOBAL_VARIABLE
-                        is TolkConstVar -> TolkColor.CONSTANT
-                        is TolkFunctionParameter -> TolkColor.PARAMETER
-                        is TolkReferenceExpression -> {
-                            if (resolved.reference != null) return
-                            TolkColor.LOCAL_VARIABLE
-                        }
+            is TolkVar -> {
+                highlight(element.identifier, holder, TolkColor.LOCAL_VARIABLE.textAttributesKey)
+            }
 
-                        else -> return
+            is TolkReferenceExpression -> {
+                val reference = element.reference ?: return
+                val resolved = reference.resolve() ?: return
+                val color = when (resolved) {
+                    is TolkFunction -> TolkColor.FUNCTION_CALL
+                    is TolkGlobalVar -> TolkColor.GLOBAL_VARIABLE
+                    is TolkConstVar -> TolkColor.CONSTANT
+                    is TolkFunctionParameter -> TolkColor.PARAMETER
+                    is TolkReferenceExpression -> {
+                        if (resolved.reference != null) return
+                        TolkColor.LOCAL_VARIABLE
                     }
-                    DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE
-                    highlight(element.identifier, holder, color.textAttributesKey)
-                    if (resolved is TolkFunction && resolved.isDeprecated) {
-                        highlight(element.identifier, holder, CodeInsightColors.DEPRECATED_ATTRIBUTES)
-                    }
+
+                    is TolkVar -> TolkColor.LOCAL_VARIABLE
+                    else -> return
                 }
-                return
+                DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE
+                highlight(element.identifier, holder, color.textAttributesKey)
+                if (resolved is TolkFunction && resolved.isDeprecated) {
+                    highlight(element.identifier, holder, CodeInsightColors.DEPRECATED_ATTRIBUTES)
+                }
             }
 
             is TolkLiteralExpression -> {

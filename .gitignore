@@ -24,5 +24,9 @@ hs_err_pid*
 
 *.flex
 *.skeleton
-src/main/gen
+src/gen
 local.properties
+
+# Gradle
+.gradle
+build

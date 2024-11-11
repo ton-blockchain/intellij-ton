@@ -23,7 +23,8 @@ abstract class FuncIncludeDefinitionMixin : StubBasedPsiElementBase<FuncIncludeD
     override fun getTextOffset(): Int {
         val stringLiteral = stringLiteral
         return if (stringLiteral != null) {
-            stringLiteral.startOffsetInParent + stringLiteral.rawString.startOffsetInParent
+            stringLiteral.startOffsetInParent + (stringLiteral.rawString?.startOffsetInParent
+                ?: return super.getTextOffset())
         } else {
             super.getTextOffset()
         }

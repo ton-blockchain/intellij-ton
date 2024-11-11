@@ -71,4 +71,10 @@
         <completion.contributor language="Tact"
                                 implementationClass="org.ton.intellij.tact.ide.completion.TactCompletionContributor"/>
     </extensions>
+    <actions>
+        <action id="NewTact" class="org.ton.intellij.tact.action.file.TactCreateFileAction"
+                text="Tact File" description="Create new Tact file">
+            <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewTolk"/>
+        </action>
+    </actions>
 </idea-plugin>

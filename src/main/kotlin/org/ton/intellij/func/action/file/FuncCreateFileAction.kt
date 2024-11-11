@@ -7,7 +7,7 @@ import com.intellij.psi.PsiDirectory
 import org.ton.intellij.func.FuncIcons
 
 class FuncCreateFileAction : CreateFileFromTemplateAction(
-    NEW_FUNC_FILE, "", FuncIcons.FILE
+    FILE_TEMPLATE, "", FuncIcons.FILE
 ) {
     override fun buildDialog(project: Project, directory: PsiDirectory, builder: CreateFileFromTemplateDialog.Builder) {
         builder
@@ -16,11 +16,11 @@ class FuncCreateFileAction : CreateFileFromTemplateAction(
     }
 
     override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?): String {
-        return NEW_FUNC_FILE
+        return FILE_TEMPLATE
     }
 
     companion object {
         const val FILE_TEMPLATE = "FunC File"
-        const val NEW_FUNC_FILE = "New FunC File"
+        const val NEW_FUNC_FILE = "New FunC file"
     }
 }

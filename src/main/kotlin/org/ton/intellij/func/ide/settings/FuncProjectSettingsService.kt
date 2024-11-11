@@ -3,9 +3,10 @@ package org.ton.intellij.func.ide.settings
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import org.ton.intellij.func.FuncLanguageLevel
+import org.ton.intellij.tolk.ide.settings.TolkProjectSettingsService
 
 val Project.funcSettings: FuncProjectSettingsService
-    get() = service<FuncProjectSettingsService>()
+    get() = getService<FuncProjectSettingsService>(FuncProjectSettingsService::class.java)
 
 private const val SERVICE_NAME: String = "FuncProjectSettings"
 

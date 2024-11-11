@@ -1,0 +1,15 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="TVM assembly"
+                  implementationClass="org.ton.intellij.asm.AsmFileType"
+                  fieldName="INSTANCE"
+                  language="TVM assembly"
+                  extensions="tvm"/>
+        <lang.parserDefinition language="TVM assembly"
+                               implementationClass="org.ton.intellij.asm.AsmParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="TVM assembly"
+                                       implementationClass="org.ton.intellij.asm.AsmSyntaxHighlighterFactory"/>
+        <completion.contributor language="TVM assembly"
+                                implementationClass="org.ton.intellij.asm.AsmCompletionContributor"/>
+    </extensions>
+</idea-plugin>

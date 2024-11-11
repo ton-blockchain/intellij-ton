@@ -74,6 +74,8 @@
         <languageInjectionContributor language="FunC"
                                       implementationClass="org.ton.intellij.func.ide.FuncLanguageInjector"/>
 
+        <languageInjector implementation="org.ton.intellij.func.psi.FuncStringAsmInjector"/>
+
         <localInspection language="FunC" displayName="Unused function inspection" groupPath="FunC"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.func.inspection.FuncUnusedFunctionInspection"/>
@@ -139,25 +141,16 @@
         <langCodeStyleSettingsProvider
                 implementation="org.ton.intellij.func.ide.formatter.FuncLanguageCodeStyleSettingsProvider"/>
 
-        <projectConfigurable instance="org.ton.intellij.func.ide.configurable.FuncProjectConfigurable"
-                             groupId="language"
-                             id="language.func"
-                             bundle="messages.FuncBundle" key="func.name"/>
+<!--        <projectConfigurable instance="org.ton.intellij.func.ide.configurable.FuncProjectConfigurable"-->
+<!--                             groupId="language"-->
+<!--                             id="language.func"-->
+<!--                             bundle="messages.FuncBundle" key="func.name"/>-->
     </extensions>
 
     <actions>
-        <action id="func.new_func_file" class="org.ton.intellij.func.action.file.FuncCreateFileAction"
+        <action id="NewFunc" class="org.ton.intellij.func.action.file.FuncCreateFileAction"
                 text="FunC File" description="Create new FunC file">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewXml"/>
         </action>
-        <group id="ton.file.group.func">
-            <action id="ton.func.ToCamelCase" class="org.ton.intellij.func.action.file.FuncToCamelCaseAction"
-                    text="Convert to CamelCase FunC">
-                <keyboard-shortcut first-keystroke="control shift K" keymap="$default"/>
-            </action>
-            <add-to-group group-id="ToolsMenu" anchor="before" relative-to-action="ExternalToolsGroup"/>
-            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
-            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
-        </group>
     </actions>
 </idea-plugin>

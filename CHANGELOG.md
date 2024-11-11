@@ -1,5 +1,13 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [2.4.0]
+
+### Added
+- Tolk support
+- TVM Assembly support
+### Fixed
+- A lot of minor bugs
+
 ## [2.3.0]
 
 ### Added

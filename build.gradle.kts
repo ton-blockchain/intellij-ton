@@ -86,12 +86,20 @@ val generateFiftParser = generateParser("Fift")
 val generateTlbLexer = generateLexer("Tlb")
 val generateTlbParser = generateParser("Tlb")
 
+val generateAsmLexer = generateLexer("Asm")
+val generateAsmParser = generateParser("Asm")
+
+val generateTolkLexer = generateLexer("Tolk")
+val generateTolkParser = generateParser("Tolk")
+
 val compileKotlin = tasks.named("compileKotlin") {
     dependsOn(
         generateFuncParser, generateFuncLexer,
         generateTactParser, generateTactLexer,
         generateFiftParser, generateFiftLexer,
         generateTlbParser, generateTlbLexer,
+        generateAsmParser, generateAsmLexer,
+        generateTolkParser, generateTolkLexer,
     )
 }
 
@@ -111,7 +119,7 @@ tasks {
     runIde { enabled = true }
     prepareSandbox { enabled = true }
     patchPluginXml {
-        sinceBuild.set("231")
+        sinceBuild.set("232")
         untilBuild.set("")
         changeNotes.set(provider {
             changelog.renderItem(changelog.run {

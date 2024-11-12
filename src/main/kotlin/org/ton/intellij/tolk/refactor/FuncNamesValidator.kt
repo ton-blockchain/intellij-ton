@@ -2,46 +2,21 @@ package org.ton.intellij.tolk.refactor
 
 import com.intellij.lang.refactoring.NamesValidator
 import com.intellij.openapi.project.Project
+import org.ton.intellij.tolk.psi.TOLK_KEYWORDS
+import org.ton.intellij.tolk.psi.TolkTokenType
 
 class TolkNamesValidator : NamesValidator {
-    override fun isKeyword(name: String, project: Project?): Boolean {
-        return when (name) {
-            "return",
-            "var",
-            "repeat",
-            "do",
-            "while",
-            "until",
-            "try",
-            "catch",
-            "if",
-            "ifnot",
-            "then",
-            "else",
-            "elseif",
-            "elseifnot",
-            "type",
-            "forall",
-            "extern",
-            "global",
-            "const",
-            "asm",
-            "impure",
-            "inline",
-            "inline_ref",
-            "method_id",
-            "infix",
-            "infixl",
-            "infixr",
-            "operator",
-            "auto_apply" -> true
+    private val KEYWORD_SET = TOLK_KEYWORDS.types.filterIsInstance<TolkTokenType>().map { it.name }.toSet()
 
-            else -> false
-        }
+    override fun isKeyword(name: String, project: Project?): Boolean {
+        return KEYWORD_SET.contains(name)
     }
 
     override fun isIdentifier(name: String, project: Project?): Boolean {
         if (name.isBlank()) return false
+
+        if (KEYWORD_SET.contains(name)) return false
+
         if (name.first() == '\"') return false
         if (name.first() == '`' && name.last() == '`') {
             return name.length >= 3

@@ -2,9 +2,9 @@
     <id>org.ton.intellij-ton</id>
     <name>TON</name>
     <category>Languages</category>
-    <vendor url="https://github.com/ton-blockchain/intellij-ton">TON Foundation</vendor>
+    <vendor url="https://github.com/ton-blockchain/intellij-ton">TON Core</vendor>
     <description>TON Blockchain Development Plugin for IntelliJ: Adds support for TON blockchain programming languages,
-        including FunC, Fift, Tact, and TL-B schemas.
+        including FunC, Tolk, Fift, Tact, and TL-B schemas.
         Ideal for Web3 developers working within the TON ecosystem.
     </description>
 

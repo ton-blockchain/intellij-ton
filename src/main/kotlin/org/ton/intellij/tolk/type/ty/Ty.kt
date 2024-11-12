@@ -147,6 +147,12 @@ data object TolkTyBuilder : TolkTyAtomic() {
     override fun toString(): String = "builder"
 }
 
+data object TolkTyVoid : TolkTyAtomic() {
+    override val name: String = "void"
+
+    override fun toString(): String = "void"
+}
+
 data object TolkTyCont : TolkTyAtomic() {
     override val name: String = "cont"
 
@@ -173,6 +179,8 @@ val TolkTypeReference.rawType: TolkTy
                 TolkElementTypes.TUPLE_KEYWORD -> TolkTyAtomicTuple
                 else -> TolkTyUnknown
             }
+
+            is TolkVoidType -> TolkTyVoid
 
             is TolkTensorType -> TolkTy(
                 typeReferenceList.map {

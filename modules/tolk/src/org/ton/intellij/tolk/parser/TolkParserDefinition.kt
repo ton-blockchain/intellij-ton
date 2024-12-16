@@ -46,7 +46,7 @@ class TolkParserDefinition : ParserDefinition {
     override fun createElement(node: ASTNode): PsiElement {
         try {
             return TolkElementTypes.Factory.createElement(node)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             throw TolkParserException(node.psi.containingFile.text, node, e)
         }
     }

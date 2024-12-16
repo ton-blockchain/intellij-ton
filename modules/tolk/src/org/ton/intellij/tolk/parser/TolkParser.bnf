@@ -134,12 +134,12 @@
 private root ::= TopLevelDefinition_with_recover*
 
 private TopLevelDefinition ::= (IncludeDefinition | VersionDefinition | GlobalVar | ConstVar | TypeDef | Struct | Function | EmptyStatement)
-private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelDefinition {
+private TopLevelDefinition_with_recover ::= !(<<eof>>) (TopLevelDefinition) {
     pin = 1
     recoverWhile = TopLevelDefinition_recover
 }
-private TopLevelDefinition_recover ::= !TopLevelDefinition_first
-private TopLevelDefinition_first ::= 'tolk' | 'fun' | 'import' | 'global' | 'const' | ';'| '@' | 'enum' | 'struct' | 'type' | 'get'
+private TopLevelDefinition_recover ::= !(TopLevelDefinition_first)
+private TopLevelDefinition_first ::= 'tolk' | 'fun' | 'import' | 'global' | 'const' | ';' | '@' | 'enum' | 'struct' | 'type' | "get"
 
 RawString ::= RAW_STRING_ELEMENT*
 StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE {
@@ -244,7 +244,6 @@ Function ::= Annotation* ((get 'fun'?) | ('fun')) IDENTIFIER TypeParameterList? 
     hooks = [
         leftBinder = "ADJACENT_LINE_COMMENTS"
     ]
-    recoverWhile = TopLevelDefinition_recover
 }
 private get ::= <<getKeyword>>
 

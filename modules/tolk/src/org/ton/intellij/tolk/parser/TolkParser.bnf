@@ -298,28 +298,25 @@ Statement ::= ReturnStatement
             | VarStatement
             | ExpressionStatement
             | EmptyStatement
+
+
 ExpressionStatement ::= Expression ';' {
-    recoverWhile=BlockStatement_recovery
+    pin=1
 }
+
 EmptyStatement ::= ';'
 
 ReturnStatement ::= 'return' Expression? ';' {pin=1}
 
-BlockStatement ::= '{' BlockStatement_element* '}' {
+BlockStatement ::= '{' BlockElement_with_recovery* '}' {
     pin=1
 }
-private BlockStatement_element ::= !'}' Statement {
-    pin = 1
-    recoverWhile=BlockStatement_recovery
+private BlockElement_with_recovery ::= Statement {
+    recoverWhile=BlockElement_recovery
 }
-private BlockStatement_recovery ::= !(Expression_first | TopLevelDefinition_first)
-private Expression_first ::= (';' | '}'
-                             | 'var' | 'val'
-                             | 'return' | '{' | 'repeat'
-                             | 'break' | 'continue'
-                             | 'if' | 'do' | 'while' | 'try' | 'redef'
-                             | '(' | '['
-                             | 'assert' | 'throw')
+private BlockElement_recovery ::= !(StatementFirst | ExpressionFirst | '}')
+private StatementFirst ::= 'return'|'{'|'repeat'|'if'|'do'|'while'|'assert'|'throw'|'try'|'var'|'val'|';'
+private ExpressionFirst ::= IDENTIFIER | INTEGER_LITERAL | '-' | '+' | '!' | '(' | '['
 
 RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
 
@@ -415,7 +412,9 @@ Expression ::= AssignBinExpression
     implements=[
         "org.ton.intellij.tolk.psi.TolkTypedElement"
     ]
+    recoverWhile=Expression_recover
 }
+private Expression_recover ::= !(';'|'}'|',')
 
 fake BinExpression ::= Expression BinaryOp Expression {
     mixin="org.ton.intellij.tolk.psi.impl.TolkBinExpressionMixin"
@@ -499,6 +498,7 @@ Var ::= (IDENTIFIER) ['redef' | (':' TypeExpression) ] {
 }
 
 DotExpression ::= Expression '.' CallExpression {
+    pin=2
     methods=[
         left="/Expression[0]"
         right="/Expression[1]"
@@ -517,10 +517,6 @@ ArgumentList ::= '(' [<<list_with_recover Argument>>] ')' {
 //}
 //private recoverArgs ::= !(')'|';')
 
-private expressionWithRecoverUntilParen ::= Expression {recoverWhile="not_paren_recover"}
-private expressionWithRecoverUntilParenOrComma ::= Expression {recoverWhile="not_paren_or_comma_recover"}
-private not_paren_recover ::= !')'
-private not_paren_or_comma_recover ::= !(')' | ',')
 
 Argument ::= 'mutate'? Expression
 
@@ -539,15 +535,15 @@ fake ParenExpression ::= '(' Expression ')' {
     pin = 1
 }
 
-TensorOrParenExpression ::= '(' Expression ((&',' TensorExpression_upper) | ')') {
+TensorOrParenExpression ::= '(' Expression TensorExpression_upper? ')' {
     pin = 1
     elementType = ParenExpression
 }
-upper TensorExpression_upper ::= (',' TensorExpressionValue)* ')' {
+upper TensorExpression_upper ::= TensorExpressionValue+ {
     elementType = TensorExpression
 }
-
-private TensorExpressionValue ::=Expression {
+private TensorExpressionValue ::= ',' Expression {
+    pin=1
     recoverWhile=TensorExpressionValue_recovery
 }
 private TensorExpressionValue_recovery ::= !(','|')'|';')

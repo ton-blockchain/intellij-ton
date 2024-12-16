@@ -66,8 +66,7 @@ data class TolkInferenceResult(
         return varTypes[element]
     }
 
-    companion object {
-    }
+    companion object
 }
 
 class TolkInferenceContext(
@@ -206,8 +205,12 @@ class TolkInferenceWalker(
         }
     }
 
-    fun infer(element: TolkCatch, throwableElements: List<TolkThrowStatement>) {
-        val blockWalker = TolkInferenceWalker(ctx, this, this.throwableElements)
+    fun infer(element: TolkCatch) {
+        val blockWalker = TolkInferenceWalker(ctx, this)
+        element.catchParameterList.forEachIndexed { index, param ->
+            val name = param.name?.removeSurrounding("`") ?: return@forEachIndexed
+            blockWalker.symbolDefinitions[name] = Symbol(param, if (index == 0) TolkType.Int else null)
+        }
         element.blockStatement?.let { blockStatement ->
             blockWalker.infer(blockStatement)
         }
@@ -335,7 +338,7 @@ class TolkInferenceWalker(
             blockWalker.infer(blockStatement)
         }
         element.catch?.let { catch ->
-            infer(catch, blockWalker.throwableElements)
+            infer(catch)
         }
     }
 

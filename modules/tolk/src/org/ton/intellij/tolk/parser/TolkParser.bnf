@@ -260,7 +260,6 @@ AnnotationParamList ::= '(' << comma_separated_list AnnotationParam >> ')' {
 AnnotationParam ::= INTEGER_LITERAL | StringLiteral
 
 FunctionBody ::= ';' | AsmDefinition | BlockStatement | ('builtin' ';')
-private FunctionBody_recovery ::= !(';' | 'asm' | '{' | 'builtin')
 
 TypeParameterList ::= '<' << comma_separated_list TypeParameter >> '>' {
     pin=1
@@ -299,7 +298,7 @@ Statement ::= ReturnStatement
             | VarStatement
             | ExpressionStatement
             | EmptyStatement
-ExpressionStatement ::= Expression &';' {
+ExpressionStatement ::= Expression ';' {
     recoverWhile=BlockStatement_recovery
 }
 EmptyStatement ::= ';'
@@ -314,13 +313,13 @@ private BlockStatement_element ::= !'}' Statement {
     recoverWhile=BlockStatement_recovery
 }
 private BlockStatement_recovery ::= !(Expression_first | TopLevelDefinition_first)
-private Expression_first ::= ('}' | IDENTIFIER
+private Expression_first ::= (';' | '}'
                              | 'var' | 'val'
                              | 'return' | '{' | 'repeat'
                              | 'break' | 'continue'
                              | 'if' | 'do' | 'while' | 'try' | 'redef'
                              | '(' | '['
-                             | 'assert' | 'throw' | ';')
+                             | 'assert' | 'throw')
 
 RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
 

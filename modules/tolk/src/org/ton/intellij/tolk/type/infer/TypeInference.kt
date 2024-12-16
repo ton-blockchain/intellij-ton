@@ -380,8 +380,8 @@ class TolkInferenceWalker(
                 }
 
                 is TolkVarTuple -> {
-                    if (varType is TolkType.TypedTuple) {
-                        element.varDefinitionList.zip(varType.elements).forEach { (e1, e2) ->
+                    if (tolkType is TolkType.TypedTuple) {
+                        element.varDefinitionList.zip(tolkType.elements).forEach { (e1, e2) ->
                             unify(e1, e2)
                         }
                     } else {
@@ -390,8 +390,8 @@ class TolkInferenceWalker(
                 }
 
                 is TolkVarTensor -> {
-                    if (varType is TolkType.Tensor) {
-                        element.varDefinitionList.zip(varType.elements).forEach { (e1, e2) ->
+                    if (tolkType is TolkType.Tensor) {
+                        element.varDefinitionList.zip(tolkType.elements).forEach { (e1, e2) ->
                             unify(e1, e2)
                         }
                     } else {

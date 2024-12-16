@@ -36,6 +36,7 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         val name = element.name
         if (name.isNullOrEmpty() || name == "_") return
         val type = element.type ?: return
+        if (type is TolkType.HoleType) return
 
         sink.addPresentation(
             position = InlineInlayPosition(element.endOffset, true),
@@ -79,24 +80,6 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         val block = element.functionBody?.blockStatement ?: return
         val parameters = element.parameterList ?: return
         val returnType = (element.type as? TolkType.Function)?.returnType ?: return
-
-//        val returnStatements = LinkedList<TolkReturnStatement>()
-//        object : TolkRecursiveElementWalkingVisitor() {
-//            override fun elementFinished(element: PsiElement) {
-//                if (element is TolkReturnStatement) {
-//                    returnStatements.add(element)
-//                }
-//            }
-//
-//            override fun visitElement(element: PsiElement) {
-//                if (element is TolkExpressionStatement) return
-//                super.visitElement(element)
-//            }
-//        }.visitElement(block)
-//
-//        val returnType = returnStatements.asSequence()
-//            .mapNotNull { it.expression?.type }
-//            .firstOrNull() ?: return
 
         sink.addPresentation(
             position = InlineInlayPosition(parameters.endOffset, true),

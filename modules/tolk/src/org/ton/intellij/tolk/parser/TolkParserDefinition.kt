@@ -19,13 +19,9 @@ import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkTokenType
 
 class TolkParserException(
-    val fileText: CharSequence,
     val node: ASTNode,
     cause: Throwable? = null,
 ) : RuntimeException("""Failed to parse TOLK file
-    == START FILE ==
-    ${fileText.lines().joinToString("\n")}
-    ==  END FILE  ==
     |node: $node, text: '${node.text}'
     |0 Previous node: ${node.treePrev}, text: '${node.treePrev?.text}'
     |1 Previous node: ${node.treePrev?.treePrev}, text: '${node.treePrev?.treePrev?.text}'
@@ -47,7 +43,7 @@ class TolkParserDefinition : ParserDefinition {
         try {
             return TolkElementTypes.Factory.createElement(node)
         } catch (e: Throwable) {
-            throw TolkParserException(node.psi.containingFile.text, node, e)
+            throw TolkParserException( node, e)
         }
     }
 

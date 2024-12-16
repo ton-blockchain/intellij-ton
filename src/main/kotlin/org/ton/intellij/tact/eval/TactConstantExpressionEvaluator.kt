@@ -2,7 +2,7 @@ package org.ton.intellij.tact.eval
 
 import com.intellij.openapi.project.Project
 import org.ton.intellij.tact.psi.*
-import org.ton.intellij.tvm.math.divModFloor
+import org.ton.intellij.util.divModFloor
 import org.ton.intellij.util.recursionGuard
 import java.math.BigInteger
 

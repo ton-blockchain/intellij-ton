@@ -1,3 +1,4 @@
+
 import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
@@ -7,7 +8,6 @@ import java.time.Clock
 import java.time.Instant
 
 val publishChannel = prop("publishChannel")
-val ideaVersion = prop("ideaVersion")
 val pluginVersion = prop("pluginVersion").let { pluginVersion ->
     if (publishChannel != "release" && publishChannel != "stable") {
         val buildSuffix = prop("buildNumber") {
@@ -19,23 +19,18 @@ val pluginVersion = prop("pluginVersion").let { pluginVersion ->
     }
 }
 version = pluginVersion
-println("pluginVersion=$version")
 
 plugins {
     kotlin("jvm") version "1.9.22"
-    id("org.jetbrains.intellij") version "1.17.3"
+    id("org.jetbrains.intellij.platform")
     id("org.jetbrains.grammarkit") version "2022.3.2.2"
     id("org.jetbrains.changelog") version "2.2.0"
-    idea
 }
 
 allprojects {
     apply(plugin = "kotlin")
 
     repositories {
-        maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
-        mavenCentral()
-        maven(url = "https://jitpack.io")
     }
 
     tasks.withType<KotlinCompile> {
@@ -43,9 +38,57 @@ allprojects {
         kotlinOptions.freeCompilerArgs += "-Xjvm-default=all"
     }
 
-    dependencies {
-        implementation("me.alllex.parsus:parsus-jvm:0.6.1")
-        implementation("com.github.andreypfau.tlb:tlb-jvm:54070d9405")
+    java {
+        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    }
+
+    sourceSets {
+        main {
+            kotlin.srcDir("src")
+            java.srcDirs("gen")
+            resources.srcDir("resources")
+        }
+    }
+}
+
+dependencies {
+    implementation("me.alllex.parsus:parsus-jvm:0.6.1")
+    implementation("com.github.andreypfau.tlb:tlb-jvm:54070d9405")
+
+    intellijPlatform {
+        val version = providers.gradleProperty("platformVersion")
+        intellijIdeaCommunity(version)
+
+        pluginModule(project(":modules:util"))
+        pluginModule(project(":modules:asm"))
+        pluginModule(project(":modules:tolk"))
+    }
+}
+
+intellijPlatform {
+    pluginConfiguration {
+        id = "org.ton.intellij-ton"
+        name = "TON"
+        version = project.version.toString()
+        description = """
+        TON Blockchain Development Plugin for IntelliJ: Adds support for TON blockchain programming languages,
+        including FunC, Tolk, Fift, Tact, and TL-B schemas.
+        Ideal for Web3 developers working within the TON ecosystem.
+        """.trimIndent()
+        changeNotes.set(
+            provider {
+                changelog.renderItem(changelog.getLatest(), Changelog.OutputType.HTML)
+            }
+        )
+        ideaVersion {
+            sinceBuild.set("232")
+            untilBuild = provider { null }
+        }
+        vendor {
+            name = "TON Core"
+            url = "https://github.com/ton-blockchain/intellij-ton"
+            email = "andreypfau@ton.org"
+        }
     }
 }
 
@@ -53,25 +96,6 @@ sourceSets {
     main {
         java.srcDirs("src/gen")
     }
-}
-
-idea {
-    module {
-        isDownloadSources = true
-        generatedSourceDirs.add(file("src/gen"))
-    }
-}
-
-intellij {
-    version.set(ideaVersion)
-    type.set("IU")
-    plugins.set(
-        listOf(
-            "JavaScript",
-            "com.google.ide-perf:1.3.1",
-            "izhangzhihao.rainbow.brackets:2023.3.2"
-        )
-    )
 }
 
 val generateFuncLexer = generateLexer("Func")
@@ -86,24 +110,14 @@ val generateFiftParser = generateParser("Fift")
 val generateTlbLexer = generateLexer("Tlb")
 val generateTlbParser = generateParser("Tlb")
 
-val generateAsmLexer = generateLexer("Asm")
-val generateAsmParser = generateParser("Asm")
-
-val generateTolkLexer = generateLexer("Tolk")
-val generateTolkParser = generateParser("Tolk")
-
 val compileKotlin = tasks.named("compileKotlin") {
     dependsOn(
         generateFuncParser, generateFuncLexer,
         generateTactParser, generateTactLexer,
         generateFiftParser, generateFiftLexer,
         generateTlbParser, generateTlbLexer,
-        generateAsmParser, generateAsmLexer,
-        generateTolkParser, generateTolkLexer,
     )
 }
-
-val compileJava = tasks.named("compileJava")
 
 changelog {
     version.set(version)
@@ -116,23 +130,6 @@ changelog {
 }
 
 tasks {
-    runIde { enabled = true }
-    prepareSandbox { enabled = true }
-    patchPluginXml {
-        sinceBuild.set("232")
-        untilBuild.set("")
-        changeNotes.set(provider {
-            changelog.renderItem(changelog.run {
-                getLatest()
-            }, Changelog.OutputType.HTML)
-        })
-    }
-    buildSearchableOptions {
-        enabled = prop("enableBuildSearchableOptions").toBoolean()
-    }
-    configurations.runtimeClasspath.get().forEach {
-        println(it)
-    }
     jar {
         from({
             configurations.runtimeClasspath.get().filter { file ->

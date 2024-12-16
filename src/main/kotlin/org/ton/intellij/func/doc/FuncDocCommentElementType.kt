@@ -29,8 +29,8 @@ import org.ton.intellij.func.doc.psi.FuncDocElementTypes.DOC_TEXT
 import org.ton.intellij.func.doc.psi.impl.FuncDocCommentImpl
 import org.ton.intellij.func.doc.psi.impl.FuncDocGapImpl
 import org.ton.intellij.func.psi.FuncElementTypes
-import org.ton.intellij.markdown.MarkdownDocAstBuilder
-import org.ton.intellij.markdown.MarkdownPsiFactory
+import org.ton.intellij.util.markdown.MarkdownDocAstBuilder
+import org.ton.intellij.util.markdown.MarkdownPsiFactory
 
 class FuncDocCommentElementType(debugName: String) : ILazyParseableElementType(debugName, FuncLanguage) {
     val factory = object : MarkdownPsiFactory {

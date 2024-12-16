@@ -8,9 +8,9 @@ import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
 import org.ton.intellij.func.psi.*
-import org.ton.intellij.tvm.math.divModCeil
-import org.ton.intellij.tvm.math.divModFloor
-import org.ton.intellij.tvm.math.divModRound
+import org.ton.intellij.util.divModCeil
+import org.ton.intellij.util.divModFloor
+import org.ton.intellij.util.divModRound
 import org.ton.intellij.util.exception.ConstantEvaluationOverflowException
 import org.ton.intellij.util.recursionGuard
 import java.math.BigInteger

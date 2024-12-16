@@ -26,7 +26,6 @@ val FUNC_KEYWORDS = tokenSetOf(
     FuncElementTypes.CATCH_KEYWORD,
     FuncElementTypes.IF_KEYWORD,
     FuncElementTypes.IFNOT_KEYWORD,
-    FuncElementTypes.THEN_KEYWORD,
     FuncElementTypes.ELSE_KEYWORD,
     FuncElementTypes.ELSEIF_KEYWORD,
     FuncElementTypes.ELSEIFNOT_KEYWORD,

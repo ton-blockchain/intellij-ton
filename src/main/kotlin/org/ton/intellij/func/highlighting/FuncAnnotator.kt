@@ -10,8 +10,8 @@ import org.ton.intellij.func.FuncBundle
 import org.ton.intellij.func.eval.FuncIntValue
 import org.ton.intellij.func.eval.value
 import org.ton.intellij.func.psi.*
-import org.ton.intellij.tvm.math.TVM_INT_MAX_VALUE
-import org.ton.intellij.tvm.math.TVM_INT_MIN_VALUE
+import org.ton.intellij.util.TVM_INT_MAX_VALUE
+import org.ton.intellij.util.TVM_INT_MIN_VALUE
 
 class FuncAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {

@@ -8,15 +8,16 @@
         Ideal for Web3 developers working within the TON ecosystem.
     </description>
 
-    <xi:include href="asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <xi:include href="/META-INF/asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="func.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="tact.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="tlb.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="fift.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="boc.xml" xpointer="xpointer(/idea-plugin/*)"/>
-    <xi:include href="tolk.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <xi:include href="/META-INF/tolk.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <depends>com.intellij.modules.platform</depends>
-    <depends optional="true" config-file="ton-blueprint.xml">JavaScript</depends>
+    <depends>com.intellij.dev</depends>
+    <!--    <depends optional="true" config-file="ton-blueprint.xml">JavaScript</depends>-->
 
     <extensions defaultExtensionNs="com.intellij">
         <spellchecker.bundledDictionaryProvider

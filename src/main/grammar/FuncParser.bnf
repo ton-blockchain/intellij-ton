@@ -490,6 +490,7 @@ HoleType ::= 'var' | '_'
 PrimitiveType ::= 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type'
 TypeIdentifier ::= IDENTIFIER {
     mixin="org.ton.intellij.func.psi.impl.FuncTypeIdentifierMixin"
+    extends=TypeReference
 }
 UnitType ::= '(' ')'
 

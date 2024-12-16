@@ -10,7 +10,7 @@ import org.ton.intellij.func.highlighting.FuncColor
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.impl.isImpure
 import org.ton.intellij.func.psi.impl.isMutable
-import org.ton.intellij.markdown.MarkdownDocAstBuilder
+import org.ton.intellij.util.markdown.MarkdownDocAstBuilder
 import java.util.function.Consumer
 
 class FuncDocumentationProvider : AbstractDocumentationProvider() {
@@ -202,12 +202,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
             is FuncUnitType -> appendStyledSpan(FuncColor.PARENTHESES.attributes, "()")
 
             else -> {
-                val typeIdentifier = type.typeIdentifier?.text
-                if (typeIdentifier != null) {
-                    appendStyledSpan(FuncColor.TYPE_PARAMETER.attributes, typeIdentifier)
-                } else {
-                    append(type)
-                }
+                append(type)
             }
         }
     }

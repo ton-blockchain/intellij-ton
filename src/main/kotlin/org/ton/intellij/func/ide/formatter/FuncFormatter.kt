@@ -39,7 +39,6 @@ class FuncFormatter : FormattingModelBuilder {
                     CATCH_KEYWORD,
                     IF_KEYWORD,
                     IFNOT_KEYWORD,
-                    THEN_KEYWORD,
                     ELSE_KEYWORD,
                     ELSEIF_KEYWORD,
                     ELSEIFNOT_KEYWORD,

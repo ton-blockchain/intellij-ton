@@ -15,26 +15,42 @@ import org.ton.intellij.util.recursionGuard
 import java.util.*
 
 val TolkElement.inference: TolkInferenceResult?
-    get() =
-        context?.parentOfType<TolkInferenceContextOwner>()?.let { inferTypesIn(it) }
+    get() {
+        val context: TolkInferenceContextOwner? =
+            this as? TolkInferenceContextOwner ?: context?.parentOfType<TolkInferenceContextOwner>()
+        return if (context != null) {
+            inferTypesIn(context)
+        } else {
+            null
+        }
+    }
 
 fun inferTypesIn(element: TolkInferenceContextOwner): TolkInferenceResult {
-    val ctx = TolkInferenceContext(element.project)
+    val ctx = TolkInferenceContext(element.project, element)
     return recursionGuard(element, memoize = false) { ctx.infer(element) }
-        ?: error("Can not run nested type inference")
+        ?: throw CyclicReferenceException(element)
 }
 
+class CyclicReferenceException(val element: TolkInferenceContextOwner) :
+    IllegalStateException("Can't do inference on cyclic inference context owner: $element")
+
 interface TolkInferenceData {
+    val returnStatements: List<TolkReturnStatement>
+
     fun getResolvedRefs(element: TolkReferenceExpression): OrderedSet<PsiElementResolveResult>
 
-    fun getType(element: TolkTypedElement): TolkType?
+    fun getType(element: TolkExpression): TolkType?
+
+    fun getType(element: TolkVar): TolkType?
 }
 
 private val EMPTY_RESOLVED_SET = OrderedSet<PsiElementResolveResult>()
 
 data class TolkInferenceResult(
-    val resolvedRefs: Map<TolkReferenceExpression, OrderedSet<PsiElementResolveResult>>,
-    val resolvedType: Map<TolkTypedElement, TolkType> = emptyMap(),
+    private val resolvedRefs: Map<TolkReferenceExpression, OrderedSet<PsiElementResolveResult>>,
+    private val expressionTypes: Map<TolkExpression, TolkType>,
+    private val varTypes: Map<TolkVar, TolkType>,
+    override val returnStatements: List<TolkReturnStatement>,
 ) : TolkInferenceData {
     val timestamp = System.nanoTime()
 
@@ -42,8 +58,12 @@ data class TolkInferenceResult(
         return resolvedRefs[element] ?: EMPTY_RESOLVED_SET
     }
 
-    override fun getType(element: TolkTypedElement): TolkType? {
-        return resolvedType[element]
+    override fun getType(element: TolkExpression): TolkType? {
+        return expressionTypes[element]
+    }
+
+    override fun getType(element: TolkVar): TolkType? {
+        return varTypes[element]
     }
 
     companion object {
@@ -52,10 +72,13 @@ data class TolkInferenceResult(
 
 class TolkInferenceContext(
     val project: Project,
+    val owner: TolkInferenceContextOwner
 ) : TolkInferenceData {
     private val resolvedRefs = HashMap<TolkReferenceExpression, OrderedSet<PsiElementResolveResult>>()
-    private val diagnostics = ArrayList<TolkDiagnostic>()
-    private val elementTypes = HashMap<TolkTypedElement, TolkType>()
+    private val diagnostics = LinkedList<TolkDiagnostic>()
+    private val varTypes = HashMap<TolkVar, TolkType>()
+    private val expressionTypes = HashMap<TolkExpression, TolkType>()
+    override val returnStatements = LinkedList<TolkReturnStatement>()
 
     override fun getResolvedRefs(element: TolkReferenceExpression): OrderedSet<PsiElementResolveResult> {
         return resolvedRefs[element] ?: EMPTY_RESOLVED_SET
@@ -65,18 +88,37 @@ class TolkInferenceContext(
         resolvedRefs[element] = OrderedSet(refs)
     }
 
-    override fun getType(element: TolkTypedElement): TolkType? {
-        if (element is TolkLiteralExpression) return element.type
-        if (element is TolkBinExpression) return TolkType.Int
-        return elementTypes[element]
+    override fun getType(element: TolkExpression): TolkType? {
+        return when (element) {
+            is TolkBinExpression -> element.type
+            is TolkPrefixExpression -> element.type
+            is TolkLiteralExpression -> element.type
+            is TolkUnitExpression -> TolkType.Unit
+            else -> expressionTypes[element]
+        }
     }
 
-    fun setType(element: TolkTypedElement, type: TolkType?): TolkType? {
-        if (type == null) return null
-        elementTypes[element] = type
+    override fun getType(element: TolkVar): TolkType? {
+        return varTypes[element]
+    }
+
+    fun <T : TolkType> setType(element: TolkVar, type: T?): T? {
+        if (type != null) {
+            varTypes[element] = type
+        }
         return type
     }
 
+    fun <T : TolkType> setType(element: TolkExpression, type: T?): T? {
+        if (type != null) {
+            expressionTypes[element] = type
+        }
+        return type
+    }
+
+    fun addReturnStatement(element: TolkReturnStatement) {
+        returnStatements.add(element)
+    }
 
     fun addDiagnostic(diagnostic: TolkDiagnostic) {
         if (diagnostic.element.containingFile.isPhysical) {
@@ -109,7 +151,7 @@ class TolkInferenceContext(
             }
         }
 
-        return TolkInferenceResult(resolvedRefs, elementTypes)
+        return TolkInferenceResult(resolvedRefs, expressionTypes, varTypes, returnStatements)
     }
 }
 
@@ -130,6 +172,8 @@ class TolkInferenceWalker(
         element.functions.forEach { function ->
             symbolDefinitions[function.name?.removeSurrounding("`") ?: return@forEach] = Symbol(
                 function,
+                // can't resolve type of recursion functions without a provided return type
+                if (ctx.owner == function && function.typeExpression == null) null else function.type
             )
         }
         element.globalVars.forEach { globalVar ->
@@ -164,23 +208,6 @@ class TolkInferenceWalker(
 
     fun infer(element: TolkCatch, throwableElements: List<TolkThrowStatement>) {
         val blockWalker = TolkInferenceWalker(ctx, this, this.throwableElements)
-        element.catchParameterList.forEachIndexed { index, catchParameter ->
-            val name = catchParameter.identifier.text?.removeSurrounding("`") ?: return@forEachIndexed
-            val type = when (index) {
-                0 -> TolkType.Int
-                1 -> {
-                    val allThrowableArgTypes = throwableElements.mapNotNull {
-                        it.expressionList.getOrNull(1)?.let {
-                            ctx.getType(it)
-                        }
-                    }.distinct()
-                    TolkType.UnionType(allThrowableArgTypes)
-                }
-                else -> null
-            }
-            blockWalker.symbolDefinitions[name] = Symbol(catchParameter, type)
-            ctx.setType(catchParameter, type)
-        }
         element.blockStatement?.let { blockStatement ->
             blockWalker.infer(blockStatement)
         }
@@ -189,9 +216,7 @@ class TolkInferenceWalker(
     fun infer(element: TolkVarDefinition, typeMap: MutableMap<TolkVar, TolkType>): TolkType? {
         return when (element) {
             is TolkVar -> {
-                val name = element.name?.removeSurrounding("`") ?: return null
                 val type = element.typeExpression?.type ?: TolkType.HoleType()
-                symbolDefinitions[name] = Symbol(element, type)
                 typeMap[element] = type
                 type
             }
@@ -241,6 +266,7 @@ class TolkInferenceWalker(
         element.expression?.let { expression ->
             infer(expression)
         }
+        ctx.addReturnStatement(element)
     }
 
     private fun infer(element: TolkRepeatStatement) {
@@ -399,7 +425,7 @@ class TolkInferenceWalker(
     private fun infer(element: TolkExpression, expectedType: TolkType? = null): TolkType? {
         return when (element) {
             is TolkBinExpression -> infer(element)
-            is TolkTernaryExpression -> infer(element)
+            is TolkTernaryExpression -> infer(element, expectedType)
             is TolkPrefixExpression -> infer(element)
             is TolkDotExpression -> infer(element, expectedType)
             is TolkCallExpression -> infer(element, expectedType)
@@ -408,34 +434,37 @@ class TolkInferenceWalker(
             is TolkTensorExpression -> infer(element, expectedType)
             is TolkReferenceExpression -> infer(element)
             is TolkLiteralExpression -> element.type
+            is TolkUnitExpression -> TolkType.Unit
             else -> expectedType
         }
     }
 
     private fun infer(element: TolkBinExpression): TolkType? {
+        val type = element.type
         element.right?.let { expression ->
-            infer(expression)
+            infer(expression, type)
         }
-        infer(element.left)
-        return null
+        infer(element.left, type)
+        return type
     }
 
-    private fun infer(element: TolkTernaryExpression): TolkType? {
-        infer(element.condition)
-        element.thenBranch?.let { branch ->
-            infer(branch)
+    private fun infer(element: TolkTernaryExpression, expectedType: TolkType?): TolkType? {
+        infer(element.condition, TolkType.Bool)
+        val thenType = element.thenBranch?.let { branch ->
+            infer(branch, expectedType)
         }
-        element.elseBranch?.let { branch ->
-            infer(branch)
+        val elseType = element.elseBranch?.let { branch ->
+            infer(branch, expectedType)
         }
-        return null
+        return thenType ?: elseType ?: expectedType
     }
 
     private fun infer(element: TolkPrefixExpression): TolkType? {
+        val type = element.type
         element.expression?.let { expression ->
-            infer(expression)
+            infer(expression, type)
         }
-        return null
+        return type
     }
 
     private fun infer(

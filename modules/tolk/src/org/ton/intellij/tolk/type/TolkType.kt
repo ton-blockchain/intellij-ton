@@ -76,6 +76,7 @@ sealed interface TolkType {
         val Continuation = TolkPrimitiveType.Continuation
         val Tuple = TolkPrimitiveType.Tuple
         val Unit = TolkPrimitiveType.Unit
+        val Bool = TolkPrimitiveType.Bool
 
         fun create(vararg elements: TolkType): TolkType {
             return create(elements.toList())
@@ -111,6 +112,7 @@ sealed class TolkPrimitiveType(
     object Continuation : TolkPrimitiveType("continuation")
     object Tuple : TolkPrimitiveType("tuple")
     object Unit : TolkPrimitiveType("()")
+    object Bool : TolkPrimitiveType("bool")
 
     override fun toString(): String = name
 }

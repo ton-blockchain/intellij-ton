@@ -5,9 +5,12 @@ import com.intellij.codeInsight.hints.declarative.InlayTreeSink
 import com.intellij.codeInsight.hints.declarative.InlineInlayPosition
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.endOffset
-import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.TolkCatchParameter
+import org.ton.intellij.tolk.psi.TolkConstVar
+import org.ton.intellij.tolk.psi.TolkFunction
+import org.ton.intellij.tolk.psi.TolkVar
+import org.ton.intellij.tolk.type.TolkType
 import org.ton.intellij.tolk.type.printTolkType
-import java.util.*
 
 class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
     override fun collectFromElement(
@@ -28,6 +31,7 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
 
     private fun collectFromVar(element: PsiElement, sink: InlayTreeSink) {
         if (element !is TolkVar) return
+        if (!element.isValid) return
         if (element.typeExpression != null) return
         val name = element.name
         if (name.isNullOrEmpty() || name == "_") return
@@ -74,24 +78,25 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         if (element.typeExpression != null) return
         val block = element.functionBody?.blockStatement ?: return
         val parameters = element.parameterList ?: return
+        val returnType = (element.type as? TolkType.Function)?.returnType ?: return
 
-        val returnStatements = LinkedList<TolkReturnStatement>()
-        object : TolkRecursiveElementWalkingVisitor() {
-            override fun elementFinished(element: PsiElement) {
-                if (element is TolkReturnStatement) {
-                    returnStatements.add(element)
-                }
-            }
-
-            override fun visitElement(element: PsiElement) {
-                if (element is TolkExpressionStatement) return
-                super.visitElement(element)
-            }
-        }.visitElement(block)
-
-        val returnType = returnStatements.asSequence()
-            .mapNotNull { it.expression?.type }
-            .firstOrNull() ?: return
+//        val returnStatements = LinkedList<TolkReturnStatement>()
+//        object : TolkRecursiveElementWalkingVisitor() {
+//            override fun elementFinished(element: PsiElement) {
+//                if (element is TolkReturnStatement) {
+//                    returnStatements.add(element)
+//                }
+//            }
+//
+//            override fun visitElement(element: PsiElement) {
+//                if (element is TolkExpressionStatement) return
+//                super.visitElement(element)
+//            }
+//        }.visitElement(block)
+//
+//        val returnType = returnStatements.asSequence()
+//            .mapNotNull { it.expression?.type }
+//            .firstOrNull() ?: return
 
         sink.addPresentation(
             position = InlineInlayPosition(parameters.endOffset, true),

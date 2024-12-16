@@ -6,5 +6,5 @@ import org.ton.intellij.tolk.type.infer.inference
 
 interface TolkTypedElement : TolkElement, TolkTypeProvider {
     override val type: TolkType?
-        get() = inference?.getType(this)
+        get() = if (this is TolkExpression) inference?.getType(this) else null
 }

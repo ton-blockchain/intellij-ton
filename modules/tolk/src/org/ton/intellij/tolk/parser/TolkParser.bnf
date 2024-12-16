@@ -300,31 +300,28 @@ Statement ::= ReturnStatement
             | VarStatement
             | ExpressionStatement
             | EmptyStatement
-ExpressionStatement ::= Expression ';' {
-    pin=1
+ExpressionStatement ::= Expression &';' {
     recoverWhile=BlockStatement_recovery
 }
 EmptyStatement ::= ';'
 
 ReturnStatement ::= 'return' Expression? ';' {pin=1}
 
-BlockStatement ::= BlockStart '}' {
+BlockStatement ::= '{' BlockStatement_element* '}' {
     pin=1
 }
-private BlockStart ::= '{' BlockStatement_element* {
-    pin=1
-    recoverWhile=Block_recovery
+private BlockStatement_element ::= !'}' Statement {
+    pin = 1
+    recoverWhile=BlockStatement_recovery
 }
-private Block_recovery ::= !('}')
-private BlockStatement_element ::= Statement
-private BlockStatement_recovery ::= !('}' | IDENTIFIER
-| 'var' | 'val'
-| 'return' | '{' | 'repeat'
-| 'break' | 'continue'
-| 'if' | 'do' | 'while' | 'try' | 'redef'
-| '(' | '['
-| 'int' | 'cell' | 'slice' | 'builder' | 'continuation' | 'tuple'
-| 'assert' | 'throw' | ';')
+private BlockStatement_recovery ::= !(Expression_first | TopLevelDefinition_first)
+private Expression_first ::= ('}' | IDENTIFIER
+                             | 'var' | 'val'
+                             | 'return' | '{' | 'repeat'
+                             | 'break' | 'continue'
+                             | 'if' | 'do' | 'while' | 'try' | 'redef'
+                             | '(' | '['
+                             | 'assert' | 'throw' | ';')
 
 RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
 
@@ -420,11 +417,10 @@ Expression ::= AssignBinExpression
     implements=[
         "org.ton.intellij.tolk.psi.TolkTypedElement"
     ]
-    recoverWhile=Expression_recover
 }
-private Expression_recover ::= !(';'|'if'|'return'|'do'|'while'|'try'|'catch'|'}'|'{')
 
 fake BinExpression ::= Expression BinaryOp Expression {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkBinExpressionMixin"
     methods=[
         left="/Expression[0]"
         right="/Expression[1]"
@@ -463,7 +459,9 @@ CompBinExpression ::= Expression CompBinOp Expression
 ShiftBinExpression ::= Expression ShiftBinOp Expression
 AddBinExpression ::= Expression AddBinOp Expression
 MulBinExpression ::= Expression MulBinOp Expression
-PrefixExpression ::= ('!'|'~'|'-'|'+') Expression
+PrefixExpression ::= ('!'|'~'|'-'|'+') Expression {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkPrefixExpressionMixin"
+}
 
 AssignBinOp ::= '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '^>>=' | '~>>=' | '&=' | '|=' | '^=' | '=' {
     name = "operator"

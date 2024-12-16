@@ -18,6 +18,20 @@ import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkTokenType
 
+class TolkParserException(
+    val fileText: CharSequence,
+    val node: ASTNode,
+    cause: Throwable? = null,
+) : RuntimeException("""Failed to parse TOLK file
+    == START FILE ==
+    ${fileText.lines().joinToString("\n")}
+    ==  END FILE  ==
+    |node: $node, text: '${node.text}'
+    |0 Previous node: ${node.treePrev}, text: '${node.treePrev?.text}'
+    |1 Previous node: ${node.treePrev?.treePrev}, text: '${node.treePrev?.treePrev?.text}'
+    |2 Previous node: ${node.treePrev?.treePrev?.treePrev}, text: '${node.treePrev?.treePrev?.treePrev?.text}'
+""".trimMargin(), cause)
+
 class TolkParserDefinition : ParserDefinition {
     override fun createLexer(project: Project?): Lexer = TolkLexer()
 
@@ -29,8 +43,13 @@ class TolkParserDefinition : ParserDefinition {
 
     override fun getStringLiteralElements(): TokenSet = STRING_LITERALS
 
-    override fun createElement(node: ASTNode?): PsiElement =
-        TolkElementTypes.Factory.createElement(node)
+    override fun createElement(node: ASTNode): PsiElement {
+        try {
+            return TolkElementTypes.Factory.createElement(node)
+        } catch (e: Exception) {
+            throw TolkParserException(node.psi.containingFile.text, node, e)
+        }
+    }
 
     override fun createFile(viewProvider: FileViewProvider) =
         TolkFile(viewProvider)

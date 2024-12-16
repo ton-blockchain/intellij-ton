@@ -10,6 +10,8 @@ import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.stub.TolkFunctionStub
 import org.ton.intellij.tolk.type.TolkType
 import org.ton.intellij.tolk.type.TolkType.Function
+import org.ton.intellij.tolk.type.infer.CyclicReferenceException
+import org.ton.intellij.tolk.type.infer.inference
 import javax.swing.Icon
 
 abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkFunction {
@@ -30,8 +32,30 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
                     println("Failed to get type for $parameter")
                 }
             } ?: emptyList()
-            val returnType = typeExpression?.type ?: TolkType.Unit
+            val returnType = returnType ?: return@getCachedValue null
             val type = Function(TolkType.create(parameters), returnType)
+
+            CachedValueProvider.Result.create(type, this)
+        }
+
+    private val returnType: TolkType?
+        get() = CachedValuesManager.getCachedValue(this) {
+            val typeExpressionType = typeExpression?.type
+            if (typeExpressionType != null) {
+                return@getCachedValue CachedValueProvider.Result.create(
+                    typeExpressionType,
+                    this
+                )
+            }
+
+            val returnStatements = try {
+                inference?.returnStatements
+            } catch (_: CyclicReferenceException) {
+                return@getCachedValue null
+            }
+            val type = returnStatements?.asSequence()?.map {
+                it.expression?.type
+            }?.filterNotNull()?.firstOrNull() ?: TolkType.Unit
 
             CachedValueProvider.Result.create(type, this)
         }

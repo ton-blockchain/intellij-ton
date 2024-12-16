@@ -3,13 +3,18 @@ package org.ton.intellij.tolk.psi.impl
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
+import org.ton.intellij.tolk.psi.TolkCatch
 import org.ton.intellij.tolk.psi.TolkCatchParameter
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.type.TolkType
-import org.ton.intellij.tolk.type.infer.inference
 
 abstract class TolkCatchParameterMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkCatchParameter {
-    override val type: TolkType? get() = inference?.getType(this)
+    override val type: TolkType?
+        get() = if ((parent as? TolkCatch)?.catchParameterList?.indexOf(this) == 0) {
+            TolkType.Int
+        } else {
+            null
+        }
 
     override fun getName(): String = identifier.text
 

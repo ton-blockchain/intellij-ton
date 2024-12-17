@@ -1,0 +1,153 @@
+<idea-plugin>
+    <resource-bundle>messages.FuncBundle</resource-bundle>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="FunC"
+                  implementationClass="org.ton.intellij.func.FuncFileType"
+                  fieldName="INSTANCE"
+                  language="FunC"
+                  extensions="fc;func"
+        />
+
+        <lang.parserDefinition language="FunC"
+                               implementationClass="org.ton.intellij.func.parser.FuncParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="FunC"
+                                       implementationClass="org.ton.intellij.func.highlighting.FuncSyntaxHighlighterFactory"/>
+        <lang.commenter language="FunC" implementationClass="org.ton.intellij.func.ide.FuncCommenter"/>
+
+        <lang.braceMatcher language="FunC" implementationClass="org.ton.intellij.func.ide.FuncBraceMatcher"/>
+        <lang.quoteHandler language="FunC" implementationClass="org.ton.intellij.func.ide.FuncQuoteHandler"/>
+        <lang.foldingBuilder language="FunC" implementationClass="org.ton.intellij.func.ide.FuncFoldingBuilder"/>
+        <lang.findUsagesProvider language="FunC"
+                                 implementationClass="org.ton.intellij.func.ide.FuncFindUsagesProvider"/>
+        <lang.implementationTextSelectioner language="FunC"
+                                            implementationClass="org.ton.intellij.func.ide.FuncImplementationTextSelectioner"/>
+        <!--        <platform.backend.documentation.psiTargetProvider id="FuncDocumentationTargetProvider"-->
+        <!--                                                          implementation="org.ton.intellij.func.ide.quickdoc.FuncPsiDocumentationTargetProvider"/>-->
+        <lang.documentationProvider language="FunC"
+                                    implementationClass="org.ton.intellij.func.doc.FuncDocumentationProvider"/>
+        <lang.formatter language="FunC" implementationClass="org.ton.intellij.func.ide.formatter.FuncFormatter"/>
+        <lang.refactoringSupport language="FunC"
+                                 implementationClass="org.ton.intellij.func.refactor.FuncRefactoringSupportProvider"/>
+        <lang.namesValidator language="FunC"
+                             implementationClass="org.ton.intellij.func.refactor.FuncNamesValidator"/>
+        <completion.contributor language="FunC"
+                                implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionContributor"/>
+        <completion.confidence language="FunC" order="last"
+                               implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionConfidence"/>
+        <lookup.charFilter implementation="org.ton.intellij.func.ide.completion.FuncCharFilter"/>
+
+        <stubIndex implementation="org.ton.intellij.func.stub.index.FuncNamedElementIndex"/>
+        <stubElementTypeHolder class="org.ton.intellij.func.psi.FuncElementTypes" externalIdPrefix="func."/>
+        <lang.elementManipulator forClass="org.ton.intellij.func.psi.FuncIncludeDefinition"
+                                 implementationClass="org.ton.intellij.func.psi.impl.FuncIncludePathElementManipulator"/>
+
+        <typedHandler implementation="org.ton.intellij.func.editor.FuncTypedHandler" id="FuncTypedHandler"/>
+
+        <liveTemplateContext
+                contextId="func"
+                implementation="org.ton.intellij.func.template.FuncEverywhereContextType"/>
+        <defaultLiveTemplates file="/liveTemplates/funcHidden.xml" hidden="true"/>
+
+        <!-- Hints -->
+        <codeInsight.parameterInfo language="FunC"
+                                   implementationClass="org.ton.intellij.func.ide.FuncParameterInfoHandler"/>
+        <codeInsight.parameterNameHints language="FunC"
+                                        implementationClass="org.ton.intellij.func.ide.hints.FuncParameterHintsProvider"/>
+
+        <codeInsight.declarativeInlayProvider bundle="messages.FuncBundle"
+                                              group="VALUES_GROUP"
+                                              implementationClass="org.ton.intellij.func.ide.hints.FuncConstantHintsProvider"
+                                              isEnabledByDefault="true"
+                                              language="FunC"
+                                              nameKey="numeric.constant.values"
+                                              providerId="func.constant.hints">
+        </codeInsight.declarativeInlayProvider>
+
+
+        <annotator language="FunC" implementationClass="org.ton.intellij.func.highlighting.FuncAnnotator"/>
+        <annotator language="FunC" implementationClass="org.ton.intellij.func.highlighting.FuncDocAnnotator"/>
+
+        <codeInsight.lineMarkerProvider language="FunC"
+                                        implementationClass="org.ton.intellij.func.ide.linemarker.FuncRecursiveCallLineMarkerProvider"/>
+
+        <languageInjector implementation="org.ton.intellij.func.psi.FuncStringAsmInjector"/>
+
+        <localInspection language="FunC" displayName="Unused function inspection" groupPath="FunC"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.func.inspection.FuncUnusedFunctionInspection"/>
+        <localInspection language="FunC" displayName="Unused variable inspection" groupPath="FunC"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.func.inspection.FuncUnusedVariableInspection"/>
+        <localInspection language="FunC" displayName="Unused parameter inspection" groupPath="FunC"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.func.inspection.FuncUnusedFunctionParameterInspection"/>
+        <localInspection language="FunC" displayName="Unused type parameter inspection" groupPath="FunC"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.func.inspection.FuncUnusedTypeParameterInspection"/>
+
+        <!-- style issues -->
+        <localInspection language="FunC" groupPath="FunC"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.constant.expression.name"
+                         groupKey="group.style.name"
+                         enabledByDefault="true" level="INFORMATION"
+                         implementationClass="org.ton.intellij.func.inspection.style.FuncConstantExpressionInspection"/>
+
+        <!-- numeric issues -->
+        <localInspection language="FunC" groupPath="FunC"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.func.inspection.numeric.FuncDivideByZeroInspection"/>
+        <localInspection language="FunC" groupPath="FunC"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.func.inspection.numeric.FuncIntOverflowInspection"/>
+
+        <!-- control flow issues -->
+        <localInspection language="FunC" displayName="Missing return at end of function" groupPath="FunC"
+                         groupName="Control flow issues" enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.func.inspection.FuncMissingReturnInspection"/>
+        <localInspection language="FunC" displayName="Calling function with method-id" groupPath="FunC"
+                         groupName="Control flow issues" enabledByDefault="false" level="ERROR"
+                         implementationClass="org.ton.intellij.func.inspection.FuncUnexpectedGetMethodCallInspection"/>
+        <localInspection language="FunC" displayName="Calling function" groupPath="FunC"
+                         groupName="Control flow issues" enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.func.inspection.FuncFunctionCallInspection"/>
+        <localInspection language="FunC" groupPath="FunC" groupName="Control flow issues" enabledByDefault="true"
+                         level="INFORMATION"
+                         implementationClass="org.ton.intellij.func.inspection.FuncReplaceGuardClauseWithFunctionCallInspection"
+                         displayName="Replace guard clause with function call"/>
+        <!--        <localInspection language="FunC" displayName="`if` condition is not an integer" groupPath="FunC"-->
+        <!--                         groupName="Control flow issues" enabledByDefault="true" level="ERROR"-->
+        <!--                         implementationClass="org.ton.intellij.func.inspection.FuncIfConditionIsNotAnIntegerInspection"/>-->
+
+        <!-- control flow issues -->
+
+        <!-- general -->
+        <localInspection language="FunC" displayName="Unresolved reference inspection" groupPath="FunC"
+                         groupName="General" enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.func.inspection.FuncUnresolvedReferenceInspection"/>
+        <localInspection language="FunC" displayName="Unresolved type identifier" groupPath="FunC"
+                         groupName="General" enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.func.inspection.FuncUnresolvedTypeIdentifierInspection"/>
+
+        <!-- Completion -->
+        <completion.contributor language="FunC"
+                                implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionContributor"/>
+
+        <!-- Code Style -->
+        <langCodeStyleSettingsProvider
+                implementation="org.ton.intellij.func.ide.formatter.FuncLanguageCodeStyleSettingsProvider"/>
+
+        <!--        <projectConfigurable instance="org.ton.intellij.func.ide.configurable.FuncProjectConfigurable"-->
+        <!--                             groupId="language"-->
+        <!--                             id="language.func"-->
+        <!--                             bundle="messages.FuncBundle" key="func.name"/>-->
+    </extensions>
+
+    <actions>
+        <action id="NewFunc" class="org.ton.intellij.func.action.file.FuncCreateFileAction"
+                text="FunC File" description="Create new FunC file">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewXml"/>
+        </action>
+    </actions>
+</idea-plugin>

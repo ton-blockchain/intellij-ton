@@ -17,9 +17,7 @@ private const val SERVICE_NAME: String = "TolkProjectSettings"
 )
 class TolkProjectSettingsService(
     val project: Project
-) : SimplePersistentStateComponent<TolkProjectSettings>(TolkProjectSettings()) {
-
-}
+) : SimplePersistentStateComponent<TolkProjectSettings>(TolkProjectSettings())
 
 class TolkProjectSettings : BaseState() {
     var languageLevel by enum(TolkLanguageLevel.TOLK_0_1)

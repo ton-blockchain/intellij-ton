@@ -5,13 +5,13 @@ import com.intellij.codeInsight.hints.declarative.PresentationTreeBuilder
 import com.intellij.codeInsight.hints.declarative.PsiPointerInlayActionNavigationHandler
 import com.intellij.codeInsight.hints.declarative.PsiPointerInlayActionPayload
 import com.intellij.psi.PsiElement
-import com.intellij.psi.createSmartPointer
+import com.intellij.psi.SmartPointerManager
 
 fun PresentationTreeBuilder.printPsi(element: PsiElement, name: String) {
     text(
         name,
         InlayActionData(
-            PsiPointerInlayActionPayload(element.createSmartPointer()),
+            PsiPointerInlayActionPayload(SmartPointerManager.createPointer(element)),
             PsiPointerInlayActionNavigationHandler.HANDLER_ID
         )
     )

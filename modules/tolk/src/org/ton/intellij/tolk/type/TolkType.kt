@@ -30,7 +30,7 @@ sealed interface TolkType {
         override fun toString(): String = "$inputType -> $returnType"
     }
 
-    class Tensor constructor(
+    class Tensor(
         val elements: List<TolkType>
     ) : TolkType {
         override fun toString(): String = "(${elements.joinToString()})"

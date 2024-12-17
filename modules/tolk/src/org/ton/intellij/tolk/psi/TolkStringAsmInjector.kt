@@ -11,7 +11,7 @@ class TolkStringAsmInjector : LanguageInjector {
         places: InjectedLanguagePlaces
     ) {
         if (host !is TolkStringLiteral) return
-        if (!host.isValidHost()) return
+        if (!host.isValidHost) return
         val text = host.rawString ?: return
         places.addPlace(AsmLanguage, text.textRangeInParent, null, null)
     }

@@ -8,19 +8,20 @@ import org.ton.intellij.tolk.psi.TolkExpression
 import org.ton.intellij.tolk.type.TolkType
 import org.ton.intellij.tolk.type.infer.inference
 
-val TolkCallExpression.actualArgumentList: List<TolkExpression> get() {
-    val dotExpr = parent as? TolkDotExpression
-    val firstArg = dotExpr?.left
-    val actualArgumentList = ArrayList<TolkExpression>()
-    if (firstArg != null && firstArg != this) {
-        actualArgumentList.add(firstArg)
+val TolkCallExpression.actualArgumentList: List<TolkExpression>
+    get() {
+        val dotExpr = parent as? TolkDotExpression
+        val firstArg = dotExpr?.left
+        val actualArgumentList = ArrayList<TolkExpression>()
+        if (firstArg != null && firstArg != this) {
+            actualArgumentList.add(firstArg)
+        }
+        argumentList.argumentList.forEach { arg ->
+            val argument = arg.expression
+            actualArgumentList.add(argument)
+        }
+        return actualArgumentList
     }
-    argumentList.argumentList.forEach { arg ->
-        val argument = arg.expression
-        actualArgumentList.add(argument)
-    }
-    return actualArgumentList
-}
 
 abstract class TolkCallExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkCallExpression {
     override val type: TolkType? get() = inference?.getType(this)

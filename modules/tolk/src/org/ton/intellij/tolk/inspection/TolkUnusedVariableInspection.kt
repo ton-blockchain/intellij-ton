@@ -1,15 +1,9 @@
 package org.ton.intellij.tolk.inspection
 
 import com.intellij.codeInspection.LocalInspectionToolSession
-import com.intellij.codeInspection.LocalQuickFix
-import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
-import com.intellij.openapi.util.TextRange
-import com.intellij.psi.search.searches.ReferencesSearch
-import org.ton.intellij.tolk.ide.fixes.RemoveElementFix
-import org.ton.intellij.tolk.ide.fixes.RenameUnderscoreFix
-import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.util.ancestorStrict
+import org.ton.intellij.tolk.psi.TolkReferenceExpression
+import org.ton.intellij.tolk.psi.TolkVisitor
 
 class TolkUnusedVariableInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(

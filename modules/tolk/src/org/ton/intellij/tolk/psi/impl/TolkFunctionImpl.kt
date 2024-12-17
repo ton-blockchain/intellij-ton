@@ -65,13 +65,13 @@ val TolkFunction.isMutable: Boolean
     get() = stub?.isMutable ?: (node.findChildByType(TolkElementTypes.TILDE) != null)
 
 val TolkFunction.isDeprecated: Boolean
-    get() = stub?.isDeprecated ?: annotationList.any { it.identifier?.textMatches("deprecated") ?: false }
+    get() = stub?.isDeprecated ?: annotationList.any { it.identifier?.textMatches("deprecated") == true }
 
 val TolkFunction.getKeyword get() = node.findChildByType(TolkElementTypes.GET_KEYWORD)
 
 val TolkFunction.isGetMethod: Boolean
     get() = stub?.isGetMethod
-        ?: (getKeyword != null || annotationList.any { it.identifier?.textMatches("method_id") ?: false })
+        ?: (getKeyword != null || annotationList.any { it.identifier?.textMatches("method_id") == true })
 
 val TolkFunction.hasAsm: Boolean
     get() = stub?.hasAsm ?: (functionBody?.asmDefinition != null)

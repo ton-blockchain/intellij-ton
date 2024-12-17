@@ -1,4 +1,3 @@
 package org.ton.intellij.tolk.psi
 
-interface TolkNamedType : TolkNamedElement, TolkTypeParameterListOwner {
-}
+interface TolkNamedType : TolkNamedElement, TolkTypeParameterListOwner

@@ -85,10 +85,10 @@ data class DocLine(
     }
 }
 
-public fun Sequence<DocLine>.removeEolDecoration(infix: String): Sequence<DocLine> =
+fun Sequence<DocLine>.removeEolDecoration(infix: String): Sequence<DocLine> =
     map { it.trimStart().removePrefix(infix) }.removeCommonIndent()
 
-public fun Sequence<DocLine>.removeCommonIndent(): Sequence<DocLine> {
+fun Sequence<DocLine>.removeCommonIndent(): Sequence<DocLine> {
     val lines = toList()
 
     val minIndent = lines.fold(Int.MAX_VALUE) { minIndent, line ->
@@ -104,4 +104,4 @@ public fun Sequence<DocLine>.removeCommonIndent(): Sequence<DocLine> {
     }
 }
 
-public fun Sequence<DocLine>.content() = mapNotNull { if (it.isRemoved) null else it.content }
+fun Sequence<DocLine>.content() = mapNotNull { if (it.isRemoved) null else it.content }

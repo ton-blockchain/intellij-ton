@@ -14,8 +14,6 @@ import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.elementType
-import com.intellij.psi.util.endOffset
-import com.intellij.psi.util.startOffset
 import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.tolk.eval.TolkIntValue
 import org.ton.intellij.tolk.eval.value
@@ -33,8 +31,8 @@ class TolkAnnotator : Annotator {
             }
 
             is TolkAnnotation -> {
-                val startOffset = element.at.startOffset
-                val endOffset = element.identifier?.endOffset ?: return
+                val startOffset = element.at.textRange.startOffset
+                val endOffset = element.identifier?.textRange?.endOffset ?: return
                 return highlight(TextRange(startOffset, endOffset), holder, TolkColor.ANNOTATION.textAttributesKey)
             }
 
@@ -90,6 +88,7 @@ class TolkAnnotator : Annotator {
             is TolkVar -> {
                 highlight(element.identifier, holder, TolkColor.LOCAL_VARIABLE.textAttributesKey)
             }
+
             is TolkCatchParameter -> {
                 highlight(element.identifier, holder, TolkColor.LOCAL_VARIABLE.textAttributesKey)
             }
@@ -114,7 +113,10 @@ class TolkAnnotator : Annotator {
                     val nestedEnd = commentValue.lastIndexOf("*/")
                     if (nestedStart != -1 && nestedEnd != -1) {
                         val nestedRange =
-                            TextRange(element.startOffset + 2 + nestedStart, element.startOffset + 4 + nestedEnd)
+                            TextRange(
+                                element.textRange.startOffset + 2 + nestedStart,
+                                element.textRange.startOffset + 4 + nestedEnd
+                            )
                         holder.newAnnotation(HighlightSeverity.ERROR, TolkBundle.message("nested_comment.description"))
                             .range(nestedRange)
                             .withFix(RemoveNestedComments(element, nestedRange))

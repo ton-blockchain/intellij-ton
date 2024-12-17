@@ -119,7 +119,7 @@ val PsiElement.prevVisibleOrNewLine: PsiElement?
         .firstOrNull()
 
 
-public fun <E : PsiElement> getChildrenByType(
+fun <E : PsiElement> getChildrenByType(
     stub: StubElement<out PsiElement>,
     elementType: IElementType,
     f: ArrayFactory<E?>,

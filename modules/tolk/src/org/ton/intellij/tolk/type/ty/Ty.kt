@@ -1,6 +1,5 @@
 package org.ton.intellij.tolk.type.ty
 
-import org.ton.intellij.tolk.psi.TolkTypeExpression
 import org.ton.intellij.tolk.type.infer.TolkTyFoldable
 import org.ton.intellij.tolk.type.infer.TolkTyFolder
 

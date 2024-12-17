@@ -1,4 +1,3 @@
-
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -12,10 +11,10 @@ dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
         intellijIdeaCommunity(version)
-        bundledModule("com.intellij.dev")
+        bundledPlugin("com.intellij.dev")
     }
-    compileOnly(project(":modules:asm"))
-    compileOnly(project(":modules:util"))
+    compileOnly(project(":asm"))
+    compileOnly(project(":util"))
 }
 
 val generateTolkParser = task<GenerateParserTask>("generateTolkParser") {
@@ -25,7 +24,7 @@ val generateTolkParser = task<GenerateParserTask>("generateTolkParser") {
     pathToPsiRoot.set("/org/ton/intellij/tolk/psi")
     purgeOldFiles.set(true)
 
-    dependsOn(":modules:util:composedJar")
+    dependsOn(":util:composedJar")
 }
 
 val generateTolkLexer = task<GenerateLexerTask>("generateTolkLexer") {

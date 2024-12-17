@@ -31,7 +31,7 @@ abstract class TolkInspectionBase : LocalInspectionTool() {
         } else DUMMY_VISITOR
     }
 
-    open protected fun buildTolkVisitor(
+    protected open fun buildTolkVisitor(
         holder: ProblemsHolder,
         session: LocalInspectionToolSession,
     ): TolkVisitor = object : TolkVisitor() {

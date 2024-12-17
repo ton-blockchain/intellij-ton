@@ -16,7 +16,7 @@ class TolkFoldingBuilder : FoldingBuilder {
     private fun collectDescriptorsRecursively(node: ASTNode, descriptors: MutableList<FoldingDescriptor>) {
         when (node.elementType) {
             TolkElementTypes.BLOCK_STATEMENT,
-            -> descriptors.add(FoldingDescriptor(node, node.textRange))
+                -> descriptors.add(FoldingDescriptor(node, node.textRange))
         }
 
         node.getChildren(null).forEach { childNode ->
@@ -26,7 +26,7 @@ class TolkFoldingBuilder : FoldingBuilder {
 
     override fun getPlaceholderText(node: ASTNode): String = when (node.elementType) {
         TolkElementTypes.BLOCK_STATEMENT,
-        -> "{...}"
+            -> "{...}"
 
         else -> "..."
     }

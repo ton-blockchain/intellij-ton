@@ -1,10 +1,7 @@
 package org.ton.intellij.tolk.type.infer
 
-import com.intellij.openapi.progress.ProgressManager
-import com.intellij.psi.PsiElementResolveResult
-import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.type.ty.*
-import org.ton.intellij.util.infiniteWith
+import org.ton.intellij.tolk.psi.TolkNamedElement
+import org.ton.intellij.tolk.type.ty.TolkTy
 
 class TolkTypeInferenceWalker(
     val ctx: TolkInferenceContext,

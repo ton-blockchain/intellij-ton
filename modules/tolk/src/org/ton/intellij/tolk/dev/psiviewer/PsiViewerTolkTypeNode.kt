@@ -9,7 +9,7 @@ import org.ton.intellij.tolk.type.TolkType
 class PsiViewerTolkTypeNode(
     private val type: TolkType,
     private val nodeContext: PsiViewerPropertyNode.Context
-) : PsiViewerPropertyNode{
+) : PsiViewerPropertyNode {
     class Factory : PsiViewerPropertyNode.Factory {
         override suspend fun createNode(
             nodeContext: PsiViewerPropertyNode.Context,

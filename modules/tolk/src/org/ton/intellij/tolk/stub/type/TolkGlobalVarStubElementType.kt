@@ -1,7 +1,6 @@
 package org.ton.intellij.tolk.stub.type
 
 import com.intellij.psi.PsiElement
-import com.intellij.psi.stubs.IndexSink
 import com.intellij.psi.stubs.StubElement
 import com.intellij.psi.stubs.StubInputStream
 import com.intellij.psi.stubs.StubOutputStream
@@ -9,7 +8,6 @@ import com.intellij.util.ArrayFactory
 import org.ton.intellij.tolk.psi.TolkGlobalVar
 import org.ton.intellij.tolk.psi.impl.TolkGlobalVarImpl
 import org.ton.intellij.tolk.stub.TolkGlobalVarStub
-import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
 
 class TolkGlobalVarStubElementType(
     debugName: String,

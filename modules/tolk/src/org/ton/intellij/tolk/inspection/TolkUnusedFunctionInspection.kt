@@ -24,7 +24,7 @@ class TolkUnusedFunctionInspection : TolkInspectionBase() {
             if (name == "onSplitPrepare") return
             if (name == "onSplitInstall") return
             val containingDirectory = o.containingFile.containingDirectory ?: return
-            if(containingDirectory.name.startsWith("tolk-stdlib")) return
+            if (containingDirectory.name.startsWith("tolk-stdlib")) return
             if (ReferencesSearch.search(o, o.useScope).findFirst() == null) {
                 val id = o.identifier ?: return
                 val range = TextRange.from(id.startOffsetInParent, id.textLength)

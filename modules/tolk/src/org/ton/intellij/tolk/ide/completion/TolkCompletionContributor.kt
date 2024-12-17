@@ -49,7 +49,9 @@ class TolkCompletionContributor : CompletionContributor() {
         )
         extend(
             CompletionType.BASIC,
-            psiElement().withParent(psiElement().withElementType(TokenType.ERROR_ELEMENT).withParent(TolkFile::class.java)),
+            psiElement().withParent(
+                psiElement().withElementType(TokenType.ERROR_ELEMENT).withParent(TolkFile::class.java)
+            ),
             TolkKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
                 "fun",

@@ -180,19 +180,10 @@
                 implementation="org.ton.intellij.tolk.dev.psiviewer.PsiViewerTolkTypeNode$Factory"/>
     </extensions>
 
-    <!--    <actions>-->
-    <!--        <action id="NewTolk" class="org.ton.intellij.tolk.action.file.TolkCreateFileAction"-->
-    <!--                text="Tolk File" description="Create new Tolk file">-->
-    <!--            <add-to-group group-id="NewGroup"/>-->
-    <!--        </action>-->
-    <!--        <group id="ConvertFuncToTolkGroup">-->
-    <!--            <separator/>-->
-    <!--            <action id="ConvertFuncToTolk" class="org.ton.intellij.tolk.ide.actions.FuncToTolkAction">-->
-    <!--                <keyboard-shortcut first-keystroke="control alt shift T" keymap="$default"/>-->
-    <!--            </action>-->
-    <!--            <add-to-group group-id="CodeMenu" anchor="last"/>-->
-    <!--            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>-->
-    <!--            <add-to-group group-id="EditorTabPopupMenu" anchor="last"/>-->
-    <!--        </group>-->
-    <!--    </actions>-->
+    <actions>
+        <action id="NewTolk" class="org.ton.intellij.tolk.action.file.TolkCreateFileAction"
+                text="Tolk File" description="Create new Tolk file">
+            <add-to-group group-id="NewGroup"/>
+        </action>
+    </actions>
 </idea-plugin>

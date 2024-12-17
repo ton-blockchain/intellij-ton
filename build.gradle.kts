@@ -1,8 +1,7 @@
 
-import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.changelog.Changelog
-import org.jetbrains.grammarkit.tasks.GenerateLexerTask
-import org.jetbrains.grammarkit.tasks.GenerateParserTask
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.time.Clock
 import java.time.Instant
@@ -21,25 +20,22 @@ val pluginVersion = prop("pluginVersion").let { pluginVersion ->
 version = pluginVersion
 
 plugins {
-    kotlin("jvm") version "1.9.22"
+    kotlin("jvm") version "2.0.10"
     id("org.jetbrains.intellij.platform")
     id("org.jetbrains.grammarkit") version "2022.3.2.2"
-    id("org.jetbrains.changelog") version "2.2.0"
+    id("org.jetbrains.changelog") version "2.2.1"
 }
 
 allprojects {
     apply(plugin = "kotlin")
 
-    repositories {
-    }
-
     tasks.withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
-        kotlinOptions.freeCompilerArgs += "-Xjvm-default=all"
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+        compilerOptions.freeCompilerArgs.add("-Xjvm-default=all")
     }
 
     java {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+        toolchain.languageVersion.set(JavaLanguageVersion.of(21))
     }
 
     sourceSets {
@@ -51,17 +47,25 @@ allprojects {
     }
 }
 
-dependencies {
-    implementation("me.alllex.parsus:parsus-jvm:0.6.1")
-    implementation("com.github.andreypfau.tlb:tlb-jvm:54070d9405")
+tasks {
+    buildSearchableOptions {
+        enabled = false
+    }
+}
 
+dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
-        intellijIdeaCommunity(version)
+        create(IntelliJPlatformType.IntellijIdeaUltimate, version)
 
-        pluginModule(project(":modules:util"))
-        pluginModule(project(":modules:asm"))
-        pluginModule(project(":modules:tolk"))
+        pluginModule(implementation(project(":util")))
+        pluginModule(implementation(project(":asm")))
+        pluginModule(implementation(project(":tolk")))
+        pluginModule(implementation(project(":func")))
+        pluginModule(implementation(project(":tact")))
+        pluginModule(implementation(project(":boc")))
+        pluginModule(implementation(project(":tlb")))
+        pluginModule(implementation(project(":fift")))
     }
 }
 
@@ -81,7 +85,7 @@ intellijPlatform {
             }
         )
         ideaVersion {
-            sinceBuild.set("232")
+            sinceBuild.set("243")
             untilBuild = provider { null }
         }
         vendor {
@@ -90,33 +94,6 @@ intellijPlatform {
             email = "andreypfau@ton.org"
         }
     }
-}
-
-sourceSets {
-    main {
-        java.srcDirs("src/gen")
-    }
-}
-
-val generateFuncLexer = generateLexer("Func")
-val generateFuncParser = generateParser("Func")
-
-val generateTactLexer = generateLexer("Tact")
-val generateTactParser = generateParser("Tact")
-
-val generateFiftLexer = generateLexer("Fift")
-val generateFiftParser = generateParser("Fift")
-
-val generateTlbLexer = generateLexer("Tlb")
-val generateTlbParser = generateParser("Tlb")
-
-val compileKotlin = tasks.named("compileKotlin") {
-    dependsOn(
-        generateFuncParser, generateFuncLexer,
-        generateTactParser, generateTactLexer,
-        generateFiftParser, generateFiftLexer,
-        generateTlbParser, generateTlbLexer,
-    )
 }
 
 changelog {
@@ -129,35 +106,5 @@ changelog {
     groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"))
 }
 
-tasks {
-    jar {
-        from({
-            configurations.runtimeClasspath.get().filter { file ->
-                !file.nameWithoutExtension.startsWith("kotlin-stdlib") &&
-                        !file.nameWithoutExtension.startsWith("annotations")
-            }.map {
-                if (it.isDirectory) it
-                else zipTree(it)
-            }
-        })
-    }
-}
-
 fun prop(name: String, default: (() -> String?)? = null) = extra.properties[name] as? String
     ?: default?.invoke() ?: error("Property `$name` is not defined in gradle.properties")
-
-fun generateParser(language: String, suffix: String = "", config: GenerateParserTask.() -> Unit = {}) =
-    task<GenerateParserTask>("generate${language.capitalized()}Parser${suffix.capitalized()}") {
-        sourceFile.set(file("src/main/grammar/${language}Parser.bnf"))
-        targetRootOutputDir.set(file("src/gen"))
-        pathToParser.set("/org/ton/intellij/${language.lowercase()}/parser/${language}Parser.java")
-        pathToPsiRoot.set("/org/ton/intellij/${language.lowercase()}/psi")
-        purgeOldFiles.set(true)
-        config()
-    }
-
-fun generateLexer(language: String) = task<GenerateLexerTask>("generate${language}Lexer") {
-    sourceFile.set(file("src/main/grammar/${language}Lexer.flex"))
-    targetOutputDir.set(file("src/gen/org/ton/intellij/${language.lowercase()}/lexer"))
-    purgeOldFiles.set(true)
-}

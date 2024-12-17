@@ -39,7 +39,6 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
 }
 
 
-
 //fun TolkReferenceExpression.isVariableDefinition(): Boolean = CachedValuesManager.getCachedValue(this) {
 //    val result = !PsiTreeUtil.treeWalkUp(this, null) { scope, lastParent ->
 //        if (scope is TolkApplyExpression && scope.right == lastParent) { // `var |foo|` <-- last parent

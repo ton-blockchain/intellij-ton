@@ -25,7 +25,7 @@ class TolkProjectConfigurable(
 //            }, SimpleListCellRenderer.create("") { it.displayName })
 //        }
         row("Tolk stdlib:") {
-            textFieldWithBrowseButton("path", null, FileChooserDescriptorFactory.createSingleFolderDescriptor())
+            textFieldWithBrowseButton(FileChooserDescriptorFactory.createSingleFolderDescriptor(), null)
                 .bindText({
                     sdkRef.toString()
                 }, {

@@ -20,8 +20,7 @@ class TolkConstantExpressionIntention : PsiElementBaseIntentionAction() {
         if (element !is TolkExpression) return false
         if (element is TolkLiteralExpression && element.integerLiteral != null) return false
         val parent = element.parent
-        if (parent is TolkExpression) return false
-        return true
+        return parent !is TolkExpression
     }
 
     override fun invoke(project: Project, editor: Editor?, element: PsiElement) {

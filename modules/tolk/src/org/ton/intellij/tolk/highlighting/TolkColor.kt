@@ -27,7 +27,10 @@ enum class TolkColor(
     PARAMETER(TolkBundle.message("settings.tolk.color.parameter"), Default.PARAMETER),
     MUT_PARAMETER(TolkBundle.message("settings.tolk.color.mutable_parameter"), Default.PARAMETER),
     SELF_PARAMETER(TolkBundle.message("settings.tolk.color.self_parameter"), Default.KEYWORD),
-    TYPE_PARAMETER(TolkBundle.message("settings.tolk.color.type_parameter"), TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")),
+    TYPE_PARAMETER(
+        TolkBundle.message("settings.tolk.color.type_parameter"),
+        TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")
+    ),
 
     PRIMITIVE(TolkBundle.message("settings.tolk.color.primitive"), Default.KEYWORD),
 

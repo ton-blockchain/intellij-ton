@@ -1,0 +1,33 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="TL-B Generator" displayType="BALLOON"/>
+        <fileType name="TLB"
+                  implementationClass="org.ton.intellij.tlb.TlbFileType"
+                  fieldName="INSTANCE"
+                  language="tlb"
+                  extensions="tlb"/>
+        <lang.parserDefinition language="tlb"
+                               implementationClass="org.ton.intellij.tlb.ide.TlbParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="tlb"
+                                       implementationClass="org.ton.intellij.tlb.ide.TlbSyntaxHighlighterFactory"/>
+        <annotator language="tlb" implementationClass="org.ton.intellij.tlb.ide.TlbAnnotator"/>
+        <colorSettingsPage implementation="org.ton.intellij.tlb.ide.TlbColorSettingsPage"/>
+        <lang.commenter language="tlb"
+                        implementationClass="org.ton.intellij.tlb.ide.TlbCommenter"/>
+        <lang.braceMatcher language="tlb"
+                           implementationClass="org.ton.intellij.tlb.ide.TlbBraceMatcher"/>
+        <lang.findUsagesProvider language="tlb"
+                                 implementationClass="org.ton.intellij.tlb.ide.TlbFindUsagesProvider"/>
+    </extensions>
+    <actions>
+        <group id="ton.file.group.tlb">
+            <!--            <action id="ton.tlb.GenerateFuncTlb" class="org.ton.intellij.tlb.ide.actions.GenerateFuncTlbAction"-->
+            <!--                    text="Generate FunC TL-B Parser">-->
+            <!--                <keyboard-shortcut first-keystroke="control shift G" keymap="$default"/>-->
+            <!--            </action>-->
+            <add-to-group group-id="ToolsMenu" anchor="before" relative-to-action="ExternalToolsGroup"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+        </group>
+    </actions>
+</idea-plugin>

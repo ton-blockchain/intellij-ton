@@ -21,5 +21,4 @@ class TolkIncludePathReference(
     },
     null,
     true
-) {
-}
+)

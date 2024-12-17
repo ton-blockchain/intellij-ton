@@ -21,7 +21,6 @@ import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.highlighting.TolkColor
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.isMutable
-import org.ton.intellij.tolk.psi.impl.isPrimitive
 import java.util.*
 
 class TolkPsiDocumentationTargetProvider : PsiDocumentationTargetProvider {

@@ -98,8 +98,8 @@ class TolkFormattingBlock(
     }
 
     private fun calcWrap(child: ASTNode): Wrap? {
-        val type = child.elementType
-        val parentType = child.treeParent.elementType
+        child.elementType
+        child.treeParent.elementType
 //        if ((type == DOT || type == TILDE) && parentType == QUALIFIED_EXPRESSION) return Wrap.createWrap(
 //            WrapType.NORMAL,
 //            false

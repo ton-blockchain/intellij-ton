@@ -27,7 +27,7 @@ abstract class TolkDocElementImpl(type: IElementType) : CompositePsiElement(type
     override fun toString(): String = "${javaClass.simpleName}($elementType)"
 }
 
-class TolkDocGapImpl(type: IElementType, val text: CharSequence) : LeafPsiElement(type, text), TolkDocGap {
+class TolkDocGapImpl(type: IElementType, text: CharSequence) : LeafPsiElement(type, text), TolkDocGap {
     override fun getTokenType(): IElementType = elementType
 }
 

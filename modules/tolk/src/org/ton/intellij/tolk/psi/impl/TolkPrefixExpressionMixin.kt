@@ -7,7 +7,7 @@ import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkPrefixExpression
 import org.ton.intellij.tolk.type.TolkType
 
-abstract class TolkPrefixExpressionMixin (node: ASTNode) : ASTWrapperPsiElement(node), TolkPrefixExpression {
+abstract class TolkPrefixExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkPrefixExpression {
     override val type: TolkType?
         get() = if (firstChild.elementType == TolkElementTypes.EXCL) TolkType.Bool else TolkType.Int
 }

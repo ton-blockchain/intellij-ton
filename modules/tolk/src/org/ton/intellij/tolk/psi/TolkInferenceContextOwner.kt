@@ -18,7 +18,7 @@ private val FUNC_INFERENCE_KEY: Key<CachedValue<TolkInferenceResult>> = Key.crea
 val TolkInferenceContextOwner.selfInferenceResult: TolkInferenceResult
     get() {
         return CachedValuesManager.getCachedValue(this, FUNC_INFERENCE_KEY) {
-            val (inferred,time) = measureTimedValue {
+            val (inferred, _) = measureTimedValue {
                 inferTypesIn(this)
             }
 //            println("${(this as? TolkNamedElement)?.name} - infer $time")

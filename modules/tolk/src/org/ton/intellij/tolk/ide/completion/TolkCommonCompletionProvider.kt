@@ -17,7 +17,6 @@ import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.type.TolkType
 import org.ton.intellij.util.parentOfType
-import org.ton.intellij.util.psiElement
 
 // TODO fix apply expressions
 object TolkCommonCompletionProvider : TolkCompletionProvider() {
@@ -308,15 +307,24 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                         .withTypeText((this.type as? TolkType.Function)?.returnType?.toString() ?: "")
                         .let { builder ->
                             typeParameterList?.let { list ->
-                                builder.appendTailText(list.typeParameterList.joinToString(prefix = "<", postfix = ">") {
-                                    it.name.toString()
-                                }, true)
+                                builder.appendTailText(
+                                    list.typeParameterList.joinToString(
+                                        prefix = "<",
+                                        postfix = ">"
+                                    ) {
+                                        it.name.toString()
+                                    }, true
+                                )
                             } ?: builder
                         }
                         .let { builder ->
-                            builder.appendTailText(parameterList?.parameterList?.joinToString(prefix = "(", postfix = ")") {
-                                "${it.name}: ${it.typeExpression?.type}"
-                            } ?: "()", true)
+                            builder.appendTailText(
+                                parameterList?.parameterList?.joinToString(
+                                    prefix = "(",
+                                    postfix = ")"
+                                ) {
+                                    "${it.name}: ${it.typeExpression?.type}"
+                                } ?: "()", true)
                         }
                         .withInsertHandler { context, item ->
                             if (contextElement?.parent !is TolkCallExpression) {

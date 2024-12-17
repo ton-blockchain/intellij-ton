@@ -17,7 +17,7 @@ class TolkSyntaxHighlighter : SyntaxHighlighterBase() {
             TolkElementTypes.RAW_STRING_ELEMENT,
             TolkElementTypes.CLOSING_QUOTE,
             TolkElementTypes.OPEN_QUOTE,
-            -> TolkColor.STRING
+                -> TolkColor.STRING
 
             TolkElementTypes.INTEGER_LITERAL -> TolkColor.NUMBER
             TolkElementTypes.SEMICOLON -> TolkColor.SEMICOLON

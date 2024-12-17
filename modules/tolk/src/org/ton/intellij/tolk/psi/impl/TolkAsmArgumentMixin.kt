@@ -27,7 +27,7 @@ class TolkAsmArgumentReference(element: TolkAsmArgument) :
         val params = function.parameterList?.parameterList ?: return@AbstractResolver null
         return@AbstractResolver params.find {
             val name = it.name ?: return@find false
-            myElement.identifier?.textMatches(name) ?: false
+            myElement.identifier?.textMatches(name) == true
         }
     }
 

@@ -21,7 +21,7 @@ class TolkKeywordCompletionProvider(
         context: ProcessingContext,
         result: CompletionResultSet,
     ) {
-        val element = parameters.position
+        parameters.position
         keywords.asReversed().forEachIndexed { index, s ->
             result.addElement(createKeywordLookupElement(s, priority + (index * 0.01)))
         }

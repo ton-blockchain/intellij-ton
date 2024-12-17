@@ -8,15 +8,18 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
         is TolkType.ParameterType -> {
             printPsi(type.psiElement, type.name)
         }
+
         is TolkNamedType -> text(type.name)
         is TolkType.Function -> {
             printTolkType(type.inputType)
             text(" -> ")
             printTolkType(type.returnType)
         }
+
         is TolkType.HoleType -> {
             text("_")
         }
+
         is TolkType.Tensor -> {
             text("(")
             val iterator = type.elements.iterator()
@@ -29,6 +32,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
             }
             text(")")
         }
+
         is TolkType.TypedTuple -> {
             text("[")
             val iterator = type.elements.iterator()
@@ -41,6 +45,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
             }
             text("]")
         }
+
         is TolkType.UnionType -> {
             val iterator = type.elements.iterator()
             while (iterator.hasNext()) {

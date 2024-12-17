@@ -22,7 +22,7 @@ class TolkUnresolvedReferenceInspection : TolkInspectionBase() {
             if (resolved != null) return
             val id = o.identifier
             val range = TextRange.from(id.startOffsetInParent, id.textLength)
-            if(InjectedLanguageManager.getInstance(o.project).isInjectedFragment(o.containingFile)) return
+            if (InjectedLanguageManager.getInstance(o.project).isInjectedFragment(o.containingFile)) return
             registerProblem(o, range)
         }
 
@@ -33,7 +33,7 @@ class TolkUnresolvedReferenceInspection : TolkInspectionBase() {
             val str = o.stringLiteral ?: return
             val rawStr = str.rawString ?: return
             val range = TextRange.from(rawStr.startOffsetInParent, rawStr.textLength)
-            if(InjectedLanguageManager.getInstance(o.project).isInjectedFragment(o.containingFile)) return
+            if (InjectedLanguageManager.getInstance(o.project).isInjectedFragment(o.containingFile)) return
             registerProblem(str, range)
         }
 

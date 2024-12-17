@@ -18,9 +18,7 @@ class TolkSdkField(
         childComponent.selectedIndex = 0
     }
 
-    private class KeyEventAwareComboBox : ComboBox<TolkSdkRef>() {
-
-    }
+    private class KeyEventAwareComboBox : ComboBox<TolkSdkRef>()
 }
 
 class TolkSdkRenderer(

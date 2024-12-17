@@ -1,4 +1,3 @@
-
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -13,7 +12,7 @@ dependencies {
         val version = providers.gradleProperty("platformVersion")
         intellijIdeaCommunity(version)
     }
-    compileOnly(project(":modules:util"))
+    compileOnly(project(":util"))
 }
 
 val generateAsmParser = task<GenerateParserTask>("generateAsmParser") {

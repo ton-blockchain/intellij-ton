@@ -102,7 +102,7 @@ class MarkdownNode(
 
                 MarkdownElementTypes.CODE_BLOCK,
                 MarkdownElementTypes.CODE_FENCE,
-                -> {
+                    -> {
                     sb.trimEnd()
                     var language: Language = TolkLanguage
                     val contents = StringBuilder()
@@ -135,7 +135,7 @@ class MarkdownNode(
 
                 MarkdownElementTypes.SHORT_REFERENCE_LINK,
                 MarkdownElementTypes.FULL_REFERENCE_LINK,
-                -> {
+                    -> {
                     val linkLabelNode = node.child(MarkdownElementTypes.LINK_LABEL)
                     val linkLabelContent = linkLabelNode?.children
                         ?.dropWhile { it.type == MarkdownTokenTypes.LBRACKET }
@@ -187,13 +187,13 @@ class MarkdownNode(
                 MarkdownTokenTypes.EXCLAMATION_MARK,
                 GFMTokenTypes.CHECK_BOX,
                 GFMTokenTypes.GFM_AUTOLINK,
-                -> {
+                    -> {
                     sb.append(nodeText)
                 }
 
                 MarkdownTokenTypes.CODE_LINE,
                 MarkdownTokenTypes.CODE_FENCE_CONTENT,
-                -> {
+                    -> {
                     sb.appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet(
                         when (DocumentationSettings.isHighlightingOfCodeBlocksEnabled()) {
                             true -> DocumentationSettings.InlineCodeHighlightingMode.SEMANTIC_HIGHLIGHTING

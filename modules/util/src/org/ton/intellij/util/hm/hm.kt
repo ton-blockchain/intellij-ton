@@ -14,6 +14,7 @@ sealed class HMType {
             return body.substitute(HMSubstitution(freshSubs))
         }
     } // Polymorphic type
+
     data class Tuple(val elements: List<HMType>) : HMType() // Tuple type
     data class Tensor(val elements: List<HMType>) : HMType() // Tuple type
 
@@ -33,6 +34,7 @@ sealed class HMType {
                     val s2 = unify(substitute(t1.to, s1), substitute(t2.to, s1))
                     s1 + s2
                 }
+
                 t1 is Tensor && t2 is Tensor -> {
                     if (t1.elements.size != t2.elements.size)
                         throw IllegalArgumentException("Cannot unify tuples of different sizes: $t1 and $t2")
@@ -40,6 +42,7 @@ sealed class HMType {
                         acc + unify(substitute(e1, acc), substitute(e2, acc))
                     }
                 }
+
                 t1 is Tuple && t2 is Tuple -> {
                     if (t1.elements.size != t2.elements.size)
                         throw IllegalArgumentException("Cannot unify tuples of different sizes: $t1 and $t2")
@@ -47,6 +50,7 @@ sealed class HMType {
                         acc + unify(substitute(e1, acc), substitute(e2, acc))
                     }
                 }
+
                 else -> throw UnificationException(t1, t2)
             }
         }
@@ -58,6 +62,7 @@ sealed class HMType {
                 substitute(type.from, sub),
                 substitute(type.to, sub)
             )
+
             is Tuple -> Tuple(type.elements.map { substitute(it, sub) })
             is Tensor -> Tensor(type.elements.map { substitute(it, sub) })
             is Const<*> -> type
@@ -147,6 +152,7 @@ class HindleyMilner {
             val types = inferred.map { (_, type) -> type.substitute(substitution) }
             substitution to HMType.Tuple(types)
         }
+
         is HMExpr.Tensor -> {
             val inferred = expr.elements.map { infer(env, it) }
             val substitution = inferred.fold(HMSubstitution()) { acc, (sub, _) -> acc + sub }
@@ -170,8 +176,8 @@ sealed class HMExpr {
 }
 
 fun main() {
-    val env = mutableMapOf<String, HMType>()
-    val hm = HindleyMilner()
+    mutableMapOf<String, HMType>()
+    HindleyMilner()
 
     /*
     fun test<T>(a: (int, T), b: bool) -> (T, bool)
@@ -179,7 +185,7 @@ fun main() {
     val (a: int, b) = test((int, int), bool)
     */
 
-   val func = HMType.ForAll(
+    HMType.ForAll(
         listOf("T"),
         HMType.Func(
             HMType.Tensor(

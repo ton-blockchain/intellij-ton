@@ -8,12 +8,16 @@ import org.ton.intellij.tolk.psi.TolkIncludeDefinition
 
 class TolkIncludeDefinitionStub(
     parent: StubElement<*>,
-    elementType: IStubElementType<*,*>,
+    elementType: IStubElementType<*, *>,
     path: StringRef
 ) : StubBase<TolkIncludeDefinition>(
     parent, elementType
 ) {
-    constructor(parent: StubElement<*>, elementType: IStubElementType<*, *>, path: String) : this(parent, elementType, StringRef.fromString(path))
+    constructor(parent: StubElement<*>, elementType: IStubElementType<*, *>, path: String) : this(
+        parent,
+        elementType,
+        StringRef.fromString(path)
+    )
 
     private val _path: StringRef = path
 

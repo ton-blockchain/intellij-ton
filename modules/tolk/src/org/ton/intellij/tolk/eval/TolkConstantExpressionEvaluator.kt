@@ -8,9 +8,9 @@ import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.util.*
 import org.ton.intellij.util.exception.ConstantEvaluationOverflowException
 import org.ton.intellij.util.recursionGuard
-import org.ton.intellij.util.*
 import java.math.BigInteger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap

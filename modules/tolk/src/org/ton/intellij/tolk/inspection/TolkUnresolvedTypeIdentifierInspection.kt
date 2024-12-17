@@ -3,10 +3,8 @@ package org.ton.intellij.tolk.inspection
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
-import com.intellij.openapi.util.TextRange
 import org.ton.intellij.tolk.psi.TolkTypeIdentifier
 import org.ton.intellij.tolk.psi.TolkVisitor
-import org.ton.intellij.tolk.psi.impl.TolkTypeIdentifierImpl
 
 class TolkUnresolvedTypeIdentifierInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(

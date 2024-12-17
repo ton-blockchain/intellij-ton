@@ -61,7 +61,7 @@ abstract class TolkTypeIdentifierMixin(node: ASTNode) : ASTWrapperPsiElement(nod
                         }
                     }
                 }
-                val project = myElement.project
+                myElement.project
 //                TolkTypeDefIndex.findElementsByName(
 //                    project,
 //                    typeParameterName,

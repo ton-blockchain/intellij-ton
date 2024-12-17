@@ -3,7 +3,6 @@ package org.ton.intellij.tolk.psi
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.vfs.VfsUtil
-import com.intellij.openapi.vfs.findFile
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.util.CachedValueProvider

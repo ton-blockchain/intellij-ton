@@ -2,30 +2,22 @@ package org.ton.intellij.tolk.eval
 
 import org.apache.commons.codec.binary.Hex
 import org.ton.intellij.tolk.psi.TolkLiteralExpression
-import org.ton.intellij.tolk.type.ty.*
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.util.zip.CRC32
 
-sealed interface TolkValue {
-}
+sealed interface TolkValue
 
-object TolkUnknownValue : TolkValue {
-
-}
+object TolkUnknownValue : TolkValue
 
 data class TolkIntValue(val value: BigInteger) : TolkValue {
     override fun toString(): String = value.toString()
 
 }
 
-data class TolkTupleValue(val values: List<TolkValue?>) : TolkValue {
+data class TolkTupleValue(val values: List<TolkValue?>) : TolkValue
 
-}
-
-data class TolkTensorValue(val values: List<TolkValue?>) : TolkValue {
-
-}
+data class TolkTensorValue(val values: List<TolkValue?>) : TolkValue
 
 @OptIn(ExperimentalUnsignedTypes::class)
 val TolkLiteralExpression.value: TolkValue

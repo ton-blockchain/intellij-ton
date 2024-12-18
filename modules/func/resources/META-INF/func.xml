@@ -147,7 +147,7 @@
     <actions>
         <action id="NewFunc" class="org.ton.intellij.func.action.file.FuncCreateFileAction"
                 text="FunC File" description="Create new FunC file">
-            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewXml"/>
+            <add-to-group group-id="NewGroup"/>
         </action>
     </actions>
 </idea-plugin>

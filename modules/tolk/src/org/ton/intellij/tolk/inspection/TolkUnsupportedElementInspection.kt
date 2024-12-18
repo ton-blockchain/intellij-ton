@@ -4,10 +4,7 @@ import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import org.ton.intellij.tolk.TolkBundle
-import org.ton.intellij.tolk.psi.TolkStruct
-import org.ton.intellij.tolk.psi.TolkTypeDef
-import org.ton.intellij.tolk.psi.TolkUnionType
-import org.ton.intellij.tolk.psi.TolkVisitor
+import org.ton.intellij.tolk.psi.*
 
 class TolkUnsupportedElementInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(
@@ -22,17 +19,25 @@ class TolkUnsupportedElementInspection : TolkInspectionBase() {
             )
         }
 
+        override fun visitAsExpression(o: TolkAsExpression) {
+            reportProblem(o)
+        }
+
+        override fun visitTypeArgumentList(o: TolkTypeArgumentList) {
+            reportProblem(o)
+        }
+
         override fun visitTypeDef(o: TolkTypeDef) {
-            holder.registerProblem(
-                o,
-                TolkBundle.message("inspection.unsupported_element.description"),
-                ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
-            )
+            reportProblem(o)
         }
 
         override fun visitStruct(o: TolkStruct) {
+            reportProblem(o)
+        }
+
+        fun reportProblem(psiElement: TolkElement) {
             holder.registerProblem(
-                o,
+                psiElement,
                 TolkBundle.message("inspection.unsupported_element.description"),
                 ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
             )

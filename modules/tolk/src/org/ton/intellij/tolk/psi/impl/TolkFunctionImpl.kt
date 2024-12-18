@@ -25,6 +25,8 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
 
     override fun toString(): String = "TolkFunction($containingFile - $name)"
 
+    override fun getBaseIcon(): Icon? = TolkIcons.FUNCTION
+
     override val type: TolkType?
         get() = CachedValuesManager.getCachedValue(this) {
             val parameters = parameterList?.parameterList?.map { parameter ->

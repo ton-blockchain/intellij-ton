@@ -2,7 +2,6 @@ package org.ton.intellij.tolk.psi.impl
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
-import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
@@ -17,7 +16,7 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
 
     override fun getReferences(): Array<TolkReference> {
 //        if (isVariableDefinition()) return EMPTY_ARRAY
-        return arrayOf(TolkReference(this, TextRange(0, textLength)))
+        return arrayOf(TolkReference(this, identifier.textRangeInParent))
     }
 
     override fun getReference(): TolkReference? = references.firstOrNull()
@@ -37,7 +36,6 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
         private val EMPTY_ARRAY = emptyArray<TolkReference>()
     }
 }
-
 
 //fun TolkReferenceExpression.isVariableDefinition(): Boolean = CachedValuesManager.getCachedValue(this) {
 //    val result = !PsiTreeUtil.treeWalkUp(this, null) { scope, lastParent ->

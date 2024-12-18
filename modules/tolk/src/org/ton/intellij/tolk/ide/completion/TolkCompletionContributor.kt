@@ -12,6 +12,7 @@ import org.ton.intellij.tolk.psi.*
 class TolkCompletionContributor : CompletionContributor() {
     init {
         extend(TolkMacroCompletionProvider)
+        extend(TolkTypeCompletionProvider)
         extend(
             CompletionType.BASIC,
             inBlock(),

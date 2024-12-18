@@ -9,6 +9,7 @@ import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.patterns.ElementPattern
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.TolkIcons
@@ -32,24 +33,57 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         val element = position.parent as TolkReferenceExpression
         val file = element.containingFile.originalFile as? TolkFile ?: return
 
-        val isDotCall = element.prevSibling?.elementType == TolkElementTypes.DOT
-//        if (isDotCall) {
-//            val dotExpression = element.parent?.parent as? TolkDotExpression
-//            val firstArgType = dotExpression?.expressionList?.firstOrNull()?.type
-//            val filter: (element: TolkTypedElement) -> (Boolean) = {
-//                var input = (it.type as? TolkType.Function)?.inputType
-//                input = if (input is TolkType.Tensor) {
-//                    input.elements.firstOrNull()
-//                } else input
-//                if (input != null)  {
-//                    input == firstArgType
-//                } else {
-//                    true
-//                }
-//            }
-//            if (firstArgType != null)
-//        }
+        PsiTreeUtil.treeWalkUp(element, null) { scope, lastParent ->
+            if (scope is TolkFunction) {
+                scope.parameterList?.parameterList?.forEach {
+                    result.addElement(
+                        it.toLookupElementBuilder(TolkCompletionContext(element), true)
+                    )
+                }
+            }
+            if (scope is TolkCatch && lastParent is TolkBlockStatement) {
+                scope.catchParameterList.forEach { catchParameter ->
+                    result.addElement(
+                        catchParameter.toLookupElementBuilder(TolkCompletionContext(element), true)
+                    )
+                }
+            }
+            if (scope is TolkInferenceContextOwner) {
+                return@treeWalkUp false
+            }
+            if (scope is TolkBlockStatement) {
+                scope.statementList.forEach { statement ->
+                    if (statement == lastParent) return@treeWalkUp true
+                    if (statement is TolkVarStatement) {
+                        fun addVarDefinition(varDefinition: TolkVarDefinition?) {
+                            when (varDefinition) {
+                                is TolkVar -> {
+                                    result.addElement(
+                                        varDefinition.toLookupElementBuilder(TolkCompletionContext(element), true)
+                                    )
+                                }
+                                is TolkVarTuple -> {
+                                    varDefinition.varDefinitionList.forEach {
+                                        addVarDefinition(it)
+                                    }
+                                }
+                                is TolkVarTensor -> {
+                                    varDefinition.varDefinitionList.forEach {
+                                        addVarDefinition(it)
+                                    }
+                                }
+                            }
+                        }
 
+                        addVarDefinition(statement.varDefinition)
+                    }
+                }
+            }
+
+            true
+        }
+
+        val isDotCall = element.prevSibling?.elementType == TolkElementTypes.DOT
         val ctx = TolkCompletionContext(element)
         if (!isDotCall) {
             val function = element.parentOfType<TolkFunction>()

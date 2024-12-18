@@ -80,6 +80,7 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         element.functionBody?.blockStatement ?: return
         val parameters = element.parameterList ?: return
         val returnType = (element.type as? TolkType.Function)?.returnType ?: return
+        if (returnType == TolkType.Unit) return
 
         sink.addPresentation(
             position = InlineInlayPosition(parameters.endOffset, true),

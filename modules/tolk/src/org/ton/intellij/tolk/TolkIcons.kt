@@ -9,6 +9,6 @@ object TolkIcons {
     val PARAMETER = AllIcons.Nodes.Parameter
     val CONSTANT = AllIcons.Nodes.Constant
     val VARIABLE = AllIcons.Nodes.Variable
-    val GLOBAL_VARIABLE = AllIcons.Nodes.Gvariable
+    val GLOBAL_VARIABLE = IconLoader.getIcon("/icons/globalVariable.svg", TolkIcons::class.java)
     val RECURSIVE_CALL = AllIcons.Gutter.RecursiveMethod
 }

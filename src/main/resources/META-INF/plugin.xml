@@ -12,7 +12,7 @@
     <xi:include href="/META-INF/func.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/tact.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/tlb.xml" xpointer="xpointer(/idea-plugin/*)"/>
-    <xi:include href="../../../../modules/fift/resources/META-INF/fift.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <xi:include href="/META-INF/fift.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/boc.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/tolk.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <depends>com.intellij.modules.platform</depends>

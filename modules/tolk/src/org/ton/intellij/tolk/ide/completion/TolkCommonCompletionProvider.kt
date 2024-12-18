@@ -8,7 +8,6 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.patterns.ElementPattern
-import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import com.intellij.util.ProcessingContext
@@ -17,11 +16,11 @@ import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.type.TolkType
 import org.ton.intellij.util.parentOfType
+import org.ton.intellij.util.psiElement
 
-// TODO fix apply expressions
 object TolkCommonCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
-        psiElement().withParent(psiElement<TolkReferenceExpression>())
+        psiElement<PsiElement>().withParent(psiElement<TolkReferenceExpression>())
 
     override fun addCompletions(
         parameters: CompletionParameters,

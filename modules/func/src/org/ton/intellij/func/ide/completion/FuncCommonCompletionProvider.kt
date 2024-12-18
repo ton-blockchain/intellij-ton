@@ -7,7 +7,6 @@ import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.patterns.ElementPattern
-import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.PsiElementProcessor
 import com.intellij.psi.util.PsiTreeUtil
@@ -22,11 +21,12 @@ import org.ton.intellij.func.type.ty.FuncTyAtomic
 import org.ton.intellij.func.type.ty.FuncTyTensor
 import org.ton.intellij.func.type.ty.FuncTyUnit
 import org.ton.intellij.util.processAllKeys
+import org.ton.intellij.util.psiElement
 import java.util.*
 
 object FuncCommonCompletionProvider : FuncCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
-        psiElement().withParent(psiElement<FuncReferenceExpression>())
+        psiElement<PsiElement>().withParent(psiElement<FuncReferenceExpression>())
 
     override fun addCompletions(
         parameters: CompletionParameters,

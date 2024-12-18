@@ -16,6 +16,8 @@
         <lang.braceMatcher language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkBraceMatcher"/>
         <lang.quoteHandler language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkQuoteHandler"/>
         <lang.foldingBuilder language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkFoldingBuilder"/>
+        <lang.psiStructureViewFactory language="Tolk"
+                                      implementationClass="org.ton.intellij.tolk.ide.structure.TolkPsiStructureViewFactory"/>
         <lang.findUsagesProvider language="Tolk"
                                  implementationClass="org.ton.intellij.tolk.ide.TolkFindUsagesProvider"/>
         <lang.implementationTextSelectioner language="Tolk"

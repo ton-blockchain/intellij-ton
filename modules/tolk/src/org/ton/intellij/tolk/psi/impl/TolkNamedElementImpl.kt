@@ -7,6 +7,7 @@ import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.TolkNamedStub
+import org.ton.intellij.tolk.type.TolkType
 import javax.swing.Icon
 
 abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementImpl<T>, TolkNamedElement {
@@ -26,11 +27,27 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
 
     override fun getPresentation(): ItemPresentation? {
         return object : ItemPresentation {
-            override fun getPresentableText(): String? = name
-
-            override fun getLocationString(): String {
-                val fileName = containingFile.name
-                return "in $fileName"
+            override fun getPresentableText(): String? = when(this@TolkNamedElementImpl) {
+                is TolkFunction -> buildString {
+                    append(name)
+                    append("(")
+                    parameterList?.parameterList?.joinTo(this) { parameter ->
+                        parameter.type?.toString() ?: "_"
+                    }
+                    append("): ")
+                    append((type as? TolkType.Function)?.returnType ?: "_")
+                }
+                is TolkConstVar -> buildString {
+                    append(name)
+                    append(": ")
+                    append(type ?: "_")
+                }
+                is TolkGlobalVar -> buildString {
+                    append(name)
+                    append(": ")
+                    append(type ?: "_")
+                }
+                else -> name
             }
 
             override fun getIcon(unused: Boolean): Icon? = when (this@TolkNamedElementImpl) {

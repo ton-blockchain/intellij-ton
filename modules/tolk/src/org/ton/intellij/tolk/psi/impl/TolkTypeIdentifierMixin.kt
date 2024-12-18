@@ -24,6 +24,7 @@ abstract class TolkTypeIdentifierMixin(node: ASTNode) : ASTWrapperPsiElement(nod
             "continuation" -> TolkType.Continuation
             "tuple" -> TolkType.Tuple
             "void" -> TolkType.Unit
+            "bool" -> TolkType.Bool
             else -> null
         }
 

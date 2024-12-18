@@ -93,6 +93,7 @@ class TolkInferenceContext(
             is TolkPrefixExpression -> element.type
             is TolkLiteralExpression -> element.type
             is TolkUnitExpression -> TolkType.Unit
+            is TolkAsExpression -> element.type
             else -> expressionTypes[element]
         }
     }
@@ -438,6 +439,7 @@ class TolkInferenceWalker(
             is TolkReferenceExpression -> infer(element)
             is TolkLiteralExpression -> element.type
             is TolkUnitExpression -> TolkType.Unit
+            is TolkAsExpression -> element.type
             else -> expectedType
         }
     }

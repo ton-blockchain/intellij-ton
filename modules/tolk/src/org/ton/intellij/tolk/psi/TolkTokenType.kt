@@ -48,7 +48,7 @@ val TOLK_KEYWORDS = tokenSetOf(
     TolkElementTypes.BREAK_KEYWORD,
     TolkElementTypes.CONTINUE_KEYWORD,
     TolkElementTypes.NULL_KEYWORD,
-    TolkElementTypes.BOOL_KEYWORD,
     TolkElementTypes.ENUM_KEYWORD,
-    TolkElementTypes.STRUCT_KEYWORD
+    TolkElementTypes.STRUCT_KEYWORD,
+    TolkElementTypes.AS_KEYWORD
 )

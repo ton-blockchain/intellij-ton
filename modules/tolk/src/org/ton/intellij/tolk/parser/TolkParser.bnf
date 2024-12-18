@@ -91,6 +91,7 @@
             CATCH_KEYWORD               = 'catch'
             IF_KEYWORD                  = 'if'
             ELSE_KEYWORD                = 'else'
+            AS_KEYWORD                  = 'as'
 
             TYPE_KEYWORD                = 'type'
             TRUE_KEYWORD                = 'true'
@@ -101,7 +102,6 @@
             AUTO_KEYWORD                = 'auto'
             VOID_KEYWORD                = 'void'
             VAL_KEYWORD                 = 'val'
-            BOOL_KEYWORD                = 'bool'
             ENUM_KEYWORD                = 'enum'
             STRUCT_KEYWORD              = 'struct'
             EXPORT_KEYWORD              = 'export'
@@ -397,6 +397,7 @@ CatchParameter ::= IDENTIFIER {
 }
 
 Expression ::= AssignBinExpression
+    | AsExpression
     | TernaryExpression
     | LogicalBinExpression
     | BitwiseBinExpression
@@ -509,6 +510,10 @@ CallExpression ::= Expression ArgumentList {
     rightAssociative = true
     mixin = "org.ton.intellij.tolk.psi.impl.TolkCallExpressionMixin"
 }
+AsExpression ::= Expression 'as' TypeExpression {
+    pin = 2
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkAsExpressionMixin"
+}
 ArgumentList ::= '(' [<<list_with_recover Argument>>] ')' {
     pin = 1
 }
@@ -561,13 +566,25 @@ LiteralExpression ::= INTEGER_LITERAL | BoolExpression | NullExpression | String
     mixin="org.ton.intellij.tolk.psi.impl.TolkLiteralExpressionMixin"
 }
 
-ReferenceExpression ::= IDENTIFIER {
+ReferenceExpression ::= IDENTIFIER TypeArgumentList? {
     mixin="org.ton.intellij.tolk.psi.impl.TolkReferenceExpressionMixin"
     implements= [
         "org.ton.intellij.tolk.psi.TolkNamedElement"
         "org.ton.intellij.tolk.psi.TolkTypedElement"
     ]
 }
+
+TypeArgumentList ::= '<' TypeArgumentElements '>' {
+    pin = 1
+}
+private TypeArgumentElements ::= <<comma_separated_list TypeArgument>> {
+    recoverWhile=TypeArgumentList_recovery
+}
+private TypeArgumentList_recovery ::= !('>'|'('|')'|';')
+private TypeArgument ::= TypeExpression {
+    recoverWhile=TypeArgument_recovery
+}
+private TypeArgument_recovery ::= !(','|'>'|'('|';'|StatementFirst)
 
 ParameterList ::= FunctionParameterList_start ')' {
     pin = 1

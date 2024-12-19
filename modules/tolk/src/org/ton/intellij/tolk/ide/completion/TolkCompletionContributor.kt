@@ -28,26 +28,8 @@ class TolkCompletionContributor : CompletionContributor() {
                 "try"
             )
         )
-        extend(
-            CompletionType.BASIC,
-            psiElement().withParent(TolkParameter::class.java),
-            TolkKeywordCompletionProvider(
-                CONTEXT_KEYWORD_PRIORITY,
-                keywords = funcPrimitiveTypes
-            )
-        )
-        extend(
-            CompletionType.BASIC,
-            or(
-                psiElement().inside(TolkTupleType::class.java),
-                psiElement().inside(TolkTensorType::class.java),
-                psiElement().inside(TolkParenType::class.java),
-            ), TolkKeywordCompletionProvider(
-                CONTEXT_KEYWORD_PRIORITY,
-                keywords = funcPrimitiveTypes,
-                insertSpace = false
-            )
-        )
+        extend(TolkFunCompletionProvider)
+        extend(TolkParameterCompletionProvider)
         extend(
             CompletionType.BASIC,
             psiElement().withParent(

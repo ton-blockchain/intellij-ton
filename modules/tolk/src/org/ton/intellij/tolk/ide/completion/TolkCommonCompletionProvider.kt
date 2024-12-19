@@ -123,9 +123,11 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 }
             }
             file.functions.forEach {
+                if (!isDotCall || (it.parameterList?.parameterList?.size ?: 0) >= 1) {
                 result.addElement(
                     it.toLookupElementBuilder(ctx, true)
                 )
+                    }
             }
         }
 
@@ -144,7 +146,9 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                         }
                     }
                     tolkFile.functions.forEach {
-                        result.addElement(it.toLookupElementBuilder(ctx, isCommon))
+                        if (!isDotCall || (it.parameterList?.parameterList?.size ?: 0) >= 1) {
+                            result.addElement(it.toLookupElementBuilder(ctx, isCommon))
+                        }
                     }
                 }
                 true

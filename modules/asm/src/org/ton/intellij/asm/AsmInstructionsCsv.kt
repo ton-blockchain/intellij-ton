@@ -13,9 +13,7 @@ object AsmInstructionsCsv {
             split[6],
             split[7],
             split[8]
-        ).also {
-            println("parsed: $it")
-        }
+        )
     }
 
     data class Instruction(

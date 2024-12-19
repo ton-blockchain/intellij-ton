@@ -10,7 +10,7 @@ class AsmCompletionContributor : CompletionContributor() {
     init {
         extend(
             CompletionType.BASIC,
-            PlatformPatterns.psiElement().withElementType(AsmElementTypes.UNKNOWN_IDENTIFIER),
+            PlatformPatterns.psiElement().withElementType(AsmElementTypes.WORD),
             object : CompletionProvider<CompletionParameters>() {
                 override fun addCompletions(
                     parameters: CompletionParameters,

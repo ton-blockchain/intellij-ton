@@ -6,13 +6,17 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.ElementPattern
+import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
+import com.intellij.psi.TokenType
 import com.intellij.util.ProcessingContext
-import org.ton.intellij.tolk.psi.TolkPsiPattern
+import org.ton.intellij.tolk.psi.TolkFile
 
 object TolkMacroCompletionProvider : TolkCompletionProvider(), DumbAware {
     override val elementPattern: ElementPattern<out PsiElement> =
-        TolkPsiPattern.macroPattern()
+        psiElement().withParent(
+            psiElement().withElementType(TokenType.ERROR_ELEMENT).withParent(TolkFile::class.java)
+        )
 
     override fun addCompletions(
         parameters: CompletionParameters,

@@ -182,12 +182,14 @@ class TolkInferenceWalker(
         element.constVars.forEach { constVar ->
             symbolDefinitions[constVar.name?.removeSurrounding("`") ?: return@forEach] = Symbol(constVar)
         }
-        element.includeDefinitions.forEach {
-            val resolvedFile = it.resolveFile(project)
-            if (resolvedFile != null) {
-                val resolvedTolkFile = resolvedFile.findPsiFile(element.project) as? TolkFile
-                if (resolvedTolkFile != null) {
-                    inferFile(resolvedTolkFile, false)
+        if (useIncludes) {
+            element.includeDefinitions.forEach {
+                val resolvedFile = it.resolveFile(project)
+                if (resolvedFile != null) {
+                    val resolvedTolkFile = resolvedFile.findPsiFile(element.project) as? TolkFile
+                    if (resolvedTolkFile != null) {
+                        inferFile(resolvedTolkFile, false)
+                    }
                 }
             }
         }

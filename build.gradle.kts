@@ -66,6 +66,7 @@ dependencies {
         pluginModule(implementation(project(":boc")))
         pluginModule(implementation(project(":tlb")))
         pluginModule(implementation(project(":fift")))
+        pluginModule(implementation(project(":blueprint")))
     }
 }
 

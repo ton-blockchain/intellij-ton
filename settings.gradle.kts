@@ -29,6 +29,7 @@ module("fc2tolk")
 module("boc")
 module("tlb")
 module("fift")
+module("blueprint")
 
 fun module(name: String) {
     include("$name")

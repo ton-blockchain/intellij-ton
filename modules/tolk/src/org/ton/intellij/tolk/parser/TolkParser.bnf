@@ -574,9 +574,7 @@ ReferenceExpression ::= IDENTIFIER TypeArgumentList? {
     ]
 }
 
-TypeArgumentList ::= '<' TypeArgumentElements '>' {
-    pin = 1
-}
+TypeArgumentList ::= '<' TypeArgumentElements '>'
 private TypeArgumentElements ::= <<comma_separated_list TypeArgument>> {
     recoverWhile=TypeArgumentList_recovery
 }

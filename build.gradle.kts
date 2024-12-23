@@ -67,6 +67,7 @@ dependencies {
         pluginModule(implementation(project(":tlb")))
         pluginModule(implementation(project(":fift")))
         pluginModule(implementation(project(":blueprint")))
+        pluginModule(implementation(project(":fc2tolk-js")))
     }
 }
 

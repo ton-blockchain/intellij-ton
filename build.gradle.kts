@@ -44,6 +44,15 @@ allprojects {
             java.srcDirs("gen")
             resources.srcDir("resources")
         }
+        test {
+            kotlin.srcDir("test")
+            resources.srcDir("testResources")
+        }
+    }
+    tasks {
+        test {
+            useJUnitPlatform()
+        }
     }
 }
 

@@ -4,16 +4,20 @@ import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
-import org.ton.intellij.tlb.resolve.TlbNamedRefReference
 
 interface TlbElement : PsiElement
 abstract class TlbElementImpl(node: ASTNode) : ASTWrapperPsiElement(node)
 
-interface TlbNamedElement : TlbElement, PsiNameIdentifierOwner
+interface TlbNamedElement : TlbElement, PsiNameIdentifierOwner {
+    val identifier: PsiElement?
+
+    override fun getNameIdentifier(): PsiElement? = identifier
+}
+
 
 abstract class TlbNamedElementImpl(node: ASTNode) : TlbElementImpl(node), TlbNamedElement {
-    override fun getNameIdentifier(): PsiElement? = findChildByType(TlbTypes.IDENTIFIER)
     override fun getName(): String? = nameIdentifier?.text
+
     override fun setName(name: String): PsiElement = apply {
         nameIdentifier?.replace(project.tlbPsiFactory.createIdentifier(name))
     }
@@ -21,6 +25,18 @@ abstract class TlbNamedElementImpl(node: ASTNode) : TlbElementImpl(node), TlbNam
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
 }
 
-abstract class TlbNamedRefMixin(node: ASTNode) : TlbNamedElementImpl(node), TlbNamedRef {
-    override fun getReference() = TlbNamedRefReference(this)
+interface TlbFieldListOwner : TlbElement {
+    val fieldList: TlbFieldList?
+}
+
+//interface TlbNaturalTypeExpression : TlbTypeExpression {
+//
+//}
+
+fun TlbTypeExpression.unwrap(): TlbTypeExpression? {
+    var current: TlbTypeExpression? = this
+    while (current is TlbParenTypeExpression) {
+        current = current.typeExpression
+    }
+    return current
 }

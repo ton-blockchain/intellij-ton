@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementResolveResult
+import com.intellij.psi.util.elementType
 import com.intellij.util.containers.OrderedSet
 import org.ton.intellij.tolk.diagnostics.TolkDiagnostic
 import org.ton.intellij.tolk.psi.*
@@ -12,6 +13,7 @@ import org.ton.intellij.tolk.psi.impl.resolveFile
 import org.ton.intellij.tolk.type.TolkType
 import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.recursionGuard
+import org.ton.intellij.util.tokenSetOf
 import java.util.*
 
 val TolkElement.inference: TolkInferenceResult?
@@ -441,17 +443,31 @@ class TolkInferenceWalker(
             is TolkReferenceExpression -> infer(element)
             is TolkLiteralExpression -> element.type
             is TolkUnitExpression -> TolkType.Unit
-            is TolkAsExpression -> element.type
+            is TolkAsExpression -> infer(element)
             else -> expectedType
         }
     }
 
+    private val boolOperators = tokenSetOf(
+        TolkElementTypes.ANDAND,
+        TolkElementTypes.OROR,
+        TolkElementTypes.EQEQ,
+        TolkElementTypes.GEQ,
+        TolkElementTypes.LEQ,
+        TolkElementTypes.GT,
+        TolkElementTypes.LT,
+    )
+
     private fun infer(element: TolkBinExpression): TolkType? {
-        val type = element.type
-        element.right?.let { expression ->
-            infer(expression, type)
+        var expectedType: TolkType? = null
+        val operator = element.binaryOp.firstChild.elementType
+        if (operator in boolOperators) {
+            expectedType = TolkType.Bool
         }
-        infer(element.left, type)
+        val type = element.right?.let { expression ->
+            infer(expression, expectedType)
+        }
+        infer(element.left, expectedType)
         return type
     }
 
@@ -600,6 +616,11 @@ class TolkInferenceWalker(
             ctx.setType(found.element, type)
         }
         return ctx.setType(element, type)
+    }
+
+    private fun infer(element: TolkAsExpression): TolkType? {
+        infer(element.expression)
+        return element.type
     }
 
     private fun resolveSymbol(name: String): Symbol? {

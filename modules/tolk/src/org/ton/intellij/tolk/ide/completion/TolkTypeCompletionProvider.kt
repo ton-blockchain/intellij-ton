@@ -16,7 +16,8 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         psiElement<PsiElement>().withParent(psiElement<TolkTypeIdentifier>())
 
     private val primitiveTypes = listOf(
-        "int", "slice", "cell", "builder", "tuple", "continuation", "bool"
+        "int", "slice", "cell", "builder", "tuple", "bool",
+//        "continuation"
     )
 
     override fun addCompletions(

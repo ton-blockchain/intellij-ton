@@ -553,10 +553,14 @@ private TensorExpressionValue ::= ',' Expression {
 }
 private TensorExpressionValue_recovery ::= !(','|')'|';')
 
-TupleExpression ::= '[' [ <<comma_separated_list Expression>> ] ']' {
+TupleExpression ::= '[' [ <<comma_separated_list TupleElement>> ] ']' {
     pin=1
     extends=Expression
 }
+private TupleElement ::= Expression {
+    recoverWhile=TupleElement_recovery
+}
+private TupleElement_recovery ::= !(','|']'|';')
 
 private IntegerExpression ::= INTEGER_LITERAL
 private BoolExpression ::= 'true' | 'false'

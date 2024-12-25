@@ -6,11 +6,11 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import org.ton.intellij.tolk.psi.TolkReferenceExpression
+import org.ton.intellij.tolk.psi.TolkNamedElement
 
 // TODO: fix apply expressions
 class RenameUnderscoreFix(
-    val element: TolkReferenceExpression
+    val element: TolkNamedElement
 ) : LocalQuickFixAndIntentionActionOnPsiElement(element) {
     override fun getFamilyName(): String =
         CodeInsightBundle.message("rename.element.family")
@@ -25,8 +25,6 @@ class RenameUnderscoreFix(
         startElement: PsiElement,
         endElement: PsiElement
     ) {
-//        val expression = TolkPsiFactory[project].createExpression("var (_) = 1") as TolkBinExpression
-//        val newElement = ((expression.left as TolkApplyExpression).right as TolkTensorExpression).expressionList.first()
-//        startElement.replace(newElement)
+        element.setName("_")
     }
 }

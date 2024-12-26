@@ -64,7 +64,7 @@ fun TlbConstructor.print(
     skipTag: Boolean = false,
     implicitBraces: Boolean = true,
 ) {
-    appendable.append(identifier.text)
+    appendable.append(constructorTag.identifier.text)
     if (!skipTag) {
         val constructorTag = constructorTag?.text
         if (constructorTag == null) {
@@ -82,13 +82,9 @@ fun TlbConstructor.print(
     }
     fieldList.print(appendable, implicitBraces)
     appendable.append(" = ")
-    val combinator = combinator
-    if (combinator == null) {
-        appendable.append("(invalid-constructor-combinator)")
-        return
-    }
-    appendable.append(combinator.identifier.text)
-    val params = combinator.paramList?.typeExpressionList ?: emptyList()
+
+    appendable.append(identifier?.text)
+    val params = paramList?.typeExpressionList ?: emptyList()
     params.forEach {
         appendable.append(" ")
         if (it is TlbNegatedTypeExpression && it.typeExpression !is TlbIntTypeExpression) {

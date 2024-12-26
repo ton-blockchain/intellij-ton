@@ -1,6 +1,7 @@
 package org.ton.intellij.tlb
 
 import org.ton.intellij.tlb.psi.TlbConstructor
+import org.ton.intellij.tlb.psi.TlbConstructorTag
 import org.ton.intellij.tlb.psi.printToString
 import java.util.zip.CRC32
 
@@ -53,4 +54,34 @@ fun TlbConstructor.computeTag(): ConstructorTag? {
         println("crc32('$normalized') = ${value.toHexString()}")
         ConstructorTag((value.toLong() shl 32) or 0x80000000)
     }
+}
+
+fun TlbConstructorTag.toConstructorTag(): ConstructorTag {
+    val str = binaryTag?.text ?: hexTag?.text
+    var n = str?.length ?: 0
+    if (str == null || n <= 1) {
+        return ConstructorTag(0)
+    }
+    var bits = 0L
+    var value = 0L
+    if (str[0] == '#') {
+        for (i in 1 until n) {
+            var c = str[i]
+            if (c =='_') {
+                break
+            }
+            c = when (c) {
+                in '0'..'9' -> c - '0'
+                in 'a'..'f' -> c - 'a' + 10
+                in 'A'..'F' -> c - 'A' + 10
+                else -> return ConstructorTag(0)
+            }.toChar()
+            if (bits > 60) {
+                return ConstructorTag(0)
+            }
+            value = (value shl 4) or c.toLong()
+        }
+    }
+
+    return ConstructorTag(value)
 }

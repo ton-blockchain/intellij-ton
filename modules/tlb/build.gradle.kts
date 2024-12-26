@@ -13,6 +13,7 @@ dependencies {
         val version = providers.gradleProperty("platformVersion")
         intellijIdeaCommunity(version)
         testFramework(TestFrameworkType.Platform)
+        bundledPlugin("com.intellij.dev")
     }
     compileOnly(project(":util"))
     testImplementation(kotlin("test"))

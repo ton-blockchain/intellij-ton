@@ -66,20 +66,24 @@ private Constructor_with_recovery ::= !(<<eof>>) Constructor {
 }
 private Constructor_recovery ::= !('!'|IDENTIFIER)
 
-Constructor ::= ('!'? IDENTIFIER ConstructorTag?) FieldList Combinator_with_eq ';' {
+Constructor ::= ('!'? ConstructorTag) FieldList Combinator_with_eq ';' {
     pin=1
     implements=[
         "org.ton.intellij.tlb.psi.TlbFieldListOwner"
+        "org.ton.intellij.tlb.psi.TlbNamedElement"
     ]
+    mixin="org.ton.intellij.tlb.psi.impl.TlbConstructorMixin"
 }
-ConstructorTag ::= HEX_TAG | BINARY_TAG
+ConstructorTag ::= IDENTIFIER (HEX_TAG | BINARY_TAG)? {
+    pin=1
+}
 
-private Combinator_with_eq ::= '=' Combinator {
+private Combinator_with_eq ::= '=' IDENTIFIER ParamList {
     pin=1
+    recoverWhile=Combinator_recovery
 }
-Combinator ::= IDENTIFIER ParamList {
-    pin=1
-}
+private Combinator_recovery ::= !(';'|'!')
+
 ParamList ::= Param* {
     recoverWhile=ParamList_recovery
 }
@@ -170,7 +174,9 @@ NegatedParamTypeExpression ::= '~' ParamTypeExpression {
     pin = 1
     elementType=NegatedTypeExpression
 }
-ParamTypeExpression ::= IDENTIFIER | '#' | '##' | '#<=' | '#<'
+ParamTypeExpression ::= IDENTIFIER | '#' | '##' | '#<=' | '#<' {
+    mixin="org.ton.intellij.tlb.psi.impl.TlbParamTypeExpressionMixin"
+}
 
 fake NegatedTypeExpression ::= '~' TypeExpression
 

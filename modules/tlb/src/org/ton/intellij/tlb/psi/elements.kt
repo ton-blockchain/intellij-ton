@@ -40,3 +40,19 @@ fun TlbTypeExpression.unwrap(): TlbTypeExpression? {
     }
     return current
 }
+
+fun TlbTypeExpression.naturalValue(): Int? {
+    return when(this) {
+        is TlbIntTypeExpression -> naturalValue()
+        is TlbParenTypeExpression -> naturalValue()
+        else -> null
+    }
+}
+
+fun TlbParenTypeExpression.naturalValue(): Int? {
+    return unwrap()?.naturalValue()
+}
+
+fun TlbIntTypeExpression.naturalValue(): Int? {
+    return number.text.toIntOrNull()
+}

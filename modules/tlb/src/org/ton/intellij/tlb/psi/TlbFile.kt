@@ -9,4 +9,13 @@ import org.ton.intellij.tlb.TlbLanguage
 class TlbFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TlbLanguage), TlbElement {
     override fun getFileType(): FileType = TlbFileType
     override fun toString(): String = "TLB"
+
+    fun findConstructors(name: String): Sequence<TlbConstructor> = sequence {
+        val constructors = findChildrenByClass(TlbConstructor::class.java)
+        for (constructor in constructors) {
+            if (constructor.name == name) {
+                yield(constructor)
+            }
+        }
+    }
 }

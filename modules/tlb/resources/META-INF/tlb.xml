@@ -19,6 +19,11 @@
         <lang.findUsagesProvider language="tlb"
                                  implementationClass="org.ton.intellij.tlb.ide.TlbFindUsagesProvider"/>
     </extensions>
+    <extensions defaultExtensionNs="com.intellij.dev">
+        <psiViewer.propertyNodeFactory
+                implementation="org.ton.intellij.tlb.dev.PsiViewerTlbSizeNode$Factory"/>
+    </extensions>
+
     <actions>
         <group id="ton.file.group.tlb">
             <!--            <action id="ton.tlb.GenerateFuncTlb" class="org.ton.intellij.tlb.ide.actions.GenerateFuncTlbAction"-->

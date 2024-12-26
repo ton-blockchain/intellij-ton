@@ -14,5 +14,5 @@ class TlbPsiFactory(val project: Project) {
             .createFileFromText("DUMMY.tlb", TlbFileType, code)
             .childOfType()
 
-    fun createIdentifier(text: String) = createFromText<TlbConstructor>("$text#_ = $text;")!!.identifier
+    fun createIdentifier(text: String) = createFromText<TlbConstructor>("$text#_ = $text;")!!.identifier!!
 }

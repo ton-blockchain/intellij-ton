@@ -86,6 +86,7 @@ class TolkFormattingBlock(
         val parent = child.treeParent
         val parentType = parent.elementType
         when (parentType) {
+            PARAMETER_LIST,
             BLOCK_STATEMENT -> return indentIfNotBrace(child)
             DOT_EXPRESSION -> if (parent.firstChildNode != child) return Indent.getNormalIndent()
             TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE, PAREN_TYPE, ARGUMENT_LIST -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
@@ -119,10 +120,4 @@ class TolkFormattingBlock(
     private fun indentIfNotBrace(child: ASTNode): Indent =
         if (BRACES_TOKEN_SET.contains(child.elementType)) Indent.getNoneIndent()
         else Indent.getNormalIndent()
-
-    init {
-        val builder = StringBuilder()
-
-
-    }
 }

@@ -25,10 +25,10 @@ object TlbSyntaxHighlighter : SyntaxHighlighterBase() {
         NUMBER -> TlbColor.NUMBER
         HEX_TAG -> TlbColor.HEX_TAG
         BINARY_TAG -> TlbColor.BINARY_TAG
-        PREDIFINED_TYPE -> TlbColor.TYPE
+        PREDIFINED_TYPE -> TlbColor.IMPLICIT_FIELD_NAME
         IDENTIFIER -> TlbColor.FIELD_NAME
         CIRCUMFLEX, COLUMN, EQ -> TlbColor.OPERATION_SIGN
-        in TlbParserDefinition.BUILTIN_TYPES -> TlbColor.TYPE
+        in TlbParserDefinition.BUILTIN_TYPES -> TlbColor.IMPLICIT_FIELD_NAME
         else -> null
     }.let {
         pack(it?.textAttributesKey)

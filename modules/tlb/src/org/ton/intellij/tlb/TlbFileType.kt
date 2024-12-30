@@ -5,7 +5,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.annotations.NonNls
 
 object TlbFileType : LanguageFileType(TlbLanguage) {
-    override fun getName() = "TLB"
+    override fun getName() = "TL-B"
     override fun getDescription() = "TL-B schema"
     override fun getDefaultExtension() = "tlb"
     override fun getIcon() = TlbIcons.FILE

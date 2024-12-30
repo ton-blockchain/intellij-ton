@@ -36,25 +36,5 @@ class TlbParserDefinition : ParserDefinition {
         val BUILTIN_TYPES = TokenSet.create(
             TAG, DOUBLE_TAG, NAT_LESS, NAT_LEQ
         )
-        val INBUILT_TYPE_NAMES = buildSet {
-            add("Any")
-            add("Cell")
-            add("Type")
-            add("int")
-            add("uint")
-            add("bits")
-            repeat(2056) {
-                add("int$it")
-            }
-            repeat(2057) {
-                add("uint$it")
-            }
-            repeat(1023) {
-                add("bits$it")
-            }
-            BUILTIN_TYPES.types.forEach { builtinType ->
-                add(builtinType.toString())
-            }
-        }
     }
 }

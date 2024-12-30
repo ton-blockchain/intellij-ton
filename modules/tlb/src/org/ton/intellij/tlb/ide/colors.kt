@@ -30,9 +30,10 @@ enum class TlbColor(
     HEX_TAG("HEX Tag", Defaults.STATIC_FIELD),
     BINARY_TAG("Binary Tag", Defaults.STATIC_FIELD),
     FIELD_NAME("Field name", XmlHighlighterColors.HTML_ATTRIBUTE_NAME),
-    IMPLICIT_FIELD_NAME("Implicit field name", TextAttributesKey.find("KOTLIN_TYPE_PARAMETER")),
-    COMBINATOR_NAME("Combinator name", Defaults.KEYWORD),
-    TYPE("Type", XmlHighlighterColors.HTML_ATTRIBUTE_VALUE)
+    TYPE_PARAMETER("Type parameter", TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")),
+    CONSTRUCTOR_TYPE_NAME("Constructor type name", Defaults.KEYWORD),
+    IMPLICIT_FIELD_NAME("Implicit field name", XmlHighlighterColors.HTML_ATTRIBUTE_VALUE),
+    BUILTIN_TYPE("Builtin type", XmlHighlighterColors.HTML_ATTRIBUTE_VALUE)
     ;
 
     val textAttributesKey =

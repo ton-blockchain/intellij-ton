@@ -1,5 +1,6 @@
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -11,8 +12,11 @@ dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
         intellijIdeaCommunity(version)
+        testFramework(TestFrameworkType.Platform)
+        bundledPlugin("com.intellij.dev")
     }
     compileOnly(project(":util"))
+    testImplementation(kotlin("test"))
 }
 
 val generateTlbParser = task<GenerateParserTask>("generateTlbParser") {
@@ -31,6 +35,10 @@ val generateTlbLexer = task<GenerateLexerTask>("generateTlbLexer") {
     sourceFile.set(file(input))
     targetOutputDir.set(file(output))
     purgeOldFiles.set(true)
+}
+
+tasks.test {
+    useJUnit()
 }
 
 tasks.withType<JavaCompile>().configureEach {

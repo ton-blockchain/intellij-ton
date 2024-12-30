@@ -83,7 +83,7 @@ LINE_COMMENT = "/""/"[^\n]*
 
 NUMBER=[0-9]+
 IDENTIFIER=[a-zA-Z_][0-9a-zA-Z0-9_]*
-PREDIFINED_TYPE=u?int[0-9]+|Cell
+//PREDIFINED_TYPE=u?int[0-9]+|Cell
 
 %xstate BLOCK_COMMENT_STATE, DOC_COMMENT_STATE
 
@@ -133,8 +133,7 @@ PREDIFINED_TYPE=u?int[0-9]+|Cell
 {LINE_COMMENT} { return LINE_COMMENT; }
 
 {NUMBER} { return NUMBER; }
-{PREDIFINED_TYPE} { return PREDIFINED_TYPE; }
-{IDENTIFIER} { return IDENTIFIER; }
+
 
 "+" { return PLUS; }
 "-" { return MINUS; }
@@ -149,6 +148,7 @@ PREDIFINED_TYPE=u?int[0-9]+|Cell
 "]" { return RBRACKET; }
 "=" { return EQUALS; }
 "?" { return QUESTION; }
+"!" { return EXCL; }
 "." { return DOT; }
 "~" { return TILDE; }
 "^" { return CIRCUMFLEX; }
@@ -166,5 +166,9 @@ PREDIFINED_TYPE=u?int[0-9]+|Cell
 "#<" { return NAT_LESS; }
 "#<=" { return NAT_LEQ; }
 "#" { return TAG; }
+
+"Type" { return TYPE_KEYWORD; }
+
+{IDENTIFIER} { return IDENTIFIER; }
 
 [^] { return BAD_CHARACTER; }

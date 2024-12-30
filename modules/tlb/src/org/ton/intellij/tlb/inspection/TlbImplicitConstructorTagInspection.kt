@@ -3,6 +3,7 @@ package org.ton.intellij.tlb.inspection
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.psi.util.PsiTreeUtil
 import org.ton.intellij.tlb.ConstructorTag
 import org.ton.intellij.tlb.computeTag
 import org.ton.intellij.tlb.inspection.fix.TlbSetConstructorTagFix
@@ -22,6 +23,10 @@ class TlbImplicitConstructorTagInspection : TlbInspectionBase() {
             if (o.name == "_") {
                 return
             }
+            if (PsiTreeUtil.hasErrorElements(o)) {
+                return
+            }
+
             val fixes = ArrayList<LocalQuickFix>(2)
             fixes.add(TlbSetConstructorTagFix(o, ConstructorTag.EMPTY))
 
@@ -31,7 +36,7 @@ class TlbImplicitConstructorTagInspection : TlbInspectionBase() {
             }
 
             holder.registerProblem(
-                o,
+                o.identifier,
                 "Constructor tag not defined",
                 *fixes.toTypedArray()
             )

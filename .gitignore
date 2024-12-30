@@ -32,6 +32,8 @@ local.properties
 build
 
 /**/gen/
+!.idea/icon.svg
+.idea
 .intellijPlatform.idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/**/usage.statistics.xml

@@ -14,7 +14,7 @@ class ConstructorTag(
 ) {
     override fun toString(): String {
         if (value == 0L) {
-            return ""
+            return "\$_"
         }
         return buildString {
             var tag = value
@@ -41,6 +41,10 @@ class ConstructorTag(
             }
         }
     }
+
+    companion object {
+        val EMPTY = ConstructorTag(0L)
+    }
 }
 
 @OptIn(ExperimentalStdlibApi::class)
@@ -51,37 +55,70 @@ fun TlbConstructor.computeTag(): ConstructorTag? {
     }
     return CRC32().run {
         update(normalized.toByteArray())
-        println("crc32('$normalized') = ${value.toHexString()}")
+//        println("crc32('$normalized') = ${value.toHexString()}")
         ConstructorTag((value.toLong() shl 32) or 0x80000000)
     }
 }
 
 fun TlbConstructorTag.toConstructorTag(): ConstructorTag {
-    val str = binaryTag?.text ?: hexTag?.text
-    var n = str?.length ?: 0
-    if (str == null || n <= 1) {
-        return ConstructorTag(0)
-    }
-    var bits = 0L
+    val str = binaryTag?.text ?: hexTag?.text ?: return ConstructorTag.EMPTY
+    val n = str.length
+    if (n <= 1) return ConstructorTag.EMPTY
+    var i = 1
     var value = 0L
-    if (str[0] == '#') {
-        for (i in 1 until n) {
-            var c = str[i]
-            if (c =='_') {
-                break
+    var bits = 0
+
+    when (str[0]) {
+        '#' -> {
+            while (i < n) {
+                val c = str[i]
+                if (c == '_') {
+                    break
+                }
+                val hex = when (c) {
+                    in '0'..'9' -> c.code - '0'.code
+                    in 'A'..'F' -> c.code - 'A'.code + 10
+                    in 'a'..'f' -> c.code - 'a'.code + 10
+                    else -> return ConstructorTag.EMPTY
+                }
+
+                if (bits + 4 > 64) return ConstructorTag.EMPTY
+
+                value = value or (hex.toLong() shl (60 - bits))
+                bits += 4
+                i++
             }
-            c = when (c) {
-                in '0'..'9' -> c - '0'
-                in 'a'..'f' -> c - 'a' + 10
-                in 'A'..'F' -> c - 'A' + 10
-                else -> return ConstructorTag(0)
-            }.toChar()
-            if (bits > 60) {
-                return ConstructorTag(0)
+        }
+
+        '$' -> {
+            if (str[1] != '_') {
+                while (i < n) {
+                    val c = str[i]
+                    if (c != '0' && c != '1') return ConstructorTag.EMPTY
+                    if (bits == 64) return ConstructorTag.EMPTY
+
+                    val bit = c.code - '0'.code
+                    value = value or (bit.toLong() shl (63 - bits))
+                    bits++
+                    i++
+                }
             }
-            value = (value shl 4) or c.toLong()
+        }
+        else -> return ConstructorTag.EMPTY
+    }
+
+    if (i < n - 1) return ConstructorTag.EMPTY
+
+    if (i == n - 1 && bits > 0) {
+        while (bits > 0 && ((value shr (64 - bits)) and 1) == 0L) {
+            bits--
+        }
+        if (bits > 0) {
+            bits--
         }
     }
 
-    return ConstructorTag(value)
+    if (bits == 64) return ConstructorTag.EMPTY
+
+    return ConstructorTag(value or (1L shl (63 - bits)))
 }

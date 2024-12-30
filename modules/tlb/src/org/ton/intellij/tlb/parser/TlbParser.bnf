@@ -66,7 +66,7 @@ private Constructor_with_recovery ::= !(<<eof>>) Constructor {
 }
 private Constructor_recovery ::= !('!'|IDENTIFIER)
 
-Constructor ::= ('!'? ConstructorTag) FieldList Combinator_with_eq ';' {
+Constructor ::= ConstructorFullId FieldList ResultType_with_eq ';' {
     pin=1
     implements=[
         "org.ton.intellij.tlb.psi.TlbFieldListOwner"
@@ -74,15 +74,22 @@ Constructor ::= ('!'? ConstructorTag) FieldList Combinator_with_eq ';' {
     ]
     mixin="org.ton.intellij.tlb.psi.impl.TlbConstructorMixin"
 }
-ConstructorTag ::= IDENTIFIER (HEX_TAG | BINARY_TAG)? {
+private ConstructorFullId ::= ('!'? IDENTIFIER) ConstructorTag? {
     pin=1
 }
+ConstructorTag ::= HEX_TAG | BINARY_TAG
 
-private Combinator_with_eq ::= '=' IDENTIFIER ParamList {
+private ResultType_with_eq ::= '=' ResultType  {
     pin=1
-    recoverWhile=Combinator_recovery
 }
-private Combinator_recovery ::= !(';'|'!')
+ResultType ::= IDENTIFIER ParamList {
+   implements=[
+            "org.ton.intellij.tlb.psi.TlbNamedElement"
+   ]
+   mixin="org.ton.intellij.tlb.psi.impl.TlbResultTypeMixin"
+   recoverWhile=ResultType_recovery
+}
+private ResultType_recovery ::= !(';'|'!')
 
 ParamList ::= Param* {
     recoverWhile=ParamList_recovery
@@ -178,7 +185,9 @@ ParamTypeExpression ::= IDENTIFIER | '#' | '##' | '#<=' | '#<' {
     mixin="org.ton.intellij.tlb.psi.impl.TlbParamTypeExpressionMixin"
 }
 
-fake NegatedTypeExpression ::= '~' TypeExpression
+fake NegatedTypeExpression ::= '~' TypeExpression {
+    pin = 1
+}
 
 //combinator_declaration ::= [ '!' ] constructor [ constructor_prefix ] field_definition_list '=' combinator ';' {pin=2}
 //

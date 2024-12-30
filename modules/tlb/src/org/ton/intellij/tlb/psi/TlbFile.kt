@@ -10,11 +10,12 @@ class TlbFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TlbLan
     override fun getFileType(): FileType = TlbFileType
     override fun toString(): String = "TLB"
 
-    fun findConstructors(name: String): Sequence<TlbConstructor> = sequence {
+    fun findResultTypes(name: String): Sequence<TlbResultType> = sequence {
         val constructors = findChildrenByClass(TlbConstructor::class.java)
         for (constructor in constructors) {
-            if (constructor.name == name) {
-                yield(constructor)
+            val resultType = constructor.resultType ?: continue
+            if (resultType.name == name) {
+                yield(resultType)
             }
         }
     }

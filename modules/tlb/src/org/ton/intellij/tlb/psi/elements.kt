@@ -42,11 +42,41 @@ fun TlbTypeExpression.unwrap(): TlbTypeExpression? {
 }
 
 fun TlbTypeExpression.naturalValue(): Int? {
-    return when(this) {
+    return when (this) {
         is TlbIntTypeExpression -> naturalValue()
         is TlbParenTypeExpression -> naturalValue()
         else -> null
     }
+}
+
+fun TlbTypeExpression.isNatural(): Boolean {
+    when (val unwrapped = unwrap()) {
+        is TlbApplyTypeExpression -> return unwrapped.isNatural()
+        is TlbIntTypeExpression -> return true
+        is TlbParamTypeExpression -> return unwrapped.isNatural()
+        else -> {
+            val naturalValue = unwrapped?.naturalValue()
+            if (naturalValue == null) {
+                return false
+            }
+            return false
+        }
+    }
+}
+
+fun TlbApplyTypeExpression.isNatural(): Boolean {
+    return typeExpression.isNatural()
+}
+
+fun TlbParamTypeExpression.isNatural(): Boolean {
+    return doubleTag != null ||
+            natLeq != null ||
+            natLess != null ||
+            tag != null ||
+            (reference?.resolve() as? TlbImplicitField)?.tag != null ||
+            (identifier?.text?.let {
+                it.startsWith("uint") || it.startsWith("int")
+            } == true)
 }
 
 fun TlbParenTypeExpression.naturalValue(): Int? {
@@ -55,4 +85,8 @@ fun TlbParenTypeExpression.naturalValue(): Int? {
 
 fun TlbIntTypeExpression.naturalValue(): Int? {
     return number.text.toIntOrNull()
+}
+
+fun TlbTypeExpression.isNegated(): Boolean {
+    return unwrap() is TlbNegatedTypeExpression
 }

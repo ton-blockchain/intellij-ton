@@ -7,7 +7,8 @@ import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.impl.source.resolve.ResolveCache
-import com.intellij.psi.util.parentsOfType
+import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.psi.util.parentOfType
 
 class TlbReference(
     val project: Project,
@@ -18,26 +19,47 @@ class TlbReference(
         if (!myElement.isValid) return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
         val name = t.element.identifier?.text ?: return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
         val results = ArrayList<ResolveResult>()
-        for (fieldOwner in t.element.parentsOfType<TlbFieldListOwner>()) {
-            val field = fieldOwner.fieldList?.fieldList?.find { field ->
-                (field as? TlbNamedElement)?.name == name
-            }
-            if (field is TlbNamedElement) {
-                results.add(PsiElementResolveResult(field))
-                if (!incompleteCode) {
-                    return@PolyVariantResolver results.toTypedArray()
+
+        PsiTreeUtil.treeWalkUp(t.element, null) { scope, lastParent ->
+            if (scope is TlbParamList) {
+                for (field in scope.parentOfType<TlbFieldListOwner>()?.fieldList?.fieldList.orEmpty()) {
+                    if (field is TlbNamedElement && field.name == name) {
+                        results.add(PsiElementResolveResult(field))
+                        if (!incompleteCode) {
+                            return@treeWalkUp false
+                        }
+                    }
                 }
-                break
+                return@treeWalkUp false
             }
+            if (scope is TlbFieldList) {
+                for (field in scope.fieldList) {
+                    if (field == lastParent) {
+                        return@treeWalkUp false
+                    }
+                    if (field is TlbNamedElement && field.name == name) {
+                        results.add(PsiElementResolveResult(field))
+                        if (!incompleteCode) {
+                            return@treeWalkUp false
+                        }
+                    }
+                }
+                false
+            } else {
+                true
+            }
+        }
+        if (results.isNotEmpty()) {
+            return@PolyVariantResolver results.toTypedArray()
         }
 
         val argumentList = (element.parent as? TlbApplyTypeExpression)?.argumentList?.typeExpressionList ?: emptyList()
 
         val tlbFile = t.element.containingFile as? TlbFile
-        tlbFile?.findConstructors(name)?.forEach { constructor ->
-            val parameterList = constructor.paramList?.typeExpressionList ?: emptyList()
+        tlbFile?.findResultTypes(name)?.forEach { resultType ->
+            val parameterList = resultType.paramList.typeExpressionList
             if (incompleteCode || matchArgumentAndParams(argumentList, parameterList)) {
-                results.add(PsiElementResolveResult(constructor))
+                results.add(PsiElementResolveResult(resultType))
             }
         }
 

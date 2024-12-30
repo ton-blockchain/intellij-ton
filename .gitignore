@@ -33,6 +33,7 @@ build
 
 /**/gen/
 !.idea/icon.svg
+.intellijPlatform
 .idea
 .intellijPlatform.idea/**/workspace.xml
 .idea/**/tasks.xml

@@ -397,8 +397,8 @@ CatchParameter ::= IDENTIFIER {
 }
 
 Expression ::= AssignBinExpression
-    | AsExpression
     | TernaryExpression
+    | AsExpression
     | LogicalBinExpression
     | BitwiseBinExpression
     | CompBinExpression
@@ -476,7 +476,7 @@ VarStatement ::= ('var'|'val') VarDefinition '=' Expression ';' {
     pin = 1
 }
 
-VarDefinition ::= VarTensor | VarTuple | Var
+VarDefinition ::= VarTensor | VarTuple | VarRedef | Var
 
 VarTensor ::= '(' <<list_with_recover VarDefinition>> ')' {
     pin = 1
@@ -488,8 +488,16 @@ VarTuple ::= '[' <<list_with_recover VarDefinition>> ']' {
     extends = VarDefinition
 }
 
-Var ::= (IDENTIFIER) ['redef' | (':' TypeExpression) ] {
-    pin = 1
+VarRedef ::= ReferenceExpression 'redef' {
+    pin = 2
+    extends = VarDefinition
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkVarRedefMixin"
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+    ]
+}
+
+Var ::= IDENTIFIER (':' TypeExpression)? {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkVarMixin"
     implements = [
         "org.ton.intellij.tolk.psi.TolkNamedElement"
@@ -612,7 +620,7 @@ Parameter ::= 'mutate'? IDENTIFIER ':' !"self" TypeExpression {
 // Types
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TypeExpression ::= MapType | UnionType | AtomicType {
+TypeExpression ::= FunType | UnionType | AtomicType {
     implements=[
         "org.ton.intellij.tolk.psi.TolkTypedElement"
     ]
@@ -629,7 +637,7 @@ private unionType2 ::= UnionTypeElement &'|' [('|' UnionTypeElement )+ '|'?] {
     pin = 2
 }
 
-private UnionTypeElement ::= MapType | VoidType | TensorOrParenExpression | TupleType | TypeIdentifier
+private UnionTypeElement ::= FunType | VoidType | TensorOrParenExpression | TupleType | TypeIdentifier
 //UnionType ::= headingUnionType | regularUnionType
 //private regularUnionType ::= !'auto' TypeReference &'|' [(UnionTypeElement)+ '|'?] {
 //    pin = 3
@@ -645,18 +653,28 @@ private UnionTypeElement ::= MapType | VoidType | TensorOrParenExpression | Tupl
 
 TupleType ::= '[' TypeExpression TupleTypeValue* ']' {
     pin = 1
+    mixin="org.ton.intellij.tolk.psi.impl.TolkTupleTypeMixin"
 }
 private TupleTypeValue ::= ',' TypeExpression {
     recoverWhile=TupleTypeValueRecovery
 }
 private TupleTypeValueRecovery ::= !(']'|IDENTIFIER|',')
 
-MapType ::= AtomicType '->' TypeExpression {
+FunType ::= (FunTypeKw|MapTypeArrow) TypeExpression {
+    pin = 1
+    mixin="org.ton.intellij.tolk.psi.impl.TolkFunTypeMixin"
+}
+private FunTypeKw ::= 'fun' AtomicType '->' {
+    pin = 1
+}
+private MapTypeArrow ::= AtomicType '->' {
     pin = 2
 }
 
 AutoType ::= 'auto'
-VoidType ::= 'void' | ('(' ')')
+VoidType ::= 'void' | ('(' ')') {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkVoidTypeMixin"
+}
 
 TypeIdentifier ::= IDENTIFIER {
     mixin="org.ton.intellij.tolk.psi.impl.TolkTypeIdentifierMixin"

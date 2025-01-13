@@ -5,13 +5,14 @@ import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.util.elementType
+import com.intellij.psi.util.parentOfType
 import com.intellij.util.containers.OrderedSet
 import org.ton.intellij.tolk.diagnostics.TolkDiagnostic
+import org.ton.intellij.tolk.diagnostics.TolkTypeMismatchDiagnostic
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.TolkIncludeDefinitionMixin
 import org.ton.intellij.tolk.psi.impl.resolveFile
 import org.ton.intellij.tolk.type.TolkType
-import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.recursionGuard
 import org.ton.intellij.util.tokenSetOf
 import java.util.*
@@ -221,8 +222,14 @@ class TolkInferenceWalker(
         }
     }
 
-    fun infer(element: TolkVarDefinition, typeMap: MutableMap<TolkVar, TolkType>): TolkType? {
+    fun infer(element: TolkVarDefinition, typeMap: MutableMap<TolkVarDefinition, TolkType>): TolkType? {
         return when (element) {
+            is TolkVarRedef -> {
+                val type = infer(element.referenceExpression) ?: return null
+                typeMap[element] = type
+                type
+            }
+
             is TolkVar -> {
                 val type = element.typeExpression?.type ?: TolkType.HoleType()
                 typeMap[element] = type
@@ -272,7 +279,9 @@ class TolkInferenceWalker(
 
     private fun infer(element: TolkReturnStatement) {
         element.expression?.let { expression ->
-            infer(expression)
+            val function = element.parentOfType<TolkFunction>()
+            val returnType = function?.typeExpression?.type
+            infer(expression, returnType)
         }
         ctx.addReturnStatement(element)
     }
@@ -370,7 +379,7 @@ class TolkInferenceWalker(
     }
 
     private fun infer(element: TolkVarStatement) {
-        val typeMap = HashMap<TolkVar, TolkType>()
+        val typeMap = HashMap<TolkVarDefinition, TolkType>()
         val varType = element.varDefinition?.let { definition ->
             infer(definition, typeMap)
         }
@@ -414,9 +423,13 @@ class TolkInferenceWalker(
             }
         }
         typeMap.forEach { (definition, type) ->
-            val name = definition.name?.removeSurrounding("`") ?: return@forEach
-            symbolDefinitions[name] = Symbol(definition, type)
-            ctx.setType(definition, type)
+            if (definition is TolkNamedElement) {
+                val name = definition.name?.removeSurrounding("`") ?: return@forEach
+                symbolDefinitions[name] = Symbol(definition, type)
+            }
+            if (definition is TolkVar) {
+                ctx.setType(definition, type)
+            }
 //            println("set $name = $type")
         }
 
@@ -437,7 +450,7 @@ class TolkInferenceWalker(
             is TolkPrefixExpression -> infer(element)
             is TolkDotExpression -> infer(element, expectedType)
             is TolkCallExpression -> infer(element, expectedType)
-            is TolkTupleExpression -> infer(element)
+            is TolkTupleExpression -> infer(element, expectedType)
             is TolkParenExpression -> infer(element, expectedType)
             is TolkTensorExpression -> infer(element, expectedType)
             is TolkReferenceExpression -> infer(element)
@@ -451,11 +464,17 @@ class TolkInferenceWalker(
     private val boolOperators = tokenSetOf(
         TolkElementTypes.ANDAND,
         TolkElementTypes.OROR,
+    )
+    private val boolResultOperators = tokenSetOf(
         TolkElementTypes.EQEQ,
-        TolkElementTypes.GEQ,
-        TolkElementTypes.LEQ,
-        TolkElementTypes.GT,
+        TolkElementTypes.NEQ,
+        TolkElementTypes.SPACESHIP,
         TolkElementTypes.LT,
+        TolkElementTypes.GT,
+        TolkElementTypes.LEQ,
+        TolkElementTypes.GEQ,
+        TolkElementTypes.ANDAND,
+        TolkElementTypes.OROR,
     )
 
     private fun infer(element: TolkBinExpression): TolkType? {
@@ -464,11 +483,49 @@ class TolkInferenceWalker(
         if (operator in boolOperators) {
             expectedType = TolkType.Bool
         }
-        val type = element.right?.let { expression ->
+        val rightType = element.right?.let { expression ->
             infer(expression, expectedType)
         }
-        infer(element.left, expectedType)
-        return type
+        val leftType = infer(element.left, expectedType)
+        if (rightType == null && leftType == null) {
+            return null
+        }
+        if (expectedType == TolkType.Bool) {
+            if (rightType != TolkType.Bool) {
+                ctx.addDiagnostic(
+                    TolkTypeMismatchDiagnostic(
+                        element.right ?: element,
+                        TolkType.Bool,
+                        rightType
+                    )
+                )
+            }
+            if (leftType != TolkType.Bool) {
+                ctx.addDiagnostic(
+                    TolkTypeMismatchDiagnostic(
+                        element.left,
+                        TolkType.Bool,
+                        leftType
+                    )
+                )
+            }
+        } else {
+            if (leftType != null && rightType != null && leftType != rightType) {
+                ctx.addDiagnostic(
+                    TolkTypeMismatchDiagnostic(
+                        element.right ?: element,
+                        leftType,
+                        rightType
+                    )
+                )
+            }
+        }
+        val resultType = if (operator in boolResultOperators) {
+            TolkType.Bool
+        } else {
+            leftType ?: rightType
+        }
+        return ctx.setType(element, resultType)
     }
 
     private fun infer(element: TolkTernaryExpression, expectedType: TolkType?): TolkType? {
@@ -479,7 +536,7 @@ class TolkInferenceWalker(
         val elseType = element.elseBranch?.let { branch ->
             infer(branch, expectedType)
         }
-        return thenType ?: elseType ?: expectedType
+        return ctx.setType(element, thenType ?: elseType ?: expectedType)
     }
 
     private fun infer(element: TolkPrefixExpression): TolkType? {
@@ -497,9 +554,9 @@ class TolkInferenceWalker(
         infer(element.left)
         val type = element.right?.let { expression ->
             if (expression is TolkCallExpression) {
-                infer(expression, withFirstArg = element.left)
+                infer(expression, expectedType, withFirstArg = element.left)
             } else {
-                infer(expression)
+                infer(expression, expectedType)
             }
         }
         return ctx.setType(element, type ?: expectedType)
@@ -537,24 +594,43 @@ class TolkInferenceWalker(
             }
             return ctx.setType(element, expectedType ?: functionType?.returnType)
         }
+//        println("parameterTypes: $parameterTypes")
 
         // we can provide expected types for generic resolve
-        val typeMapping = HashMap<String, TolkType>()
-        parameterTypes.zip(arguments).forEach { (paramType, arg) ->
-            val argType = infer(arg, expectedType = paramType)
-            if (paramType is TolkType.ParameterType && argType != null && argType !is TolkType.ParameterType) {
-                typeMapping[paramType.name] = argType
+        val typeMapping = HashMap<TolkTypeParameter, TolkType>()
+        fun unify(paramType: TolkType, argType: TolkType?) {
+            when {
+                paramType is TolkType.Function && argType is TolkType.Function -> {
+                    unify(paramType.inputType, argType.inputType)
+                    unify(paramType.returnType, argType.returnType)
+                }
+                paramType is TolkType.TypedTuple && argType is TolkType.TypedTuple -> {
+                    paramType.elements.zip(argType.elements).forEach { (param, arg) ->
+                        unify(param, arg)
+                    }
+                }
+                paramType is TolkType.Tensor && argType is TolkType.Tensor -> {
+                    paramType.elements.zip(argType.elements).forEach { (param, arg) ->
+                        unify(param, arg)
+                    }
+                }
+                paramType is TolkType.ParameterType && argType != null && argType !is TolkType.ParameterType -> {
+                    typeMapping[paramType.psiElement] = argType
+                }
             }
         }
 
-        val returnType = functionType.returnType
-        val result = when (returnType) {
-            is TolkType.ParameterType -> typeMapping[returnType.name] ?: expectedType ?: returnType
-            else -> returnType
+        parameterTypes.zip(arguments).forEach { (paramType, arg) ->
+            val argType = infer(arg, expectedType = paramType)
+            unify(paramType, argType)
         }
-        ctx.setType(element, result)
-//        println("end infer ${element.text} = result")
-        return result
+
+        var returnType = functionType.returnType.substitute(typeMapping)
+        if (returnType is TolkType.ParameterType) {
+            returnType = expectedType ?: returnType
+        }
+//        println("end infer ${element.text} = $returnType")
+        return ctx.setType(element, returnType)
     }
 
     private fun infer(element: TolkParenExpression, expectedType: TolkType? = null): TolkType? {
@@ -607,13 +683,25 @@ class TolkInferenceWalker(
     private fun infer(element: TolkReferenceExpression): TolkType? {
         val name = element.name?.removeSurrounding("`") ?: return null
         val found = resolveSymbol(name) ?: return null
+        val foundElement = found.element
         ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(found.element)))
         var type = found.type
         if (type == null) {
-            type = (found.element as? TolkTypedElement)?.type ?: return null
+            type = (foundElement as? TolkTypedElement)?.type ?: return null
         }
-        if (found.element is TolkVar) {
+        if (foundElement is TolkVar) {
             ctx.setType(found.element, type)
+        } else if (foundElement is TolkTypeParameterListOwner) {
+            val typeArgumentList = element.typeArgumentList?.typeExpressionList
+            val typeParameters = foundElement.typeParameterList?.typeParameterList
+            if (typeArgumentList != null && typeParameters != null) {
+                val typeMap = HashMap<TolkTypeParameter, TolkType>()
+                typeParameters.zip(typeArgumentList).forEach { (param, arg) ->
+                    val type = arg.type ?: return@forEach
+                    typeMap[param] = type
+                }
+                type = type.substitute(typeMap)
+            }
         }
         return ctx.setType(element, type)
     }

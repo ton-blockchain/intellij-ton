@@ -2,22 +2,25 @@ package org.ton.intellij.tolk.type
 
 
 import org.ton.intellij.tolk.psi.TolkTypeParameter
-import org.ton.intellij.tolk.psi.TolkTypeParameterListOwner
-import org.ton.intellij.util.parentOfType
 
 sealed interface TolkType {
+
+    fun substitute(substitution: Map<TolkTypeParameter, TolkType>): TolkType {
+        return when (this) {
+            is Function -> Function(inputType.substitute(substitution), returnType.substitute(substitution))
+            is Tensor -> Tensor(elements.map { it.substitute(substitution) })
+            is TypedTuple -> TypedTuple(elements.map { it.substitute(substitution) })
+            is UnionType -> UnionType(elements.map { it.substitute(substitution) })
+            is ParameterType -> substitution[this.psiElement] ?: this
+            else -> this
+        }
+    }
+
     class ParameterType(
         val psiElement: TolkTypeParameter
     ) : TolkNamedType {
         override val name: String
             get() = psiElement.name ?: ""
-
-        val uniqueId by lazy {
-            psiElement.parentOfType<TolkTypeParameterListOwner>()?.let {
-                it.containingFile.name + "@" + it.name + "$" + name
-            } ?: "$name@${psiElement.hashCode()}"
-        }
-
 
         override fun toString(): String = name
     }

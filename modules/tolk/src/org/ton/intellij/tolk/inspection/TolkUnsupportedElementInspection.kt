@@ -20,11 +20,11 @@ class TolkUnsupportedElementInspection : TolkInspectionBase() {
         }
 
         override fun visitAsExpression(o: TolkAsExpression) {
-            reportProblem(o)
+//            reportProblem(o)
         }
 
         override fun visitTypeArgumentList(o: TolkTypeArgumentList) {
-            reportProblem(o)
+//            reportProblem(o)
         }
 
         override fun visitTypeDef(o: TolkTypeDef) {

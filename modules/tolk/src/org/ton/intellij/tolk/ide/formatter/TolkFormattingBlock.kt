@@ -88,9 +88,9 @@ class TolkFormattingBlock(
         when (parentType) {
             PARAMETER_LIST,
             BLOCK_STATEMENT -> return indentIfNotBrace(child)
-            DOT_EXPRESSION -> if (parent.firstChildNode != child) return Indent.getNormalIndent()
-            TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE, PAREN_TYPE, ARGUMENT_LIST -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
-            TUPLE_TYPE, TUPLE_EXPRESSION -> if (type != LBRACK && type != RBRACK) return Indent.getNormalIndent()
+            DOT_EXPRESSION, TERNARY_EXPRESSION -> if (parent.firstChildNode != child) return Indent.getNormalIndent()
+            VAR_TENSOR, TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE, PAREN_TYPE, ARGUMENT_LIST -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
+            VAR_TUPLE, TUPLE_TYPE, TUPLE_EXPRESSION -> if (type != LBRACK && type != RBRACK) return Indent.getNormalIndent()
             FUNCTION -> if (type == BUILTIN_KEYWORD || type == ASM_DEFINITION) return Indent.getNormalIndent()
         }
         // todo: check if intent work normally

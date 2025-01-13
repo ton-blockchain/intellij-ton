@@ -13,7 +13,7 @@ abstract class TolkTypeParameterMixin : TolkNamedElementImpl<TolkTypeParameterSt
 
     constructor(stub: TolkTypeParameterStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
 
-    override val type: TolkType = TolkType.ParameterType(this)
+    override val type: TolkType get() = TolkType.ParameterType(this)
 
     override fun getIcon(flags: Int): Icon? = TolkIcons.PARAMETER
 }

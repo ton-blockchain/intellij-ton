@@ -1,0 +1,709 @@
+{
+    parserClass='org.ton.intellij.tolk.parser.TolkParser'
+    parserUtilClass='org.ton.intellij.tolk.parser.TolkParserUtil'
+
+    psiClassPrefix='Tolk'
+    psiImplClassSuffix='Impl'
+    psiPackage='org.ton.intellij.tolk.psi'
+    psiImplPackage='org.ton.intellij.tolk.psi.impl'
+    implements='org.ton.intellij.tolk.psi.TolkElement'
+
+    elementTypeHolderClass="org.ton.intellij.tolk.psi.TolkElementTypes"
+    tokenTypeClass="org.ton.intellij.tolk.psi.TolkTokenType"
+    elementTypeClass="org.ton.intellij.tolk.psi.TolkElementType"
+
+    extends("^(?!Type).+Expression")=Expression
+    extends(".*Statement")=Statement
+    extends(".+Type")=TypeExpression
+    elementType(".+BinExpression")=BinExpression
+    elementType(".+BinOp")=BinaryOp
+
+    generateTokenAccessors=true
+
+    tokens = [
+            PLUS                = '+'
+            MINUS               = '-'
+            TIMES               = '*'
+            DIV                 = '/'
+            MOD                 = '%'
+            QUEST               = '?'
+            COLON               = ':'
+            COMMA               = ','
+            SEMICOLON           = ';'
+            LBRACE              = '{'
+            RBRACE              = '}'
+            LBRACK              = '['
+            RBRACK              = ']'
+            LPAREN              = '('
+            RPAREN              = ')'
+            EQ                  = '='
+            LT                  = '<'
+            GT                  = '>'
+            AND                 = '&'
+            ANDAND              = '&&'
+            OR                  = '|'
+            OROR                = '||'
+            XOR                 = '^'
+            SHA                 = '#'
+            EXCL                = '!'
+            DOT                 = '.'
+            AT                  = '@'
+
+            EQEQ                = '=='
+            NEQ                 = '!='
+            LEQ                 = '<='
+            GEQ                 = '>='
+            SPACESHIP           = '<=>'
+            LSHIFT              = '<<'
+            RSHIFT              = '>>'
+            RSHIFTR             = '~>>'
+            RSHIFTC             = '^>>'
+            DIVR                = '~/'
+            DIVC                = '^/'
+            MODR                = '~%'
+            MODC                = '^%'
+            DIVMOD              = '/%'
+            PLUSLET             = '+='
+            MINUSLET            = '-='
+            TIMESLET            = '*='
+            DIVLET              = '/='
+            DIVRLET             = '~/='
+            DIVCLET             = '^/='
+            MODLET              = '%='
+            MODRLET             = '~%='
+            MODCLET             = '^%='
+            LSHIFTLET           = '<<='
+            RSHIFTLET           = '>>='
+            RSHIFTRLET          = '~>>='
+            RSHIFTCLET          = '^>>='
+            ANDLET              = '&='
+            ORLET               = '|='
+            XORLET              = '^='
+            MAPSTO              = '->'
+            TILDE               = '~'
+
+            RETURN_KEYWORD              = 'return'
+            VAR_KEYWORD                 = 'var'
+            REPEAT_KEYWORD              = 'repeat'
+            DO_KEYWORD                  = 'do'
+            WHILE_KEYWORD               = 'while'
+            TRY_KEYWORD                 = 'try'
+            CATCH_KEYWORD               = 'catch'
+            IF_KEYWORD                  = 'if'
+            ELSE_KEYWORD                = 'else'
+            AS_KEYWORD                  = 'as'
+
+            TYPE_KEYWORD                = 'type'
+            TRUE_KEYWORD                = 'true'
+            FALSE_KEYWORD               = 'false'
+            NULL_KEYWORD                = 'null'
+            REDEF_KEYWORD               = 'redef'
+            FUN_KEYWORD                 = 'fun'
+            AUTO_KEYWORD                = 'auto'
+            VOID_KEYWORD                = 'void'
+            VAL_KEYWORD                 = 'val'
+            ENUM_KEYWORD                = 'enum'
+            STRUCT_KEYWORD              = 'struct'
+            EXPORT_KEYWORD              = 'export'
+            BREAK_KEYWORD               = 'break'
+            CONTINUE_KEYWORD            = 'continue'
+            THROW_KEYWORD               = 'throw'
+            ASSERT_KEYWORD              = 'assert'
+            MUTATE_KEYWORD              = 'mutate'
+
+            EXPORT_KEYWORD              = 'export'
+            GLOBAL_KEYWORD              = 'global'
+            ASM_KEYWORD                 = 'asm'
+            OPERATOR_KEYWORD            = 'operator'
+            INFIX_KEYWORD               = 'infix'
+            CONST_KEYWORD               = 'const'
+            BUILTIN_KEYWORD             = 'builtin'
+            GET_KEYWORD                 = 'GET_KEYWORD'
+            IMPORT_KEYWORD              = 'import'
+            TOLK_KEYWORD                = 'tolk'
+
+            ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
+            DANGLING_NEWLINE = "DANGLING_NEWLINE"
+//            VERSION_VALUE = "regexp:((=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?)"
+            IDENTIFIER = "regexp:[a-zA-Z_$?:][0-9a-zA-Z_$?:]*"
+//            WHITESPACE = 'regexp:[\ \n\t\f]'
+            INTEGER_LITERAL = 'regexp:(0|([1-9]([_0-9])*))'
+    ]
+}
+
+private root ::= TopLevelDefinition_with_recover*
+
+private TopLevelDefinition ::= (IncludeDefinition | VersionDefinition | GlobalVar | ConstVar | TypeDef | Struct | Function | EmptyStatement)
+private TopLevelDefinition_with_recover ::= !(<<eof>>) (TopLevelDefinition) {
+    pin = 1
+    recoverWhile = TopLevelDefinition_recover
+}
+private TopLevelDefinition_recover ::= !(TopLevelDefinition_first)
+private TopLevelDefinition_first ::= 'tolk' | 'fun' | 'import' | 'global' | 'const' | ';' | '@' | 'enum' | 'struct' | 'type' | "get"
+
+RawString ::= RAW_STRING_ELEMENT*
+StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE {
+    pin=1
+    implements=["com.intellij.psi.PsiLanguageInjectionHost"]
+    mixin="org.ton.intellij.tolk.psi.impl.TolkStringLiteralMixin"
+}
+
+GlobalVar ::= 'global' IDENTIFIER GlobalVarType ';'  {
+    pin = 1
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkGlobalVarMixin"
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkNamedElement"
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+    ]
+    stubClass="org.ton.intellij.tolk.stub.TolkGlobalVarStub"
+    elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+}
+private GlobalVarType ::= ':' TypeExpression {
+    pin = 1
+}
+
+ConstVar ::= 'const' IDENTIFIER ConstVarType? '=' Expression ';' {
+    pin = 1
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkConstVarMixin"
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkNamedElement"
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+    ]
+    stubClass="org.ton.intellij.tolk.stub.TolkConstVarStub"
+    elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+}
+private ConstVarType ::= ':' &('int'|'slice') TypeExpression {
+    pin = 1
+}
+
+IncludeDefinition ::= 'import' StringLiteral {
+    pin=1
+    mixin="org.ton.intellij.tolk.psi.impl.TolkIncludeDefinitionMixin"
+    stubClass="org.ton.intellij.tolk.stub.TolkIncludeDefinitionStub"
+    elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+}
+
+VersionDefinition ::= 'tolk' VersionValue {
+    pin=1
+}
+VersionValue ::= ('='|'>'|'>='|'<'|'<='|'^')? INTEGER_LITERAL ('.' INTEGER_LITERAL)*
+
+TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpression {
+    pin = 1
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkTypeMixin"
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
+    ]
+    stubClass="org.ton.intellij.tolk.stub.TolkTypeDefStub"
+    elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+}
+
+Struct ::= 'struct' IDENTIFIER TypeParameterList? (StructBody | ';') {
+    pin = 1
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkStructMixin"
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
+    ]
+    stubClass="org.ton.intellij.tolk.stub.TolkStructStub"
+    elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+}
+
+StructBody ::= '{' StructField* '}' {
+    pin = 1
+}
+
+StructField ::= IDENTIFIER ':' TypeExpression ['=' Expression] ';' {
+    pin = 2
+}
+//PragmaDefinition ::= PragmaDefinitionPart
+//PragmaKey ::= IDENTIFIER
+//PragmaValue ::= StringLiteral | IntegerExpression
+//private PragmaDefinitionPart ::= "pragma" (PragmaVersion | PragmaKeyValue)  {
+//    pin = 1
+//}
+//PragmaKeyValue ::= PragmaKey PragmaValue? {
+//    pin=1
+//}
+//PragmaVersion ::= ("version" | "not-version") ('='|'>'|'>='|'<'|'<='|'^')? INTEGER_LITERAL ('.' INTEGER_LITERAL)* {
+//    pin=1
+//}
+//PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
+
+//Function ::= (TypeParameterList|'get')? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
+Function ::= Annotation* ((get 'fun'?) | ('fun')) IDENTIFIER TypeParameterList? ParameterList ReturnType? FunctionBody {
+    pin = 2
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkNamedElement"
+        "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
+        "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+    ]
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkFunctionMixin"
+    stubClass = "org.ton.intellij.tolk.stub.TolkFunctionStub"
+    elementTypeFactory = "org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+    hooks = [
+        leftBinder = "ADJACENT_LINE_COMMENTS"
+    ]
+}
+private get ::= <<getKeyword>>
+
+private ReturnType ::= ':' TypeExpression {
+    pin = 1
+}
+
+Annotation ::= '@' IDENTIFIER AnnotationParamList? {
+    pin = 1
+}
+AnnotationParamList ::= '(' << comma_separated_list AnnotationParam >> ')' {
+    pin = 1
+}
+AnnotationParam ::= INTEGER_LITERAL | StringLiteral
+
+FunctionBody ::= ';' | AsmDefinition | BlockStatement | ('builtin' ';')
+
+TypeParameterList ::= '<' << comma_separated_list TypeParameter >> '>' {
+    pin=1
+}
+TypeParameter ::= IDENTIFIER {
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkTypeParameterMixin"
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkNamedElement"
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+    ]
+    stubClass="org.ton.intellij.tolk.stub.TolkTypeParameterStub"
+    elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+}
+
+AsmDefinition ::= 'asm' AsmParameters? AsmBody ';' {pin=1}
+AsmParameters ::= '(' AsmArgumentList? AsmIndexList? ')' {pin=1}
+private AsmArgumentList ::= AsmArgument+
+AsmArgument ::= 'self'|IDENTIFIER {
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkAsmArgumentMixin"
+}
+private AsmIndexList ::= '->' AsmIndex+ {
+    pin=1
+}
+AsmIndex ::= IntegerExpression
+AsmBody ::= StringLiteral+
+
+Statement ::= ReturnStatement
+            | BlockStatement
+            | RepeatStatement
+            | IfStatement
+            | DoStatement
+            | WhileStatement
+            | AssertStatement
+            | ThrowStatement
+            | TryStatement
+            | VarStatement
+            | ExpressionStatement
+            | EmptyStatement
+
+
+ExpressionStatement ::= Expression ';' {
+    pin=1
+}
+
+EmptyStatement ::= ';'
+
+ReturnStatement ::= 'return' Expression? ';' {pin=1}
+
+BlockStatement ::= '{' BlockElement_with_recovery* '}' {
+    pin=1
+}
+private BlockElement_with_recovery ::= Statement {
+    recoverWhile=BlockElement_recovery
+}
+private BlockElement_recovery ::= !(StatementFirst | ExpressionFirst | '}')
+private StatementFirst ::= 'return'|'{'|'repeat'|'if'|'do'|'while'|'assert'|'throw'|'try'|'var'|'val'|';'
+private ExpressionFirst ::= IDENTIFIER | INTEGER_LITERAL | '-' | '+' | '!' | '(' | '['
+
+RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
+
+IfStatement ::= 'if' Condition BlockStatement ElseBranch? {
+    pin=1
+    methods=[
+        condition="/Expression"
+    ]
+}
+private Condition ::= '(' Expression ')' {
+    pin = 1
+}
+
+ElseBranch ::= 'else' (BlockStatement | IfStatement) {
+    pin = 1
+}
+
+DoStatement ::= 'do' BlockStatement 'while' Condition ';' {
+    pin = 1
+    methods = [
+        condition="/Expression"
+    ]
+}
+WhileStatement ::= 'while' Condition BlockStatement {
+    pin = 1
+    methods = [
+        condition="/Expression"
+    ]
+}
+
+ThrowStatement ::= 'throw' ((!'(' ThrowExcNo) | ThrowArg) ';' {
+    pin = 1
+}
+private ThrowExcNo ::= Expression {
+    recoverWhile=ThrowExcNo_recover
+}
+
+private ThrowExcNo_recover ::= !(';')
+
+private ThrowArg ::= '(' Expression ',' ThrowArg_element ')' {
+    pin=1
+    recoverWhile=ThrowExcNo_recover
+}
+private ThrowArg_element ::= Expression {
+    recoverWhile=ThrowArg_element_recover
+}
+private ThrowArg_element_recover ::= !(')'|';')
+
+AssertStatement ::= 'assert' AssertBody {
+    pin = 1
+}
+private AssertBody ::= '(' AssertCondition (AssertWithThrow | AssertWithoutThrow) {
+    pin = 1
+}
+private AssertWithThrow ::= ')' ThrowStatement {
+    pin = 1
+}
+private AssertWithoutThrow ::= ',' AssertExcNo ')' ';' {
+    pin = 1
+}
+
+AssertCondition ::= Expression
+AssertExcNo ::= Expression
+
+TryStatement ::= 'try' BlockStatement Catch {pin=1}
+Catch ::= 'catch' CatchParameterList? BlockStatement {
+    pin = 1
+}
+private CatchParameterList ::= '(' CatchParameter (',' CatchParameter)? ')' {
+    pin = 1
+}
+CatchParameter ::= IDENTIFIER {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkCatchParameterMixin"
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkNamedElement"
+    ]
+}
+
+Expression ::= AssignBinExpression
+    | TernaryExpression
+    | AsExpression
+    | LogicalBinExpression
+    | BitwiseBinExpression
+    | CompBinExpression
+    | ShiftBinExpression
+    | AddBinExpression
+    | MulBinExpression
+    | PrefixExpression
+    | DotExpression
+    | CallExpression
+    | AtomicExpression
+{
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+    ]
+    recoverWhile=Expression_recover
+}
+private Expression_recover ::= !(';'|'}'|',')
+
+fake BinExpression ::= Expression BinaryOp Expression {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkBinExpressionMixin"
+    methods=[
+        left="/Expression[0]"
+        right="/Expression[1]"
+    ]
+}
+
+//noinspection BnfUnusedRule
+fake BinaryOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%='
+| '<<=' | '>>=' | '^>>=' | '~>>='
+| '&=' | '|=' | '^='
+| '==' | '!='
+| '<' | '>' | '<=' | '>=' | '<=>'
+| '<<' | '>>' | '~>>' | '^>>'
+| '-' | '+'
+| '|'
+| '^'
+| '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%'
+| '&'
+| '||'
+| '&&'
+
+AssignBinExpression ::= Expression AssignBinOp Expression {
+    rightAssociative=true
+}
+TernaryExpression ::= Expression '?' Expression ':' Expression {
+    pin=2
+    methods=[
+        condition="/Expression[0]"
+        thenBranch="/Expression[1]"
+        elseBranch="/Expression[2]"
+    ]
+}
+LogicalBinExpression ::= Expression LogicalBinOp Expression
+BitwiseBinExpression ::= Expression BitwiseBinOp Expression
+CompBinExpression ::= Expression CompBinOp Expression
+ShiftBinExpression ::= Expression ShiftBinOp Expression
+AddBinExpression ::= Expression AddBinOp Expression
+MulBinExpression ::= Expression MulBinOp Expression
+PrefixExpression ::= ('!'|'~'|'-'|'+') Expression {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkPrefixExpressionMixin"
+}
+
+AssignBinOp ::= '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '^>>=' | '~>>=' | '&=' | '|=' | '^=' | '=' {
+    name = "operator"
+}
+LogicalBinOp ::= '&&' | '||' { name = "operator" }
+BitwiseBinOp ::= '&' | '|' | '^' { name = "operator" }
+
+CompBinOp ::= '==' | '!=' | '<' | '>' | '<=' | '>=' | '<=>' { name = "operator" }
+ShiftBinOp ::= '<<' | '>>' | '~>>' | '^>>' { name = "operator" }
+AddBinOp ::= '-' | '+' { name = "operator" }
+MulBinOp  ::= '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%' { name = "operator" }
+
+VarStatement ::= ('var'|'val') VarDefinition '=' Expression ';' {
+    pin = 1
+}
+
+VarDefinition ::= VarTensor | VarTuple | VarRedef | Var
+
+VarTensor ::= '(' <<list_with_recover VarDefinition>> ')' {
+    pin = 1
+    extends = VarDefinition
+}
+
+VarTuple ::= '[' <<list_with_recover VarDefinition>> ']' {
+    pin = 1
+    extends = VarDefinition
+}
+
+VarRedef ::= ReferenceExpression 'redef' {
+    pin = 2
+    extends = VarDefinition
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkVarRedefMixin"
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+    ]
+}
+
+Var ::= IDENTIFIER (':' TypeExpression)? {
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkVarMixin"
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkNamedElement"
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+    ]
+    extends = VarDefinition
+}
+
+DotExpression ::= Expression '.' CallExpression {
+    pin=2
+    methods=[
+        left="/Expression[0]"
+        right="/Expression[1]"
+    ]
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkDotExpressionMixin"
+}
+CallExpression ::= Expression ArgumentList {
+    rightAssociative = true
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkCallExpressionMixin"
+}
+AsExpression ::= Expression 'as' TypeExpression {
+    pin = 2
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkAsExpressionMixin"
+}
+ArgumentList ::= '(' [<<list_with_recover Argument>>] ')' {
+    pin = 1
+}
+//private args ::= <<comma_separated_list Argument>> {
+//    recoverWhile = recoverArgs
+//}
+//private recoverArgs ::= !(')'|';')
+
+
+Argument ::= 'mutate'? Expression
+
+private AtomicExpression ::= UnitExpression
+                        | TensorOrParenExpression
+                        | TupleExpression
+                        | LiteralExpression
+                        | ReferenceExpression
+
+UnitExpression ::= '(' ')'
+
+fake TensorExpression ::= '(' <<comma_separated_list Expression>> ')' {
+    pin = 2
+}
+fake ParenExpression ::= '(' Expression ')' {
+    pin = 1
+}
+
+TensorOrParenExpression ::= '(' Expression TensorExpression_upper? ')' {
+    pin = 1
+    elementType = ParenExpression
+}
+upper TensorExpression_upper ::= TensorExpressionValue+ {
+    elementType = TensorExpression
+}
+private TensorExpressionValue ::= ',' Expression {
+    pin=1
+    recoverWhile=TensorExpressionValue_recovery
+}
+private TensorExpressionValue_recovery ::= !(','|')'|';')
+
+TupleExpression ::= '[' [ <<comma_separated_list TupleElement>> ] ']' {
+    pin=1
+    extends=Expression
+}
+private TupleElement ::= Expression {
+    recoverWhile=TupleElement_recovery
+}
+private TupleElement_recovery ::= !(','|']'|';')
+
+private IntegerExpression ::= INTEGER_LITERAL
+private BoolExpression ::= 'true' | 'false'
+private NullExpression ::= 'null' !'('
+
+LiteralExpression ::= INTEGER_LITERAL | BoolExpression | NullExpression | StringLiteral {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkLiteralExpressionMixin"
+}
+
+ReferenceExpression ::= IDENTIFIER TypeArgumentList? {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkReferenceExpressionMixin"
+    implements= [
+        "org.ton.intellij.tolk.psi.TolkNamedElement"
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+    ]
+}
+
+TypeArgumentList ::= '<' TypeArgumentElements '>'
+private TypeArgumentElements ::= <<comma_separated_list TypeArgument>> {
+    recoverWhile=TypeArgumentList_recovery
+}
+private TypeArgumentList_recovery ::= !('>'|'('|')'|';')
+private TypeArgument ::= TypeExpression {
+    recoverWhile=TypeArgument_recovery
+}
+private TypeArgument_recovery ::= !(','|'>'|'('|';'|StatementFirst)
+
+ParameterList ::= FunctionParameterList_start ')' {
+    pin = 1
+}
+private FunctionParameterList_start ::= '(' FunctionParameterList_item* {
+    pin = 1
+    recoverWhile=FunctionParameterList_recovery
+}
+private FunctionParameterList_recovery ::= !')'|'asm'|'{'
+private FunctionParameterList_item ::= Parameter ( ','| &')' ) {pin=1}
+
+Parameter ::= 'mutate'? IDENTIFIER ':' !"self" TypeExpression {
+    pin = 2
+    mixin="org.ton.intellij.tolk.psi.impl.TolkParameterMixin"
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkNamedElement"
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+    ]
+    stubClass="org.ton.intellij.tolk.stub.TolkParameterStub"
+    elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Types
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+TypeExpression ::= FunType | UnionType | AtomicType {
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+    ]
+}
+
+private AtomicType ::= AutoType | VoidType | TensorOrParenType | TupleType | NullType | TypeIdentifier
+
+UnionType ::= unionType1 | unionType2
+NullType ::= 'null' {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkNullTypeMixin"
+}
+
+private unionType1 ::= '|' UnionTypeElement [('|' UnionTypeElement )+ '|'?] {
+    pin = 1
+}
+private unionType2 ::= UnionTypeElement &'|' [('|' UnionTypeElement )+ '|'?] {
+    pin = 2
+}
+
+private UnionTypeElement ::= FunType | VoidType | TensorOrParenExpression | TupleType | TypeIdentifier
+//UnionType ::= headingUnionType | regularUnionType
+//private regularUnionType ::= !'auto' TypeReference &'|' [(UnionTypeElement)+ '|'?] {
+//    pin = 3
+//}
+//private headingUnionType ::= '|' !'auto' TypeReference [(UnionTypeElement)+ '|'?] {
+//    pin = 1
+//}
+//private UnionTypeElement ::= '|' !'auto' TypeReference {
+//    pin = 1
+//}
+
+//private TypeReference_first ::= '[' | '(' | 'var' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type' | IDENTIFIER
+
+TupleType ::= '[' TypeExpression TupleTypeValue* ']' {
+    pin = 1
+    mixin="org.ton.intellij.tolk.psi.impl.TolkTupleTypeMixin"
+}
+private TupleTypeValue ::= ',' TypeExpression {
+    recoverWhile=TupleTypeValueRecovery
+}
+private TupleTypeValueRecovery ::= !(']'|IDENTIFIER|',')
+
+FunType ::= (FunTypeKw|MapTypeArrow) TypeExpression {
+    pin = 1
+    mixin="org.ton.intellij.tolk.psi.impl.TolkFunTypeMixin"
+}
+private FunTypeKw ::= 'fun' AtomicType '->' {
+    pin = 1
+}
+private MapTypeArrow ::= AtomicType '->' {
+    pin = 2
+}
+
+AutoType ::= 'auto'
+VoidType ::= 'void' | ('(' ')') {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkVoidTypeMixin"
+}
+
+TypeIdentifier ::= IDENTIFIER {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkTypeIdentifierMixin"
+    extends=TypeExpression
+}
+
+fake TensorType ::= '(' [ <<comma_separated_list TypeExpression>> ] ')' {
+    pin = 1
+    mixin="org.ton.intellij.tolk.psi.impl.TolkTensorTypeMixin"
+}
+fake ParenType ::= '(' TypeExpression ')' {
+    pin = 1
+    mixin="org.ton.intellij.tolk.psi.impl.TolkParenTypeMixin"
+}
+
+TensorOrParenType ::= '(' !')' TypeExpression (TensorType_upper | ')') {
+    pin = 2
+    elementType = ParenType
+}
+upper TensorType_upper ::= ',' [ TypeExpression (',' TypeExpression)* ] ')' {
+    pin = 1
+    elementType = TensorType
+}
+
+private meta comma_separated_list ::= <<param>> (',' <<param>>)*
+private meta list_with_recover ::= <<comma_separated_list <<param>>>> {
+    recoverWhile=paren_list_element_recover
+}
+private paren_list_element_recover ::= !(')'|']'|';')

@@ -1,0 +1,240 @@
+{
+    parserClass="org.ton.intellij.tlb.parser.TlbParser"
+    extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+    psiClassPrefix="Tlb"
+    psiImplClassSuffix="Impl"
+    psiPackage="org.ton.intellij.tlb.psi"
+    psiImplPackage="org.ton.intellij.tlb.psi.impl"
+    implements="org.ton.intellij.tlb.psi.TlbElement"
+
+    elementTypeHolderClass="org.ton.intellij.tlb.psi.TlbTypes"
+    elementTypeClass="org.ton.intellij.tlb.psi.TlbElementType"
+    tokenTypeClass="org.ton.intellij.tlb.psi.TlbTokenType"
+
+    extends(".+Field")=Field
+    extends(".+TypeExpression")=TypeExpression
+
+    generateTokenAccessors=true
+
+    tokens = [
+        HEX_TAG='regexp:#([0-9a-fA-F]+_?|_)'
+        BINARY_TAG='regexp:\$[01]*_?'
+
+        PLUS='+'
+        MINUS='-'
+        TIMES='*'
+        COLUMN=':'
+        SEMICOLUMN=';'
+        LPAREN='('
+        RPAREN=')'
+        LBRACE='{'
+        RBRACE='}'
+        LBRACKET='['
+        RBRACKET=']'
+        EQUALS='='
+        UNDERSCORE='_'
+        QUESTION='?'
+        EXCL='!'
+        DOT='.'
+        TILDE='~'
+        DOUBLE_TAG='##'
+        TAG='#'
+        CIRCUMFLEX='^'
+        DOLLAR='$'
+        EQ='=='
+        LESS='<'
+        GREATER='>'
+        LEQ='<='
+        GEQ='>='
+        NEQ='!='
+        NAT_LESS='#<'
+        NAT_LEQ='#<='
+        TYPE_KEYWORD='Type'
+        WHITE_SPACE='regexp:\s+'
+        COMMENT='regexp:(//.*)'
+        NUMBER='regexp:[0-9]+'
+        PREDIFINED_TYPE='PREDIFINED_TYPE'
+        IDENTIFIER='regexp:[a-zA-Z_][0-9a-zA-Z0-9_]*'
+    ]
+}
+
+private root ::= Constructor_with_recovery*
+private Constructor_with_recovery ::= !(<<eof>>) Constructor {
+    pin=1
+    recoverWhile=Constructor_recovery
+}
+private Constructor_recovery ::= !('!'|IDENTIFIER)
+
+Constructor ::= ConstructorFullId FieldList ResultType_with_eq ';' {
+    pin=1
+    implements=[
+        "org.ton.intellij.tlb.psi.TlbFieldListOwner"
+        "org.ton.intellij.tlb.psi.TlbNamedElement"
+    ]
+    mixin="org.ton.intellij.tlb.psi.impl.TlbConstructorMixin"
+}
+private ConstructorFullId ::= ('!'? IDENTIFIER) ConstructorTag? {
+    pin=1
+}
+ConstructorTag ::= HEX_TAG | BINARY_TAG
+
+private ResultType_with_eq ::= '=' ResultType  {
+    pin=1
+}
+ResultType ::= IDENTIFIER ParamList {
+   implements=[
+            "org.ton.intellij.tlb.psi.TlbNamedElement"
+   ]
+   mixin="org.ton.intellij.tlb.psi.impl.TlbResultTypeMixin"
+   recoverWhile=ResultType_recovery
+}
+private ResultType_recovery ::= !(';'|'!')
+
+ParamList ::= Param* {
+    recoverWhile=ParamList_recovery
+}
+private ParamList_recovery ::= !(';'|'!'|IDENTIFIER)
+private Param ::= (NegatedTermTypeExpression | TermTypeExpression) !(BINARY_TAG|HEX_TAG|'{'|'[')
+NegatedTermTypeExpression ::= '~' TermTypeExpression {
+    pin = 1
+    elementType=NegatedTypeExpression
+}
+
+FieldList ::= Field* {
+    recoverWhile=FieldList_recovery
+}
+
+private FieldList_recovery ::= !('='|']'|';'|)
+
+Field ::= ImplicitField | ConstraintField | CommonField
+
+CommonField ::= FieldName? FieldTypeExpression {
+    mixin="org.ton.intellij.tlb.psi.impl.TlbCommonFieldMixin"
+    implements=[
+        "org.ton.intellij.tlb.psi.TlbNamedElement"
+    ]
+}
+ImplicitField ::= '{' FieldName ('#'|'Type') '}' {
+    pin = 2
+    mixin="org.ton.intellij.tlb.psi.impl.TlbImplicitFieldMixin"
+    implements=[
+        "org.ton.intellij.tlb.psi.TlbNamedElement"
+    ]
+}
+ConstraintField ::= '{' ConstraintTypeExpression '}' {
+    pin=2
+}
+
+private FieldName ::= IDENTIFIER ':'
+TypeExpression ::= AddTypeExpression
+    | MulTypeExpression
+    | ApplyTypeExpression
+    | FieldTypeExpression {
+    implements=["org.ton.intellij.tlb.psi.TlbSizeOwner"]
+}
+
+private Operator ::= '=' | '<=' | '<' | '>=' | '>'
+ConstraintTypeExpression ::= TypeExpression Operator TypeExpression {
+    rightAssociative=true
+    mixin="org.ton.intellij.tlb.psi.impl.TlbConstraintTypeExpressionMixin"
+}
+
+AddTypeExpression ::= TypeExpression '+' TypeExpression
+MulTypeExpression ::= TypeExpression '*' TypeExpression
+ApplyTypeExpression ::= TypeExpression ArgumentList {
+    mixin="org.ton.intellij.tlb.psi.impl.TlbApplyTypeExpressionMixin"
+}
+ArgumentList ::= (&('('|IDENTIFIER|NUMBER|'~'|'^'|'[') FieldTypeExpression)+
+
+private FieldTypeExpression ::=
+    CondTypeExpression |
+    GetBitTypeExpression |
+    TermTypeExpression
+
+CondTypeExpression ::= TypeExpression '?' TermTypeExpression
+GetBitTypeExpression ::= TypeExpression '.' TermTypeExpression
+
+private TermTypeExpression ::=
+    ParenTypeExpression |
+    IntTypeExpression |
+    ConstructorTypeExpression |
+    ReferenceTypeExpression |
+    NegatedParamTypeExpression |
+    ParamTypeExpression
+
+ParenTypeExpression ::= '(' TypeExpression ')' {
+    pin = 1
+}
+IntTypeExpression ::= NUMBER
+
+ConstructorTypeExpression ::= '[' FieldList ']' {
+    pin = 1
+    implements=[
+        "org.ton.intellij.tlb.psi.TlbFieldListOwner"
+    ]
+}
+ReferenceTypeExpression ::= '^' TermTypeExpression {
+    pin = 1
+}
+NegatedParamTypeExpression ::= '~' ParamTypeExpression {
+    pin = 1
+    elementType=NegatedTypeExpression
+}
+ParamTypeExpression ::= IDENTIFIER | '#' | '##' | '#<=' | '#<' {
+    mixin="org.ton.intellij.tlb.psi.impl.TlbParamTypeExpressionMixin"
+}
+
+fake NegatedTypeExpression ::= '~' TypeExpression {
+    pin = 1
+}
+
+//combinator_declaration ::= [ '!' ] constructor [ constructor_prefix ] field_definition_list '=' combinator ';' {pin=2}
+//
+//constructor ::= ( '_' | constructor_name )
+//constructor_name ::= IDENTIFIER
+//constructor_prefix ::= HEX_TAG | BINARY_TAG
+//combinator ::= combinator_name type_expression* {pin=1}
+//combinator_name ::= IDENTIFIER {
+//    implements = "org.ton.intellij.tlb.psi.TlbNamedElement"
+//    mixin = "org.ton.intellij.tlb.psi.TlbNamedElementImpl"
+//}
+//
+//private field_definition_list_recovery ::= !( '=' | ']' )
+//field_definition_list ::= field_definition* {recoverWhile=field_definition_list_recovery}
+//field_definition ::= implicit_definition | named_field | cell_ref | paren_expression | expr95
+//implicit_definition ::= '{' ( implicit_field | expression ) '}' {pin=1}
+//named_field ::= field_name ':' expr95 {pin=2}
+//field_name ::= '_' | IDENTIFIER {
+//    implements = "org.ton.intellij.tlb.psi.TlbNamedElement"
+//    mixin = "org.ton.intellij.tlb.psi.TlbNamedElementImpl"
+//}
+//implicit_field ::= implicit_field_name ':' implicit_field_type {pin=2}
+//implicit_field_type ::= '#' | 'Type'
+//implicit_field_name ::= IDENTIFIER {
+//    implements = "org.ton.intellij.tlb.psi.TlbNamedElement"
+//    mixin = "org.ton.intellij.tlb.psi.TlbNamedElementImpl"
+//}
+//
+//anonymous_constructor ::= '[' field_definition_list ']' {pin=1}
+//
+//cell_ref ::= '^' type_expression {pin=1}
+//
+//expression ::= expr10
+//private expr10 ::= expr20 '=' expr20 | expr20 '<=' expr20 | expr20 '<' expr20 | expr20 '>=' expr20 | expr20 '>' expr20 | expr20
+//private expr20 ::= expr30 ( '+' expr30 )*
+//private expr30 ::= expr90 ( '*' expr90 )*
+//private expr90 ::= expr95+
+//private expr95 ::= expr97 [ cond_type ]
+//private cond_type ::= '?' type_expression {pin=1}
+//private expr97 ::= type_expression [ '.' type_expression ]
+//
+//type_expression ::= [ '~' ] ( paren_expression | anonymous_constructor | cell_ref | builtin_type | NUMBER | named_ref )
+//named_ref ::= IDENTIFIER {
+//    implements = "org.ton.intellij.tlb.psi.TlbNamedElement"
+//    mixin = "org.ton.intellij.tlb.psi.TlbNamedRefMixin"
+//}
+//private paren_expression ::= "(" expression ')' {pin=1}
+//builtin_type ::= '#<' | '#<=' | '##' | '#' | PREDIFINED_TYPE
+//noinspection BnfUnusedRule
+private unused_in_bnf ::= LINE_COMMENT | BLOCK_COMMENT | LINE_DOCUMENTATION | BLOCK_DOCUMENTATION

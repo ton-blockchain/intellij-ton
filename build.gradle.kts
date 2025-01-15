@@ -1,13 +1,12 @@
-import org.gradle.configurationcache.extensions.capitalized
+
 import org.jetbrains.changelog.Changelog
-import org.jetbrains.grammarkit.tasks.GenerateLexerTask
-import org.jetbrains.grammarkit.tasks.GenerateParserTask
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.time.Clock
 import java.time.Instant
 
 val publishChannel = prop("publishChannel")
-val ideaVersion = prop("ideaVersion")
 val pluginVersion = prop("pluginVersion").let { pluginVersion ->
     if (publishChannel != "release" && publishChannel != "stable") {
         val buildSuffix = prop("buildNumber") {
@@ -19,91 +18,94 @@ val pluginVersion = prop("pluginVersion").let { pluginVersion ->
     }
 }
 version = pluginVersion
-println("pluginVersion=$version")
 
 plugins {
-    kotlin("jvm") version "1.9.22"
-    id("org.jetbrains.intellij") version "1.17.3"
+    kotlin("jvm") version "2.0.10"
+    id("org.jetbrains.intellij.platform")
     id("org.jetbrains.grammarkit") version "2022.3.2.2"
-    id("org.jetbrains.changelog") version "2.2.0"
-    idea
+    id("org.jetbrains.changelog") version "2.2.1"
 }
 
 allprojects {
     apply(plugin = "kotlin")
 
-    repositories {
-        maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
-        mavenCentral()
-        maven(url = "https://jitpack.io")
-    }
-
     tasks.withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
-        kotlinOptions.freeCompilerArgs += "-Xjvm-default=all"
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+        compilerOptions.freeCompilerArgs.add("-Xjvm-default=all")
     }
 
-    dependencies {
-        implementation("me.alllex.parsus:parsus-jvm:0.6.1")
-        implementation("com.github.andreypfau.tlb:tlb-jvm:54070d9405")
+    java {
+        toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    }
+
+    sourceSets {
+        main {
+            kotlin.srcDir("src")
+            java.srcDirs("gen")
+            resources.srcDir("resources")
+        }
+        test {
+            kotlin.srcDir("test")
+            resources.srcDir("testResources")
+        }
+    }
+    tasks {
+        test {
+            useJUnitPlatform()
+        }
     }
 }
 
-sourceSets {
-    main {
-        java.srcDirs("src/gen")
+tasks {
+    buildSearchableOptions {
+        enabled = false
     }
 }
 
-idea {
-    module {
-        isDownloadSources = true
-        generatedSourceDirs.add(file("src/gen"))
+dependencies {
+    intellijPlatform {
+        val version = providers.gradleProperty("platformVersion")
+        create(IntelliJPlatformType.IntellijIdeaUltimate, version)
+
+        pluginModule(implementation(project(":util")))
+        pluginModule(implementation(project(":asm")))
+        pluginModule(implementation(project(":tolk")))
+        pluginModule(implementation(project(":func")))
+        pluginModule(implementation(project(":tact")))
+        pluginModule(implementation(project(":boc")))
+        pluginModule(implementation(project(":tlb")))
+        pluginModule(implementation(project(":fift")))
+        pluginModule(implementation(project(":blueprint")))
+        pluginModule(implementation(project(":fc2tolk-js")))
     }
 }
 
-intellij {
-    version.set(ideaVersion)
-    type.set("IU")
-    plugins.set(
-        listOf(
-            "JavaScript",
-            "com.google.ide-perf:1.3.1",
-            "izhangzhihao.rainbow.brackets:2023.3.2"
+intellijPlatform {
+    pluginConfiguration {
+        id = "org.ton.intellij-ton"
+        name = "TON"
+        version = project.version.toString()
+        description = """
+        TON Blockchain Development Plugin for IntelliJ: Adds support for TON blockchain programming languages,
+        including FunC, Tolk, Fift, Tact, and TL-B schemas.
+        Ideal for Web3 developers working within the TON ecosystem.
+        """.trimIndent()
+        changeNotes.set(
+            provider {
+                changelog.renderItem(changelog.getLatest(), Changelog.OutputType.HTML)
+            }
         )
-    )
+        ideaVersion {
+            sinceBuild.set("243")
+            untilBuild = provider { null }
+        }
+        vendor {
+            name = "TON Core"
+            url = "https://github.com/ton-blockchain/intellij-ton"
+            email = "andreypfau@ton.org"
+        }
+    }
 }
-
-val generateFuncLexer = generateLexer("Func")
-val generateFuncParser = generateParser("Func")
-
-val generateTactLexer = generateLexer("Tact")
-val generateTactParser = generateParser("Tact")
-
-val generateFiftLexer = generateLexer("Fift")
-val generateFiftParser = generateParser("Fift")
-
-val generateTlbLexer = generateLexer("Tlb")
-val generateTlbParser = generateParser("Tlb")
-
-val generateAsmLexer = generateLexer("Asm")
-val generateAsmParser = generateParser("Asm")
-
-val generateTolkLexer = generateLexer("Tolk")
-val generateTolkParser = generateParser("Tolk")
-
-val compileKotlin = tasks.named("compileKotlin") {
-    dependsOn(
-        generateFuncParser, generateFuncLexer,
-        generateTactParser, generateTactLexer,
-        generateFiftParser, generateFiftLexer,
-        generateTlbParser, generateTlbLexer,
-        generateAsmParser, generateAsmLexer,
-        generateTolkParser, generateTolkLexer,
-    )
-}
-
-val compileJava = tasks.named("compileJava")
 
 changelog {
     version.set(version)
@@ -115,52 +117,5 @@ changelog {
     groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"))
 }
 
-tasks {
-    runIde { enabled = true }
-    prepareSandbox { enabled = true }
-    patchPluginXml {
-        sinceBuild.set("232")
-        untilBuild.set("")
-        changeNotes.set(provider {
-            changelog.renderItem(changelog.run {
-                getLatest()
-            }, Changelog.OutputType.HTML)
-        })
-    }
-    buildSearchableOptions {
-        enabled = prop("enableBuildSearchableOptions").toBoolean()
-    }
-    configurations.runtimeClasspath.get().forEach {
-        println(it)
-    }
-    jar {
-        from({
-            configurations.runtimeClasspath.get().filter { file ->
-                !file.nameWithoutExtension.startsWith("kotlin-stdlib") &&
-                        !file.nameWithoutExtension.startsWith("annotations")
-            }.map {
-                if (it.isDirectory) it
-                else zipTree(it)
-            }
-        })
-    }
-}
-
 fun prop(name: String, default: (() -> String?)? = null) = extra.properties[name] as? String
     ?: default?.invoke() ?: error("Property `$name` is not defined in gradle.properties")
-
-fun generateParser(language: String, suffix: String = "", config: GenerateParserTask.() -> Unit = {}) =
-    task<GenerateParserTask>("generate${language.capitalized()}Parser${suffix.capitalized()}") {
-        sourceFile.set(file("src/main/grammar/${language}Parser.bnf"))
-        targetRootOutputDir.set(file("src/gen"))
-        pathToParser.set("/org/ton/intellij/${language.lowercase()}/parser/${language}Parser.java")
-        pathToPsiRoot.set("/org/ton/intellij/${language.lowercase()}/psi")
-        purgeOldFiles.set(true)
-        config()
-    }
-
-fun generateLexer(language: String) = task<GenerateLexerTask>("generate${language}Lexer") {
-    sourceFile.set(file("src/main/grammar/${language}Lexer.flex"))
-    targetOutputDir.set(file("src/gen/org/ton/intellij/${language.lowercase()}/lexer"))
-    purgeOldFiles.set(true)
-}

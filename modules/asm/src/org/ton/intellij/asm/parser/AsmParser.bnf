@@ -1,0 +1,44 @@
+{
+    parserClass='org.ton.intellij.asm.parser.AsmParser'
+
+    psiClassPrefix='Asm'
+    psiImplClassSuffix='Impl'
+    psiPackage='org.ton.intellij.asm.psi'
+    psiImplPackage='org.ton.intellij.asm.psi.impl'
+    implements='org.ton.intellij.asm.psi.AsmElement'
+
+    elementTypeHolderClass="org.ton.intellij.asm.psi.AsmElementTypes"
+    elementTypeClass="org.ton.intellij.asm.psi.AsmElementType"
+
+    generateTokenAccessors=true
+
+    tokens = [
+        INTEGER='regexp:[0-9]+'
+        SLICE_BINARY='regexp:(b\{[01]+})'
+        SLICE_HEX='regexp:(x\{[0-9a-fA-F_]+})'
+        STACK_REGISTER='regexp:s[0-9]+|s\(-[0-9]+\)'
+        CONTROL_REGISTER='regexp:c[0-7]'
+        BUILDER_BEGIN='<b'
+        BUILDER_END='b>'
+        SLICE_BEGIN='<s'
+        SLICE_END='s>'
+        CODE_BEGIN='<{'
+        CODE_END='}>'
+        CODE_END_CELL='}>c'
+        CODE_END_SLICE='}>s'
+        WORD='regexp:\S+'
+    ]
+}
+private root ::= Verb*
+Verb ::= INTEGER | SLICE_BINARY | SLICE_HEX
+ | STACK_REGISTER
+ | CONTROL_REGISTER
+ | BUILDER_BEGIN
+ | BUILDER_END
+ | SLICE_BEGIN
+ | SLICE_END
+ | CODE_BEGIN
+ | CODE_END
+ | CODE_END_CELL
+ | CODE_END_SLICE
+ | WORD

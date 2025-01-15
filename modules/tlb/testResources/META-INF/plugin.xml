@@ -1,0 +1,4 @@
+<idea-plugin package="org.rust" xmlns:xi="http://www.w3.org/2001/XInclude">
+    <id>org.ton.intellij-ton.tlb</id>
+    <xi:include href="/META-INF/tlb.xml" xpointer="xpointer(/idea-plugin/*)"/>
+</idea-plugin>

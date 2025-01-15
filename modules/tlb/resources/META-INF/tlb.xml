@@ -1,0 +1,82 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="TL-B Generator" displayType="BALLOON"/>
+        <fileType name="TL-B"
+                  implementationClass="org.ton.intellij.tlb.TlbFileType"
+                  fieldName="INSTANCE"
+                  language="TL-B"
+                  extensions="tlb"/>
+        <lang.parserDefinition language="TL-B"
+                               implementationClass="org.ton.intellij.tlb.ide.TlbParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="TL-B"
+                                       implementationClass="org.ton.intellij.tlb.ide.TlbSyntaxHighlighterFactory"/>
+        <annotator language="TL-B" implementationClass="org.ton.intellij.tlb.ide.TlbAnnotator"/>
+        <colorSettingsPage implementation="org.ton.intellij.tlb.ide.TlbColorSettingsPage"/>
+        <lang.commenter language="TL-B"
+                        implementationClass="org.ton.intellij.tlb.ide.TlbCommenter"/>
+        <lang.braceMatcher language="TL-B"
+                           implementationClass="org.ton.intellij.tlb.ide.TlbBraceMatcher"/>
+        <lang.findUsagesProvider language="TL-B"
+                                 implementationClass="org.ton.intellij.tlb.ide.TlbFindUsagesProvider"/>
+
+        <localInspection
+                language="TL-B" displayName="Wrong name case for result type"
+                groupPath="TL-B"
+                groupName="TL-B"
+                implementationClass="org.ton.intellij.tlb.inspection.TlbWrongResultTypeNameCaseInspection"
+                enabledByDefault="true" level="ERROR"/>
+        <localInspection language="TL-B" displayName="Apply bit selection to values of negative polarity"
+                         groupPath="TL-B"
+                         groupName="TL-B"
+                         implementationClass="org.ton.intellij.tlb.inspection.TlbGetBitNegateInspection"
+                         enabledByDefault="true" level="ERROR"/>
+        <localInspection language="TL-B" displayName="Apply bit selection to types"
+                         groupPath="TL-B"
+                         groupName="TL-B"
+                         implementationClass="org.ton.intellij.tlb.inspection.TlbGetBitTypeInspection"
+                         enabledByDefault="true" level="ERROR"/>
+        <localInspection language="TL-B" displayName="Field as expression"
+                         groupPath="TL-B"
+                         groupName="TL-B"
+                         implementationClass="org.ton.intellij.tlb.inspection.TlbFieldAsExpressionInspection"
+                         enabledByDefault="true" level="ERROR"/>
+        <localInspection language="TL-B" displayName="Negate explicit field"
+                            groupPath="TL-B"
+                            groupName="TL-B"
+                            implementationClass="org.ton.intellij.tlb.inspection.TlbNegateExplicitFieldInspection"
+                            enabledByDefault="true" level="ERROR"/>
+        <localInspection language="TL-B" displayName="Uninitialized implicit field"
+                            groupPath="TL-B"
+                            groupName="TL-B"
+                            implementationClass="org.ton.intellij.tlb.inspection.TlbUninitializedImplicitFieldInspection"
+                            enabledByDefault="true" level="ERROR"/>
+        <localInspection language="TL-B" displayName="Implicit field not defined"
+                            groupPath="TL-B"
+                            groupName="TL-B"
+                            implementationClass="org.ton.intellij.tlb.inspection.TlbUnresolvedReferenceInspection"
+                            enabledByDefault="true" level="ERROR"/>
+        <localInspection
+                language="TL-B" displayName="Constructor tag not defined"
+                groupPath="TL-B"
+                groupName="TL-B"
+                implementationClass="org.ton.intellij.tlb.inspection.TlbImplicitConstructorTagInspection"
+                enabledByDefault="true" level="WARNING"/>
+    </extensions>
+    <extensions defaultExtensionNs="com.intellij.dev">
+        <psiViewer.propertyNodeFactory
+                implementation="org.ton.intellij.tlb.dev.PsiViewerTlbSizeNode$Factory"/>
+    </extensions>
+
+
+    <actions>
+        <group id="ton.file.group.tlb">
+            <!--            <action id="ton.tlb.GenerateFuncTlb" class="org.ton.intellij.tlb.ide.actions.GenerateFuncTlbAction"-->
+            <!--                    text="Generate FunC TL-B Parser">-->
+            <!--                <keyboard-shortcut first-keystroke="control shift G" keymap="$default"/>-->
+            <!--            </action>-->
+            <add-to-group group-id="ToolsMenu" anchor="before" relative-to-action="ExternalToolsGroup"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+        </group>
+    </actions>
+</idea-plugin>

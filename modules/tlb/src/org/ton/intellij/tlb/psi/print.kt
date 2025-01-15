@@ -270,7 +270,7 @@ fun TlbTypeExpression.print(
         }
 
         is TlbParenTypeExpression -> {
-            unwrap()?.print(appendable, priority)
+            unwrap()?.print(appendable, priority, skipParens)
         }
 
         else -> {

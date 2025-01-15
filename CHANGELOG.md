@@ -1,5 +1,17 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [2.5.0]
+
+### Added
+- Tolk 0.7 support
+- Tolk type inference & completion
+- Tolk type hints for variables & functions
+- TL-B schema inspections
+- TL-B constructor tag generator
+
+### Fixed
+- A lot of minor bugs
+
 ## [2.4.0]
 
 ### Added

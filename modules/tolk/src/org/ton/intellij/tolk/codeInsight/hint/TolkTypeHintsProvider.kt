@@ -36,7 +36,7 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         val name = element.name
         if (name.isNullOrEmpty() || name == "_") return
         val type = element.type ?: return
-        if (type is TolkType.HoleType) return
+        if (type is TolkType.Unknown) return
 
         sink.addPresentation(
             position = InlineInlayPosition(element.endOffset, true),
@@ -80,8 +80,11 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         element.functionBody?.blockStatement ?: return
         val parameters = element.parameterList ?: return
         val returnType = (element.type as? TolkType.Function)?.returnType ?: return
-        if (returnType == TolkType.Unit) return
-
+        when (returnType) {
+            TolkType.Unit,
+            TolkType.Unknown -> return
+            else -> {}
+        }
         sink.addPresentation(
             position = InlineInlayPosition(parameters.endOffset, true),
             hintFormat = HintFormat.default

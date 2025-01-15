@@ -110,7 +110,7 @@ fun TlbTypeExpression.print(
     when (this) {
         is TlbNegatedTypeExpression -> {
             appendable.append("~")
-            this.typeExpression.print(appendable, priority, skipParens)
+            this.typeExpression?.print(appendable, priority, skipParens)
         }
 
         is TlbParamTypeExpression -> {

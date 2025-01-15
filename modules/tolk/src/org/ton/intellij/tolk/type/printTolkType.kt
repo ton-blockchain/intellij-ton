@@ -16,8 +16,8 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
             printTolkType(type.returnType)
         }
 
-        is TolkType.HoleType -> {
-            text("_")
+        is TolkType.Unknown -> {
+            text("?")
         }
 
         is TolkType.Tensor -> {

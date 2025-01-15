@@ -626,9 +626,12 @@ TypeExpression ::= FunType | UnionType | AtomicType {
     ]
 }
 
-private AtomicType ::= AutoType | VoidType | TensorOrParenType | TupleType | TypeIdentifier
+private AtomicType ::= AutoType | VoidType | TensorOrParenType | TupleType | NullType | TypeIdentifier
 
 UnionType ::= unionType1 | unionType2
+NullType ::= 'null' {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkNullTypeMixin"
+}
 
 private unionType1 ::= '|' UnionTypeElement [('|' UnionTypeElement )+ '|'?] {
     pin = 1

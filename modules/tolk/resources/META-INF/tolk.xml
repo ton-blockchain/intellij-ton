@@ -24,8 +24,8 @@
                                             implementationClass="org.ton.intellij.tolk.ide.TolkImplementationTextSelectioner"/>
         <!--        <platform.backend.documentation.psiTargetProvider id="TolkDocumentationTargetProvider"-->
         <!--                                                          implementation="org.ton.intellij.tolk.ide.quickdoc.TolkPsiDocumentationTargetProvider"/>-->
-        <lang.documentationProvider language="Tolk"
-                                    implementationClass="org.ton.intellij.tolk.doc.TolkDocumentationProvider"/>
+<!--        <lang.documentationProvider language="Tolk"-->
+<!--                                    implementationClass="org.ton.intellij.tolk.doc.TolkDocumentationProvider"/>-->
         <lang.formatter language="Tolk" implementationClass="org.ton.intellij.tolk.ide.formatter.TolkFormatter"/>
         <lang.refactoringSupport language="Tolk"
                                  implementationClass="org.ton.intellij.tolk.refactor.TolkRefactoringSupportProvider"/>

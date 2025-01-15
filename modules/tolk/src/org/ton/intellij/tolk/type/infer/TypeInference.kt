@@ -231,21 +231,21 @@ class TolkInferenceWalker(
             }
 
             is TolkVar -> {
-                val type = element.typeExpression?.type ?: TolkType.HoleType()
+                val type = element.typeExpression?.type ?: TolkType.Unknown
                 typeMap[element] = type
                 type
             }
 
             is TolkVarTuple -> {
                 val tuple = element.varDefinitionList.map {
-                    infer(it, typeMap) ?: TolkType.HoleType()
+                    infer(it, typeMap) ?: TolkType.Unknown
                 }
                 TolkType.TypedTuple(tuple)
             }
 
             is TolkVarTensor -> {
                 val tensor = element.varDefinitionList.map {
-                    infer(it, typeMap) ?: TolkType.HoleType()
+                    infer(it, typeMap) ?: TolkType.Unknown
                 }
                 TolkType.create(tensor)
             }
@@ -384,7 +384,7 @@ class TolkInferenceWalker(
             infer(definition, typeMap)
         }
         val expressionType = element.expression?.let { expression ->
-            infer(expression, if (varType !is TolkType.HoleType) varType else null)
+            infer(expression, if (varType !is TolkType.Unknown) varType else null)
         }
 
         fun unify(
@@ -643,7 +643,7 @@ class TolkInferenceWalker(
         val expectedTypes = (expectedType as? TolkType.Tensor)?.elements
         val actualTypes = element.expressionList.mapIndexedNotNull { index, expression ->
             val expectedType = expectedTypes?.getOrNull(index)
-            if (expectedType is TolkType.HoleType) {
+            if (expectedType is TolkType.Unknown) {
                 infer(expression)
             } else {
                 infer(expression, expectedType)
@@ -664,7 +664,7 @@ class TolkInferenceWalker(
         val expressions = element.expressionList
         val actualTypes = expressions.mapIndexedNotNull { index, expression ->
             val expectedType = expectedTypes?.getOrNull(index)
-            if (expectedType is TolkType.HoleType) {
+            if (expectedType is TolkType.Unknown) {
                 infer(expression)
             } else {
                 infer(expression, expectedType)

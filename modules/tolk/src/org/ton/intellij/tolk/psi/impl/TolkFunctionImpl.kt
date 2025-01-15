@@ -57,7 +57,7 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
             }
             val type = returnStatements?.asSequence()?.map {
                 it.expression?.type
-            }?.filterNotNull()?.firstOrNull() ?: TolkType.Unit
+            }?.filterNotNull()?.firstOrNull() ?: TolkType.Unknown
 
             CachedValueProvider.Result.create(type, this)
         }

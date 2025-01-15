@@ -45,24 +45,8 @@ sealed interface TolkType {
         override fun toString(): String = "[${elements.joinToString()}]"
     }
 
-    class HoleType(
-//        type: TolkType? = null
-    ) : TolkType {
-//        var type: TolkType? = type
-//            set(value) {
-//                if (field == null) {
-//                } else if (field != value) {
-//                    field = value
-//                } else {
-//                    throw IllegalStateException("Rebinding auto type")
-//                }
-//            }
-//
-//        override fun removeHoles(): TolkType {
-//            return type ?: throw IllegalStateException("Hole type is not bound")
-//        }
-
-        //        override fun toString(): String = type?.toString() ?: "_"
+    object Unknown : TolkType {
+        override fun toString(): String = "?"
     }
 
     class UnionType(

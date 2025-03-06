@@ -245,18 +245,32 @@ class TolkInferenceWalker(
         val afterCondition = inferExpression(condition, flow, true)
         val trueFlow = element.blockStatement?.let {
             processBlockStatement(it, afterCondition.trueFlow)
-        } ?: afterCondition.trueFlow
+        }
         val falseFlow = element.elseBranch?.statement?.let {
             inferStatement(it, afterCondition.falseFlow)
-        } ?: afterCondition.falseFlow
-        val nextFlow = if (trueFlow.unreachable != null) {
-            falseFlow.merge(trueFlow)
-            falseFlow
-        } else {
-            trueFlow.join(falseFlow)
         }
 
-        return nextFlow
+        if (trueFlow == null && falseFlow == null) {
+            return afterCondition.outFlow
+        }
+
+        if (trueFlow != null && trueFlow.unreachable != null) {
+            return falseFlow?.merge(trueFlow) ?: afterCondition.falseFlow.merge(trueFlow)
+        }
+
+        return (trueFlow ?: afterCondition.trueFlow).join(falseFlow ?: afterCondition.falseFlow)
+
+//        val nextFlow = if (trueFlow.unreachable != null) {
+//            falseFlow.merge(trueFlow)
+//            falseFlow
+//        } else if (falseFlow.unreachable != null) {
+//            trueFlow.merge(falseFlow)
+//            trueFlow
+//        } else {
+//            trueFlow.join(falseFlow)
+//        }
+
+//        return nextFlow
     }
 
     private fun processRepeatStatement(element: TolkRepeatStatement, flow: TolkFlowContext): TolkFlowContext {
@@ -617,31 +631,32 @@ class TolkInferenceWalker(
             }
 
             TolkElementTypes.ANDAND -> {
-                val afterLeft = inferExpression(left, nextFlow, true)
                 nextFlow.setType(element, TolkType.Bool)
+                val afterLeft = inferExpression(left, nextFlow, true)
                 if (right == null) {
                     return afterLeft.outFlow.toResult()
                 }
                 val afterRight = inferExpression(right, afterLeft.trueFlow, true)
                 if (!usedAsCondition) {
-                    val outFlow = afterLeft.falseFlow.join(afterRight.falseFlow)
-                    val leftType = ctx.getType(left) ?: TolkType.Unknown
-                    val rightType = ctx.getType(right) ?: TolkType.Unknown
+                    val outFlow = afterLeft.falseFlow.join(afterRight.outFlow)
+                    val leftType = outFlow.getType(left) ?: TolkType.Unknown
+                    val rightType = outFlow.getType(right) ?: TolkType.Unknown
                     val elementType = leftType.join(rightType)
                     outFlow.setType(element, elementType)
                     return TolkExpressionFlowContext(outFlow, false)
                 }
                 val outFlow = afterLeft.outFlow.join(afterRight.outFlow)
+                val leftType = outFlow.getType(left) ?: TolkType.Unknown
+                val rightType = outFlow.getType(right) ?: TolkType.Unknown
                 val trueFlow = afterRight.trueFlow
                 val falseFlow = afterLeft.falseFlow.join(afterRight.falseFlow)
-                val leftType = ctx.getType(left) ?: TolkType.Unknown
-                val rightType = ctx.getType(right) ?: TolkType.Unknown
                 val elementType = leftType.join(rightType)
                 outFlow.setType(element, elementType)
                 return TolkExpressionFlowContext(outFlow, trueFlow, falseFlow)
             }
 
             TolkElementTypes.OROR -> {
+                nextFlow.setType(element, TolkType.Bool)
                 val afterLeft = inferExpression(left, nextFlow, true)
                 if (right == null) {
                     return afterLeft.outFlow.toResult()
@@ -720,7 +735,7 @@ class TolkInferenceWalker(
         val notNullType = exprType.removeNullability()
         val resultType = if (exprType == TolkType.Null) { // `expr == null` is always true
             if (isInverted) TolkType.FALSE else TolkType.TRUE
-        } else if (notNullType == TolkType.Never) { // `expr == null` is always false
+        } else if (notNullType == TolkType.Never || notNullType == exprType) { // `expr == null` is always false
             if (isInverted) TolkType.TRUE else TolkType.FALSE
         } else {
             TolkType.Bool
@@ -1597,7 +1612,7 @@ class TolkFlowContext(
         return type
     }
 
-    fun merge(other: TolkFlowContext) {
+    fun merge(other: TolkFlowContext) = apply {
         other.types.forEach { k,v ->
             types.putIfAbsent(k, v)
         }
@@ -1608,6 +1623,12 @@ class TolkFlowContext(
     }
 
     fun join(other: TolkFlowContext): TolkFlowContext {
+        if (other.unreachable == TolkUnreachableKind.CantHappen) {
+            return TolkFlowContext(globalSymbols, types, symbols, unreachable)
+        }
+        if (unreachable == TolkUnreachableKind.CantHappen) {
+            return TolkFlowContext(other.globalSymbols, other.types, other.symbols, other.unreachable)
+        }
         val joinedSymbols = LinkedHashMap(types)
         val joinedNames = LinkedHashMap(symbols)
         other.types.forEach { (element, type) ->

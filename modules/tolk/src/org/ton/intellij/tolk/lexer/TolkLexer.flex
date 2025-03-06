@@ -206,6 +206,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "."                      { return DOT; }
       "@"                      { return AT; }
 
+      "?."                     { return SAFE_ACCESS; }
       "=="                     { return EQEQ; }
       "!="                     { return NEQ; }
       "<="                     { return LEQ; }

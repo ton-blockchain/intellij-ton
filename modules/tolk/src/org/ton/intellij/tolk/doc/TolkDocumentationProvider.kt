@@ -148,7 +148,7 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
 //                    appendStyledSpan(TolkColor.TYPE_PARAMETER.attributes, type.identifier.text)
 //                }
 
-            is TolkTupleType -> {
+            is TolkTupleTypeExpression -> {
 //                appendStyledSpan(TolkColor.BRACKETS.attributes, "[")
 //                type.typeReferenceList.joinTo(this) {
 //                    buildString {
@@ -159,7 +159,7 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
 
             }
 
-            is TolkTensorType -> {
+            is TolkTensorTypeExpression -> {
 //                appendStyledSpan(TolkColor.PARENTHESES.attributes, "(")
 //                type.typeReferenceList.joinTo(this) {
 //                    buildString {
@@ -169,24 +169,12 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
 //                appendStyledSpan(TolkColor.PARENTHESES.attributes, ")")
             }
 
-            is TolkParenType -> {
+            is TolkParenTypeExpression -> {
 //                appendStyledSpan(TolkColor.PARENTHESES.attributes, "(")
 //                type.typeReference?.let {
 //                    renderType(it)
 //                }
 //                appendStyledSpan(TolkColor.PARENTHESES.attributes, ")")
-            }
-
-            is TolkMapType -> {
-//                type.from?.let {
-//                    renderType(it)
-//                }
-//                append(" ")
-//                appendStyledSpan(TolkColor.OPERATION_SIGN.attributes, "->")
-//                append(" ")
-//                type.to?.let {
-//                    renderType(it)
-//                }
             }
 
             else -> {

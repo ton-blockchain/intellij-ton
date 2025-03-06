@@ -30,12 +30,12 @@ allprojects {
     apply(plugin = "kotlin")
 
     tasks.withType<KotlinCompile> {
-        compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
         compilerOptions.freeCompilerArgs.add("-Xjvm-default=all")
     }
 
     java {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
     }
 
     sourceSets {
@@ -96,7 +96,7 @@ intellijPlatform {
             }
         )
         ideaVersion {
-            sinceBuild.set("243")
+            sinceBuild.set("241")
             untilBuild = provider { null }
         }
         vendor {

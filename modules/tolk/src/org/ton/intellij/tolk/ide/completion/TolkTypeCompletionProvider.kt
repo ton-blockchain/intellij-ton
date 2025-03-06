@@ -6,14 +6,14 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.patterns.ElementPattern
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
-import org.ton.intellij.tolk.psi.TolkTypeIdentifier
+import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
 import org.ton.intellij.tolk.psi.TolkTypeParameterListOwner
 import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.psiElement
 
 object TolkTypeCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
-        psiElement<PsiElement>().withParent(psiElement<TolkTypeIdentifier>())
+        psiElement<PsiElement>().withParent(psiElement<TolkReferenceTypeExpression>())
 
     private val primitiveTypes = listOf(
         "int", "slice", "cell", "builder", "tuple", "bool",

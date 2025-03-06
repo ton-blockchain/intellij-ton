@@ -8,10 +8,7 @@ import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.stub.TolkFunctionStub
-import org.ton.intellij.tolk.type.TolkType
-import org.ton.intellij.tolk.type.TolkType.Function
-import org.ton.intellij.tolk.type.infer.CyclicReferenceException
-import org.ton.intellij.tolk.type.infer.inference
+import org.ton.intellij.tolk.type.*
 import javax.swing.Icon
 
 abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkFunction {
@@ -35,7 +32,7 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
                 }
             } ?: emptyList()
             val returnType = returnType ?: return@getCachedValue null
-            val type = Function(TolkType.create(parameters), returnType)
+            val type = TolkFunctionType(TolkType.tensor(parameters), returnType)
 
             CachedValueProvider.Result.create(type, this)
         }
@@ -50,16 +47,22 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
                 )
             }
 
-            val returnStatements = try {
-                inference?.returnStatements
+            val inference = try {
+                inference
             } catch (_: CyclicReferenceException) {
-                return@getCachedValue null
+                null
+            } ?: return@getCachedValue CachedValueProvider.Result.create(TolkType.Unknown, TolkType.Unknown)
+            val result = if (inference.returnStatements.isNotEmpty()) {
+                inference.returnStatements.asSequence().map {
+                    it.expression?.type
+                }.filterNotNull().fold(null) { a, b -> a?.join(b) ?: b }
+            } else if (inference.unreachable == TolkUnreachableKind.ThrowStatement) {
+                TolkType.Never
+            } else {
+                TolkType.Unit
             }
-            val type = returnStatements?.asSequence()?.map {
-                it.expression?.type
-            }?.filterNotNull()?.firstOrNull() ?: TolkType.Unknown
 
-            CachedValueProvider.Result.create(type, this)
+           CachedValueProvider.Result.create(result, this)
         }
 }
 
@@ -80,4 +83,3 @@ val TolkFunction.hasAsm: Boolean
 
 val TolkFunction.isBuiltin: Boolean
     get() = stub?.isBuiltin ?: (functionBody?.builtinKeyword != null)
-

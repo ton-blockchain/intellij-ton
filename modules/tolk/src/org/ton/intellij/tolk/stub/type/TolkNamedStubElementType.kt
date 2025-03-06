@@ -19,7 +19,7 @@ abstract class TolkNamedStubElementType<S : TolkNamedStub<T>, T : TolkNamedEleme
     }
 
     override fun indexStub(stub: S, sink: IndexSink) {
-        val name = stub.name
+        val name = stub.name?.removeSurrounding("`")
         if (name.isNullOrEmpty() || !shouldIndex()) return
 
         sink.occurrence(TolkNamedElementIndex.KEY, name)

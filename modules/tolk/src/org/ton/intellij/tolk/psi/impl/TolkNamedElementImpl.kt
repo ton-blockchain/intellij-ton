@@ -6,7 +6,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.TolkNamedStub
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkFunctionType
 import javax.swing.Icon
 
 abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementImpl<T>, TolkNamedElement {
@@ -38,7 +38,7 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
                         parameter.type?.toString() ?: "_"
                     }
                     append("): ")
-                    append((type as? TolkType.Function)?.returnType ?: "_")
+                    append((type as? TolkFunctionType)?.returnType ?: "_")
                 }
                 is TolkConstVar -> buildString {
                     append(name)

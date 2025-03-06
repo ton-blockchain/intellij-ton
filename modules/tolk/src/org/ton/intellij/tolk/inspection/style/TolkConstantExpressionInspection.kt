@@ -25,8 +25,9 @@ class TolkConstantExpressionInspection : TolkInspectionBase() {
             if (parent is TolkBinExpression && (parent.binaryOp.eq == null || parent.right != expression)) return
             if (parent is TolkExpression && parent !is TolkBinExpression) return
             val value = TolkConstantExpressionEvaluator.compute(holder.project, expression) ?: return
+            if (value !is TolkIntValue) return
             val valueText = buildString {
-                if (value is TolkIntValue && expression is TolkLiteralExpression && expression.stringLiteral != null) {
+                if (expression is TolkLiteralExpression && expression.stringLiteral != null) {
                     append("0x")
                     val hex = value.value.toString(16)
                     append(hex)

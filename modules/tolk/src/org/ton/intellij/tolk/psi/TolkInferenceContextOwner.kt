@@ -5,8 +5,8 @@ import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
-import org.ton.intellij.tolk.type.infer.TolkInferenceResult
-import org.ton.intellij.tolk.type.infer.inferTypesIn
+import org.ton.intellij.tolk.type.TolkInferenceResult
+import org.ton.intellij.tolk.type.inferTypesIn
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 

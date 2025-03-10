@@ -6,7 +6,7 @@ import org.ton.intellij.tolk.psi.TolkCallExpression
 import org.ton.intellij.tolk.psi.TolkDotExpression
 import org.ton.intellij.tolk.psi.TolkExpression
 import org.ton.intellij.tolk.type.TolkType
-import org.ton.intellij.tolk.type.infer.inference
+import org.ton.intellij.tolk.type.inference
 
 val TolkCallExpression.actualArgumentList: List<TolkExpression>
     get() {

@@ -2,7 +2,7 @@ package org.ton.intellij.tolk.psi
 
 import org.ton.intellij.tolk.type.TolkType
 import org.ton.intellij.tolk.type.TolkTypeProvider
-import org.ton.intellij.tolk.type.infer.inference
+import org.ton.intellij.tolk.type.inference
 
 interface TolkTypedElement : TolkElement, TolkTypeProvider {
     override val type: TolkType?

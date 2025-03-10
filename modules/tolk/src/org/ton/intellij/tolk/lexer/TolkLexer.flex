@@ -3,12 +3,12 @@ package org.ton.intellij.tolk.lexer;
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.util.containers.Stack;
-import org.ton.intellij.tolk.parser.TolkParserDefinition;
 import org.ton.intellij.tolk.psi.TolkElementTypes;
 
-import static com.intellij.psi.TokenType.*;
-import static org.ton.intellij.tolk.psi.TolkElementTypes.*;
+import static com.intellij.psi.TokenType.BAD_CHARACTER;
+import static com.intellij.psi.TokenType.WHITE_SPACE;
 import static org.ton.intellij.tolk.parser.TolkParserDefinition.*;
+import static org.ton.intellij.tolk.psi.TolkElementTypes.*;
 
 %%
 
@@ -37,23 +37,15 @@ import static org.ton.intellij.tolk.parser.TolkParserDefinition.*;
 %}
 
 %{
-  IElementType imbueBlockComment() {
-      assert(zzNestedCommentLevel == 0);
-      yybegin(YYINITIAL);
-
-      zzStartRead = zzPostponedMarkedPos;
-      zzPostponedMarkedPos = -1;
-
-      if (yylength() >= 3) {
-          if (yycharat(2) == '-' && (yylength() == 3 || yycharat(3) != '-' && yycharat(3) != '}')) {
-              return BLOCK_DOC_COMMENT;
-          }
-          if (yycharat(2) == '*' && (yylength() == 3 || yycharat(3) != '*' && yycharat(3) != '/')) {
-              return BLOCK_DOC_COMMENT;
-          }
+  IElementType commentStateToTokenType(int state) {
+      switch (state) {
+          case IN_BLOCK_COMMENT:
+              return BLOCK_COMMENT;
+          case IN_BLOCK_DOC:
+              return DOC_COMMENT;
+          default:
+              throw new IllegalStateException("Unexpected state: " + state);
       }
-
-      return BLOCK_COMMENT;
   }
 
   IElementType imbueOuterEolComment(){
@@ -62,7 +54,7 @@ import static org.ton.intellij.tolk.parser.TolkParserDefinition.*;
       zzStartRead = zzPostponedMarkedPos;
       zzPostponedMarkedPos = -1;
 
-      return EOL_DOC_COMMENT;
+      return DOC_COMMENT;
   }
 %}
 
@@ -111,9 +103,9 @@ import static org.ton.intellij.tolk.parser.TolkParserDefinition.*;
 %eof{
   return;
 %eof}
-%xstate STRING RAW_STRING DOC_COMMENT
+%xstate STRING RAW_STRING
 
-%s IN_BLOCK_COMMENT
+%s IN_BLOCK_COMMENT IN_BLOCK_DOC
 %s IN_EOL_DOC_COMMENT
 
 
@@ -136,9 +128,6 @@ WHITE_SPACE_CHAR=[\ \n\t\f]
 
 IDENTIFIER_SYMBOLS=[\?\:\'\$\_]
 IDENTIFIER_PART=[:digit:]|[:letter:]|IDENTIFIER_SYMBOLS
-
-LINE_DOC_COMMENT=;;;[^\n]*
-LINE_COMMENT=;;[^\n]*
 
 INTEGER_LITERAL=({DECIMAL_INTEGER_LITERAL}|{HEX_INTEGER_LITERAL}|{BIN_INTEGER_LITERAL})
 DECIMAL_INTEGER_LITERAL=(0|([1-9]({DIGIT_OR_UNDERSCORE})*))
@@ -172,7 +161,19 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
 
       \"                       { pushState(STRING); return OPEN_QUOTE; }
 
-      "/*"([^*]|\*+[^*/])*\*+"/"      { return BLOCK_COMMENT; }
+      "/**/" {
+          return BLOCK_COMMENT;
+      }
+      "/**" {
+          pushState(IN_BLOCK_DOC);
+          commentDepth = 0;
+          commentStart = getTokenStart();
+      }
+      "/*" {
+          pushState(IN_BLOCK_COMMENT);
+          commentDepth = 0;
+          commentStart = getTokenStart();
+      }
       ("////") .*                { return EOL_COMMENT; }
       {EOL_DOC_LINE}           { yybegin(IN_EOL_DOC_COMMENT);
                                  zzPostponedMarkedPos = zzStartRead; }
@@ -206,6 +207,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "."                      { return DOT; }
       "@"                      { return AT; }
 
+      "?."                     { return SAFE_ACCESS; }
       "=="                     { return EQEQ; }
       "!="                     { return NEQ; }
       "<="                     { return LEQ; }
@@ -301,25 +303,35 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
 
 <STRING, RAW_STRING> {REGULAR_STRING_PART}         { return TolkElementTypes.RAW_STRING_ELEMENT; }
 
-<IN_BLOCK_COMMENT> {
-  "/*"|"{-"  {
-          if (zzNestedCommentLevel++ == 0) {
-              zzPostponedMarkedPos = zzStartRead;
-              }
+<IN_BLOCK_COMMENT, IN_BLOCK_DOC> {
+    "/*" {
+         commentDepth++;
+    }
+
+    <<EOF>> {
+          int state = yystate();
+          popState();
+          zzStartRead = commentStart;
+          return commentStateToTokenType(state);
+    }
+
+    "*/" {
+        if (commentDepth > 0) {
+            commentDepth--;
         }
+        else {
+             int state = yystate();
+             popState();
+             zzStartRead = commentStart;
+             return commentStateToTokenType(state);
+        }
+    }
 
-  "*/"|"-}"
-      { if (--zzNestedCommentLevel == 0)
-              return imbueBlockComment();
-      }
-
-  <<EOF>> { zzNestedCommentLevel = 0; return imbueBlockComment(); }
-
-  [^]     { }
+    [\s\S] {}
 }
 
 <IN_EOL_DOC_COMMENT> {
-  {EOL_WS}{LINE_WS}*(";;;;"|"////")   { yybegin(YYINITIAL);
+  {EOL_WS}{LINE_WS}*("////")   { yybegin(YYINITIAL);
                                yypushback(yylength());
                                return imbueOuterEolComment();}
   {EOL_WS}{EOL_DOC_LINE}     {}

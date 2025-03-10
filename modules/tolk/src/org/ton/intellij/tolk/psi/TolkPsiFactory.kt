@@ -22,7 +22,7 @@ class TolkPsiFactory private constructor(val project: Project) {
         PsiParserFacade.getInstance(project).createWhiteSpaceFromText(ws)
 
     fun createStatement(text: String): TolkStatement {
-        val file = createFile("() foo() { $text }")
+        val file = createFile("fun foo() { $text }")
         return file.functions.first().functionBody!!.blockStatement!!.statementList.first()
     }
 

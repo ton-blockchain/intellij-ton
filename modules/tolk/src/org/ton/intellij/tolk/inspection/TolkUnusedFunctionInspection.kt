@@ -20,7 +20,7 @@ class TolkUnusedFunctionInspection : TolkInspectionBase() {
             if (name == "main") return
             if (name == "onInternalMessage") return
             if (name == "onExternalMessage") return
-            if (name == "onTickTock") return
+            if (name == "onRunTickTock") return
             if (name == "onSplitPrepare") return
             if (name == "onSplitInstall") return
             val containingDirectory = o.containingFile.containingDirectory ?: return

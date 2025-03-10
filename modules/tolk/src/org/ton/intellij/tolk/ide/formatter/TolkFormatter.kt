@@ -54,9 +54,9 @@ class TolkFormatter : FormattingModelBuilder {
             .betweenInside(LPAREN, MAPSTO, ASM_PARAMETERS).spaces(1)
             .betweenInside(
                 TokenSet.create(
-                    TENSOR_TYPE,
-                    TUPLE_TYPE,
-                    TYPE_IDENTIFIER,
+                    TENSOR_TYPE_EXPRESSION,
+                    TUPLE_TYPE_EXPRESSION,
+                    REFERENCE_TYPE_EXPRESSION,
                 ), TokenSet.create(IDENTIFIER, TILDE), FUNCTION
             ).spaces(1)
             .afterInside(TYPE_EXPRESSION, FUNCTION).spaces(1)
@@ -67,8 +67,8 @@ class TolkFormatter : FormattingModelBuilder {
             .beforeInside(UNIT_EXPRESSION, CALL_EXPRESSION).none()
             .beforeInside(TENSOR_EXPRESSION, DOT_EXPRESSION).none()
             .beforeInside(UNIT_EXPRESSION, DOT_EXPRESSION).none()
-            .beforeInside(RPAREN, TokenSet.create(TENSOR_EXPRESSION, TENSOR_TYPE)).none()
-            .beforeInside(RBRACK, TokenSet.create(TUPLE_EXPRESSION, TUPLE_TYPE)).none()
+            .beforeInside(RPAREN, TokenSet.create(TENSOR_EXPRESSION, TENSOR_TYPE_EXPRESSION)).none()
+            .beforeInside(RBRACK, TokenSet.create(TUPLE_EXPRESSION, TUPLE_TYPE_EXPRESSION)).none()
             .aroundInside(TokenSet.create(QUEST, COLON), TERNARY_EXPRESSION).spaces(1)
             .aroundInside(
                 tokenSetOf(

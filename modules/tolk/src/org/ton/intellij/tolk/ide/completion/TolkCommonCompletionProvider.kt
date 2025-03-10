@@ -15,7 +15,7 @@ import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.sdk.TolkSdkManager
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkFunctionType
 import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.psiElement
 
@@ -341,7 +341,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             is TolkFunction -> {
                 PrioritizedLookupElement.withPriority(
                     base
-                        .withTypeText((this.type as? TolkType.Function)?.returnType?.toString() ?: "")
+                        .withTypeText((this.type as? TolkFunctionType)?.returnType?.toString() ?: "")
                         .let { builder ->
                             typeParameterList?.let { list ->
                                 builder.appendTailText(

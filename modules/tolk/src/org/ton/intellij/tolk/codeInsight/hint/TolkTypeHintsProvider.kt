@@ -1,14 +1,13 @@
 package org.ton.intellij.tolk.codeInsight.hint
 
-import com.intellij.codeInsight.hints.declarative.HintFormat
 import com.intellij.codeInsight.hints.declarative.InlayTreeSink
 import com.intellij.codeInsight.hints.declarative.InlineInlayPosition
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.endOffset
 import org.ton.intellij.tolk.psi.TolkCatchParameter
 import org.ton.intellij.tolk.psi.TolkConstVar
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkVar
+import org.ton.intellij.tolk.type.TolkFunctionType
 import org.ton.intellij.tolk.type.TolkType
 import org.ton.intellij.tolk.type.printTolkType
 
@@ -36,11 +35,12 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         val name = element.name
         if (name.isNullOrEmpty() || name == "_") return
         val type = element.type ?: return
-        if (type is TolkType.Unknown) return
+        if (type == TolkType.Unknown) return
 
         sink.addPresentation(
-            position = InlineInlayPosition(element.endOffset, true),
-            hintFormat = HintFormat.default
+            position = InlineInlayPosition(element.textRange.endOffset, true),
+//            hintFormat = HintFormat.default
+            hasBackground = true,
         ) {
             text(": ")
             printTolkType(type)
@@ -52,8 +52,9 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         if (element.name == "_") return
         val type = element.type ?: return
         sink.addPresentation(
-            position = InlineInlayPosition(element.endOffset, true),
-            hintFormat = HintFormat.default
+            position = InlineInlayPosition(element.textRange.endOffset, true),
+//            hintFormat = HintFormat.default,
+            hasBackground = true,
         ) {
             text(": ")
             printTolkType(type)
@@ -66,8 +67,9 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         val identifier = element.identifier ?: return
         val type = element.type ?: return
         sink.addPresentation(
-            position = InlineInlayPosition(identifier.endOffset, true),
-            hintFormat = HintFormat.default
+            position = InlineInlayPosition(identifier.textRange.endOffset, true),
+//            hintFormat = HintFormat.default,
+            hasBackground = true,
         ) {
             text(": ")
             printTolkType(type)
@@ -79,15 +81,16 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         if (element.typeExpression != null) return
         element.functionBody?.blockStatement ?: return
         val parameters = element.parameterList ?: return
-        val returnType = (element.type as? TolkType.Function)?.returnType ?: return
+        val returnType = (element.type as? TolkFunctionType)?.returnType ?: return
         when (returnType) {
             TolkType.Unit,
             TolkType.Unknown -> return
             else -> {}
         }
         sink.addPresentation(
-            position = InlineInlayPosition(parameters.endOffset, true),
-            hintFormat = HintFormat.default
+            position = InlineInlayPosition(parameters.textRange.endOffset, true),
+//            hintFormat = HintFormat.default,
+            hasBackground = true,
         ) {
             text(": ")
             printTolkType(returnType)

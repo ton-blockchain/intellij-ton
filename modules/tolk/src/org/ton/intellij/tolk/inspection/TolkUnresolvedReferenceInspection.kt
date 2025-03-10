@@ -16,7 +16,9 @@ class TolkUnresolvedReferenceInspection : TolkInspectionBase() {
         session: LocalInspectionToolSession,
     ): TolkVisitor = object : TolkVisitor() {
         override fun visitReferenceExpression(o: TolkReferenceExpression) {
-            if (o.name == "_") return
+            when(o.name) {
+                "_", "__expect_type" -> return
+            }
             val reference = o.reference ?: return
             val resolved = reference.resolve()
             if (resolved != null) return

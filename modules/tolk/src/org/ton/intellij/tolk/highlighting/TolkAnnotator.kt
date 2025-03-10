@@ -36,7 +36,7 @@ class TolkAnnotator : Annotator {
                 return highlight(TextRange(startOffset, endOffset), holder, TolkColor.ANNOTATION.textAttributesKey)
             }
 
-            is TolkTypeIdentifier -> {
+            is TolkReferenceTypeExpression -> {
                 if (element.isPrimitive) {
                     return highlight(element, holder, TolkColor.PRIMITIVE.textAttributesKey)
                 }
@@ -149,6 +149,11 @@ class TolkAnnotator : Annotator {
     }
 
     fun highlightReference(element: TolkReferenceExpression, holder: AnnotationHolder) {
+        val identifier = element.identifier
+        if (element.name == "__expect_type") {
+            highlight(identifier, holder, DefaultLanguageHighlighterColors.LABEL)
+            return
+        }
         val reference = element.reference ?: return
         val resolved = reference.resolve() ?: return
         val color = when (resolved) {
@@ -164,10 +169,9 @@ class TolkAnnotator : Annotator {
             is TolkVar -> TolkColor.LOCAL_VARIABLE
             else -> return
         }
-        DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE
-        highlight(element.identifier, holder, color.textAttributesKey)
+        highlight(identifier, holder, color.textAttributesKey)
         if (resolved is TolkFunction && resolved.isDeprecated) {
-            highlight(element.identifier, holder, CodeInsightColors.DEPRECATED_ATTRIBUTES)
+            highlight(identifier, holder, CodeInsightColors.DEPRECATED_ATTRIBUTES)
         }
     }
 

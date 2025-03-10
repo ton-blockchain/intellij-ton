@@ -24,8 +24,8 @@
                                             implementationClass="org.ton.intellij.tolk.ide.TolkImplementationTextSelectioner"/>
         <!--        <platform.backend.documentation.psiTargetProvider id="TolkDocumentationTargetProvider"-->
         <!--                                                          implementation="org.ton.intellij.tolk.ide.quickdoc.TolkPsiDocumentationTargetProvider"/>-->
-<!--        <lang.documentationProvider language="Tolk"-->
-<!--                                    implementationClass="org.ton.intellij.tolk.doc.TolkDocumentationProvider"/>-->
+        <!--        <lang.documentationProvider language="Tolk"-->
+        <!--                                    implementationClass="org.ton.intellij.tolk.doc.TolkDocumentationProvider"/>-->
         <lang.formatter language="Tolk" implementationClass="org.ton.intellij.tolk.ide.formatter.TolkFormatter"/>
         <lang.refactoringSupport language="Tolk"
                                  implementationClass="org.ton.intellij.tolk.refactor.TolkRefactoringSupportProvider"/>
@@ -61,7 +61,9 @@
                 group="TYPES_GROUP"
                 isEnabledByDefault="true"
                 bundle="messages.TolkBundle"
-                nameKey="codeInsight.hint.types" providerId="tolk.types.hints">
+                nameKey="codeInsight.hint.types"
+                providerId="tolk.types.hints"
+        >
             <option optionId="hint.type.var"
                     enabledByDefault="true"
                     bundle="messages.TolkBundle"
@@ -79,8 +81,16 @@
                     descriptionKey="codeInsight.hint.description.types.fun"/>
 
         </codeInsight.declarativeInlayProvider>
-        <!--        <codeInsight.parameterNameHints language="Tolk"-->
-        <!--                                        implementationClass="org.ton.intellij.tolk.ide.hints.TolkParameterHintsProvider"/>-->
+        <codeInsight.declarativeInlayProvider group="PARAMETERS_GROUP"
+                                              implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkParameterHintsProvider"
+                                              isEnabledByDefault="true"
+                                              language="Tolk"
+                                              providerId="tolk.parameters.hints"
+                                              bundle="messages.TolkBundle"
+                                              nameKey="codeInsight.hint.parameters"
+                                              descriptionKey="codeInsight.hint.description.parameters"/>
+        <codeInsight.parameterInfo language="Tolk"
+                                   implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkParameterInfoHandler"/>
 
         <!--        <codeInsight.declarativeInlayProvider bundle="messages.TolkBundle"-->
         <!--                                              group="VALUES_GROUP"-->

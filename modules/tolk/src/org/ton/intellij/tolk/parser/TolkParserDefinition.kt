@@ -60,10 +60,7 @@ class TolkParserDefinition : ParserDefinition {
         val EOL_COMMENT = TolkTokenType("<EOL_COMMENT>")
 
         @JvmField
-        val BLOCK_DOC_COMMENT = TolkTokenType("<BLOCK_DOC_COMMENT>")
-
-        @JvmField
-        val EOL_DOC_COMMENT = TolkDocCommentElementType("<EOL_DOC_COMMENT>")
+        val DOC_COMMENT = TolkDocCommentElementType("<DOC_COMMENT>")
 
         val WHITESPACES = TokenSet.create(TokenType.WHITE_SPACE)
         val STRING_LITERALS = TokenSet.create(TolkElementTypes.STRING_LITERAL)

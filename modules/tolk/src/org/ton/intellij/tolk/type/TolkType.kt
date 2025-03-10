@@ -2,107 +2,208 @@ package org.ton.intellij.tolk.type
 
 
 import org.ton.intellij.tolk.psi.TolkTypeParameter
+import org.ton.intellij.tolk.type.range.TvmIntRangeSet
 
 sealed interface TolkType {
+    fun nullable(): TolkType {
+        return TolkUnionType.create(this, Null)
+    }
+
+    fun isNullable(): Boolean {
+        return this is TolkUnionType && elements.contains(Null)
+    }
+
+    fun removeNullability(): TolkType = this
+
+    /**
+     * if A.isSuperType(B) then A.join(B) is A and A.meet(B) is B.
+     */
+    fun isSuperType(other: TolkType): Boolean = other == this || other == TolkNeverType
+
+    fun join(other: TolkType): TolkType
+
+    fun meet(other: TolkType): TolkType = if (other.isSuperType(this)) this else TolkNeverType
+
+    fun visit(visitor: TolkTypeVisitor) {}
 
     fun substitute(substitution: Map<TolkTypeParameter, TolkType>): TolkType {
         return when (this) {
-            is Function -> Function(inputType.substitute(substitution), returnType.substitute(substitution))
-            is Tensor -> Tensor(elements.map { it.substitute(substitution) })
-            is TypedTuple -> TypedTuple(elements.map { it.substitute(substitution) })
-            is UnionType -> UnionType(elements.map { it.substitute(substitution) })
+            is TolkTensorType -> tensor(elements.map { it.substitute(substitution) })
+            is TolkTypedTupleType -> TolkTypedTupleType(elements.map { it.substitute(substitution) })
+            is TolkUnionType -> TolkUnionType.create(elements.map { it.substitute(substitution) })
             is ParameterType -> substitution[this.psiElement] ?: this
             else -> this
         }
     }
 
-    class ParameterType(
+    data class ParameterType(
         val psiElement: TolkTypeParameter
-    ) : TolkNamedType {
-        override val name: String
-            get() = psiElement.name ?: ""
+    ) : TolkType {
+        val name: String get() = psiElement.name.toString()
 
         override fun toString(): String = name
-    }
 
-    class Function(
-        val inputType: TolkType,
-        val returnType: TolkType
-    ) : TolkType {
+        override fun join(other: TolkType): TolkType {
+            if (this == other) return this
+            return TolkUnionType.create(this, other)
+        }
 
-        override fun toString(): String = "$inputType -> $returnType"
-    }
-
-    class Tensor(
-        val elements: List<TolkType>
-    ) : TolkType {
-        override fun toString(): String = "(${elements.joinToString()})"
-    }
-
-    class TypedTuple(
-        val elements: List<TolkType>
-    ) : TolkType {
-        override fun toString(): String = "[${elements.joinToString()}]"
-    }
-
-    object Unknown : TolkType {
-        override fun toString(): String = "?"
-    }
-
-    class UnionType(
-        val elements: List<TolkType>
-    ) : TolkType {
-        override fun toString(): String = elements.joinToString(" | ")
+        override fun visit(visitor: TolkTypeVisitor) {
+            visitor.visitTypeParameter(this)
+        }
     }
 
     companion object {
-        val Int = TolkPrimitiveType.Int
-        val Cell = TolkPrimitiveType.Cell
-        val Builder = TolkPrimitiveType.Builder
-        val Slice = TolkPrimitiveType.Slice
-        val Continuation = TolkPrimitiveType.Continuation
-        val Tuple = TolkPrimitiveType.Tuple
-        val Unit = TolkPrimitiveType.Unit
-        val Bool = TolkPrimitiveType.Bool
+        val Int = TolkIntRangeType(TvmIntRangeSet.ALL)
+        val TRUE = TolkConstantBoolType(true)
+        val FALSE = TolkConstantBoolType(false)
+        val Bool = TolkBoolType
+        val Null = TolkNullType
+        val Unit = TolkUnitType
+        val Cell = TolkCellType
+        val Slice = TolkSliceType
+        val Builder = TolkBuilderType
+        val Continuation = TolkContinuationType
+        val Tuple = TolkTupleType
+        val Unknown = TolkUnknownType
+        val Never = TolkNeverType
 
-        fun create(vararg elements: TolkType): TolkType {
-            return create(elements.toList())
+        fun bool(value: Boolean): TolkType = if (value) TRUE else FALSE
+
+        fun union(vararg elements: TolkType): TolkType {
+            return TolkUnionType.create(elements.toList())
         }
 
-        fun create(elements: Collection<TolkType>): TolkType {
-            return when {
-                elements.isEmpty() -> Unit
-                elements.size == 1 -> {
-                    val element = elements.first()
-                    if (element is Tensor) {
-                        create(element.elements)
-                    } else element
-                }
+        fun union(elements: Iterable<TolkType>): TolkType = TolkUnionType.create(elements.toList())
 
-                else -> Tensor(elements.toList())
-            }
-        }
+        fun tensor(elements: Collection<TolkType>): TolkType = TolkTensorType.create(elements.toList())
+
+        fun typedTuple(elements: Collection<TolkType>): TolkType = TolkTypedTupleType(elements.toList())
     }
 }
 
-interface TolkNamedType : TolkType {
-    val name: String
+interface TolkPrimitiveType : TolkType
+
+interface TolkConstantType<T> : TolkType {
+    val value: T
 }
 
-sealed class TolkPrimitiveType(
-    override val name: String
-) : TolkNamedType {
-    object Int : TolkPrimitiveType("int")
-    object Cell : TolkPrimitiveType("cell")
-    object Builder : TolkPrimitiveType("builder")
-    object Slice : TolkPrimitiveType("slice")
-    object Continuation : TolkPrimitiveType("continuation")
-    object Tuple : TolkPrimitiveType("tuple")
-    object Unit : TolkPrimitiveType("()")
-    object Bool : TolkPrimitiveType("bool")
+object TolkUnitType : TolkPrimitiveType {
+    override fun join(other: TolkType): TolkType {
+        if (other == this) return this
+        return TolkType.union(other, this)
+    }
 
-    override fun toString(): String = name
+    override fun toString(): String = "()"
 }
 
+object TolkNullType : TolkPrimitiveType {
+    override fun join(other: TolkType): TolkType {
+        if (other == this) return this
+        return TolkType.union(other, this)
+    }
 
+    override fun removeNullability(): TolkType = TolkType.Never
 
+    override fun toString(): String = "null"
+}
+
+object TolkCellType : TolkPrimitiveType {
+    override fun isSuperType(other: TolkType): Boolean = other == this
+
+    override fun join(other: TolkType): TolkType {
+        if (other is TolkCellType) return this
+        return TolkType.union(this, other)
+    }
+
+    override fun meet(other: TolkType): TolkType {
+        if (other is TolkCellType) return this
+        return TolkNeverType
+    }
+
+    override fun toString(): String = "cell"
+}
+
+object TolkSliceType : TolkPrimitiveType {
+    override fun isSuperType(other: TolkType): Boolean = other == this
+
+    override fun join(other: TolkType): TolkType {
+        if (other is TolkSliceType) return this
+        return TolkType.union(this, other)
+    }
+
+    override fun meet(other: TolkType): TolkType {
+        if (other is TolkSliceType) return this
+        return TolkNeverType
+    }
+
+    override fun toString(): String = "slice"
+}
+
+object TolkBuilderType : TolkPrimitiveType {
+    override fun isSuperType(other: TolkType): Boolean = other == this
+
+    override fun join(other: TolkType): TolkType {
+        if (other is TolkBuilderType) return this
+        return TolkUnionType.create(this, other)
+    }
+
+    override fun meet(other: TolkType): TolkType {
+        if (other is TolkBuilderType) return this
+        return TolkNeverType
+    }
+
+    override fun toString(): String = "builder"
+}
+
+object TolkContinuationType : TolkPrimitiveType {
+    override fun isSuperType(other: TolkType): Boolean = other == this
+
+    override fun join(other: TolkType): TolkType {
+        if (other is TolkContinuationType) return this
+        return TolkType.union(this, other)
+    }
+
+    override fun meet(other: TolkType): TolkType {
+        if (other is TolkContinuationType) return this
+        return TolkNeverType
+    }
+
+    override fun toString(): String = "continuation"
+}
+
+object TolkTupleType : TolkPrimitiveType {
+    override fun isSuperType(other: TolkType): Boolean = other == this
+
+    override fun join(other: TolkType): TolkType {
+        if (other is TolkTupleType) return this
+        return TolkType.union(this, other)
+    }
+
+    override fun meet(other: TolkType): TolkType {
+        if (other is TolkTupleType) return this
+        return TolkNeverType
+    }
+
+    override fun toString(): String = "tuple"
+}
+
+object TolkUnknownType : TolkType {
+    override fun isSuperType(other: TolkType): Boolean = true
+    override fun join(other: TolkType): TolkType = this
+    override fun meet(other: TolkType): TolkType = other
+
+    override fun toString(): String = "unknown"
+}
+
+object TolkNeverType : TolkType {
+    override fun isSuperType(other: TolkType): Boolean = other == this
+    override fun join(other: TolkType): TolkType = other
+    override fun meet(other: TolkType): TolkType = this
+
+    override fun toString(): String = "never"
+}
+
+interface TolkTypeVisitor {
+    fun visitTypeParameter(value: TolkType.ParameterType)
+}

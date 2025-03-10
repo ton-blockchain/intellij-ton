@@ -11,7 +11,7 @@ class TolkUnsupportedElementInspection : TolkInspectionBase() {
         holder: ProblemsHolder,
         session: LocalInspectionToolSession,
     ): TolkVisitor = object : TolkVisitor() {
-        override fun visitUnionType(o: TolkUnionType) {
+        override fun visitUnionTypeExpression(o: TolkUnionTypeExpression) {
             holder.registerProblem(
                 o,
                 TolkBundle.message("inspection.unsupported_element.description"),

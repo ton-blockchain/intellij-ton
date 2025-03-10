@@ -15,7 +15,7 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
         get() = references.firstOrNull()?.resolve()?.let { it as? TolkTypedElement }?.type
 
     override fun getReferences(): Array<TolkReference> {
-//        if (isVariableDefinition()) return EMPTY_ARRAY
+        if (name == "__expect_type") return EMPTY_ARRAY
         return arrayOf(TolkReference(this, identifier.textRangeInParent))
     }
 
@@ -31,6 +31,8 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
     override fun getName(): String? = identifier.text
 
     override fun getNameIdentifier(): PsiElement? = identifier
+
+    override fun toString(): String = "TolkReferenceExpression($text)"
 
     companion object {
         private val EMPTY_ARRAY = emptyArray<TolkReference>()

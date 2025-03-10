@@ -9,12 +9,12 @@ import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.psi.TolkFunction
-import org.ton.intellij.tolk.psi.TolkTypeIdentifier
+import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
 import org.ton.intellij.tolk.psi.TolkTypeParameterListOwner
 import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.type.TolkType
 
-abstract class TolkTypeIdentifierMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkTypeIdentifier {
+abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceTypeExpression {
     private val primitiveType
         get() = when (text) {
             "int" -> TolkType.Int
@@ -25,6 +25,7 @@ abstract class TolkTypeIdentifierMixin(node: ASTNode) : ASTWrapperPsiElement(nod
             "tuple" -> TolkType.Tuple
             "void" -> TolkType.Unit
             "bool" -> TolkType.Bool
+            "never" -> TolkType.Never
             else -> null
         }
 
@@ -40,7 +41,7 @@ abstract class TolkTypeIdentifierMixin(node: ASTNode) : ASTWrapperPsiElement(nod
 
     override fun getReference(): PsiReference? = references.firstOrNull()
 
-    class TolkTypeIdentifierReference(element: TolkTypeIdentifier) : PsiReferenceBase.Poly<TolkTypeIdentifier>(
+    class TolkTypeIdentifierReference(element: TolkReferenceTypeExpression) : PsiReferenceBase.Poly<TolkReferenceTypeExpression>(
         element, TextRange(0, element.textLength), false
     ) {
         override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
@@ -116,5 +117,5 @@ abstract class TolkTypeIdentifierMixin(node: ASTNode) : ASTWrapperPsiElement(nod
 //    }
 }
 
-val TolkTypeIdentifier.isPrimitive: Boolean
-    get() = (this as TolkTypeIdentifierMixin).isPrimitive
+val TolkReferenceTypeExpression.isPrimitive: Boolean
+    get() = (this as TolkReferenceTypeExpressionMixin).isPrimitive

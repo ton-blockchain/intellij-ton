@@ -19,6 +19,8 @@ data class TolkTupleValue(val values: List<TolkValue?>) : TolkValue
 
 data class TolkTensorValue(val values: List<TolkValue?>) : TolkValue
 
+data class TolkSliceValue(val value: String) : TolkValue
+
 @OptIn(ExperimentalUnsignedTypes::class)
 val TolkLiteralExpression.value: TolkValue
     get() {
@@ -57,7 +59,7 @@ val TolkLiteralExpression.value: TolkValue
             if (text.length < 2) return TolkIntValue(BigInteger.ZERO)
             val tag = text.lastOrNull()
             if (tag == '"') {
-                return TolkIntValue(BigInteger.ZERO) // TODO: Slice type
+                return TolkSliceValue(text.removeSurrounding("\""))
             }
             when (tag) {
                 'u' -> {

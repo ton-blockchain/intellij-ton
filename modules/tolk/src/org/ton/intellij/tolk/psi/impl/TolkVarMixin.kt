@@ -6,7 +6,7 @@ import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.psi.TolkVar
 import org.ton.intellij.tolk.type.TolkType
-import org.ton.intellij.tolk.type.infer.inference
+import org.ton.intellij.tolk.type.inference
 
 abstract class TolkVarMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkVar {
     override fun getName(): String = identifier.text
@@ -22,4 +22,6 @@ abstract class TolkVarMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkVar
 
     override val type: TolkType?
         get() = typeExpression?.type ?: inference?.getType(this)
+
+    override fun toString(): String = "TolkVar($text)"
 }

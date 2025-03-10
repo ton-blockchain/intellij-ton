@@ -1,5 +1,13 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [2.5.2]
+
+### Added
+- Tolk 0.9 support
+- Tolk block documentations
+- Tolk parameter hints
+- Intellij Platform v241 support
+
 ## [2.5.0]
 
 ### Added

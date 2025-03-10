@@ -39,6 +39,33 @@ class TolkUnionType private constructor(
         elements.forEach { it.visit(visitor) }
     }
 
+    fun simplify(): TolkType {
+        if (elements.size <= 2) return this
+        val unique: MutableList<TolkType> = ArrayList(elements)
+        var changed = true
+        while (changed) {
+            changed = false
+            outer@for(i in 0 until unique.size) {
+                for (j in 0 until unique.size) {
+                    if (i == j) continue
+                    val iType = unique[i]
+                    val jType = unique[j]
+                    val joined = iType.join(jType)
+                    if (joined !is TolkUnionType) {
+                        unique[i] = joined
+                        unique.removeAt(j)
+                        changed = true
+                        break@outer
+                    }
+                }
+            }
+        }
+
+        if (unique.size == 1) return unique.single()
+
+        return TolkUnionType(unique.toSet())
+    }
+
     companion object {
         fun create(vararg elements: TolkType): TolkType {
             return create(elements.asIterable())
@@ -46,7 +73,7 @@ class TolkUnionType private constructor(
 
         fun create(elements: Iterable<TolkType>): TolkType {
             val elements = joinUnions(elements)
-            return elements.singleOrNull() ?: TolkUnionType(elements)
+            return elements.singleOrNull() ?: TolkUnionType(elements).simplify()
         }
 
         private fun joinUnions(set: Iterable<TolkType>): Set<TolkType> {

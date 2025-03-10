@@ -39,7 +39,10 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
 
     private val returnType: TolkType?
         get() = CachedValuesManager.getCachedValue(this) {
-            val typeExpressionType = typeExpression?.type
+            var typeExpressionType = typeExpression?.type
+            if (typeExpressionType == TolkType.Unknown) {
+                typeExpressionType = null
+            }
             if (typeExpressionType != null) {
                 return@getCachedValue CachedValueProvider.Result.create(
                     typeExpressionType,
@@ -51,8 +54,9 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
                 inference
             } catch (_: CyclicReferenceException) {
                 null
-            } ?: return@getCachedValue CachedValueProvider.Result.create(TolkType.Unknown, TolkType.Unknown)
-            val result = if (inference.returnStatements.isNotEmpty()) {
+            } ?: return@getCachedValue CachedValueProvider.Result.create(null, this)
+
+            var result = if (inference.returnStatements.isNotEmpty()) {
                 inference.returnStatements.asSequence().map {
                     it.expression?.type
                 }.filterNotNull().fold(null) { a, b -> a?.join(b) ?: b }
@@ -60,6 +64,9 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
                 TolkType.Never
             } else {
                 TolkType.Unit
+            }
+            if (result == TolkType.Unknown) {
+                result = null
             }
 
            CachedValueProvider.Result.create(result, this)

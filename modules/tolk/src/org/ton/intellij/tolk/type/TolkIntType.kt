@@ -35,7 +35,11 @@ data class TolkConstantIntType(
 
     override fun isSuperType(other: TolkType): Boolean = other == this || other == TolkNeverType
 
-    override fun toString(): String = if (value.bitLength() <= 16) value.toString() else "int"
+    override fun toString(): String {
+        val bitLength = value.bitLength()
+        if (bitLength <= 16) return value.toString()
+        return "0x${value.toString(16)}"
+    }
 }
 
 data class TolkIntRangeType(
@@ -44,5 +48,5 @@ data class TolkIntRangeType(
 
     override fun negate(): TolkIntType = TolkIntRangeType(range.unaryMinus())
 
-    override fun toString(): String = "int"
+    override fun toString(): String = range.toString()
 }

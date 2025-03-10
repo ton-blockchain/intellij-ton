@@ -11,7 +11,13 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
         }
 
         is TolkFunctionType -> {
-            printTolkType(type.inputType)
+            if (type.inputType is TolkTensorType) {
+                printTolkType(type.inputType)
+            } else {
+                text("(")
+                printTolkType(type.inputType)
+                text(")")
+            }
             text(" -> ")
             printTolkType(type.returnType)
         }
@@ -19,6 +25,9 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
         TolkNeverType -> text("never")
 
         is TolkUnknownType -> text("unknown")
+        is TolkIntType -> text("int")
+        is TolkBoolType -> text("bool")
+        is TolkUnitType -> text("void")
 
         is TolkTensorType -> {
             text("(")
@@ -71,6 +80,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
                 }
             }
         }
+
 
         else -> text(type.toString())
     }

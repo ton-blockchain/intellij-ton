@@ -153,8 +153,7 @@ GlobalVar ::= 'global' IDENTIFIER GlobalVarType ';'  {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkGlobalVarMixin"
     implements=[
-        "org.ton.intellij.tolk.psi.TolkNamedElement"
-        "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkSymbolElement"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkGlobalVarStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -167,8 +166,7 @@ ConstVar ::= 'const' IDENTIFIER ConstVarType? '=' Expression ';' {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkConstVarMixin"
     implements=[
-        "org.ton.intellij.tolk.psi.TolkNamedElement"
-        "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkSymbolElement"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkConstVarStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -234,17 +232,16 @@ StructField ::= IDENTIFIER ':' TypeExpression ['=' Expression] ';' {
 Function ::= Annotation* ((get 'fun'?) | ('fun')) IDENTIFIER TypeParameterList? ParameterList ReturnType? FunctionBody {
     pin = 2
     implements = [
-        "org.ton.intellij.tolk.psi.TolkNamedElement"
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
-        "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkSymbolElement"
     ]
     mixin = "org.ton.intellij.tolk.psi.impl.TolkFunctionMixin"
     stubClass = "org.ton.intellij.tolk.stub.TolkFunctionStub"
     elementTypeFactory = "org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
-    hooks = [
-        leftBinder = "ADJACENT_LINE_COMMENTS"
-    ]
+//    hooks = [
+//        leftBinder = "ADJACENT_LINE_COMMENTS"
+//    ]
 }
 private get ::= <<getKeyword>>
 
@@ -268,8 +265,7 @@ TypeParameterList ::= '<' << comma_separated_list TypeParameter >> '>' {
 TypeParameter ::= IDENTIFIER {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkTypeParameterMixin"
     implements=[
-        "org.ton.intellij.tolk.psi.TolkNamedElement"
-        "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkSymbolElement"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkTypeParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -393,8 +389,7 @@ private CatchParameterList ::= '(' CatchParameter (',' CatchParameter)? ')' {
 CatchParameter ::= IDENTIFIER {
     mixin="org.ton.intellij.tolk.psi.impl.TolkCatchParameterMixin"
     implements = [
-        "org.ton.intellij.tolk.psi.TolkTypedElement"
-        "org.ton.intellij.tolk.psi.TolkNamedElement"
+        "org.ton.intellij.tolk.psi.TolkSymbolElement"
     ]
 }
 
@@ -513,8 +508,7 @@ VarRedef ::= ReferenceExpression 'redef' {
 Var ::= IDENTIFIER (':' TypeExpression)? {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkVarMixin"
     implements = [
-        "org.ton.intellij.tolk.psi.TolkNamedElement"
-        "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkSymbolElement"
     ]
     extends = VarDefinition
 }
@@ -634,8 +628,7 @@ Parameter ::= 'mutate'? IDENTIFIER ':' !"self" TypeExpression {
     pin = 2
     mixin="org.ton.intellij.tolk.psi.impl.TolkParameterMixin"
     implements=[
-        "org.ton.intellij.tolk.psi.TolkNamedElement"
-        "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkSymbolElement"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"

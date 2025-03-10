@@ -5,6 +5,8 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.TokenType
 import com.intellij.psi.formatter.common.AbstractBlock
 import com.intellij.psi.tree.TokenSet
+import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_COMMENT
+import org.ton.intellij.tolk.psi.TOLK_DOC_COMMENTS
 import org.ton.intellij.tolk.psi.TolkElementTypes.*
 import java.util.*
 
@@ -67,6 +69,7 @@ class TolkFormattingBlock(
         val childIndent =
             when (node.elementType) {
                 BLOCK_STATEMENT -> Indent.getNormalIndent()
+                DOC_COMMENT -> Indent.getNoneIndent()
                 else -> Indent.getNormalIndent()
             }
         val wrap = calcWrap(node)
@@ -91,7 +94,7 @@ class TolkFormattingBlock(
             DOT_EXPRESSION, TERNARY_EXPRESSION -> if (parent.firstChildNode != child) return Indent.getNormalIndent()
             VAR_TENSOR, TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE_EXPRESSION, PAREN_TYPE_EXPRESSION, ARGUMENT_LIST -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
             VAR_TUPLE, TUPLE_TYPE_EXPRESSION, TUPLE_EXPRESSION -> if (type != LBRACK && type != RBRACK) return Indent.getNormalIndent()
-            FUNCTION -> if (type == BUILTIN_KEYWORD || type == ASM_DEFINITION) return Indent.getNormalIndent()
+            FUNCTION_BODY -> if (type == BUILTIN_KEYWORD || type == ASM_DEFINITION) return Indent.getNormalIndent()
         }
         // todo: check if intent work normally
 //        if (type == PRIMITIVE_TYPE_EXPRESSION || type == HOLE_TYPE_EXPRESSION) return Indent.getNoneIndent()

@@ -132,7 +132,7 @@ IDENTIFIER_PART=[:digit:]|[:letter:]|IDENTIFIER_SYMBOLS
 INTEGER_LITERAL=({DECIMAL_INTEGER_LITERAL}|{HEX_INTEGER_LITERAL}|{BIN_INTEGER_LITERAL})
 DECIMAL_INTEGER_LITERAL=(0|([1-9]({DIGIT_OR_UNDERSCORE})*))
 HEX_INTEGER_LITERAL=0[Xx]({HEX_DIGIT_OR_UNDERSCORE})*
-BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
+BIN_INTEGER_LITERAL=0[Bb](0|1|_)*
 
 PLAIN_IDENTIFIER=[a-zA-Z$_][a-zA-Z0-9$_]*
 QUOTE_ESCAPED_IDENTIFIER = (`[^`\n]+`)|(_[^_\n\w,]+_)
@@ -305,7 +305,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
 
 <IN_BLOCK_COMMENT, IN_BLOCK_DOC> {
     "/*" {
-         commentDepth++;
+         commentDepth = 1;
     }
 
     <<EOF>> {
@@ -316,15 +316,15 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
     }
 
     "*/" {
-        if (commentDepth > 0) {
-            commentDepth--;
-        }
-        else {
+//        if (commentDepth > 0) {
+//            commentDepth--;
+//        }
+//        else {
              int state = yystate();
              popState();
              zzStartRead = commentStart;
              return commentStateToTokenType(state);
-        }
+//        }
     }
 
     [\s\S] {}

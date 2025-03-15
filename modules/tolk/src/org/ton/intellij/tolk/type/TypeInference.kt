@@ -954,6 +954,9 @@ class TolkInferenceWalker(
                     }
                 }
                 ctx.setType(element, type)
+                right?.let { right ->
+                    ctx.setType(right, type)
+                }
                 return exprFlow
             }
 
@@ -969,6 +972,9 @@ class TolkInferenceWalker(
                     }
                 }
                 ctx.setType(element, type)
+                right?.let { right ->
+                    ctx.setType(right, type)
+                }
                 return exprFlow
             }
 

@@ -13,6 +13,29 @@ class TolkUnionType private constructor(
         return elements.joinToString(" | ")
     }
 
+    override fun printDisplayName(appendable: Appendable) {
+        if (elements.size == 2) {
+            val first = elements.first()
+            val second = elements.last()
+            if (first == TolkType.Null) {
+                second.printDisplayName(appendable)
+                appendable.append("?")
+                return
+            }
+            if (second == TolkType.Null) {
+                first.printDisplayName(appendable)
+                appendable.append("?")
+                return
+            }
+        }
+        var separator = ""
+        elements.forEach {
+            appendable.append(separator)
+            it.printDisplayName(appendable)
+            separator = " | "
+        }
+    }
+
     override fun removeNullability(): TolkType {
         return create(elements.asSequence().filter { it != TolkType.Null }.asIterable())
     }

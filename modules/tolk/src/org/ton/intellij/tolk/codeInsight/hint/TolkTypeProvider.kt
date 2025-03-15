@@ -14,7 +14,11 @@ class TolkTypeProvider : ExpressionTypeProvider<TolkTypedElement>() {
     }
 
     private fun typePresentation(element: TolkTypedElement): String {
-        return element.type?.toString() ?: "<unknown>"
+        return element.type?.let {
+            buildString {
+                it.printDisplayName(this)
+            }
+        } ?: "<unknown>"
     }
 
     override fun getErrorHint(): @NlsContexts.HintText String = TolkBundle.message("codeInsight.hint.error_hint")
@@ -22,7 +26,10 @@ class TolkTypeProvider : ExpressionTypeProvider<TolkTypedElement>() {
     override fun getExpressionsAt(elementAt: PsiElement): List<TolkTypedElement> {
         return elementAt.parents(true).filterIsInstance<TolkExpression>().filter {
             // remove reference to function (with type `(..)->(..)`) in call expression
-            it !is TolkReferenceExpression || it.parent !is TolkCallExpression
+            it !is TolkReferenceExpression || it.node.treeParent.elementType != TolkElementTypes.CALL_EXPRESSION
+        }.filter {
+            // remove `0` from `t.0`
+            it !is TolkLiteralExpression || it.node.treeParent.elementType != TolkElementTypes.DOT_EXPRESSION
         }.filter {
             val parent = it.parent
             // remove `bar()` from `foo.bar()`

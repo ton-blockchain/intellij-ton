@@ -5,6 +5,17 @@ data class TolkTensorType private constructor(
 ) : TolkType {
     override fun toString(): String = "(${elements.joinToString()})"
 
+    override fun printDisplayName(appendable: Appendable) {
+        appendable.append("(")
+        var separator = ""
+        elements.forEach {
+            appendable.append(separator)
+            it.printDisplayName(appendable)
+            separator = ", "
+        }
+        appendable.append(")")
+    }
+
     override fun join(other: TolkType): TolkType {
         if (this == other) return this
         if (other is TolkTensorType && elements.size == other.elements.size) {

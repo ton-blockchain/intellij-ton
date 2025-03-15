@@ -8,6 +8,26 @@ data class TolkFunctionType(
 ) : TolkType {
     override fun toString(): String = "$inputType -> $returnType"
 
+    override fun printDisplayName(appendable: Appendable) {
+        when (inputType) {
+            is TolkUnitType -> {
+                appendable.append("()")
+            }
+
+            is TolkTensorType -> {
+                inputType.printDisplayName(appendable)
+            }
+
+            else -> {
+                appendable.append("(")
+                inputType.printDisplayName(appendable)
+                appendable.append(")")
+            }
+        }
+        appendable.append(" -> ")
+        returnType.printDisplayName(appendable)
+    }
+
     override fun join(other: TolkType): TolkType {
         if (this == other) return this
         if (other is TolkFunctionType) {

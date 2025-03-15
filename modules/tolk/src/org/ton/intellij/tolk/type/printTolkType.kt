@@ -22,13 +22,6 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
             printTolkType(type.returnType)
         }
 
-        TolkNeverType -> text("never")
-
-        is TolkUnknownType -> text("unknown")
-        is TolkIntType -> text("int")
-        is TolkBoolType -> text("bool")
-        is TolkUnitType -> text("void")
-
         is TolkTensorType -> {
             text("(")
             val iterator = type.elements.iterator()
@@ -81,7 +74,8 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
             }
         }
 
-
-        else -> text(type.toString())
+        else -> text(buildString {
+            type.printDisplayName(this)
+        })
     }
 }

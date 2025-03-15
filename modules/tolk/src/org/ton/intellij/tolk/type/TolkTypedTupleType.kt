@@ -5,6 +5,17 @@ data class TolkTypedTupleType(
 ) : TolkType {
     override fun toString(): String = "[${elements.joinToString()}]"
 
+    override fun printDisplayName(appendable: Appendable) {
+        appendable.append("[")
+        var separator = ""
+        elements.forEach {
+            appendable.append(separator)
+            it.printDisplayName(appendable)
+            separator = ", "
+        }
+        appendable.append("]")
+    }
+
     override fun join(other: TolkType): TolkType {
         if (this == other) return this
         if (other is TolkTypedTupleType && elements.size == other.elements.size) {

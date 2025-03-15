@@ -34,21 +34,26 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
                 is TolkFunction -> buildString {
                     append(name)
                     append("(")
-                    parameterList?.parameterList?.joinTo(this) { parameter ->
-                        parameter.type?.toString() ?: "_"
+                    var separator = ""
+                    parameterList?.parameterList?.forEach { parameter ->
+                        append(separator)
+                        parameter.type?.printDisplayName(this) ?: append("_")
+                        separator = ", "
                     }
-                    append("): ")
-                    append((type as? TolkFunctionType)?.returnType ?: "_")
+                    (type as? TolkFunctionType)?.returnType?.let {
+                        append("): ")
+                        it.printDisplayName(this)
+                    } ?: append("): void")
                 }
                 is TolkConstVar -> buildString {
                     append(name)
                     append(": ")
-                    append(type ?: "_")
+                    type?.printDisplayName(this) ?: append("_")
                 }
                 is TolkGlobalVar -> buildString {
                     append(name)
                     append(": ")
-                    append(type ?: "_")
+                    type?.printDisplayName(this) ?: append("_")
                 }
                 else -> name
             }

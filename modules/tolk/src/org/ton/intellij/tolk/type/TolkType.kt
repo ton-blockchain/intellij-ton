@@ -36,6 +36,10 @@ sealed interface TolkType {
         }
     }
 
+    fun printDisplayName(appendable: Appendable) {
+        appendable.append(toString())
+    }
+
     data class ParameterType(
         val psiElement: TolkTypeParameter
     ) : TolkType {
@@ -67,6 +71,59 @@ sealed interface TolkType {
         val Tuple = TolkTupleType
         val Unknown = TolkUnknownType
         val Never = TolkNeverType
+        val Coins = TolkCoinsType()
+
+        fun byName(text: String): TolkType? {
+            return when (text) {
+                "int" -> Int
+                "cell" -> Cell
+                "slice" -> Slice
+                "builder" -> Builder
+                "continuation" -> Continuation
+                "tuple" -> Tuple
+                "void" -> Unit
+                "bool" -> Bool
+                "never" -> Never
+                "coins" -> Coins
+                else -> {
+                    when {
+                        text.startsWith("uint") -> {
+                            val n = text.removePrefix("uint").toIntOrNull() ?: return null
+                            if (n in 1..1023) {
+                                return uint(n)
+                            }
+                            return null
+                        }
+
+                        text.startsWith("int") -> {
+                            val n = text.removePrefix("int").toIntOrNull() ?: return null
+                            if (n in 1..1023) {
+                                return int(n)
+                            }
+                            return null
+                        }
+
+                        text.startsWith("bits") -> {
+                            val n = text.removePrefix("bits").toIntOrNull() ?: return null
+                            if (n in 1..1023) {
+                                return bits(n)
+                            }
+                            return null
+                        }
+
+                        text.startsWith("bytes") -> {
+                            val n = text.removePrefix("bytes").toIntOrNull() ?: return null
+                            if (n in 1..128) {
+                                return bytes(n)
+                            }
+                            return null
+                        }
+
+                        else -> null
+                    }
+                }
+            }
+        }
 
         fun bool(value: Boolean): TolkType = if (value) TRUE else FALSE
 
@@ -79,6 +136,14 @@ sealed interface TolkType {
         fun tensor(elements: Collection<TolkType>): TolkType = TolkTensorType.create(elements.toList())
 
         fun typedTuple(elements: Collection<TolkType>): TolkType = TolkTypedTupleType(elements.toList())
+
+        fun uint(n: Int): TolkType = TolkUIntNType(n)
+
+        fun int(n: Int): TolkType = TolkIntNType(n)
+
+        fun bits(n: Int): TolkType = TolkBitsNType(n)
+
+        fun bytes(n: Int): TolkType = TolkBytesNType(n)
     }
 }
 
@@ -94,7 +159,7 @@ object TolkUnitType : TolkPrimitiveType {
         return TolkType.union(other, this)
     }
 
-    override fun toString(): String = "()"
+    override fun toString(): String = "void"
 }
 
 object TolkNullType : TolkPrimitiveType {
@@ -202,6 +267,62 @@ object TolkNeverType : TolkType {
     override fun meet(other: TolkType): TolkType = this
 
     override fun toString(): String = "never"
+}
+
+data class TolkCoinsType(
+    override val range: TvmIntRangeSet = TvmIntRangeSet.ALL
+) : TolkIntType {
+    override fun negate(): TolkIntType = TolkCoinsType(range.unaryMinus())
+
+    override fun printDisplayName(appendable: Appendable) {
+        appendable.append("coins")
+    }
+
+    override fun toString(): String = "coins"
+}
+
+data class TolkIntNType(
+    val n: Int,
+    override val range: TvmIntRangeSet = TvmIntRangeSet.ALL
+) : TolkIntType {
+    override fun negate(): TolkIntType = TolkIntNType(n, range.unaryMinus())
+
+    override fun printDisplayName(appendable: Appendable) {
+        appendable.append("int$n")
+    }
+
+    override fun toString(): String = "int$n"
+}
+
+data class TolkUIntNType(
+    val n: Int,
+    override val range: TvmIntRangeSet = TvmIntRangeSet.ALL
+) : TolkIntType {
+    override fun negate(): TolkIntType = TolkUIntNType(n, range.unaryMinus())
+
+    override fun toString(): String = "uint$n"
+}
+
+data class TolkBitsNType(
+    val n: Int,
+) : TolkType {
+    override fun toString(): String = "bits$n"
+
+    override fun join(other: TolkType): TolkType {
+        if (this == other) return this
+        return TolkUnionType.create(this, other)
+    }
+}
+
+data class TolkBytesNType(
+    val n: Int,
+) : TolkType {
+    override fun toString(): String = "bytes$n"
+
+    override fun join(other: TolkType): TolkType {
+        if (this == other) return this
+        return TolkUnionType.create(this, other)
+    }
 }
 
 interface TolkTypeVisitor {

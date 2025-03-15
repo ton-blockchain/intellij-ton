@@ -171,7 +171,7 @@ ConstVar ::= 'const' IDENTIFIER ConstVarType? '=' Expression ';' {
     stubClass="org.ton.intellij.tolk.stub.TolkConstVarStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
-private ConstVarType ::= ':' &('int'|'slice') TypeExpression {
+private ConstVarType ::= ':' TypeExpression {
     pin = 1
 }
 
@@ -570,14 +570,14 @@ TensorOrParenExpression ::= '(' Expression TensorExpression_upper? ')' {
     pin = 1
     elementType = ParenExpression
 }
-upper TensorExpression_upper ::= TensorExpressionValue+ {
+upper TensorExpression_upper ::= TensorExpressionValue* ','? {
     elementType = TensorExpression
+//    pin=1
 }
 private TensorExpressionValue ::= ',' Expression {
-    pin=1
-    recoverWhile=TensorExpressionValue_recovery
+//    recoverWhile=TensorExpressionValue_recovery
 }
-private TensorExpressionValue_recovery ::= !(','|')'|';')
+//private TensorExpressionValue_recovery ::= !(','|')'|';')
 
 TupleExpression ::= '[' [ <<comma_separated_list TupleElement>> ] ']' {
     pin=1
@@ -724,7 +724,7 @@ upper TensorType_upper ::= ',' [ TypeExpression (',' TypeExpression)* ] ')' {
     elementType = TensorTypeExpression
 }
 
-private meta comma_separated_list ::= <<param>> (',' <<param>>)*
+private meta comma_separated_list ::= <<param>> (',' <<param>>)* ','?
 private meta list_with_recover ::= <<comma_separated_list <<param>>>> {
     recoverWhile=paren_list_element_recover
 }

@@ -22,6 +22,10 @@ interface TolkIntType : TolkPrimitiveType {
         if (range is TvmIntRangeSet.Point) return TolkConstantIntType(range.value)
         return TolkIntRangeType(range)
     }
+
+    override fun printDisplayName(appendable: Appendable) {
+        appendable.append("int")
+    }
 }
 
 data class TolkConstantIntType(

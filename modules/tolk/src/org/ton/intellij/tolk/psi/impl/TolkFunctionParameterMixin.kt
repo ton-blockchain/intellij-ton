@@ -18,7 +18,12 @@ abstract class TolkParameterMixin : TolkNamedElementImpl<TolkParameterStub>, Tol
 
     override val type: TolkType? get() = typeExpression?.type
 
+    val isMutable: Boolean get() = stub?.isMutable ?: (mutateKeyword != null)
+
     override fun getPresentation(): ItemPresentation? {
         return super.getPresentation()
     }
 }
+
+val TolkParameter.isMutable: Boolean get() =
+    (this as? TolkParameterMixin)?.isMutable ?: (mutateKeyword != null)

@@ -9,6 +9,7 @@ import com.intellij.util.containers.OrderedSet
 import org.ton.intellij.tolk.diagnostics.TolkDiagnostic
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.TolkIncludeDefinitionMixin
+import org.ton.intellij.tolk.psi.impl.isMutable
 import org.ton.intellij.tolk.psi.impl.resolveFile
 import org.ton.intellij.tolk.psi.impl.targetIndex
 import org.ton.intellij.util.recursionGuard
@@ -549,7 +550,6 @@ class TolkInferenceWalker(
     )
 
 
-
     private fun inferBinExpression(
         element: TolkBinExpression,
         flow: TolkFlowContext,
@@ -884,22 +884,37 @@ class TolkInferenceWalker(
         val argumentTypes = ArrayList<TolkType>(element.argumentList.argumentList.size + 1)
 
         var functionSymbol = if (callee is TolkReferenceExpression) {
-            ctx.getResolvedRefs(callee).firstOrNull() as? TolkFunction
+            val resolvedRefs = ctx.getResolvedRefs(callee)
+            resolvedRefs.firstOrNull()?.element as? TolkFunction
         } else null
+        var deltaParams = 0
         if (callee is TolkDotExpression) {
             val firstArgType = ctx.getType(callee.left) ?: TolkType.Unknown
             argumentTypes.add(firstArgType)
+            deltaParams = 1
             val calleeRight = callee.right
             if (calleeRight is TolkReferenceExpression) {
                 functionSymbol = ctx.getResolvedRefs(calleeRight).firstOrNull() as? TolkFunction
             }
         }
 
-        element.argumentList.argumentList.forEach { argument ->
-            nextFlow = inferExpression(argument.expression, nextFlow, false).outFlow
-            val type = ctx.getType(argument.expression) ?: TolkType.Unknown
-            argumentTypes.add(type)
+        element.argumentList.argumentList.forEachIndexed { index, argument ->
+            val argExpr = argument.expression
+            nextFlow = inferExpression(argExpr, nextFlow, false).outFlow
+            val argType = ctx.getType(argExpr) ?: TolkType.Unknown
+            argumentTypes.add(argType)
+
+            val param =
+                functionSymbol?.parameterList?.parameterList?.getOrNull(deltaParams + index) ?: return@forEachIndexed
+            val paramType = param.typeExpression?.type
+            if (param.isMutable && paramType != null && paramType != argType) {
+                val sExpr = extractSinkExpression(argExpr)
+                if (sExpr != null) {
+                    nextFlow.setSymbol(sExpr, paramType)
+                }
+            }
         }
+
         val callType = TolkFunctionType(TolkType.tensor(argumentTypes), hint ?: TolkType.Unknown)
 
         if (functionType != null) {

@@ -14,18 +14,20 @@ class TolkParameterStubElementType(
 ) : TolkNamedStubElementType<TolkParameterStub, TolkParameter>(debugName) {
     override fun serialize(stub: TolkParameterStub, dataStream: StubOutputStream) {
         dataStream.writeName(stub.name)
+        dataStream.writeBoolean(stub.isMutable)
     }
 
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>): TolkParameterStub {
         val name = dataStream.readName()
-        return TolkParameterStub(parentStub, this, name)
+        val mutable = dataStream.readBoolean()
+        return TolkParameterStub(parentStub, this, name, mutable)
     }
 
     override fun createStub(
         psi: TolkParameter,
         parentStub: StubElement<out PsiElement>,
     ): TolkParameterStub {
-        return TolkParameterStub(parentStub, this, psi.name)
+        return TolkParameterStub(parentStub, this, psi.name, psi.mutateKeyword != null)
     }
 
     override fun createPsi(stub: TolkParameterStub): TolkParameter {

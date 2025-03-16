@@ -570,7 +570,7 @@ TensorOrParenExpression ::= '(' Expression TensorExpression_upper? ')' {
     pin = 1
     elementType = ParenExpression
 }
-upper TensorExpression_upper ::= TensorExpressionValue* ','? {
+upper TensorExpression_upper ::= TensorExpressionValue+ ','? {
     elementType = TensorExpression
 //    pin=1
 }

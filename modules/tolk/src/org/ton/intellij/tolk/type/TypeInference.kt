@@ -233,20 +233,12 @@ class TolkInferenceWalker(
         val afterCondition = inferExpression(condition, flow, true)
         val trueFlow = element.blockStatement?.let {
             processBlockStatement(it, afterCondition.trueFlow)
-        }
+        } ?: afterCondition.trueFlow
         val falseFlow = element.elseBranch?.statement?.let {
             inferStatement(it, afterCondition.falseFlow)
-        }
+        } ?: afterCondition.falseFlow
 
-        if (trueFlow == null && falseFlow == null) {
-            return afterCondition.outFlow
-        }
-
-        if (trueFlow != null && trueFlow.unreachable != null) {
-            return falseFlow ?: afterCondition.falseFlow
-        }
-
-        return (trueFlow ?: afterCondition.trueFlow).join(falseFlow ?: afterCondition.falseFlow)
+        return trueFlow.join(falseFlow)
     }
 
     private fun processRepeatStatement(element: TolkRepeatStatement, flow: TolkFlowContext): TolkFlowContext {

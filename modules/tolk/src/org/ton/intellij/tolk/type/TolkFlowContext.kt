@@ -61,32 +61,49 @@ class TolkFlowContext(
     }
 
     fun join(other: TolkFlowContext): TolkFlowContext {
-        if (other.unreachable == TolkUnreachableKind.CantHappen) {
-            return TolkFlowContext(globalSymbols, symbolTypes, symbols, sinkExpressions, unreachable)
+        if (this.unreachable == null && other.unreachable != null) {
+            return other.join(this)
         }
-        if (unreachable == TolkUnreachableKind.CantHappen) {
-            return TolkFlowContext(
-                other.globalSymbols,
-                other.symbolTypes,
-                other.symbols,
-                other.sinkExpressions,
-                other.unreachable
-            )
+
+        val joinedSymbols: MutableMap<String, TolkSymbolElement> = HashMap(other.symbols)
+        joinedSymbols.putAll(symbols)
+
+        val joinedSinkExpressionsMutableMap: MutableMap<TolkSinkExpression, TolkType>
+        val joinedSymbolTypes: MutableMap<TolkSymbolElement, TolkType>
+
+        if (this.unreachable != null && other.unreachable == null) {
+            joinedSymbolTypes = HashMap(symbolTypes)
+            other.symbolTypes.forEach { otherSymbol ->
+                joinedSymbolTypes[otherSymbol.key] = otherSymbol.value
+            }
+            joinedSinkExpressionsMutableMap = HashMap()
+            other.sinkExpressions.forEach { otherSinkExpression ->
+                joinedSinkExpressionsMutableMap[otherSinkExpression.key] = otherSinkExpression.value
+            }
+        } else {
+            joinedSymbolTypes = HashMap(symbolTypes)
+            other.symbolTypes.forEach { otherSymbol ->
+                joinedSymbolTypes[otherSymbol.key] =
+                    joinedSymbolTypes[otherSymbol.key]?.join(otherSymbol.value) ?: otherSymbol.value
+            }
+            joinedSinkExpressionsMutableMap = HashMap()
+            other.sinkExpressions.forEach { otherSExpr ->
+                val thisSExpr = sinkExpressions[otherSExpr.key]
+                if (thisSExpr != null) {
+                    joinedSinkExpressionsMutableMap[otherSExpr.key] = thisSExpr.join(otherSExpr.value)
+                }
+            }
         }
-        val joinedSymbols = LinkedHashMap(symbolTypes)
-        val joinedSinkExpressions = LinkedHashMap(sinkExpressions)
-        val joinedNames = LinkedHashMap(symbols)
-        other.symbolTypes.forEach { (element, type) ->
-            joinedSymbols[element] = joinedSymbols[element]?.join(type) ?: type
-        }
-        other.symbols.forEach { (name, element) ->
-            joinedNames[name] = element
-        }
-        other.sinkExpressions.forEach { (element, type) ->
-            joinedSinkExpressions[element] = joinedSinkExpressions[element]?.join(type) ?: type
-        }
+
         val joinedUnreachable =
             if (unreachable != null && other.unreachable != null) TolkUnreachableKind.Unknown else null
-        return TolkFlowContext(globalSymbols, joinedSymbols, joinedNames, joinedSinkExpressions, joinedUnreachable)
+
+        return TolkFlowContext(
+            globalSymbols,
+            joinedSymbolTypes,
+            joinedSymbols,
+            joinedSinkExpressionsMutableMap,
+            joinedUnreachable
+        )
     }
 }

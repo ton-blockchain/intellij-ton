@@ -34,6 +34,13 @@ class TolkTypeProvider : ExpressionTypeProvider<TolkTypedElement>() {
             val parent = it.parent
             // remove `bar()` from `foo.bar()`
             it !is TolkCallExpression || parent !is TolkDotExpression || parent.right != it
-        }.toList()
+        }
+            .filter { // remove __expect_type call result
+                val callExpr = it as? TolkCallExpression ?: return@filter true
+                val refExpr = callExpr.expression as? TolkReferenceExpression ?: return@filter true
+                refExpr.name != "__expect_type"
+            }
+
+            .toList()
     }
 }

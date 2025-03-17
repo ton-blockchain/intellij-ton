@@ -27,7 +27,7 @@ class TolkExpectTypeBuiltinInspection  : TolkInspectionBase() {
             if (expectTypeText != actualTypeText) {
                 holder.registerProblem(
                     left,
-                    "Type mismatch\nexpected: `$expectTypeText`, but found: `$actualTypeText`",
+                    "Type mismatch\nexpected: `$expectTypeText`, but found: `$actualTypeText`\nactual: `$actualType`",
                 )
             }
         }

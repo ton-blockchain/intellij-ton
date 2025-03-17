@@ -32,7 +32,6 @@ sealed interface TolkType {
         return when (this) {
             is TolkTensorType -> tensor(elements.map { it.substitute(substitution) })
             is TolkTypedTupleType -> TolkTypedTupleType.create(elements.map { it.substitute(substitution) })
-            is TolkUnionType -> TolkUnionType.create(elements.map { it.substitute(substitution) })
             is ParameterType -> substitution[this.psiElement] ?: this
             else -> this
         }

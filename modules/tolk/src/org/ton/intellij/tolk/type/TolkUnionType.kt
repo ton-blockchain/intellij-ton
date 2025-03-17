@@ -1,5 +1,7 @@
 package org.ton.intellij.tolk.type
 
+import org.ton.intellij.tolk.psi.TolkTypeParameter
+
 class TolkUnionType private constructor(
     val elements: Set<TolkType>,
     private val hasGenerics: Boolean,
@@ -65,6 +67,13 @@ class TolkUnionType private constructor(
         elements.forEach { it.visit(visitor) }
     }
 
+    override fun substitute(substitution: Map<TolkTypeParameter, TolkType>): TolkType {
+        val newElements = HashSet<TolkType>()
+        elements.forEach {
+            newElements.add(it.substitute(substitution))
+        }
+        return simplify(newElements)
+    }
 
     companion object {
         fun create(vararg elements: TolkType): TolkType {
@@ -73,12 +82,28 @@ class TolkUnionType private constructor(
 
         fun create(elements: Iterable<TolkType>): TolkType {
             val elements = joinUnions(elements)
+            if (elements.size == 2) {
+                return TolkUnionType(elements, elements.any { it.hasGenerics() })
+            }
+            return simplify(elements)
+        }
+
+        private fun joinUnions(set: Iterable<TolkType>): Set<TolkType> {
+            val newElements = mutableSetOf<TolkType>()
+            set.forEach { element ->
+                if (element is TolkUnionType) {
+                    newElements.addAll(element.elements)
+                } else {
+                    newElements.add(element)
+                }
+            }
+            return newElements
+        }
+
+        private fun simplify(elements: Set<TolkType>): TolkType {
             when (elements.size) {
                 1 -> {
                     return elements.single()
-                }
-                2 -> {
-                    return TolkUnionType(elements, elements.any { it.hasGenerics() })
                 }
                 else -> {
                     val unique: MutableList<TolkType> = ArrayList(elements)
@@ -113,18 +138,6 @@ class TolkUnionType private constructor(
                     return TolkUnionType(uniqueSet, hasGenerics)
                 }
             }
-        }
-
-        private fun joinUnions(set: Iterable<TolkType>): Set<TolkType> {
-            val newElements = mutableSetOf<TolkType>()
-            set.forEach { element ->
-                if (element is TolkUnionType) {
-                    newElements.addAll(element.elements)
-                } else {
-                    newElements.add(element)
-                }
-            }
-            return newElements
         }
     }
 }

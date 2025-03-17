@@ -146,7 +146,9 @@ fun TolkFunction.resolveGenerics(
             }
 
             paramType is TolkType.ParameterType -> {
-                mapping[paramType.psiElement] = argType
+                if (!mapping.containsKey(paramType.psiElement)) {
+                    mapping[paramType.psiElement] = argType
+                }
             }
         }
     }

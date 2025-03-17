@@ -14,7 +14,7 @@ data class TolkFunctionType(
 
     val parameters: List<TolkType> = if (inputType is TolkTensorType) inputType.elements else listOf(inputType)
 
-    override fun printDisplayName(appendable: Appendable) {
+    override fun printDisplayName(appendable: Appendable): Appendable {
         when (inputType) {
             is TolkUnitType -> {
                 appendable.append("()")
@@ -32,6 +32,7 @@ data class TolkFunctionType(
         }
         appendable.append(" -> ")
         returnType.printDisplayName(appendable)
+        return appendable
     }
 
     override fun join(other: TolkType): TolkType {

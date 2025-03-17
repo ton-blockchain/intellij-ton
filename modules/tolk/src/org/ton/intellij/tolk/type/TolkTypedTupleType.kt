@@ -8,7 +8,7 @@ class TolkTypedTupleType private constructor(
 
     override fun hasGenerics(): Boolean = hasGenerics
 
-    override fun printDisplayName(appendable: Appendable) {
+    override fun printDisplayName(appendable: Appendable): Appendable {
         appendable.append("[")
         var separator = ""
         elements.forEach {
@@ -17,6 +17,7 @@ class TolkTypedTupleType private constructor(
             separator = ", "
         }
         appendable.append("]")
+        return appendable
     }
 
     override fun join(other: TolkType): TolkType {

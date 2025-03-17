@@ -566,15 +566,20 @@ fake ParenExpression ::= '(' Expression ')' {
     pin = 1
 }
 
-TensorOrParenExpression ::= '(' Expression TensorExpression_upper? ')' {
+TensorOrParenExpression ::= '(' TensorOrParenElement TensorExpression_upper* ')' {
     pin = 1
     elementType = ParenExpression
 }
-upper TensorExpression_upper ::= TensorExpressionValue+ ','? {
+upper TensorExpression_upper ::= ',' (TensorOrParenElement | &')') {
     elementType = TensorExpression
-//    pin=1
+    pin=1
 }
-private TensorExpressionValue ::= ',' Expression {
+private TensorOrParenElement ::= Expression
+
+// element_list ::= '(' element (',' (element | &')'))* ')' {pin(".*")=1}
+// element_list ::=     element (',' (element | &')'))*  {pin(".*")=1}
+// element_list ::=      ',' (element | &')')  {pin(".*")=1}
+private TensorExpressionValue ::= Expression ','? {
 //    recoverWhile=TensorExpressionValue_recovery
 }
 //private TensorExpressionValue_recovery ::= !(','|')'|';')

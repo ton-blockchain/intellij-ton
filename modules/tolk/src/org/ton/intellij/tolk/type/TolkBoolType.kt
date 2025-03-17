@@ -4,9 +4,7 @@ interface TolkBoolType : TolkPrimitiveType {
 
     fun negate(): TolkBoolType = TolkType.Bool
 
-    override fun printDisplayName(appendable: Appendable) {
-        appendable.append("bool")
-    }
+    override fun printDisplayName(appendable: Appendable) = appendable.append("bool")
 
     companion object : TolkBoolType {
         override fun isSuperType(other: TolkType): Boolean = other == TolkType.Never || other is TolkBoolType

@@ -38,9 +38,7 @@ sealed interface TolkType {
         }
     }
 
-    fun printDisplayName(appendable: Appendable) {
-        appendable.append(toString())
-    }
+    fun printDisplayName(appendable: Appendable): Appendable = appendable.append(toString())
 
     data class ParameterType(
         val psiElement: TolkTypeParameter
@@ -282,9 +280,7 @@ data class TolkCoinsType(
 ) : TolkIntType {
     override fun negate(): TolkIntType = TolkCoinsType(range.unaryMinus())
 
-    override fun printDisplayName(appendable: Appendable) {
-        appendable.append("coins")
-    }
+    override fun printDisplayName(appendable: Appendable) = appendable.append("coins")
 
     override fun toString(): String = "coins"
 }
@@ -295,9 +291,7 @@ data class TolkIntNType(
 ) : TolkIntType {
     override fun negate(): TolkIntType = TolkIntNType(n, range.unaryMinus())
 
-    override fun printDisplayName(appendable: Appendable) {
-        appendable.append("int$n")
-    }
+    override fun printDisplayName(appendable: Appendable) = appendable.append("int$n")
 
     override fun toString(): String = "int$n"
 }
@@ -309,6 +303,8 @@ data class TolkUIntNType(
     override fun negate(): TolkIntType = TolkUIntNType(n, range.unaryMinus())
 
     override fun toString(): String = "uint$n"
+
+    override fun printDisplayName(appendable: Appendable) = appendable.append("uint$n")
 }
 
 data class TolkBitsNType(
@@ -338,9 +334,7 @@ data class TolkVarInt32Type(
 ) : TolkIntType {
     override fun negate(): TolkIntType = TolkVarInt32Type(range.unaryMinus())
 
-    override fun printDisplayName(appendable: Appendable) {
-        appendable.append("varint32")
-    }
+    override fun printDisplayName(appendable: Appendable) = appendable.append("varint32")
 
     override fun toString(): String = "varint32"
 }
@@ -350,9 +344,7 @@ data class TolkVarInt16Type(
 ) : TolkIntType {
     override fun negate(): TolkIntType = TolkVarInt16Type(range.unaryMinus())
 
-    override fun printDisplayName(appendable: Appendable) {
-        appendable.append("varint16")
-    }
+    override fun printDisplayName(appendable: Appendable) = appendable.append("varint16")
 
     override fun toString(): String = "varint16"
 }

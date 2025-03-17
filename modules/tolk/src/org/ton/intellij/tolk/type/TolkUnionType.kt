@@ -16,19 +16,19 @@ class TolkUnionType private constructor(
         return elements.joinToString(" | ")
     }
 
-    override fun printDisplayName(appendable: Appendable) {
+    override fun printDisplayName(appendable: Appendable) = appendable.apply {
         if (elements.size == 2) {
             val first = elements.first()
             val second = elements.last()
             if (first == TolkType.Null) {
                 second.printDisplayName(appendable)
                 appendable.append("?")
-                return
+                return@apply
             }
             if (second == TolkType.Null) {
                 first.printDisplayName(appendable)
                 appendable.append("?")
-                return
+                return@apply
             }
         }
         var separator = ""

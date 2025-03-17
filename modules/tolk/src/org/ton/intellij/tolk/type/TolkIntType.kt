@@ -23,9 +23,8 @@ interface TolkIntType : TolkPrimitiveType {
         return TolkIntRangeType(range)
     }
 
-    override fun printDisplayName(appendable: Appendable) {
-        appendable.append("int")
-    }
+    override fun printDisplayName(appendable: Appendable) = appendable.append("int")
+
 }
 
 data class TolkConstantIntType(

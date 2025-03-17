@@ -14,7 +14,10 @@ import java.util.zip.CRC32
 abstract class TolkLiteralExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkLiteralExpression {
     override val type: TolkType?
         get() {
-            if (node.treeParent.elementType == TolkElementTypes.DOT_EXPRESSION) return super.type
+            val treeParent = node.treeParent
+            if (treeParent.elementType == TolkElementTypes.DOT_EXPRESSION && treeParent.lastChildNode == node) {
+                return super.type
+            }
             val integerLiteral = integerLiteral?.text
             if (integerLiteral != null) {
                 var text = integerLiteral.replace("_", "")

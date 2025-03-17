@@ -27,7 +27,7 @@ import org.ton.intellij.util.recursionGuard
 //            processFile(context, nextFile)
 //        }
 
-class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkLanguage), TolkElement {
+class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkLanguage), TolkElement, TolkInferenceContextOwner {
     override fun getFileType(): FileType = TolkFileType
 
     override fun getStub(): TolkFileStub? = super.getStub() as? TolkFileStub

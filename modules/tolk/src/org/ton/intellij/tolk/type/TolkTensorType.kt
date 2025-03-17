@@ -1,7 +1,8 @@
 package org.ton.intellij.tolk.type
 
 data class TolkTensorType private constructor(
-    val elements: List<TolkType>
+    val elements: List<TolkType>,
+    val hasGenerics: Boolean
 ) : TolkType {
     override fun toString(): String = "(${elements.joinToString()})"
 
@@ -19,7 +20,13 @@ data class TolkTensorType private constructor(
     override fun join(other: TolkType): TolkType {
         if (this == other) return this
         if (other is TolkTensorType && elements.size == other.elements.size) {
-            return TolkTensorType(elements.zip(other.elements).map { (a, b) -> a.join(b) })
+            var hasGenerics = false
+            val newElements = elements.zip(other.elements).map { (a, b) ->
+                val join = a.join(b)
+                hasGenerics = hasGenerics || join.hasGenerics()
+                join
+            }
+            return TolkTensorType(newElements, hasGenerics)
         }
         return TolkUnionType.create(this, other)
     }
@@ -28,7 +35,13 @@ data class TolkTensorType private constructor(
         if (this == other) return this
         if (other == TolkType.Unknown) return this
         if (other is TolkTensorType && elements.size == other.elements.size) {
-            return TolkTensorType(elements.zip(other.elements).map { (a, b) -> a.meet(b) })
+            var hasGenerics = false
+            val newElements = elements.zip(other.elements).map { (a, b) ->
+                val meet = a.meet(b)
+                hasGenerics = hasGenerics || meet.hasGenerics()
+                meet
+            }
+            return TolkTensorType(newElements, hasGenerics)
         }
         return TolkType.Never
     }
@@ -42,12 +55,13 @@ data class TolkTensorType private constructor(
             return create(elements.toList())
         }
 
-        fun create(elements: Collection<TolkType>): TolkType {
+        fun create(elements: List<TolkType>): TolkType {
             if (elements.isEmpty()) return TolkUnitType
             if (elements.size == 1) {
                 return elements.single()
             }
-            return TolkTensorType(elements.toList())
+            val hasGenerics = elements.any { it.hasGenerics() }
+            return TolkTensorType(elements, hasGenerics)
         }
     }
 }

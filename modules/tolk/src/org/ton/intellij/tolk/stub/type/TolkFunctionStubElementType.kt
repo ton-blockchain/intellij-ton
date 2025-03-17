@@ -20,6 +20,7 @@ class TolkFunctionStubElementType(
         if (stub.hasAsm) flags = flags or HAS_ASM
         if (stub.isBuiltin) flags = flags or IS_BUILTIN
         if (stub.isDeprecated) flags = flags or IS_DEPRECATED
+        if (stub.isGeneric) flags = flags or IS_GENERIC
         dataStream.writeByte(flags)
     }
 
@@ -31,7 +32,8 @@ class TolkFunctionStubElementType(
         val hasAsm = flags and HAS_ASM != 0
         val isBuiltin = flags and IS_BUILTIN != 0
         val isDeprecated = flags and IS_DEPRECATED != 0
-        return TolkFunctionStub(parentStub, this, name, isMutable, isGetMethod, hasAsm, isBuiltin, isDeprecated)
+        val isGenerics = flags and IS_GENERIC != 0
+        return TolkFunctionStub(parentStub, this, name, isMutable, isGetMethod, hasAsm, isBuiltin, isDeprecated, isGenerics)
     }
 
     override fun createStub(psi: TolkFunction, parentStub: StubElement<out PsiElement>): TolkFunctionStub {
@@ -43,7 +45,8 @@ class TolkFunctionStubElementType(
             psi.isGetMethod,
             psi.hasAsm,
             psi.isBuiltin,
-            psi.isDeprecated
+            psi.isDeprecated,
+            psi.isGeneric
         )
     }
 
@@ -57,6 +60,7 @@ class TolkFunctionStubElementType(
         private const val HAS_ASM = 1 shl 2
         private const val IS_BUILTIN = 1 shl 3
         private const val IS_DEPRECATED = 1 shl 4
+        private const val IS_GENERIC = 1 shl 5
 
         val EMPTY_ARRAY = emptyArray<TolkFunction>()
         val ARRAY_FACTORY: ArrayFactory<TolkFunction?> = ArrayFactory {

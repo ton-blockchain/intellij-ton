@@ -26,10 +26,12 @@ sealed interface TolkType {
 
     fun visit(visitor: TolkTypeVisitor) {}
 
+    fun hasGenerics(): Boolean = false
+
     fun substitute(substitution: Map<TolkTypeParameter, TolkType>): TolkType {
         return when (this) {
             is TolkTensorType -> tensor(elements.map { it.substitute(substitution) })
-            is TolkTypedTupleType -> TolkTypedTupleType(elements.map { it.substitute(substitution) })
+            is TolkTypedTupleType -> TolkTypedTupleType.create(elements.map { it.substitute(substitution) })
             is TolkUnionType -> TolkUnionType.create(elements.map { it.substitute(substitution) })
             is ParameterType -> substitution[this.psiElement] ?: this
             else -> this
@@ -46,6 +48,8 @@ sealed interface TolkType {
         val name: String get() = psiElement.name.toString()
 
         override fun toString(): String = name
+
+        override fun hasGenerics(): Boolean = true
 
         override fun join(other: TolkType): TolkType {
             if (this == other) return this
@@ -72,6 +76,8 @@ sealed interface TolkType {
         val Unknown = TolkUnknownType
         val Never = TolkNeverType
         val Coins = TolkCoinsType()
+        val VarInt32 = TolkVarInt32Type()
+        val VarInt16 = TolkVarInt16Type()
 
         fun byName(text: String): TolkType? {
             return when (text) {
@@ -85,6 +91,8 @@ sealed interface TolkType {
                 "bool" -> Bool
                 "never" -> Never
                 "coins" -> Coins
+                "varint16" -> VarInt16
+                "varint32" -> VarInt32
                 else -> {
                     when {
                         text.startsWith("uint") -> {
@@ -133,9 +141,9 @@ sealed interface TolkType {
 
         fun union(elements: Iterable<TolkType>): TolkType = TolkUnionType.create(elements.toList())
 
-        fun tensor(elements: Collection<TolkType>): TolkType = TolkTensorType.create(elements.toList())
+        fun tensor(elements: List<TolkType>): TolkType = TolkTensorType.create(elements)
 
-        fun typedTuple(elements: Collection<TolkType>): TolkType = TolkTypedTupleType(elements.toList())
+        fun typedTuple(elements: List<TolkType>): TolkType = TolkTypedTupleType.create(elements)
 
         fun uint(n: Int): TolkType = TolkUIntNType(n)
 
@@ -323,6 +331,30 @@ data class TolkBytesNType(
         if (this == other) return this
         return TolkUnionType.create(this, other)
     }
+}
+
+data class TolkVarInt32Type(
+    override val range: TvmIntRangeSet = TvmIntRangeSet.ALL
+) : TolkIntType {
+    override fun negate(): TolkIntType = TolkVarInt32Type(range.unaryMinus())
+
+    override fun printDisplayName(appendable: Appendable) {
+        appendable.append("varint32")
+    }
+
+    override fun toString(): String = "varint32"
+}
+
+data class TolkVarInt16Type(
+    override val range: TvmIntRangeSet = TvmIntRangeSet.ALL
+) : TolkIntType {
+    override fun negate(): TolkIntType = TolkVarInt16Type(range.unaryMinus())
+
+    override fun printDisplayName(appendable: Appendable) {
+        appendable.append("varint16")
+    }
+
+    override fun toString(): String = "varint16"
 }
 
 interface TolkTypeVisitor {

@@ -240,6 +240,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "^="                     { return XORLET; }
       "->"                     { return MAPSTO; }
       "~"                      { return TILDE; }
+      "=>"                     { return ARROW; }
 
       "return"                 { return RETURN_KEYWORD; }
       "var"                    { return VAR_KEYWORD; }
@@ -275,7 +276,10 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "export"                 { return EXPORT_KEYWORD; }
       "break"                  { return BREAK_KEYWORD; }
       "continue"               { return CONTINUE_KEYWORD; }
+      "match"                  { return MATCH_KEYWORD; }
       "as"                     { return AS_KEYWORD; }
+      "is"                     { return IS_KEYWORD; }
+      "!is"                    { return NOT_IS_KEYWORD; }
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
       {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }

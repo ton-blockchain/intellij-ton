@@ -148,6 +148,7 @@ class TolkInferenceContext(
                 flow = walker.inferFunction(element, flow)
                 unreachable = flow.unreachable
             }
+
             is TolkFile -> {
                 val walker = TolkInferenceWalker(this)
                 var flow = TolkFlowContext()
@@ -244,7 +245,7 @@ class TolkInferenceWalker(
             is TolkAssertStatement -> processAssertStatement(element, flow)
             is TolkTryStatement -> processTryStatement(element, flow)
             is TolkExpressionStatement -> processExpressionStatement(element, flow)
-            is TolkVarStatement -> processVarStatement(element, flow)
+            is TolkMatchStatement -> processMatchStatement(element, flow)
             else -> flow
         }
     }
@@ -368,17 +369,21 @@ class TolkInferenceWalker(
         return nextFlow
     }
 
-    private fun processVarStatement(element: TolkVarStatement, flow: TolkFlowContext): TolkFlowContext {
-        val varDefinition = element.varDefinition ?: return flow
+    private fun processMatchStatement(element: TolkMatchStatement, flow: TolkFlowContext): TolkFlowContext {
+        val nextFlow = inferExpression(element.matchExpression, flow, false).outFlow
+        return nextFlow
+    }
 
+    private fun processVarExpression(element: TolkVarExpression, flow: TolkFlowContext): TolkExpressionFlowContext {
         var nextFlow = flow
+        val varDefinition = element.varDefinition ?: return TolkExpressionFlowContext(nextFlow, false)
+
         nextFlow = processVarDefinition(varDefinition, nextFlow)
         val varDefinitionType = ctx.getType(varDefinition)
-        val expression = element.expression ?: return nextFlow
-        nextFlow = inferExpression(expression, nextFlow, false, varDefinitionType).outFlow
-        processVarDefinitionAfterRight(varDefinition, ctx.getType(expression) ?: TolkType.Unknown, nextFlow)
-
-        return nextFlow
+        val expression = element.expression ?: return TolkExpressionFlowContext(nextFlow, false)
+        val nextExprFlow = inferExpression(expression, nextFlow, false, varDefinitionType)
+        processVarDefinitionAfterRight(varDefinition, ctx.getType(expression) ?: TolkType.Unknown, nextExprFlow.outFlow)
+        return nextExprFlow
     }
 
     private fun processVarDefinition(element: TolkVarDefinition, flow: TolkFlowContext): TolkFlowContext {
@@ -471,6 +476,7 @@ class TolkInferenceWalker(
             is TolkLiteralExpression -> inferLiteralExpression(element, flow, usedAsCondition)
             is TolkTernaryExpression -> inferTernaryExpression(element, flow, usedAsCondition, hint)
             is TolkBinExpression -> inferBinExpression(element, flow, usedAsCondition)
+            is TolkIsExpression -> inferIsExpression(element, flow, usedAsCondition)
             is TolkReferenceExpression -> inferReferenceExpression(element, flow, usedAsCondition)
             is TolkTupleExpression -> inferTupleExpression(element, flow, usedAsCondition, hint)
             is TolkTensorExpression -> inferTensorExpression(element, flow, usedAsCondition, hint)
@@ -480,6 +486,8 @@ class TolkInferenceWalker(
             is TolkPrefixExpression -> inferPrefixExpression(element, flow, usedAsCondition, hint)
             is TolkNotNullExpression -> inferNotNullExpression(element, flow, usedAsCondition)
             is TolkAsExpression -> inferAsExpression(element, flow, usedAsCondition)
+            is TolkVarExpression -> processVarExpression(element, flow)
+            is TolkMatchExpression -> inferMatchExpression(element, flow, usedAsCondition)
 //            else -> error("Can't infer type of ${element.type} ${element::class}")
             else -> TolkExpressionFlowContext(flow, usedAsCondition)
         }
@@ -743,6 +751,23 @@ class TolkInferenceWalker(
         return nextFlow.toResult()
     }
 
+    private fun inferIsExpression(
+        element: TolkIsExpression,
+        flow: TolkFlowContext,
+        usedAsCondition: Boolean
+    ): TolkExpressionFlowContext {
+
+        val expression = element.expression
+        val nextFlow = inferExpression(expression, flow, usedAsCondition)
+
+        val typeExpression = element.typeExpression ?: return nextFlow
+
+        val isCheck = element.node.findChildByType(TolkElementTypes.IS_KEYWORD) != null
+
+        ctx.setType(element, TolkType.Bool)
+        return nextFlow
+    }
+
     private fun inferIsNullCheck(
         element: TolkBinExpression,
         expression: TolkExpression,
@@ -868,11 +893,13 @@ class TolkInferenceWalker(
                         ctx.getType(symbol)
                     }
                 }
+
                 is TolkConstVar -> if (ctx.owner is TolkFunction) {
                     symbol.type
                 } else {
                     ctx.getType(symbol)
                 }
+
                 else -> flow.getType(symbol)
             }
             ctx.setType(element, type)
@@ -1216,6 +1243,41 @@ class TolkInferenceWalker(
         return TolkExpressionFlowContext(afterExpr.outFlow, true)
     }
 
+    private fun inferMatchExpression(
+        element: TolkMatchExpression,
+        flow: TolkFlowContext,
+        usedAsCondition: Boolean
+    ): TolkExpressionFlowContext {
+        val expression = element.expression ?: return TolkExpressionFlowContext(flow, usedAsCondition)
+        val afterExpr = inferExpression(expression, flow, false)
+
+        var nextFlow = afterExpr.outFlow
+        element.matchArmList.forEach { matchArm ->
+            val matchExpression = matchArm.expression
+            if (matchExpression != null) {
+                inferExpression(matchExpression, afterExpr.outFlow, usedAsCondition)
+                return@forEach
+            }
+            val returnStatement = matchArm.returnStatement
+            if (returnStatement != null) {
+                inferStatement(returnStatement, afterExpr.outFlow)
+                return@forEach
+            }
+            val throwStatement = matchArm.throwStatement
+            if (throwStatement != null) {
+                inferStatement(throwStatement, afterExpr.outFlow)
+                return@forEach
+            }
+            val blockStatement = matchArm.blockStatement
+            if (blockStatement != null) {
+                inferStatement(blockStatement, afterExpr.outFlow)
+                return@forEach
+            }
+        }
+
+        return TolkExpressionFlowContext(nextFlow, usedAsCondition)
+    }
+
     private fun extractSinkExpression(expression: TolkExpression): TolkSinkExpression? {
         return when (expression) {
             is TolkReferenceExpression -> {
@@ -1252,6 +1314,7 @@ class TolkInferenceWalker(
                 }
                 return symbol?.type
             }
+
             is TolkDotExpression -> {
                 val index = expression.targetIndex ?: return null
                 val leftType = calcDeclaredTypeBeforeSmartCast(expression.left) ?: return null
@@ -1262,6 +1325,7 @@ class TolkInferenceWalker(
                     return leftType.elements.getOrNull(index)
                 }
             }
+
             is TolkParenExpression -> {
                 return calcDeclaredTypeBeforeSmartCast(expression.unwrapParen())
             }

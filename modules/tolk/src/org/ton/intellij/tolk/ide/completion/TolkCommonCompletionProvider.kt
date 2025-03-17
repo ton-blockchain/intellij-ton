@@ -54,7 +54,9 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             if (scope is TolkBlockStatement) {
                 scope.statementList.forEach { statement ->
                     if (statement == lastParent) return@treeWalkUp true
-                    if (statement is TolkVarStatement) {
+                    if (statement !is TolkExpressionStatement) return@forEach
+                    val expression = statement.expression
+                    if (expression is TolkVarExpression) {
                         fun addVarDefinition(varDefinition: TolkVarDefinition?) {
                             when (varDefinition) {
                                 is TolkVar -> {
@@ -75,7 +77,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                             }
                         }
 
-                        addVarDefinition(statement.varDefinition)
+                        addVarDefinition(expression.varDefinition)
                     }
                 }
             }

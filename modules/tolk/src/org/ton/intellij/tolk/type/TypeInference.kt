@@ -17,7 +17,7 @@ import java.util.*
 val TolkElement.inference: TolkInferenceResult?
     get() {
         val context: TolkInferenceContextOwner? =
-            this as? TolkInferenceContextOwner ?: context?.parentOfType<TolkInferenceContextOwner>()
+            this as? TolkInferenceContextOwner ?: context?.parentOfType<TolkInferenceContextOwner>(withSelf = true)
         return if (context != null) {
             inferTypesIn(context)
         } else {
@@ -48,6 +48,7 @@ data class TolkInferenceResult(
     private val resolvedRefs: Map<TolkReferenceExpression, OrderedSet<PsiElementResolveResult>>,
     private val expressionTypes: Map<TolkTypedElement, TolkType>,
     private val varTypes: Map<TolkVarDefinition, TolkType>,
+    private val constTypes: Map<TolkConstVar, TolkType>,
     override val returnStatements: List<TolkReturnStatement>,
     val unreachable: TolkUnreachableKind? = null
 ) : TolkInferenceData {
@@ -60,6 +61,8 @@ data class TolkInferenceResult(
     override fun getType(element: TolkTypedElement?): TolkType? {
         if (element is TolkVarDefinition) {
             return varTypes[element]
+        } else if (element is TolkConstVar) {
+            return constTypes[element]
         }
         return expressionTypes[element ?: return null]
     }
@@ -74,6 +77,7 @@ class TolkInferenceContext(
     private val resolvedRefs = HashMap<TolkReferenceExpression, OrderedSet<PsiElementResolveResult>>()
     private val diagnostics = LinkedList<TolkDiagnostic>()
     private val varTypes = HashMap<TolkVarDefinition, TolkType>()
+    private val constTypes = HashMap<TolkConstVar, TolkType>()
     internal val expressionTypes = HashMap<TolkTypedElement, TolkType>()
     override val returnStatements = LinkedList<TolkReturnStatement>()
     var declaredReturnType: TolkType? = null
@@ -89,6 +93,8 @@ class TolkInferenceContext(
     override fun getType(element: TolkTypedElement?): TolkType? {
         if (element is TolkVarDefinition) {
             return varTypes[element]
+        } else if (element is TolkConstVar) {
+            return constTypes[element]
         }
         return expressionTypes[element]
     }
@@ -96,6 +102,13 @@ class TolkInferenceContext(
     fun <T : TolkType> setType(element: TolkVarDefinition, type: T?): T? {
         if (type != null) {
             varTypes[element] = type
+        }
+        return type
+    }
+
+    fun <T : TolkType> setType(element: TolkConstVar, type: T?): T? {
+        if (type != null) {
+            constTypes[element] = type
         }
         return type
     }
@@ -152,7 +165,7 @@ class TolkInferenceContext(
             }
         }
 
-        return TolkInferenceResult(resolvedRefs, expressionTypes, varTypes, returnStatements, unreachable)
+        return TolkInferenceResult(resolvedRefs, expressionTypes, varTypes, constTypes, returnStatements, unreachable)
     }
 }
 
@@ -209,13 +222,14 @@ class TolkInferenceWalker(
     }
 
     fun inferConstant(element: TolkConstVar, flow: TolkFlowContext): TolkFlowContext {
-        var nextFlow = flow
         val expression = element.expression
         if (expression != null) {
             val typeHint = element.typeExpression?.type
-            nextFlow = inferExpression(expression, nextFlow, false, typeHint).outFlow
+            inferExpression(expression, flow, false, typeHint).outFlow
+            val exprType = ctx.getType(expression)
+            ctx.setType(element, typeHint ?: exprType)
         }
-        return nextFlow
+        return flow
     }
 
     private fun inferStatement(element: TolkStatement, flow: TolkFlowContext): TolkFlowContext {
@@ -847,8 +861,18 @@ class TolkInferenceWalker(
                     symbolType.substitute(substituteMap)
                 }
 
-                is TolkGlobalVar -> symbol.type
-                is TolkConstVar -> symbol.type
+                is TolkGlobalVar -> {
+                    if (ctx.owner is TolkFunction) {
+                        symbol.type
+                    } else {
+                        ctx.getType(symbol)
+                    }
+                }
+                is TolkConstVar -> if (ctx.owner is TolkFunction) {
+                    symbol.type
+                } else {
+                    ctx.getType(symbol)
+                }
                 else -> flow.getType(symbol)
             }
             ctx.setType(element, type)

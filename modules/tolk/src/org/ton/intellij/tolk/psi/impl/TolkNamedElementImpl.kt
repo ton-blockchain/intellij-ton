@@ -20,7 +20,7 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
 
     override fun getTextOffset(): Int = identifier?.textOffset ?: 0
 
-    override fun getName(): String? = stub?.name ?: identifier?.text
+    override fun getName(): String? = stub?.name ?: identifier?.text?.removeSurrounding("`")
 
     override fun getNameIdentifier(): PsiElement? = identifier
 

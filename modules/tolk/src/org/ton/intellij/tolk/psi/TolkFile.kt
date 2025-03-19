@@ -103,6 +103,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
 
     fun import(file: TolkFile) {
         if (file == this) return
+        if (!file.isPhysical) return
         var path = VfsUtil.findRelativePath(virtualFile ?: return, file.virtualFile ?: return, '/') ?: return
         val needImport = includeDefinitions.none { it.resolveFile(it.project) == file.virtualFile }
         if (!needImport) return

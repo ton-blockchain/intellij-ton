@@ -22,7 +22,7 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
 
     override fun getTextOffset(): Int = identifier.textOffset
 
-    override fun getName(): String? = identifier.text
+    override fun getName(): String? = identifier.text.removeSurrounding("`")
 
     override fun getNameIdentifier(): PsiElement? = identifier
 

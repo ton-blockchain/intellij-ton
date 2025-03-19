@@ -14,6 +14,7 @@ import com.intellij.psi.util.elementType
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.impl.parameters
 import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.type.TolkFunctionType
 import org.ton.intellij.util.parentOfType
@@ -171,7 +172,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         isImported: Boolean
     ): LookupElement {
         val contextElement = context.context
-        var name = this.name ?: ""
+        val name = this.name ?: ""
         val file = this.containingFile.originalFile
         val contextFile = context.context?.containingFile?.originalFile
         val includePath = if (file == contextFile || contextFile == null) ""
@@ -191,7 +192,11 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             is TolkFunction -> {
                 PrioritizedLookupElement.withPriority(
                     base
-                        .withTypeText((this.type as? TolkFunctionType)?.returnType?.toString() ?: "")
+                        .withTypeText((this.type as? TolkFunctionType)?.returnType?.let {
+                            buildString {
+                                it.printDisplayName(this)
+                            }
+                        } ?: "_")
                         .let { builder ->
                             typeParameterList?.let { list ->
                                 builder.appendTailText(
@@ -210,13 +215,24 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                                     prefix = "(",
                                     postfix = ")"
                                 ) {
-                                    "${it.name}: ${it.typeExpression?.type}"
+                                    buildString {
+                                        append(it.name)
+                                        append(": ")
+                                        it.typeExpression?.type?.printDisplayName(this) ?: append("_")
+                                    }
                                 } ?: "()", true)
                         }
                         .withInsertHandler { context, item ->
-                            if (contextElement?.parent !is TolkCallExpression) {
+                            val nextVisibleLeaf = contextElement?.let {
+                                PsiTreeUtil.nextVisibleLeaf(it)
+                            }
+
+                            if (nextVisibleLeaf == null || nextVisibleLeaf.elementType != TolkElementTypes.LPAREN) {
                                 context.editor.document.insertString(context.editor.caretModel.offset, "()")
-                                context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + 2)
+
+                                val offset = if (this.parameters.isEmpty()) 2 else 1
+
+                                context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
                                 context.commitDocument()
                             }
 
@@ -234,7 +250,9 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             is TolkConstVar -> {
                 PrioritizedLookupElement.withPriority(
                     base
-                        .withTypeText(typeExpression?.type?.toString() ?: "")
+                        .withTypeText(buildString {
+                            typeExpression?.type?.printDisplayName(this) ?: append("_")
+                        })
                         .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
                         .withInsertHandler { context, item ->
                             context.commitDocument()
@@ -251,7 +269,11 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             is TolkGlobalVar -> {
                 PrioritizedLookupElement.withPriority(
                     base
-                        .withTypeText(typeExpression?.type?.toString() ?: "")
+                        .withTypeText(
+                            buildString {
+                                typeExpression?.type?.printDisplayName(this) ?: append("_")
+                            }
+                        )
                         .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
                         .withInsertHandler { context, item ->
                             context.commitDocument()
@@ -269,7 +291,9 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 PrioritizedLookupElement.withPriority(
                     base
                         .withIcon(TolkIcons.VARIABLE)
-                        .withTypeText(typeExpression?.type?.toString() ?: ""),
+                        .withTypeText(buildString {
+                            typeExpression?.type?.printDisplayName(this) ?: append("_")
+                        }),
                     TolkCompletionContributor.VAR_PRIORITY
                 )
             }
@@ -278,7 +302,9 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 PrioritizedLookupElement.withPriority(
                     base
                         .withIcon(TolkIcons.PARAMETER)
-                        .withTypeText(typeExpression?.type?.toString() ?: ""),
+                        .withTypeText(buildString {
+                            typeExpression?.type?.printDisplayName(this) ?: append("_")
+                        }),
                     TolkCompletionContributor.VAR_PRIORITY
                 )
             }

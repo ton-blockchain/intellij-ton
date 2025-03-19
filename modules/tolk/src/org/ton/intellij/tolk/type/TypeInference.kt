@@ -175,6 +175,7 @@ class TolkInferenceWalker(
 //    val parent: TolkInferenceWalker? = null,
 //    val throwableElements: MutableList<TolkThrowStatement> = LinkedList(),
 ) {
+    private val project = ctx.project
     private val importFiles = LinkedHashSet<VirtualFile>()
 
     fun inferFile(element: TolkFile, flow: TolkFlowContext, useIncludes: Boolean = true): TolkFlowContext {
@@ -871,8 +872,13 @@ class TolkInferenceWalker(
         flow: TolkFlowContext,
         usedAsCondition: Boolean
     ): TolkExpressionFlowContext {
-        val name = element.name
-        val symbol = flow.getSymbol(name)
+        val nextFlow = TolkExpressionFlowContext(flow, usedAsCondition)
+        val name = element.name ?: return nextFlow
+        var symbol = flow.getSymbol(name)
+        if (symbol == null) {
+            symbol = TolkBuiltins[project].getFunction(name)
+        }
+
         if (symbol != null) {
             val type = when (symbol) {
                 is TolkFunction -> {
@@ -905,7 +911,7 @@ class TolkInferenceWalker(
             ctx.setType(element, type)
             ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(symbol)))
         }
-        return TolkExpressionFlowContext(flow, usedAsCondition)
+        return nextFlow
     }
 
     private fun inferTupleExpression(
@@ -1232,7 +1238,11 @@ class TolkInferenceWalker(
         flow: TolkFlowContext,
         usedAsCondition: Boolean,
     ): TolkExpressionFlowContext {
-        val expression = element.expression
+        val expression = try {
+            element.expression
+        } catch (e: Exception) {
+            throw e
+        }
         val asType = element.typeExpression?.type
         val afterExpr = inferExpression(expression, flow, false, asType)
         ctx.setType(element, asType)

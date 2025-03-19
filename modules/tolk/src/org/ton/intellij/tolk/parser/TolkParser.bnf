@@ -606,23 +606,22 @@ fake ParenExpression ::= '(' Expression ')' {
     pin = 1
 }
 
-TensorOrParenExpression ::= '(' TensorOrParenElement TensorExpression_upper* ')' {
+TensorOrParenExpression ::= '(' TensorOrParenElement (TensorExpression_upper|',')? ')' {
     pin = 1
     elementType = ParenExpression
 }
-upper TensorExpression_upper ::= ',' (TensorOrParenElement | &')') {
+upper TensorExpression_upper ::= ',' TensorOrParenElement TensorExpressionElements* {
     elementType = TensorExpression
+    pin=2
+}
+private TensorExpressionElements ::= ',' (TensorOrParenElement | &')') {
     pin=1
 }
-private TensorOrParenElement ::= Expression
-
-// element_list ::= '(' element (',' (element | &')'))* ')' {pin(".*")=1}
-// element_list ::=     element (',' (element | &')'))*  {pin(".*")=1}
-// element_list ::=      ',' (element | &')')  {pin(".*")=1}
-private TensorExpressionValue ::= Expression ','? {
-//    recoverWhile=TensorExpressionValue_recovery
+private TensorOrParenElement ::= Expression {
+    recoverWhile=TensorExpressionValue_recovery
 }
-//private TensorExpressionValue_recovery ::= !(','|')'|';')
+
+private TensorExpressionValue_recovery ::= !(','|')'|';')
 
 TupleExpression ::= '[' [ <<comma_separated_list TupleElement>> ] ']' {
     pin=1

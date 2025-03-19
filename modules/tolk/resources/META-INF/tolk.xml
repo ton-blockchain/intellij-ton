@@ -188,12 +188,18 @@
 
         <additionalLibraryRootsProvider
                 implementation="org.ton.intellij.tolk.sdk.TolkSdkSyntheticLibraryProvider"/>
+
+        <postStartupActivity implementation="org.ton.intellij.tolk.psi.impl.TolkBuiltins$RegisterActivity"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij.dev">
         <psiViewer.propertyNodeFactory
                 implementation="org.ton.intellij.tolk.dev.psiviewer.PsiViewerTolkTypeNode$Factory"/>
     </extensions>
+
+    <applicationListeners>
+        <listener class="org.ton.intellij.tolk.psi.impl.TolkBuiltins$UnregisterListener" topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    </applicationListeners>
 
     <actions>
         <action id="NewTolk" class="org.ton.intellij.tolk.action.file.TolkCreateFileAction"

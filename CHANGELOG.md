@@ -1,5 +1,17 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [2.5.3]
+
+### Added
+- [Tolk 0.10](https://github.com/ton-blockchain/ton/pull/1559) support
+
+### Fixed
+- Tolk: Resolving references in constants
+- Tolk: Resolving builtin function references: `_+_`, etc.
+- Tolk: Double `()` in function call completion
+- Tolk: `MAX..MIN` in type rendering
+- Tolk: some minor smart-casts issues
+
 ## [2.5.2]
 
 ### Added

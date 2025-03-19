@@ -8,6 +8,33 @@ data class TolkFunctionType(
 ) : TolkType {
     override fun toString(): String = "$inputType -> $returnType"
 
+    override fun hasGenerics(): Boolean {
+        return inputType.hasGenerics() || returnType.hasGenerics()
+    }
+
+    val parameters: List<TolkType> = if (inputType is TolkTensorType) inputType.elements else listOf(inputType)
+
+    override fun printDisplayName(appendable: Appendable): Appendable {
+        when (inputType) {
+            is TolkUnitType -> {
+                appendable.append("()")
+            }
+
+            is TolkTensorType -> {
+                inputType.printDisplayName(appendable)
+            }
+
+            else -> {
+                appendable.append("(")
+                inputType.printDisplayName(appendable)
+                appendable.append(")")
+            }
+        }
+        appendable.append(" -> ")
+        returnType.printDisplayName(appendable)
+        return appendable
+    }
+
     override fun join(other: TolkType): TolkType {
         if (this == other) return this
         if (other is TolkFunctionType) {
@@ -29,7 +56,7 @@ data class TolkFunctionType(
         return TolkFunctionType(inputType.substitute(substitution), returnType.substitute(substitution))
     }
 
-    fun resolveGenerics(functionCall: TolkFunctionType): TolkFunctionType {
+    fun resolveGenerics(functionCall: TolkFunctionType, list: List<TolkType>? = null): TolkFunctionType {
         val fType = functionCall.meet(this)
         val mapping = HashMap<TolkTypeParameter, TolkType>()
 

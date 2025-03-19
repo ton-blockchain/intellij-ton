@@ -14,20 +14,9 @@ import org.ton.intellij.tolk.psi.TolkTypeParameterListOwner
 import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.type.TolkType
 
-abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceTypeExpression {
-    private val primitiveType
-        get() = when (text) {
-            "int" -> TolkType.Int
-            "cell" -> TolkType.Cell
-            "slice" -> TolkType.Slice
-            "builder" -> TolkType.Builder
-            "continuation" -> TolkType.Continuation
-            "tuple" -> TolkType.Tuple
-            "void" -> TolkType.Unit
-            "bool" -> TolkType.Bool
-            "never" -> TolkType.Never
-            else -> null
-        }
+abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node),
+    TolkReferenceTypeExpression {
+    private val primitiveType: TolkType? get() = TolkType.byName(this.text)
 
     val isPrimitive get() = primitiveType != null
 
@@ -41,9 +30,10 @@ abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiEl
 
     override fun getReference(): PsiReference? = references.firstOrNull()
 
-    class TolkTypeIdentifierReference(element: TolkReferenceTypeExpression) : PsiReferenceBase.Poly<TolkReferenceTypeExpression>(
-        element, TextRange(0, element.textLength), false
-    ) {
+    class TolkTypeIdentifierReference(element: TolkReferenceTypeExpression) :
+        PsiReferenceBase.Poly<TolkReferenceTypeExpression>(
+            element, TextRange(0, element.textLength), false
+        ) {
         override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
             return buildList<ResolveResult> {
                 val typeParameterName = myElement.identifier.text

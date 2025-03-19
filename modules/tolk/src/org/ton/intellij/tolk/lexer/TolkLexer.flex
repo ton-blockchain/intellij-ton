@@ -127,14 +127,15 @@ HEX_DIGIT_OR_UNDERSCORE = [_0-9A-Fa-f]
 WHITE_SPACE_CHAR=[\ \n\t\f]
 
 IDENTIFIER_SYMBOLS=[\?\:\'\$\_]
-IDENTIFIER_PART=[:digit:]|[:letter:]|IDENTIFIER_SYMBOLS
 
 INTEGER_LITERAL=({DECIMAL_INTEGER_LITERAL}|{HEX_INTEGER_LITERAL}|{BIN_INTEGER_LITERAL})
-DECIMAL_INTEGER_LITERAL=(0|([1-9]({DIGIT_OR_UNDERSCORE})*))
+DECIMAL_INTEGER_LITERAL=([0-9]({DIGIT_OR_UNDERSCORE})*)
 HEX_INTEGER_LITERAL=0[Xx]({HEX_DIGIT_OR_UNDERSCORE})*
-BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
+BIN_INTEGER_LITERAL=0[Bb](0|1|_)*
 
-PLAIN_IDENTIFIER=[a-zA-Z$_][a-zA-Z0-9$_]*
+LETTER = [:letter:]|_|\$
+IDENTIFIER_PART=[:digit:]|{LETTER}
+PLAIN_IDENTIFIER={LETTER} {IDENTIFIER_PART}*
 QUOTE_ESCAPED_IDENTIFIER = (`[^`\n]+`)|(_[^_\n\w,]+_)
 IDENTIFIER = {QUOTE_ESCAPED_IDENTIFIER}|{PLAIN_IDENTIFIER}
 //VERSION_VALUE = (=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?
@@ -240,6 +241,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "^="                     { return XORLET; }
       "->"                     { return MAPSTO; }
       "~"                      { return TILDE; }
+      "=>"                     { return ARROW; }
 
       "return"                 { return RETURN_KEYWORD; }
       "var"                    { return VAR_KEYWORD; }
@@ -275,11 +277,15 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "export"                 { return EXPORT_KEYWORD; }
       "break"                  { return BREAK_KEYWORD; }
       "continue"               { return CONTINUE_KEYWORD; }
+      "match"                  { return MATCH_KEYWORD; }
       "as"                     { return AS_KEYWORD; }
+      "is"                     { return IS_KEYWORD; }
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
       {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }
       {IDENTIFIER}             { return IDENTIFIER; }
+      \!is{IDENTIFIER_PART}    { yypushback(3); return EXCL; }
+      "!is"                    { return NOT_IS_KEYWORD; }
 }
 
 <RAW_STRING> \n                  { return TolkElementTypes.RAW_STRING_ELEMENT; }
@@ -305,7 +311,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
 
 <IN_BLOCK_COMMENT, IN_BLOCK_DOC> {
     "/*" {
-         commentDepth++;
+         commentDepth = 1;
     }
 
     <<EOF>> {
@@ -316,15 +322,15 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
     }
 
     "*/" {
-        if (commentDepth > 0) {
-            commentDepth--;
-        }
-        else {
+//        if (commentDepth > 0) {
+//            commentDepth--;
+//        }
+//        else {
              int state = yystate();
              popState();
              zzStartRead = commentStart;
              return commentStateToTokenType(state);
-        }
+//        }
     }
 
     [\s\S] {}

@@ -5,15 +5,9 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
-import org.ton.intellij.tolk.psi.TolkTypedElement
-import org.ton.intellij.tolk.type.TolkType
 
 
 abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceExpression {
-
-    override val type: TolkType?
-        get() = references.firstOrNull()?.resolve()?.let { it as? TolkTypedElement }?.type
-
     override fun getReferences(): Array<TolkReference> {
         if (name == "__expect_type") return EMPTY_ARRAY
         return arrayOf(TolkReference(this, identifier.textRangeInParent))
@@ -28,7 +22,7 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
 
     override fun getTextOffset(): Int = identifier.textOffset
 
-    override fun getName(): String? = identifier.text
+    override fun getName(): String? = identifier.text.removeSurrounding("`")
 
     override fun getNameIdentifier(): PsiElement? = identifier
 

@@ -9,15 +9,20 @@ class TolkParameterStub(
     parent: StubElement<*>,
     elementType: IStubElementType<*, *>,
     name: StringRef?,
+    val isMutable: Boolean,
 ) : TolkNamedStub<TolkParameter>(parent, elementType, name) {
     constructor(
         parent: StubElement<*>,
         elementType: IStubElementType<*, *>,
         name: String?,
-    ) : this(parent, elementType, StringRef.fromString(name))
+        mutable: Boolean,
+    ) : this(parent, elementType, StringRef.fromString(name), mutable)
 
     override fun toString(): String = buildString {
         append("TolkParameterStub(")
+        if (isMutable) {
+            append("mutable=true, ")
+        }
         append("name=").append(name)
         append(")")
     }

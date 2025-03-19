@@ -165,8 +165,7 @@ class TolkAnnotator : Annotator {
                 if (resolved.reference != null) return
                 TolkColor.LOCAL_VARIABLE
             }
-
-            is TolkVar -> TolkColor.LOCAL_VARIABLE
+            is TolkVar, is TolkCatchParameter -> TolkColor.LOCAL_VARIABLE
             else -> return
         }
         highlight(identifier, holder, color.textAttributesKey)

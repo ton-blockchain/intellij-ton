@@ -3,6 +3,7 @@ package org.ton.intellij.tolk.psi.impl
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import org.apache.commons.codec.binary.Hex
+import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkLiteralExpression
 import org.ton.intellij.tolk.type.TolkConstantIntType
 import org.ton.intellij.tolk.type.TolkType
@@ -11,8 +12,12 @@ import java.security.MessageDigest
 import java.util.zip.CRC32
 
 abstract class TolkLiteralExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkLiteralExpression {
-    override val type: TolkType
+    override val type: TolkType?
         get() {
+            val treeParent = node.treeParent
+            if (treeParent.elementType == TolkElementTypes.DOT_EXPRESSION && treeParent.lastChildNode == node) {
+                return super.type
+            }
             val integerLiteral = integerLiteral?.text
             if (integerLiteral != null) {
                 var text = integerLiteral.replace("_", "")

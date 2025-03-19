@@ -27,7 +27,7 @@ import org.ton.intellij.util.recursionGuard
 //            processFile(context, nextFile)
 //        }
 
-class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkLanguage), TolkElement {
+class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkLanguage), TolkElement, TolkInferenceContextOwner {
     override fun getFileType(): FileType = TolkFileType
 
     override fun getStub(): TolkFileStub? = super.getStub() as? TolkFileStub
@@ -103,6 +103,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
 
     fun import(file: TolkFile) {
         if (file == this) return
+        if (!file.isPhysical) return
         var path = VfsUtil.findRelativePath(virtualFile ?: return, file.virtualFile ?: return, '/') ?: return
         val needImport = includeDefinitions.none { it.resolveFile(it.project) == file.virtualFile }
         if (!needImport) return

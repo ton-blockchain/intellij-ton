@@ -14,6 +14,7 @@ class TolkFunctionStub(
     val hasAsm: Boolean,
     val isBuiltin: Boolean,
     val isDeprecated: Boolean,
+    val isGeneric: Boolean,
 ) : TolkNamedStub<TolkFunction>(parent, elementType, name) {
     constructor(
         parent: StubElement<*>, elementType: IStubElementType<*, *>,
@@ -23,6 +24,7 @@ class TolkFunctionStub(
         hasAsm: Boolean,
         isBuiltin: Boolean,
         isDeprecated: Boolean,
+        isGeneric: Boolean,
     ) : this(
         parent,
         elementType,
@@ -31,7 +33,8 @@ class TolkFunctionStub(
         isGetMethod,
         hasAsm,
         isBuiltin,
-        isDeprecated
+        isDeprecated,
+        isGeneric,
     )
 
     override fun toString(): String = buildString {

@@ -82,6 +82,7 @@
             XORLET              = '^='
             MAPSTO              = '->'
             TILDE               = '~'
+            ARROW               = '=>'
 
             RETURN_KEYWORD              = 'return'
             VAR_KEYWORD                 = 'var'
@@ -93,6 +94,8 @@
             IF_KEYWORD                  = 'if'
             ELSE_KEYWORD                = 'else'
             AS_KEYWORD                  = 'as'
+            IS_KEYWORD                  = 'is'
+            NOT_IS_KEYWORD              = '!is'
 
             TYPE_KEYWORD                = 'type'
             TRUE_KEYWORD                = 'true'
@@ -111,6 +114,7 @@
             THROW_KEYWORD               = 'throw'
             ASSERT_KEYWORD              = 'assert'
             MUTATE_KEYWORD              = 'mutate'
+            MATCH_KEYWORD               = 'match'
 
             EXPORT_KEYWORD              = 'export'
             GLOBAL_KEYWORD              = 'global'
@@ -171,7 +175,7 @@ ConstVar ::= 'const' IDENTIFIER ConstVarType? '=' Expression ';' {
     stubClass="org.ton.intellij.tolk.stub.TolkConstVarStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
-private ConstVarType ::= ':' &('int'|'slice') TypeExpression {
+private ConstVarType ::= ':' TypeExpression {
     pin = 1
 }
 
@@ -292,10 +296,13 @@ Statement ::= ReturnStatement
             | AssertStatement
             | ThrowStatement
             | TryStatement
-            | VarStatement
+            | MatchStatement
             | ExpressionStatement
             | EmptyStatement
 
+MatchStatement ::= MatchExpression ';'? {
+    pin=1
+}
 
 ExpressionStatement ::= Expression ';' {
     pin=1
@@ -303,7 +310,7 @@ ExpressionStatement ::= Expression ';' {
 
 EmptyStatement ::= ';'
 
-ReturnStatement ::= 'return' Expression? ';' {pin=1}
+ReturnStatement ::= 'return' Expression? {pin=1}
 
 BlockStatement ::= '{' BlockElement_with_recovery* '}' {
     pin=1
@@ -312,8 +319,8 @@ private BlockElement_with_recovery ::= Statement {
     recoverWhile=BlockElement_recovery
 }
 private BlockElement_recovery ::= !(StatementFirst | ExpressionFirst | '}')
-private StatementFirst ::= 'return'|'{'|'repeat'|'if'|'do'|'while'|'assert'|'throw'|'try'|'var'|'val'|';'
-private ExpressionFirst ::= IDENTIFIER | INTEGER_LITERAL | '-' | '+' | '!' | '(' | '['
+private StatementFirst ::= 'return'|'{'|'repeat'|'if'|'do'|'while'|'assert'|'throw'|'try'|'var'|'val'|'match'|';'
+private ExpressionFirst ::= IDENTIFIER | INTEGER_LITERAL | '-' | '+' | '!' | '(' | '[' | 'match'
 
 RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
 
@@ -344,7 +351,7 @@ WhileStatement ::= 'while' Condition BlockStatement {
     ]
 }
 
-ThrowStatement ::= 'throw' (ThrowArg | ThrowExcNo) ';' {
+ThrowStatement ::= 'throw' (ThrowArg | ThrowExcNo) {
     pin = 1
 }
 private ThrowExcNo ::= (!'(') Expression {
@@ -394,9 +401,12 @@ CatchParameter ::= IDENTIFIER {
 }
 
 Expression ::=
-    TernaryExpression
+    VarExpression
+    | TernaryExpression
     | AssignBinExpression
     | AsExpression
+    | IsExpression
+    | MatchExpression
     | LogicalBinExpression
     | BitwiseBinExpression
     | CompBinExpression
@@ -440,6 +450,9 @@ fake BinaryOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%='
 | '||'
 | '&&'
 
+VarExpression ::= ('var'|'val') VarDefinition '=' Expression {
+    pin = 1
+}
 AssignBinExpression ::= Expression AssignBinOp Expression {
     rightAssociative=true
     pin=2
@@ -475,10 +488,6 @@ CompBinOp ::= '==' | '!=' | '<' | '>' | '<=' | '>=' | '<=>' { name = "operator" 
 ShiftBinOp ::= '<<' | '>>' | '~>>' | '^>>' { name = "operator" }
 AddBinOp ::= '-' | '+' { name = "operator" }
 MulBinOp  ::= '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%' { name = "operator" }
-
-VarStatement ::= ('var'|'val') VarDefinition '=' Expression ';' {
-    pin = 1
-}
 
 VarDefinition ::= VarTensor | VarTuple | VarRedef | Var {
     implements=[
@@ -540,6 +549,37 @@ AsExpression ::= Expression 'as' TypeExpression {
     pin = 2
     mixin = "org.ton.intellij.tolk.psi.impl.TolkAsExpressionMixin"
 }
+IsExpression ::= Expression ('is'|'!is') TypeExpression {
+    pin = 2
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkIsExpressionMixin"
+}
+
+MatchExpression ::= 'match' '(' Expression ')' '{' MatchArm* '}' {
+    pin = 1
+}
+MatchArm ::= MatchPattern '=>' (MatchThrowArm | MatchReturnArm | MatchBlockArm | MatchExpressionArm) {
+    pin = 1
+}
+
+private MatchThrowArm ::= ThrowStatement (&'}' | ',') {
+    pin = 1
+}
+private MatchReturnArm ::= ReturnStatement (&'}' | ',') {
+    pin = 1
+}
+private MatchBlockArm ::= BlockStatement ','? {
+    pin = 1
+}
+private MatchExpressionArm ::= Expression (&'}' | ',') {
+    pin = 1
+}
+
+MatchPattern ::= MatchPatternElement | 'else' {
+    pin = 1
+}
+private MatchPatternElement ::= TypeExpression
+
+
 ArgumentList ::= '(' [<<list_with_recover Argument>>] ')' {
     pin = 1
 }
@@ -566,17 +606,21 @@ fake ParenExpression ::= '(' Expression ')' {
     pin = 1
 }
 
-TensorOrParenExpression ::= '(' Expression TensorExpression_upper? ')' {
+TensorOrParenExpression ::= '(' TensorOrParenElement (TensorExpression_upper|',')? ')' {
     pin = 1
     elementType = ParenExpression
 }
-upper TensorExpression_upper ::= TensorExpressionValue+ {
+upper TensorExpression_upper ::= ',' TensorOrParenElement TensorExpressionElements* {
     elementType = TensorExpression
+    pin=2
 }
-private TensorExpressionValue ::= ',' Expression {
+private TensorExpressionElements ::= ',' (TensorOrParenElement | &')') {
     pin=1
+}
+private TensorOrParenElement ::= Expression {
     recoverWhile=TensorExpressionValue_recovery
 }
+
 private TensorExpressionValue_recovery ::= !(','|')'|';')
 
 TupleExpression ::= '[' [ <<comma_separated_list TupleElement>> ] ']' {
@@ -662,7 +706,7 @@ NullTypeExpression ::= 'null' {
     mixin="org.ton.intellij.tolk.psi.impl.TolkNullTypeMixin"
 }
 
-private UnionTypeElement ::= FunTypeExpression | SimpleTypeExpression
+private UnionTypeElement ::= FunTypeExpression | NullableTypeExpression | SimpleTypeExpression
 //UnionType ::= headingUnionType | regularUnionType
 //private regularUnionType ::= !'auto' TypeReference &'|' [(UnionTypeElement)+ '|'?] {
 //    pin = 3
@@ -724,7 +768,7 @@ upper TensorType_upper ::= ',' [ TypeExpression (',' TypeExpression)* ] ')' {
     elementType = TensorTypeExpression
 }
 
-private meta comma_separated_list ::= <<param>> (',' <<param>>)*
+private meta comma_separated_list ::= <<param>> (',' <<param>>)* ','?
 private meta list_with_recover ::= <<comma_separated_list <<param>>>> {
     recoverWhile=paren_list_element_recover
 }

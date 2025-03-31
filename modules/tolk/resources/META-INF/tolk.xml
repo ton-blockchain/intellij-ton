@@ -125,9 +125,9 @@
         <localInspection language="Tolk" displayName="Unused type parameter inspection" groupPath="Tolk"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedTypeParameterInspection"/>
-        <localInspection language="Tolk" displayName="Unsupported element inspection" groupPath="Tolk"
-                         groupName="Declaration redundancy" enabledByDefault="true" level="ERROR"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnsupportedElementInspection"/>
+<!--        <localInspection language="Tolk" displayName="Unsupported element inspection" groupPath="Tolk"-->
+<!--                         groupName="Declaration redundancy" enabledByDefault="true" level="ERROR"-->
+<!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnsupportedElementInspection"/>-->
         <localInspection language="Tolk" displayName="__expect_type inspection" groupPath="Tolk"
                          groupName="Declaration redundancy" enabledByDefault="false" level="ERROR"
                          implementationClass="org.ton.intellij.tolk.inspection.TolkExpectTypeBuiltinInspection"/>

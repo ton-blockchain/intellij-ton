@@ -20,6 +20,11 @@ class TolkTypedTupleType private constructor(
         return appendable
     }
 
+    override fun actualType(): TolkTypedTupleType = TolkTypedTupleType(
+        elements.map { it.actualType() },
+        hasGenerics
+    )
+
     override fun join(other: TolkType): TolkType {
         if (this == other) return this
         if (other is TolkTypedTupleType && elements.size == other.elements.size) {

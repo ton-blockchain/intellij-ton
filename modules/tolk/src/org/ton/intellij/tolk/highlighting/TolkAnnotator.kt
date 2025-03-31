@@ -53,7 +53,6 @@ class TolkAnnotator : Annotator {
                 val sha = element.node.firstChildNode
                 val macroName = sha.treeNext
 
-
                 highlight(macroName.textRange, holder, TolkColor.MACRO.textAttributesKey)
                 return
             }
@@ -83,6 +82,16 @@ class TolkAnnotator : Annotator {
                     TolkColor.PARAMETER.textAttributesKey
                 )
                 return
+            }
+
+            is TolkStructField -> {
+                highlight(element.identifier, holder, TolkColor.FIELD.textAttributesKey)
+            }
+
+            is TolkStructExpressionField -> {
+                if (element.node.findChildByType(TolkElementTypes.COLON) != null) {
+                    highlight(element.identifier, holder, TolkColor.FIELD.textAttributesKey)
+                }
             }
 
             is TolkVar -> {
@@ -166,6 +175,7 @@ class TolkAnnotator : Annotator {
                 TolkColor.LOCAL_VARIABLE
             }
             is TolkVar, is TolkCatchParameter -> TolkColor.LOCAL_VARIABLE
+            is TolkStructField -> TolkColor.FIELD
             else -> return
         }
         highlight(identifier, holder, color.textAttributesKey)

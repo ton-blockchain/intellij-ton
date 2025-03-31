@@ -12,10 +12,7 @@ import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.psi.impl.resolveFile
 import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.stub.TolkFileStub
-import org.ton.intellij.tolk.stub.type.TolkConstVarStubElementType
-import org.ton.intellij.tolk.stub.type.TolkFunctionStubElementType
-import org.ton.intellij.tolk.stub.type.TolkGlobalVarStubElementType
-import org.ton.intellij.tolk.stub.type.TolkIncludeDefinitionStubElementType
+import org.ton.intellij.tolk.stub.type.*
 import org.ton.intellij.util.getChildrenByType
 import org.ton.intellij.util.recursionGuard
 
@@ -100,6 +97,29 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             }
             CachedValueProvider.Result.create(constVars, this)
         }
+
+    val typeDefs: List<TolkTypeDef>
+        get() = CachedValuesManager.getCachedValue(this) {
+            val stub = stub
+            val typeDefs = if (stub != null) {
+                getChildrenByType(stub, TolkElementTypes.TYPE_DEF, TolkTypeDefStubElementType.ARRAY_FACTORY)
+            } else {
+                findChildrenByClass(TolkTypeDef::class.java).toList()
+            }
+            CachedValueProvider.Result.create(typeDefs, this)
+        }
+
+    val structs: List<TolkStruct>
+        get() = CachedValuesManager.getCachedValue(this) {
+            val stub = stub
+            val typeDefs = if (stub != null) {
+                getChildrenByType(stub, TolkElementTypes.STRUCT, TolkStructStubElementType.ARRAY_FACTORY)
+            } else {
+                findChildrenByClass(TolkStruct::class.java).toList()
+            }
+            CachedValueProvider.Result.create(typeDefs, this)
+        }
+
 
     fun import(file: TolkFile) {
         if (file == this) return

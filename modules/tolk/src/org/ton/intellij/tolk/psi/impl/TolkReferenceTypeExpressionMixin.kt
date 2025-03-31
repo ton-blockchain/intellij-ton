@@ -8,10 +8,7 @@ import com.intellij.psi.PsiReference
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.util.parentOfType
-import org.ton.intellij.tolk.psi.TolkFunction
-import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
-import org.ton.intellij.tolk.psi.TolkTypeParameterListOwner
-import org.ton.intellij.tolk.psi.TolkTypedElement
+import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.type.TolkType
 
 abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node),
@@ -21,7 +18,16 @@ abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiEl
     val isPrimitive get() = primitiveType != null
 
     override val type: TolkType?
-        get() = primitiveType ?: references.firstOrNull()?.resolve()?.let { it as? TolkTypedElement }?.type
+        get() {
+            val primitiveType = primitiveType
+            if (primitiveType != null) return primitiveType
+
+            val resolved = reference?.resolve()
+            if (resolved is TolkTypedElement) {
+                return resolved.type
+            }
+            return null
+        }
 
     override fun getReferences(): Array<PsiReference> {
         if (isPrimitive) return PsiReference.EMPTY_ARRAY
@@ -36,7 +42,7 @@ abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiEl
         ) {
         override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
             return buildList<ResolveResult> {
-                val typeParameterName = myElement.identifier.text
+                val typeParameterName = myElement.identifier.text.removeSurrounding("`")
                 val owner = myElement.parentOfType<TolkTypeParameterListOwner>()
                 if (owner != null) {
                     if (typeParameterName == "self" && owner is TolkFunction) {
@@ -53,20 +59,14 @@ abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiEl
                         }
                     }
                 }
-                myElement.project
-//                TolkTypeDefIndex.findElementsByName(
-//                    project,
-//                    typeParameterName,
-//                    GlobalSearchScope.filesScope(project) {
-//                        val file = myElement.containingFile as? TolkFile ?: return@filesScope emptyList()
-//                        file.collectIncludedFiles(true).map { it.virtualFile }
-//                    }
-//                ).forEach { typeDef ->
-//                    add(PsiElementResolveResult(typeDef))
-//                }
+
+                val file = myElement.containingFile as? TolkFile ?: return@buildList
+                val typeDefResults = collectTypeDefResults(file, typeParameterName)
+                addAll(typeDefResults)
             }.toTypedArray()
         }
     }
+
 
 //    inner class CacheResolver : CachedValueProvider<TolkTy> {
 //        override fun compute(): CachedValueProvider.Result<TolkTy?>? {
@@ -105,6 +105,25 @@ abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiEl
 //            }
 //        }
 //    }
+}
+
+private fun collectTypeDefResults(file: TolkFile, target: String): List<PsiElementResolveResult> {
+    val results = ArrayList<PsiElementResolveResult>()
+
+    val includedFiles = file.collectIncludedFiles(true)
+    includedFiles.forEach { file ->
+        file.typeDefs.forEach { typeDef ->
+            if (typeDef.name == target) {
+                results.add(PsiElementResolveResult(typeDef))
+            }
+        }
+        file.structs.forEach { struct ->
+            if (struct.name == target) {
+                results.add(PsiElementResolveResult(struct))
+            }
+        }
+    }
+    return results
 }
 
 val TolkReferenceTypeExpression.isPrimitive: Boolean

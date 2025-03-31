@@ -1,6 +1,8 @@
 package org.ton.intellij.tolk.type
 
 
+import org.ton.intellij.tolk.psi.TolkStruct
+import org.ton.intellij.tolk.psi.TolkTypeDef
 import org.ton.intellij.tolk.psi.TolkTypeParameter
 import org.ton.intellij.tolk.type.range.TvmIntRangeSet
 
@@ -15,10 +17,22 @@ sealed interface TolkType {
 
     fun removeNullability(): TolkType = this
 
+    fun actualType(): TolkType = unwrapTypeAlias()
+
+    fun unwrapTypeAlias(): TolkType {
+        return when (this) {
+            is TolkAliasType -> typeExpression.unwrapTypeAlias()
+            else -> this
+        }
+    }
+
     /**
      * if A.isSuperType(B) then A.join(B) is A and A.meet(B) is B.
      */
-    fun isSuperType(other: TolkType): Boolean = other == this || other == TolkNeverType
+    fun isSuperType(other: TolkType): Boolean {
+        if (other is TolkAliasType) return isSuperType(other.typeExpression)
+        return other == this || other == TolkNeverType
+    }
 
     fun join(other: TolkType): TolkType
 
@@ -149,7 +163,18 @@ sealed interface TolkType {
         fun bits(n: Int): TolkType = TolkBitsNType(n)
 
         fun bytes(n: Int): TolkType = TolkBytesNType(n)
+
+        fun alias(typeDef: TolkTypeDef, typeExpression: TolkType): TolkAliasType =
+            TolkAliasType(typeDef, typeExpression)
+
+        fun  struct(struct: TolkStruct): TolkStructType = TolkStructType(struct)
     }
+}
+
+fun TolkType?.join(other: TolkType?): TolkType? {
+    if (this == null || this == TolkType.Unknown) return other
+    if (other == null || other == TolkType.Unknown) return this
+    return this.join(other)
 }
 
 interface TolkPrimitiveType : TolkType
@@ -164,7 +189,7 @@ object TolkUnitType : TolkPrimitiveType {
         return TolkType.union(other, this)
     }
 
-    override fun toString(): String = "void"
+    override fun toString(): String = "()"
 }
 
 object TolkNullType : TolkPrimitiveType {
@@ -290,6 +315,8 @@ data class TolkIntNType(
 ) : TolkIntType {
     override fun negate(): TolkIntType = TolkIntNType(n, range.unaryMinus())
 
+    override fun actualType(): TolkType = this
+
     override fun printDisplayName(appendable: Appendable) = appendable.append("int$n")
 
     override fun toString(): String = "int$n"
@@ -301,6 +328,8 @@ data class TolkUIntNType(
 ) : TolkIntType {
     override fun negate(): TolkIntType = TolkUIntNType(n, range.unaryMinus())
 
+    override fun actualType(): TolkType = this
+
     override fun toString(): String = "uint$n"
 
     override fun printDisplayName(appendable: Appendable) = appendable.append("uint$n")
@@ -310,6 +339,8 @@ data class TolkBitsNType(
     val n: Int,
 ) : TolkType {
     override fun toString(): String = "bits$n"
+
+    override fun actualType(): TolkType = this
 
     override fun join(other: TolkType): TolkType {
         if (this == other) return this
@@ -322,6 +353,8 @@ data class TolkBytesNType(
 ) : TolkType {
     override fun toString(): String = "bytes$n"
 
+    override fun actualType(): TolkType = this
+
     override fun join(other: TolkType): TolkType {
         if (this == other) return this
         return TolkUnionType.create(this, other)
@@ -333,6 +366,8 @@ data class TolkVarInt32Type(
 ) : TolkIntType {
     override fun negate(): TolkIntType = TolkVarInt32Type(range.unaryMinus())
 
+    override fun actualType(): TolkType = this
+
     override fun printDisplayName(appendable: Appendable) = appendable.append("varint32")
 
     override fun toString(): String = "varint32"
@@ -342,6 +377,8 @@ data class TolkVarInt16Type(
     override val range: TvmIntRangeSet = TvmIntRangeSet.ALL
 ) : TolkIntType {
     override fun negate(): TolkIntType = TolkVarInt16Type(range.unaryMinus())
+
+    override fun actualType(): TolkType = this
 
     override fun printDisplayName(appendable: Appendable) = appendable.append("varint16")
 

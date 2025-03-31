@@ -8,8 +8,11 @@ interface TolkIntType : TolkPrimitiveType {
 
     fun negate(): TolkIntType
 
+    override fun actualType(): TolkType = TolkType.Int
+
     override fun isSuperType(other: TolkType): Boolean {
         if (other == TolkType.Never) return true
+        if (other is TolkAliasType) return isSuperType(other.typeExpression)
         if (other !is TolkIntType) return false
         return range.contains(other.range)
     }
@@ -17,6 +20,7 @@ interface TolkIntType : TolkPrimitiveType {
     override fun join(other: TolkType): TolkType {
         if (other == this) return this
         if (other == TolkType.Never) return this
+        if (other is TolkAliasType) return join(other.typeExpression)
         if (other !is TolkIntType) return TolkUnionType.create(this, other)
         val range = this.range.join(other.range)
         if (range is TvmIntRangeSet.Point) return TolkConstantIntType(range.value)
@@ -36,7 +40,10 @@ data class TolkConstantIntType(
 
     override fun negate(): TolkIntType = TolkConstantIntType(value.negate())
 
-    override fun isSuperType(other: TolkType): Boolean = other == this || other == TolkNeverType
+    override fun isSuperType(other: TolkType): Boolean {
+        if (other is TolkAliasType) return isSuperType(other.typeExpression)
+        return other == this || other == TolkNeverType
+    }
 
     override fun toString(): String {
         val bitLength = value.bitLength()

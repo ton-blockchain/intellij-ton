@@ -17,6 +17,11 @@ data class TolkTensorType private constructor(
         append(")")
     }
 
+    override fun actualType(): TolkTensorType = TolkTensorType(
+        elements.map { it.actualType() },
+        hasGenerics
+    )
+
     override fun join(other: TolkType): TolkType {
         if (this == other) return this
         if (other is TolkTensorType && elements.size == other.elements.size) {

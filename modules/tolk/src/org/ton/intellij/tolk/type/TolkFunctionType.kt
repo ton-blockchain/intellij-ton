@@ -36,7 +36,7 @@ data class TolkFunctionType(
     }
 
     override fun join(other: TolkType): TolkType {
-        if (this == other) return this
+        if (this == other.unwrapTypeAlias()) return other
         if (other is TolkFunctionType) {
             return TolkFunctionType(inputType.join(other.inputType), returnType.join(other.returnType))
         }
@@ -53,7 +53,9 @@ data class TolkFunctionType(
     }
 
     override fun substitute(substitution: Map<TolkTypeParameter, TolkType>): TolkFunctionType {
-        return TolkFunctionType(inputType.substitute(substitution), returnType.substitute(substitution))
+        val inputType = inputType.substitute(substitution)
+        val returnType = returnType.substitute(substitution)
+        return TolkFunctionType(inputType, returnType)
     }
 
     fun resolveGenerics(functionCall: TolkFunctionType, list: List<TolkType>? = null): TolkFunctionType {

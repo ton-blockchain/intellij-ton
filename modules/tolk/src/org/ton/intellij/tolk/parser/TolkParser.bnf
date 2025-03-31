@@ -206,18 +206,32 @@ Struct ::= 'struct' IDENTIFIER TypeParameterList? (StructBody | ';') {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkStructMixin"
     implements = [
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
+        "org.ton.intellij.tolk.psi.TolkSymbolElement"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkStructStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
 
-StructBody ::= '{' StructField* '}' {
+StructBody ::= '{' StructBodyElements? '}' {
     pin = 1
 }
 
-StructField ::= IDENTIFIER ':' TypeExpression ['=' Expression] ';' {
-    pin = 2
+private StructBodyElements ::= (StructBody_MultipleElement | StructBody_SingleElement) (','|';')?
+
+private StructBody_SingleElement ::= StructField
+private StructBody_MultipleElement ::= StructField ((','|';') StructField)+
+
+StructField ::= IDENTIFIER ':' TypeExpression ['=' Expression] {
+    pin = 1
+    recoverWhile = StructField_recover
+    mixin="org.ton.intellij.tolk.psi.impl.TolkStructFieldMixin"
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkSymbolElement"
+    ]
+    stubClass="org.ton.intellij.tolk.stub.TolkStructFieldStub"
+    elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
+private StructField_recover ::= !(';'|','|'}')
 //PragmaDefinition ::= PragmaDefinitionPart
 //PragmaKey ::= IDENTIFIER
 //PragmaValue ::= StringLiteral | IntegerExpression
@@ -402,22 +416,22 @@ CatchParameter ::= IDENTIFIER {
 
 Expression ::=
     VarExpression
-    | TernaryExpression
     | AssignBinExpression
+    | TernaryExpression
     | AsExpression
-    | IsExpression
     | MatchExpression
     | LogicalBinExpression
     | BitwiseBinExpression
     | CompBinExpression
+    | IsExpression
     | ShiftBinExpression
     | AddBinExpression
     | MulBinExpression
     | PrefixExpression
     | NotNullExpression
-//    | SafeAccessExpression
     | CallExpression
     | DotExpression
+    | StructExpression
     | AtomicExpression
 {
     implements=[
@@ -477,6 +491,22 @@ PrefixExpression ::= ('!'|'~'|'-'|'+') Expression {
 NotNullExpression ::= Expression '!' {
 //    mixin="org.ton.intellij.tolk.psi.impl.TolkNullableTypeExpressionMixin"
 }
+
+StructExpression ::= ReferenceTypeExpression? StructExpressionBody
+StructExpressionBody ::= '{' StructExpressionFields? '}' {
+    pin = 1
+}
+
+private StructExpressionFields ::= StructExpressionField (',' StructExpressionField)* ','? {
+    pin = 1
+}
+
+StructExpressionField ::= IDENTIFIER (':' Expression)? {
+    pin = 1
+    mixin="org.ton.intellij.tolk.psi.impl.TolkStructExpressionFieldMixin"
+}
+
+//private StructExpressionField_recover ::= !(','|'}'|';'|')'|']')
 
 AssignBinOp ::= '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%=' | '^%=' | '<<=' | '>>=' | '^>>=' | '~>>=' | '&=' | '|=' | '^=' | '=' {
     name = "operator"
@@ -574,11 +604,7 @@ private MatchExpressionArm ::= Expression (&'}' | ',') {
     pin = 1
 }
 
-MatchPattern ::= MatchPatternElement | 'else' {
-    pin = 1
-}
-private MatchPatternElement ::= TypeExpression
-
+MatchPattern ::= TypeExpression | Expression | 'else'
 
 ArgumentList ::= '(' [<<list_with_recover Argument>>] ')' {
     pin = 1
@@ -693,7 +719,9 @@ NullableTypeExpression ::= SimpleTypeExpression '?' {
 
 private SimpleTypeExpression ::= AutoTypeExpression | VoidTypeExpression | TensorOrParenTypeExpression | TupleTypeExpression | NullTypeExpression | ReferenceTypeExpression
 
-UnionTypeExpression ::= unionType1 | unionType2
+UnionTypeExpression ::= unionType1 | unionType2 {
+    mixin="org.ton.intellij.tolk.psi.impl.TolkUnionTypeExpressionMixin"
+}
 
 private unionType1 ::= '|' UnionTypeElement [('|' UnionTypeElement )+ '|'?] {
     pin = 1

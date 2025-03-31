@@ -68,11 +68,24 @@ class TolkUnionType private constructor(
     }
 
     override fun substitute(substitution: Map<TolkTypeParameter, TolkType>): TolkType {
-        val newElements = HashSet<TolkType>()
+        val newElements = LinkedHashSet<TolkType>()
         elements.forEach {
             newElements.add(it.substitute(substitution))
         }
         return simplify(newElements)
+    }
+
+    fun containsAll(rhsType: TolkUnionType): Boolean {
+        for (rhsVariant in rhsType.elements) {
+            if (!contains(rhsVariant)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    operator fun contains(type: TolkType): Boolean {
+        return elements.any { it.actualType() == type.actualType() }
     }
 
     companion object {
@@ -128,7 +141,7 @@ class TolkUnionType private constructor(
 
                     if (unique.size == 1) return unique.single()
                     var hasGenerics = false
-                    val uniqueSet = HashSet<TolkType>(unique.size)
+                    val uniqueSet = LinkedHashSet<TolkType>(unique.size)
                     for (type in unique) {
                         if (type.hasGenerics()) {
                             hasGenerics = true

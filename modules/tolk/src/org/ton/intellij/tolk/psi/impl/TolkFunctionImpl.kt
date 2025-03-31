@@ -34,7 +34,7 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
         get() = CachedValuesManager.getCachedValue(this) {
             val parameters = parameters.map { parameter ->
                 parameter.typeExpression?.type ?: return@getCachedValue null.also {
-                    println("[${containingFile.name}] Failed to get type for $parameter - `${parameter.text}`")
+//                    println("[${containingFile.name}] Failed to get type for $parameter - `${parameter.text}`")
                 }
             }
             val returnType = returnType ?: return@getCachedValue null
@@ -76,6 +76,8 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
             }
 
             CachedValueProvider.Result.create(result, this)
+        }?.also {
+//            println("${name} returnType: $it ||| ${buildString { it.printDisplayName(this) }}")
         }
 }
 

@@ -430,8 +430,8 @@ Expression ::=
     | CallExpression
     | DotExpression // expr80
     | NotNullExpression // expr90
-    | AtomicExpression
     | StructExpression
+    | AtomicExpression
     | MatchExpression
 {
     implements=[

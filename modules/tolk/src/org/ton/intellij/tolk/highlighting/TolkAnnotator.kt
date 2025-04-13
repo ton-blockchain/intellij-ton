@@ -20,6 +20,7 @@ import org.ton.intellij.tolk.eval.value
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.isDeprecated
 import org.ton.intellij.tolk.psi.impl.isPrimitive
+import org.ton.intellij.tolk.type.TolkType
 import org.ton.intellij.util.TVM_INT_MAX_VALUE
 import org.ton.intellij.util.TVM_INT_MIN_VALUE
 
@@ -47,6 +48,23 @@ class TolkAnnotator : Annotator {
                     else -> TolkColor.IDENTIFIER
                 }
                 highlight(element.identifier, holder, color.textAttributesKey)
+            }
+
+            is TolkMatchPatternReference -> {
+                val identifier = element.identifier
+                val name = identifier.text
+                if (TolkType.byName(name) != null) {
+                   return highlight(identifier, holder, TolkColor.PRIMITIVE.textAttributesKey)
+                }
+                val resolved = element.reference?.resolve()
+                val color = when(resolved) {
+                    is TolkTypeParameter -> TolkColor.TYPE_PARAMETER
+                    is TolkParameter -> if (resolved.name == "self") TolkColor.SELF_PARAMETER else null
+                    is TolkConstVar -> TolkColor.CONSTANT
+                    is TolkGlobalVar -> TolkColor.GLOBAL_VARIABLE
+                    else -> null
+                } ?: TolkColor.IDENTIFIER
+                highlight(identifier, holder, color.textAttributesKey)
             }
 
             is TolkIncludeDefinition -> {

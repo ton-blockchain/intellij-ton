@@ -1,23 +1,19 @@
-package org.ton.intellij.tolk.psi.impl
+package org.ton.intellij.tolk.psi.reference
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.impl.source.resolve.ResolveCache
-import org.ton.intellij.tolk.psi.TolkInferenceContextOwner
-import org.ton.intellij.tolk.psi.TolkPsiFactory
-import org.ton.intellij.tolk.psi.TolkReferenceExpression
-import org.ton.intellij.tolk.psi.selfInferenceResult
+import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.util.parentOfType
 
-class TolkReference(
-    element: TolkReferenceExpression,
-    rangeInElement: TextRange,
-) : PsiReferenceBase.Poly<TolkReferenceExpression>(element, rangeInElement, false) {
-    val identifier: PsiElement get() = element.identifier
+class TolkSymbolReference(
+    element: TolkElement,
+) : PsiReferenceBase.Poly<TolkElement>(element, TextRange(0, element.textLength), false) {
+    val identifier: PsiElement get() = element.node.findChildByType(TolkElementTypes.IDENTIFIER)!!.psi
 
-    private val resolver = ResolveCache.PolyVariantResolver<TolkReference> { t, incompleteCode ->
+    private val resolver = ResolveCache.PolyVariantResolver<TolkSymbolReference> { t, incompleteCode ->
         if (!myElement.isValid) return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
 
         val inference = element.parentOfType<TolkInferenceContextOwner>()?.selfInferenceResult
@@ -34,6 +30,6 @@ class TolkReference(
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {
-        return element.identifier.replace(TolkPsiFactory[element.project].createIdentifier(newElementName))
+        return identifier.replace(TolkPsiFactory.Companion[element.project].createIdentifier(newElementName))
     }
 }

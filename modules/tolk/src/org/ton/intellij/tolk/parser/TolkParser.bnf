@@ -247,7 +247,7 @@ private StructField_recover ::= !(';'|','|'}')
 //PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
 //Function ::= (TypeParameterList|'get')? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
-Function ::= Annotation* ((get 'fun'?) | ('fun')) IDENTIFIER TypeParameterList? ParameterList ReturnType? FunctionBody {
+Function ::= Annotation* ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypeParameterList? ParameterList ReturnType? FunctionBody {
     pin = 2
     implements = [
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
@@ -261,6 +261,8 @@ Function ::= Annotation* ((get 'fun'?) | ('fun')) IDENTIFIER TypeParameterList? 
 //        leftBinder = "ADJACENT_LINE_COMMENTS"
 //    ]
 }
+FunctionReceiver ::= TypeExpression '.'
+
 private get ::= <<getKeyword>>
 
 private ReturnType ::= ':' TypeExpression {
@@ -702,8 +704,7 @@ private FunctionParameterList_start ::= '(' FunctionParameterList_item* {
 private FunctionParameterList_recovery ::= !')'|'asm'|'{'
 private FunctionParameterList_item ::= Parameter ( ','| &')' ) {pin=1}
 
-Parameter ::= 'mutate'? IDENTIFIER ':' !"self" TypeExpression {
-    pin = 2
+Parameter ::= 'mutate'? (ParameterSelf | ParameterWithType) {
     mixin="org.ton.intellij.tolk.psi.impl.TolkParameterMixin"
     implements=[
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
@@ -711,6 +712,14 @@ Parameter ::= 'mutate'? IDENTIFIER ':' !"self" TypeExpression {
     stubClass="org.ton.intellij.tolk.stub.TolkParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
+
+private ParameterWithType ::= IDENTIFIER ':' !"self" TypeExpression {
+    pin = 2
+}
+private ParameterSelf ::= "self" {
+//    pin = 2
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Types
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

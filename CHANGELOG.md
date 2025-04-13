@@ -1,5 +1,10 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [2.5.4]
+
+### Added
+- [Tolk 0.11](https://github.com/ton-blockchain/ton/pull/1610) support
+
 ## [2.5.3]
 
 ### Added

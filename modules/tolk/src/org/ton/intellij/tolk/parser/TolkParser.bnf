@@ -416,23 +416,23 @@ CatchParameter ::= IDENTIFIER {
 
 Expression ::=
     VarExpression
-    | AssignBinExpression
-    | TernaryExpression
-    | AsExpression
-    | MatchExpression
-    | LogicalBinExpression
-    | BitwiseBinExpression
-    | CompBinExpression
-    | IsExpression
-    | ShiftBinExpression
-    | AddBinExpression
-    | MulBinExpression
-    | PrefixExpression
-    | NotNullExpression
+    | AssignBinExpression // expr10
+    | TernaryExpression // expr10
+    | LogicalBinExpression //expr13
+    | BitwiseBinExpression // expr14
+    | CompBinExpression // expr15
+    | ShiftBinExpression // expr17
+    | AddBinExpression // expr20
+    | MulBinExpression // expr30
+    | AsExpression // expr40
+    | IsExpression // expr40
+    | PrefixExpression // expr75
     | CallExpression
-    | DotExpression
-    | StructExpression
+    | DotExpression // expr80
+    | NotNullExpression // expr90
     | AtomicExpression
+    | StructExpression
+    | MatchExpression
 {
     implements=[
         "org.ton.intellij.tolk.psi.TolkTypedElement"
@@ -519,6 +519,7 @@ ShiftBinOp ::= '<<' | '>>' | '~>>' | '^>>' { name = "operator" }
 AddBinOp ::= '-' | '+' { name = "operator" }
 MulBinOp  ::= '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%' { name = "operator" }
 
+// vat_declaration_lhs
 VarDefinition ::= VarTensor | VarTuple | VarRedef | Var {
     implements=[
         "org.ton.intellij.tolk.psi.TolkTypedElement"

@@ -133,6 +133,9 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         if (sdk != null && VfsUtil.isAncestor(sdk.stdlibFile, file.virtualFile, false)) {
             val sdkPath = sdk.stdlibFile.path
             path = file.virtualFile.path.replace(sdkPath, "@stdlib")
+            if (path == "@stdlib/common.tolk") {
+                return
+            }
         }
         val newInclude = factory.createIncludeDefinition(path)
 

@@ -65,7 +65,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
         }
 
         is TolkUnionType -> {
-            val elements = type.elements
+            val elements = type.variants
             if (elements.size == 2) {
                 val first = elements.first()
                 val second = elements.last()

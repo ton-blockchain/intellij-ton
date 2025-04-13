@@ -55,6 +55,15 @@ data class TolkTensorType private constructor(
         elements.forEach { it.visit(visitor) }
     }
 
+    override fun canRhsBeAssigned(other: TolkType): Boolean {
+        if (this == other) return true
+        if (other is TolkAliasType) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTensorType && elements.size == other.elements.size) {
+            return elements.zip(other.elements).all { (a, b) -> a.canRhsBeAssigned(b) }
+        }
+        return other == TolkType.Never
+    }
+
     companion object {
         fun create(vararg elements: TolkType): TolkType {
             return create(elements.toList())

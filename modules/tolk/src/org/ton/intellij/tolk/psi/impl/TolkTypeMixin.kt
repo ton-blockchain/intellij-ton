@@ -9,6 +9,7 @@ import org.ton.intellij.tolk.psi.TolkTypeDef
 import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.stub.TolkTypeDefStub
 import org.ton.intellij.tolk.type.TolkAliasType
+import org.ton.intellij.util.recursionGuard
 import javax.swing.Icon
 
 abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDef, TolkTypedElement {
@@ -22,7 +23,9 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
 
     override val type: TolkAliasType?
         get() {
-            val typeExpressionType = typeExpression?.type ?: return null
+            val typeExpressionType = recursionGuard(this) {
+                typeExpression?.type
+            } ?: return null
             return TolkAliasType(this, typeExpressionType)
         }
 
@@ -38,7 +41,7 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
                 append(name)
                 type?.let {
                     append(" = ")
-                    it.typeExpression.printDisplayName(this)
+                    it.underlyingType.printDisplayName(this)
                 }
             }
 

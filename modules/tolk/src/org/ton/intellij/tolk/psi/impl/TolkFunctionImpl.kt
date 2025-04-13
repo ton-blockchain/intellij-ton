@@ -142,7 +142,7 @@ fun TolkFunction.resolveGenerics(
             }
 
             paramType is TolkUnionType && argType is TolkUnionType -> {
-                paramType.elements.zip(argType.elements).forEach { (a, b) ->
+                paramType.variants.zip(argType.variants).forEach { (a, b) ->
                     resolve(a, b)
                 }
             }

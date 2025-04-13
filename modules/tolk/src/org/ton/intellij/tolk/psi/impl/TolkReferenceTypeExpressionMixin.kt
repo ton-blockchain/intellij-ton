@@ -3,6 +3,7 @@ package org.ton.intellij.tolk.psi.impl
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiReference
 import com.intellij.psi.PsiReferenceBase
@@ -110,7 +111,26 @@ abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiEl
 private fun collectTypeDefResults(file: TolkFile, target: String): List<PsiElementResolveResult> {
     val results = ArrayList<PsiElementResolveResult>()
 
-    val includedFiles = file.collectIncludedFiles(true)
+    val includedFiles = HashSet<TolkFile>()
+    val commonStdlib =
+        TolkIncludeDefinitionMixin.resolveTolkImport(file.project, file, "@stdlib/common")
+    if (commonStdlib != null) {
+        val tolkCommonStdlib = commonStdlib.findPsiFile(file.project) as? TolkFile
+        if (tolkCommonStdlib != null) {
+            includedFiles.add(tolkCommonStdlib)
+        }
+    }
+    file.includeDefinitions.forEach {
+        val resolvedFile = it.resolveFile(it.project)
+        if (resolvedFile != null) {
+            val resolvedTolkFile = resolvedFile.findPsiFile(it.project) as? TolkFile
+            if (resolvedTolkFile != null) {
+                includedFiles.add(resolvedTolkFile)
+            }
+        }
+    }
+    includedFiles.add(file)
+
     includedFiles.forEach { file ->
         file.typeDefs.forEach { typeDef ->
             if (typeDef.name == target) {

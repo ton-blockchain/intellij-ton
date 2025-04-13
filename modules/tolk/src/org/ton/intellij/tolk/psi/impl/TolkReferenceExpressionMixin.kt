@@ -5,15 +5,16 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
+import org.ton.intellij.tolk.psi.reference.TolkSymbolReference
 
 
 abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceExpression {
-    override fun getReferences(): Array<TolkReference> {
+    override fun getReferences(): Array<TolkSymbolReference> {
         if (name == "__expect_type") return EMPTY_ARRAY
-        return arrayOf(TolkReference(this, identifier.textRangeInParent))
+        return arrayOf(TolkSymbolReference(this))
     }
 
-    override fun getReference(): TolkReference? = references.firstOrNull()
+    override fun getReference(): TolkSymbolReference? = references.firstOrNull()
 
     override fun setName(name: String): PsiElement {
         identifier.replace(TolkPsiFactory[project].createIdentifier(name))
@@ -29,7 +30,7 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
     override fun toString(): String = "TolkReferenceExpression($text)"
 
     companion object {
-        private val EMPTY_ARRAY = emptyArray<TolkReference>()
+        private val EMPTY_ARRAY = emptyArray<TolkSymbolReference>()
     }
 }
 

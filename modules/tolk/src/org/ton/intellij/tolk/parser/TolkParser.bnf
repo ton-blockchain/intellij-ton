@@ -605,7 +605,14 @@ private MatchExpressionArm ::= Expression (&'}' | ',') {
     pin = 1
 }
 
-MatchPattern ::= TypeExpression | Expression | 'else'
+MatchPattern ::= MatchPatternReference | TypeExpression | Expression | 'else'
+
+MatchPatternReference ::= IDENTIFIER {
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkMatchPatternReferenceMixin"
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+    ]
+}
 
 ArgumentList ::= '(' [<<list_with_recover Argument>>] ')' {
     pin = 1

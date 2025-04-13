@@ -29,10 +29,12 @@ class TolkFindUsagesProvider : FindUsagesProvider {
 
     override fun getType(element: PsiElement): String {
         return when (element) {
-            is TolkFunction -> "function"
-            is TolkConstVar -> "constant"
-            is TolkGlobalVar -> "global var"
-            is TolkTypeParameter -> "type parameter"
+            is TolkFunction -> "Function"
+            is TolkConstVar -> "Constant"
+            is TolkGlobalVar -> "Global variable"
+            is TolkTypeParameter -> "Type parameter"
+            is TolkTypeDef -> "Type alias"
+            is TolkStruct -> "Structure"
             else -> return "<TYPE $element>"
         }
     }

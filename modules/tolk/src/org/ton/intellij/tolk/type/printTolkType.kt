@@ -9,17 +9,33 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
         is TolkType.ParameterType -> {
             printPsi(type.psiElement, type.name)
         }
+        is TolkAliasType -> {
+            printPsi(type.psi, type.psi.name ?: buildString {
+                type.printDisplayName(this)
+            })
+        }
+        is TolkStructType -> {
+            printPsi(type.psi, type.psi.name ?: buildString {
+                type.printDisplayName(this)
+            })
+        }
 
         is TolkFunctionType -> {
-            if (type.inputType is TolkTensorType) {
-                printTolkType(type.inputType)
+            val inputType = type.inputType
+            if (inputType is TolkTensorType || inputType is TolkUnitType) {
+                printTolkType(inputType)
             } else {
                 text("(")
-                printTolkType(type.inputType)
+                printTolkType(inputType)
                 text(")")
             }
             text(" -> ")
-            printTolkType(type.returnType)
+            val returnType = type.returnType
+            if (returnType is TolkUnitType) {
+                text("void")
+            } else {
+                printTolkType(returnType)
+            }
         }
 
         is TolkTensorType -> {
@@ -49,7 +65,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
         }
 
         is TolkUnionType -> {
-            val elements = type.elements
+            val elements = type.variants
             if (elements.size == 2) {
                 val first = elements.first()
                 val second = elements.last()

@@ -67,6 +67,8 @@ class TolkStructureViewElement(
                     is TolkFunction -> it
                     is TolkGlobalVar -> it
                     is TolkConstVar -> it
+                    is TolkTypeDef -> it
+                    is TolkStruct -> it
                     else -> null
                 }
             }

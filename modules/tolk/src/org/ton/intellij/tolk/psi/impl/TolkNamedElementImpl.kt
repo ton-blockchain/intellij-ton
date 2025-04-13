@@ -55,6 +55,7 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
                     append(": ")
                     type?.printDisplayName(this) ?: append("_")
                 }
+                is TolkTypeDef -> name
                 else -> name
             }
 

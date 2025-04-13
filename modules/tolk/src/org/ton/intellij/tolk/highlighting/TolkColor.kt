@@ -43,6 +43,7 @@ enum class TolkColor(
     CONSTANT("Constant", Default.CONSTANT),
     GLOBAL_VARIABLE("Global variable", Default.GLOBAL_VARIABLE),
     LOCAL_VARIABLE("Local variable", Default.LOCAL_VARIABLE),
+    FIELD("Field", Default.INSTANCE_FIELD),
     MACRO("Macro", Default.METADATA),
     ANNOTATION("Annotation", Default.METADATA),
     IDENTIFIER("Identifier", Default.IDENTIFIER),

@@ -65,7 +65,7 @@ tasks {
 dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
-        create(IntelliJPlatformType.IntellijIdeaUltimate, version)
+        create(IntelliJPlatformType.IntellijIdeaCommunity, version)
 
         pluginModule(implementation(project(":util")))
         pluginModule(implementation(project(":asm")))

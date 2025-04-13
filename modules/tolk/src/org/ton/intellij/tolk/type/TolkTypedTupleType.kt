@@ -20,6 +20,11 @@ class TolkTypedTupleType private constructor(
         return appendable
     }
 
+    override fun actualType(): TolkTypedTupleType = TolkTypedTupleType(
+        elements.map { it.actualType() },
+        hasGenerics
+    )
+
     override fun join(other: TolkType): TolkType {
         if (this == other) return this
         if (other is TolkTypedTupleType && elements.size == other.elements.size) {
@@ -51,6 +56,18 @@ class TolkTypedTupleType private constructor(
 
     override fun visit(visitor: TolkTypeVisitor) {
         elements.forEach { it.visit(visitor) }
+    }
+
+    override fun canRhsBeAssigned(other: TolkType): Boolean {
+        if (other is TolkTypedTupleType) {
+            if (elements.size != other.elements.size) return false
+            for (i in elements.indices) {
+                if (!elements[i].canRhsBeAssigned(other.elements[i])) return false
+            }
+            return true
+        }
+        if (other is TolkAliasType) return canRhsBeAssigned(other.unwrapTypeAlias())
+        return other == TolkType.Never
     }
 
     override fun equals(other: Any?): Boolean {

@@ -17,6 +17,11 @@ data class TolkTensorType private constructor(
         append(")")
     }
 
+    override fun actualType(): TolkTensorType = TolkTensorType(
+        elements.map { it.actualType() },
+        hasGenerics
+    )
+
     override fun join(other: TolkType): TolkType {
         if (this == other) return this
         if (other is TolkTensorType && elements.size == other.elements.size) {
@@ -48,6 +53,15 @@ data class TolkTensorType private constructor(
 
     override fun visit(visitor: TolkTypeVisitor) {
         elements.forEach { it.visit(visitor) }
+    }
+
+    override fun canRhsBeAssigned(other: TolkType): Boolean {
+        if (this == other) return true
+        if (other is TolkAliasType) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTensorType && elements.size == other.elements.size) {
+            return elements.zip(other.elements).all { (a, b) -> a.canRhsBeAssigned(b) }
+        }
+        return other == TolkType.Never
     }
 
     companion object {

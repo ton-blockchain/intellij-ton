@@ -223,15 +223,15 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                                 } ?: "()", true)
                         }
                         .withInsertHandler { context, item ->
-                            val nextVisibleLeaf = contextElement?.let {
-                                PsiTreeUtil.nextVisibleLeaf(it)
-                            }
+                            val offset = context.editor.caretModel.offset
+                            val chars = context.document.charsSequence
 
-                            if (nextVisibleLeaf == null || nextVisibleLeaf.elementType != TolkElementTypes.LPAREN) {
-                                context.editor.document.insertString(context.editor.caretModel.offset, "()")
+                            val absoluteOpeningBracketOffset =chars.indexOfSkippingSpace('(', offset)
+                            val absoluteCloseBracketOffset = absoluteOpeningBracketOffset?.let { chars.indexOfSkippingSpace(')', it + 1) }
 
+                            if (absoluteOpeningBracketOffset == null) {
                                 val offset = if (this.parameters.isEmpty()) 2 else 1
-
+                                context.editor.document.insertString(context.editor.caretModel.offset, "()")
                                 context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
                                 context.commitDocument()
                             }
@@ -312,4 +312,14 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             else -> LookupElementBuilder.create(this.name.toString()).withIcon(this.getIcon(0))
         }
     }
+}
+
+private  fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
+    for (i in startIndex until this.length) {
+        val currentChar = this[i]
+        if (c == currentChar) return i
+        if (currentChar != ' ' && currentChar != '\t') return null
+    }
+
+    return null
 }

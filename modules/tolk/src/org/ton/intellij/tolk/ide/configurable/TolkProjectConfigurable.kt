@@ -38,7 +38,6 @@ class TolkProjectConfigurable(
                 it.languageLevel = state.languageLevel
                 TolkSdkManager[project].setSdkRef(sdkRef)
             }
-            println("apply path = ${sdkRef}")
         }
     }
 }

@@ -17,6 +17,8 @@ class TolkFlowContext(
         other.unreachable
     )
 
+    fun clone() = TolkFlowContext(this)
+
     fun getType(symbol: TolkSymbolElement): TolkType? {
         return symbolTypes[symbol]
     }
@@ -106,4 +108,8 @@ class TolkFlowContext(
             joinedUnreachable
         )
     }
+}
+
+fun TolkFlowContext?.join(element: TolkFlowContext): TolkFlowContext {
+    return this?.join(element) ?: element
 }

@@ -14,6 +14,7 @@ object TolkElementTypeFactory {
         "TYPE_PARAMETER" -> TolkTypeParameterStubElementType(name)
         "TYPE_DEF" -> TolkTypeDefStubElementType(name)
         "STRUCT" -> TolkStructStubElementType(name)
+        "STRUCT_FIELD" -> TolkStructFieldStubElementType(name)
         else -> throw RuntimeException("Unknown element type: $name")
     }
 }

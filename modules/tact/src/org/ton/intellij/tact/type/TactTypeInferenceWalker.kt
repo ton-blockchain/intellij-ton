@@ -371,8 +371,8 @@ class TactTypeInferenceWalker(
         return when (val candidate = candidates.firstOrNull()) {
             is TactFunctionParameter -> candidate.type?.ty
             is TactLetStatement -> candidate.type?.ty ?: candidate.expression?.inferType()
-            is TactForEachKey -> (candidate.parentOfType<TactForEachStatement>()?.expression?.inferType() as? TactTyMap)?.key
-            is TactForEachValue -> (candidate.parentOfType<TactForEachStatement>()?.expression?.inferType() as? TactTyMap)?.value
+//            is TactForEachKey -> (candidate.parentOfType<TactForEachStatement>()?.expression?.inferType() as? TactTyMap)?.key
+//            is TactForEachValue -> (candidate.parentOfType<TactForEachStatement>()?.expression?.inferType() as? TactTyMap)?.value
             is TactCatchParameter -> candidate.inferType()
             else -> null
         }

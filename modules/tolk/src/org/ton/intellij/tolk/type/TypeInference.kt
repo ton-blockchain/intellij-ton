@@ -1395,7 +1395,7 @@ class TolkInferenceWalker(
 
                 val syncExprType = if (symbol != null) {
                     ctx.setResolvedRefs(matchPatternReference, listOf(PsiElementResolveResult(symbol)))
-                    symbol.type
+                    ctx.getType(symbol)
                 } else {
                     var exactType = TolkType.byName(name)
                     if (exactType == null) {

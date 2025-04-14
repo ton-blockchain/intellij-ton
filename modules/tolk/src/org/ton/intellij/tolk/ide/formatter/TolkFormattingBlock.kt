@@ -6,7 +6,6 @@ import com.intellij.psi.TokenType
 import com.intellij.psi.formatter.common.AbstractBlock
 import com.intellij.psi.tree.TokenSet
 import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_COMMENT
-import org.ton.intellij.tolk.psi.TOLK_DOC_COMMENTS
 import org.ton.intellij.tolk.psi.TolkElementTypes.*
 import java.util.*
 
@@ -65,6 +64,7 @@ class TolkFormattingBlock(
 
     private fun createBlock(node: ASTNode): ASTBlock? {
         if (node.elementType == TokenType.WHITE_SPACE) return null
+
         val indent = calcIndent(node) ?: return null
         val childIndent =
             when (node.elementType) {
@@ -89,8 +89,8 @@ class TolkFormattingBlock(
         val parent = child.treeParent
         val parentType = parent.elementType
         when (parentType) {
-            PARAMETER_LIST,
-            BLOCK_STATEMENT -> return indentIfNotBrace(child)
+            MATCH_EXPRESSION -> if (type != MATCH_KEYWORD) return indentIfNotBrace(child)
+            PARAMETER_LIST, BLOCK_STATEMENT, STRUCT_EXPRESSION_BODY, STRUCT_BODY -> return indentIfNotBrace(child)
             DOT_EXPRESSION, TERNARY_EXPRESSION -> if (parent.firstChildNode != child) return Indent.getNormalIndent()
             VAR_TENSOR, TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE_EXPRESSION, PAREN_TYPE_EXPRESSION, ARGUMENT_LIST -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
             VAR_TUPLE, TUPLE_TYPE_EXPRESSION, TUPLE_EXPRESSION -> if (type != LBRACK && type != RBRACK) return Indent.getNormalIndent()
@@ -102,12 +102,6 @@ class TolkFormattingBlock(
     }
 
     private fun calcWrap(child: ASTNode): Wrap? {
-        child.elementType
-        child.treeParent.elementType
-//        if ((type == DOT || type == TILDE) && parentType == QUALIFIED_EXPRESSION) return Wrap.createWrap(
-//            WrapType.NORMAL,
-//            false
-//        )
         return null
     }
 

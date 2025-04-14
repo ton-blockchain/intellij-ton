@@ -25,7 +25,7 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         psiElement<PsiElement>().withParent(psiElement<TolkReferenceTypeExpression>())
 
     private val primitiveTypes = listOf(
-        "int", "slice", "cell", "builder", "tuple", "bool",
+        "int", "slice", "cell", "builder", "tuple", "bool", "address"
 //        "continuation"
     )
 

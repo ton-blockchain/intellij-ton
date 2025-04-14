@@ -768,33 +768,9 @@ class TolkInferenceWalker(
                 return TolkExpressionFlowContext(outFlow, trueFlow, falseFlow)
             }
 
-            TolkElementTypes.EQ -> {
-                nextFlow = inferExpression(left, nextFlow, false).outFlow
-                if (right == null) {
-                    return nextFlow.toResult()
-                }
-                nextFlow = inferExpression(right, nextFlow, false).outFlow
-                val rightType = ctx.getType(right) ?: TolkType.Unknown
-                processAssigmentAfterRight(left, rightType, nextFlow)
-                ctx.setType(element, rightType)
-            }
+            TolkElementTypes.EQ -> return inferAssigment(element, flow, usedAsCondition)
 
-            in ASIGMENT_OPERATORS -> {
-                nextFlow = inferExpression(left, nextFlow, false).outFlow
-                if (right == null) {
-                    return nextFlow.toResult()
-                }
-                nextFlow = inferExpression(right, nextFlow, false).outFlow
-                val leftType = ctx.getType(left) ?: TolkType.Unknown
-                val rightType = ctx.getType(right) ?: TolkType.Unknown
-                if (TolkType.Int.isSuperType(leftType) && TolkType.Int.isSuperType(rightType)) {
-                    ctx.setType(element, TolkType.Int)
-                    val symbol = extractSinkExpression(left)
-                    if (symbol != null) {
-                        nextFlow.setSymbol(symbol, TolkType.Int)
-                    }
-                }
-            }
+            in ASIGMENT_OPERATORS -> return inferSetAssigment(element, flow, usedAsCondition)
 
             else -> {
                 nextFlow = inferExpression(left, nextFlow, false).outFlow
@@ -911,13 +887,80 @@ class TolkInferenceWalker(
         return TolkExpressionFlowContext(afterExpr.outFlow, trueFlow, falseFlow)
     }
 
+    private fun inferSetAssigment(
+        element: TolkBinExpression,
+        flow: TolkFlowContext,
+        usedAsCondition: Boolean
+    ): TolkExpressionFlowContext {
+        val lhs = element.left
+        val afterLhs = inferExpression(lhs, flow, false)
+        val rhs = element.right ?: return afterLhs
+        val rhsFlow = afterLhs.outFlow
+        val afterRhs = inferExpression(rhs, rhsFlow, false, ctx.getType(lhs))
+
+//        val builtinFuncName = "_${element.binaryOp.text}_"
+//        val builtinFunc = TolkBuiltins[project].getFunction(builtinFuncName)
+//        builtinFunc?.type
+        val resultType = ctx.getType(rhs)?.actualType() ?: TolkType.Unknown
+        ctx.setType(element, resultType)
+
+        return TolkExpressionFlowContext(afterRhs.outFlow, usedAsCondition)
+    }
+
+    private fun inferAssigment(
+        element: TolkBinExpression,
+        flow: TolkFlowContext,
+        usedAsCondition: Boolean
+    ): TolkExpressionFlowContext {
+        val lhs = element.left
+        var nextFlow = inferLeftSideAssigment(lhs, flow)
+        val rhs = element.right
+        if (rhs != null) {
+            nextFlow = inferExpression(rhs, nextFlow, false).outFlow
+            processAssigmentAfterRight(lhs, ctx.getType(rhs) ?: TolkType.Unknown, nextFlow)
+            ctx.setType(element, ctx.getType(rhs))
+        }
+        return TolkExpressionFlowContext(nextFlow, usedAsCondition)
+    }
+
     private fun inferLeftSideAssigment(
         element: TolkExpression,
         flow: TolkFlowContext,
     ): TolkFlowContext {
-        if (element !is TolkTensorExpression) return flow
         var nextFlow = flow
-        // TODO
+        when (element) {
+            is TolkTensorExpression -> {
+                val tensorItems = element.expressionList
+                val typesList = ArrayList<TolkType>(tensorItems.size)
+                tensorItems.forEach { item ->
+                    nextFlow = inferLeftSideAssigment(item, flow)
+                    typesList.add(ctx.getType(item) ?: TolkType.Unknown)
+                }
+                ctx.setType(element, TolkType.tensor(typesList))
+            }
+
+            is TolkTupleExpression -> {
+                val tupleItems = element.expressionList
+                val typesList = ArrayList<TolkType>(tupleItems.size)
+                tupleItems.forEach { item ->
+                    nextFlow = inferLeftSideAssigment(item, flow)
+                    typesList.add(ctx.getType(item) ?: TolkType.Unknown)
+                }
+                ctx.setType(element, TolkType.typedTuple(typesList))
+            }
+
+            is TolkParenExpression -> {
+                nextFlow = inferLeftSideAssigment(element.expression ?: return nextFlow, flow)
+                ctx.setType(element, ctx.getType(element.expression))
+            }
+
+            else -> {
+                nextFlow = inferExpression(element, nextFlow, false).outFlow
+                //            val sExpr = extractSinkExpression(element) ?: return nextFlow
+                //            val declaredType = ctx.getType(element) ?: return nextFlow
+                //            ctx.setType(element, declaredType)
+            }
+        }
         return nextFlow
     }
 
@@ -926,9 +969,6 @@ class TolkInferenceWalker(
         rightType: TolkType,
         flow: TolkFlowContext
     ) {
-        val leftType = ctx.getType(left)
-        val joinType = leftType?.join(rightType) ?: rightType
-
         when (left) {
             is TolkReferenceExpression -> {
                 val resolvedElement = extractSinkExpression(left)
@@ -938,28 +978,39 @@ class TolkInferenceWalker(
             }
 
             is TolkTensorExpression -> {
-                if (joinType is TolkTensorType) {
-                    left.expressionList.zip(joinType.elements).forEach { (left, right) ->
-                        processAssigmentAfterRight(left, right, flow)
-                    }
+                val rhsTensor = rightType as? TolkTensorType
+                val tensorItems = left.expressionList
+                val typesList = ArrayList<TolkType>(tensorItems.size)
+                tensorItems.forEachIndexed { index, item ->
+                    val ithRhsType = rhsTensor?.elements?.getOrNull(index) ?: TolkType.Unknown
+                    processAssigmentAfterRight(item, ithRhsType, flow)
+                    typesList.add(ctx.getType(item) ?: TolkType.Unknown)
                 }
+                ctx.setType(left, TolkType.tensor(typesList))
             }
 
             is TolkTupleExpression -> {
-                if (joinType is TolkTypedTupleType) {
-                    left.expressionList.zip(joinType.elements).forEach { (left, right) ->
-                        processAssigmentAfterRight(left, right, flow)
-                    }
+                val rhsTuple = rightType as? TolkTypedTupleType
+                val tupleItems = left.expressionList
+                val typesList = ArrayList<TolkType>(tupleItems.size)
+                tupleItems.forEachIndexed { index, item ->
+                    val ithRhsType = rhsTuple?.elements?.getOrNull(index) ?: TolkType.Unknown
+                    processAssigmentAfterRight(item, ithRhsType, flow)
+                    typesList.add(ctx.getType(item) ?: TolkType.Unknown)
                 }
+                ctx.setType(left, TolkType.typedTuple(typesList))
             }
 
             is TolkParenExpression -> {
                 processAssigmentAfterRight(left.expression ?: return, rightType, flow)
+                ctx.setType(left, ctx.getType(left.expression))
             }
 
             else -> {
                 val sExpr = extractSinkExpression(left) ?: return
-                flow.setSymbol(sExpr, rightType)
+                val lhsDeclaredType = ctx.getType(left) ?: return
+                val smartCastedType = calcSmartcastTypeOnAssignment(lhsDeclaredType, rightType)
+                flow.setSymbol(sExpr, smartCastedType)
             }
         }
     }
@@ -1431,7 +1482,7 @@ class TolkInferenceWalker(
                     currentDot = currentDot.left.unwrapNotNull() as? TolkDotExpression ?: break
                 }
                 val ref = currentDot.left.unwrapNotNull() as? TolkReferenceExpression ?: return null
-                val symbol = ctx.getResolvedRefs(ref).firstOrNull()?.element as? TolkSymbolElement ?: return null
+                val symbol = ctx.getResolvedRefs(ref).firstOrNull()?.element as? TolkVar ?: return null
                 return TolkSinkExpression(symbol, indexPath)
             }
 

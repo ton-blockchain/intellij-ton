@@ -43,9 +43,9 @@ class TolkFlowContext(
 
     fun setSymbol(element: TolkSinkExpression, type: TolkType) {
         var indexPath = element.indexPath
-        if (indexPath <= 0) {
-            return setSymbol(element.symbol, type)
-        }
+//        if (indexPath < 0) {
+//            return setSymbol(element.symbol, type)
+//        }
 
         var indexMask = 0L
         while (indexPath > 0) {

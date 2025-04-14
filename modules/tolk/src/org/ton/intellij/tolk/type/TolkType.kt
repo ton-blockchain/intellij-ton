@@ -89,6 +89,7 @@ sealed interface TolkType {
         val Coins = TolkCoinsType()
         val VarInt32 = TolkVarInt32Type()
         val VarInt16 = TolkVarInt16Type()
+        val Address = TolkAddressType
 
         fun byName(text: String): TolkType? {
             return when (text) {
@@ -104,6 +105,7 @@ sealed interface TolkType {
                 "coins" -> Coins
                 "varint16" -> VarInt16
                 "varint32" -> VarInt32
+                "address" -> Address
                 else -> {
                     when {
                         text.startsWith("uint") -> {
@@ -299,6 +301,22 @@ object TolkNeverType : TolkType {
     override fun canRhsBeAssigned(other: TolkType): Boolean = true
 
     override fun toString(): String = "never"
+}
+
+object TolkAddressType : TolkPrimitiveType {
+    override fun isSuperType(other: TolkType): Boolean = other == this
+
+    override fun join(other: TolkType): TolkType {
+        if (other is TolkAddressType) return this
+        return TolkUnionType.create(this, other)
+    }
+
+    override fun meet(other: TolkType): TolkType {
+        if (other is TolkAddressType) return this
+        return TolkNeverType
+    }
+
+    override fun toString(): String = "address"
 }
 
 data class TolkCoinsType(

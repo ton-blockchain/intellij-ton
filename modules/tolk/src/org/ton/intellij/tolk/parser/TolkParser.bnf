@@ -201,7 +201,7 @@ TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpression {
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
 
-Struct ::= 'struct' IDENTIFIER TypeParameterList? (StructBody | ';') {
+Struct ::= 'struct' StructConstructorTag? IDENTIFIER TypeParameterList? (StructBody | ';') {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkStructMixin"
     implements = [
@@ -211,6 +211,8 @@ Struct ::= 'struct' IDENTIFIER TypeParameterList? (StructBody | ';') {
     stubClass="org.ton.intellij.tolk.stub.TolkStructStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
+
+StructConstructorTag ::= '(' INTEGER_LITERAL ')'
 
 StructBody ::= '{' StructBodyElements? '}' {
     pin = 1

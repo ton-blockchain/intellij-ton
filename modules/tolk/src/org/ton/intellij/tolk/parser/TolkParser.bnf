@@ -430,8 +430,8 @@ Expression ::=
     | IsExpression // expr40
     | PrefixExpression // expr75
     | CallExpression
+    | NotNullExpression
     | DotExpression // expr80
-    | NotNullExpression // expr90
     | StructExpression
     | AtomicExpression
     | MatchExpression

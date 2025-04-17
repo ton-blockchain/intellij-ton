@@ -94,8 +94,13 @@ class TolkAnnotator : Annotator {
             }
 
             is TolkParameter -> {
+                val identifier = element.identifier ?: return
+                if (element.name == "self" && element.typeExpression == null) {
+                    highlight(identifier, holder, TolkColor.SELF_PARAMETER.textAttributesKey)
+                    return
+                }
                 highlight(
-                    element.identifier,
+                    identifier,
                     holder,
                     TolkColor.PARAMETER.textAttributesKey
                 )
@@ -187,7 +192,13 @@ class TolkAnnotator : Annotator {
             is TolkFunction -> TolkColor.FUNCTION_CALL
             is TolkGlobalVar -> TolkColor.GLOBAL_VARIABLE
             is TolkConstVar -> TolkColor.CONSTANT
-            is TolkParameter -> TolkColor.PARAMETER
+            is TolkParameter -> {
+                if (resolved.name == "self" && resolved.typeExpression == null) {
+                    TolkColor.SELF_PARAMETER
+                } else {
+                    TolkColor.PARAMETER
+                }
+            }
             is TolkReferenceExpression -> {
                 if (resolved.reference != null) return
                 TolkColor.LOCAL_VARIABLE

@@ -194,6 +194,9 @@ class TolkInferenceWalker(
         element.constVars.forEach { constVar ->
             nextFlow = inferConstant(constVar, nextFlow)
         }
+        element.structs.forEach { struct ->
+            nextFlow = inferStruct(struct, nextFlow)
+        }
         importFiles.add(element.virtualFile)
         if (useIncludes) {
             element.includeDefinitions.forEach {
@@ -232,6 +235,20 @@ class TolkInferenceWalker(
             val exprType = ctx.getType(expression)
             ctx.setType(element, typeHint ?: exprType)
         }
+        return flow
+    }
+
+    fun inferStruct(element: TolkStruct, flow: TolkFlowContext): TolkFlowContext {
+        element.structBody?.structFieldList?.forEach { field ->
+            inferField(field, flow)
+        }
+        return flow
+    }
+
+    fun inferField(element: TolkStructField, flow: TolkFlowContext): TolkFlowContext {
+        val expression = element.expression ?: return flow
+        val typeHint = element.typeExpression?.type
+        inferExpression(expression, flow, false, typeHint).outFlow
         return flow
     }
 

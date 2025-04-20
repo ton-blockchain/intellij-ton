@@ -91,6 +91,7 @@ sealed interface TolkType {
         val VarInt16 = TolkVarInt16Type()
         val Address = TolkAddressType
 
+        // add to TolkTypeCompletionProvider also
         fun byName(text: String): TolkType? {
             return when (text) {
                 "int" -> Int

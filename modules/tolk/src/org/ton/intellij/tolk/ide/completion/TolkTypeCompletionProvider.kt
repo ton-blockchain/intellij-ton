@@ -2,7 +2,6 @@ package org.ton.intellij.tolk.ide.completion
 
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
-import com.intellij.codeInsight.completion.CompletionUtil
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.findPsiFile
@@ -11,12 +10,10 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubIndex
 import com.intellij.util.ProcessingContext
-import org.ton.intellij.tolk.psi.TolkFile
-import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
-import org.ton.intellij.tolk.psi.TolkTypeDef
-import org.ton.intellij.tolk.psi.TolkTypeParameterListOwner
+import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.sdk.TolkSdkManager
-import org.ton.intellij.tolk.stub.index.TolkTypeDefIndex
+import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
+import org.ton.intellij.tolk.type.TolkType
 import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.psiElement
 
@@ -25,9 +22,27 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         psiElement<PsiElement>().withParent(psiElement<TolkReferenceTypeExpression>())
 
     private val primitiveTypes = listOf(
-        "int", "slice", "cell", "builder", "tuple", "bool", "address"
-//        "continuation"
+        TolkType.Bool,
+        TolkType.Null,
+        TolkType.Cell,
+        TolkType.Slice,
+        TolkType.Builder,
+        TolkType.Tuple,
+        TolkType.Never,
+        TolkType.Coins,
+        TolkType.VarInt16,
+        TolkType.VarInt32,
+        TolkType.Address,
+    ).map { it.toString() } + listOf(
+        "uint",
+        "int",
+        "bits",
+        "bytes",
     )
+
+    private val cachedPrimitiveElements = primitiveTypes.map {
+        LookupElementBuilder.create(it).withBoldness(true)
+    }
 
     override fun addCompletions(
         parameters: CompletionParameters,
@@ -42,38 +57,35 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
                 LookupElementBuilder.createWithIcon(type)
             )
         }
-        primitiveTypes.forEach { type ->
-            result.addElement(
-                LookupElementBuilder.create(type).withBoldness(true)
-            )
+        cachedPrimitiveElements.forEach {
+            result.addElement(it)
         }
-        val typeCandidates = HashSet<TolkTypeDef>()
+
+        val typeCandidates = HashSet<TolkSymbolElement>()
         val tolkSdk = TolkSdkManager[project].getSdkRef().resolve(project)
         if (tolkSdk != null) {
             VfsUtilCore.iterateChildrenRecursively(tolkSdk.stdlibFile, null) {
                 val tolkFile = it.findPsiFile(project) as? TolkFile
-                if (tolkFile != null) {
-                    tolkFile.typeDefs.forEach { typeDef ->
-                        typeCandidates.add(typeDef)
-                    }
+                tolkFile?.typeDefs?.forEach { typeDef ->
+                    typeCandidates.add(typeDef)
+                }
+                tolkFile?.structs?.forEach { struct ->
+                    typeCandidates.add(struct)
                 }
                 true
             }
         }
-        val prefix = CompletionUtil.findReferenceOrAlphanumericPrefix(parameters)
 
-        StubIndex.getInstance().processAllKeys(TolkTypeDefIndex.KEY, project) {key ->
-            if (key.startsWith(prefix)) {
-                StubIndex.getInstance().processElements(
-                    TolkTypeDefIndex.KEY,
-                    key,
-                    project,
-                    GlobalSearchScope.allScope(project),
-                    TolkTypeDef::class.java
-                ) {
-                    typeCandidates.add(it)
-                    true
-                }
+        StubIndex.getInstance().processAllKeys(TolkTypeSymbolIndex.KEY, project) { key ->
+            StubIndex.getInstance().processElements(
+                TolkTypeSymbolIndex.KEY,
+                key,
+                project,
+                GlobalSearchScope.projectScope(project),
+                TolkTypeSymbolElement::class.java
+            ) {
+                typeCandidates.add(it)
+                true
             }
             true
         }
@@ -89,7 +101,5 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
                     }
             )
         }
-
-
     }
 }

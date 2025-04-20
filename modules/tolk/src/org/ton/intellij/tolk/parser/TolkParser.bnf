@@ -196,6 +196,7 @@ TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpression {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkTypeMixin"
     implements = [
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
+        "org.ton.intellij.tolk.psi.TolkTypeSymbolElement"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkTypeDefStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -206,7 +207,7 @@ Struct ::= 'struct' StructConstructorTag? IDENTIFIER TypeParameterList? (StructB
     mixin = "org.ton.intellij.tolk.psi.impl.TolkStructMixin"
     implements = [
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
-        "org.ton.intellij.tolk.psi.TolkSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkTypeSymbolElement"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkStructStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -228,7 +229,7 @@ StructField ::= IDENTIFIER ':' TypeExpression ['=' Expression] {
     recoverWhile = StructField_recover
     mixin="org.ton.intellij.tolk.psi.impl.TolkStructFieldMixin"
     implements=[
-        "org.ton.intellij.tolk.psi.TolkSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkTypeSymbolElement"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkStructFieldStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"

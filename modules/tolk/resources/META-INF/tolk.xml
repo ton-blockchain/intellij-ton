@@ -39,6 +39,8 @@
 
         <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkNamedElementIndex"/>
         <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkTypeDefIndex"/>
+        <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkStructIndex"/>
+        <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex"/>
         <stubElementTypeHolder class="org.ton.intellij.tolk.psi.TolkElementTypes" externalIdPrefix="tolk."/>
         <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkIncludeDefinition"
                                  implementationClass="org.ton.intellij.tolk.psi.impl.TolkIncludePathElementManipulator"/>

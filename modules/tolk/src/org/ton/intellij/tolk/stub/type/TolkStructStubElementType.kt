@@ -8,10 +8,14 @@ import com.intellij.util.ArrayFactory
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.impl.TolkStructImpl
 import org.ton.intellij.tolk.stub.TolkStructStub
+import org.ton.intellij.tolk.stub.index.TolkStructIndex
+import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
 
 class TolkStructStubElementType(
     debugName: String,
 ) : TolkNamedStubElementType<TolkStructStub, TolkStruct>(debugName) {
+    override val extraIndexKeys = listOf(TolkStructIndex.KEY, TolkTypeSymbolIndex.KEY)
+
     override fun serialize(stub: TolkStructStub, dataStream: StubOutputStream) {
         dataStream.writeName(stub.name)
     }

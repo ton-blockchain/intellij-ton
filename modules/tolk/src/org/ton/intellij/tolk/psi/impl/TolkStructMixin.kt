@@ -6,6 +6,7 @@ import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.stub.TolkStructStub
+import org.ton.intellij.tolk.type.TolkStructType
 import org.ton.intellij.tolk.type.TolkType
 import javax.swing.Icon
 
@@ -18,7 +19,7 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
         return super.getUseScope()
     }
 
-    override val type: TolkType = TolkType.struct(this)
+    override val type: TolkStructType = TolkType.struct(this)
 
     override fun getBaseIcon() = TolkIcons.STRUCTURE
 

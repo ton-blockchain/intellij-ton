@@ -5,13 +5,9 @@ import com.intellij.psi.stubs.StubElement
 import com.intellij.psi.stubs.StubInputStream
 import com.intellij.psi.stubs.StubOutputStream
 import com.intellij.util.ArrayFactory
-import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.psi.impl.TolkStructFieldImpl
-import org.ton.intellij.tolk.psi.impl.TolkStructImpl
 import org.ton.intellij.tolk.stub.TolkStructFieldStub
-import org.ton.intellij.tolk.stub.TolkStructStub
-import org.ton.intellij.tolk.stub.index.TolkTypeDefIndex
 
 class TolkStructFieldStubElementType(
     debugName: String,

@@ -9,11 +9,12 @@ import org.ton.intellij.tolk.psi.TolkTypeDef
 import org.ton.intellij.tolk.psi.impl.TolkTypeDefImpl
 import org.ton.intellij.tolk.stub.TolkTypeDefStub
 import org.ton.intellij.tolk.stub.index.TolkTypeDefIndex
+import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
 
 class TolkTypeDefStubElementType(
     debugName: String,
 ) : TolkNamedStubElementType<TolkTypeDefStub, TolkTypeDef>(debugName) {
-    override val extraIndexKeys = listOf(TolkTypeDefIndex.KEY)
+    override val extraIndexKeys = listOf(TolkTypeDefIndex.KEY, TolkTypeSymbolIndex.KEY)
 
     override fun serialize(stub: TolkTypeDefStub, dataStream: StubOutputStream) {
         dataStream.writeName(stub.name)

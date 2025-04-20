@@ -47,6 +47,11 @@ sealed interface TolkType {
     }
 
     fun printDisplayName(appendable: Appendable): Appendable = appendable.append(toString())
+
+    val displayName: String get() = buildString {
+        printDisplayName(this)
+    }
+
     fun canRhsBeAssigned(other: TolkType): Boolean {
         if (other == this) return true
         if (other is TolkAliasType) return canRhsBeAssigned(other.unwrapTypeAlias())

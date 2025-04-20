@@ -27,7 +27,7 @@ class TolkUnusedFunctionParameterInspection : TolkInspectionBase() {
         }
 
         private fun processParameter(parameter: TolkParameter, searchScope: SearchScope) {
-            val id = parameter.identifier
+            val id = parameter.identifier ?: return
             if (id.textMatches("_")) return
             if (ReferencesSearch.search(parameter, searchScope).none()) {
                 holder.registerProblem(

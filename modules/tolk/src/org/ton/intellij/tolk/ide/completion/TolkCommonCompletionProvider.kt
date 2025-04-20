@@ -22,7 +22,11 @@ import org.ton.intellij.util.psiElement
 
 object TolkCommonCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
-        psiElement<PsiElement>().withParent(psiElement<TolkReferenceExpression>())
+        psiElement<PsiElement>()
+            .withParent(psiElement<TolkReferenceExpression>()
+                .andNot(psiElement<TolkReferenceExpression>()
+                    .withParent(TolkDotExpression::class.java)))
+
 
     override fun addCompletions(
         parameters: CompletionParameters,

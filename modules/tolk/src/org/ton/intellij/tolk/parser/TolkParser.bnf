@@ -229,7 +229,7 @@ StructField ::= IDENTIFIER ':' TypeExpression ['=' Expression] {
     recoverWhile = StructField_recover
     mixin="org.ton.intellij.tolk.psi.impl.TolkStructFieldMixin"
     implements=[
-        "org.ton.intellij.tolk.psi.TolkTypeSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkSymbolElement"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkStructFieldStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"

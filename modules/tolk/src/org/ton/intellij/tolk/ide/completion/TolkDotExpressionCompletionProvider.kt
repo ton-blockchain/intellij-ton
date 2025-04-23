@@ -6,9 +6,14 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.PsiElement
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.TolkDotExpression
+import org.ton.intellij.tolk.psi.TolkFunction
+import org.ton.intellij.tolk.psi.impl.toLookupElement
+import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 import org.ton.intellij.tolk.type.TolkStructType
 
 object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
@@ -22,11 +27,12 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         context: ProcessingContext,
         result: CompletionResultSet
     ) {
+        val project = parameters.originalFile.project
         val dotExpression = parameters.position.parentOfType<TolkDotExpression>() ?: return
         val leftType = dotExpression.left.type ?: return
         val actualLeftType = leftType.unwrapTypeAlias().actualType()
         if (actualLeftType is TolkStructType) {
-            actualLeftType.psi.structBody?.structFieldList?.forEach { field ->
+            actualLeftType.psi?.structBody?.structFieldList?.forEach { field ->
                 result.addElement(
                     LookupElementBuilder
                         .createWithIcon(field)
@@ -37,6 +43,23 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                         }
                 )
             }
+        }
+
+        StubIndex.getInstance().processAllKeys(TolkFunctionIndex.KEY, project) { key ->
+            StubIndex.getInstance().processElements(
+                TolkFunctionIndex.KEY,
+                key,
+                project,
+                GlobalSearchScope.projectScope(project),
+                TolkFunction::class.java
+            ) { function ->
+                val receiverType = function.functionReceiver?.typeExpression?.type?.unwrapTypeAlias()?.actualType() ?: return@processElements true
+                if (receiverType == actualLeftType) {
+                    result.addElement(function.toLookupElement())
+                }
+                true
+            }
+            true
         }
     }
 }

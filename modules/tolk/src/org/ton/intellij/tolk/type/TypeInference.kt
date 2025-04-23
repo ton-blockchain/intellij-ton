@@ -1025,7 +1025,7 @@ class TolkInferenceWalker(
         if (leftType != null) {
             val leftTypeUnwrapped = leftType.unwrapTypeAlias()
             if (leftTypeUnwrapped is TolkStructType) {
-                symbol = leftTypeUnwrapped.psi.structBody?.structFieldList?.find { it.name == name }
+                symbol = leftTypeUnwrapped.psi?.structBody?.structFieldList?.find { it.name == name }
             }
         }
 
@@ -1456,7 +1456,7 @@ class TolkInferenceWalker(
         body.structExpressionFieldList.forEach { field ->
             val expression = field.expression ?: return@forEach
             val name = field.identifier.text.removeSurrounding("`")
-            val fieldType = structType.psi.structBody?.structFieldList?.find { it.name == name }?.type
+            val fieldType = structType.psi?.structBody?.structFieldList?.find { it.name == name }?.type
             inferExpression(expression, nextFlow.outFlow, false, fieldType)
         }
         return nextFlow

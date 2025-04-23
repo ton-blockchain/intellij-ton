@@ -1,10 +1,15 @@
 package org.ton.intellij.tolk.psi.impl
 
+import com.intellij.codeInsight.completion.PrioritizedLookupElement
+import com.intellij.codeInsight.lookup.LookupElement
+import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
+import org.jetbrains.kotlin.idea.completion.handlers.indexOfSkippingSpace
 import org.ton.intellij.tolk.TolkIcons
+import org.ton.intellij.tolk.ide.completion.TolkCompletionContributor
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkParameter
@@ -30,7 +35,7 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
     val parameters: List<TolkParameter>
         get() = parameterList?.parameterList ?: emptyList()
 
-    override val type: TolkType?
+    override val type: TolkFunctionType?
         get() = CachedValuesManager.getCachedValue(this) {
             val parameters = parameters.map { parameter ->
                 parameter.typeExpression?.type ?: return@getCachedValue null.also {
@@ -102,8 +107,67 @@ val TolkFunction.isBuiltin: Boolean
 val TolkFunction.isGeneric: Boolean
     get() = greenStub?.isGeneric ?: typeParameterList?.typeParameterList?.isNotEmpty() ?: false
 
+val TolkFunction.hasSelf: Boolean
+    get() = greenStub?.hasSelf ?: (parameterList?.parameterList?.firstOrNull()?.let {
+        it.name == "self" && it.typeExpression == null
+    } ?: false)
+
 val TolkFunction.parameters: List<TolkParameter>
     get() = (this as? TolkFunctionMixin)?.parameters ?: (parameterList?.parameterList ?: emptyList())
+
+fun TolkFunction.toLookupElement(): LookupElement {
+    return PrioritizedLookupElement.withPriority(
+        LookupElementBuilder.createWithIcon(this)
+            // Добавляем тип возвращаемого значения
+            .withTypeText((this.type as? TolkFunctionType)?.returnType?.let {
+                buildString { it.printDisplayName(this) }
+            } ?: "_")
+            // Добавляем типовые параметры, если есть
+            .let { builder ->
+                typeParameterList?.let { list ->
+                    builder.appendTailText(
+                        list.typeParameterList.joinToString(
+                            prefix = "<",
+                            postfix = ">"
+                        ) { it.name.toString() },
+                        true
+                    )
+                } ?: builder
+            }
+            // Добавляем параметры функции
+            .let { builder ->
+                builder.appendTailText(
+                    parameterList?.parameterList?.joinToString(
+                        prefix = "(",
+                        postfix = ")"
+                    ) {
+                        buildString {
+                            append(it.name)
+                            append(": ")
+                            it.typeExpression?.type?.printDisplayName(this) ?: append("_")
+                        }
+                    } ?: "()",
+                    true
+                )
+            }
+            // Добавляем обработчик вставки
+            .withInsertHandler { context, item ->
+                val offset = context.editor.caretModel.offset
+                val chars = context.document.charsSequence
+
+                val hasOpenBracket = chars.indexOfSkippingSpace('(', offset) != null
+
+                if (!hasOpenBracket) {
+                    val offset = if (this.parameters.isEmpty()) 2 else 1
+                    context.document.insertString(context.editor.caretModel.offset, "()")
+                    context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
+                }
+
+                context.commitDocument()
+            },
+        TolkCompletionContributor.FUNCTION_PRIORITY
+    )
+}
 
 fun TolkFunction.resolveGenerics(
     callableType: TolkFunctionType,

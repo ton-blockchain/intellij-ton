@@ -15,7 +15,8 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
             })
         }
         is TolkStructType -> {
-            printPsi(type.psi, type.psi.name ?: buildString {
+            val psi = type.psi ?: return
+            printPsi(psi, psi.name ?: buildString {
                 type.printDisplayName(this)
             })
         }

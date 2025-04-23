@@ -1,6 +1,7 @@
 package org.ton.intellij.tolk.psi.impl
 
 import com.intellij.lang.ASTNode
+import com.intellij.psi.PsiElement
 import com.intellij.psi.search.SearchScope
 import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.TolkIcons
@@ -24,4 +25,14 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
     override fun getBaseIcon() = TolkIcons.STRUCTURE
 
     override fun getIcon(flags: Int): Icon? = getBaseIcon()
+
+    override fun isEquivalentTo(another: PsiElement?): Boolean {
+        if (this === another) return true
+        if (another !is TolkStruct) return false
+        if (name != another.name) return false
+        if (originalElement == another.originalElement) return true
+        val thisFile = containingFile.originalFile
+        val anotherFile = another.containingFile.originalFile
+        return thisFile == anotherFile
+    }
 }

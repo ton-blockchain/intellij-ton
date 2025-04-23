@@ -30,7 +30,7 @@ abstract class TolkStructExpressionFieldMixin(node: ASTNode) : ASTWrapperPsiElem
                 structExpression.type?.unwrapTypeAlias() as? TolkStructType ?: return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
 
             val name = field.identifier.text.removeSurrounding("`")
-            val field = structType.psi.structBody?.structFieldList?.find {
+            val field = structType.psi?.structBody?.structFieldList?.find {
                 it.name == name
             } ?: return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
             return@PolyVariantResolver arrayOf(

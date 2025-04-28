@@ -208,7 +208,6 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "."                      { return DOT; }
       "@"                      { return AT; }
 
-      "?."                     { return SAFE_ACCESS; }
       "=="                     { return EQEQ; }
       "!="                     { return NEQ; }
       "<="                     { return LEQ; }
@@ -280,6 +279,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "match"                  { return MATCH_KEYWORD; }
       "as"                     { return AS_KEYWORD; }
       "is"                     { return IS_KEYWORD; }
+      "self"                   { return SELF_KEYWORD; }
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
       {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }

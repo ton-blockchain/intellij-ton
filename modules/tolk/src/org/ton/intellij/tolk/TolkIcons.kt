@@ -6,6 +6,7 @@ import com.intellij.openapi.util.IconLoader
 object TolkIcons {
     val FILE = IconLoader.getIcon("/icons/tolk_file.svg", TolkIcons::class.java)
     val FUNCTION = AllIcons.Nodes.Function
+    val METHOD = AllIcons.Nodes.Method
     val PARAMETER = AllIcons.Nodes.Parameter
     val CONSTANT = AllIcons.Nodes.Constant
     val VARIABLE = AllIcons.Nodes.Variable

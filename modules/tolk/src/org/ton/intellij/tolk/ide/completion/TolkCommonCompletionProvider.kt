@@ -198,7 +198,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                     base
                         .withTypeText((this.type as? TolkFunctionType)?.returnType?.let {
                             buildString {
-                                it.printDisplayName(this)
+                                it.renderAppendable(this)
                             }
                         } ?: "_")
                         .let { builder ->
@@ -222,7 +222,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                                     buildString {
                                         append(it.name)
                                         append(": ")
-                                        it.typeExpression?.type?.printDisplayName(this) ?: append("_")
+                                        it.typeExpression?.type?.renderAppendable(this) ?: append("_")
                                     }
                                 } ?: "()", true)
                         }
@@ -255,7 +255,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 PrioritizedLookupElement.withPriority(
                     base
                         .withTypeText(buildString {
-                            typeExpression?.type?.printDisplayName(this) ?: append("_")
+                            typeExpression?.type?.renderAppendable(this) ?: append("_")
                         })
                         .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
                         .withInsertHandler { context, item ->
@@ -275,7 +275,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                     base
                         .withTypeText(
                             buildString {
-                                typeExpression?.type?.printDisplayName(this) ?: append("_")
+                                typeExpression?.type?.renderAppendable(this) ?: append("_")
                             }
                         )
                         .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
@@ -296,7 +296,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                     base
                         .withIcon(TolkIcons.VARIABLE)
                         .withTypeText(buildString {
-                            typeExpression?.type?.printDisplayName(this) ?: append("_")
+                            typeExpression?.type?.renderAppendable(this) ?: append("_")
                         }),
                     TolkCompletionContributor.VAR_PRIORITY
                 )
@@ -307,7 +307,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                     base
                         .withIcon(TolkIcons.PARAMETER)
                         .withTypeText(buildString {
-                            typeExpression?.type?.printDisplayName(this) ?: append("_")
+                            typeExpression?.type?.renderAppendable(this) ?: append("_")
                         }),
                     TolkCompletionContributor.VAR_PRIORITY
                 )

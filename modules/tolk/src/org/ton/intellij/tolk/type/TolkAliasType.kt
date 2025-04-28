@@ -7,8 +7,8 @@ class TolkAliasType(
     val psi: TolkTypeDef,
     val underlyingType: TolkType
 ) : TolkType by underlyingType {
-    override fun printDisplayName(appendable: Appendable): Appendable {
-        return psi.name?.let { appendable.append(it) } ?: underlyingType.printDisplayName(appendable)
+    override fun renderAppendable(appendable: Appendable): Appendable {
+        return psi.name?.let { appendable.append(it) } ?: underlyingType.renderAppendable(appendable)
     }
 
     override fun substitute(substitution: Map<TolkTypeParameter, TolkType>): TolkType {

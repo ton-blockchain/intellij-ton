@@ -48,7 +48,6 @@
             EXCL                = '!'
             DOT                 = '.'
             AT                  = '@'
-            SAFE_ACCESS         = '?.'
 
             EQEQ                = '=='
             NEQ                 = '!='
@@ -115,6 +114,7 @@
             ASSERT_KEYWORD              = 'assert'
             MUTATE_KEYWORD              = 'mutate'
             MATCH_KEYWORD               = 'match'
+            SELF_KEYWORD                = 'self'
 
             EXPORT_KEYWORD              = 'export'
             GLOBAL_KEYWORD              = 'global'
@@ -268,7 +268,7 @@ FunctionReceiver ::= TypeExpression '.'
 
 private get ::= <<getKeyword>>
 
-private ReturnType ::= ':' TypeExpression {
+ReturnType ::= ':' (TypeExpression | 'self') {
     pin = 1
 }
 
@@ -558,15 +558,6 @@ Var ::= IDENTIFIER (':' TypeExpression)? {
     extends = VarDefinition
 }
 
-SafeAccessExpression ::= Expression '?.' CallExpression {
-    pin=2
-    methods=[
-        left="/Expression[0]"
-        right="/Expression[1]"
-    ]
-    mixin = "org.ton.intellij.tolk.psi.impl.TolkSafeAccessExpressionMixin"
-}
-
 CallExpression ::= Expression ArgumentList {
     rightAssociative = true
     mixin = "org.ton.intellij.tolk.psi.impl.TolkCallExpressionMixin"
@@ -634,6 +625,7 @@ private AtomicExpression ::= UnitExpression
                         | TensorOrParenExpression
                         | TupleExpression
                         | LiteralExpression
+                        | SelfExpression
                         | ReferenceExpression
 
 UnitExpression ::= '(' ')'
@@ -679,6 +671,10 @@ LiteralExpression ::= INTEGER_LITERAL | BoolExpression | NullExpression | String
     mixin="org.ton.intellij.tolk.psi.impl.TolkLiteralExpressionMixin"
 }
 
+SelfExpression ::= 'self' {
+//    mixin="org.ton.intellij.tolk.psi.impl.TolkSelfExpressionMixin"
+}
+
 ReferenceExpression ::= IDENTIFIER TypeArgumentList? {
     mixin="org.ton.intellij.tolk.psi.impl.TolkReferenceExpressionMixin"
     implements= [
@@ -697,17 +693,11 @@ private TypeArgument ::= TypeExpression {
 }
 private TypeArgument_recovery ::= !(','|'>'|'('|';'|StatementFirst)
 
-ParameterList ::= FunctionParameterList_start ')' {
+ParameterList ::= '(' !',' SelfParameter_with_comma? Parameter_with_recover* ')' {
     pin = 1
 }
-private FunctionParameterList_start ::= '(' FunctionParameterList_item* {
-    pin = 1
-    recoverWhile=FunctionParameterList_recovery
-}
-private FunctionParameterList_recovery ::= !')'|'asm'|'{'
-private FunctionParameterList_item ::= Parameter ( ','| &')' ) {pin=1}
 
-Parameter ::= 'mutate'? (ParameterSelf | ParameterWithType) {
+Parameter ::= 'mutate'? IDENTIFIER ':' TypeExpression {
     mixin="org.ton.intellij.tolk.psi.impl.TolkParameterMixin"
     implements=[
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
@@ -715,12 +705,18 @@ Parameter ::= 'mutate'? (ParameterSelf | ParameterWithType) {
     stubClass="org.ton.intellij.tolk.stub.TolkParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
-
-private ParameterWithType ::= IDENTIFIER ':' !"self" TypeExpression {
-    pin = 2
+private Parameter_with_recover ::= !(')'|'{'|';') Parameter (','|&')') {
+    pin = 1
+    recoverWhile = Parameter_recover
 }
-private ParameterSelf ::= "self" {
-//    pin = 2
+private Parameter_recover ::= !('('|'['|'mutate'|IDENTIFIER|'self'|')'|'{'|';')
+
+SelfParameter ::= 'mutate'? 'self' {
+    stubClass="org.ton.intellij.tolk.stub.TolkSelfParameterStub"
+    elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+}
+private SelfParameter_with_comma ::= SelfParameter (','|&')') {
+    pin = 1
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

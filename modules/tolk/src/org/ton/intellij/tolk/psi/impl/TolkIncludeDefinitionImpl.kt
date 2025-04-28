@@ -12,6 +12,7 @@ import org.ton.intellij.tolk.psi.TolkIncludeDefinition
 import org.ton.intellij.tolk.psi.impl.TolkIncludeDefinitionMixin.Companion.resolveTolkImport
 import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.stub.TolkIncludeDefinitionStub
+import org.ton.intellij.util.greenStub
 
 abstract class TolkIncludeDefinitionMixin : StubBasedPsiElementBase<TolkIncludeDefinitionStub>, TolkIncludeDefinition {
     constructor(stub: TolkIncludeDefinitionStub, type: IStubElementType<*, *>) : super(stub, type)
@@ -47,6 +48,6 @@ abstract class TolkIncludeDefinitionMixin : StubBasedPsiElementBase<TolkIncludeD
 }
 
 val TolkIncludeDefinition.path: String
-    get() = stub?.path ?: stringLiteral?.rawString?.text ?: ""
+    get() = greenStub?.path ?: stringLiteral?.rawString?.text ?: ""
 
 fun TolkIncludeDefinition.resolveFile(project: Project) = resolveTolkImport(project, containingFile as TolkFile, path)

@@ -6,7 +6,7 @@ interface TolkBoolType : TolkPrimitiveType {
 
     override fun actualType(): TolkType = TolkType.Bool
 
-    override fun printDisplayName(appendable: Appendable) = appendable.append("bool")
+    override fun renderAppendable(appendable: Appendable) = appendable.append("bool")
 
     companion object : TolkBoolType {
         override fun isSuperType(other: TolkType): Boolean = other == TolkType.Never || other is TolkBoolType

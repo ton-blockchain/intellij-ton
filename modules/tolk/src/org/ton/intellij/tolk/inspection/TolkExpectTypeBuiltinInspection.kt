@@ -22,7 +22,7 @@ class TolkExpectTypeBuiltinInspection  : TolkInspectionBase() {
             val actualType = left.expression.type ?: return
 
             val actualTypeText = buildString {
-                actualType.printDisplayName(this)
+                actualType.renderAppendable(this)
             }
             if (expectTypeText != actualTypeText) {
                 holder.registerProblem(

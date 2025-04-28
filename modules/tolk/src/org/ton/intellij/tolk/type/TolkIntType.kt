@@ -36,7 +36,7 @@ interface TolkIntType : TolkPrimitiveType {
         return other == TolkType.Never
     }
 
-    override fun printDisplayName(appendable: Appendable) = appendable.append("int")
+    override fun renderAppendable(appendable: Appendable) = appendable.append("int")
 
 }
 

@@ -16,10 +16,12 @@ import com.intellij.patterns.PsiElementPattern
 import com.intellij.psi.*
 import com.intellij.psi.impl.PsiDocumentManagerBase
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.stubs.StubElement
 import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.stubs.StubIndexKey
 import com.intellij.psi.tree.IElementType
+import com.intellij.psi.tree.IStubFileElementType
 import com.intellij.psi.tree.TokenSet
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ArrayFactory
@@ -125,4 +127,11 @@ fun <E : PsiElement> getChildrenByType(
     f: ArrayFactory<E?>,
 ): List<E> {
     return stub.getChildrenByType(elementType, f).toList() as List<E>
+}
+
+fun ASTNode.shouldCreateStubIfParentIsStub(): Boolean {
+    val parent = treeParent
+    val parentType = parent.elementType
+    return (parentType is IStubElementType<*, *> && parentType.shouldCreateStub(parent)) ||
+            parentType is IStubFileElementType<*>
 }

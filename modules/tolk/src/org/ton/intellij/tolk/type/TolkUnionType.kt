@@ -26,17 +26,17 @@ class TolkUnionType private constructor(
         return variants.joinToString(" | ")
     }
 
-    override fun printDisplayName(appendable: Appendable) = appendable.apply {
+    override fun renderAppendable(appendable: Appendable) = appendable.apply {
         val orNull = orNull
         if (orNull != null) {
-            orNull.printDisplayName(this)
+            orNull.renderAppendable(this)
             append("?")
             return@apply
         }
         var separator = ""
         variants.forEach {
             appendable.append(separator)
-            it.printDisplayName(appendable)
+            it.renderAppendable(appendable)
             separator = " | "
         }
     }

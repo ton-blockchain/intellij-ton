@@ -202,6 +202,10 @@ class TolkInferenceWalker(
         element.structs.forEach { struct ->
             nextFlow = inferStruct(struct, nextFlow)
         }
+        element.typeDefs.forEach { typeDef ->
+            val name = typeDef.name ?: return@forEach
+            nextFlow.globalSymbols[name] = typeDef
+        }
         importFiles.add(element.virtualFile)
         if (useIncludes) {
             element.includeDefinitions.forEach {
@@ -1050,44 +1054,51 @@ class TolkInferenceWalker(
             symbol = TolkBuiltins[project].getFunction(name)
         }
 
-        if (symbol != null) {
-            val type = when (symbol) {
-                is TolkFunction -> {
-                    val symbolType = symbol.type ?: TolkFunctionType(TolkType.Unknown, TolkType.Unknown)
-                    val substituteMap = HashMap<TolkTypeParameter, TolkType>()
-                    val typeArgumentList = element.typeArgumentList?.typeExpressionList ?: emptyList()
-                    val typeParameterList = symbol.typeParameterList?.typeParameterList ?: emptyList()
-                    typeParameterList.zip(typeArgumentList).forEach { (typeParameter, typeArgument) ->
-                        substituteMap[typeParameter] = typeArgument.type ?: TolkType.Unknown
-                    }
-                    symbolType.substitute(substituteMap)
-                }
+        if (symbol == null) {
+            val primitiveType = TolkType.byName(name)
+            if (primitiveType != null) {
+                ctx.setType(element, primitiveType)
+            }
+            return nextFlow
+        }
 
-                is TolkGlobalVar -> {
-                    if (ctx.owner is TolkFunction) {
-                        symbol.type
-                    } else {
-                        ctx.getType(symbol)
-                    }
+        val type = when (symbol) {
+            is TolkFunction -> {
+                val symbolType = symbol.type ?: TolkFunctionType(TolkType.Unknown, TolkType.Unknown)
+                val substituteMap = HashMap<TolkTypeParameter, TolkType>()
+                val typeArgumentList = element.typeArgumentList?.typeExpressionList ?: emptyList()
+                val typeParameterList = symbol.typeParameterList?.typeParameterList ?: emptyList()
+                typeParameterList.zip(typeArgumentList).forEach { (typeParameter, typeArgument) ->
+                    substituteMap[typeParameter] = typeArgument.type ?: TolkType.Unknown
                 }
+                symbolType.substitute(substituteMap)
+            }
 
-                is TolkConstVar -> if (ctx.owner is TolkFunction) {
+            is TolkGlobalVar -> {
+                if (ctx.owner is TolkFunction) {
                     symbol.type
                 } else {
                     ctx.getType(symbol)
                 }
-
-                is TolkStructField -> {
-                    symbol.type
-                }
-                is TolkStruct -> {
-                    symbol.type
-                }
-                else -> flow.getType(symbol)
             }
-            ctx.setType(element, type)
-            ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(symbol)))
+
+            is TolkConstVar -> if (ctx.owner is TolkFunction) {
+                symbol.type
+            } else {
+                ctx.getType(symbol)
+            }
+
+            is TolkStructField -> {
+                symbol.type
+            }
+
+            is TolkStruct -> {
+                symbol.type
+            }
+            else -> flow.getType(symbol)
         }
+        ctx.setType(element, type)
+        ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(symbol)))
         return nextFlow
     }
 

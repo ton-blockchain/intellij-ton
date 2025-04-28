@@ -46,10 +46,10 @@ sealed interface TolkType {
         }
     }
 
-    fun printDisplayName(appendable: Appendable): Appendable = appendable.append(toString())
+    fun renderAppendable(appendable: Appendable): Appendable = appendable.append(toString())
 
     val displayName: String get() = buildString {
-        printDisplayName(this)
+        renderAppendable(this)
     }
 
     fun canRhsBeAssigned(other: TolkType): Boolean {
@@ -330,7 +330,7 @@ data class TolkCoinsType(
 ) : TolkIntType {
     override fun negate(): TolkIntType = TolkCoinsType(range.unaryMinus())
 
-    override fun printDisplayName(appendable: Appendable) = appendable.append("coins")
+    override fun renderAppendable(appendable: Appendable) = appendable.append("coins")
 
     override fun toString(): String = "coins"
 }
@@ -350,7 +350,7 @@ data class TolkIntNType(
         "int$n"
     }
 
-    override fun printDisplayName(appendable: Appendable) = appendable.append(toString())
+    override fun renderAppendable(appendable: Appendable) = appendable.append(toString())
 
     override fun canRhsBeAssigned(other: TolkType): Boolean {
         if (other == this) return true
@@ -397,7 +397,7 @@ data class TolkVarInt32Type(
 
     override fun actualType(): TolkType = this
 
-    override fun printDisplayName(appendable: Appendable) = appendable.append("varint32")
+    override fun renderAppendable(appendable: Appendable) = appendable.append("varint32")
 
     override fun toString(): String = "varint32"
 }
@@ -409,7 +409,7 @@ data class TolkVarInt16Type(
 
     override fun actualType(): TolkType = this
 
-    override fun printDisplayName(appendable: Appendable) = appendable.append("varint16")
+    override fun renderAppendable(appendable: Appendable) = appendable.append("varint16")
 
     override fun toString(): String = "varint16"
 }

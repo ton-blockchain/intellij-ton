@@ -1,6 +1,5 @@
 package org.ton.intellij.tolk.stub.type
 
-import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.stubs.IndexSink
 import com.intellij.psi.stubs.StubBase
@@ -13,9 +12,5 @@ abstract class TolkStubElementType<S : StubBase<T>, T : TolkElement>(
     override fun getExternalId(): String = "tolk.${super.toString()}"
 
     override fun indexStub(stub: S, sink: IndexSink) {
-    }
-
-    override fun shouldCreateStub(node: ASTNode?): Boolean {
-        return super.shouldCreateStub(node)
     }
 }

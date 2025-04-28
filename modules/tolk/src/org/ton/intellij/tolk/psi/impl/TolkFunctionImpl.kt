@@ -10,6 +10,9 @@ import com.intellij.psi.util.CachedValuesManager
 import org.jetbrains.kotlin.idea.completion.handlers.indexOfSkippingSpace
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.ide.completion.TolkCompletionContributor
+import org.ton.intellij.tolk.presentation.TolkPsiRenderer
+import org.ton.intellij.tolk.presentation.renderParameterList
+import org.ton.intellij.tolk.presentation.renderTypeExpression
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkParameter
@@ -25,6 +28,9 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
     constructor(stub: TolkFunctionStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
 
     override fun getIcon(flags: Int): Icon? {
+        if (hasSelf) {
+            return TolkIcons.METHOD
+        }
         return TolkIcons.FUNCTION
     }
 
@@ -42,75 +48,63 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
 //                    println("[${containingFile.name}] Failed to get type for $parameter - `${parameter.text}`")
                 }
             }
-            val returnType = returnType ?: return@getCachedValue null
+            val returnType = actualReturnType ?: return@getCachedValue null
             val type = TolkFunctionType(TolkType.tensor(parameters), returnType)
 
             CachedValueProvider.Result.create(type, this)
         }
 
-    private val returnType: TolkType?
+    private val actualReturnType: TolkType?
         get() = CachedValuesManager.getCachedValue(this) {
-            var typeExpressionType = typeExpression?.type
-            if (typeExpressionType == TolkType.Unknown) {
-                typeExpressionType = null
-            }
-            if (typeExpressionType != null) {
-                return@getCachedValue CachedValueProvider.Result.create(
-                    typeExpressionType,
-                    this
-                )
-            }
-
-            val inference = try {
-                inference
-            } catch (_: CyclicReferenceException) {
-                null
-            } ?: return@getCachedValue CachedValueProvider.Result.create(null, this)
-
-            var result = if (inference.returnStatements.isNotEmpty()) {
-                inference.returnStatements.asSequence().map {
-                    it.expression?.type
-                }.filterNotNull().fold(null) { a, b -> a?.join(b) ?: b }
-            } else if (inference.unreachable == TolkUnreachableKind.ThrowStatement) {
-                TolkType.Never
-            } else {
-                TolkType.Unit
-            }
-            if (result == TolkType.Unknown) {
-                result = null
-            }
-
-            CachedValueProvider.Result.create(result, this)
-        }?.also {
-//            println("${name} returnType: $it ||| ${buildString { it.printDisplayName(this) }}")
+            CachedValueProvider.Result.create(resolveReturnType(), this)
         }
+
+    private fun resolveReturnType(): TolkType? {
+        val returnTypePsi = returnType
+        if (returnTypePsi != null) {
+            return if (returnTypePsi.selfKeyword != null) {
+                functionReceiver?.typeExpression?.type
+            } else {
+                returnTypePsi.typeExpression?.type
+            }
+        }
+        val inference = inference ?: return null
+        val result = if (inference.returnStatements.isNotEmpty()) {
+            inference.returnStatements.asSequence().map {
+                it.expression?.type
+            }.filterNotNull().fold(null) { a, b -> a?.join(b) ?: b }
+        } else if (inference.unreachable == TolkUnreachableKind.ThrowStatement) {
+            TolkType.Never
+        } else {
+            TolkType.Unit
+        }
+        return result
+    }
 }
 
 val TolkFunction.isMutable: Boolean
-    get() = stub?.isMutable ?: (node.findChildByType(TolkElementTypes.TILDE) != null)
+    get() = greenStub?.isMutable ?: (node.findChildByType(TolkElementTypes.TILDE) != null)
 
 val TolkFunction.isDeprecated: Boolean
-    get() = stub?.isDeprecated ?: annotationList.any { it.identifier?.textMatches("deprecated") == true }
+    get() = greenStub?.isDeprecated ?: annotationList.any { it.identifier?.textMatches("deprecated") == true }
 
 val TolkFunction.getKeyword get() = node.findChildByType(TolkElementTypes.GET_KEYWORD)
 
 val TolkFunction.isGetMethod: Boolean
-    get() = stub?.isGetMethod
+    get() = greenStub?.isGetMethod
         ?: (getKeyword != null || annotationList.any { it.identifier?.textMatches("method_id") == true })
 
 val TolkFunction.hasAsm: Boolean
-    get() = stub?.hasAsm ?: (functionBody?.asmDefinition != null)
+    get() = greenStub?.hasAsm ?: (functionBody?.asmDefinition != null)
 
 val TolkFunction.isBuiltin: Boolean
-    get() = stub?.isBuiltin ?: (functionBody?.builtinKeyword != null)
+    get() = greenStub?.isBuiltin ?: (functionBody?.builtinKeyword != null)
 
 val TolkFunction.isGeneric: Boolean
     get() = greenStub?.isGeneric ?: typeParameterList?.typeParameterList?.isNotEmpty() ?: false
 
 val TolkFunction.hasSelf: Boolean
-    get() = greenStub?.hasSelf ?: (parameterList?.parameterList?.firstOrNull()?.let {
-        it.name == "self" && it.typeExpression == null
-    } ?: false)
+    get() = greenStub?.hasSelf ?: (parameterList?.selfParameter != null)
 
 val TolkFunction.parameters: List<TolkParameter>
     get() = (this as? TolkFunctionMixin)?.parameters ?: (parameterList?.parameterList ?: emptyList())
@@ -118,11 +112,9 @@ val TolkFunction.parameters: List<TolkParameter>
 fun TolkFunction.toLookupElement(): LookupElement {
     return PrioritizedLookupElement.withPriority(
         LookupElementBuilder.createWithIcon(this)
-            // Добавляем тип возвращаемого значения
             .withTypeText((this.type as? TolkFunctionType)?.returnType?.let {
-                buildString { it.printDisplayName(this) }
+                buildString { it.renderAppendable(this) }
             } ?: "_")
-            // Добавляем типовые параметры, если есть
             .let { builder ->
                 typeParameterList?.let { list ->
                     builder.appendTailText(
@@ -134,23 +126,8 @@ fun TolkFunction.toLookupElement(): LookupElement {
                     )
                 } ?: builder
             }
-            // Добавляем параметры функции
-            .let { builder ->
-                builder.appendTailText(
-                    parameterList?.parameterList?.joinToString(
-                        prefix = "(",
-                        postfix = ")"
-                    ) {
-                        buildString {
-                            append(it.name)
-                            append(": ")
-                            it.typeExpression?.type?.printDisplayName(this) ?: append("_")
-                        }
-                    } ?: "()",
-                    true
-                )
-            }
-            // Добавляем обработчик вставки
+            .withTailText(getTailText())
+            .appendTailText(getExtraTailText(), true)
             .withInsertHandler { context, item ->
                 val offset = context.editor.caretModel.offset
                 val chars = context.document.charsSequence
@@ -167,6 +144,16 @@ fun TolkFunction.toLookupElement(): LookupElement {
             },
         TolkCompletionContributor.FUNCTION_PRIORITY
     )
+}
+
+private fun TolkFunction.getTailText(): String {
+    val parameterList = parameterList ?: return "()"
+    return TolkPsiRenderer().renderParameterList(parameterList)
+}
+
+private fun TolkFunction.getExtraTailText(): String {
+    val receiver = functionReceiver?.typeExpression ?: return ""
+    return " of ${TolkPsiRenderer().renderTypeExpression(receiver)}"
 }
 
 fun TolkFunction.resolveGenerics(

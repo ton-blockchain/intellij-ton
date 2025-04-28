@@ -11,13 +11,13 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
         }
         is TolkAliasType -> {
             printPsi(type.psi, type.psi.name ?: buildString {
-                type.printDisplayName(this)
+                type.renderAppendable(this)
             })
         }
         is TolkStructType -> {
             val psi = type.psi ?: return
             printPsi(psi, psi.name ?: buildString {
-                type.printDisplayName(this)
+                type.renderAppendable(this)
             })
         }
 
@@ -92,7 +92,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
         }
 
         else -> text(buildString {
-            type.printDisplayName(this)
+            type.renderAppendable(this)
         })
     }
 }

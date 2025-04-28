@@ -10,7 +10,7 @@ data class TolkStructType(
         return TolkUnionType.create(this, other)
     }
 
-    override fun printDisplayName(appendable: Appendable): Appendable {
+    override fun renderAppendable(appendable: Appendable): Appendable {
         return appendable.append(psi.name)
     }
 

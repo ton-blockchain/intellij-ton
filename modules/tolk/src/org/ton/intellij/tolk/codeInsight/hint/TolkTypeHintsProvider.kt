@@ -78,7 +78,7 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
 
     private fun collectFromFunction(element: PsiElement, sink: InlayTreeSink) {
         if (element !is TolkFunction) return
-        if (element.typeExpression != null) return
+        if (element.returnType != null) return
         element.functionBody?.blockStatement ?: return
         val parameters = element.parameterList ?: return
         val returnType = (element.type as? TolkFunctionType)?.returnType ?: return

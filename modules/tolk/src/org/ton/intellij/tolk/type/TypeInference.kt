@@ -178,6 +178,7 @@ class TolkInferenceWalker(
 ) {
     private val project = ctx.project
     private val importFiles = LinkedHashSet<VirtualFile>()
+    private var currentFunction: TolkFunction? = null
 
     fun inferFile(element: TolkFile, flow: TolkFlowContext, useIncludes: Boolean = true): TolkFlowContext {
         val project = element.project
@@ -213,8 +214,15 @@ class TolkInferenceWalker(
     }
 
     fun inferFunction(element: TolkFunction, flow: TolkFlowContext): TolkFlowContext {
+        currentFunction = element
         var nextFlow = flow
-        ctx.declaredReturnType = element.typeExpression?.type
+        ctx.declaredReturnType = element.returnType?.let {
+            if (it.selfKeyword != null) {
+                element.functionReceiver?.typeExpression?.type
+            } else {
+                it.typeExpression?.type
+            }
+        }
         element.typeParameterList?.typeParameterList?.forEach { typeParameter ->
             nextFlow.setSymbol(typeParameter, typeParameter.type ?: TolkType.Unknown)
         }
@@ -224,6 +232,7 @@ class TolkInferenceWalker(
         element.functionBody?.blockStatement?.let {
             nextFlow = processBlockStatement(it, nextFlow)
         }
+        currentFunction = null
         return nextFlow
     }
 
@@ -530,7 +539,7 @@ class TolkInferenceWalker(
             }
 
             is TolkVarTuple -> {
-                val rhsTuple =rightType.unwrapTypeAlias() as? TolkTypedTupleType
+                val rhsTuple = rightType.unwrapTypeAlias() as? TolkTypedTupleType
                 val leftElements = element.varDefinitionList
                 val typesList = ArrayList<TolkType>(leftElements.size)
                 leftElements.forEachIndexed { index, expression ->
@@ -585,6 +594,7 @@ class TolkInferenceWalker(
             is TolkBinExpression -> inferBinExpression(element, flow, usedAsCondition)
             is TolkIsExpression -> inferIsExpression(element, flow, usedAsCondition)
             is TolkReferenceExpression -> inferReferenceExpression(element, flow, usedAsCondition)
+            is TolkSelfExpression -> inferSelfExpression(element, flow, usedAsCondition)
             is TolkTupleExpression -> inferTupleExpression(element, flow, usedAsCondition, hint)
             is TolkTensorExpression -> inferTensorExpression(element, flow, usedAsCondition, hint)
             is TolkCallExpression -> inferCallExpression(element, flow, usedAsCondition, hint)
@@ -1073,6 +1083,15 @@ class TolkInferenceWalker(
             ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(symbol)))
         }
         return nextFlow
+    }
+
+    private fun inferSelfExpression(
+        element: TolkSelfExpression,
+        flow: TolkFlowContext,
+        usedAsCondition: Boolean,
+    ): TolkExpressionFlowContext {
+        ctx.setType(element, currentFunction?.functionReceiver?.typeExpression?.type)
+        return TolkExpressionFlowContext(flow, usedAsCondition)
     }
 
     private fun inferTupleExpression(

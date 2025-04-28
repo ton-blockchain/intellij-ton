@@ -16,7 +16,7 @@ class TolkTypeProvider : ExpressionTypeProvider<TolkTypedElement>() {
     private fun typePresentation(element: TolkTypedElement): String {
         return element.type?.let {
             buildString {
-                it.printDisplayName(this)
+                it.renderAppendable(this)
             }
         } ?: "<unknown>"
     }

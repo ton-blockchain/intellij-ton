@@ -1,6 +1,7 @@
 package org.ton.intellij.tolk.psi
 
 import com.intellij.psi.stubs.IStubElementType
+import org.ton.intellij.tolk.stub.TolkSelfParameterStub
 import org.ton.intellij.tolk.stub.type.*
 
 object TolkElementTypeFactory {
@@ -9,6 +10,7 @@ object TolkElementTypeFactory {
         "INCLUDE_DEFINITION" -> TolkIncludeDefinitionStubElementType(name)
         "FUNCTION" -> TolkFunctionStubElementType(name)
         "PARAMETER" -> TolkParameterStubElementType(name)
+        "SELF_PARAMETER" -> TolkSelfParameterStub.Type
         "GLOBAL_VAR" -> TolkGlobalVarStubElementType(name)
         "CONST_VAR" -> TolkConstVarStubElementType(name)
         "TYPE_PARAMETER" -> TolkTypeParameterStubElementType(name)

@@ -6,12 +6,12 @@ data class TolkTensorType private constructor(
 ) : TolkType {
     override fun toString(): String = "(${elements.joinToString()})"
 
-    override fun printDisplayName(appendable: Appendable) = appendable.apply{
+    override fun renderAppendable(appendable: Appendable) = appendable.apply{
         append("(")
         var separator = ""
         elements.forEach {
             append(separator)
-            it.printDisplayName(appendable)
+            it.renderAppendable(appendable)
             separator = ", "
         }
         append(")")

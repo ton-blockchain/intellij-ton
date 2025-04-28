@@ -42,7 +42,7 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
                 append(name)
                 type?.let {
                     append(" = ")
-                    it.underlyingType.printDisplayName(this)
+                    it.underlyingType.renderAppendable(this)
                 }
             }
 

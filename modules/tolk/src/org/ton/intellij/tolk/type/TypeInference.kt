@@ -196,6 +196,10 @@ class TolkInferenceWalker(
             nextFlow = inferConstant(constVar, nextFlow)
         }
         element.structs.forEach { struct ->
+            val name = struct.name ?: return@forEach
+            nextFlow.globalSymbols[name] = struct
+        }
+        element.structs.forEach { struct ->
             nextFlow = inferStruct(struct, nextFlow)
         }
         importFiles.add(element.virtualFile)
@@ -1076,7 +1080,9 @@ class TolkInferenceWalker(
                 is TolkStructField -> {
                     symbol.type
                 }
-
+                is TolkStruct -> {
+                    symbol.type
+                }
                 else -> flow.getType(symbol)
             }
             ctx.setType(element, type)

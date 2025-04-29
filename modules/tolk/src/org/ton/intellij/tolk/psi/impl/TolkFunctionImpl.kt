@@ -68,7 +68,9 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
                 returnTypePsi.typeExpression?.type
             }
         }
-        val inference = inference ?: return null
+        val inference = try {
+            inference
+        } catch (_: CyclicReferenceException) { null } ?: return null
         val result = if (inference.returnStatements.isNotEmpty()) {
             inference.returnStatements.asSequence().map {
                 it.expression?.type

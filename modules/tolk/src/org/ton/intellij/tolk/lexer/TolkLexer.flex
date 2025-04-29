@@ -214,7 +214,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       ">="                     { return GEQ; }
       "<=>"                    { return SPACESHIP; }
       "<<"                     { return LSHIFT; }
-      ">>"                     { return RSHIFT; }
+      // ">>"                     { return RSHIFT; }
       "~>>"                    { return RSHIFTR; }
       "^>>"                    { return RSHIFTC; }
       "~/"                     { return DIVR; }

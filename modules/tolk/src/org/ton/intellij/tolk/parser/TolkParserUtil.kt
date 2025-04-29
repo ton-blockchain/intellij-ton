@@ -47,4 +47,26 @@ object TolkParserUtil : GeneratedParserUtilBase() {
         }
         return false
     }
+
+
+    @JvmStatic
+    fun parseGtGt(b: PsiBuilder, level: Int): Boolean {
+        if (b.tokenType == TolkElementTypes.RSHIFT) {
+            b.advanceLexer()
+            return true
+        }
+        val marker = b.mark()
+        if (b.tokenType != TolkElementTypes.GT) {
+            marker.drop()
+            return false
+        }
+        b.advanceLexer()
+        if (b.tokenType != TolkElementTypes.GT) {
+            marker.drop()
+            return false
+        }
+        b.advanceLexer()
+        marker.collapse(TolkElementTypes.RSHIFT)
+        return true
+    }
 }

@@ -425,8 +425,8 @@ Expression ::=
     | TernaryExpression // expr10
     | LogicalBinExpression //expr13
     | BitwiseBinExpression // expr14
-    | CompBinExpression // expr15
     | ShiftBinExpression // expr17
+    | CompBinExpression // expr15
     | AddBinExpression // expr20
     | MulBinExpression // expr30
     | AsExpression // expr40
@@ -486,8 +486,8 @@ TernaryExpression ::= Expression '?' Expression ':' Expression {
 }
 LogicalBinExpression ::= Expression LogicalBinOp Expression
 BitwiseBinExpression ::= Expression BitwiseBinOp Expression
-CompBinExpression ::= Expression CompBinOp Expression
 ShiftBinExpression ::= Expression ShiftBinOp Expression
+CompBinExpression ::= Expression CompBinOp Expression
 AddBinExpression ::= Expression AddBinOp Expression
 MulBinExpression ::= Expression MulBinOp Expression
 PrefixExpression ::= ('!'|'~'|'-'|'+') Expression {
@@ -520,7 +520,7 @@ LogicalBinOp ::= '&&' | '||' { name = "operator" }
 BitwiseBinOp ::= '&' | '|' | '^' { name = "operator" }
 
 CompBinOp ::= '==' | '!=' | '<' | '>' | '<=' | '>=' | '<=>' { name = "operator" }
-ShiftBinOp ::= '<<' | '>>' | '~>>' | '^>>' { name = "operator" }
+ShiftBinOp ::= '<<' | <<parseGtGt>> | '~>>' | '^>>' { name = "operator" }
 AddBinOp ::= '-' | '+' { name = "operator" }
 MulBinOp  ::= '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%' { name = "operator" }
 
@@ -683,15 +683,17 @@ ReferenceExpression ::= IDENTIFIER TypeArgumentList? {
     ]
 }
 
-TypeArgumentList ::= '<' TypeArgumentElements '>'
-private TypeArgumentElements ::= <<comma_separated_list TypeArgument>> {
-    recoverWhile=TypeArgumentList_recovery
-}
-private TypeArgumentList_recovery ::= !('>'|'('|')'|';')
-private TypeArgument ::= TypeExpression {
-    recoverWhile=TypeArgument_recovery
-}
-private TypeArgument_recovery ::= !(','|'>'|'('|';'|StatementFirst)
+TypeArgumentList ::= '<' <<comma_separated_list TypeArgument>> '>'
+private TypeArgument ::= TypeExpression
+
+//private TypeArgumentElements ::= <<comma_separated_list TypeArgument>> {
+////    recoverWhile=TypeArgumentList_recovery
+//}
+////private TypeArgumentList_recovery ::= !('>'|'('|')'|';')
+//private TypeArgument ::= TypeExpression {
+////    recoverWhile=TypeArgument_recovery
+//}
+//private TypeArgument_recovery ::= !(','|'>'|'('|';'|StatementFirst)
 
 ParameterList ::= '(' !',' SelfParameter_with_comma? Parameter_with_recover* ')' {
     pin = 1
@@ -723,17 +725,38 @@ private SelfParameter_with_comma ::= SelfParameter (','|&')') {
 // Types
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TypeExpression ::= FunTypeExpression | UnionTypeExpression | NullableTypeExpression | SimpleTypeExpression {
+TypeExpression ::=
+    FunTypeExpression
+    | UnionTypeExpression
+    | NullableTypeExpression
+    | GenericTypeExpression
+    | SimpleTypeExpression
+{
     implements=[
         "org.ton.intellij.tolk.psi.TolkTypedElement"
     ]
+}
+
+GenericTypeExpression ::= SimpleTypeExpression TypeArgumentList {
+   extends=TypeExpression
 }
 
 NullableTypeExpression ::= SimpleTypeExpression '?' {
     mixin="org.ton.intellij.tolk.psi.impl.TolkNullableTypeExpressionMixin"
 }
 
-private SimpleTypeExpression ::= AutoTypeExpression | VoidTypeExpression | TensorOrParenTypeExpression | TupleTypeExpression | NullTypeExpression | ReferenceTypeExpression
+private SimpleTypeExpression ::=
+    NullTypeExpression
+    | SelfTypeExpression
+    | AutoTypeExpression
+    | VoidTypeExpression
+    | TensorOrParenTypeExpression
+    | TupleTypeExpression
+    | ReferenceTypeExpression
+
+SelfTypeExpression ::= 'self' {
+    extends=TypeExpression
+}
 
 UnionTypeExpression ::= unionType1 | unionType2 {
     mixin="org.ton.intellij.tolk.psi.impl.TolkUnionTypeExpressionMixin"

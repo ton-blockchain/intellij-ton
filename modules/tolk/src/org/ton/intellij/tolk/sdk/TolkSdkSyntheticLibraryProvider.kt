@@ -12,7 +12,8 @@ class TolkSdkSyntheticLibraryProvider : AdditionalLibraryRootsProvider() {
     override fun getAdditionalProjectLibraries(project: Project): MutableCollection<SyntheticLibrary> {
         val tolkSdkManager = TolkSdkManager[project]
         val tolkSdk = tolkSdkManager.getSdkRef().resolve(project)
-        return mutableListOf(tolkSdk?.library ?: return mutableListOf())
+        val library = tolkSdk?.library ?: return mutableListOf()
+        return mutableListOf(library)
     }
 }
 

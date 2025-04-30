@@ -264,6 +264,7 @@ Function ::= Annotation* ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER T
 //        leftBinder = "ADJACENT_LINE_COMMENTS"
 //    ]
 }
+
 FunctionReceiver ::= TypeExpression '.'
 
 private get ::= <<getKeyword>>
@@ -349,6 +350,7 @@ IfStatement ::= 'if' Condition BlockStatement ElseBranch? {
         condition="/Expression"
     ]
 }
+
 private Condition ::= '(' Expression ')' {
     pin = 1
 }

@@ -50,7 +50,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                 TolkFunctionIndex.KEY,
                 key,
                 project,
-                GlobalSearchScope.projectScope(project),
+                GlobalSearchScope.allScope(project),
                 TolkFunction::class.java
             ) { function ->
                 val receiverType = function.functionReceiver?.typeExpression?.type?.unwrapTypeAlias()?.actualType() ?: return@processElements true

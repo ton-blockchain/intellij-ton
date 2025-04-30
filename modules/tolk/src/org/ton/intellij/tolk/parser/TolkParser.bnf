@@ -674,7 +674,7 @@ LiteralExpression ::= INTEGER_LITERAL | BoolExpression | NullExpression | String
 }
 
 SelfExpression ::= 'self' {
-//    mixin="org.ton.intellij.tolk.psi.impl.TolkSelfExpressionMixin"
+    mixin="org.ton.intellij.tolk.psi.impl.TolkSelfExpressionMixin"
 }
 
 ReferenceExpression ::= IDENTIFIER TypeArgumentList? {
@@ -741,6 +741,7 @@ TypeExpression ::=
 
 GenericTypeExpression ::= SimpleTypeExpression TypeArgumentList {
    extends=TypeExpression
+   mixin="org.ton.intellij.tolk.psi.impl.TolkGenericTypeExpressionMixin"
 }
 
 NullableTypeExpression ::= SimpleTypeExpression '?' {

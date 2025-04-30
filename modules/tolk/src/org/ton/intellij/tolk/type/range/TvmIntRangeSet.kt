@@ -80,53 +80,60 @@ sealed class TvmIntRangeSet {
         }
 
         override fun join(other: TvmIntRangeSet): TvmIntRangeSet {
-            if (other.isEmpty() || other == this) return this
-            if (other is Point) return other.join(this)
-            if (other is Range) {
-                if (other.min <= max && min <= other.max ||
-                    (other.max < min && other.max + BigInteger.ONE == min) ||
-                    (other.min > max && max + BigInteger.ONE == other.min)
-                ) {
-                    return range(minOf(min, other.min), maxOf(max, other.max))
+            try {
+                if (other.isEmpty() || other == this) return this
+                if (other is Point) return other.join(this)
+                if (other is Range) {
+                    if (other.min <= max && min <= other.max ||
+                        (other.max < min && other.max + BigInteger.ONE == min) ||
+                        (other.min > max && max + BigInteger.ONE == other.min)
+                    ) {
+                        return range(minOf(min, other.min), maxOf(max, other.max))
+                    }
+                    if (other.max < min) {
+                        return RangeSet(other.min, other.max, min, max)
+                    }
+                    return RangeSet(min, max, other.min, other.max)
                 }
-                if (other.max < min) {
-                    RangeSet(other.min, other.max, min, max)
-                }
-                return RangeSet(min, max, other.min, other.max)
-            }
 
-            val longs = other.asRangeArray()
-            var minIndex = longs.binarySearch(min)
-            if (minIndex < 0) {
-                minIndex = -minIndex - 1
-                if (minIndex % 2 == 0 && minIndex > 0 && longs[minIndex - 1] + BigInteger.ONE == min) {
-                    minIndex--
+                val longs = other.asRangeArray()
+                var minIndex = longs.binarySearch(min)
+                if (minIndex < 0) {
+                    minIndex = -minIndex - 1
+                    if (minIndex % 2 == 0 && minIndex > 0 && longs[minIndex - 1] + BigInteger.ONE == min) {
+                        minIndex--
+                    }
+                } else if (minIndex % 2 == 0) {
+                    minIndex++
                 }
-            } else if (minIndex % 2 == 0) {
-                minIndex++
-            }
-            var maxIndex = longs.binarySearch(max)
-            if (maxIndex < 0) {
-                maxIndex = -maxIndex - 1
-                if (maxIndex % 2 == 0 && maxIndex < longs.size && max + BigInteger.ONE == longs[maxIndex]) {
+                var maxIndex = longs.binarySearch(max)
+                if (maxIndex < 0) {
+                    maxIndex = -maxIndex - 1
+                    if (maxIndex % 2 == 0 && maxIndex < longs.size && max + BigInteger.ONE == longs[maxIndex]) {
+                        maxIndex++
+                    }
+                } else if (maxIndex % 2 == 0) {
                     maxIndex++
                 }
-            } else if (maxIndex % 2 == 0) {
-                maxIndex++
-            }
 
-            val result = Array(longs.size + 2) { BigInteger.ZERO }
-            System.arraycopy(longs, 0, result, 0, minIndex)
-            var pos = minIndex
-            if (minIndex % 2 == 0) {
-                result[pos++] = min
-            }
-            if (maxIndex % 2 == 0) {
-                result[pos++] = max
-            }
-            System.arraycopy(longs, maxIndex, result, pos, longs.size - maxIndex)
+                val result = Array(longs.size + 2) { BigInteger.ZERO }
+                System.arraycopy(longs, 0, result, 0, minIndex)
+                var pos = minIndex
+                if (minIndex % 2 == 0) {
+                    result[pos++] = min
+                }
+                if (maxIndex % 2 == 0) {
+                    result[pos++] = max
+                }
+                val remaining = longs.size - maxIndex
+                if (remaining > 0) {
+                    System.arraycopy(longs, maxIndex, result, pos, remaining)
+                }
 
-            return ranges(result, longs.size + pos - maxIndex)
+                return ranges(result, longs.size + remaining)
+            } catch (e: Exception) {
+                throw IllegalStateException("Failed to join $this with $other", e)
+            }
         }
 
         override fun toString(): String = "{${format(min, max)}}"

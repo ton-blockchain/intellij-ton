@@ -5,10 +5,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.resolve.ResolveCache
 import com.intellij.psi.util.parentOfType
-import org.ton.intellij.tolk.psi.TolkElementTypes
-import org.ton.intellij.tolk.psi.TolkPsiFactory
-import org.ton.intellij.tolk.psi.TolkStructExpression
-import org.ton.intellij.tolk.psi.TolkStructExpressionField
+import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.type.TolkStructType
 
 abstract class TolkStructExpressionFieldMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkStructExpressionField {
@@ -20,22 +17,7 @@ abstract class TolkStructExpressionFieldMixin(node: ASTNode) : ASTWrapperPsiElem
         val identifier: PsiElement get() = element.identifier
 
         private val resolver = ResolveCache.PolyVariantResolver<FieldReference> { t, incompleteCode ->
-            if (field.node.findChildByType(TolkElementTypes.COLON) == null) {
-                // resolve local variable
-                return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
-            }
-            val structExpression = field.parentOfType<TolkStructExpression>() ?: return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
-
-            val structType =
-                structExpression.type?.unwrapTypeAlias() as? TolkStructType ?: return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
-
-            val name = field.identifier.text.removeSurrounding("`")
-            val field = structType.psi?.structBody?.structFieldList?.find {
-                it.name == name
-            } ?: return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
-            return@PolyVariantResolver arrayOf(
-                PsiElementResolveResult(field)
-            )
+            resolveInner(incompleteCode)
         }
 
         override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
@@ -46,6 +28,25 @@ abstract class TolkStructExpressionFieldMixin(node: ASTNode) : ASTWrapperPsiElem
 
         override fun handleElementRename(newElementName: String): PsiElement {
             return identifier.replace(TolkPsiFactory[element.project].createIdentifier(newElementName))
+        }
+
+        private fun resolveInner(incompleteCode: Boolean): Array<ResolveResult> {
+            if (field.node.findChildByType(TolkElementTypes.COLON) == null) {
+                // resolve local variable
+                val inference = element.parentOfType<TolkInferenceContextOwner>()?.selfInferenceResult ?: return ResolveResult.EMPTY_ARRAY
+                val resolvedRefs = inference.getResolvedRefs(field)
+                return resolvedRefs.toTypedArray()
+            }
+            val structExpression = field.parentOfType<TolkStructExpression>() ?: return ResolveResult.EMPTY_ARRAY
+
+            val structType =
+                structExpression.type?.unwrapTypeAlias() as? TolkStructType ?: return ResolveResult.EMPTY_ARRAY
+
+            val name = field.identifier.text.removeSurrounding("`")
+            val field = structType.psi?.structBody?.structFieldList?.find {
+                it.name == name
+            } ?: return ResolveResult.EMPTY_ARRAY
+            return arrayOf(PsiElementResolveResult(field))
         }
     }
 }

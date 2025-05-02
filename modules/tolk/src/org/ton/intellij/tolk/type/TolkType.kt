@@ -1,6 +1,8 @@
 package org.ton.intellij.tolk.type
 
 
+import org.ton.intellij.tolk.psi.TolkElement
+import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkTypeDef
 import org.ton.intellij.tolk.psi.TolkTypeParameter
@@ -37,11 +39,11 @@ sealed interface TolkType {
 
     fun hasGenerics(): Boolean = false
 
-    fun substitute(substitution: Map<TolkTypeParameter, TolkType>): TolkType {
+    fun substitute(substitution: Map<TolkElement, TolkType>): TolkType {
         return when (this) {
             is TolkTensorType -> tensor(elements.map { it.substitute(substitution) })
             is TolkTypedTupleType -> TolkTypedTupleType.create(elements.map { it.substitute(substitution) })
-            is ParameterType -> substitution[this.psiElement] ?: this
+            is GenericType -> substitution[this.psiElement] ?: this
             else -> this
         }
     }
@@ -58,10 +60,14 @@ sealed interface TolkType {
         return other == Never
     }
 
-    data class ParameterType(
-        val psiElement: TolkTypeParameter
+    data class GenericType(
+        val psiElement: TolkElement
     ) : TolkType {
-        val name: String get() = psiElement.name.toString()
+        val name: String get() = when(psiElement) {
+            is TolkTypeParameter -> psiElement.name.toString()
+            is TolkReferenceTypeExpression -> psiElement.identifier.text
+            else -> psiElement.text
+        }
 
         override fun toString(): String = name
 
@@ -70,10 +76,6 @@ sealed interface TolkType {
         override fun join(other: TolkType): TolkType {
             if (this == other) return this
             return TolkUnionType.create(this, other)
-        }
-
-        override fun visit(visitor: TolkTypeVisitor) {
-            visitor.visitTypeParameter(this)
         }
     }
 
@@ -415,5 +417,5 @@ data class TolkVarInt16Type(
 }
 
 interface TolkTypeVisitor {
-    fun visitTypeParameter(value: TolkType.ParameterType)
+    fun visitTypeParameter(value: TolkType.GenericType)
 }

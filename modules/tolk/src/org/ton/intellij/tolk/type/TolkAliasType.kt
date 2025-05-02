@@ -1,7 +1,7 @@
 package org.ton.intellij.tolk.type
 
+import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkTypeDef
-import org.ton.intellij.tolk.psi.TolkTypeParameter
 
 class TolkAliasType(
     val psi: TolkTypeDef,
@@ -11,7 +11,7 @@ class TolkAliasType(
         return psi.name?.let { appendable.append(it) } ?: underlyingType.renderAppendable(appendable)
     }
 
-    override fun substitute(substitution: Map<TolkTypeParameter, TolkType>): TolkType {
+    override fun substitute(substitution: Map<TolkElement, TolkType>): TolkType {
         return this
     }
 

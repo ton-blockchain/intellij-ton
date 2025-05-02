@@ -1,6 +1,6 @@
 package org.ton.intellij.tolk.type
 
-import org.ton.intellij.tolk.psi.TolkTypeParameter
+import org.ton.intellij.tolk.psi.TolkElement
 
 class TolkUnionType private constructor(
     val variants: Set<TolkType>,
@@ -67,7 +67,7 @@ class TolkUnionType private constructor(
         variants.forEach { it.visit(visitor) }
     }
 
-    override fun substitute(substitution: Map<TolkTypeParameter, TolkType>): TolkType {
+    override fun substitute(substitution: Map<TolkElement, TolkType>): TolkType {
         val newElements = LinkedHashSet<TolkType>()
         variants.forEach {
             newElements.add(it.substitute(substitution))

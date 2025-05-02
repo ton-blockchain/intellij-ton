@@ -116,6 +116,17 @@ open class TolkPsiRenderer {
             is TolkReferenceTypeExpression -> {
                 appendable.append(element.identifier.text.removeSurrounding("`"))
             }
+            is TolkGenericTypeExpression -> {
+                appendTypeExpression(appendable, element.typeExpression)
+                appendable.append("<")
+                var separator = ""
+                element.typeArgumentList.typeExpressionList.forEach { param ->
+                    appendable.append(separator)
+                    appendTypeExpression(appendable, param)
+                    separator = ", "
+                }
+                appendable.append(">")
+            }
         }
     }
 }

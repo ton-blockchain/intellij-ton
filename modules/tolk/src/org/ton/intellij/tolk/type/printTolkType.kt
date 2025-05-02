@@ -6,7 +6,7 @@ import org.ton.intellij.util.printPsi
 
 fun PresentationTreeBuilder.printTolkType(type: TolkType) {
     when (type) {
-        is TolkType.ParameterType -> {
+        is TolkType.GenericType -> {
             printPsi(type.psiElement, type.name)
         }
         is TolkAliasType -> {

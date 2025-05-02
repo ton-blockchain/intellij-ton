@@ -41,11 +41,16 @@ class TolkAnnotator : Annotator {
                 if (element.isPrimitive) {
                     return highlight(element, holder, TolkColor.PRIMITIVE.textAttributesKey)
                 }
-                val resolved = element.reference?.resolve()
-                val color = when {
-                    resolved is TolkTypeParameter -> TolkColor.TYPE_PARAMETER
-                    resolved is TolkParameter && resolved.name == "self" -> TolkColor.SELF_PARAMETER
-                    else -> TolkColor.IDENTIFIER
+                val color = if (element.type is TolkType.GenericType) {
+                    TolkColor.TYPE_PARAMETER
+                } else {
+                    val resolved = element.reference?.resolve()
+                    when {
+                        resolved is TolkTypeParameter -> TolkColor.TYPE_PARAMETER
+                        resolved is TolkReferenceTypeExpression && resolved.type is TolkType.GenericType -> TolkColor.TYPE_PARAMETER
+                        resolved is TolkParameter && resolved.name == "self" -> TolkColor.SELF_PARAMETER
+                        else -> TolkColor.IDENTIFIER
+                    }
                 }
                 highlight(element.identifier, holder, color.textAttributesKey)
             }
@@ -54,14 +59,22 @@ class TolkAnnotator : Annotator {
                 val identifier = element.identifier
                 val name = identifier.text
                 if (TolkType.byName(name) != null) {
-                   return highlight(identifier, holder, TolkColor.PRIMITIVE.textAttributesKey)
+                    return highlight(identifier, holder, TolkColor.PRIMITIVE.textAttributesKey)
                 }
                 val resolved = element.reference?.resolve()
-                val color = when(resolved) {
+                val color = when (resolved) {
                     is TolkTypeParameter -> TolkColor.TYPE_PARAMETER
                     is TolkParameter -> if (resolved.name == "self") TolkColor.SELF_PARAMETER else null
                     is TolkConstVar -> TolkColor.CONSTANT
                     is TolkGlobalVar -> TolkColor.GLOBAL_VARIABLE
+                    is TolkReferenceTypeExpression -> {
+                        if (resolved.type is TolkType.GenericType) {
+                            TolkColor.TYPE_PARAMETER
+                        } else {
+                            null
+                        }
+                    }
+
                     else -> null
                 } ?: TolkColor.IDENTIFIER
                 highlight(identifier, holder, color.textAttributesKey)
@@ -199,10 +212,12 @@ class TolkAnnotator : Annotator {
                     TolkColor.PARAMETER
                 }
             }
+
             is TolkReferenceExpression -> {
                 if (resolved.reference != null) return
                 TolkColor.LOCAL_VARIABLE
             }
+
             is TolkVar, is TolkCatchParameter -> TolkColor.LOCAL_VARIABLE
             is TolkStructField -> TolkColor.FIELD
             else -> return

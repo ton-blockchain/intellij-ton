@@ -5,6 +5,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 import com.intellij.refactoring.suggested.startOffset
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.impl.hasSelf
 import org.ton.intellij.util.parentOfType
 
 class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<String>> {
@@ -27,7 +28,7 @@ class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<Str
         val parameterList = function.parameterList?.parameterList ?: return null
         val parameterIterator = parameterList.iterator()
 
-        val parameterInfos: ArrayList<String> = if (callee is TolkDotExpression && parameterIterator.hasNext()) {
+        val parameterInfos: ArrayList<String> = if (callee is TolkDotExpression && function.hasSelf && parameterIterator.hasNext()) {
             parameterIterator.next()
             ArrayList(parameterList.size - 1)
         } else {

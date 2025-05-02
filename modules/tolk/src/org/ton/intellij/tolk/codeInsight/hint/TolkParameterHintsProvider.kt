@@ -5,6 +5,7 @@ import com.intellij.codeInsight.hints.declarative.InlineInlayPosition
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.impl.hasSelf
 
 class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
     override fun collectFromElement(
@@ -25,7 +26,7 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
         } ?: return
 
         val parameterIterator =  function.parameterList?.parameterList?.iterator() ?: return
-        if (callee is TolkDotExpression && parameterIterator.hasNext()) {
+        if (callee is TolkDotExpression && function.hasSelf && parameterIterator.hasNext()) {
             parameterIterator.next()
         }
         val argumentList = element.argumentList.iterator()

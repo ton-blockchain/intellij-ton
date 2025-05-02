@@ -29,10 +29,10 @@ class TolkTypeReference(
                     }
                 }
 
-                val typeParameterList = owner.typeParameterList
-                typeParameterList?.typeParameterList?.forEach { typeParameter ->
-                    if (typeParameter.name == typeParameterName) {
-                        add(PsiElementResolveResult(typeParameter))
+                if (myElement.parentOfType<TolkFunctionReceiver>() == null) {
+                    val genericType = owner.resolveGenericType(typeParameterName)
+                    if (genericType != null && genericType.psiElement != element) {
+                        add(PsiElementResolveResult(genericType.psiElement))
                     }
                 }
             }

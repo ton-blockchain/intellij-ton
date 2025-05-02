@@ -1,6 +1,6 @@
 package org.ton.intellij.tolk.type
 
-import org.ton.intellij.tolk.psi.TolkTypeParameter
+import org.ton.intellij.tolk.psi.TolkElement
 
 data class TolkFunctionType(
     val inputType: TolkType,
@@ -52,7 +52,7 @@ data class TolkFunctionType(
         return TolkType.Never
     }
 
-    override fun substitute(substitution: Map<TolkTypeParameter, TolkType>): TolkFunctionType {
+    override fun substitute(substitution: Map<TolkElement, TolkType>): TolkFunctionType {
         val inputType = inputType.substitute(substitution)
         val returnType = returnType.substitute(substitution)
         return TolkFunctionType(inputType, returnType)

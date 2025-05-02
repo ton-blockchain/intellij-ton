@@ -2,6 +2,8 @@ package org.ton.intellij.tolk.psi.impl
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
+import com.intellij.psi.util.parentOfType
+import org.ton.intellij.tolk.psi.TolkFunctionReceiver
 import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
 import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.psi.reference.TolkTypeReference
@@ -21,6 +23,9 @@ abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiEl
             val resolved = reference?.resolve()
             if (resolved is TolkTypedElement) {
                 return resolved.type
+            }
+            if (parentOfType<TolkFunctionReceiver>() != null) {
+                return TolkType.GenericType(this)
             }
             return null
         }

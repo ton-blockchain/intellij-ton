@@ -7,16 +7,15 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
-import org.jetbrains.kotlin.idea.completion.handlers.indexOfSkippingSpace
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.ide.completion.TolkCompletionContributor
 import org.ton.intellij.tolk.presentation.TolkPsiRenderer
 import org.ton.intellij.tolk.presentation.renderParameterList
 import org.ton.intellij.tolk.presentation.renderTypeExpression
+import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkParameter
-import org.ton.intellij.tolk.psi.TolkTypeParameter
 import org.ton.intellij.tolk.stub.TolkFunctionStub
 import org.ton.intellij.tolk.type.*
 import org.ton.intellij.util.greenStub
@@ -163,7 +162,7 @@ fun TolkFunction.resolveGenerics(
     typeArguments: List<TolkType>? = null
 ): TolkFunctionType {
     val thisType = type as? TolkFunctionType ?: TolkFunctionType(TolkType.Unknown, TolkType.Unknown)
-    val mapping = HashMap<TolkTypeParameter, TolkType>()
+    val mapping = HashMap<TolkElement, TolkType>()
     typeParameterList?.typeParameterList?.forEachIndexed { index, typeParameter ->
         val typeArgument = typeArguments?.getOrNull(index)
         if (typeArgument != null) {
@@ -200,7 +199,7 @@ fun TolkFunction.resolveGenerics(
                 }
             }
 
-            paramType is TolkType.ParameterType -> {
+            paramType is TolkType.GenericType -> {
                 if (!mapping.containsKey(paramType.psiElement)) {
                     mapping[paramType.psiElement] = argType
                 }
@@ -210,4 +209,14 @@ fun TolkFunction.resolveGenerics(
 
     resolve(thisType, callableType)
     return thisType.substitute(mapping)
+}
+
+private fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
+    for (i in startIndex until this.length) {
+        val currentChar = this[i]
+        if (c == currentChar) return i
+        if (currentChar != ' ' && currentChar != '\t') return null
+    }
+
+    return null
 }

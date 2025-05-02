@@ -1065,7 +1065,7 @@ class TolkInferenceWalker(
         val type = when (symbol) {
             is TolkFunction -> {
                 val symbolType = symbol.type ?: TolkFunctionType(TolkType.Unknown, TolkType.Unknown)
-                val substituteMap = HashMap<TolkTypeParameter, TolkType>()
+                val substituteMap = HashMap<TolkElement, TolkType>()
                 val typeArgumentList = element.typeArgumentList?.typeExpressionList ?: emptyList()
                 val typeParameterList = symbol.typeParameterList?.typeParameterList ?: emptyList()
                 typeParameterList.zip(typeArgumentList).forEach { (typeParameter, typeArgument) ->

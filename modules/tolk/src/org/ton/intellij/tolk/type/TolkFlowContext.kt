@@ -1,9 +1,11 @@
 package org.ton.intellij.tolk.type
 
+import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkSymbolElement
 
 class TolkFlowContext(
     val globalSymbols: MutableMap<String, TolkSymbolElement> = HashMap(),
+    val functions: MutableMap<String, MutableList<TolkFunction>> = HashMap(),
     val symbolTypes: MutableMap<TolkSymbolElement, TolkType> = LinkedHashMap(),
     val symbols: MutableMap<String, TolkSymbolElement> = LinkedHashMap(),
     val sinkExpressions: MutableMap<TolkSinkExpression, TolkType> = LinkedHashMap(),
@@ -11,6 +13,7 @@ class TolkFlowContext(
 ) {
     constructor(other: TolkFlowContext) : this(
         other.globalSymbols,
+        HashMap(other.functions),
         LinkedHashMap(other.symbolTypes),
         LinkedHashMap(other.symbols),
         LinkedHashMap(other.sinkExpressions),
@@ -25,6 +28,61 @@ class TolkFlowContext(
 
     fun getType(sinkExpression: TolkSinkExpression): TolkType? {
         return sinkExpressions[sinkExpression]
+    }
+
+    fun getFunctionCandidates(calledReceiver: TolkType?, name: String): List<TolkFunction> {
+        val namedFunctions = functions[name] ?: return emptyList()
+        namedFunctions.singleOrNull()?.let {
+            return namedFunctions
+        }
+
+        if (calledReceiver == null) {
+            return namedFunctions.filter { it.functionReceiver == null }
+        }
+
+        val candidates = ArrayList<TolkFunction>()
+        // step1: find all methods where a receiver equals to provided, e.g. `MInt.copy`
+        for (function in namedFunctions) {
+            val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
+            if (!functionReceiver.hasGenerics() && functionReceiver == calledReceiver) {
+                candidates.add(function)
+            }
+        }
+        if (candidates.isNotEmpty()) {
+            return candidates
+        }
+
+        // step2: find all methods where a receiver can accept provided, e.g. `int8.copy` / `int?.copy` / `(int|slice).copy`
+        for (function in namedFunctions) {
+            val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
+            if (!functionReceiver.hasGenerics() && functionReceiver.canRhsBeAssigned(calledReceiver)) {
+                candidates.add(function)
+            }
+        }
+
+        if (candidates.isNotEmpty()) {
+            return candidates
+        }
+
+        // step 3: try to match generic receivers, e.g. `Container<T>.copy` / `(T?|slice).copy` but NOT `T.copy`
+        for (function in namedFunctions) {
+            val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
+            if (functionReceiver.hasGenerics() && functionReceiver !is TolkType.GenericType) {
+//                candidates.add(function)
+            }
+        }
+        if (candidates.isNotEmpty()) {
+            return candidates
+        }
+
+        // step 4: try to match `T.copy`
+        for (function in namedFunctions) {
+            val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
+            if (functionReceiver is TolkType.GenericType) {
+                candidates.add(function)
+            }
+        }
+        return candidates
     }
 
     fun getSymbol(
@@ -102,6 +160,7 @@ class TolkFlowContext(
 
         return TolkFlowContext(
             globalSymbols,
+            functions,
             joinedSymbolTypes,
             joinedSymbols,
             joinedSinkExpressionsMutableMap,

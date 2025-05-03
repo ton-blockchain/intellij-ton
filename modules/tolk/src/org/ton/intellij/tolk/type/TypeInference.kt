@@ -183,8 +183,14 @@ class TolkInferenceWalker(
     fun inferFile(element: TolkFile, flow: TolkFlowContext, useIncludes: Boolean = true): TolkFlowContext {
         val project = element.project
         var nextFlow = flow
-        element.functions.forEach { function ->
-            nextFlow.globalSymbols[function.name?.removeSurrounding("`") ?: return@forEach] = function
+        val functions = element.functions
+        functions.forEach { function ->
+            val name = function.name ?: return@forEach
+            nextFlow.globalSymbols[name] = function // todo: add only without generics
+            val namedFunctions = nextFlow.functions.getOrPut(name) {
+                ArrayList()
+            }
+            namedFunctions.add(function)
         }
         element.globalVars.forEach { globalVar ->
             nextFlow.globalSymbols[globalVar.name?.removeSurrounding("`") ?: return@forEach] = globalVar
@@ -1034,22 +1040,22 @@ class TolkInferenceWalker(
         element: TolkReferenceExpression,
         flow: TolkFlowContext,
         usedAsCondition: Boolean,
-        leftType: TolkType? = null,
+        receiverType: TolkType? = null,
     ): TolkExpressionFlowContext {
         val nextFlow = TolkExpressionFlowContext(flow, usedAsCondition)
         val name = element.name ?: return nextFlow
 
-        var symbol: TolkSymbolElement? = null
-        if (leftType != null) {
-            val leftTypeUnwrapped = leftType.unwrapTypeAlias()
-            if (leftTypeUnwrapped is TolkStructType) {
-                symbol = leftTypeUnwrapped.psi.structBody?.structFieldList?.find { it.name == name }
+        val functionCandidates = flow.getFunctionCandidates(receiverType, name)
+        if (functionCandidates.isNotEmpty()) {
+            val singleCandidate = functionCandidates.singleOrNull()
+            if (singleCandidate != null) {
+                ctx.setType(element, singleCandidate.type)
             }
+            ctx.setResolvedRefs(element, functionCandidates.map { PsiElementResolveResult(it) })
+            return nextFlow
         }
 
-        if (symbol == null) {
-            symbol = flow.getSymbol(name)
-        }
+        var symbol: TolkSymbolElement? = flow.getSymbol(name)
         if (symbol == null) {
             symbol = TolkBuiltins[project].getFunction(name)
         }

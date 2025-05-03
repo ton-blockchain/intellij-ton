@@ -28,7 +28,7 @@ class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<Str
         val parameterList = function.parameterList?.parameterList ?: return null
         val parameterIterator = parameterList.iterator()
 
-        val parameterInfos: ArrayList<String> = if (callee is TolkDotExpression && function.hasSelf && parameterIterator.hasNext()) {
+        val parameterInfos: ArrayList<String> = if (callee is TolkDotExpression && !function.hasSelf && parameterIterator.hasNext()) {
             parameterIterator.next()
             ArrayList(parameterList.size - 1)
         } else {
@@ -40,7 +40,7 @@ class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<Str
             val parameterInfo = buildString {
                 append(parameter.name)
                 append(": ")
-                append(parameter.typeExpression?.text)
+                append(parameter.typeExpression.text)
             }
             parameterInfos.add(parameterInfo)
         }

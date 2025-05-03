@@ -715,7 +715,7 @@ private Parameter_with_recover ::= !(')'|'{'|';') Parameter (','|&')') {
 }
 private Parameter_recover ::= !('('|'['|'mutate'|IDENTIFIER|'self'|')'|'{'|';')
 
-SelfParameter ::= 'mutate'? 'self' {
+SelfParameter ::= 'mutate'? SelfTypeExpression {
     stubClass="org.ton.intellij.tolk.stub.TolkSelfParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
@@ -759,6 +759,7 @@ private SimpleTypeExpression ::=
 
 SelfTypeExpression ::= 'self' {
     extends=TypeExpression
+    mixin="org.ton.intellij.tolk.psi.impl.TolkSelfTypeExpressionMixin"
 }
 
 UnionTypeExpression ::= unionType1 | unionType2 {

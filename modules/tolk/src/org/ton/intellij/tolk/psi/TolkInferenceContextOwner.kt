@@ -12,12 +12,12 @@ import kotlin.time.measureTimedValue
 
 interface TolkInferenceContextOwner : TolkElement
 
-private val FUNC_INFERENCE_KEY: Key<CachedValue<TolkInferenceResult>> = Key.create("FUNC_INFERENCE_KEY")
+private val TOLK_INFERENCE_KEY: Key<CachedValue<TolkInferenceResult>> = Key.create("TOLK_INFERENCE_KEY")
 
 @OptIn(ExperimentalTime::class)
 val TolkInferenceContextOwner.selfInferenceResult: TolkInferenceResult
     get() {
-        return CachedValuesManager.getCachedValue(this, FUNC_INFERENCE_KEY) {
+        return CachedValuesManager.getCachedValue(this, TOLK_INFERENCE_KEY) {
             val (inferred, _) = measureTimedValue {
                 inferTypesIn(this)
             }

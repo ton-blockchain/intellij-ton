@@ -9,7 +9,7 @@ import org.ton.intellij.tolk.psi.TolkPsiFactory
 
 class TolkMatchArmReference(
     element: TolkMatchPatternReference
-) : PsiPolyVariantReferenceBase<TolkMatchPatternReference>(element, TextRange(0, element.textLength), false) {
+) : PsiPolyVariantReferenceBase<TolkMatchPatternReference>(element) {
     override fun multiResolve(incompleteCode: Boolean): Array<out ResolveResult?> {
         val symbolResult = TolkSymbolReference(element).multiResolve(incompleteCode)
         if (symbolResult.isNotEmpty()) return symbolResult
@@ -18,6 +18,11 @@ class TolkMatchArmReference(
         if (typeResult.isNotEmpty()) return typeResult
 
         return ResolveResult.EMPTY_ARRAY
+    }
+
+    override fun calculateDefaultRangeInElement(): TextRange {
+        val identifier = element.identifier
+        return TextRange(identifier.startOffsetInParent, identifier.textLength)
     }
 
     override fun handleElementRename(newElementName: String): PsiElement? {

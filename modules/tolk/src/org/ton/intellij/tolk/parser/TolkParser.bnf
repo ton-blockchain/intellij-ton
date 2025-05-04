@@ -609,7 +609,7 @@ private MatchExpressionArm ::= Expression (&'}' | ',') {
 
 MatchPattern ::= MatchPatternReference | TypeExpression | Expression | 'else'
 
-MatchPatternReference ::= IDENTIFIER {
+MatchPatternReference ::= IDENTIFIER TypeArgumentList? {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkMatchPatternReferenceMixin"
     implements = [
         "org.ton.intellij.tolk.psi.TolkTypedElement"

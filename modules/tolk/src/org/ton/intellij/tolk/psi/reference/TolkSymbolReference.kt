@@ -10,8 +10,13 @@ import org.ton.intellij.util.parentOfType
 
 class TolkSymbolReference(
     element: TolkElement,
-) : PsiReferenceBase.Poly<TolkElement>(element, TextRange(0, element.textLength), false) {
+) : PsiReferenceBase.Poly<TolkElement>(element) {
     val identifier: PsiElement get() = element.node.findChildByType(TolkElementTypes.IDENTIFIER)!!.psi
+
+    override fun calculateDefaultRangeInElement(): TextRange? {
+        val identifier = identifier
+        return TextRange(identifier.startOffsetInParent, identifier.textLength)
+    }
 
     private val resolver = ResolveCache.PolyVariantResolver<TolkSymbolReference> { t, incompleteCode ->
         if (!myElement.isValid) return@PolyVariantResolver ResolveResult.EMPTY_ARRAY

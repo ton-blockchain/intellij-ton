@@ -286,13 +286,17 @@ FunctionBody ::= ';' | AsmDefinition | BlockStatement | ('builtin' ';')
 TypeParameterList ::= '<' << comma_separated_list TypeParameter >> '>' {
     pin=1
 }
-TypeParameter ::= IDENTIFIER {
+TypeParameter ::= IDENTIFIER DefaultTypeParameter? {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkTypeParameterMixin"
     implements=[
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkTypeParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+}
+
+DefaultTypeParameter ::= '=' TypeExpression {
+    pin=1
 }
 
 AsmDefinition ::= 'asm' AsmParameters? AsmBody ';' {pin=1}
@@ -731,17 +735,11 @@ TypeExpression ::=
     FunTypeExpression
     | UnionTypeExpression
     | NullableTypeExpression
-    | GenericTypeExpression
     | SimpleTypeExpression
 {
     implements=[
         "org.ton.intellij.tolk.psi.TolkTypedElement"
     ]
-}
-
-GenericTypeExpression ::= SimpleTypeExpression TypeArgumentList {
-   extends=TypeExpression
-   mixin="org.ton.intellij.tolk.psi.impl.TolkGenericTypeExpressionMixin"
 }
 
 NullableTypeExpression ::= SimpleTypeExpression '?' {
@@ -816,7 +814,7 @@ VoidTypeExpression ::= 'void' | ('(' ')') {
     mixin="org.ton.intellij.tolk.psi.impl.TolkVoidTypeExpressionMixin"
 }
 
-ReferenceTypeExpression ::= IDENTIFIER {
+ReferenceTypeExpression ::= IDENTIFIER TypeArgumentList? {
     mixin="org.ton.intellij.tolk.psi.impl.TolkReferenceTypeExpressionMixin"
     extends=TypeExpression
 }

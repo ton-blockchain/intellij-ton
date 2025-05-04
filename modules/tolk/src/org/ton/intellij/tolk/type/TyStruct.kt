@@ -2,6 +2,7 @@ package org.ton.intellij.tolk.type
 
 import com.intellij.codeInsight.completion.CompletionUtil
 import org.ton.intellij.tolk.psi.TolkStruct
+import org.ton.intellij.tolk.psi.TolkTypeExpression
 
 data class TyStruct private constructor(
     val psi: TolkStruct,
@@ -31,10 +32,10 @@ data class TyStruct private constructor(
     }
 
     companion object {
-        fun create(struct: TolkStruct): TyStruct {
-            val typeParameters = mutableListOf<TyTypeParameter>()
-            struct.typeParameterList?.typeParameterList?.forEach { generic ->
-                typeParameters += TyTypeParameter.create(generic)
+        fun create(struct: TolkStruct, args: List<TolkTypeExpression>? = null): TyStruct {
+            val typeParameters = mutableListOf<TolkTy>()
+            struct.typeParameterList?.typeParameterList?.forEachIndexed { index, param ->
+                typeParameters += args?.getOrNull(index)?.type ?: TyTypeParameter.create(param)
             }
             return TyStruct(CompletionUtil.getOriginalOrSelf(struct), typeParameters)
         }

@@ -5,9 +5,11 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.psi.TolkFunctionReceiver
 import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
+import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.psi.reference.TolkTypeReference
 import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.TyStruct
 import org.ton.intellij.tolk.type.TyTypeParameter
 
 abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node),
@@ -22,6 +24,9 @@ abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiEl
             if (primitiveType != null) return primitiveType
 
             val resolved = reference?.resolve()
+            if (resolved is TolkStruct) {
+                return TyStruct.create(resolved, typeArgumentList?.typeExpressionList)
+            }
             if (resolved is TolkTypedElement) {
                 return resolved.type
             }

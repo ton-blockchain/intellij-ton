@@ -37,15 +37,14 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
     val parameters: List<TolkParameter>
         get() = parameterList?.parameterList ?: emptyList()
 
-    override val type: TolkFunctionTy?
+    override val type: TolkFunctionTy
         get() = CachedValuesManager.getCachedValue(this) {
             val parameters = parameters.map { parameter ->
-                parameter.typeExpression?.type ?: return@getCachedValue null.also {
-//                    println("[${containingFile.name}] Failed to get type for $parameter - `${parameter.text}`")
-                }
+                parameter.typeExpression.type ?: TolkTy.Unknown
             }
-            val returnType = actualReturnType ?: return@getCachedValue null
-            val type = TolkFunctionTy(TolkTy.tensor(parameters), returnType)
+            val parameterType = TolkTy.tensor(parameters)
+            val returnType = actualReturnType ?: TolkTy.Unknown
+            val type = TolkFunctionTy(parameterType, actualReturnType ?: returnType)
 
             CachedValueProvider.Result.create(type, this)
         }
@@ -66,7 +65,9 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
         }
         val inference = try {
             inference
-        } catch (_: CyclicReferenceException) { null } ?: return null
+        } catch (_: CyclicReferenceException) {
+            null
+        } ?: return null
         val result = if (inference.returnStatements.isNotEmpty()) {
             inference.returnStatements.asSequence().map {
                 it.expression?.type
@@ -79,6 +80,8 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
         return result
     }
 }
+
+val TolkFunction.declaredType: TolkFunctionTy get() = (this as TolkFunctionMixin).type
 
 val TolkFunction.isMutable: Boolean
     get() = greenStub?.isMutable ?: (node.findChildByType(TolkElementTypes.TILDE) != null)
@@ -193,13 +196,13 @@ fun TolkFunction.resolveGenerics(
                 paramType.elements.zip(argType.elements).forEach { (a, b) -> resolve(a, b) }
             }
 
-            paramType is TolkUnionTy && argType is TolkUnionTy -> {
+            paramType is TyUnion && argType is TyUnion -> {
                 paramType.variants.zip(argType.variants).forEach { (a, b) ->
                     resolve(a, b)
                 }
             }
 
-            paramType is TyTypeParameter  -> {
+            paramType is TyTypeParameter -> {
                 val psi = paramType.parameter.psi
                 if (!mapping.containsKey(psi)) {
                     mapping[psi] = argType

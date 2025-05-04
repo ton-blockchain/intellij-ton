@@ -26,7 +26,7 @@ data class TolkFunctionTy(
         if (other is TolkFunctionTy) {
             return TolkFunctionTy(inputType.join(other.inputType), returnType.join(other.returnType))
         }
-        return TolkUnionTy.create(this, other)
+        return TyUnion.create(this, other)
     }
 
     override fun meet(other: TolkTy): TolkTy {

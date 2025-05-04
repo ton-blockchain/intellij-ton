@@ -40,7 +40,7 @@ private class TypeRenderer(
             is TolkTensorTy -> ty.elements.joinToString(", ", "(", ")", transform = render)
             is TolkTypedTupleTy -> ty.elements.joinToString(", ", "[", "]", transform = render)
             is TolkFunctionTy -> "${render(ty.inputType)} -> ${render(ty.returnType)}"
-            is TolkUnionTy -> buildString {
+            is TyUnion -> buildString {
                 val orNull = ty.orNull
                 if (orNull != null) {
                     render(orNull)

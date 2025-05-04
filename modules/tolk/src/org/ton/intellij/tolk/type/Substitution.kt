@@ -19,6 +19,52 @@ open class Substitution(
     }
 
     override fun hashCode(): Int = typeSubst.hashCode()
+
+    companion object {
+        fun instantiate(paramType: TolkTy, argType: TolkTy): Substitution {
+            val substitution = mutableMapOf<TyTypeParameter, TolkTy>()
+
+            fun deduce(paramType: TolkTy, argType: TolkTy) {
+                when {
+                    paramType is TyStruct && argType is TyStruct -> {
+                        paramType.typeArguments.zip(argType.typeArguments).forEach { (a, b) ->
+                            deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
+                        }
+                    }
+
+                    paramType is TolkFunctionTy && argType is TolkFunctionTy -> {
+                        deduce(paramType.inputType.unwrapTypeAlias(), argType.inputType.unwrapTypeAlias())
+                        deduce(paramType.returnType.unwrapTypeAlias(), argType.returnType.unwrapTypeAlias())
+                    }
+
+                    paramType is TolkTensorTy && argType is TolkTensorTy -> {
+                        paramType.elements.zip(argType.elements).forEach { (a, b) -> deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
+                    }
+
+                    paramType is TolkTypedTupleTy && argType is TolkTypedTupleTy -> {
+                        paramType.elements.zip(argType.elements).forEach { (a, b) -> deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
+                    }
+
+                    paramType is TyUnion && argType is TyUnion -> {
+                        paramType.variants.zip(argType.variants).forEach { (a, b) ->
+                            deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
+                        }
+                    }
+
+                    paramType is TyTypeParameter -> {
+                        if (!substitution.containsKey(paramType)) {
+                            substitution[paramType] = argType
+                        }
+                    }
+
+                    else -> {}
+                }
+            }
+
+            deduce(paramType.unwrapTypeAlias(), argType.unwrapTypeAlias())
+            return Substitution(substitution)
+        }
+    }
 }
 
 object EmptySubstitution : Substitution()

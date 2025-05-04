@@ -21,7 +21,7 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
         return super.getUseScope()
     }
 
-    override val type: TyStruct get() = TolkTy.struct(this)
+    override val type: TyStruct get() = declaredType
 
     override fun getBaseIcon() = TolkIcons.STRUCTURE
 
@@ -37,6 +37,8 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
         return thisFile == anotherFile
     }
 }
+
+val TolkStruct.declaredType: TyStruct get() = TolkTy.struct(this)
 
 fun TolkStruct.findField(name: String): TolkStructField? {
     // todo: optimize by stub

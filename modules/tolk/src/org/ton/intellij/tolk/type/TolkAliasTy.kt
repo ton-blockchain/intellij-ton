@@ -23,7 +23,7 @@ class TolkAliasTy(
 
     override fun join(other: TolkTy): TolkTy {
         if (this == other) return this
-        return TolkUnionTy.create(this, other)
+        return TyUnion.create(this, other)
     }
 
     override fun toString(): String = "TolkAliasType($underlyingType)"

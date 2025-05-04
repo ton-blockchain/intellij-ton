@@ -7,11 +7,11 @@ import org.ton.intellij.tolk.type.range.TvmIntRangeSet
 
 interface TolkTy : TypeFoldable<TolkTy> {
     fun nullable(): TolkTy {
-        return TolkUnionTy.create(this, Null)
+        return TyUnion.create(this, Null)
     }
 
     fun isNullable(): Boolean {
-        return this is TolkUnionTy && variants.contains(Null)
+        return this is TyUnion && variants.contains(Null)
     }
 
     open fun removeNullability(): TolkTy = this
@@ -143,10 +143,10 @@ interface TolkTy : TypeFoldable<TolkTy> {
         fun bool(value: Boolean): TolkTy = if (value) TRUE else FALSE
 
         fun union(vararg elements: TolkTy): TolkTy {
-            return TolkUnionTy.create(elements.toList())
+            return TyUnion.create(elements.toList())
         }
 
-        fun union(elements: Iterable<TolkTy>): TolkTy = TolkUnionTy.create(elements.toList())
+        fun union(elements: Iterable<TolkTy>): TolkTy = TyUnion.create(elements.toList())
 
         fun tensor(elements: List<TolkTy>): TolkTy = TolkTensorTy.create(elements)
 
@@ -233,7 +233,7 @@ object TolkBuilderTy : TolkPrimitiveTy {
 
     override fun join(other: TolkTy): TolkTy {
         if (other is TolkBuilderTy) return this
-        return TolkUnionTy.create(this, other)
+        return TyUnion.create(this, other)
     }
 
     override fun meet(other: TolkTy): TolkTy {
@@ -299,7 +299,7 @@ object TolkAddressTy : TolkPrimitiveTy {
 
     override fun join(other: TolkTy): TolkTy {
         if (other is TolkAddressTy) return this
-        return TolkUnionTy.create(this, other)
+        return TyUnion.create(this, other)
     }
 
     override fun meet(other: TolkTy): TolkTy {
@@ -350,7 +350,7 @@ data class TolkBitsNTy(
 
     override fun join(other: TolkTy): TolkTy {
         if (this == other) return this
-        return TolkUnionTy.create(this, other)
+        return TyUnion.create(this, other)
     }
 }
 
@@ -363,7 +363,7 @@ data class TolkBytesNTy(
 
     override fun join(other: TolkTy): TolkTy {
         if (this == other) return this
-        return TolkUnionTy.create(this, other)
+        return TyUnion.create(this, other)
     }
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {

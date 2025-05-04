@@ -42,7 +42,7 @@ class TolkTypedTupleTy private constructor(
             }
             return TolkTypedTupleTy(joined, hasGenerics)
         }
-        return TolkUnionTy.create(this, other)
+        return TyUnion.create(this, other)
     }
 
     override fun meet(other: TolkTy): TolkTy {

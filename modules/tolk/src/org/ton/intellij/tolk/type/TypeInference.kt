@@ -1264,11 +1264,6 @@ class TolkInferenceWalker(
 
         val argumentTypes = ArrayList<TolkTy>(arguments.size + deltaParams)
 
-        if (callee is TolkDotExpression) {
-            val firstArgType = ctx.getType(callee.left) ?: TolkTy.Unknown
-            argumentTypes.add(firstArgType)
-        }
-
         arguments.forEachIndexed { index, argument ->
             val argExpr = argument.expression
             nextFlow = inferExpression(argExpr, nextFlow, false).outFlow

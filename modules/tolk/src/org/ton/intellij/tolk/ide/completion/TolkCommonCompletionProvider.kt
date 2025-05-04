@@ -9,23 +9,30 @@ import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.patterns.ElementPattern
 import com.intellij.psi.PsiElement
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.elementType
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.impl.hasSelf
 import org.ton.intellij.tolk.psi.impl.parameters
+import org.ton.intellij.tolk.psi.impl.toLookupElement
 import org.ton.intellij.tolk.sdk.TolkSdkManager
+import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 import org.ton.intellij.tolk.type.TolkFunctionTy
-import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.psiElement
 
 object TolkCommonCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
         psiElement<PsiElement>()
-            .withParent(psiElement<TolkReferenceExpression>()
-                .andNot(psiElement<TolkReferenceExpression>()
-                    .withParent(TolkDotExpression::class.java)))
+            .withParent(
+                psiElement<TolkReferenceExpression>()
+                    .andNot(
+                        psiElement<TolkReferenceExpression>()
+                            .withParent(TolkDotExpression::class.java)
+                    )
+            )
 
 
     override fun addCompletions(
@@ -38,8 +45,10 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         val element = position.parent as TolkReferenceExpression
         val file = element.containingFile.originalFile as? TolkFile ?: return
 
+        var currentFunction: TolkFunction? = null
         PsiTreeUtil.treeWalkUp(element, null) { scope, lastParent ->
             if (scope is TolkFunction) {
+                currentFunction = scope
                 scope.parameterList?.parameterList?.forEach {
                     result.addElement(
                         it.toLookupElementBuilder(TolkCompletionContext(element), true)
@@ -69,11 +78,13 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                                         varDefinition.toLookupElementBuilder(TolkCompletionContext(element), true)
                                     )
                                 }
+
                                 is TolkVarTuple -> {
                                     varDefinition.varDefinitionList.forEach {
                                         addVarDefinition(it)
                                     }
                                 }
+
                                 is TolkVarTensor -> {
                                     varDefinition.varDefinitionList.forEach {
                                         addVarDefinition(it)
@@ -90,51 +101,53 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             true
         }
 
-        val isDotCall = element.prevSibling?.elementType == TolkElementTypes.DOT
-        val ctx = TolkCompletionContext(element)
-        if (!isDotCall) {
-            val function = element.parentOfType<TolkFunction>()
-            if (function != null) {
-                object : TolkVisitor() {
-                    override fun visitParameter(o: TolkParameter) {
-                        result.addElement(
-                            o.toLookupElementBuilder(ctx, true)
-                        )
-                    }
-
-                    override fun visitVar(o: TolkVar) {
-                        result.addElement(
-                            o.toLookupElementBuilder(ctx, true)
-                        )
-                    }
-
-                    override fun visitCatchParameter(o: TolkCatchParameter) {
-                        result.addElement(
-                            o.toLookupElementBuilder(ctx, true)
-                        )
-                    }
-                }.visitElement(function)
+        StubIndex.getInstance().processAllKeys(TolkFunctionIndex.KEY, project) { key ->
+            StubIndex.getInstance().processElements(
+                TolkFunctionIndex.KEY,
+                key,
+                project,
+                GlobalSearchScope.allScope(project),
+                TolkFunction::class.java
+            ) { function ->
+                if (function.hasSelf) return@processElements true
+                result.addElement(function.toLookupElement())
+                true
             }
+            true
+        }
+
+        val ctx = TolkCompletionContext(element)
+        if (currentFunction != null) {
+            object : TolkVisitor() {
+                override fun visitParameter(o: TolkParameter) {
+                    result.addElement(
+                        o.toLookupElementBuilder(ctx, true)
+                    )
+                }
+
+                override fun visitVar(o: TolkVar) {
+                    result.addElement(
+                        o.toLookupElementBuilder(ctx, true)
+                    )
+                }
+
+                override fun visitCatchParameter(o: TolkCatchParameter) {
+                    result.addElement(
+                        o.toLookupElementBuilder(ctx, true)
+                    )
+                }
+            }.visitElement(currentFunction)
         }
         file.collectIncludedFiles(true).forEach { includedFile ->
-            if (!isDotCall) {
-                file.constVars.forEach {
-                    result.addElement(
-                        it.toLookupElementBuilder(ctx, true)
-                    )
-                }
-                file.globalVars.forEach {
-                    result.addElement(
-                        it.toLookupElementBuilder(ctx, true)
-                    )
-                }
-            }
-            file.functions.forEach {
-                if (!isDotCall || (it.parameterList?.parameterList?.size ?: 0) >= 1) {
+            file.constVars.forEach {
                 result.addElement(
                     it.toLookupElementBuilder(ctx, true)
                 )
-                    }
+            }
+            file.globalVars.forEach {
+                result.addElement(
+                    it.toLookupElementBuilder(ctx, true)
+                )
             }
         }
 
@@ -144,18 +157,11 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 val isCommon = it.name.endsWith("common.tolk")
                 val tolkFile = it.findPsiFile(project) as? TolkFile
                 if (tolkFile != null) {
-                    if (!isDotCall) {
-                        tolkFile.constVars.forEach {
-                            result.addElement(it.toLookupElementBuilder(ctx, isCommon))
-                        }
-                        tolkFile.globalVars.forEach {
-                            result.addElement(it.toLookupElementBuilder(ctx, isCommon))
-                        }
+                    tolkFile.constVars.forEach {
+                        result.addElement(it.toLookupElementBuilder(ctx, isCommon))
                     }
-                    tolkFile.functions.forEach {
-                        if (!isDotCall || (it.parameterList?.parameterList?.size ?: 0) >= 1) {
-                            result.addElement(it.toLookupElementBuilder(ctx, isCommon))
-                        }
+                    tolkFile.globalVars.forEach {
+                        result.addElement(it.toLookupElementBuilder(ctx, isCommon))
                     }
                 }
                 true
@@ -230,8 +236,9 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                             val offset = context.editor.caretModel.offset
                             val chars = context.document.charsSequence
 
-                            val absoluteOpeningBracketOffset =chars.indexOfSkippingSpace('(', offset)
-                            val absoluteCloseBracketOffset = absoluteOpeningBracketOffset?.let { chars.indexOfSkippingSpace(')', it + 1) }
+                            val absoluteOpeningBracketOffset = chars.indexOfSkippingSpace('(', offset)
+                            val absoluteCloseBracketOffset =
+                                absoluteOpeningBracketOffset?.let { chars.indexOfSkippingSpace(')', it + 1) }
 
                             if (absoluteOpeningBracketOffset == null) {
                                 val offset = if (this.parameters.isEmpty()) 2 else 1
@@ -318,7 +325,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
     }
 }
 
-private  fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
+private fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
     for (i in startIndex until this.length) {
         val currentChar = this[i]
         if (c == currentChar) return i

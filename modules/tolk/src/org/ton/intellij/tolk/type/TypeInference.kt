@@ -186,7 +186,6 @@ class TolkInferenceWalker(
         val functions = element.functions
         functions.forEach { function ->
             val name = function.name ?: return@forEach
-            nextFlow.globalSymbols[name] = function // todo: add only without generics
             val namedFunctions = nextFlow.functions.getOrPut(name) {
                 HashSet()
             }

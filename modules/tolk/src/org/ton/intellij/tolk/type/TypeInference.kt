@@ -1055,6 +1055,19 @@ class TolkInferenceWalker(
             return nextFlow
         }
 
+        val objType = receiverType?.unwrapTypeAlias() ?: TolkType.Unknown
+        if (objType is TolkStructType) {
+            val field = objType.psi.findField(name)
+            if (field != null) {
+                val inferredType = extractSinkExpression(element)?.let { sExpr ->
+                    flow.getType(sExpr)
+                } ?: field.type
+                ctx.setType(element, inferredType)
+                ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(field)))
+                return nextFlow
+            }
+        }
+
         var symbol: TolkSymbolElement? = flow.getSymbol(name)
         if (symbol == null) {
             symbol = TolkBuiltins[project].getFunction(name)

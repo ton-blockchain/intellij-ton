@@ -38,11 +38,13 @@ open class Substitution(
                     }
 
                     paramType is TolkTensorTy && argType is TolkTensorTy -> {
-                        paramType.elements.zip(argType.elements).forEach { (a, b) -> deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
+                        paramType.elements.zip(argType.elements)
+                            .forEach { (a, b) -> deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
                     }
 
                     paramType is TolkTypedTupleTy && argType is TolkTypedTupleTy -> {
-                        paramType.elements.zip(argType.elements).forEach { (a, b) -> deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
+                        paramType.elements.zip(argType.elements)
+                            .forEach { (a, b) -> deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
                     }
 
                     paramType is TyUnion && argType is TyUnion -> {
@@ -53,7 +55,15 @@ open class Substitution(
 
                     paramType is TyTypeParameter -> {
                         if (!substitution.containsKey(paramType)) {
-                            substitution[paramType] = argType
+                            val newType =
+                                if (argType == TolkTy.Unknown && paramType.parameter is TyTypeParameter.NamedTypeParameter) {
+                                    paramType.parameter.psi.defaultTypeParameter?.typeExpression?.type
+                                } else {
+                                    argType
+                                }
+                            if (newType != null) {
+                                substitution[paramType] = newType
+                            }
                         }
                     }
 

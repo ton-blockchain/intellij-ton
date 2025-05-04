@@ -1210,7 +1210,6 @@ class TolkInferenceWalker(
             if (calleeRight is TolkReferenceExpression) {
                 functionSymbol = ctx.getResolvedRefs(calleeRight).firstOrNull()?.element as? TolkFunction
                 typeArgs = calleeRight.typeArgumentList?.typeExpressionList?.map { it.type ?: TolkTy.Unknown }
-
             }
         }
 
@@ -1252,7 +1251,12 @@ class TolkInferenceWalker(
         }
 
         val callType = TolkFunctionTy(TolkTy.tensor(argumentTypes), hint ?: TolkTy.Unknown)
-        val resolvedFunctionType = functionSymbol.resolveGenerics(callType, typeArgs)
+        val functionType = ctx.getType(callee) as? TolkFunctionTy ?: TolkFunctionTy(TolkTy.Unknown, TolkTy.Unknown)
+        val sub = Substitution.instantiate(functionType, callType)
+        val subType = functionType.substitute(sub) as? TolkFunctionTy ?: callType
+
+//        val resolvedFunctionType = functionSymbol.resolveGenerics(callType, typeArgs)
+        val resolvedFunctionType = subType
         val resolvedParameterTypes = resolvedFunctionType.parameters
 
         arguments.forEachIndexed { index, argument ->

@@ -3,6 +3,8 @@ package org.ton.intellij.tolk.psi.impl
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.parentOfType
+import org.ton.intellij.tolk.psi.TolkBlockStatement
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.reference.TolkSymbolReference
@@ -31,6 +33,10 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
     override fun getNameIdentifier(): PsiElement? = identifier
 
     override fun toString(): String = "TolkReferenceExpression($text)"
+
+    override fun getContext(): PsiElement? {
+        return parentOfType<TolkBlockStatement>()
+    }
 
     companion object {
         private val EMPTY_ARRAY = emptyArray<TolkSymbolReference>()

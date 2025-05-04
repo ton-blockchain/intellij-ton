@@ -19,7 +19,11 @@ val TolkInferenceContextOwner.selfInferenceResult: TolkInferenceResult
     get() {
         return CachedValuesManager.getCachedValue(this, TOLK_INFERENCE_KEY) {
             val (inferred, _) = measureTimedValue {
-                inferTypesIn(this)
+                try {
+                    inferTypesIn(this)
+                } catch (e: Throwable) {
+                    throw IllegalStateException("Failed to infer types in $this (${this.containingFile.virtualFile.path}, offset: ${this.textOffset})", e)
+                }
             }
             CachedValueProvider.Result.create(inferred, PsiModificationTracker.MODIFICATION_COUNT)
         }

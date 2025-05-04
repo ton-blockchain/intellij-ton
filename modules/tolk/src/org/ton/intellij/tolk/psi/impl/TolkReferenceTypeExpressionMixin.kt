@@ -33,7 +33,6 @@ abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiEl
 
     override fun getReference() = if(isPrimitive) null else TolkTypeReference(this)
 
-
 //    inner class CacheResolver : CachedValueProvider<TolkTy> {
 //        override fun compute(): CachedValueProvider.Result<TolkTy?>? {
 //            resolve().firstOrNull()?.let { return CachedValueProvider.Result.create(it, this) }

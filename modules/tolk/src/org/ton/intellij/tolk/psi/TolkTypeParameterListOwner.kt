@@ -26,6 +26,7 @@ interface TolkTypeParameterListOwner : TolkNamedElement {
         val unresolvedAsGenerics: MutableMap<String, TolkReferenceTypeExpression> = mutableMapOf(),
     )  : TolkRecursiveElementWalkingVisitor() {
         override fun visitReferenceTypeExpression(o: TolkReferenceTypeExpression) {
+            o.typeArgumentList?.typeExpressionList?.forEach { it.accept(this) }
             val reference = o.reference ?: return
             if (reference.resolve() != null) return
             unresolvedAsGenerics[o.identifier.text.removeSurrounding("`")] = o

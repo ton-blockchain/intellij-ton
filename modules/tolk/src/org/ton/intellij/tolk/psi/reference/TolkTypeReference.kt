@@ -13,9 +13,14 @@ import org.ton.intellij.tolk.psi.impl.resolveFile
 class TolkTypeReference(
     element: TolkElement,
 ) : PsiReferenceBase.Poly<TolkElement>(
-    element, TextRange(0, element.textLength), false
+    element
 ) {
     val identifier get() = element.node.findChildByType(TolkElementTypes.IDENTIFIER)!!
+
+    override fun calculateDefaultRangeInElement(): TextRange? {
+        val identifier = identifier
+        return TextRange(identifier.startOffsetInParent, identifier.textLength)
+    }
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         return buildList<ResolveResult> {

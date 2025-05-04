@@ -8,12 +8,12 @@ import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkSelfExpression
 import org.ton.intellij.tolk.psi.TolkSelfParameter
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
 
 abstract class TolkSelfExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkSelfExpression {
     override fun getReference() = TolkSelfExpressionReference(this)
 
-    override val type: TolkType?
+    override val type: TolkTy?
         get() = reference.resolve()?.parentOfType<TolkFunction>()?.functionReceiver?.typeExpression?.type
 
     class TolkSelfExpressionReference(element: TolkSelfExpression) : PsiReferenceBase<TolkSelfExpression>(

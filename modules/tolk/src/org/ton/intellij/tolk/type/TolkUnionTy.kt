@@ -2,19 +2,23 @@ package org.ton.intellij.tolk.type
 
 import org.ton.intellij.tolk.psi.TolkElement
 
-class TolkUnionType private constructor(
-    val variants: Set<TolkType>,
+class TolkUnionTy private constructor(
+    val variants: Set<TolkTy>,
     private val hasGenerics: Boolean,
-) : TolkType {
+) : TolkTy {
     override fun hasGenerics(): Boolean = hasGenerics
 
-    val orNull: TolkType?
+    override fun superFoldWith(folder: TypeFolder): TolkTy {
+        return create(variants.map { it.foldWith(folder) })
+    }
+
+    val orNull: TolkTy?
         get() {
             if (variants.size != 2) return null
             val first = variants.first()
             val second = variants.last()
-            if (first == TolkType.Null) return second
-            if (second == TolkType.Null) return first
+            if (first == TolkTy.Null) return second
+            if (second == TolkTy.Null) return first
             return null
         }
 
@@ -26,56 +30,37 @@ class TolkUnionType private constructor(
         return variants.joinToString(" | ")
     }
 
-    override fun renderAppendable(appendable: Appendable) = appendable.apply {
-        val orNull = orNull
-        if (orNull != null) {
-            orNull.renderAppendable(this)
-            append("?")
-            return@apply
-        }
-        var separator = ""
-        variants.forEach {
-            appendable.append(separator)
-            it.renderAppendable(appendable)
-            separator = " | "
-        }
+    override fun removeNullability(): TolkTy {
+        return create(variants.filter { it != TolkTy.Null })
     }
 
-    override fun removeNullability(): TolkType {
-        return create(variants.filter { it != TolkType.Null })
-    }
-
-    override fun isSuperType(other: TolkType): Boolean {
+    override fun isSuperType(other: TolkTy): Boolean {
         return variants.all { it.isSuperType(other) }
     }
 
-    override fun join(other: TolkType): TolkType {
-        if (other is TolkUnionType) {
+    override fun join(other: TolkTy): TolkTy {
+        if (other is TolkUnionTy) {
             return create(variants + other.variants)
         }
         return create(variants + other)
     }
 
-    override fun meet(other: TolkType): TolkType {
-        if (other is TolkUnionType) {
+    override fun meet(other: TolkTy): TolkTy {
+        if (other is TolkUnionTy) {
             return create(variants.intersect(other.variants))
         }
         return create(variants.filter { it.isSuperType(other) })
     }
 
-    override fun visit(visitor: TolkTypeVisitor) {
-        variants.forEach { it.visit(visitor) }
-    }
-
-    override fun substitute(substitution: Map<TolkElement, TolkType>): TolkType {
-        val newElements = LinkedHashSet<TolkType>()
+    override fun substitute(substitution: Map<TolkElement, TolkTy>): TolkTy {
+        val newElements = LinkedHashSet<TolkTy>()
         variants.forEach {
             newElements.add(it.substitute(substitution))
         }
         return simplify(newElements)
     }
 
-    fun containsAll(rhsType: TolkUnionType): Boolean {
+    fun containsAll(rhsType: TolkUnionTy): Boolean {
         for (rhsVariant in rhsType.variants) {
             if (!contains(rhsVariant)) {
                 return false
@@ -84,22 +69,22 @@ class TolkUnionType private constructor(
         return true
     }
 
-    operator fun contains(type: TolkType): Boolean {
+    operator fun contains(type: TolkTy): Boolean {
         return variants.any { it.actualType() == type.actualType() }
     }
 
-    override fun canRhsBeAssigned(other: TolkType): Boolean {
+    override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
         if (calculateExactVariantToFitRhs(other) != null) return true
-        if (other is TolkUnionType) return containsAll(other)
-        if (other is TolkAliasType) return canRhsBeAssigned(other.unwrapTypeAlias())
-        return other == TolkType.Never
+        if (other is TolkUnionTy) return containsAll(other)
+        if (other is TolkAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
+        return other == TolkTy.Never
     }
 
     fun calculateExactVariantToFitRhs(
-        rhsType: TolkType
-    ): TolkType? {
-        val rhsUnion = rhsType.unwrapTypeAlias() as? TolkUnionType
+        rhsType: TolkTy
+    ): TolkTy? {
+        val rhsUnion = rhsType.unwrapTypeAlias() as? TolkUnionTy
         //   // primitive 1-slot nullable don't store type_id, they can be assigned less strict, like `int?` to `int16?`
         if (rhsUnion != null) {
             val orNull = orNull
@@ -116,7 +101,7 @@ class TolkUnionType private constructor(
             }
         }
         // find the only T_i; it would also be used for transition at IR generation, like `(int,null)` to `(int, User?) | int`
-        var firstCovering: TolkType? = null
+        var firstCovering: TolkTy? = null
         for (variant in variants) {
             if (variant.canRhsBeAssigned(rhsType)) {
                 if (firstCovering != null) {
@@ -129,23 +114,23 @@ class TolkUnionType private constructor(
     }
 
     companion object {
-        fun create(vararg elements: TolkType): TolkType {
+        fun create(vararg elements: TolkTy): TolkTy {
             return create(elements.toList())
         }
 
-        fun create(elements: Collection<TolkType>): TolkType {
+        fun create(elements: Collection<TolkTy>): TolkTy {
             val elements = joinUnions(elements)
             if (elements.size == 1) return elements.first()
-            return TolkUnionType(elements, elements.any { it.hasGenerics() })
+            return TolkUnionTy(elements, elements.any { it.hasGenerics() })
         }
 
-        private fun joinUnions(set: Collection<TolkType>): Set<TolkType> {
-            val flatVariants = LinkedHashMap<TolkType, TolkType>(set.size)
+        private fun joinUnions(set: Collection<TolkTy>): Set<TolkTy> {
+            val flatVariants = LinkedHashMap<TolkTy, TolkTy>(set.size)
             set.forEach { variant ->
-                if (variant is TolkUnionType) {
+                if (variant is TolkUnionTy) {
                     for (nestedVariant in variant.variants) {
                         val actualType = nestedVariant.actualType()
-                        if (actualType == TolkType.Null) {
+                        if (actualType == TolkTy.Null) {
                             flatVariants[actualType] = actualType
                         } else {
                             flatVariants.getOrPut(actualType) {
@@ -155,7 +140,7 @@ class TolkUnionType private constructor(
                     }
                 } else {
                     val actualType = variant.actualType()
-                    if (actualType == TolkType.Null) {
+                    if (actualType == TolkTy.Null) {
                         flatVariants[actualType] = actualType
                     } else {
                         flatVariants.getOrPut(actualType) {
@@ -168,14 +153,14 @@ class TolkUnionType private constructor(
         }
 
 
-        private fun simplify(elements: Set<TolkType>): TolkType {
+        private fun simplify(elements: Set<TolkTy>): TolkTy {
             when (elements.size) {
                 1 -> {
                     return elements.single()
                 }
 
                 else -> {
-                    val unique: MutableList<TolkType> = ArrayList(elements)
+                    val unique: MutableList<TolkTy> = ArrayList(elements)
                     var changed = true
                     while (changed) {
                         changed = false
@@ -185,7 +170,7 @@ class TolkUnionType private constructor(
                                 val iType = unique[i]
                                 val jType = unique[j]
                                 val joined = iType.join(jType)
-                                if (joined !is TolkUnionType) {
+                                if (joined !is TolkUnionTy) {
                                     unique[i] = joined
                                     unique.removeAt(j)
                                     changed = true
@@ -197,14 +182,14 @@ class TolkUnionType private constructor(
 
                     if (unique.size == 1) return unique.single()
                     var hasGenerics = false
-                    val uniqueSet = LinkedHashSet<TolkType>(unique.size)
+                    val uniqueSet = LinkedHashSet<TolkTy>(unique.size)
                     for (type in unique) {
                         if (type.hasGenerics()) {
                             hasGenerics = true
                         }
                         uniqueSet.add(type)
                     }
-                    return TolkUnionType(uniqueSet, hasGenerics)
+                    return TolkUnionTy(uniqueSet, hasGenerics)
                 }
             }
         }

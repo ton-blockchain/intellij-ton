@@ -20,14 +20,15 @@ import org.ton.intellij.tolk.eval.value
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.isDeprecated
 import org.ton.intellij.tolk.psi.impl.isPrimitive
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.TyTypeParameter
 import org.ton.intellij.util.TVM_INT_MAX_VALUE
 import org.ton.intellij.util.TVM_INT_MIN_VALUE
 
 class TolkAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         when (element) {
-            is TolkTypeParameter -> {
+            is org.ton.intellij.tolk.psi.TolkTypeParameter -> {
                 return highlight(element.identifier, holder, TolkColor.TYPE_PARAMETER.textAttributesKey)
             }
 
@@ -41,13 +42,13 @@ class TolkAnnotator : Annotator {
                 if (element.isPrimitive) {
                     return highlight(element, holder, TolkColor.PRIMITIVE.textAttributesKey)
                 }
-                val color = if (element.type is TolkType.GenericType) {
+                val color = if (element.type is TyTypeParameter) {
                     TolkColor.TYPE_PARAMETER
                 } else {
                     val resolved = element.reference?.resolve()
                     when {
-                        resolved is TolkTypeParameter -> TolkColor.TYPE_PARAMETER
-                        resolved is TolkReferenceTypeExpression && resolved.type is TolkType.GenericType -> TolkColor.TYPE_PARAMETER
+                        resolved is org.ton.intellij.tolk.psi.TolkTypeParameter -> TolkColor.TYPE_PARAMETER
+                        resolved is TolkReferenceTypeExpression && resolved.type is TyTypeParameter -> TolkColor.TYPE_PARAMETER
                         resolved is TolkParameter && resolved.name == "self" -> TolkColor.SELF_PARAMETER
                         else -> TolkColor.IDENTIFIER
                     }
@@ -58,17 +59,17 @@ class TolkAnnotator : Annotator {
             is TolkMatchPatternReference -> {
                 val identifier = element.identifier
                 val name = identifier.text
-                if (TolkType.byName(name) != null) {
+                if (TolkTy.byName(name) != null) {
                     return highlight(identifier, holder, TolkColor.PRIMITIVE.textAttributesKey)
                 }
                 val resolved = element.reference?.resolve()
                 val color = when (resolved) {
-                    is TolkTypeParameter -> TolkColor.TYPE_PARAMETER
+                    is org.ton.intellij.tolk.psi.TolkTypeParameter -> TolkColor.TYPE_PARAMETER
                     is TolkParameter -> if (resolved.name == "self") TolkColor.SELF_PARAMETER else null
                     is TolkConstVar -> TolkColor.CONSTANT
                     is TolkGlobalVar -> TolkColor.GLOBAL_VARIABLE
                     is TolkReferenceTypeExpression -> {
-                        if (resolved.type is TolkType.GenericType) {
+                        if (resolved.type is TyTypeParameter) {
                             TolkColor.TYPE_PARAMETER
                         } else {
                             null

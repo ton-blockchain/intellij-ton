@@ -8,8 +8,8 @@ import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.stub.TolkStructStub
-import org.ton.intellij.tolk.type.TolkStructType
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.TyStruct
 import javax.swing.Icon
 
 abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruct {
@@ -21,7 +21,7 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
         return super.getUseScope()
     }
 
-    override val type: TolkStructType = TolkType.struct(this)
+    override val type: TyStruct get() = TolkTy.struct(this)
 
     override fun getBaseIcon() = TolkIcons.STRUCTURE
 

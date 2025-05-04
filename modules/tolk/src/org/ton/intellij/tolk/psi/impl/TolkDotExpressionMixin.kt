@@ -6,10 +6,10 @@ import org.ton.intellij.tolk.eval.TolkIntValue
 import org.ton.intellij.tolk.eval.value
 import org.ton.intellij.tolk.psi.TolkDotExpression
 import org.ton.intellij.tolk.psi.TolkLiteralExpression
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
 
 abstract class TolkDotExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkDotExpression {
-    override val type: TolkType? get() = right?.type
+    override val type: TolkTy? get() = right?.type
 
     val targetIndex: Int? get() = ((right as? TolkLiteralExpression)?.value as? TolkIntValue)?.value?.toInt()
 }

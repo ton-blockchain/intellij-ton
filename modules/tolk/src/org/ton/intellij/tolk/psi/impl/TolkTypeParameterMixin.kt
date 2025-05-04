@@ -5,7 +5,8 @@ import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkTypeParameter
 import org.ton.intellij.tolk.stub.TolkTypeParameterStub
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.TyTypeParameter
 import javax.swing.Icon
 
 abstract class TolkTypeParameterMixin : TolkNamedElementImpl<TolkTypeParameterStub>, TolkTypeParameter {
@@ -13,7 +14,7 @@ abstract class TolkTypeParameterMixin : TolkNamedElementImpl<TolkTypeParameterSt
 
     constructor(stub: TolkTypeParameterStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
 
-    override val type: TolkType get() = TolkType.GenericType(this)
+    override val type: TolkTy get() = TyTypeParameter.create(this)
 
     override fun getIcon(flags: Int): Icon? = TolkIcons.PARAMETER
 }

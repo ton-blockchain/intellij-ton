@@ -1,14 +1,14 @@
 package org.ton.intellij.tolk.psi
 
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TyTypeParameter
 
 interface TolkTypeParameterListOwner : TolkNamedElement {
     val typeParameterList: TolkTypeParameterList?
 
-    fun resolveGenericType(name: String): TolkType.GenericType? {
+    fun resolveGenericType(name: String): TyTypeParameter? {
         val typeParam = typeParameterList?.typeParameterList?.firstOrNull { it.name == name }
         if (typeParam != null) {
-            return TolkType.GenericType(typeParam)
+            return TyTypeParameter.create(typeParam)
         }
         if (this !is TolkFunction) return null
         functionReceiver?.let { functionReceiver ->
@@ -16,7 +16,7 @@ interface TolkTypeParameterListOwner : TolkNamedElement {
             functionReceiver.accept(visitor)
             val element = visitor.unresolvedAsGenerics[name]
             if (element != null) {
-                return TolkType.GenericType(element)
+                return TyTypeParameter.create(element)
             }
         }
         return null

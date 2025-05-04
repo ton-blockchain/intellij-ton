@@ -5,7 +5,7 @@ import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkGlobalVar
 import org.ton.intellij.tolk.stub.TolkGlobalVarStub
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
 import javax.swing.Icon
 
 abstract class TolkGlobalVarMixin : TolkNamedElementImpl<TolkGlobalVarStub>, TolkGlobalVar {
@@ -13,7 +13,7 @@ abstract class TolkGlobalVarMixin : TolkNamedElementImpl<TolkGlobalVarStub>, Tol
 
     constructor(stub: TolkGlobalVarStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
 
-    override val type: TolkType? get() = typeExpression?.type
+    override val type: TolkTy? get() = typeExpression?.type
 
     override fun getIcon(flags: Int): Icon? = TolkIcons.GLOBAL_VARIABLE
 }

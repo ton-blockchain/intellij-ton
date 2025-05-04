@@ -6,9 +6,9 @@ import org.ton.intellij.tolk.psi.TolkSymbolElement
 class TolkFlowContext(
     val globalSymbols: MutableMap<String, TolkSymbolElement> = HashMap(),
     val functions: MutableMap<String, MutableCollection<TolkFunction>> = HashMap(),
-    val symbolTypes: MutableMap<TolkSymbolElement, TolkType> = LinkedHashMap(),
+    val symbolTypes: MutableMap<TolkSymbolElement, TolkTy> = LinkedHashMap(),
     val symbols: MutableMap<String, TolkSymbolElement> = LinkedHashMap(),
-    val sinkExpressions: MutableMap<TolkSinkExpression, TolkType> = LinkedHashMap(),
+    val sinkExpressions: MutableMap<TolkSinkExpression, TolkTy> = LinkedHashMap(),
     var unreachable: TolkUnreachableKind? = null
 ) {
     constructor(other: TolkFlowContext) : this(
@@ -22,15 +22,15 @@ class TolkFlowContext(
 
     fun clone() = TolkFlowContext(this)
 
-    fun getType(symbol: TolkSymbolElement): TolkType? {
+    fun getType(symbol: TolkSymbolElement): TolkTy? {
         return symbolTypes[symbol]
     }
 
-    fun getType(sinkExpression: TolkSinkExpression): TolkType? {
+    fun getType(sinkExpression: TolkSinkExpression): TolkTy? {
         return sinkExpressions[sinkExpression]
     }
 
-    fun getFunctionCandidates(calledReceiver: TolkType?, name: String): List<TolkFunction> {
+    fun getFunctionCandidates(calledReceiver: TolkTy?, name: String): List<TolkFunction> {
         val namedFunctions = functions[name] ?: return emptyList()
         namedFunctions.singleOrNull()?.let {
             return namedFunctions.toList()
@@ -44,7 +44,7 @@ class TolkFlowContext(
         // step1: find all methods where a receiver equals to provided, e.g. `MInt.copy`
         for (function in namedFunctions) {
             val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
-            if (!functionReceiver.hasGenerics() && functionReceiver == calledReceiver) {
+            if (!functionReceiver.hasGenerics() && functionReceiver.isEquivalentTo(calledReceiver)) {
                 candidates.add(function)
             }
         }
@@ -67,7 +67,7 @@ class TolkFlowContext(
         // step 3: try to match generic receivers, e.g. `Container<T>.copy` / `(T?|slice).copy` but NOT `T.copy`
         for (function in namedFunctions) {
             val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
-            if (functionReceiver.hasGenerics() && functionReceiver !is TolkType.GenericType) {
+            if (functionReceiver.hasGenerics() && functionReceiver !is TyTypeParameter) {
 //                candidates.add(function)
             }
         }
@@ -78,7 +78,7 @@ class TolkFlowContext(
         // step 4: try to match `T.copy`
         for (function in namedFunctions) {
             val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
-            if (functionReceiver is TolkType.GenericType) {
+            if (functionReceiver is TyTypeParameter) {
                 candidates.add(function)
             }
         }
@@ -92,14 +92,14 @@ class TolkFlowContext(
         return symbols[fullName] ?: globalSymbols[fullName]
     }
 
-    fun setSymbol(element: TolkSymbolElement, type: TolkType) {
+    fun setSymbol(element: TolkSymbolElement, type: TolkTy) {
         val name = element.name?.removeSurrounding("`") ?: return
         symbols[name] = element
         symbolTypes[element] = type
         invalidateAllSubfields(element, 0, 0)
     }
 
-    fun setSymbol(element: TolkSinkExpression, type: TolkType) {
+    fun setSymbol(element: TolkSinkExpression, type: TolkTy) {
         var indexPath = element.indexPath
 //        if (indexPath < 0) {
 //            return setSymbol(element.symbol, type)
@@ -128,8 +128,8 @@ class TolkFlowContext(
         val joinedSymbols: MutableMap<String, TolkSymbolElement> = HashMap(other.symbols)
         joinedSymbols.putAll(symbols)
 
-        val joinedSinkExpressionsMutableMap: MutableMap<TolkSinkExpression, TolkType>
-        val joinedSymbolTypes: MutableMap<TolkSymbolElement, TolkType>
+        val joinedSinkExpressionsMutableMap: MutableMap<TolkSinkExpression, TolkTy>
+        val joinedSymbolTypes: MutableMap<TolkSymbolElement, TolkTy>
 
         if (this.unreachable != null && other.unreachable == null) {
             joinedSymbolTypes = HashMap(symbolTypes)

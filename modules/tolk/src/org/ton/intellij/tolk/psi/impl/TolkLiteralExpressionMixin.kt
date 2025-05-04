@@ -5,14 +5,14 @@ import com.intellij.lang.ASTNode
 import org.apache.commons.codec.binary.Hex
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkLiteralExpression
-import org.ton.intellij.tolk.type.TolkConstantIntType
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkConstantIntTy
+import org.ton.intellij.tolk.type.TolkTy
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.util.zip.CRC32
 
 abstract class TolkLiteralExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkLiteralExpression {
-    override val type: TolkType?
+    override val type: TolkTy?
         get() {
             val treeParent = node.treeParent
             if (treeParent.elementType == TolkElementTypes.DOT_EXPRESSION && treeParent.lastChildNode == node) {
@@ -34,73 +34,73 @@ abstract class TolkLiteralExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(
                         BigInteger(text)
                     }
                 } catch (e: NumberFormatException) {
-                    return TolkType.Int
+                    return TolkTy.Int
                 }
                 if (isNegative) {
                     integer = integer.negate()
                 }
-                return TolkConstantIntType(integer)
+                return TolkConstantIntTy(integer)
             }
             if (trueKeyword != null) {
-                return TolkType.TRUE
+                return TolkTy.TRUE
             }
             if (falseKeyword != null) {
-                return TolkType.FALSE
+                return TolkTy.FALSE
             }
             if (nullKeyword != null) {
-                return TolkType.Null
+                return TolkTy.Null
             }
             val stringLiteral = stringLiteral
             if (stringLiteral != null) {
                 val text = stringLiteral.text
-                if (text.length < 2) return TolkType.Slice
+                if (text.length < 2) return TolkTy.Slice
                 val tag = text.lastOrNull()
                 if (tag == '"') {
-                    return TolkType.Slice
+                    return TolkTy.Slice
                 }
                 when (tag) {
                     'u' -> {
-                        if (text.length <= 3) return TolkConstantIntType(BigInteger.ZERO)
+                        if (text.length <= 3) return TolkConstantIntTy(BigInteger.ZERO)
                         val rawValue = text.substring(1, text.length - 2)
                         val intValue = BigInteger(Hex.encodeHexString(rawValue.encodeToByteArray()), 16)
-                        return TolkConstantIntType(intValue)
+                        return TolkConstantIntTy(intValue)
                     }
 
                     'h' -> {
-                        if (text.length <= 3) return TolkConstantIntType(BigInteger.ZERO)
+                        if (text.length <= 3) return TolkConstantIntTy(BigInteger.ZERO)
                         val rawValue = text.substring(1, text.length - 2)
                         val digestValue = MessageDigest.getInstance("SHA-256").apply {
                             update(rawValue.toByteArray())
                         }.digest()
                         val intValue = BigInteger(Hex.encodeHexString(digestValue).substring(0, 8), 16)
-                        return TolkConstantIntType(intValue)
+                        return TolkConstantIntTy(intValue)
                     }
 
                     'H' -> {
-                        if (text.length <= 3) return TolkConstantIntType(BigInteger.ZERO)
+                        if (text.length <= 3) return TolkConstantIntTy(BigInteger.ZERO)
                         val rawValue = text.substring(1, text.length - 2)
                         val digestValue = MessageDigest.getInstance("SHA-256").apply {
                             update(rawValue.toByteArray())
                         }.digest()
                         val intValue = BigInteger(Hex.encodeHexString(digestValue), 16)
-                        return TolkConstantIntType(intValue)
+                        return TolkConstantIntTy(intValue)
                     }
 
                     'c' -> {
-                        if (text.length <= 3) return TolkConstantIntType(BigInteger.ZERO)
+                        if (text.length <= 3) return TolkConstantIntTy(BigInteger.ZERO)
                         val rawValue = text.substring(1, text.length - 2)
                         val intValue = CRC32().apply {
                             update(rawValue.toByteArray())
                         }.value
-                        return TolkConstantIntType(BigInteger.valueOf(intValue))
+                        return TolkConstantIntTy(BigInteger.valueOf(intValue))
                     }
 
                     else -> {
-                        return TolkType.Unknown
+                        return TolkTy.Unknown
                     }
                 }
             }
-            return TolkType.Unknown
+            return TolkTy.Unknown
         }
 
     override fun toString(): String = "TolkLiteralExpression($type)"

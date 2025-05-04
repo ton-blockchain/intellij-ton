@@ -6,12 +6,12 @@ import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.TolkCatch
 import org.ton.intellij.tolk.psi.TolkCatchParameter
 import org.ton.intellij.tolk.psi.TolkPsiFactory
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
 
 abstract class TolkCatchParameterMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkCatchParameter {
-    override val type: TolkType?
+    override val type: TolkTy?
         get() = if ((parent as? TolkCatch)?.catchParameterList?.indexOf(this) == 0) {
-            TolkType.Int
+            TolkTy.Int
         } else {
             null
         }

@@ -14,7 +14,7 @@ import org.ton.intellij.tolk.psi.TolkDotExpression
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.impl.toLookupElement
 import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
-import org.ton.intellij.tolk.type.TolkStructType
+import org.ton.intellij.tolk.type.TyStruct
 
 object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement>
@@ -31,7 +31,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         val dotExpression = parameters.position.parentOfType<TolkDotExpression>() ?: return
         val leftType = dotExpression.left.type ?: return
         val actualLeftType = leftType.unwrapTypeAlias().actualType()
-        if (actualLeftType is TolkStructType) {
+        if (actualLeftType is TyStruct) {
             actualLeftType.psi?.structBody?.structFieldList?.forEach { field ->
                 result.addElement(
                     LookupElementBuilder

@@ -6,7 +6,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.TolkNamedStub
-import org.ton.intellij.tolk.type.TolkFunctionType
+import org.ton.intellij.tolk.type.TolkFunctionTy
 import javax.swing.Icon
 
 abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementImpl<T>, TolkNamedElement {
@@ -40,7 +40,7 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
                         parameter.type?.renderAppendable(this) ?: append("_")
                         separator = ", "
                     }
-                    (type as? TolkFunctionType)?.returnType?.let {
+                    (type as? TolkFunctionTy)?.returnType?.let {
                         append("): ")
                         it.renderAppendable(this)
                     } ?: append("): void")

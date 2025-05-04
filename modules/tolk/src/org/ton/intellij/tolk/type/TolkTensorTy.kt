@@ -39,7 +39,7 @@ data class TolkTensorTy private constructor(
             }
             return TolkTensorTy(newElements, hasGenerics)
         }
-        return TolkUnionTy.create(this, other)
+        return TyUnion.create(this, other)
     }
 
     override fun meet(other: TolkTy): TolkTy {

@@ -31,18 +31,18 @@ class TolkFlowContext(
         return sinkExpressions[sinkExpression]
     }
 
-    fun getFunctionCandidates(calledReceiver: TolkTy?, name: String): List<TolkFunction> {
+    fun getFunctionCandidates(calledReceiver: TolkTy?, name: String): List<Pair<TolkFunction, Substitution>> {
         val namedFunctions = functions[name] ?: return emptyList()
         if (calledReceiver == null) {
-            return namedFunctions.filter { !it.hasSelf }
+            return namedFunctions.asSequence().filter { !it.hasSelf }.map { it to EmptySubstitution }.toList()
         }
 
-        val candidates = ArrayList<TolkFunction>()
+        val candidates = ArrayList<Pair<TolkFunction, Substitution>>()
         // step1: find all methods where a receiver equals to provided, e.g. `MInt.copy`
         for (function in namedFunctions) {
             val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
             if (!functionReceiver.hasGenerics() && functionReceiver.isEquivalentTo(calledReceiver)) {
-                candidates.add(function)
+                candidates.add(function to EmptySubstitution)
             }
         }
         if (candidates.isNotEmpty()) {
@@ -53,7 +53,7 @@ class TolkFlowContext(
         for (function in namedFunctions) {
             val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
             if (!functionReceiver.hasGenerics() && functionReceiver.canRhsBeAssigned(calledReceiver)) {
-                candidates.add(function)
+                candidates.add(function to EmptySubstitution)
             }
         }
 
@@ -65,7 +65,11 @@ class TolkFlowContext(
         for (function in namedFunctions) {
             val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
             if (functionReceiver.hasGenerics() && functionReceiver !is TyTypeParameter) {
-//                candidates.add(function)
+                val sub = Substitution.instantiate(functionReceiver, calledReceiver)
+                val subType = functionReceiver.substitute(sub)
+                if (calledReceiver.isEquivalentTo(subType)) {
+                    candidates.add(function to sub)
+                }
             }
         }
         if (candidates.isNotEmpty()) {
@@ -76,7 +80,7 @@ class TolkFlowContext(
         for (function in namedFunctions) {
             val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
             if (functionReceiver is TyTypeParameter) {
-                candidates.add(function)
+                candidates.add(function to Substitution(mapOf(functionReceiver to calledReceiver)))
             }
         }
         return candidates

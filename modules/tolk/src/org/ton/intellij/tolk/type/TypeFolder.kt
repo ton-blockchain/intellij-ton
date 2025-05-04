@@ -14,6 +14,9 @@ fun <T : TypeFoldable<T>> TypeFoldable<T>.substitute(substitution: Substitution)
     foldWith(object : TypeFolder {
         override fun foldType(ty: TolkTy): TolkTy = when {
             ty is TyTypeParameter -> substitution[ty] ?: ty
-            else -> ty
+            else -> ty.superFoldWith(this)
         }
     })
+
+
+val substitution = mutableMapOf<TyTypeParameter, TolkTy>()

@@ -11,11 +11,12 @@ data class TyStruct private constructor(
 
     override fun join(other: TolkTy): TolkTy {
         if (other.unwrapTypeAlias() == this) return other
-        return TolkUnionTy.create(this, other)
+        return TyUnion.create(this, other)
     }
 
     override fun superFoldWith(folder: TypeFolder): TolkTy {
-        return TyStruct(psi, typeArguments.map { it.foldWith(folder) })
+        val newTypeArguments = typeArguments.map { it.foldWith(folder) }
+        return TyStruct(psi, newTypeArguments)
     }
 
     override fun isEquivalentToInner(other: TolkTy): Boolean {

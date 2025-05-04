@@ -570,12 +570,12 @@ class TolkInferenceWalker(
         lhsDeclaredType: TolkTy,
         rhsInferredType: TolkTy,
     ): TolkTy {
-        val lhsUnion = lhsDeclaredType.unwrapTypeAlias() as? TolkUnionTy ?: return lhsDeclaredType
+        val lhsUnion = lhsDeclaredType.unwrapTypeAlias() as? TyUnion ?: return lhsDeclaredType
         val lhsSubtype = lhsUnion.calculateExactVariantToFitRhs(rhsInferredType)
         if (lhsSubtype != null) {
             return lhsSubtype
         }
-        val rhsUnion = rhsInferredType as? TolkUnionTy ?: return lhsDeclaredType
+        val rhsUnion = rhsInferredType as? TyUnion ?: return lhsDeclaredType
 
         var lhsHasAllVariantsOfRhs = true
         for (rhsVariant in rhsUnion.variants) {
@@ -592,7 +592,7 @@ class TolkInferenceWalker(
                 subtypesOfLhs.add(lhsVariant)
             }
         }
-        return TolkUnionTy.create(subtypesOfLhs)
+        return TyUnion.create(subtypesOfLhs)
     }
 
     private fun inferExpression(
@@ -1061,10 +1061,13 @@ class TolkInferenceWalker(
         if (functionCandidates.isNotEmpty()) {
             val singleCandidate = functionCandidates.singleOrNull()
             if (singleCandidate != null) {
-                ctx.setType(element, singleCandidate.type)
-                ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(singleCandidate)))
+                val (function, sub) = singleCandidate
+                val functionType = function.declaredType
+                val subType = functionType.substitute(sub)
+                ctx.setType(element, subType)
+                ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(function)))
             } else {
-                ctx.setResolvedRefs(element, functionCandidates.map { PsiElementResolveResult(it) })
+                ctx.setResolvedRefs(element, functionCandidates.map { (function, _) -> PsiElementResolveResult(function) })
             }
             return nextFlow
         }
@@ -1113,7 +1116,21 @@ class TolkInferenceWalker(
             }
 
             is TolkStruct -> {
-                symbol.type
+                val structTy = symbol.declaredType
+
+                val typeArguments = element.typeArgumentList?.typeExpressionList
+                val substitution = HashMap<TyTypeParameter, TolkTy>()
+                structTy.typeArguments.forEachIndexed { index, typeParam ->
+                    if (typeParam !is TyTypeParameter) return@forEachIndexed
+                    val parameter = typeParam.parameter as? TyTypeParameter.NamedTypeParameter ?: return@forEachIndexed
+                    val subType = typeArguments?.getOrNull(index)?.type ?: parameter.psi.defaultTypeParameter?.typeExpression?.type
+                    if (subType != null) {
+                        substitution[typeParam] = subType
+                    }
+                }
+
+                val subType = structTy.substitute(Substitution(substitution))
+                subType
             }
             else -> flow.getType(symbol)
         }
@@ -1606,10 +1623,10 @@ class TolkInferenceWalker(
     // example: `int | slice | builder | bool` - `bool | slice` = `int | builder`
     // what for: `if (x != null)` / `if (x is T)`, to smart cast x inside if
     private fun TolkTy?.subtract(other: TolkTy?): TolkTy {
-        val lhsUnion = this as? TolkUnionTy ?: return TolkNeverTy
+        val lhsUnion = this as? TyUnion ?: return TolkNeverTy
 
         val restVariants = ArrayList<TolkTy>()
-        if (other is TolkUnionTy) {
+        if (other is TyUnion) {
             if (lhsUnion.containsAll(other)) {
                 for (lhsVariant in lhsUnion.variants) {
                     if (!other.contains(lhsVariant)) {
@@ -1630,6 +1647,6 @@ class TolkInferenceWalker(
         if (restVariants.size == 1) {
             return restVariants.first()
         }
-        return TolkUnionTy.create(restVariants)
+        return TyUnion.create(restVariants)
     }
 }

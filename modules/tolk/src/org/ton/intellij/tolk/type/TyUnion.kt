@@ -2,7 +2,7 @@ package org.ton.intellij.tolk.type
 
 import org.ton.intellij.tolk.psi.TolkElement
 
-class TolkUnionTy private constructor(
+class TyUnion private constructor(
     val variants: Set<TolkTy>,
     private val hasGenerics: Boolean,
 ) : TolkTy {
@@ -39,14 +39,14 @@ class TolkUnionTy private constructor(
     }
 
     override fun join(other: TolkTy): TolkTy {
-        if (other is TolkUnionTy) {
+        if (other is TyUnion) {
             return create(variants + other.variants)
         }
         return create(variants + other)
     }
 
     override fun meet(other: TolkTy): TolkTy {
-        if (other is TolkUnionTy) {
+        if (other is TyUnion) {
             return create(variants.intersect(other.variants))
         }
         return create(variants.filter { it.isSuperType(other) })
@@ -60,7 +60,7 @@ class TolkUnionTy private constructor(
         return simplify(newElements)
     }
 
-    fun containsAll(rhsType: TolkUnionTy): Boolean {
+    fun containsAll(rhsType: TyUnion): Boolean {
         for (rhsVariant in rhsType.variants) {
             if (!contains(rhsVariant)) {
                 return false
@@ -76,7 +76,7 @@ class TolkUnionTy private constructor(
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
         if (calculateExactVariantToFitRhs(other) != null) return true
-        if (other is TolkUnionTy) return containsAll(other)
+        if (other is TyUnion) return containsAll(other)
         if (other is TolkAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
         return other == TolkTy.Never
     }
@@ -84,7 +84,7 @@ class TolkUnionTy private constructor(
     fun calculateExactVariantToFitRhs(
         rhsType: TolkTy
     ): TolkTy? {
-        val rhsUnion = rhsType.unwrapTypeAlias() as? TolkUnionTy
+        val rhsUnion = rhsType.unwrapTypeAlias() as? TyUnion
         //   // primitive 1-slot nullable don't store type_id, they can be assigned less strict, like `int?` to `int16?`
         if (rhsUnion != null) {
             val orNull = orNull
@@ -121,13 +121,13 @@ class TolkUnionTy private constructor(
         fun create(elements: Collection<TolkTy>): TolkTy {
             val elements = joinUnions(elements)
             if (elements.size == 1) return elements.first()
-            return TolkUnionTy(elements, elements.any { it.hasGenerics() })
+            return TyUnion(elements, elements.any { it.hasGenerics() })
         }
 
         private fun joinUnions(set: Collection<TolkTy>): Set<TolkTy> {
             val flatVariants = LinkedHashMap<TolkTy, TolkTy>(set.size)
             set.forEach { variant ->
-                if (variant is TolkUnionTy) {
+                if (variant is TyUnion) {
                     for (nestedVariant in variant.variants) {
                         val actualType = nestedVariant.actualType()
                         if (actualType == TolkTy.Null) {
@@ -170,7 +170,7 @@ class TolkUnionTy private constructor(
                                 val iType = unique[i]
                                 val jType = unique[j]
                                 val joined = iType.join(jType)
-                                if (joined !is TolkUnionTy) {
+                                if (joined !is TyUnion) {
                                     unique[i] = joined
                                     unique.removeAt(j)
                                     changed = true
@@ -189,7 +189,7 @@ class TolkUnionTy private constructor(
                         }
                         uniqueSet.add(type)
                     }
-                    return TolkUnionTy(uniqueSet, hasGenerics)
+                    return TyUnion(uniqueSet, hasGenerics)
                 }
             }
         }

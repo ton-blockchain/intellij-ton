@@ -21,7 +21,7 @@ interface TolkIntTy : TolkPrimitiveTy {
         if (other == this) return this
         if (other == TolkTy.Never) return this
         if (other is TolkAliasTy) return join(other.underlyingType)
-        if (other !is TolkIntTy) return TolkUnionTy.create(this, other)
+        if (other !is TolkIntTy) return TyUnion.create(this, other)
         val range = this.range.join(other.range)
         if (range is TvmIntRangeSet.Point) return TolkConstantIntTy(range.value)
         return TolkIntRangeTy(range)

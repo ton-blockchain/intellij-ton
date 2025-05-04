@@ -7,8 +7,8 @@ import org.ton.intellij.tolk.psi.TolkCatchParameter
 import org.ton.intellij.tolk.psi.TolkConstVar
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkVar
-import org.ton.intellij.tolk.type.TolkFunctionType
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkFunctionTy
+import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.printTolkType
 
 class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
@@ -35,7 +35,7 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         val name = element.name
         if (name.isNullOrEmpty() || name == "_") return
         val type = element.type ?: return
-        if (type == TolkType.Unknown) return
+        if (type == TolkTy.Unknown) return
 
         sink.addPresentation(
             position = InlineInlayPosition(element.textRange.endOffset, true),
@@ -81,10 +81,10 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         if (element.returnType != null) return
         element.functionBody?.blockStatement ?: return
         val parameters = element.parameterList ?: return
-        val returnType = (element.type as? TolkFunctionType)?.returnType ?: return
+        val returnType = (element.type as? TolkFunctionTy)?.returnType ?: return
         when (returnType) {
-            TolkType.Unit,
-            TolkType.Unknown -> return
+            TolkTy.Unit,
+            TolkTy.Unknown -> return
             else -> {}
         }
         sink.addPresentation(

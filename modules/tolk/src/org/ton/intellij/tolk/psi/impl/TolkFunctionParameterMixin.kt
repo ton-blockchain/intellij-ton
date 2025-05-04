@@ -8,7 +8,7 @@ import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkParameter
 import org.ton.intellij.tolk.stub.TolkParameterStub
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
 import javax.swing.Icon
 
 abstract class TolkParameterMixin : TolkNamedElementImpl<TolkParameterStub>, TolkParameter {
@@ -18,7 +18,7 @@ abstract class TolkParameterMixin : TolkNamedElementImpl<TolkParameterStub>, Tol
 
     override fun getIcon(flags: Int): Icon = TolkIcons.PARAMETER
 
-    override val type: TolkType?
+    override val type: TolkTy?
         get() {
             val typeExpression = typeExpression
             if (typeExpression == null && name == "self") {

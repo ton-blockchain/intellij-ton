@@ -1,9 +1,9 @@
 package org.ton.intellij.tolk.type
 
-data class TolkTensorType private constructor(
-    val elements: List<TolkType>,
+data class TolkTensorTy private constructor(
+    val elements: List<TolkTy>,
     val hasGenerics: Boolean
-) : TolkType {
+) : TolkTy {
     override fun toString(): String = "(${elements.joinToString()})"
 
     override fun renderAppendable(appendable: Appendable) = appendable.apply{
@@ -17,65 +17,68 @@ data class TolkTensorType private constructor(
         append(")")
     }
 
-    override fun actualType(): TolkTensorType = TolkTensorType(
+    override fun superFoldWith(folder: TypeFolder): TolkTy {
+        return create(
+            elements.map { it.foldWith(folder) }
+        )
+    }
+
+    override fun actualType(): TolkTensorTy = TolkTensorTy(
         elements.map { it.actualType() },
         hasGenerics
     )
 
-    override fun join(other: TolkType): TolkType {
+    override fun join(other: TolkTy): TolkTy {
         if (this == other) return this
-        if (other is TolkTensorType && elements.size == other.elements.size) {
+        if (other is TolkTensorTy && elements.size == other.elements.size) {
             var hasGenerics = false
             val newElements = elements.zip(other.elements).map { (a, b) ->
                 val join = a.join(b)
                 hasGenerics = hasGenerics || join.hasGenerics()
                 join
             }
-            return TolkTensorType(newElements, hasGenerics)
+            return TolkTensorTy(newElements, hasGenerics)
         }
-        return TolkUnionType.create(this, other)
+        return TolkUnionTy.create(this, other)
     }
 
-    override fun meet(other: TolkType): TolkType {
+    override fun meet(other: TolkTy): TolkTy {
         if (this == other) return this
-        if (other == TolkType.Unknown) return this
-        if (other is TolkTensorType && elements.size == other.elements.size) {
+        if (other == TolkTy.Unknown) return this
+        if (other is TolkTensorTy && elements.size == other.elements.size) {
             var hasGenerics = false
             val newElements = elements.zip(other.elements).map { (a, b) ->
                 val meet = a.meet(b)
                 hasGenerics = hasGenerics || meet.hasGenerics()
                 meet
             }
-            return TolkTensorType(newElements, hasGenerics)
+            return TolkTensorTy(newElements, hasGenerics)
         }
-        return TolkType.Never
+        return TolkTy.Never
     }
 
-    override fun visit(visitor: TolkTypeVisitor) {
-        elements.forEach { it.visit(visitor) }
-    }
 
-    override fun canRhsBeAssigned(other: TolkType): Boolean {
+    override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (this == other) return true
-        if (other is TolkAliasType) return canRhsBeAssigned(other.unwrapTypeAlias())
-        if (other is TolkTensorType && elements.size == other.elements.size) {
+        if (other is TolkAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTensorTy && elements.size == other.elements.size) {
             return elements.zip(other.elements).all { (a, b) -> a.canRhsBeAssigned(b) }
         }
-        return other == TolkType.Never
+        return other == TolkTy.Never
     }
 
     companion object {
-        fun create(vararg elements: TolkType): TolkType {
+        fun create(vararg elements: TolkTy): TolkTy {
             return create(elements.toList())
         }
 
-        fun create(elements: List<TolkType>): TolkType {
-            if (elements.isEmpty()) return TolkUnitType
+        fun create(elements: List<TolkTy>): TolkTy {
+            if (elements.isEmpty()) return TolkUnitTy
             if (elements.size == 1) {
                 return elements.single()
             }
             val hasGenerics = elements.any { it.hasGenerics() }
-            return TolkTensorType(elements, hasGenerics)
+            return TolkTensorTy(elements, hasGenerics)
         }
     }
 }

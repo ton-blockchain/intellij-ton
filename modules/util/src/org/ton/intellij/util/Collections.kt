@@ -31,3 +31,28 @@ private class WithNextIterator<T : Any>(private val iterator: Iterator<T>) : Ite
         return WithNextValue(next, nextNext)
     }
 }
+
+fun <K, V> mergeMaps(map1: Map<K, V>, map2: Map<K, V>): Map<K, V> =
+    when {
+        map1.isEmpty() -> map2
+        map2.isEmpty() -> map1
+        else -> newHashMapWithExpectedSize<K, V>(map1.size + map2.size).apply {
+            putAll(map1)
+            putAll(map2)
+        }
+    }
+
+private fun <K, V> newHashMapWithExpectedSize(size: Int): java.util.HashMap<K, V> =
+    HashMap<K, V>(mapCapacity(size))
+
+private const val INT_MAX_POWER_OF_TWO: Int = Int.MAX_VALUE / 2 + 1
+
+private fun mapCapacity(expectedSize: Int): Int {
+    if (expectedSize < 3) {
+        return expectedSize + 1
+    }
+    if (expectedSize < INT_MAX_POWER_OF_TWO) {
+        return expectedSize + expectedSize / 3
+    }
+    return Int.MAX_VALUE
+}

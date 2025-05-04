@@ -5,7 +5,7 @@ import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.stub.TolkStructFieldStub
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
 import javax.swing.Icon
 
 abstract class TolkStructFieldMixin : TolkNamedElementImpl<TolkStructFieldStub>, TolkStructField {
@@ -13,7 +13,7 @@ abstract class TolkStructFieldMixin : TolkNamedElementImpl<TolkStructFieldStub>,
 
     constructor(stub: TolkStructFieldStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
 
-    override val type: TolkType?
+    override val type: TolkTy?
         get() = typeExpression?.type
 
     override fun getBaseIcon() = TolkIcons.FIELD

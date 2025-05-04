@@ -31,8 +31,8 @@ class TolkTypeReference(
 
                 if (myElement.parentOfType<TolkFunctionReceiver>() == null) {
                     val genericType = owner.resolveGenericType(typeParameterName)
-                    if (genericType != null && genericType.psiElement != element) {
-                        add(PsiElementResolveResult(genericType.psiElement))
+                    if (genericType != null && genericType.parameter.psi != element) {
+                        add(PsiElementResolveResult(genericType.parameter.psi))
                     }
                 }
             }

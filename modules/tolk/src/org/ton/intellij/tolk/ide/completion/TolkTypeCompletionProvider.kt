@@ -13,7 +13,7 @@ import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.psiElement
 
@@ -22,17 +22,17 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         psiElement<PsiElement>().withParent(psiElement<TolkReferenceTypeExpression>())
 
     private val primitiveTypes = listOf(
-        TolkType.Bool,
-        TolkType.Null,
-        TolkType.Cell,
-        TolkType.Slice,
-        TolkType.Builder,
-        TolkType.Tuple,
-        TolkType.Never,
-        TolkType.Coins,
-        TolkType.VarInt16,
-        TolkType.VarInt32,
-        TolkType.Address,
+        TolkTy.Bool,
+        TolkTy.Null,
+        TolkTy.Cell,
+        TolkTy.Slice,
+        TolkTy.Builder,
+        TolkTy.Tuple,
+        TolkTy.Never,
+        TolkTy.Coins,
+        TolkTy.VarInt16,
+        TolkTy.VarInt32,
+        TolkTy.Address,
     ).map { it.toString() } + listOf(
         "uint",
         "int",

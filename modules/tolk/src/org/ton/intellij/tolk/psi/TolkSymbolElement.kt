@@ -1,10 +1,10 @@
 package org.ton.intellij.tolk.psi
 
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
 
 interface TolkSymbolElement : TolkNamedElement, TolkTypedElement {
 }
 
 interface TolkTypeSymbolElement : TolkSymbolElement {
-    override val type: TolkType
+    override val type: TolkTy
 }

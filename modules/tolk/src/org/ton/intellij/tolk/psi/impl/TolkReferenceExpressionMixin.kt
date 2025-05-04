@@ -6,14 +6,14 @@ import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.reference.TolkSymbolReference
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
 
 
 abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceExpression {
     override fun getReferences(): Array<TolkSymbolReference> {
         val name = name
         if (name == "__expect_type") return EMPTY_ARRAY
-        if (name != null && TolkType.byName(name) != null) return EMPTY_ARRAY
+        if (name != null && TolkTy.byName(name) != null) return EMPTY_ARRAY
         return arrayOf(TolkSymbolReference(this))
     }
 

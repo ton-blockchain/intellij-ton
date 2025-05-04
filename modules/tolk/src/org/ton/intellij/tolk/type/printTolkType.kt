@@ -1,29 +1,38 @@
 package org.ton.intellij.tolk.type
 
 import com.intellij.codeInsight.hints.declarative.PresentationTreeBuilder
-import org.ton.intellij.tolk.type.TolkType.Companion.Null
+import org.ton.intellij.tolk.type.TolkTy.Companion.Null
 import org.ton.intellij.util.printPsi
 
-fun PresentationTreeBuilder.printTolkType(type: TolkType) {
+fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
     when (type) {
-        is TolkType.GenericType -> {
-            printPsi(type.psiElement, type.name)
+        is TyTypeParameter -> {
+            printPsi(type.parameter.psi, type.name ?: "<unknown>")
         }
-        is TolkAliasType -> {
+        is TolkAliasTy -> {
             printPsi(type.psi, type.psi.name ?: buildString {
                 type.renderAppendable(this)
             })
         }
-        is TolkStructType -> {
-            val psi = type.psi ?: return
-            printPsi(psi, psi.name ?: buildString {
-                type.renderAppendable(this)
-            })
+        is TyStruct -> {
+            val psi = type.psi
+            printPsi(psi, psi.name ?: "<unknown>")
+            if (type.typeArguments.isNotEmpty()) {
+                text("<")
+                val iterator = type.typeArguments.iterator()
+                while (iterator.hasNext()) {
+                    val argument = iterator.next()
+                    printTolkType(argument)
+                    if (iterator.hasNext()) {
+                        text(", ")
+                    }
+                }
+                text(">")
+            }
         }
-
-        is TolkFunctionType -> {
+        is TolkFunctionTy -> {
             val inputType = type.inputType
-            if (inputType is TolkTensorType || inputType is TolkUnitType) {
+            if (inputType is TolkTensorTy || inputType is TolkUnitTy) {
                 printTolkType(inputType)
             } else {
                 text("(")
@@ -32,14 +41,14 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
             }
             text(" -> ")
             val returnType = type.returnType
-            if (returnType is TolkUnitType) {
+            if (returnType is TolkUnitTy) {
                 text("void")
             } else {
                 printTolkType(returnType)
             }
         }
 
-        is TolkTensorType -> {
+        is TolkTensorTy -> {
             text("(")
             val iterator = type.elements.iterator()
             while (iterator.hasNext()) {
@@ -52,7 +61,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
             text(")")
         }
 
-        is TolkTypedTupleType -> {
+        is TolkTypedTupleTy -> {
             text("[")
             val iterator = type.elements.iterator()
             while (iterator.hasNext()) {
@@ -65,7 +74,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkType) {
             text("]")
         }
 
-        is TolkUnionType -> {
+        is TolkUnionTy -> {
             val elements = type.variants
             if (elements.size == 2) {
                 val first = elements.first()

@@ -7,15 +7,16 @@ import org.ton.intellij.tolk.psi.TolkFunctionReceiver
 import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
 import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.psi.reference.TolkTypeReference
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.TyTypeParameter
 
 abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node),
     TolkReferenceTypeExpression {
-    private val primitiveType: TolkType? get() = TolkType.byName(this.text)
+    private val primitiveType: TolkTy? get() = TolkTy.byName(this.text)
 
     val isPrimitive get() = primitiveType != null
 
-    override val type: TolkType?
+    override val type: TolkTy?
         get() {
             val primitiveType = primitiveType
             if (primitiveType != null) return primitiveType
@@ -25,7 +26,7 @@ abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiEl
                 return resolved.type
             }
             if (parentOfType<TolkFunctionReceiver>() != null) {
-                return TolkType.GenericType(this)
+                return TyTypeParameter.create(this)
             }
             return null
         }

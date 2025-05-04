@@ -1,9 +1,9 @@
 package org.ton.intellij.tolk.type
 
-class TolkTypedTupleType private constructor(
-    val elements: List<TolkType>,
+class TolkTypedTupleTy private constructor(
+    val elements: List<TolkTy>,
     private val hasGenerics: Boolean
-) : TolkType {
+) : TolkTy {
     override fun toString(): String = "[${elements.joinToString()}]"
 
     override fun hasGenerics(): Boolean = hasGenerics
@@ -20,61 +20,64 @@ class TolkTypedTupleType private constructor(
         return appendable
     }
 
-    override fun actualType(): TolkTypedTupleType = TolkTypedTupleType(
+    override fun actualType(): TolkTypedTupleTy = TolkTypedTupleTy(
         elements.map { it.actualType() },
         hasGenerics
     )
 
-    override fun join(other: TolkType): TolkType {
+    override fun superFoldWith(folder: TypeFolder): TolkTy {
+        return create(
+            elements.map { it.foldWith(folder) },
+        )
+    }
+
+    override fun join(other: TolkTy): TolkTy {
         if (this == other) return this
-        if (other is TolkTypedTupleType && elements.size == other.elements.size) {
+        if (other is TolkTypedTupleTy && elements.size == other.elements.size) {
             var hasGenerics = false
             val joined = elements.zip(other.elements).map { (a, b) ->
                 val join = a.join(b)
                 hasGenerics = hasGenerics || join.hasGenerics()
                 join
             }
-            return TolkTypedTupleType(joined, hasGenerics)
+            return TolkTypedTupleTy(joined, hasGenerics)
         }
-        return TolkUnionType.create(this, other)
+        return TolkUnionTy.create(this, other)
     }
 
-    override fun meet(other: TolkType): TolkType {
+    override fun meet(other: TolkTy): TolkTy {
         if (this == other) return this
-        if (other == TolkType.Unknown) return this
-        if (other is TolkTypedTupleType && elements.size == other.elements.size) {
+        if (other == TolkTy.Unknown) return this
+        if (other is TolkTypedTupleTy && elements.size == other.elements.size) {
             var hasGenerics = false
             val joined = elements.zip(other.elements).map { (a, b) ->
                 val meet = a.meet(b)
                 hasGenerics = hasGenerics || meet.hasGenerics()
                 meet
             }
-            return TolkTypedTupleType(joined, hasGenerics)
+            return TolkTypedTupleTy(joined, hasGenerics)
         }
-        return TolkType.Never
+        return TolkTy.Never
     }
 
-    override fun visit(visitor: TolkTypeVisitor) {
-        elements.forEach { it.visit(visitor) }
-    }
 
-    override fun canRhsBeAssigned(other: TolkType): Boolean {
-        if (other is TolkTypedTupleType) {
+    override fun canRhsBeAssigned(other: TolkTy): Boolean {
+        if (other is TolkTypedTupleTy) {
             if (elements.size != other.elements.size) return false
             for (i in elements.indices) {
                 if (!elements[i].canRhsBeAssigned(other.elements[i])) return false
             }
             return true
         }
-        if (other is TolkAliasType) return canRhsBeAssigned(other.unwrapTypeAlias())
-        return other == TolkType.Never
+        if (other is TolkAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
+        return other == TolkTy.Never
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as TolkTypedTupleType
+        other as TolkTypedTupleTy
 
         if (hasGenerics != other.hasGenerics) return false
         if (elements != other.elements) return false
@@ -89,12 +92,12 @@ class TolkTypedTupleType private constructor(
     }
 
     companion object {
-        fun create(vararg elements: TolkType): TolkType {
+        fun create(vararg elements: TolkTy): TolkTy {
             return create(elements.toList())
         }
 
-        fun create(elements: List<TolkType>): TolkType {
-            return TolkTypedTupleType(elements, elements.any { it.hasGenerics() })
+        fun create(elements: List<TolkTy>): TolkTy {
+            return TolkTypedTupleTy(elements, elements.any { it.hasGenerics() })
         }
     }
 }

@@ -6,7 +6,7 @@ import com.intellij.psi.*
 import com.intellij.psi.impl.source.resolve.ResolveCache
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.type.TolkStructType
+import org.ton.intellij.tolk.type.TyStruct
 
 abstract class TolkStructExpressionFieldMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkStructExpressionField {
     override fun getReferences(): Array<out PsiReference> {
@@ -40,7 +40,7 @@ abstract class TolkStructExpressionFieldMixin(node: ASTNode) : ASTWrapperPsiElem
             val structExpression = field.parentOfType<TolkStructExpression>() ?: return ResolveResult.EMPTY_ARRAY
 
             val structType =
-                structExpression.type?.unwrapTypeAlias() as? TolkStructType ?: return ResolveResult.EMPTY_ARRAY
+                structExpression.type?.unwrapTypeAlias() as? TyStruct ?: return ResolveResult.EMPTY_ARRAY
 
             val name = field.identifier.text.removeSurrounding("`")
             val field = structType.psi?.structBody?.structFieldList?.find {

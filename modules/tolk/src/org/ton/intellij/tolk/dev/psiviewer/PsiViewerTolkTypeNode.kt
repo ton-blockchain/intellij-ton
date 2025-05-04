@@ -4,10 +4,10 @@ import com.intellij.dev.psiViewer.properties.tree.PsiViewerPropertyNode
 import com.intellij.dev.psiViewer.properties.tree.nodes.computePsiViewerApiClassesNodes
 import com.intellij.dev.psiViewer.properties.tree.nodes.psiViewerApiClassesExtending
 import com.intellij.dev.psiViewer.properties.tree.nodes.psiViewerPsiTypeAttributes
-import org.ton.intellij.tolk.type.TolkType
+import org.ton.intellij.tolk.type.TolkTy
 
 class PsiViewerTolkTypeNode(
-    private val type: TolkType,
+    private val type: TolkTy,
     private val nodeContext: PsiViewerPropertyNode.Context
 ) : PsiViewerPropertyNode {
     class Factory : PsiViewerPropertyNode.Factory {
@@ -15,15 +15,15 @@ class PsiViewerTolkTypeNode(
             nodeContext: PsiViewerPropertyNode.Context,
             returnedValue: Any
         ): PsiViewerPropertyNode? {
-            val type = returnedValue as? TolkType ?: return null
+            val type = returnedValue as? TolkTy ?: return null
             return PsiViewerTolkTypeNode(type, nodeContext)
         }
 
-        override fun isMatchingType(clazz: Class<*>): Boolean = TolkType::class.java.isAssignableFrom(clazz)
+        override fun isMatchingType(clazz: Class<*>): Boolean = TolkTy::class.java.isAssignableFrom(clazz)
     }
 
     override val children = PsiViewerPropertyNode.Children.Async {
-        val psiTypeApiClasses = type::class.java.psiViewerApiClassesExtending(TolkType::class.java)
+        val psiTypeApiClasses = type::class.java.psiViewerApiClassesExtending(TolkTy::class.java)
         computePsiViewerApiClassesNodes(psiTypeApiClasses, type, nodeContext)
     }
 

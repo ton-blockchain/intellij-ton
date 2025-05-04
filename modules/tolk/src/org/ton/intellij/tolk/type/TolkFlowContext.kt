@@ -5,7 +5,7 @@ import org.ton.intellij.tolk.psi.TolkSymbolElement
 
 class TolkFlowContext(
     val globalSymbols: MutableMap<String, TolkSymbolElement> = HashMap(),
-    val functions: MutableMap<String, MutableList<TolkFunction>> = HashMap(),
+    val functions: MutableMap<String, MutableCollection<TolkFunction>> = HashMap(),
     val symbolTypes: MutableMap<TolkSymbolElement, TolkType> = LinkedHashMap(),
     val symbols: MutableMap<String, TolkSymbolElement> = LinkedHashMap(),
     val sinkExpressions: MutableMap<TolkSinkExpression, TolkType> = LinkedHashMap(),
@@ -33,7 +33,7 @@ class TolkFlowContext(
     fun getFunctionCandidates(calledReceiver: TolkType?, name: String): List<TolkFunction> {
         val namedFunctions = functions[name] ?: return emptyList()
         namedFunctions.singleOrNull()?.let {
-            return namedFunctions
+            return namedFunctions.toList()
         }
 
         if (calledReceiver == null) {

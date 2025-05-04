@@ -2,6 +2,7 @@ package org.ton.intellij.tolk.psi.reference
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.findPsiFile
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.ResolveResult
@@ -46,6 +47,10 @@ class TolkTypeReference(
             val typeDefResults = collectTypeDefResults(file, typeParameterName)
             addAll(typeDefResults)
         }.toTypedArray()
+    }
+
+    override fun handleElementRename(newElementName: String): PsiElement? {
+        return identifier.psi.replace(TolkPsiFactory[element.project].createIdentifier(newElementName))
     }
 
     private fun collectTypeDefResults(file: TolkFile, target: String): List<PsiElementResolveResult> {

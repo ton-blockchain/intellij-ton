@@ -6,6 +6,7 @@ import com.intellij.psi.search.SearchScope
 import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkStruct
+import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.stub.TolkStructStub
 import org.ton.intellij.tolk.type.TolkStructType
 import org.ton.intellij.tolk.type.TolkType
@@ -35,4 +36,9 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
         val anotherFile = another.containingFile.originalFile
         return thisFile == anotherFile
     }
+}
+
+fun TolkStruct.findField(name: String): TolkStructField? {
+    // todo: optimize by stub
+    return structBody?.structFieldList?.find { it.name == name }
 }

@@ -436,7 +436,7 @@ class TolkInferenceWalker(
         var nextFlow = inferLeftSideAssigment(lhs, flow)
         val rhs = element.right
         if (rhs != null) {
-            nextFlow = inferExpression(rhs, nextFlow, false).outFlow
+            nextFlow = inferExpression(rhs, nextFlow, false, ctx.getType(lhs)).outFlow
             processAssigmentAfterRight(lhs, ctx.getType(rhs) ?: TolkTy.Unknown, nextFlow)
             ctx.setType(element, ctx.getType(rhs))
         }
@@ -1526,15 +1526,38 @@ class TolkInferenceWalker(
         hint: TolkTy? = null
     ): TolkExpressionFlowContext {
         val nextFlow = TolkExpressionFlowContext(flow, false)
-        val type = (element.referenceTypeExpression?.type ?: hint) ?: return nextFlow
-        ctx.setType(element, type)
+        var structType = element.referenceTypeExpression?.type?.unwrapTypeAlias() as? TyStruct
+        if (structType != null && structType.hasGenerics() && hint != null) {
+            val instantiate = Substitution.instantiate(structType, hint.unwrapTypeAlias())
+            structType = structType.substitute(instantiate) as? TyStruct ?: structType
+        }
+        if (structType == null && hint != null) {
+            val unwrappedHint = hint.unwrapTypeAlias()
+            when(unwrappedHint) {
+                is TyStruct -> structType = unwrappedHint
+                is TyUnion -> {
+                    var found = 0
+                    var lastStruct: TyStruct? = null
+                    for (hintVariant in unwrappedHint.variants) {
+                        val unwrappedHint = hintVariant.unwrapTypeAlias()
+                        if (unwrappedHint is TyStruct) {
+                            lastStruct = unwrappedHint
+                            found++
+                        }
+                    }
+                    if (found == 1) {
+                        structType = lastStruct
+                    }
+                }
+            }
+        }
+
         val body = element.structExpressionBody
-        val structType = type.unwrapTypeAlias() as? TyStruct ?: return nextFlow
         body.structExpressionFieldList.forEach { field ->
             val expression = field.expression
             val name = field.identifier.text.removeSurrounding("`")
             if (expression != null) { // field: expression
-                val fieldType = structType.psi.structBody?.structFieldList?.find { it.name == name }?.type
+                val fieldType = structType?.psi?.findField(name)?.type
                 inferExpression(expression, nextFlow.outFlow, false, fieldType)
             } else { // let foo = 1; MyStruct { foo };
                 val localSymbol = flow.getSymbol(name)
@@ -1543,6 +1566,10 @@ class TolkInferenceWalker(
                 }
             }
         }
+
+        val type = structType ?: return nextFlow
+        ctx.setType(element, type)
+
         return nextFlow
     }
 

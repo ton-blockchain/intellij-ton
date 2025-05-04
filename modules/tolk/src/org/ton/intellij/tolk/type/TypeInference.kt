@@ -293,9 +293,12 @@ class TolkInferenceWalker(
 
     private fun processBlockStatement(element: TolkBlockStatement, flow: TolkFlowContext): TolkFlowContext {
         var nextFlow = flow
+        val oldSymbols = LinkedHashMap(flow.symbols)
         for (statement in element.statementList) {
             nextFlow = inferStatement(statement, nextFlow)
         }
+        nextFlow.symbols.clear()
+        nextFlow.symbols.putAll(oldSymbols)
         return nextFlow
     }
 
@@ -436,9 +439,11 @@ class TolkInferenceWalker(
         var nextFlow = inferLeftSideAssigment(lhs, flow)
         val rhs = element.right
         if (rhs != null) {
-            nextFlow = inferExpression(rhs, nextFlow, false, ctx.getType(lhs)).outFlow
-            processAssigmentAfterRight(lhs, ctx.getType(rhs) ?: TolkTy.Unknown, nextFlow)
-            ctx.setType(element, ctx.getType(rhs))
+            val leftType = ctx.getType(lhs)
+            nextFlow = inferExpression(rhs, nextFlow, false, leftType).outFlow
+            val rightType = ctx.getType(rhs) ?: TolkTy.Unknown
+            processAssigmentAfterRight(lhs, rightType, nextFlow)
+            ctx.setType(element, rightType)
         }
         return TolkExpressionFlowContext(nextFlow, usedAsCondition)
     }
@@ -518,6 +523,10 @@ class TolkInferenceWalker(
 
             else -> {
                 nextFlow = inferExpression(element, nextFlow, false).outFlow
+                extractSinkExpression(element)?.let { sExpr ->
+                    val lhsDeclaredType = calcDeclaredTypeBeforeSmartCast(element)
+                    ctx.setType(element, lhsDeclaredType)
+                }
             }
         }
         return nextFlow
@@ -531,11 +540,11 @@ class TolkInferenceWalker(
         when (element) {
             is TolkVar -> {
                 val declaredType = element.typeExpression?.type
-                ctx.setType(element, rightType)
                 val smartCastedType = declaredType?.let {
                     calcSmartcastTypeOnAssignment(declaredType, rightType)
                 } ?: rightType
-                outFlow.setSymbol(element, smartCastedType)
+                ctx.setType(element, declaredType ?: rightType)
+                outFlow.setSymbol(TolkSinkExpression(element), smartCastedType)
             }
 
             is TolkVarTensor -> {
@@ -860,7 +869,12 @@ class TolkInferenceWalker(
                 val rightType = ctx.getType(right)
 
                 if (leftType != null && rightType != null) {
-                    ctx.setType(element, leftType.join(rightType))
+                    ctx.setType(element, try {
+                        leftType.join(rightType)
+                    } catch (e: IllegalStateException) {
+//                        IllegalStateException("Can't join $leftType and $rightType in $currentFunction", e).printStackTrace()
+                        TolkTy.Int
+                    })
                 } else {
                     ctx.setType(element, leftType ?: rightType)
                 }
@@ -1067,12 +1081,22 @@ class TolkInferenceWalker(
                 ctx.setType(element, subType)
                 ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(function)))
             } else {
-                ctx.setResolvedRefs(element, functionCandidates.map { (function, _) -> PsiElementResolveResult(function) })
+                ctx.setResolvedRefs(
+                    element,
+                    functionCandidates.map { (function, _) -> PsiElementResolveResult(function) })
             }
             return nextFlow
         }
 
         var symbol: TolkSymbolElement? = flow.getSymbol(name)
+        if (symbol != null) {
+//            val symbolContext = symbol.parentOfType<TolkBlockStatement>()
+//            val currentContext = element.parentOfType<TolkBlockStatement>()
+//            if (symbolContext != null && currentContext != null && symbolContext != currentContext) {
+//                symbol = null
+//            }
+        }
+
         if (symbol == null) {
             symbol = TolkBuiltins[project].getFunction(name)
         }
@@ -1123,7 +1147,8 @@ class TolkInferenceWalker(
                 structTy.typeArguments.forEachIndexed { index, typeParam ->
                     if (typeParam !is TyTypeParameter) return@forEachIndexed
                     val parameter = typeParam.parameter as? TyTypeParameter.NamedTypeParameter ?: return@forEachIndexed
-                    val subType = typeArguments?.getOrNull(index)?.type ?: parameter.psi.defaultTypeParameter?.typeExpression?.type
+                    val subType = typeArguments?.getOrNull(index)?.type
+                        ?: parameter.psi.defaultTypeParameter?.typeExpression?.type
                     if (subType != null) {
                         substitution[typeParam] = subType
                     }
@@ -1132,6 +1157,7 @@ class TolkInferenceWalker(
                 val subType = structTy.substitute(Substitution(substitution))
                 subType
             }
+            is TolkVar -> flow.getType(TolkSinkExpression(symbol))
             else -> flow.getType(symbol)
         }
         ctx.setType(element, type)
@@ -1533,7 +1559,7 @@ class TolkInferenceWalker(
         }
         if (structType == null && hint != null) {
             val unwrappedHint = hint.unwrapTypeAlias()
-            when(unwrappedHint) {
+            when (unwrappedHint) {
                 is TyStruct -> structType = unwrappedHint
                 is TyUnion -> {
                     var found = 0

@@ -132,7 +132,7 @@ sealed class TvmIntRangeSet {
 
                 return ranges(result, longs.size + remaining)
             } catch (e: Exception) {
-                throw IllegalStateException("Failed to join $this with $other", e)
+               throw IllegalStateException("Failed to join $this with $other", e)
             }
         }
 
@@ -220,7 +220,7 @@ sealed class TvmIntRangeSet {
         }
     }
 
-    class RangeSet(
+    data class RangeSet(
         val ranges: Array<BigInteger>
     ) : TvmIntRangeSet() {
         constructor(r1min: BigInteger, r1max: BigInteger, r2min: BigInteger, r2max: BigInteger) : this(
@@ -295,6 +295,15 @@ sealed class TvmIntRangeSet {
             if (this === other) return true
             if (other !is RangeSet) return false
             return ranges.contentEquals(other.ranges)
+        }
+
+        override fun toString(): String {
+            val sb = StringBuilder()
+            for (i in 0 until ranges.size step 2) {
+                if (i > 0) sb.append(", ")
+                sb.append(format(ranges[i], ranges[i + 1]))
+            }
+            return "{$sb}"
         }
 
         override fun hashCode(): Int = ranges.contentHashCode()

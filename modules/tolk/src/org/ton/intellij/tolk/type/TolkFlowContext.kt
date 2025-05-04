@@ -2,6 +2,7 @@ package org.ton.intellij.tolk.type
 
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkSymbolElement
+import org.ton.intellij.tolk.psi.impl.hasSelf
 
 class TolkFlowContext(
     val globalSymbols: MutableMap<String, TolkSymbolElement> = HashMap(),
@@ -32,12 +33,8 @@ class TolkFlowContext(
 
     fun getFunctionCandidates(calledReceiver: TolkTy?, name: String): List<TolkFunction> {
         val namedFunctions = functions[name] ?: return emptyList()
-        namedFunctions.singleOrNull()?.let {
-            return namedFunctions.toList()
-        }
-
         if (calledReceiver == null) {
-            return namedFunctions.filter { it.functionReceiver == null }
+            return namedFunctions.filter { !it.hasSelf }
         }
 
         val candidates = ArrayList<TolkFunction>()

@@ -12,10 +12,7 @@ import org.ton.intellij.tolk.ide.completion.TolkCompletionContributor
 import org.ton.intellij.tolk.presentation.TolkPsiRenderer
 import org.ton.intellij.tolk.presentation.renderParameterList
 import org.ton.intellij.tolk.presentation.renderTypeExpression
-import org.ton.intellij.tolk.psi.TolkElement
-import org.ton.intellij.tolk.psi.TolkElementTypes
-import org.ton.intellij.tolk.psi.TolkFunction
-import org.ton.intellij.tolk.psi.TolkParameter
+import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.TolkFunctionStub
 import org.ton.intellij.tolk.type.*
 import org.ton.intellij.util.greenStub
@@ -139,9 +136,12 @@ fun TolkFunction.toLookupElement(): LookupElement {
                     val offset = if (this.parameters.isEmpty()) 2 else 1
                     context.document.insertString(context.editor.caretModel.offset, "()")
                     context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
+                    context.commitDocument()
                 }
 
-                context.commitDocument()
+                val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+                val includeCandidateFile = this.originalElement.containingFile as? TolkFile ?: return@withInsertHandler
+                insertFile.import(includeCandidateFile)
             },
         TolkCompletionContributor.FUNCTION_PRIORITY
     )

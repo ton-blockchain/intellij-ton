@@ -1045,13 +1045,15 @@ class TolkInferenceWalker(
         val nextFlow = TolkExpressionFlowContext(flow, usedAsCondition)
         val name = element.name ?: return nextFlow
 
-        val functionCandidates = flow.getFunctionCandidates(receiverType, name)
+        val functionCandidates = flow.getFunctionCandidates(receiverType?.actualType(), name)
         if (functionCandidates.isNotEmpty()) {
             val singleCandidate = functionCandidates.singleOrNull()
             if (singleCandidate != null) {
                 ctx.setType(element, singleCandidate.type)
+                ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(singleCandidate)))
+            } else {
+                ctx.setResolvedRefs(element, functionCandidates.map { PsiElementResolveResult(it) })
             }
-            ctx.setResolvedRefs(element, functionCandidates.map { PsiElementResolveResult(it) })
             return nextFlow
         }
 

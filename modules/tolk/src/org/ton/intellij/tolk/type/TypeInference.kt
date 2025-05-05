@@ -1323,7 +1323,14 @@ class TolkInferenceWalker(
 
         if (right is TolkReferenceExpression) {
             nextFlow = inferReferenceExpression(right, nextFlow, false, leftType).outFlow
-            val rightType = ctx.getType(right)
+            var rightType = ctx.getType(right)
+            if (leftType is TyStruct) {
+                extractSinkExpression(element)?.let { sExpr ->
+                    flow.getType(sExpr)?.let { smartCasted ->
+                        rightType = smartCasted
+                    }
+                }
+            }
             ctx.setType(element, rightType)
             return TolkExpressionFlowContext(nextFlow, usedAsCondition)
         }

@@ -5,6 +5,7 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
+import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubIndex
@@ -21,6 +22,10 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         get() = PlatformPatterns.psiElement()
             .afterLeaf(".")
             .withSuperParent(2, TolkDotExpression::class.java)
+            .andNot(PlatformPatterns.psiElement().afterLeaf(
+                PlatformPatterns.psiElement().withText(StandardPatterns.string().matches("\\d+"))
+            ))
+
 
     override fun addCompletions(
         parameters: CompletionParameters,

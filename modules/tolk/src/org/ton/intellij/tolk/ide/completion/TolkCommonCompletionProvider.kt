@@ -8,6 +8,8 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.patterns.ElementPattern
+import com.intellij.patterns.PlatformPatterns
+import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubIndex
@@ -33,6 +35,10 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                             .withParent(TolkDotExpression::class.java)
                     )
             )
+            .andNot(PlatformPatterns.psiElement().afterLeaf(
+                PlatformPatterns.psiElement().withText(StandardPatterns.string().matches("\\d+"))
+            ))
+
 
 
     override fun addCompletions(

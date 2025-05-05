@@ -876,12 +876,14 @@ class TolkInferenceWalker(
                 val rightType = ctx.getType(right)
 
                 if (leftType != null && rightType != null) {
-                    ctx.setType(element, try {
-                        leftType.join(rightType)
-                    } catch (e: IllegalStateException) {
+                    ctx.setType(
+                        element, try {
+                            leftType.join(rightType)
+                        } catch (e: IllegalStateException) {
 //                        IllegalStateException("Can't join $leftType and $rightType in $currentFunction", e).printStackTrace()
-                        TolkTy.Int
-                    })
+                            TolkTy.Int
+                        }
+                    )
                 } else {
                     ctx.setType(element, leftType ?: rightType)
                 }
@@ -1165,6 +1167,7 @@ class TolkInferenceWalker(
                 val subType = structTy.substitute(Substitution(substitution))
                 subType
             }
+
             is TolkVar -> flow.getType(TolkSinkExpression(symbol))
             else -> flow.getType(symbol)
         }
@@ -1680,13 +1683,24 @@ class TolkInferenceWalker(
             }
 
             is TolkDotExpression -> {
-                val index = expression.targetIndex ?: return null
                 val leftType = calcDeclaredTypeBeforeSmartCast(expression.left) ?: return null
-                if (leftType is TolkTensorTy) {
-                    return leftType.elements.getOrNull(index)
-                }
-                if (leftType is TolkTypedTupleTy) {
-                    return leftType.elements.getOrNull(index)
+                return when (leftType) {
+                    is TyStruct -> {
+                        val right = expression.right ?: return null
+                        val field = ctx.getResolvedRefs(right).firstOrNull()?.element as? TolkStructField ?: return null
+                        field.type
+                    }
+
+                    is TolkTensorTy -> {
+                        val index = expression.targetIndex ?: return null
+                        leftType.elements.getOrNull(index)
+                    }
+
+                    is TolkTypedTupleTy -> {
+                        val index = expression.targetIndex ?: return null
+                        leftType.elements.getOrNull(index)
+                    }
+                    else -> null
                 }
             }
 

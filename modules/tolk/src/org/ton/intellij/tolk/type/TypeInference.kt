@@ -1574,13 +1574,25 @@ class TolkInferenceWalker(
             }
         }
 
+        var substitution = Substitution()
         val body = element.structExpressionBody
+        val structPsi = structType?.psi
         body.structExpressionFieldList.forEach { field ->
             val expression = field.expression
             val name = field.identifier.text.removeSurrounding("`")
             if (expression != null) { // field: expression
-                val fieldType = structType?.psi?.structFields?.firstOrNull { it.name == name }?.type
+                val field = structPsi.structFields.firstOrNull { it.name == name }
+                var fieldType = field?.type
+                if (fieldType != null) {
+                    fieldType = fieldType.substitute(substitution)
+                }
                 inferExpression(expression, nextFlow.outFlow, false, fieldType)
+                val expressionType = ctx.getType(expression)
+                if (fieldType != null && expressionType != null) {
+                    substitution += Substitution.instantiate(fieldType, expressionType)
+                    val subType = expressionType.substitute(substitution)
+                    ctx.setType(expression, subType)
+                }
             } else { // let foo = 1; MyStruct { foo };
                 val localSymbol = flow.getSymbol(name)
                 if (localSymbol != null) {
@@ -1590,7 +1602,8 @@ class TolkInferenceWalker(
         }
 
         val type = structType ?: return nextFlow
-        ctx.setType(element, type)
+        val subType = type.substitute(substitution)
+        ctx.setType(element, subType)
 
         return nextFlow
     }

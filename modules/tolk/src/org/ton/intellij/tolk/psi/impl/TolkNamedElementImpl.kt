@@ -7,6 +7,8 @@ import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.TolkNamedStub
 import org.ton.intellij.tolk.type.TolkFunctionTy
+import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.render
 import javax.swing.Icon
 
 abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementImpl<T>, TolkNamedElement {
@@ -37,23 +39,23 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
                     var separator = ""
                     parameterList?.parameterList?.forEach { parameter ->
                         append(separator)
-                        parameter.type?.renderAppendable(this) ?: append("_")
+                        append((parameter.type ?: TolkTy.Unknown).render())
                         separator = ", "
                     }
                     (type as? TolkFunctionTy)?.returnType?.let {
                         append("): ")
-                        it.renderAppendable(this)
+                        append(it.render())
                     } ?: append("): void")
                 }
                 is TolkConstVar -> buildString {
                     append(name)
                     append(": ")
-                    type?.renderAppendable(this) ?: append("_")
+                    append((type ?: TolkTy.Unknown).render())
                 }
                 is TolkGlobalVar -> buildString {
                     append(name)
                     append(": ")
-                    type?.renderAppendable(this) ?: append("_")
+                    append((type ?: TolkTy.Unknown).render())
                 }
                 is TolkTypeDef -> name
                 else -> name

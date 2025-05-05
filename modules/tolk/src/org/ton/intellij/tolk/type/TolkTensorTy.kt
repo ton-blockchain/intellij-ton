@@ -6,17 +6,6 @@ data class TolkTensorTy private constructor(
 ) : TolkTy {
     override fun toString(): String = "(${elements.joinToString()})"
 
-    override fun renderAppendable(appendable: Appendable) = appendable.apply{
-        append("(")
-        var separator = ""
-        elements.forEach {
-            append(separator)
-            it.renderAppendable(appendable)
-            separator = ", "
-        }
-        append(")")
-    }
-
     override fun superFoldWith(folder: TypeFolder): TolkTy {
         return create(
             elements.map { it.foldWith(folder) }

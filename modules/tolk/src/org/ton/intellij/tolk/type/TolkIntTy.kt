@@ -35,9 +35,6 @@ interface TolkIntTy : TolkPrimitiveTy {
         if (other.actualType() == TolkTy.Int) return true
         return other == TolkTy.Never
     }
-
-    override fun renderAppendable(appendable: Appendable) = appendable.append("int")
-
 }
 
 data class TolkConstantIntTy(

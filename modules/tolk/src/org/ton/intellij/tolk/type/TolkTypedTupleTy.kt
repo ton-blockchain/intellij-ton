@@ -8,18 +8,6 @@ class TolkTypedTupleTy private constructor(
 
     override fun hasGenerics(): Boolean = hasGenerics
 
-    override fun renderAppendable(appendable: Appendable): Appendable {
-        appendable.append("[")
-        var separator = ""
-        elements.forEach {
-            appendable.append(separator)
-            it.renderAppendable(appendable)
-            separator = ", "
-        }
-        appendable.append("]")
-        return appendable
-    }
-
     override fun actualType(): TolkTypedTupleTy = TolkTypedTupleTy(
         elements.map { it.actualType() },
         hasGenerics

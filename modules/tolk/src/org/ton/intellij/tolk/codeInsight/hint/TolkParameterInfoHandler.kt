@@ -6,6 +6,8 @@ import com.intellij.psi.PsiFile
 import com.intellij.refactoring.suggested.startOffset
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.hasSelf
+import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.parentOfType
 
 class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<String>> {
@@ -40,7 +42,7 @@ class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<Str
             val parameterInfo = buildString {
                 append(parameter.name)
                 append(": ")
-                append(parameter.typeExpression.text)
+                append((parameter.typeExpression.type ?: TolkTy.Unknown).render())
             }
             parameterInfos.add(parameterInfo)
         }

@@ -8,6 +8,7 @@ import org.ton.intellij.tolk.psi.TolkCallExpression
 import org.ton.intellij.tolk.psi.TolkLiteralExpression
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.TolkVisitor
+import org.ton.intellij.tolk.type.render
 
 class TolkExpectTypeBuiltinInspection  : TolkInspectionBase() {
     override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor = object  : TolkVisitor() {
@@ -21,9 +22,7 @@ class TolkExpectTypeBuiltinInspection  : TolkInspectionBase() {
             val expectTypeText = ((right.expression as? TolkLiteralExpression)?.value as? TolkSliceValue)?.value ?: return
             val actualType = left.expression.type ?: return
 
-            val actualTypeText = buildString {
-                actualType.renderAppendable(this)
-            }
+            val actualTypeText = actualType.render()
             if (expectTypeText != actualTypeText) {
                 holder.registerProblem(
                     left,

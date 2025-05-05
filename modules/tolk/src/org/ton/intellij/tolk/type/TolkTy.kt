@@ -43,13 +43,6 @@ interface TolkTy : TypeFoldable<TolkTy> {
         }
     }
 
-    fun renderAppendable(appendable: Appendable): Appendable = appendable.append(toString())
-
-    val displayName: String
-        get() = buildString {
-            renderAppendable(this)
-        }
-
     open fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
         if (other is TolkAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
@@ -63,7 +56,6 @@ interface TolkTy : TypeFoldable<TolkTy> {
     override fun foldWith(folder: TypeFolder): TolkTy = folder.foldType(this)
 
     override fun superFoldWith(folder: TypeFolder): TolkTy = this
-
 
     companion object {
         val Int = TolkIntRangeTy(TvmIntRangeSet.ALL)
@@ -378,8 +370,6 @@ data class TolkVarInt32Ty(
 
     override fun actualType(): TolkTy = this
 
-    override fun renderAppendable(appendable: Appendable) = appendable.append("varint32")
-
     override fun toString(): String = "varint32"
 }
 
@@ -389,8 +379,6 @@ data class TolkVarInt16Ty(
     override fun negate(): TolkIntTy = TolkVarInt16Ty(range.unaryMinus())
 
     override fun actualType(): TolkTy = this
-
-    override fun renderAppendable(appendable: Appendable) = appendable.append("varint16")
 
     override fun toString(): String = "varint16"
 }

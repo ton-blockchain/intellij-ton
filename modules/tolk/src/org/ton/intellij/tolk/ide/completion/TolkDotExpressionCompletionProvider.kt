@@ -16,6 +16,7 @@ import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.impl.toLookupElement
 import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 import org.ton.intellij.tolk.type.TyStruct
+import org.ton.intellij.tolk.type.render
 
 object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement>
@@ -42,7 +43,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                     LookupElementBuilder
                         .createWithIcon(field)
                         .apply {
-                            field.type?.displayName?.let {
+                            field.type?.render()?.let {
                                 withTypeText(it)
                             }
                         }

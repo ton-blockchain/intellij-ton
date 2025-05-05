@@ -10,6 +10,7 @@ import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.stub.TolkTypeDefStub
 import org.ton.intellij.tolk.type.TolkAliasTy
 import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.recursionGuard
 import javax.swing.Icon
 
@@ -42,7 +43,7 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
                 append(name)
                 type?.let {
                     append(" = ")
-                    it.underlyingType.renderAppendable(this)
+                    it.underlyingType.render()
                 }
             }
 

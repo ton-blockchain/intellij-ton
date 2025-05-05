@@ -23,6 +23,8 @@ import org.ton.intellij.tolk.psi.impl.toLookupElement
 import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 import org.ton.intellij.tolk.type.TolkFunctionTy
+import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.psiElement
 
 object TolkCommonCompletionProvider : TolkCompletionProvider() {
@@ -35,10 +37,11 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                             .withParent(TolkDotExpression::class.java)
                     )
             )
-            .andNot(PlatformPatterns.psiElement().afterLeaf(
-                PlatformPatterns.psiElement().withText(StandardPatterns.string().matches("\\d+"))
-            ))
-
+            .andNot(
+                PlatformPatterns.psiElement().afterLeaf(
+                    PlatformPatterns.psiElement().withText(StandardPatterns.string().matches("\\d+"))
+                )
+            )
 
 
     override fun addCompletions(
@@ -206,13 +209,10 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
 
         return when (this) {
             is TolkFunction -> {
+                val returnType = (this.type as? TolkFunctionTy)?.returnType ?: TolkTy.Unknown
                 PrioritizedLookupElement.withPriority(
                     base
-                        .withTypeText((this.type as? TolkFunctionTy)?.returnType?.let {
-                            buildString {
-                                it.renderAppendable(this)
-                            }
-                        } ?: "_")
+                        .withTypeText(returnType.render())
                         .let { builder ->
                             typeParameterList?.let { list ->
                                 builder.appendTailText(
@@ -234,7 +234,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                                     buildString {
                                         append(it.name)
                                         append(": ")
-                                        it.typeExpression?.type?.renderAppendable(this) ?: append("_")
+                                        append((it.type ?: TolkTy.Unknown).render())
                                     }
                                 } ?: "()", true)
                         }
@@ -267,9 +267,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             is TolkConstVar -> {
                 PrioritizedLookupElement.withPriority(
                     base
-                        .withTypeText(buildString {
-                            typeExpression?.type?.renderAppendable(this) ?: append("_")
-                        })
+                        .withTypeText((type ?: TolkTy.Unknown).render())
                         .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
                         .withInsertHandler { context, item ->
                             context.commitDocument()
@@ -286,11 +284,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             is TolkGlobalVar -> {
                 PrioritizedLookupElement.withPriority(
                     base
-                        .withTypeText(
-                            buildString {
-                                typeExpression?.type?.renderAppendable(this) ?: append("_")
-                            }
-                        )
+                        .withTypeText((type ?: TolkTy.Unknown).render())
                         .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
                         .withInsertHandler { context, item ->
                             context.commitDocument()
@@ -308,9 +302,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 PrioritizedLookupElement.withPriority(
                     base
                         .withIcon(TolkIcons.VARIABLE)
-                        .withTypeText(buildString {
-                            typeExpression?.type?.renderAppendable(this) ?: append("_")
-                        }),
+                        .withTypeText((type ?: TolkTy.Unknown).render()),
                     TolkCompletionContributor.VAR_PRIORITY
                 )
             }
@@ -319,9 +311,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 PrioritizedLookupElement.withPriority(
                     base
                         .withIcon(TolkIcons.PARAMETER)
-                        .withTypeText(buildString {
-                            typeExpression?.type?.renderAppendable(this) ?: append("_")
-                        }),
+                        .withTypeText((type ?: TolkTy.Unknown).render()),
                     TolkCompletionContributor.VAR_PRIORITY
                 )
             }

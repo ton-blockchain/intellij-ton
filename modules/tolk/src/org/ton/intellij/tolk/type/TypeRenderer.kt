@@ -48,12 +48,13 @@ private class TypeRenderer(
             is TolkBoolTy -> "bool"
             is TolkCellTy -> "cell"
             is TolkCoinsTy -> "coins"
+            is TolkVarInt16Ty -> "varint16"
+            is TolkVarInt32Ty -> "varint32"
             is TolkIntNTy -> if (ty.unsigned) {
                 "uint${ty.n}"
             } else {
                 "int${ty.n}"
             }
-
             is TolkBytesNTy -> "bytes${ty.n}"
             is TolkIntTy -> "int"
             is TolkBuilderTy -> "builder"
@@ -78,7 +79,7 @@ private class TypeRenderer(
                 }
             }
 
-            else -> ty.displayName
+            else -> ty.toString()
         }
     }
 }

@@ -7,6 +7,8 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.parents
 import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.render
 
 class TolkTypeProvider : ExpressionTypeProvider<TolkTypedElement>() {
     override fun getInformationHint(elementAt: TolkTypedElement): @NlsContexts.HintText String {
@@ -14,11 +16,7 @@ class TolkTypeProvider : ExpressionTypeProvider<TolkTypedElement>() {
     }
 
     private fun typePresentation(element: TolkTypedElement): String {
-        return element.type?.let {
-            buildString {
-                it.renderAppendable(this)
-            }
-        } ?: "<unknown>"
+        return (element.type ?: TolkTy.Unknown).render()
     }
 
     override fun getErrorHint(): @NlsContexts.HintText String = TolkBundle.message("codeInsight.hint.error_hint")

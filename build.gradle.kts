@@ -71,7 +71,6 @@ dependencies {
         pluginModule(implementation(project(":asm")))
         pluginModule(implementation(project(":tolk")))
         pluginModule(implementation(project(":func")))
-        pluginModule(implementation(project(":tact")))
         pluginModule(implementation(project(":boc")))
         pluginModule(implementation(project(":tlb")))
         pluginModule(implementation(project(":fift")))
@@ -87,7 +86,7 @@ intellijPlatform {
         version = project.version.toString()
         description = """
         TON Blockchain Development Plugin for IntelliJ: Adds support for TON blockchain programming languages,
-        including FunC, Tolk, Fift, Tact, and TL-B schemas.
+        including Tolk, Func, Fift and TL-B schemas.
         Ideal for Web3 developers working within the TON ecosystem.
         """.trimIndent()
         changeNotes.set(

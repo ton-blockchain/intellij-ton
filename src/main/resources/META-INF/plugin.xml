@@ -4,14 +4,13 @@
     <category>Languages</category>
     <vendor url="https://github.com/ton-blockchain/intellij-ton">TON Core</vendor>
     <description>TON Blockchain Development Plugin for IntelliJ: Adds support for TON blockchain programming languages,
-        including FunC, Tolk, Fift, Tact, and TL-B schemas.
+        including Tolk, FunC, Fift, and TL-B schemas.
         Ideal for Web3 developers working within the TON ecosystem.
     </description>
 
     <xi:include href="/META-INF/asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/tolk.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/func.xml" xpointer="xpointer(/idea-plugin/*)"/>
-    <xi:include href="/META-INF/tact.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/tlb.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/fift.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/boc.xml" xpointer="xpointer(/idea-plugin/*)"/>

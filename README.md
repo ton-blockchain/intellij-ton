@@ -13,7 +13,6 @@
 - FunC
 - Tolk
 - Fift
-- Tact
 - TL-B Schemas
 
 ---

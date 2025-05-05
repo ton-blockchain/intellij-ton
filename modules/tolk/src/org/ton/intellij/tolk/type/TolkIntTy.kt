@@ -35,6 +35,11 @@ interface TolkIntTy : TolkPrimitiveTy {
         if (other.actualType() == TolkTy.Int) return true
         return other == TolkTy.Never
     }
+
+    override fun isEquivalentToInner(other: TolkTy): Boolean {
+        if (this === other) return true
+        return actualType() == other.actualType()
+    }
 }
 
 data class TolkConstantIntTy(
@@ -56,6 +61,7 @@ data class TolkConstantIntTy(
         if (bitLength <= 16) return value.toString()
         return "0x${value.toString(16)}"
     }
+
 }
 
 data class TolkIntRangeTy(

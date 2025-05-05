@@ -62,14 +62,23 @@ class TolkFlowContext(
         }
 
         // step 3: try to match generic receivers, e.g. `Container<T>.copy` / `(T?|slice).copy` but NOT `T.copy`
+        val actualCalledReceiver = calledReceiver.actualType()
         for (function in namedFunctions) {
             val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
+            val actualFunctionReceiver = functionReceiver.actualType()
             if (functionReceiver.hasGenerics() && functionReceiver !is TyTypeParameter) {
-                val sub = Substitution.instantiate(functionReceiver, calledReceiver)
-                val subType = functionReceiver.substitute(sub)
-                if (calledReceiver.isEquivalentTo(subType)) {
-                    candidates.add(function to sub)
+                if (actualFunctionReceiver is TyStruct && actualCalledReceiver is TyStruct) {
+                    if (!actualFunctionReceiver.psi.isEquivalentTo(actualCalledReceiver.psi)) {
+                        continue
+                    }
                 }
+
+                val sub = Substitution.instantiate(functionReceiver, calledReceiver)
+//                val subType = functionReceiver.substitute(sub)
+//                if (calledReceiver.unwrapTypeAlias().isEquivalentTo(subType)) {
+//                    candidates.add(function to sub)
+//                }
+                candidates.add(function to sub)
             }
         }
         if (candidates.isNotEmpty()) {

@@ -40,7 +40,7 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
 
 val TolkStruct.declaredType: TyStruct get() = TolkTy.struct(this)
 
-val TolkStruct.structFields: List<TolkStructField> get() {
+val TolkStruct?.structFields: List<TolkStructField> get() {
     // todo: optimize by stub
-    return structBody?.structFieldList ?: emptyList()
+    return this?.structBody?.structFieldList ?: emptyList()
 }

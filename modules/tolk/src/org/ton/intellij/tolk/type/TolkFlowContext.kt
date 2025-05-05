@@ -41,7 +41,8 @@ class TolkFlowContext(
         // step1: find all methods where a receiver equals to provided, e.g. `MInt.copy`
         for (function in namedFunctions) {
             val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
-            if (!functionReceiver.hasGenerics() && functionReceiver.isEquivalentTo(calledReceiver)) {
+//            if (!functionReceiver.hasGenerics() && functionReceiver.isEquivalentTo(calledReceiver)) {
+            if (!functionReceiver.hasGenerics() && functionReceiver == calledReceiver) {
                 candidates.add(function to EmptySubstitution)
             }
         }

@@ -34,10 +34,6 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
 
     override fun toString(): String = "TolkReferenceExpression($text)"
 
-    override fun getContext(): PsiElement? {
-        return parentOfType<TolkBlockStatement>()
-    }
-
     companion object {
         private val EMPTY_ARRAY = emptyArray<TolkSymbolReference>()
     }

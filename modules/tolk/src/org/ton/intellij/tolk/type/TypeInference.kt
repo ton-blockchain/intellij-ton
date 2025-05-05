@@ -1335,7 +1335,8 @@ class TolkInferenceWalker(
             val newResolvedRefs = ctx.getResolvedRefs(right).filter {
                 val element = it.element
                 if (element is TolkFunction) {
-                    element.hasSelf == !isStaticReceiver
+//                    element.hasSelf == !isStaticReceiver
+                    (element.hasSelf == !isStaticReceiver) || isStaticReceiver
                 } else true
             }
             ctx.setResolvedRefs(right, newResolvedRefs)

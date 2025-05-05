@@ -421,7 +421,7 @@ private CatchParameterList ::= '(' CatchParameter (',' CatchParameter)? ')' {
 CatchParameter ::= IDENTIFIER {
     mixin="org.ton.intellij.tolk.psi.impl.TolkCatchParameterMixin"
     implements = [
-        "org.ton.intellij.tolk.psi.TolkSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkLocalSymbolElement"
     ]
 }
 
@@ -559,7 +559,7 @@ VarRedef ::= ReferenceExpression 'redef' {
 Var ::= IDENTIFIER (':' TypeExpression)? {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkVarMixin"
     implements = [
-        "org.ton.intellij.tolk.psi.TolkSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkLocalSymbolElement"
     ]
     extends = VarDefinition
 }
@@ -708,7 +708,7 @@ ParameterList ::= '(' !',' SelfParameter_with_comma? Parameter_with_recover* ')'
 Parameter ::= 'mutate'? IDENTIFIER ':' TypeExpression {
     mixin="org.ton.intellij.tolk.psi.impl.TolkParameterMixin"
     implements=[
-        "org.ton.intellij.tolk.psi.TolkSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkLocalSymbolElement"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -723,7 +723,7 @@ SelfParameter ::= 'mutate'? SelfTypeExpression {
     stubClass="org.ton.intellij.tolk.stub.TolkSelfParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
     implements=[
-        "org.ton.intellij.tolk.psi.TolkSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkLocalSymbolElement"
     ]
     mixin="org.ton.intellij.tolk.psi.impl.TolkSelfParameterMixin"
 }

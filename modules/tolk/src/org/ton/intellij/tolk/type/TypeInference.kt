@@ -1167,8 +1167,8 @@ class TolkInferenceWalker(
                 val subType = structTy.substitute(Substitution(substitution))
                 subType
             }
-
             is TolkVar -> flow.getType(TolkSinkExpression(symbol))
+            is TolkLocalSymbolElement -> flow.getType(TolkSinkExpression(symbol)) ?: symbol.type
             else -> flow.getType(symbol)
         }
         ctx.setType(element, type)
@@ -1657,7 +1657,7 @@ class TolkInferenceWalker(
                 }
                 if (indexPath == 0L) return null
                 val ref = currentDot.left.unwrapNotNull() as? TolkReferenceExpression ?: return null
-                val symbol = ctx.getResolvedRefs(ref).firstOrNull()?.element as? TolkVar ?: return null
+                val symbol = ctx.getResolvedRefs(ref).firstOrNull()?.element as? TolkLocalSymbolElement ?: return null
                 return TolkSinkExpression(symbol, indexPath)
             }
 

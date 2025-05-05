@@ -41,7 +41,7 @@ abstract class TolkIncludeDefinitionMixin : StubBasedPsiElementBase<TolkIncludeD
                 val subPath = path.substringAfter("@stdlib/")
                 resolve.stdlibFile.findFile(subPath)
             } else {
-                file.virtualFile?.findFileByRelativePath("../$path")
+                file.originalFile.virtualFile?.findFileByRelativePath("../$path")
             }
         }
     }

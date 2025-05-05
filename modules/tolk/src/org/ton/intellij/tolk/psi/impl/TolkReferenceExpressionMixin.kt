@@ -3,12 +3,11 @@ package org.ton.intellij.tolk.psi.impl
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.parentOfType
-import org.ton.intellij.tolk.psi.TolkBlockStatement
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.reference.TolkSymbolReference
 import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.inference
 
 
 abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceExpression {
@@ -18,6 +17,13 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
         if (name != null && TolkTy.byName(name) != null) return EMPTY_ARRAY
         return arrayOf(TolkSymbolReference(this))
     }
+
+    override val type: TolkTy?
+        get() {
+            val inference = inference ?: return null
+            val result = inference.getType(this)
+            return result
+        }
 
     override fun getReference(): TolkSymbolReference? = references.firstOrNull()
 

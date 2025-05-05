@@ -25,7 +25,7 @@ abstract class TolkParameterMixin : TolkNamedElementImpl<TolkParameterStub>, Tol
                 val function = PsiTreeUtil.getParentOfType(this, TolkFunction::class.java) ?: return null
                 return function.functionReceiver?.typeExpression?.type
             }
-            return typeExpression?.type
+            return typeExpression.type
         }
 
     val isMutable: Boolean get() = greenStub?.isMutable ?: (mutateKeyword != null)

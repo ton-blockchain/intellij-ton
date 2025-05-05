@@ -229,9 +229,10 @@ class TolkInferenceWalker(
     fun inferFunction(element: TolkFunction, flow: TolkFlowContext): TolkFlowContext {
         currentFunction = element
         var nextFlow = flow
+        val selfType = element.functionReceiver?.typeExpression?.type ?: TolkTy.Unknown
         ctx.declaredReturnType = element.returnType?.let {
             if (it.selfKeyword != null) {
-                element.functionReceiver?.typeExpression?.type
+                selfType
             } else {
                 it.typeExpression?.type
             }
@@ -239,8 +240,14 @@ class TolkInferenceWalker(
         element.typeParameterList?.typeParameterList?.forEach { typeParameter ->
             nextFlow.setSymbol(typeParameter, typeParameter.type ?: TolkTy.Unknown)
         }
-        element.parameterList?.parameterList?.forEach { functionParameter ->
-            nextFlow.setSymbol(functionParameter, functionParameter.type ?: TolkTy.Unknown)
+        val parameterList = element.parameterList
+        if (parameterList != null) {
+            parameterList.selfParameter?.let { selfParameter ->
+                nextFlow.setSymbol(selfParameter, selfType)
+            }
+            parameterList.parameterList.forEach { functionParameter ->
+                nextFlow.setSymbol(functionParameter, functionParameter.type ?: TolkTy.Unknown)
+            }
         }
         element.functionBody?.blockStatement?.let {
             nextFlow = processBlockStatement(it, nextFlow)
@@ -1171,7 +1178,11 @@ class TolkInferenceWalker(
         flow: TolkFlowContext,
         usedAsCondition: Boolean,
     ): TolkExpressionFlowContext {
-        ctx.setType(element, currentFunction?.functionReceiver?.typeExpression?.type)
+        val selfParam = element.reference?.resolve() as? TolkSelfParameter
+        if (selfParam != null) {
+            val type = flow.getType(TolkSinkExpression(selfParam)) ?: flow.getType(selfParam)
+            ctx.setType(element, type)
+        }
         return TolkExpressionFlowContext(flow, usedAsCondition)
     }
 
@@ -1491,7 +1502,7 @@ class TolkInferenceWalker(
 
                 val syncExprType = if (symbol != null) {
                     ctx.setResolvedRefs(matchPatternReference, listOf(PsiElementResolveResult(symbol)))
-                    ctx.getType(symbol)
+                    ctx.getType(symbol) ?: symbol.type
                 } else {
                     var exactType = TolkTy.byName(name)
                     if (exactType == null) {
@@ -1610,6 +1621,11 @@ class TolkInferenceWalker(
 
     private fun extractSinkExpression(expression: TolkExpression): TolkSinkExpression? {
         return when (expression) {
+            is TolkSelfExpression -> {
+                val selfParam = expression.reference?.resolve() as? TolkSelfParameter ?: return null
+                return TolkSinkExpression(selfParam)
+            }
+
             is TolkReferenceExpression -> {
                 val symbol = ctx.getResolvedRefs(expression).firstOrNull()?.element as? TolkSymbolElement ?: return null
                 return TolkSinkExpression(symbol)

@@ -722,6 +722,10 @@ private Parameter_recover ::= !('('|'['|'mutate'|IDENTIFIER|'self'|')'|'{'|';')
 SelfParameter ::= 'mutate'? SelfTypeExpression {
     stubClass="org.ton.intellij.tolk.stub.TolkSelfParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkSymbolElement"
+    ]
+    mixin="org.ton.intellij.tolk.psi.impl.TolkSelfParameterMixin"
 }
 private SelfParameter_with_comma ::= SelfParameter (','|&')') {
     pin = 1

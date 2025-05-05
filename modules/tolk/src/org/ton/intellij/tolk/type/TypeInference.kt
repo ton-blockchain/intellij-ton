@@ -1089,13 +1089,6 @@ class TolkInferenceWalker(
         }
 
         var symbol: TolkSymbolElement? = flow.getSymbol(name)
-        if (symbol != null) {
-//            val symbolContext = symbol.parentOfType<TolkBlockStatement>()
-//            val currentContext = element.parentOfType<TolkBlockStatement>()
-//            if (symbolContext != null && currentContext != null && symbolContext != currentContext) {
-//                symbol = null
-//            }
-        }
 
         if (symbol == null) {
             symbol = TolkBuiltins[project].getFunction(name)
@@ -1137,6 +1130,11 @@ class TolkInferenceWalker(
 
             is TolkStructField -> {
                 symbol.type
+            }
+
+            is TolkTypeDef -> {
+                val typeAliasTy = symbol.type
+                typeAliasTy
             }
 
             is TolkStruct -> {
@@ -1305,7 +1303,7 @@ class TolkInferenceWalker(
         var nextFlow = flow
         val left = element.left
         nextFlow = inferExpression(left, nextFlow, false).outFlow
-        val leftType = ctx.getType(left)
+        val leftType = ctx.getType(left)?.unwrapTypeAlias()
 
         val right = element.right
 

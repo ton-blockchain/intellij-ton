@@ -902,8 +902,13 @@ class TolkInferenceWalker(
         val afterExpr = inferExpression(expression, flow, false)
 
         val isExprType = element.typeExpression?.type
-        val rhsType = isExprType?.unwrapTypeAlias()
-        val exprType = ctx.getType(expression)?.unwrapTypeAlias()
+        var rhsType = isExprType?.unwrapTypeAlias()
+        val exprType = ctx.getType(expression)?.unwrapTypeAlias() ?: TolkTy.Unknown
+        if (rhsType is TyStruct) {
+            tryPickInstantiatedGenericFromHint(exprType, rhsType.psi)?.let {
+                rhsType = it
+            }
+        }
         val nonRhsType = exprType.subtract(rhsType)
         val isNegated = element.node.findChildByType(TolkElementTypes.NOT_IS_KEYWORD) != null
         var resultType: TolkBoolTy = TolkTy.Bool
@@ -1725,6 +1730,32 @@ class TolkInferenceWalker(
             current = current.expression ?: return current
         }
         return current
+    }
+
+    // helper function: given hint = `Ok<int> | Err<slice>` and struct `Ok`, return `Ok<int>`
+    // example: `match (...) { Ok => ... }` we need to deduce `Ok<T>` based on subject
+    private fun tryPickInstantiatedGenericFromHint(hint: TolkTy, lookupRef: TolkStruct): TyStruct? {
+        // example: `var w: Ok<int> = Ok { ... }`, hint is `Ok<int>`, lookup is `Ok`
+        (hint.unwrapTypeAlias() as? TyStruct)?.let { hStruct ->
+            if (lookupRef.isEquivalentTo(hStruct.psi)) {
+                return hStruct
+            }
+        }
+        // example: `fun f(): Response<int, slice> { return Err { ... } }`, hint is `Ok<int> | Err<slice>`, lookup is `Err`
+        (hint.unwrapTypeAlias() as? TyUnion)?.let { hUnion ->
+            var onlyVariant: TyStruct? = null
+            for (variant in hUnion.variants) {
+                val unwrappedVariant = variant.unwrapTypeAlias()
+                if (unwrappedVariant is TyStruct && lookupRef.isEquivalentTo(unwrappedVariant.psi)) {
+                    if (onlyVariant != null) {
+                        return null
+                    }
+                    onlyVariant = unwrappedVariant
+                }
+            }
+            return onlyVariant
+        }
+        return null
     }
 
     // return `T`, so that `T + subtract_type` = type

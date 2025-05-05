@@ -60,6 +60,12 @@ class TyUnion private constructor(
         return simplify(newElements)
     }
 
+    override fun isEquivalentToInner(other: TolkTy): Boolean {
+        if (this === other) return true
+        if (other !is TyUnion) return false
+        return containsAll(other)
+    }
+
     fun containsAll(rhsType: TyUnion): Boolean {
         for (rhsVariant in rhsType.variants) {
             if (!contains(rhsVariant)) {
@@ -70,7 +76,7 @@ class TyUnion private constructor(
     }
 
     operator fun contains(type: TolkTy): Boolean {
-        return variants.any { it.actualType() == type.actualType() }
+        return variants.any { it.actualType().isEquivalentTo(type.actualType()) }
     }
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {

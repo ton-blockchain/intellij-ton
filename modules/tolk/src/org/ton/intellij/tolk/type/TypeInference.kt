@@ -1287,7 +1287,8 @@ class TolkInferenceWalker(
         arguments.forEachIndexed { index, argument ->
             val argExpr = argument.expression
             nextFlow = inferExpression(argExpr, nextFlow, false).outFlow
-            val argType = calcDeclaredTypeBeforeSmartCast(argExpr) ?: ctx.getType(argExpr) ?: TolkTy.Unknown
+//            val argType = calcDeclaredTypeBeforeSmartCast(argExpr) ?: ctx.getType(argExpr) ?: TolkTy.Unknown
+            val argType = ctx.getType(argExpr) ?: TolkTy.Unknown
             argumentTypes.add(argType)
         }
 

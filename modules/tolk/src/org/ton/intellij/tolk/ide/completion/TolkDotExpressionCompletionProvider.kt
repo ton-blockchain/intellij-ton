@@ -13,6 +13,9 @@ import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.TolkDotExpression
 import org.ton.intellij.tolk.psi.TolkFunction
+import org.ton.intellij.tolk.psi.TolkReferenceExpression
+import org.ton.intellij.tolk.psi.TolkTypeSymbolElement
+import org.ton.intellij.tolk.psi.impl.hasSelf
 import org.ton.intellij.tolk.psi.impl.toLookupElement
 import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 import org.ton.intellij.tolk.type.TyStruct
@@ -23,10 +26,11 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         get() = PlatformPatterns.psiElement()
             .afterLeaf(".")
             .withSuperParent(2, TolkDotExpression::class.java)
-            .andNot(PlatformPatterns.psiElement().afterLeaf(
-                PlatformPatterns.psiElement().withText(StandardPatterns.string().matches("\\d+"))
-            ))
-
+            .andNot(
+                PlatformPatterns.psiElement().afterLeaf(
+                    PlatformPatterns.psiElement().withText(StandardPatterns.string().matches("\\d+"))
+                )
+            )
 
     override fun addCompletions(
         parameters: CompletionParameters,
@@ -35,10 +39,12 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
     ) {
         val project = parameters.originalFile.project
         val dotExpression = parameters.position.parentOfType<TolkDotExpression>() ?: return
-        val leftType = dotExpression.left.type ?: return
+        val left = dotExpression.left
+        val isStaticReceiver = left is TolkReferenceExpression && left.reference?.resolve() is TolkTypeSymbolElement
+        val leftType = left.type ?: return
         val actualLeftType = leftType.unwrapTypeAlias().actualType()
-        if (actualLeftType is TyStruct) {
-            actualLeftType.psi?.structBody?.structFieldList?.forEach { field ->
+        if (actualLeftType is TyStruct && !isStaticReceiver) {
+            actualLeftType.psi.structBody?.structFieldList?.forEach { field ->
                 result.addElement(
                     LookupElementBuilder
                         .createWithIcon(field)
@@ -59,9 +65,12 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                 GlobalSearchScope.allScope(project),
                 TolkFunction::class.java
             ) { function ->
-                val receiverType = function.functionReceiver?.typeExpression?.type?.unwrapTypeAlias()?.actualType() ?: return@processElements true
+                val receiverType = function.functionReceiver?.typeExpression?.type?.unwrapTypeAlias()?.actualType()
+                    ?: return@processElements true
                 if (receiverType == actualLeftType) {
-                    result.addElement(function.toLookupElement())
+                    if (function.hasSelf == !isStaticReceiver) {
+                        result.addElement(function.toLookupElement())
+                    }
                 }
                 true
             }

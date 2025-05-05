@@ -1331,6 +1331,18 @@ class TolkInferenceWalker(
 
         if (right is TolkReferenceExpression) {
             nextFlow = inferReferenceExpression(right, nextFlow, false, leftType).outFlow
+            val isStaticReceiver = left is TolkReferenceExpression && ctx.getResolvedRefs(left).firstOrNull()?.element is TolkTypeSymbolElement
+            val newResolvedRefs = ctx.getResolvedRefs(right).filter {
+                val element = it.element
+                if (element is TolkFunction) {
+                    element.hasSelf == !isStaticReceiver
+                } else true
+            }
+            ctx.setResolvedRefs(right, newResolvedRefs)
+            if (newResolvedRefs.isEmpty()) {
+                ctx.setType(right, TolkTy.Unknown)
+            }
+
             var rightType = ctx.getType(right)
             if (leftType is TyStruct) {
                 extractSinkExpression(element)?.let { sExpr ->

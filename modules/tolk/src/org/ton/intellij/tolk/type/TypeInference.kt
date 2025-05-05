@@ -1060,7 +1060,7 @@ class TolkInferenceWalker(
 
         val objType = receiverType?.unwrapTypeAlias() ?: TolkTy.Unknown
         if (objType is TyStruct) {
-            val field = objType.psi.findField(name)
+            val field = objType.psi.structFields.firstOrNull { it.name == name }
             if (field != null) {
                 val inferredType = extractSinkExpression(element)?.let { sExpr ->
                     flow.getType(sExpr)
@@ -1578,7 +1578,7 @@ class TolkInferenceWalker(
             val expression = field.expression
             val name = field.identifier.text.removeSurrounding("`")
             if (expression != null) { // field: expression
-                val fieldType = structType?.psi?.findField(name)?.type
+                val fieldType = structType?.psi?.structFields?.firstOrNull { it.name == name }?.type
                 inferExpression(expression, nextFlow.outFlow, false, fieldType)
             } else { // let foo = 1; MyStruct { foo };
                 val localSymbol = flow.getSymbol(name)
@@ -1605,11 +1605,17 @@ class TolkInferenceWalker(
                 var currentDot: TolkDotExpression = expression
                 var indexPath = 0L
                 while (true) {
-                    val targetIndex = currentDot.targetIndex ?: break
-                    if (targetIndex !in 0..255) break
-                    indexPath = (indexPath shl 8) + targetIndex + 1
+                    var indexAt = currentDot.targetIndex
+                    if (indexAt == null) {
+                        val right = expression.right ?: break
+                        val structField = ctx.getResolvedRefs(right).firstOrNull()?.element as? TolkStructField ?: break
+                        indexAt = structField.parent.children.indexOf(structField)
+                    }
+                    if (indexAt !in 0..255) break
+                    indexPath = (indexPath shl 8) + indexAt + 1
                     currentDot = currentDot.left.unwrapNotNull() as? TolkDotExpression ?: break
                 }
+                if (indexPath == 0L) return null
                 val ref = currentDot.left.unwrapNotNull() as? TolkReferenceExpression ?: return null
                 val symbol = ctx.getResolvedRefs(ref).firstOrNull()?.element as? TolkVar ?: return null
                 return TolkSinkExpression(symbol, indexPath)

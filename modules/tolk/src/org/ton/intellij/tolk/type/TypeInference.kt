@@ -17,19 +17,14 @@ import java.util.*
 
 val TolkElement.inference: TolkInferenceResult?
     get() {
-        val context: TolkInferenceContextOwner? =
-            this as? TolkInferenceContextOwner ?: context?.parentOfType<TolkInferenceContextOwner>(withSelf = true)
-        return if (context != null) {
-            inferTypesIn(context)
-        } else {
-            null
-        }
+       return parentOfType<TolkInferenceContextOwner>()?.selfInferenceResult
     }
 
 fun inferTypesIn(element: TolkInferenceContextOwner): TolkInferenceResult {
     val ctx = TolkInferenceContext(element.project, element)
-    return recursionGuard(element, memoize = false) { ctx.infer(element) }
-        ?: throw CyclicReferenceException(element)
+    return recursionGuard(element, memoize = false) {
+        ctx.infer(element)
+    } ?: throw CyclicReferenceException(element)
 }
 
 class CyclicReferenceException(val element: TolkInferenceContextOwner) :
@@ -198,7 +193,11 @@ class TolkInferenceWalker(
             nextFlow.globalSymbols[constVar.name?.removeSurrounding("`") ?: return@forEach] = constVar
         }
         element.constVars.forEach { constVar ->
-            nextFlow = inferConstant(constVar, nextFlow)
+            try {
+                nextFlow = inferConstant(constVar, nextFlow)
+            } catch (_: IllegalStateException) {
+                // ignore, err-1153.tolk
+            }
         }
         element.structs.forEach { struct ->
             val name = struct.name ?: return@forEach

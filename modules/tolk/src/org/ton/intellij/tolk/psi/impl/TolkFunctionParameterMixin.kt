@@ -3,9 +3,7 @@ package org.ton.intellij.tolk.psi.impl
 import com.intellij.lang.ASTNode
 import com.intellij.navigation.ItemPresentation
 import com.intellij.psi.stubs.IStubElementType
-import com.intellij.psi.util.PsiTreeUtil
 import org.ton.intellij.tolk.TolkIcons
-import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkParameter
 import org.ton.intellij.tolk.stub.TolkParameterStub
 import org.ton.intellij.tolk.type.TolkTy
@@ -20,12 +18,8 @@ abstract class TolkParameterMixin : TolkNamedElementImpl<TolkParameterStub>, Tol
 
     override val type: TolkTy?
         get() {
-            val typeExpression = typeExpression
-            if (typeExpression == null && name == "self") {
-                val function = PsiTreeUtil.getParentOfType(this, TolkFunction::class.java) ?: return null
-                return function.functionReceiver?.typeExpression?.type
-            }
-            return typeExpression.type
+            val t = typeExpression.type
+            return t
         }
 
     val isMutable: Boolean get() = greenStub?.isMutable ?: (mutateKeyword != null)

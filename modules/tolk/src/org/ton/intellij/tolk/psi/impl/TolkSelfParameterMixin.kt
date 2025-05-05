@@ -9,7 +9,6 @@ import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkSelfParameter
 import org.ton.intellij.tolk.stub.TolkSelfParameterStub
 import org.ton.intellij.tolk.type.TolkTy
-import org.ton.intellij.tolk.type.inference
 
 abstract class TolkSelfParameterMixin : StubBasedPsiElementBase<TolkSelfParameterStub>, TolkSelfParameter {
     constructor(node: ASTNode) : super(node)
@@ -17,7 +16,7 @@ abstract class TolkSelfParameterMixin : StubBasedPsiElementBase<TolkSelfParamete
     constructor(stub: TolkSelfParameterStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
 
     override val type: TolkTy?
-        get() = inference?.getType(this) ?: parentOfType<TolkFunction>()?.functionReceiver?.typeExpression?.type
+        get() = parentOfType<TolkFunction>()?.functionReceiver?.typeExpression?.type
 
     override fun getNameIdentifier(): PsiElement = selfTypeExpression
 

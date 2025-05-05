@@ -1060,12 +1060,15 @@ class TolkInferenceWalker(
 
         val objType = receiverType?.unwrapTypeAlias() ?: TolkTy.Unknown
         if (objType is TyStruct) {
+            val instantiate = Substitution.instantiate(objType.psi.declaredType, objType)
             val field = objType.psi.structFields.firstOrNull { it.name == name }
+
             if (field != null) {
                 val inferredType = extractSinkExpression(element)?.let { sExpr ->
                     flow.getType(sExpr)
                 } ?: field.type
-                ctx.setType(element, inferredType)
+                val subType = inferredType?.substitute(instantiate)
+                ctx.setType(element, subType)
                 ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(field)))
                 return nextFlow
             }

@@ -1,5 +1,13 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [2.5.5]
+
+### Added
+- [Tolk 0.12](https://github.com/ton-blockchain/ton/pull/1645) support
+
+### Removed
+- Tact support, use [Tact plugin](https://github.com/tact-lang/intelli-tact)
+
 ## [2.5.4]
 
 ### Added

@@ -3,15 +3,12 @@ package org.ton.intellij.tolk.ide.completion
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElementBuilder
-import com.intellij.openapi.vfs.VfsUtilCore
-import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.patterns.ElementPattern
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubIndex
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.util.parentOfType
@@ -62,26 +59,13 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         }
 
         val typeCandidates = HashSet<TolkSymbolElement>()
-        val tolkSdk = TolkSdkManager[project].getSdkRef().resolve(project)
-        if (tolkSdk != null) {
-            VfsUtilCore.iterateChildrenRecursively(tolkSdk.stdlibFile, null) {
-                val tolkFile = it.findPsiFile(project) as? TolkFile
-                tolkFile?.typeDefs?.forEach { typeDef ->
-                    typeCandidates.add(typeDef)
-                }
-                tolkFile?.structs?.forEach { struct ->
-                    typeCandidates.add(struct)
-                }
-                true
-            }
-        }
 
         StubIndex.getInstance().processAllKeys(TolkTypeSymbolIndex.KEY, project) { key ->
             StubIndex.getInstance().processElements(
                 TolkTypeSymbolIndex.KEY,
                 key,
                 project,
-                GlobalSearchScope.projectScope(project),
+                GlobalSearchScope.allScope(project),
                 TolkTypeSymbolElement::class.java
             ) {
                 typeCandidates.add(it)

@@ -3,14 +3,15 @@ package org.ton.intellij.tolk.psi
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.findFile
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.TolkLanguage
+import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.impl.resolveFile
-import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.stub.TolkFileStub
 import org.ton.intellij.tolk.stub.type.*
 import org.ton.intellij.util.getChildrenByType
@@ -24,17 +25,22 @@ import org.ton.intellij.util.recursionGuard
 //            processFile(context, nextFile)
 //        }
 
-class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkLanguage), TolkElement, TolkInferenceContextOwner {
+class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkLanguage), TolkElement,
+    TolkInferenceContextOwner {
     override fun getFileType(): FileType = TolkFileType
 
     override fun getStub(): TolkFileStub? = super.getStub() as? TolkFileStub
 
     fun collectIncludedFiles(includeSelf: Boolean = true): Set<TolkFile> {
-        val sdk = TolkSdkManager[project].getSdkRef().resolve(project)?.library?.sourceRoots?.mapNotNull {
-            it.findPsiFile(project) as? TolkFile
-        }?.toMutableSet() ?: mutableSetOf()
-        sdk.remove(this)
-        return collectIncludedFiles(sdk, includeSelf)
+        val files = mutableSetOf<TolkFile>()
+        val stdlibDir = project.tolkSettings.toolchain?.stdlibDir
+        if (stdlibDir != null) {
+            val commonStdlib = stdlibDir.findFile("common.tolk")?.findPsiFile(project)
+            if (commonStdlib is TolkFile) {
+                files.add(commonStdlib)
+            }
+        }
+        return collectIncludedFiles(files, includeSelf)
     }
 
     private fun collectIncludedFiles(collection: MutableSet<TolkFile>, includeSelf: Boolean): MutableSet<TolkFile> {
@@ -129,9 +135,9 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         if (!needImport) return
 
         val factory = TolkPsiFactory[project]
-        val sdk = TolkSdkManager[project].getSdkRef().resolve(project)
-        if (sdk != null && VfsUtil.isAncestor(sdk.stdlibFile, file.virtualFile, false)) {
-            val sdkPath = sdk.stdlibFile.path
+        val sdk = project.tolkSettings.toolchain?.stdlibDir
+        if (sdk != null && VfsUtil.isAncestor(sdk, file.virtualFile, false)) {
+            val sdkPath = sdk.path
             path = file.virtualFile.path.replace(sdkPath, "@stdlib")
             if (path == "@stdlib/common.tolk") {
                 return

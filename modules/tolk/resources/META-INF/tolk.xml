@@ -128,9 +128,9 @@
         <localInspection language="Tolk" displayName="Unused type parameter inspection" groupPath="Tolk"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedTypeParameterInspection"/>
-<!--        <localInspection language="Tolk" displayName="Unsupported element inspection" groupPath="Tolk"-->
-<!--                         groupName="Declaration redundancy" enabledByDefault="true" level="ERROR"-->
-<!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnsupportedElementInspection"/>-->
+        <!--        <localInspection language="Tolk" displayName="Unsupported element inspection" groupPath="Tolk"-->
+        <!--                         groupName="Declaration redundancy" enabledByDefault="true" level="ERROR"-->
+        <!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnsupportedElementInspection"/>-->
         <localInspection language="Tolk" displayName="__expect_type inspection" groupPath="Tolk"
                          groupName="Declaration redundancy" enabledByDefault="false" level="ERROR"
                          implementationClass="org.ton.intellij.tolk.inspection.TolkExpectTypeBuiltinInspection"/>
@@ -190,9 +190,18 @@
                              bundle="messages.TolkBundle" key="tolk.name"/>
 
         <additionalLibraryRootsProvider
-                implementation="org.ton.intellij.tolk.sdk.TolkSdkSyntheticLibraryProvider"/>
+                implementation="org.ton.intellij.tolk.toolchain.TolkSdkSyntheticLibraryProvider"/>
 
         <postStartupActivity implementation="org.ton.intellij.tolk.psi.impl.TolkBuiltins$RegisterActivity"/>
+        <postStartupActivity implementation="org.ton.intellij.tolk.toolchain.TolkToolchainDetectActivity"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="org.ton">
+        <tolk.toolchainFlavor id="tolk.nodeModulesFlavor"
+                              implementation="org.ton.intellij.tolk.toolchain.flavor.TolkNodeModulesToolchainFlavor"
+                              order="first"/>
+        <tolk.toolchainFlavor id="tolk.compilerRepositoryFlavor"
+                              implementation="org.ton.intellij.tolk.toolchain.flavor.TolkCompilerRepositoryToolchainFlavor"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.intellij.dev">
@@ -200,8 +209,15 @@
                 implementation="org.ton.intellij.tolk.dev.psiviewer.PsiViewerTolkTypeNode$Factory"/>
     </extensions>
 
+    <extensionPoints>
+        <extensionPoint qualifiedName="org.ton.tolk.toolchainFlavor"
+                        interface="org.ton.intellij.tolk.toolchain.flavor.TolkToolchainFlavor"
+                        dynamic="true"/>
+    </extensionPoints>
+
     <applicationListeners>
-        <listener class="org.ton.intellij.tolk.psi.impl.TolkBuiltins$UnregisterListener" topic="com.intellij.openapi.project.ProjectManagerListener"/>
+        <listener class="org.ton.intellij.tolk.psi.impl.TolkBuiltins$UnregisterListener"
+                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
 
     <actions>

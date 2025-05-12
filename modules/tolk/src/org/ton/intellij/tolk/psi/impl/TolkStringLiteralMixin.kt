@@ -5,8 +5,10 @@ import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.LiteralTextEscaper
 import com.intellij.psi.PsiLanguageInjectionHost
+import com.intellij.psi.PsiReference
 import org.ton.intellij.tolk.psi.TolkAsmBody
 import org.ton.intellij.tolk.psi.TolkStringLiteral
+import org.ton.intellij.tolk.psi.reference.TolkLiteralFileReferenceSet
 
 abstract class TolkStringLiteralMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkStringLiteral {
     override fun isValidHost(): Boolean {
@@ -15,6 +17,13 @@ abstract class TolkStringLiteralMixin(node: ASTNode) : ASTWrapperPsiElement(node
 
     override fun updateText(text: String): PsiLanguageInjectionHost {
         return this
+    }
+
+    override fun getReferences(): Array<out PsiReference?> {
+        val rawString = rawString ?: return PsiReference.EMPTY_ARRAY
+        val contents = rawString.text
+        val fileSet = TolkLiteralFileReferenceSet(contents, this, rawString.startOffsetInParent)
+        return fileSet.allReferences
     }
 
     override fun createLiteralTextEscaper() = object : LiteralTextEscaper<TolkStringLiteralMixin>(this) {

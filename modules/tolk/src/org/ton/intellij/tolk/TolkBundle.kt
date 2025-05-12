@@ -11,4 +11,7 @@ object TolkBundle : DynamicBundle(BUNDLE) {
 
     fun messagePointer(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any) =
         getLazyMessage(key, *params)
+
+    operator fun get(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg params: Any): String =
+        getMessage(key, *params)
 }

@@ -6,7 +6,6 @@ import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.vfs.VfsUtilCore
-import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.patterns.StandardPatterns
@@ -20,7 +19,6 @@ import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.hasSelf
 import org.ton.intellij.tolk.psi.impl.parameters
 import org.ton.intellij.tolk.psi.impl.toLookupElement
-import org.ton.intellij.tolk.sdk.TolkSdkManager
 import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 import org.ton.intellij.tolk.type.TolkFunctionTy
 import org.ton.intellij.tolk.type.TolkTy
@@ -160,22 +158,23 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             }
         }
 
-        val tolkSdk = TolkSdkManager[project].getSdkRef().resolve(project)
-        if (tolkSdk != null) {
-            VfsUtilCore.iterateChildrenRecursively(tolkSdk.stdlibFile, null) {
-                val isCommon = it.name.endsWith("common.tolk")
-                val tolkFile = it.findPsiFile(project) as? TolkFile
-                if (tolkFile != null) {
-                    tolkFile.constVars.forEach {
-                        result.addElement(it.toLookupElementBuilder(ctx, isCommon))
-                    }
-                    tolkFile.globalVars.forEach {
-                        result.addElement(it.toLookupElementBuilder(ctx, isCommon))
-                    }
-                }
-                true
-            }
-        }
+        // TODO: rewrite to indexes
+//        val tolkSdk = project.tolkSettings.toolchain?.stdlibDir
+//        if (tolkSdk != null) {
+//            VfsUtilCore.iterateChildrenRecursively(tolkSdk, null) {
+//                val isCommon = it.name.endsWith("common.tolk")
+//                val tolkFile = it.findPsiFile(project) as? TolkFile
+//                if (tolkFile != null) {
+//                    tolkFile.constVars.forEach {
+//                        result.addElement(it.toLookupElementBuilder(ctx, isCommon))
+//                    }
+//                    tolkFile.globalVars.forEach {
+//                        result.addElement(it.toLookupElementBuilder(ctx, isCommon))
+//                    }
+//                }
+//                true
+//            }
+//        }
 
         result.addElement(LookupElementBuilder.create("null").bold())
         result.addElement(LookupElementBuilder.create("true").bold())

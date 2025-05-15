@@ -5,8 +5,10 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.impl.source.resolve.ResolveCache
-import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.util.parentOfType
+import org.ton.intellij.tolk.psi.TolkElement
+import org.ton.intellij.tolk.psi.TolkElementTypes
+import org.ton.intellij.tolk.psi.TolkPsiFactory
+import org.ton.intellij.tolk.type.inference
 
 class TolkSymbolReference(
     element: TolkElement,
@@ -21,7 +23,7 @@ class TolkSymbolReference(
     private val resolver = ResolveCache.PolyVariantResolver<TolkSymbolReference> { t, incompleteCode ->
         if (!myElement.isValid) return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
 
-        val inference = element.parentOfType<TolkInferenceContextOwner>()?.selfInferenceResult
+        val inference = element.inference
         val inferenceResolved = inference?.getResolvedRefs(element)
         if (!inferenceResolved.isNullOrEmpty()) {
             return@PolyVariantResolver inferenceResolved.toTypedArray()

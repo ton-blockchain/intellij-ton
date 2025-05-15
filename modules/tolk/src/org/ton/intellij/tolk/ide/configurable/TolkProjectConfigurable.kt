@@ -119,5 +119,6 @@ class TolkProjectConfigurable(
 
     override fun dispose() {
         Disposer.dispose(pathToToolchainComboBox)
+        Disposer.dispose(alarm)
     }
 }

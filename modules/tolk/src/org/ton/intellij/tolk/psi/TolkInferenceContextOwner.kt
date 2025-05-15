@@ -1,5 +1,6 @@
 package org.ton.intellij.tolk.psi
 
+import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.util.Key
 import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
@@ -18,13 +19,16 @@ private val TOLK_INFERENCE_KEY: Key<CachedValue<TolkInferenceResult>> = Key.crea
 val TolkInferenceContextOwner.selfInferenceResult: TolkInferenceResult
     get() {
         return CachedValuesManager.getCachedValue(this, TOLK_INFERENCE_KEY) {
-            val (inferred, _) = measureTimedValue {
+            val (inferred, time) = measureTimedValue {
                 try {
                     inferTypesIn(this)
+                } catch (e: ProcessCanceledException) {
+                    throw e
                 } catch (e: Throwable) {
                     throw IllegalStateException("Failed to infer types in $this (${this.containingFile.virtualFile.path}, offset: ${this.textOffset})", e)
                 }
             }
+            println("Inference of $this took $time")
             CachedValueProvider.Result.create(inferred, PsiModificationTracker.MODIFICATION_COUNT)
         }
     }

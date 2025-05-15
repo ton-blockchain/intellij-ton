@@ -47,9 +47,11 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         context: ProcessingContext,
         result: CompletionResultSet
     ) {
-        val project = parameters.position.project
         val position = parameters.position
         val element = position.parent as TolkReferenceExpression
+        if (position != element.identifier) return
+
+        val project = parameters.position.project
         val file = element.containingFile.originalFile as? TolkFile ?: return
 
         var currentFunction: TolkFunction? = null
@@ -304,6 +306,12 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                         .withTypeText((type ?: TolkTy.Unknown).render()),
                     TolkCompletionContributor.VAR_PRIORITY
                 )
+            }
+
+            is TolkStructField -> {
+                base
+                    .withIcon(TolkIcons.FIELD)
+                    .withTypeText((type ?: TolkTy.Unknown).render())
             }
 
             is TolkParameter -> {

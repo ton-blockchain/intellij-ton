@@ -74,6 +74,7 @@ class TolkCompletionContributor : CompletionContributor() {
         )
         extend(TolkCommonCompletionProvider)
         extend(TolkDotExpressionCompletionProvider)
+        extend(TolkExpressionFieldProvider)
     }
 
     fun extend(provider: TolkCompletionProvider) {

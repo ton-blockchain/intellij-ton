@@ -127,20 +127,19 @@ class TolkInferenceContext(
         when (element) {
             is TolkFunction -> {
                 val walker = TolkInferenceWalker(this)
-                val tolkFile = element.containingFile as? TolkFile
                 var flow = TolkFlowContext()
 
-                tolkFile?.let {
-                    val commonStdlib =
-                        TolkIncludeDefinitionMixin.resolveTolkImport(element.project, tolkFile, "@stdlib/common")
-                    if (commonStdlib != null) {
-                        val tolkCommonStdlib = commonStdlib.findPsiFile(element.project) as? TolkFile
-                        if (tolkCommonStdlib != null && tolkFile != tolkCommonStdlib) {
-                            flow = walker.inferFile(tolkCommonStdlib, flow, false)
-                        }
-                    }
-                    flow = walker.inferFile(tolkFile, flow)
-                }
+//                tolkFile?.let {
+//                    val commonStdlib =
+//                        TolkIncludeDefinitionMixin.resolveTolkImport(element.project, tolkFile, "@stdlib/common")
+//                    if (commonStdlib != null) {
+//                        val tolkCommonStdlib = commonStdlib.findPsiFile(element.project) as? TolkFile
+//                        if (tolkCommonStdlib != null && tolkFile != tolkCommonStdlib) {
+//                            flow = walker.inferFile(tolkCommonStdlib, flow, false)
+//                        }
+//                    }
+//                    flow = walker.inferFile(tolkFile, flow)
+//                }
                 flow = walker.inferFunction(element, flow)
                 unreachable = flow.unreachable
             }
@@ -149,14 +148,14 @@ class TolkInferenceContext(
                 val walker = TolkInferenceWalker(this)
                 var flow = TolkFlowContext()
 
-                val commonStdlib =
-                    TolkIncludeDefinitionMixin.resolveTolkImport(element.project, element, "@stdlib/common")
-                if (commonStdlib != null) {
-                    val tolkCommonStdlib = commonStdlib.findPsiFile(element.project) as? TolkFile
-                    if (tolkCommonStdlib != null && element != tolkCommonStdlib) {
-                        flow = walker.inferFile(tolkCommonStdlib, flow, false)
-                    }
-                }
+//                val commonStdlib =
+//                    TolkIncludeDefinitionMixin.resolveTolkImport(element.project, element, "@stdlib/common")
+//                if (commonStdlib != null) {
+//                    val tolkCommonStdlib = commonStdlib.findPsiFile(element.project) as? TolkFile
+//                    if (tolkCommonStdlib != null && element != tolkCommonStdlib) {
+//                        flow = walker.inferFile(tolkCommonStdlib, flow, false)
+//                    }
+//                }
 
                 walker.inferFile(element, flow)
             }

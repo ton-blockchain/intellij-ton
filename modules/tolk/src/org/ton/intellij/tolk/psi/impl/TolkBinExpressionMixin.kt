@@ -6,5 +6,5 @@ import org.ton.intellij.tolk.psi.TolkBinExpression
 
 
 abstract class TolkBinExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkBinExpression {
-    override fun toString(): String = "TolkBinExpression(\"$text\")"
+    override fun toString(): String = "TolkBinExpression:$text"
 }

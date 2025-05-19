@@ -5,6 +5,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.openapi.vfs.findFile
+import com.intellij.openapi.vfs.findPsiFile
+import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.toolchain.TolkToolchain
 
 val Project.tolkSettings: TolkProjectSettingsService get() = service()
@@ -19,11 +22,18 @@ val Project.tolkToolchain: TolkToolchain? get() = tolkSettings.toolchain
 class TolkProjectSettingsService(
     private val project: Project
 ) : SimplePersistentStateComponent<TolkProjectSettingsService.TolkProjectSettings>(TolkProjectSettings()) {
-    var toolchain: TolkToolchain? get() = state.toolchain
+    var toolchain: TolkToolchain?
+        get() = state.toolchainLocation?.let { TolkToolchain.fromPath(it) }
         set(value) {
-            state.toolchain = value
+            state.toolchainLocation = value?.homePath
+            defaultImport = null
         }
-    val explicitPathToStdlib: String? get() = state.explicitPathToStdlib
+    var explicitPathToStdlib: String?
+        get() = state.explicitPathToStdlib
+        set(value) {
+            state.explicitPathToStdlib = value
+            defaultImport = null
+        }
     val stdlibDir: VirtualFile? get() {
         return explicitPathToStdlib?.let {
             it.toNioPathOrNull()?.let {  path ->
@@ -32,15 +42,21 @@ class TolkProjectSettingsService(
         } ?: toolchain?.stdlibDir
     }
 
+    private var defaultImport: TolkFile? = null
+
+    fun getDefaultImport(): TolkFile? {
+        val currentDefaultImport = defaultImport
+        if (currentDefaultImport == null) {
+            val result = stdlibDir?.findFile("common.tolk")?.findPsiFile(project) as? TolkFile
+            defaultImport = result
+            return result
+        }
+        return currentDefaultImport
+    }
+
     class TolkProjectSettings : BaseState() {
         var toolchainLocation by string()
         var explicitPathToStdlib by string()
-
-        var toolchain: TolkToolchain?
-            get() = toolchainLocation?.let { TolkToolchain.fromPath(it) }
-            set(value) {
-                toolchainLocation = value?.homePath
-            }
 
         fun copy() = TolkProjectSettings().also { it.copyFrom(this) }
     }

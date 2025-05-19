@@ -65,10 +65,8 @@ class TolkProjectConfigurable(
 
         val setting = project.tolkSettings
         onApply {
-            setting.state.apply {
-                toolchain = data.toolchain
-                explicitPathToStdlib = data.explicitPathToStdlib
-            }
+            setting.toolchain = data.toolchain
+            setting.explicitPathToStdlib = data.explicitPathToStdlib
         }
         onReset {
             val currentData = data

@@ -30,6 +30,8 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
         return super.getIcon(flags) ?: super.getBaseIcon()
     }
 
+    override fun toString(): String = "$elementType:$name"
+
     override fun getPresentation(): ItemPresentation? {
         return object : ItemPresentation {
             override fun getPresentableText(): String? = when(this@TolkNamedElementImpl) {

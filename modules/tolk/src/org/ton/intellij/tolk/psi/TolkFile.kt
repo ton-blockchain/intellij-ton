@@ -3,8 +3,6 @@ package org.ton.intellij.tolk.psi
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.vfs.VfsUtil
-import com.intellij.openapi.vfs.findFile
-import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.CachedValueProvider
@@ -154,16 +152,15 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         }
     }
 
-    fun getDefaultImport(): TolkFile? {
-        return CachedValuesManager.getCachedValue(this) {
-            val project = project
-            val result = project.tolkSettings.stdlibDir?.findFile("common.tolk")?.findPsiFile(project) as? TolkFile
-            CachedValueProvider.Result.create(result, this)
-        }
+    fun getDefaultImportsScope(): GlobalSearchScope {
+        return GlobalSearchScope.fileScope(project.tolkSettings.getDefaultImport() ?: return GlobalSearchScope.EMPTY_SCOPE)
     }
 
-    fun getDefaultImportsScope(): GlobalSearchScope {
-        return GlobalSearchScope.fileScope(getDefaultImport() ?: return GlobalSearchScope.EMPTY_SCOPE)
+    fun resolveSymbols(name: String): List<TolkSymbolElement> {
+        val files = HashSet(getImportedFiles())
+        files.add(this)
+        project.tolkSettings.getDefaultImport()?.let { files.add(it) }
+        return files.flatMap { it.declaredSymbols[name].orEmpty() }
     }
 
     fun import(file: TolkFile) {

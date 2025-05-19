@@ -7,4 +7,6 @@ import org.ton.intellij.tolk.type.TolkTy
 
 abstract class TolkAsExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkAsExpression {
     override val type: TolkTy? get() = typeExpression?.type
+
+    override fun toString(): String = "TolkAsExpression:$text"
 }

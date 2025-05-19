@@ -2,12 +2,10 @@ package org.ton.intellij.tolk.psi.reference
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import com.intellij.psi.search.GlobalSearchScope
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.declaredType
 import org.ton.intellij.tolk.psi.impl.hasSelf
 import org.ton.intellij.tolk.psi.impl.structFields
-import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 import org.ton.intellij.tolk.type.*
 
 class TolkFieldLookupReference(
@@ -36,18 +34,16 @@ fun resolveFieldLookupReferenceWithReceiver(
         }
     }
 
-    val resolveScope = fieldLookup.containingFile.resolveScope
-
-    return collectFunctionCandidates(fieldLookup.project, receiverType, name, resolveScope)
+    return collectFunctionCandidates(fieldLookup.project, receiverType, name, fieldLookup.containingFile as TolkFile)
 }
 
 fun collectFunctionCandidates(
     project: Project,
     calledReceiver: TolkTy?,
     name: String,
-    resolveScope: GlobalSearchScope
+    containingFile: TolkFile
 ): List<Pair<TolkFunction, Substitution>> {
-    val namedFunctions = TolkFunctionIndex.findElements(project, name, resolveScope)
+    val namedFunctions = containingFile.resolveSymbols(name).filterIsInstance<TolkFunction>()
 
     if (calledReceiver == null) {
         return namedFunctions.asSequence().filter { !it.hasSelf }.map { it to EmptySubstitution }.toList()

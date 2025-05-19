@@ -89,6 +89,7 @@ class TolkFormattingBlock(
         val parent = child.treeParent
         val parentType = parent.elementType
         when (parentType) {
+            ANNOTATION -> return null
             MATCH_EXPRESSION -> if (type != MATCH_KEYWORD) return indentIfNotBrace(child)
             PARAMETER_LIST, BLOCK_STATEMENT, STRUCT_EXPRESSION_BODY, STRUCT_BODY -> return indentIfNotBrace(child)
             DOT_EXPRESSION, TERNARY_EXPRESSION -> if (parent.firstChildNode != child) return Indent.getNormalIndent()

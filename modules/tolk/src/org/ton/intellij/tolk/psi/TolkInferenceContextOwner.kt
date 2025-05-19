@@ -25,7 +25,6 @@ val TolkInferenceContextOwner.selfInferenceResult: TolkInferenceResult
                     throw e
                 }
             }
-            println("Inference of $this took $time")
             CachedValueProvider.Result.create(inferred, this)
         }
     }

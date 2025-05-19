@@ -13,7 +13,6 @@ import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.psi.reference.TolkTypeReference
 import org.ton.intellij.tolk.psi.reference.collectFunctionCandidates
 import org.ton.intellij.tolk.psi.reference.resolveFieldLookupReferenceWithReceiver
-import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
 import org.ton.intellij.util.recursionGuard
 import org.ton.intellij.util.tokenSetOf
 import java.math.BigInteger
@@ -1031,8 +1030,9 @@ class TolkInferenceWalker(
             ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(variableCandidate)))
             val variableType = flow.getType(TolkSinkExpression(variableCandidate)) ?: try {
                 variableCandidate.type
-            } catch (e: CyclicReferenceException) {
-                null
+            } catch (_: CyclicReferenceException) {
+                // cyclic resolve for variables = `var a = a` // TODO; fix resolving to self?
+                return nextFlow
             }
             ctx.setType(element, variableType)
             return nextFlow
@@ -1041,7 +1041,12 @@ class TolkInferenceWalker(
         val symbolCandidates = resolveToGlobalSymbols(element, name)
         if (symbolCandidates.isNotEmpty()) {
             ctx.setResolvedRefs(element, symbolCandidates.map { PsiElementResolveResult(it) })
-            var type = symbolCandidates.first().type
+            var type = try {
+                symbolCandidates.first().type
+            } catch (_: CyclicReferenceException) {
+                // cyclic resolve for constants = `const a = b; const b = a`
+                return nextFlow
+            }
             if (type is TolkStructTy) {
                 val typeArguments = element.typeArgumentList?.typeExpressionList
                 val substitution = HashMap<TolkTypeParameterTy, TolkTy>()
@@ -1109,7 +1114,7 @@ class TolkInferenceWalker(
                 project,
                 null,
                 name,
-                currentResolveScope ?: element.containingFile.resolveScope
+                element.containingFile as TolkFile,
             )
         }
     }
@@ -1118,9 +1123,9 @@ class TolkInferenceWalker(
         element: TolkReferenceElement,
         name: String
     ): List<TolkSymbolElement> {
-        val resolveScope = currentResolveScope ?: element.containingFile.resolveScope
+        val declarations = (element.containingFile as TolkFile).resolveSymbols(name)
         val result = SmartList<TolkSymbolElement>()
-        TolkNamedElementIndex.processElements(project, name, resolveScope) {
+        declarations.forEach {
             when (it) {
                 is TolkTypeSymbolElement,
                 is TolkGlobalVar,
@@ -1128,9 +1133,6 @@ class TolkInferenceWalker(
                     result.add(it)
                 }
             }
-        }
-        if (result.isEmpty()) {
-            println("resolved for name: $name, result: $result")
         }
         return result
     }

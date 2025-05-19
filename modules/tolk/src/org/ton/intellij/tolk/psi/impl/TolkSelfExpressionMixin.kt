@@ -17,6 +17,8 @@ abstract class TolkSelfExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(nod
     override val type: TolkTy?
         get() = inference?.getType(this)
 
+    override fun toString(): String = "TolkSelfExpression"
+
     class TolkSelfExpressionReference(element: TolkSelfExpression) : PsiReferenceBase<TolkSelfExpression>(
         element
     ) {

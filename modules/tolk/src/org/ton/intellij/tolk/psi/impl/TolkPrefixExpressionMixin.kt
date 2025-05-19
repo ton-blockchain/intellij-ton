@@ -10,4 +10,6 @@ import org.ton.intellij.tolk.type.TolkTy
 abstract class TolkPrefixExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkPrefixExpression {
     override val type: TolkTy?
         get() = if (firstChild.elementType == TolkElementTypes.EXCL) TolkTy.Bool else TolkTy.Int
+
+    override fun toString(): String = "TolkPrefixExpression:$text"
 }

@@ -29,7 +29,7 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
 
     override fun getReference(): TolkSymbolReference? = references.firstOrNull()
 
-    override fun toString(): String = "TolkReferenceExpression($text)"
+    override fun toString(): String = "TolkReferenceExpression:$text"
 
     companion object {
         private val EMPTY_ARRAY = emptyArray<TolkSymbolReference>()

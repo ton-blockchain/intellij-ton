@@ -8,6 +8,8 @@ abstract class TolkDotExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node
     val targetIndex: Int? get() {
         return fieldLookup?.integerLiteral?.text?.toIntOrNull()
     }
+
+    override fun toString(): String = "TolkDotExpression:$text"
 }
 
 val TolkDotExpression.targetIndex get() = (this as? TolkDotExpressionMixin)?.targetIndex

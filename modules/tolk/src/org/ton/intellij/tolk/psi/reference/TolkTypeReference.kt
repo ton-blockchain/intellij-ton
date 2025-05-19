@@ -6,6 +6,7 @@ import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.util.parentOfType
+import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.*
 import java.util.*
 
@@ -60,7 +61,7 @@ class TolkTypeReference(
             }
         }
 
-        file.getDefaultImport()?.let {
+        file.project.tolkSettings.getDefaultImport()?.let {
             if (visitedFiles.add(it)) {
                 it.declaredSymbols[target]?.forEach {
                     result.add(PsiElementResolveResult(it))

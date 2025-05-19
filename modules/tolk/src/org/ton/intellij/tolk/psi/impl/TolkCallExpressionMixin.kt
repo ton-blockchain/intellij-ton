@@ -26,6 +26,8 @@ val TolkCallExpression.actualArgumentList: List<TolkExpression>
 abstract class TolkCallExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkCallExpression {
     override val type: TolkTy? get() = inference?.getType(this)
 
+    override fun toString(): String = "TolkCallExpression:$text"
+
 //    fun resolveCall(
 //        expectedReturnType: TolkType? = null
 //    ) : TolkType? {

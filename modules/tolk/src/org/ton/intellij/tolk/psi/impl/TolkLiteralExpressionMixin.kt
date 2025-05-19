@@ -103,5 +103,5 @@ abstract class TolkLiteralExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(
             return TolkTy.Unknown
         }
 
-    override fun toString(): String = "TolkLiteralExpression($type)"
+    override fun toString(): String = "TolkLiteralExpression:$text"
 }

@@ -34,8 +34,6 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
         return TolkIcons.FUNCTION
     }
 
-    override fun toString(): String = "TolkFunction($containingFile - $name)"
-
     override fun getBaseIcon(): Icon? = TolkIcons.FUNCTION
 
     val parameters: List<TolkParameter>

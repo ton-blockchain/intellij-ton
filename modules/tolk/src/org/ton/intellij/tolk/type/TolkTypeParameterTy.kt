@@ -5,7 +5,7 @@ import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
 import org.ton.intellij.tolk.psi.TolkTypeParameter
 
-class TyTypeParameter private constructor(
+class TolkTypeParameterTy private constructor(
     val parameter: TypeParameter
 ) : TolkTy {
     val name: String? get() = parameter.name
@@ -16,10 +16,10 @@ class TyTypeParameter private constructor(
 
     override fun join(other: TolkTy): TolkTy {
         if (this == other) return this
-        return TyUnion.create(this, other)
+        return TolkUnionTy.create(this, other)
     }
 
-    override fun equals(other: Any?): Boolean = other is TyTypeParameter && other.parameter == parameter
+    override fun equals(other: Any?): Boolean = other is TolkTypeParameterTy && other.parameter == parameter
 
     override fun hashCode(): Int = parameter.hashCode()
 
@@ -41,16 +41,16 @@ class TyTypeParameter private constructor(
     }
 
     companion object {
-        fun create(psi: TolkTypeParameter): TyTypeParameter {
+        fun create(psi: TolkTypeParameter): TolkTypeParameterTy {
             val original = CompletionUtil.getOriginalOrSelf(psi)
-            return TyTypeParameter(
+            return TolkTypeParameterTy(
                 NamedTypeParameter(original)
             )
         }
 
-        fun create(psi: TolkReferenceTypeExpression): TyTypeParameter {
+        fun create(psi: TolkReferenceTypeExpression): TolkTypeParameterTy {
             val original = CompletionUtil.getOriginalOrSelf(psi)
-            return TyTypeParameter(
+            return TolkTypeParameterTy(
                 ReceiverTypeParameter(original)
             )
         }

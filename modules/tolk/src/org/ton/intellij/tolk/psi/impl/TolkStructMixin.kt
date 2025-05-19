@@ -9,7 +9,7 @@ import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.stub.TolkStructStub
 import org.ton.intellij.tolk.type.TolkTy
-import org.ton.intellij.tolk.type.TyStruct
+import org.ton.intellij.tolk.type.TolkStructTy
 import javax.swing.Icon
 
 abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruct {
@@ -21,7 +21,7 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
         return super.getUseScope()
     }
 
-    override val type: TyStruct get() = declaredType
+    override val type: TolkStructTy get() = declaredType
 
     override fun getBaseIcon() = TolkIcons.STRUCTURE
 
@@ -38,7 +38,7 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
     }
 }
 
-val TolkStruct.declaredType: TyStruct get() = TolkTy.struct(this)
+val TolkStruct.declaredType: TolkStructTy get() = TolkTy.struct(this)
 
 val TolkStruct?.structFields: List<TolkStructField> get() {
     // todo: optimize by stub

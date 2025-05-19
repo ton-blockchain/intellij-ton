@@ -28,7 +28,7 @@ data class TolkTensorTy private constructor(
             }
             return TolkTensorTy(newElements, hasGenerics)
         }
-        return TyUnion.create(this, other)
+        return TolkUnionTy.create(this, other)
     }
 
     override fun meet(other: TolkTy): TolkTy {
@@ -49,7 +49,7 @@ data class TolkTensorTy private constructor(
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (this == other) return true
-        if (other is TolkAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTypeAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
         if (other is TolkTensorTy && elements.size == other.elements.size) {
             return elements.zip(other.elements).all { (a, b) -> a.canRhsBeAssigned(b) }
         }

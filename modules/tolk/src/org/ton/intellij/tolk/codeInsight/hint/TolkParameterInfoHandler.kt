@@ -4,8 +4,10 @@ import com.intellij.lang.parameterInfo.*
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 import com.intellij.refactoring.suggested.startOffset
-import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.psi.impl.hasSelf
+import org.ton.intellij.tolk.psi.TolkArgumentList
+import org.ton.intellij.tolk.psi.TolkCallExpression
+import org.ton.intellij.tolk.psi.TolkElementTypes
+import org.ton.intellij.tolk.psi.TolkParameter
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.parentOfType
@@ -14,35 +16,15 @@ class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<Str
     override fun findElementForParameterInfo(context: CreateParameterInfoContext): TolkArgumentList? {
         val argumentList = findArgumentList(context.file, context.offset) ?: return null
         val callExpression = argumentList.parentOfType<TolkCallExpression>() ?: return null
-        val callee = callExpression.expression
-        val function = when (callee) {
-            is TolkReferenceExpression -> {
-                callee.reference?.resolve() as? TolkFunction
-            }
 
-            is TolkDotExpression -> {
-                callee.right?.reference?.resolve() as? TolkFunction
-            }
-
-            else -> null
-        } ?: return null
-
-        val parameterList = function.parameterList?.parameterList ?: return null
-        val parameterIterator = parameterList.iterator()
-
-        val parameterInfos: ArrayList<String> = if (callee is TolkDotExpression && !function.hasSelf && parameterIterator.hasNext()) {
-            parameterIterator.next()
-            ArrayList(parameterList.size - 1)
-        } else {
-            ArrayList(parameterList.size)
-        }
-
-        while (parameterIterator.hasNext()) {
-            val parameter = parameterIterator.next()
+        val parameterInfos: ArrayList<String> = ArrayList()
+        iterateOverParameters(callExpression) { parameter, argument ->
             val parameterInfo = buildString {
                 append(parameter.name)
-                append(": ")
-                append((parameter.typeExpression.type ?: TolkTy.Unknown).render())
+                if (parameter is TolkParameter) {
+                    append(": ")
+                    append((parameter.typeExpression.type ?: TolkTy.Unknown).render())
+                }
             }
             parameterInfos.add(parameterInfo)
         }

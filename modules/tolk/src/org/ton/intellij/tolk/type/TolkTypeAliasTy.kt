@@ -3,7 +3,7 @@ package org.ton.intellij.tolk.type
 import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkTypeDef
 
-class TolkAliasTy(
+class TolkTypeAliasTy(
     val psi: TolkTypeDef,
     val underlyingType: TolkTy
 ) : TolkTy {
@@ -23,7 +23,7 @@ class TolkAliasTy(
 
     override fun join(other: TolkTy): TolkTy {
         if (this == other) return this
-        return TyUnion.create(this, other)
+        return TolkUnionTy.create(this, other)
     }
 
     override fun toString(): String = "TolkAliasType($underlyingType)"

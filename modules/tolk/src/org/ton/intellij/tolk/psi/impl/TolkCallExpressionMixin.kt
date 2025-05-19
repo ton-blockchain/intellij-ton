@@ -11,7 +11,7 @@ import org.ton.intellij.tolk.type.inference
 val TolkCallExpression.actualArgumentList: List<TolkExpression>
     get() {
         val dotExpr = parent as? TolkDotExpression
-        val firstArg = dotExpr?.left
+        val firstArg = dotExpr?.expression
         val actualArgumentList = ArrayList<TolkExpression>()
         if (firstArg != null && firstArg != this) {
             actualArgumentList.add(firstArg)

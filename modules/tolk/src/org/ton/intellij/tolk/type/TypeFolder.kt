@@ -13,10 +13,10 @@ interface TypeFoldable<out Self> {
 fun <T : TypeFoldable<T>> TypeFoldable<T>.substitute(substitution: Substitution): T =
     foldWith(object : TypeFolder {
         override fun foldType(ty: TolkTy): TolkTy = when {
-            ty is TyTypeParameter -> substitution[ty] ?: ty
+            ty is TolkTypeParameterTy -> substitution[ty] ?: ty
             else -> ty.superFoldWith(this)
         }
     })
 
 
-val substitution = mutableMapOf<TyTypeParameter, TolkTy>()
+val substitution = mutableMapOf<TolkTypeParameterTy, TolkTy>()

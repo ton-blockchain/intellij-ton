@@ -4,7 +4,6 @@ import com.intellij.codeInspection.LocalQuickFixAndIntentionActionOnPsiElement
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
@@ -18,17 +17,18 @@ import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.tolk.eval.TolkIntValue
 import org.ton.intellij.tolk.eval.value
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.impl.hasSelf
 import org.ton.intellij.tolk.psi.impl.isDeprecated
 import org.ton.intellij.tolk.psi.impl.isPrimitive
 import org.ton.intellij.tolk.type.TolkTy
-import org.ton.intellij.tolk.type.TyTypeParameter
+import org.ton.intellij.tolk.type.TolkTypeParameterTy
 import org.ton.intellij.util.TVM_INT_MAX_VALUE
 import org.ton.intellij.util.TVM_INT_MIN_VALUE
 
 class TolkAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         when (element) {
-            is org.ton.intellij.tolk.psi.TolkTypeParameter -> {
+            is TolkTypeParameter -> {
                 return highlight(element.identifier, holder, TolkColor.TYPE_PARAMETER.textAttributesKey)
             }
 
@@ -38,17 +38,33 @@ class TolkAnnotator : Annotator {
                 return highlight(TextRange(startOffset, endOffset), holder, TolkColor.ANNOTATION.textAttributesKey)
             }
 
+            is TolkFieldLookup -> {
+                val identifier = element.identifier ?: return
+
+                val resolvedElement = element.reference?.resolve()
+                when(resolvedElement) {
+                    is TolkStructField -> highlight(identifier, holder, TolkColor.FIELD.textAttributesKey)
+                    is TolkFunction -> {
+                        if (resolvedElement.hasSelf) {
+                            highlight(identifier, holder, TolkColor.METHOD.textAttributesKey)
+                        } else {
+                            highlight(identifier, holder, TolkColor.FUNCTION_STATIC.textAttributesKey)
+                        }
+                    }
+                }
+            }
+
             is TolkReferenceTypeExpression -> {
                 if (element.isPrimitive) {
                     return highlight(element, holder, TolkColor.PRIMITIVE.textAttributesKey)
                 }
-                val color = if (element.type is TyTypeParameter) {
+                val color = if (element.type is TolkTypeParameterTy) {
                     TolkColor.TYPE_PARAMETER
                 } else {
                     val resolved = element.reference?.resolve()
                     when {
-                        resolved is org.ton.intellij.tolk.psi.TolkTypeParameter -> TolkColor.TYPE_PARAMETER
-                        resolved is TolkReferenceTypeExpression && resolved.type is TyTypeParameter -> TolkColor.TYPE_PARAMETER
+                        resolved is TolkTypeParameter -> TolkColor.TYPE_PARAMETER
+                        resolved is TolkReferenceTypeExpression && resolved.type is TolkTypeParameterTy -> TolkColor.TYPE_PARAMETER
                         resolved is TolkParameter && resolved.name == "self" -> TolkColor.SELF_PARAMETER
                         else -> TolkColor.IDENTIFIER
                     }
@@ -64,12 +80,12 @@ class TolkAnnotator : Annotator {
                 }
                 val resolved = element.reference?.resolve()
                 val color = when (resolved) {
-                    is org.ton.intellij.tolk.psi.TolkTypeParameter -> TolkColor.TYPE_PARAMETER
+                    is TolkTypeParameter -> TolkColor.TYPE_PARAMETER
                     is TolkParameter -> if (resolved.name == "self") TolkColor.SELF_PARAMETER else null
                     is TolkConstVar -> TolkColor.CONSTANT
                     is TolkGlobalVar -> TolkColor.GLOBAL_VARIABLE
                     is TolkReferenceTypeExpression -> {
-                        if (resolved.type is TyTypeParameter) {
+                        if (resolved.type is TolkTypeParameterTy) {
                             TolkColor.TYPE_PARAMETER
                         } else {
                             null
@@ -178,7 +194,16 @@ class TolkAnnotator : Annotator {
         when (parent) {
             is TolkFunction -> {
                 if (element == parent.nameIdentifier) {
-                    highlight(element, holder, TolkColor.FUNCTION_DECLARATION.textAttributesKey)
+                    val receiver = parent.functionReceiver
+                    if (receiver == null) {
+                        highlight(element, holder, TolkColor.FUNCTION_DECLARATION.textAttributesKey)
+                    } else {
+                        if (parent.hasSelf) {
+                            highlight(element, holder, TolkColor.METHOD.textAttributesKey)
+                        } else {
+                            highlight(element, holder, TolkColor.FUNCTION_STATIC.textAttributesKey)
+                        }
+                    }
                 }
             }
         }
@@ -196,10 +221,6 @@ class TolkAnnotator : Annotator {
 
     fun highlightReference(element: TolkReferenceExpression, holder: AnnotationHolder) {
         val identifier = element.identifier
-        if (element.name == "__expect_type") {
-            highlight(identifier, holder, DefaultLanguageHighlighterColors.LABEL)
-            return
-        }
         val reference = element.reference ?: return
         val resolved = reference.resolve() ?: return
         val color = when (resolved) {

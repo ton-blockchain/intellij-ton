@@ -2,14 +2,14 @@ package org.ton.intellij.tolk.type
 
 
 open class Substitution(
-    val typeSubst: Map<TyTypeParameter, TolkTy> = emptyMap()
+    val typeSubst: Map<TolkTypeParameterTy, TolkTy> = emptyMap()
 ) {
     operator fun plus(other: Substitution): Substitution =
         Substitution(
             typeSubst + other.typeSubst
         )
 
-    operator fun get(key: TyTypeParameter) = typeSubst[key]
+    operator fun get(key: TolkTypeParameterTy) = typeSubst[key]
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -22,11 +22,11 @@ open class Substitution(
 
     companion object {
         fun instantiate(paramType: TolkTy, argType: TolkTy): Substitution {
-            val substitution = mutableMapOf<TyTypeParameter, TolkTy>()
+            val substitution = mutableMapOf<TolkTypeParameterTy, TolkTy>()
 
             fun deduce(paramType: TolkTy, argType: TolkTy) {
                 when {
-                    paramType is TyStruct && argType is TyStruct -> {
+                    paramType is TolkStructTy && argType is TolkStructTy -> {
                         paramType.typeArguments.zip(argType.typeArguments).forEach { (a, b) ->
                             deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
                         }
@@ -47,16 +47,16 @@ open class Substitution(
                             .forEach { (a, b) -> deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
                     }
 
-                    paramType is TyUnion && argType is TyUnion -> {
+                    paramType is TolkUnionTy && argType is TolkUnionTy -> {
                         paramType.variants.zip(argType.variants).forEach { (a, b) ->
                             deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
                         }
                     }
 
-                    paramType is TyTypeParameter -> {
+                    paramType is TolkTypeParameterTy -> {
                         if (!substitution.containsKey(paramType)) {
                             val newType =
-                                if (argType == TolkTy.Unknown && paramType.parameter is TyTypeParameter.NamedTypeParameter) {
+                                if (argType == TolkTy.Unknown && paramType.parameter is TolkTypeParameterTy.NamedTypeParameter) {
                                     paramType.parameter.psi.defaultTypeParameter?.typeExpression?.type
                                 } else {
                                     argType
@@ -79,4 +79,4 @@ open class Substitution(
 
 object EmptySubstitution : Substitution()
 
-fun Map<TyTypeParameter, TolkTy>.toSubstitution() = Substitution(this)
+fun Map<TolkTypeParameterTy, TolkTy>.toSubstitution() = Substitution(this)

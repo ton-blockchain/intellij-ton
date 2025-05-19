@@ -9,6 +9,7 @@ import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.ide.completion.TolkCompletionContributor
+import org.ton.intellij.tolk.perf
 import org.ton.intellij.tolk.presentation.TolkPsiRenderer
 import org.ton.intellij.tolk.presentation.renderParameterList
 import org.ton.intellij.tolk.presentation.renderTypeExpression
@@ -46,15 +47,10 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
                 parameter.typeExpression.type ?: TolkTy.Unknown
             }
             val parameterType = TolkTy.tensor(parameters)
-            val returnType = actualReturnType ?: TolkTy.Unknown
-            val type = TolkFunctionTy(parameterType, actualReturnType ?: returnType)
+            val returnType = resolveReturnType() ?: TolkTy.Unknown
+            val type = TolkFunctionTy(parameterType, returnType)
 
             CachedValueProvider.Result.create(type, this)
-        }
-
-    private val actualReturnType: TolkTy?
-        get() = CachedValuesManager.getCachedValue(this) {
-            CachedValueProvider.Result.create(resolveReturnType(), this)
         }
 
     private fun resolveReturnType(): TolkTy? {
@@ -68,7 +64,7 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
         }
         val inference = try {
             inference
-        } catch (_: CyclicReferenceException) {
+        } catch (e: CyclicReferenceException) {
             null
         } ?: return null
         val result = if (inference.returnStatements.isNotEmpty()) {
@@ -114,9 +110,19 @@ val TolkFunction.parameters: List<TolkParameter>
     get() = (this as? TolkFunctionMixin)?.parameters ?: (parameterList?.parameterList ?: emptyList())
 
 fun TolkFunction.toLookupElement(): LookupElement {
+    val typeText = perf("type text") {
+//        val type = perf("get function type") {
+////            (returnType?.typeExpression?.type ?: (this.type as? TolkFunctionTy)?.returnType)
+//            returnType?.typeExpression?.type // triggers inference for all project, causes lags
+//        }
+//        perf("render function type") {
+//            type?.render()
+//        } ?: "<unknown>"
+        returnType?.typeExpression?.text // triggers inference for all project, causes lags
+    }
     return PrioritizedLookupElement.withPriority(
         LookupElementBuilder.createWithIcon(this)
-            .withTypeText((this.type as? TolkFunctionTy)?.returnType?.render() ?: "<unknown>")
+            .withTypeText(typeText)
             .let { builder ->
                 typeParameterList?.let { list ->
                     builder.appendTailText(

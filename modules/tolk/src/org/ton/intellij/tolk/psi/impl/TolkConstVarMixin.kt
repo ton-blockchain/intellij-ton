@@ -15,7 +15,7 @@ abstract class TolkConstVarMixin : TolkNamedElementImpl<TolkConstVarStub>, TolkC
     constructor(stub: TolkConstVarStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
 
     override val type: TolkTy?
-        get() = inference?.getType(this) ?: typeExpression?.type
+        get() = typeExpression?.type ?: inference?.getType(this)
 
     override fun getIcon(flags: Int): Icon = TolkIcons.CONSTANT
 }

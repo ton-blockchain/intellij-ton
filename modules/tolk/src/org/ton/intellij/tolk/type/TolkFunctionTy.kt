@@ -26,7 +26,7 @@ data class TolkFunctionTy(
         if (other is TolkFunctionTy) {
             return TolkFunctionTy(inputType.join(other.inputType), returnType.join(other.returnType))
         }
-        return TyUnion.create(this, other)
+        return TolkUnionTy.create(this, other)
     }
 
     override fun meet(other: TolkTy): TolkTy {
@@ -46,7 +46,7 @@ data class TolkFunctionTy(
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (this == other) return true
-        if (other is TolkAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTypeAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
         if (other !is TolkFunctionTy) return other == TolkTy.Never
         return inputType.canRhsBeAssigned(other.inputType)
                 && returnType.canRhsBeAssigned(other.returnType)

@@ -30,7 +30,7 @@ class TolkTypedTupleTy private constructor(
             }
             return TolkTypedTupleTy(joined, hasGenerics)
         }
-        return TyUnion.create(this, other)
+        return TolkUnionTy.create(this, other)
     }
 
     override fun meet(other: TolkTy): TolkTy {
@@ -57,7 +57,7 @@ class TolkTypedTupleTy private constructor(
             }
             return true
         }
-        if (other is TolkAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTypeAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
         return other == TolkTy.Never
     }
 

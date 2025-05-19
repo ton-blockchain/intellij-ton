@@ -1,15 +1,13 @@
 package org.ton.intellij.tolk.psi.reference
 
 import com.intellij.openapi.util.TextRange
-import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.psi.impl.TolkIncludeDefinitionMixin
-import org.ton.intellij.tolk.psi.impl.resolveFile
+import java.util.*
 
 class TolkTypeReference(
     element: TolkElement,
@@ -54,40 +52,30 @@ class TolkTypeReference(
     }
 
     private fun collectTypeDefResults(file: TolkFile, target: String): List<PsiElementResolveResult> {
-        val results = ArrayList<PsiElementResolveResult>()
+        val result = LinkedList<PsiElementResolveResult>()
+        val visitedFiles = HashSet<TolkFile>()
+        if (visitedFiles.add(file)) {
+            file.declaredSymbols[target]?.forEach {
+                result.add(PsiElementResolveResult(it))
+            }
+        }
 
-        val includedFiles = HashSet<TolkFile>()
-        val commonStdlib =
-            TolkIncludeDefinitionMixin.resolveTolkImport(file.project, file, "@stdlib/common")
-        if (commonStdlib != null) {
-            val tolkCommonStdlib = commonStdlib.findPsiFile(file.project) as? TolkFile
-            if (tolkCommonStdlib != null) {
-                includedFiles.add(tolkCommonStdlib)
-            }
-        }
-        file.includeDefinitions.forEach {
-            val resolvedFile = it.resolveFile(it.project)
-            if (resolvedFile != null) {
-                val resolvedTolkFile = resolvedFile.findPsiFile(it.project) as? TolkFile
-                if (resolvedTolkFile != null) {
-                    includedFiles.add(resolvedTolkFile)
+        file.getDefaultImport()?.let {
+            if (visitedFiles.add(it)) {
+                it.declaredSymbols[target]?.forEach {
+                    result.add(PsiElementResolveResult(it))
                 }
             }
         }
-        includedFiles.add(file)
 
-        includedFiles.forEach { file ->
-            file.typeDefs.forEach { typeDef ->
-                if (typeDef.name == target) {
-                    results.add(PsiElementResolveResult(typeDef))
-                }
-            }
-            file.structs.forEach { struct ->
-                if (struct.name == target) {
-                    results.add(PsiElementResolveResult(struct))
+        file.getImportedFiles().forEach { importedFile ->
+            if (visitedFiles.add(importedFile)) {
+                importedFile.declaredSymbols[target]?.forEach {
+                    result.add(PsiElementResolveResult(it))
                 }
             }
         }
-        return results
+
+        return result
     }
 }

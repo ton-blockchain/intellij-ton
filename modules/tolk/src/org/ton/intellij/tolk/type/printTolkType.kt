@@ -6,13 +6,13 @@ import org.ton.intellij.util.printPsi
 
 fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
     when (type) {
-        is TyTypeParameter -> {
+        is TolkTypeParameterTy -> {
             printPsi(type.parameter.psi, type.name ?: "<unknown>")
         }
-        is TolkAliasTy -> {
+        is TolkTypeAliasTy -> {
             printPsi(type.psi, type.psi.name ?: type.render())
         }
-        is TyStruct -> {
+        is TolkStructTy -> {
             val psi = type.psi
             printPsi(psi, psi.name ?: "<unknown>")
             if (type.typeArguments.isNotEmpty()) {
@@ -72,7 +72,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
             text("]")
         }
 
-        is TyUnion -> {
+        is TolkUnionTy -> {
             val elements = type.variants
             if (elements.size == 2) {
                 val first = elements.first()

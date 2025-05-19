@@ -7,11 +7,11 @@ import org.ton.intellij.tolk.type.range.TvmIntRangeSet
 
 interface TolkTy : TypeFoldable<TolkTy> {
     fun nullable(): TolkTy {
-        return TyUnion.create(this, Null)
+        return TolkUnionTy.create(this, Null)
     }
 
     fun isNullable(): Boolean {
-        return this is TyUnion && variants.contains(Null)
+        return this is TolkUnionTy && variants.contains(Null)
     }
 
     open fun removeNullability(): TolkTy = this
@@ -24,7 +24,7 @@ interface TolkTy : TypeFoldable<TolkTy> {
      * if A.isSuperType(B) then A.join(B) is A and A.meet(B) is B.
      */
     open fun isSuperType(other: TolkTy): Boolean {
-        if (other is TolkAliasTy) return isSuperType(other.underlyingType)
+        if (other is TolkTypeAliasTy) return isSuperType(other.underlyingType)
         return other == this || other == TolkNeverTy
     }
 
@@ -38,14 +38,14 @@ interface TolkTy : TypeFoldable<TolkTy> {
         return when (this) {
             is TolkTensorTy -> tensor(elements.map { it.substitute(substitution) })
             is TolkTypedTupleTy -> TolkTypedTupleTy.create(elements.map { it.substitute(substitution) })
-            is TyTypeParameter -> substitution[this.parameter.psi] ?: this
+            is TolkTypeParameterTy -> substitution[this.parameter.psi] ?: this
             else -> this
         }
     }
 
     open fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
-        if (other is TolkAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTypeAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
         return other == Never
     }
 
@@ -135,10 +135,10 @@ interface TolkTy : TypeFoldable<TolkTy> {
         fun bool(value: Boolean): TolkTy = if (value) TRUE else FALSE
 
         fun union(vararg elements: TolkTy): TolkTy {
-            return TyUnion.create(elements.toList())
+            return TolkUnionTy.create(elements.toList())
         }
 
-        fun union(elements: Iterable<TolkTy>): TolkTy = TyUnion.create(elements.toList())
+        fun union(elements: Iterable<TolkTy>): TolkTy = TolkUnionTy.create(elements.toList())
 
         fun tensor(elements: List<TolkTy>): TolkTy = TolkTensorTy.create(elements)
 
@@ -152,7 +152,7 @@ interface TolkTy : TypeFoldable<TolkTy> {
 
         fun bytes(n: Int): TolkTy = TolkBytesNTy(n)
 
-        fun struct(struct: TolkStruct): TyStruct = TyStruct.create(struct)
+        fun struct(struct: TolkStruct): TolkStructTy = TolkStructTy.create(struct)
     }
 }
 
@@ -225,7 +225,7 @@ object TolkBuilderTy : TolkPrimitiveTy {
 
     override fun join(other: TolkTy): TolkTy {
         if (other is TolkBuilderTy) return this
-        return TyUnion.create(this, other)
+        return TolkUnionTy.create(this, other)
     }
 
     override fun meet(other: TolkTy): TolkTy {
@@ -291,7 +291,7 @@ object TolkAddressTy : TolkPrimitiveTy {
 
     override fun join(other: TolkTy): TolkTy {
         if (other is TolkAddressTy) return this
-        return TyUnion.create(this, other)
+        return TolkUnionTy.create(this, other)
     }
 
     override fun meet(other: TolkTy): TolkTy {
@@ -328,7 +328,7 @@ data class TolkIntNTy(
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
         if (other.actualType() == TolkTy.Int) return true
-        if (other is TolkAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTypeAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
         return other == TolkTy.Never
     }
 }
@@ -342,7 +342,7 @@ data class TolkBitsNTy(
 
     override fun join(other: TolkTy): TolkTy {
         if (this == other) return this
-        return TyUnion.create(this, other)
+        return TolkUnionTy.create(this, other)
     }
 }
 
@@ -355,7 +355,7 @@ data class TolkBytesNTy(
 
     override fun join(other: TolkTy): TolkTy {
         if (this == other) return this
-        return TyUnion.create(this, other)
+        return TolkUnionTy.create(this, other)
     }
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {

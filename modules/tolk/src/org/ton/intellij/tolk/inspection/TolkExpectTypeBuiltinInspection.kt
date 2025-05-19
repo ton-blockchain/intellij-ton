@@ -14,7 +14,7 @@ class TolkExpectTypeBuiltinInspection  : TolkInspectionBase() {
     override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor = object  : TolkVisitor() {
         override fun visitCallExpression(o: TolkCallExpression) {
             val referenceExpr = o.expression as? TolkReferenceExpression ?: return
-            val name = referenceExpr.name ?: return
+            val name = referenceExpr.referenceName ?: return
             if (name != "__expect_type") return
             val argumentList = o.argumentList.argumentList
             val left = argumentList.firstOrNull() ?: return

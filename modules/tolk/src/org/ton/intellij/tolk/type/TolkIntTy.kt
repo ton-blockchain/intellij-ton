@@ -12,7 +12,7 @@ interface TolkIntTy : TolkPrimitiveTy {
 
     override fun isSuperType(other: TolkTy): Boolean {
         if (other == TolkTy.Never) return true
-        if (other is TolkAliasTy) return isSuperType(other.underlyingType)
+        if (other is TolkTypeAliasTy) return isSuperType(other.underlyingType)
         if (other !is TolkIntTy) return false
         return range.contains(other.range)
     }
@@ -20,8 +20,8 @@ interface TolkIntTy : TolkPrimitiveTy {
     override fun join(other: TolkTy): TolkTy {
         if (other == this) return this
         if (other == TolkTy.Never) return this
-        if (other is TolkAliasTy) return join(other.underlyingType)
-        if (other !is TolkIntTy) return TyUnion.create(this, other)
+        if (other is TolkTypeAliasTy) return join(other.underlyingType)
+        if (other !is TolkIntTy) return TolkUnionTy.create(this, other)
         val range = this.range.join(other.range)
         if (range is TvmIntRangeSet.Point) return TolkConstantIntTy(range.value)
         return TolkIntRangeTy(range)
@@ -31,7 +31,7 @@ interface TolkIntTy : TolkPrimitiveTy {
         if (other == this) return true
         if (other is TolkIntNTy) return true
         if (other is TolkCoinsTy) return true
-        if (other is TolkAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTypeAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
         if (other.actualType() == TolkTy.Int) return true
         return other == TolkTy.Never
     }
@@ -52,7 +52,7 @@ data class TolkConstantIntTy(
     override fun negate(): TolkIntTy = TolkConstantIntTy(value.negate())
 
     override fun isSuperType(other: TolkTy): Boolean {
-        if (other is TolkAliasTy) return isSuperType(other.underlyingType)
+        if (other is TolkTypeAliasTy) return isSuperType(other.underlyingType)
         return other == this || other == TolkNeverTy
     }
 

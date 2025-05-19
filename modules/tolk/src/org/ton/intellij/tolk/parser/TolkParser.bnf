@@ -171,6 +171,7 @@ ConstVar ::= 'const' IDENTIFIER ConstVarType? '=' Expression ';' {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkConstVarMixin"
     implements=[
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkConstVarStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -230,6 +231,7 @@ StructField ::= IDENTIFIER ':' TypeExpression ['=' Expression] {
     mixin="org.ton.intellij.tolk.psi.impl.TolkStructFieldMixin"
     implements=[
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkStructFieldStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -438,9 +440,9 @@ Expression ::=
     | AsExpression // expr40
     | IsExpression // expr40
     | PrefixExpression // expr75
-    | CallExpression
     | NotNullExpression
     | DotExpression // expr80
+    | CallExpression
     | StructExpression
     | AtomicExpression
     | MatchExpression
@@ -569,14 +571,26 @@ CallExpression ::= Expression ArgumentList {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkCallExpressionMixin"
 }
 
-DotExpression ::= Expression '.' Expression {
-    pin=2
-    methods=[
-        left="/Expression[0]"
-        right="/Expression[1]"
-    ]
+DotExpression ::= Expression '.' FieldLookup {
+    pin = 2
     mixin = "org.ton.intellij.tolk.psi.impl.TolkDotExpressionMixin"
 }
+
+//private MethodOrField ::= () (FieldLookup | MethodCall) {
+//    pin = 1
+//}
+
+FieldLookup ::= ((IDENTIFIER TypeArgumentList?) | INTEGER_LITERAL) {
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkFieldLookupMixin"
+    implements = "org.ton.intellij.tolk.psi.TolkReferenceElement"
+}
+
+//MethodCall ::= IDENTIFIER TypeArgumentList? ArgumentList {
+//    implements = [
+//        "org.ton.intellij.tolk.psi.TolkMethodOrField"
+//    ]
+//    mixin = "org.ton.intellij.tolk.psi.impl.TolkMethodCallMixin"
+//}
 
 AsExpression ::= Expression 'as' TypeExpression {
     pin = 2
@@ -587,9 +601,16 @@ IsExpression ::= Expression ('is'|'!is') TypeExpression {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkIsExpressionMixin"
 }
 
-MatchExpression ::= 'match' '(' Expression ')' '{' MatchArm* '}' {
+MatchExpression ::= 'match' '(' Expression ')' '{' MatchArms '}' {
     pin = 1
 }
+
+private MatchArms ::= MatchArm* {
+    recoverWhile=MatchArms_recovery
+}
+
+private MatchArms_recovery ::= !('}'|';')
+
 MatchArm ::= MatchPattern '=>' (MatchThrowArm | MatchReturnArm | MatchBlockArm | MatchExpressionArm) {
     pin = 1
 }
@@ -607,7 +628,10 @@ private MatchExpressionArm ::= Expression (&'}' | ',') {
     pin = 1
 }
 
-MatchPattern ::= MatchPatternReference | TypeExpression | Expression | 'else'
+MatchPattern ::= MatchPatternReference | TypeExpression | Expression | 'else' {
+    recoverWhile=MatchPattern_recover
+}
+private MatchPattern_recover ::= !('{'|'=>'|'}'|'return')
 
 MatchPatternReference ::= IDENTIFIER TypeArgumentList? {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkMatchPatternReferenceMixin"
@@ -684,12 +708,14 @@ SelfExpression ::= 'self' {
 ReferenceExpression ::= IDENTIFIER TypeArgumentList? {
     mixin="org.ton.intellij.tolk.psi.impl.TolkReferenceExpressionMixin"
     implements= [
-        "org.ton.intellij.tolk.psi.TolkNamedElement"
         "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkReferenceElement"
     ]
 }
 
-TypeArgumentList ::= '<' <<comma_separated_list TypeArgument>> '>'
+TypeArgumentList ::= '<' <<comma_separated_list TypeArgument>> '>' {
+    pin = 1
+}
 private TypeArgument ::= TypeExpression
 
 //private TypeArgumentElements ::= <<comma_separated_list TypeArgument>> {
@@ -708,7 +734,7 @@ ParameterList ::= '(' !',' SelfParameter_with_comma? Parameter_with_recover* ')'
 Parameter ::= 'mutate'? IDENTIFIER ':' TypeExpression {
     mixin="org.ton.intellij.tolk.psi.impl.TolkParameterMixin"
     implements=[
-        "org.ton.intellij.tolk.psi.TolkLocalSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkParameterElement"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -723,7 +749,7 @@ SelfParameter ::= 'mutate'? SelfTypeExpression {
     stubClass="org.ton.intellij.tolk.stub.TolkSelfParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
     implements=[
-        "org.ton.intellij.tolk.psi.TolkLocalSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkParameterElement"
     ]
     mixin="org.ton.intellij.tolk.psi.impl.TolkSelfParameterMixin"
 }

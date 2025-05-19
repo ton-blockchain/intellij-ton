@@ -5,7 +5,6 @@ import org.ton.intellij.tolk.psi.TolkSymbolElement
 import org.ton.intellij.tolk.psi.impl.hasSelf
 
 class TolkFlowContext(
-    val globalSymbols: MutableMap<String, TolkSymbolElement> = HashMap(),
     val functions: MutableMap<String, MutableCollection<TolkFunction>> = HashMap(),
     val symbolTypes: MutableMap<TolkSymbolElement, TolkTy> = LinkedHashMap(),
     val symbols: MutableMap<String, TolkSymbolElement> = LinkedHashMap(),
@@ -13,7 +12,6 @@ class TolkFlowContext(
     var unreachable: TolkUnreachableKind? = null
 ) {
     constructor(other: TolkFlowContext) : this(
-        other.globalSymbols,
         HashMap(other.functions),
         LinkedHashMap(other.symbolTypes),
         LinkedHashMap(other.symbols),
@@ -67,8 +65,8 @@ class TolkFlowContext(
         for (function in namedFunctions) {
             val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
             val actualFunctionReceiver = functionReceiver.actualType()
-            if (functionReceiver.hasGenerics() && functionReceiver !is TyTypeParameter) {
-                if (actualFunctionReceiver is TyStruct && actualCalledReceiver is TyStruct) {
+            if (functionReceiver.hasGenerics() && functionReceiver !is TolkTypeParameterTy) {
+                if (actualFunctionReceiver is TolkStructTy && actualCalledReceiver is TolkStructTy) {
                     if (!actualFunctionReceiver.psi.isEquivalentTo(actualCalledReceiver.psi)) {
                         continue
                     }
@@ -89,7 +87,7 @@ class TolkFlowContext(
         // step 4: try to match `T.copy`
         for (function in namedFunctions) {
             val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
-            if (functionReceiver is TyTypeParameter) {
+            if (functionReceiver is TolkTypeParameterTy) {
                 candidates.add(function to Substitution(mapOf(functionReceiver to calledReceiver)))
             }
         }
@@ -100,7 +98,7 @@ class TolkFlowContext(
         name: String?,
     ): TolkSymbolElement? {
         val fullName = name?.removeSurrounding("`") ?: return null
-        return symbols[fullName] ?: globalSymbols[fullName]
+        return symbols[fullName]
     }
 
     fun setSymbol(element: TolkSymbolElement, type: TolkTy) {
@@ -170,7 +168,6 @@ class TolkFlowContext(
             if (unreachable != null && other.unreachable != null) TolkUnreachableKind.Unknown else null
 
         return TolkFlowContext(
-            globalSymbols,
             functions,
             joinedSymbolTypes,
             joinedSymbols,

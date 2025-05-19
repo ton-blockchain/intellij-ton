@@ -5,7 +5,6 @@ import com.intellij.openapi.util.Key
 import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
-import com.intellij.psi.util.PsiModificationTracker
 import org.ton.intellij.tolk.type.TolkInferenceResult
 import org.ton.intellij.tolk.type.inferTypesIn
 import kotlin.time.ExperimentalTime
@@ -24,11 +23,9 @@ val TolkInferenceContextOwner.selfInferenceResult: TolkInferenceResult
                     inferTypesIn(this)
                 } catch (e: ProcessCanceledException) {
                     throw e
-                } catch (e: Throwable) {
-                    throw IllegalStateException("Failed to infer types in $this (${this.containingFile.virtualFile.path}, offset: ${this.textOffset})", e)
                 }
             }
             println("Inference of $this took $time")
-            CachedValueProvider.Result.create(inferred, PsiModificationTracker.MODIFICATION_COUNT)
+            CachedValueProvider.Result.create(inferred, this)
         }
     }

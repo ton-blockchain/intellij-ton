@@ -6,6 +6,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.findFile
 import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.psi.FileViewProvider
+import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import org.ton.intellij.tolk.TolkFileType
@@ -15,48 +16,45 @@ import org.ton.intellij.tolk.psi.impl.resolveFile
 import org.ton.intellij.tolk.stub.TolkFileStub
 import org.ton.intellij.tolk.stub.type.*
 import org.ton.intellij.util.getChildrenByType
-import org.ton.intellij.util.recursionGuard
+import java.util.*
 
-//private fun processFile(context: TolkElement, file: TolkFile) {
-//    recursionGuard(file, {
-//        for (includeDefinition in file.includeDefinitions) {
-//            val nextFile = includeDefinition.reference?.resolve()
-//            if (nextFile !is TolkFile) continue
-//            processFile(context, nextFile)
-//        }
-
-class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkLanguage), TolkElement,
-    TolkInferenceContextOwner {
+class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkLanguage), TolkElement {
     override fun getFileType(): FileType = TolkFileType
 
     override fun getStub(): TolkFileStub? = super.getStub() as? TolkFileStub
 
-    fun collectIncludedFiles(includeSelf: Boolean = true): Set<TolkFile> {
-        val files = mutableSetOf<TolkFile>()
-        val stdlibDir = project.tolkSettings.toolchain?.stdlibDir
-        if (stdlibDir != null) {
-            val commonStdlib = stdlibDir.findFile("common.tolk")?.findPsiFile(project)
-            if (commonStdlib is TolkFile) {
-                files.add(commonStdlib)
-            }
-        }
-        return collectIncludedFiles(files, includeSelf)
-    }
+    val declaredSymbols: Map<String, List<TolkSymbolElement>>
+        get() = CachedValuesManager.getCachedValue(this) {
+            val map = HashMap<String, MutableList<TolkSymbolElement>>()
 
-    private fun collectIncludedFiles(collection: MutableSet<TolkFile>, includeSelf: Boolean): MutableSet<TolkFile> {
-        recursionGuard(this, false) {
-            for (includeDefinition in includeDefinitions) {
-//                val nextFile = includeDefinition.reference?.resolve()
-                val nextFile = includeDefinition.resolveFile(project)?.findPsiFile(project)
-                if (nextFile !is TolkFile) continue
-                collection.add(nextFile)
+            typeDefs.forEach { typeDef ->
+                val name = typeDef.name ?: return@forEach
+                val list = map.getOrPut(name) { LinkedList() }
+                list.add(typeDef)
             }
-            if (includeSelf) {
-                collection.add(this)
+            structs.forEach { struct ->
+                val name = struct.name ?: return@forEach
+                val list = map.getOrPut(name) { LinkedList() }
+                list.add(struct)
             }
+            functions.forEach { function ->
+                val name = function.name ?: return@forEach
+                val list = map.getOrPut(name) { LinkedList() }
+                list.add(function)
+            }
+            constVars.forEach { constVar ->
+                val name = constVar.name ?: return@forEach
+                val list = map.getOrPut(name) { LinkedList() }
+                list.add(constVar)
+            }
+            globalVars.forEach { globalVar ->
+                val name = globalVar.name ?: return@forEach
+                val list = map.getOrPut(name) { LinkedList() }
+                list.add(globalVar)
+            }
+
+            CachedValueProvider.Result.create(map, this)
         }
-        return collection
-    }
 
     val includeDefinitions: List<TolkIncludeDefinition>
         get() = CachedValuesManager.getCachedValue(this) {
@@ -126,6 +124,47 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             CachedValueProvider.Result.create(typeDefs, this)
         }
 
+    override fun getResolveScope(): GlobalSearchScope {
+        return CachedValuesManager.getCachedValue(this) {
+            val scope = GlobalSearchScope.union(
+                listOf(
+                    GlobalSearchScope.fileScope(originalFile),
+                    getDefaultImportsScope(),
+                    getImportsScope(),
+                )
+            )
+            CachedValueProvider.Result.create(scope, this)
+        }
+    }
+
+    fun getImportsScope(): GlobalSearchScope {
+        val scopes = getImportedFiles().map { GlobalSearchScope.fileScope(it) }
+        if (scopes.isNotEmpty()) {
+            return GlobalSearchScope.union(scopes)
+        }
+        return GlobalSearchScope.EMPTY_SCOPE
+    }
+
+    fun getImportedFiles(): List<TolkFile> {
+        return CachedValuesManager.getCachedValue(this) {
+            val result = includeDefinitions.mapNotNull {
+                it.stringLiteral?.references?.lastOrNull()?.resolve() as? TolkFile ?: return@mapNotNull null
+            }
+            CachedValueProvider.Result.create(result, this)
+        }
+    }
+
+    fun getDefaultImport(): TolkFile? {
+        return CachedValuesManager.getCachedValue(this) {
+            val project = project
+            val result = project.tolkSettings.stdlibDir?.findFile("common.tolk")?.findPsiFile(project) as? TolkFile
+            CachedValueProvider.Result.create(result, this)
+        }
+    }
+
+    fun getDefaultImportsScope(): GlobalSearchScope {
+        return GlobalSearchScope.fileScope(getDefaultImport() ?: return GlobalSearchScope.EMPTY_SCOPE)
+    }
 
     fun import(file: TolkFile) {
         if (file == this) return

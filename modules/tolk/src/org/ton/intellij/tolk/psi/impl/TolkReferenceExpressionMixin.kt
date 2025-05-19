@@ -3,18 +3,20 @@ package org.ton.intellij.tolk.psi.impl
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import org.ton.intellij.tolk.psi.TolkPsiFactory
+import org.ton.intellij.tolk.psi.TolkReferenceElement
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.reference.TolkSymbolReference
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.inference
 
 
-abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceExpression {
+abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceExpression, TolkReferenceElement {
+    override val referenceNameElement: PsiElement?
+        get() = identifier
+
     override fun getReferences(): Array<TolkSymbolReference> {
-        val name = name
-        if (name == "__expect_type") return EMPTY_ARRAY
-        if (name != null && TolkTy.byName(name) != null) return EMPTY_ARRAY
+        val name = referenceName ?: return EMPTY_ARRAY
+        if (TolkTy.byName(name) != null) return EMPTY_ARRAY
         return arrayOf(TolkSymbolReference(this))
     }
 
@@ -26,17 +28,6 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
         }
 
     override fun getReference(): TolkSymbolReference? = references.firstOrNull()
-
-    override fun setName(name: String): PsiElement {
-        identifier.replace(TolkPsiFactory[project].createIdentifier(name))
-        return this
-    }
-
-    override fun getTextOffset(): Int = identifier.textOffset
-
-    override fun getName(): String? = identifier.text.removeSurrounding("`")
-
-    override fun getNameIdentifier(): PsiElement? = identifier
 
     override fun toString(): String = "TolkReferenceExpression($text)"
 

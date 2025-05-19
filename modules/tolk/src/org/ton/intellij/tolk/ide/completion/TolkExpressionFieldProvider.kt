@@ -8,11 +8,10 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.ide.completion.TolkCommonCompletionProvider.TolkCompletionContext
-import org.ton.intellij.tolk.ide.completion.TolkCommonCompletionProvider.toLookupElementBuilder
 import org.ton.intellij.tolk.psi.TolkStructExpression
 import org.ton.intellij.tolk.psi.TolkStructExpressionField
 import org.ton.intellij.tolk.psi.impl.structFields
-import org.ton.intellij.tolk.type.TyStruct
+import org.ton.intellij.tolk.type.TolkStructTy
 
 object TolkExpressionFieldProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> = psiElement()
@@ -28,7 +27,7 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         if (parent.identifier != element) return
 
         val structExpr = parent.parentOfType<TolkStructExpression>() ?: return
-        val structTy = structExpr.type?.unwrapTypeAlias() as? TyStruct ?: return
+        val structTy = structExpr.type?.unwrapTypeAlias() as? TolkStructTy ?: return
         val ctx = TolkCompletionContext(parent)
 
         structTy.psi.structFields.forEach { field ->

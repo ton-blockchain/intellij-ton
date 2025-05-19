@@ -10,6 +10,7 @@ import com.intellij.psi.stubs.StubIndex
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
+import org.ton.intellij.tolk.type.TolkPrimitiveTy
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.psiElement
@@ -27,12 +28,22 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         TolkTy.Tuple,
         TolkTy.Never,
         TolkTy.Coins,
-        TolkTy.VarInt16,
-        TolkTy.VarInt32,
         TolkTy.Address,
     ).map { it.toString() } + listOf(
         "uint",
+        "uint8",
+        "uint16",
+        "uint32",
+        "uint64",
+        "uint128",
+        "uint256",
         "int",
+        "int8",
+        "int16",
+        "int32",
+        "int64",
+        "int128",
+        "int256",
         "bits",
         "bytes",
     )
@@ -40,6 +51,10 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
     private val cachedPrimitiveElements = primitiveTypes.map {
         LookupElementBuilder.create(it).withBoldness(true)
     }
+    private val cachedVarIntElements = listOf(
+        TolkTy.VarInt16,
+        TolkTy.VarInt32,
+    )
 
     override fun addCompletions(
         parameters: CompletionParameters,
@@ -49,6 +64,18 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         val project = parameters.originalFile.project
         val position = parameters.position
         val parameterListOwner = position.parentOfType<TolkTypeParameterListOwner>()
+
+        result.restartCompletionOnPrefixChange("cont")
+        if (result.prefixMatcher.prefix == "cont") {
+            result.addElement(TolkTy.Continuation.toLookupElement())
+        }
+        result.restartCompletionOnPrefixChange("var")
+        if (result.prefixMatcher.prefix == "var") {
+            cachedVarIntElements.forEach { lookup ->
+                result.addElement(lookup.toLookupElement())
+            }
+        }
+
         parameterListOwner?.typeParameterList?.typeParameterList?.forEach { type ->
             result.addElement(
                 LookupElementBuilder.createWithIcon(type)
@@ -75,15 +102,21 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         }
 
         typeCandidates.forEach { typeDef ->
-            result.addElement(
-                LookupElementBuilder.createWithIcon(typeDef)
-                    .withInsertHandler { context, item ->
-                        val file = item.psiElement?.containingFile
-                        val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-                        val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-                        insertFile.import(includeCandidateFile)
-                    }
-            )
+            result.addElement(typeDef.toLookupElement())
         }
     }
+}
+
+fun TolkPrimitiveTy.toLookupElement(): LookupElementBuilder {
+    return LookupElementBuilder.create(this.toString()).withBoldness(true)
+}
+
+fun TolkSymbolElement.toLookupElement(): LookupElementBuilder {
+    return LookupElementBuilder.createWithIcon(this)
+        .withInsertHandler { context, item ->
+            val file = item.psiElement?.containingFile
+            val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+            val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
+            insertFile.import(includeCandidateFile)
+        }
 }

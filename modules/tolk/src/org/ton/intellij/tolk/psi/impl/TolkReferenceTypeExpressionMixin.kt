@@ -9,8 +9,8 @@ import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.psi.reference.TolkTypeReference
 import org.ton.intellij.tolk.type.TolkTy
-import org.ton.intellij.tolk.type.TyStruct
-import org.ton.intellij.tolk.type.TyTypeParameter
+import org.ton.intellij.tolk.type.TolkStructTy
+import org.ton.intellij.tolk.type.TolkTypeParameterTy
 
 abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node),
     TolkReferenceTypeExpression {
@@ -25,13 +25,13 @@ abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiEl
 
             val resolved = reference?.resolve()
             if (resolved is TolkStruct) {
-                return TyStruct.create(resolved, typeArgumentList?.typeExpressionList)
+                return TolkStructTy.create(resolved, typeArgumentList?.typeExpressionList)
             }
             if (resolved is TolkTypedElement) {
                 return resolved.type
             }
             if (parentOfType<TolkFunctionReceiver>() != null) {
-                return TyTypeParameter.create(this)
+                return TolkTypeParameterTy.create(this)
             }
             return null
         }

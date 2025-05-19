@@ -29,7 +29,7 @@ private class TypeRenderer(
         }
 
         return when (ty) {
-            is TolkAliasTy -> if (useAliasNames) buildString {
+            is TolkTypeAliasTy -> if (useAliasNames) buildString {
                 val psi = ty.psi
                 append(psi.name ?: return anonymous)
                 if (includeTypeArguments) {
@@ -61,7 +61,7 @@ private class TypeRenderer(
             is TolkTensorTy -> ty.elements.joinToString(", ", "(", ")", transform = render)
             is TolkTypedTupleTy -> ty.elements.joinToString(", ", "[", "]", transform = render)
             is TolkFunctionTy -> "${render(ty.inputType)} -> ${render(ty.returnType)}"
-            is TyUnion -> buildString {
+            is TolkUnionTy -> buildString {
                 val orNull = ty.orNull
                 if (orNull != null) {
                     render(orNull)
@@ -71,8 +71,8 @@ private class TypeRenderer(
                 }
             }
 
-            is TyTypeParameter -> ty.name ?: anonymous
-            is TyStruct -> buildString {
+            is TolkTypeParameterTy -> ty.name ?: anonymous
+            is TolkStructTy -> buildString {
                 append(ty.psi.name ?: return anonymous)
                 if (includeTypeArguments && ty.typeArguments.isNotEmpty()) {
                     append(ty.typeArguments.joinToString(", ", "<", ">", transform = render))

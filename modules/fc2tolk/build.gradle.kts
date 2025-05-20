@@ -6,7 +6,7 @@ plugins {
 dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
-        intellijIdeaCommunity(version)
+        webstorm(version)
     }
     compileOnly(project(":func"))
     compileOnly(project(":tolk"))

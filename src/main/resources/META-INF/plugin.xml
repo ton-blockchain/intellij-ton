@@ -15,7 +15,6 @@
     <xi:include href="/META-INF/fift.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/boc.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.dev</depends>
     <depends optional="true" config-file="javascript.xml">JavaScript</depends>
 
     <extensions defaultExtensionNs="com.intellij">

@@ -17,7 +17,7 @@ class TolkTypeReference(
 ) {
     val identifier get() = element.node.findChildByType(TolkElementTypes.IDENTIFIER)!!
 
-    override fun calculateDefaultRangeInElement(): TextRange? {
+    override fun calculateDefaultRangeInElement(): TextRange {
         val identifier = identifier
         return TextRange(identifier.startOffsetInParent, identifier.textLength)
     }

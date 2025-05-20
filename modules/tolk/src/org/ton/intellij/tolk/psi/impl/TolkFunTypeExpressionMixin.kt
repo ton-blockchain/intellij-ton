@@ -1,12 +1,11 @@
 package org.ton.intellij.tolk.psi.impl
 
-import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import org.ton.intellij.tolk.psi.TolkFunTypeExpression
 import org.ton.intellij.tolk.type.TolkFunctionTy
 import org.ton.intellij.tolk.type.TolkTy
 
-abstract class TolkFunTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkFunTypeExpression {
+abstract class TolkFunTypeExpressionMixin(node: ASTNode) : TolkTypeExpressionImpl(node), TolkFunTypeExpression {
     override val type: TolkTy?
         get() {
             val typeExpressions = typeExpressionList

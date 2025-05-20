@@ -22,10 +22,10 @@ val Project.tolkToolchain: TolkToolchain? get() = tolkSettings.toolchain
 class TolkProjectSettingsService(
     private val project: Project
 ) : SimplePersistentStateComponent<TolkProjectSettingsService.TolkProjectSettings>(TolkProjectSettings()) {
-    var toolchain: TolkToolchain?
-        get() = state.toolchainLocation?.let { TolkToolchain.fromPath(it) }
+    var toolchain: TolkToolchain
+        get() = state.toolchainLocation?.let { TolkToolchain.fromPath(it) } ?: TolkToolchain.NULL
         set(value) {
-            state.toolchainLocation = value?.homePath
+            state.toolchainLocation = value.homePath.ifEmpty { null }
             defaultImport = null
         }
     var explicitPathToStdlib: String?
@@ -39,7 +39,7 @@ class TolkProjectSettingsService(
             it.toNioPathOrNull()?.let {  path ->
                 VirtualFileManager.getInstance().findFileByNioPath(path)
             }
-        } ?: toolchain?.stdlibDir
+        } ?: toolchain.stdlibDir
     }
 
     private var defaultImport: TolkFile? = null

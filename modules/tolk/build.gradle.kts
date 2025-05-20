@@ -10,7 +10,7 @@ plugins {
 dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
-        intellijIdeaCommunity(version)
+        webstorm(version)
         bundledPlugin("com.intellij.dev")
     }
     compileOnly(project(":asm"))

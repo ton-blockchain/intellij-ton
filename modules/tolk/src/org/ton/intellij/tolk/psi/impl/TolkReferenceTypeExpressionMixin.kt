@@ -2,41 +2,68 @@ package org.ton.intellij.tolk.psi.impl
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
+import com.intellij.psi.PsiElement
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.psi.TolkFunctionReceiver
 import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.psi.reference.TolkTypeReference
-import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkStructTy
+import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkTypeParameterTy
 
-abstract class TolkReferenceTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node),
-    TolkReferenceTypeExpression {
-    private val primitiveType: TolkTy? get() = TolkTy.byName(this.text)
+abstract class TolkReferenceTypeExpressionMixin : ASTWrapperPsiElement, TolkReferenceTypeExpression {
+
+    constructor(node: ASTNode) : super(node)
+//    constructor(stub: TolkReferenceTypeExpressionStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+    private val primitiveType: TolkTy?
+        get() {
+            return TolkTy.byName(referenceName ?: return null)
+        }
 
     val isPrimitive get() = primitiveType != null
 
     override val type: TolkTy?
-        get() {
-            val primitiveType = primitiveType
-            if (primitiveType != null) return primitiveType
-
-            val resolved = reference?.resolve()
-            if (resolved is TolkStruct) {
-                return TolkStructTy.create(resolved, typeArgumentList?.typeExpressionList)
-            }
-            if (resolved is TolkTypedElement) {
-                return resolved.type
-            }
-            if (parentOfType<TolkFunctionReceiver>() != null) {
-                return TolkTypeParameterTy.create(this)
-            }
-            return null
+        get() = CachedValuesManager.getCachedValue(this) {
+            val type = resolveType()
+            CachedValueProvider.Result.create(type, this)
         }
 
-    override fun getReference() = if(isPrimitive) null else TolkTypeReference(this)
+     val referenceNameElement: PsiElement get() = identifier
+
+     val referenceName: String
+        get() = referenceNameElement.text.replace("`", "")
+
+    override fun getReference(): TolkTypeReference? {
+        val referenceName = referenceName
+        val primitiveType = TolkTy.byName(referenceName)
+        if (primitiveType != null) {
+            return null
+        }
+        return TolkTypeReference(this)
+    }
+
+    private fun resolveType(): TolkTy? {
+        val primitiveType = primitiveType
+        if (primitiveType != null) return primitiveType
+
+        val resolved = reference?.resolve()
+        if (resolved is TolkStruct) {
+            return TolkStructTy.create(resolved, typeArgumentList?.typeExpressionList)
+        }
+        if (resolved is TolkTypedElement) {
+            return resolved.type
+        }
+        if (parentOfType<TolkFunctionReceiver>() != null) {
+            return TolkTypeParameterTy.create(this)
+        }
+        return TolkTy.Unknown
+    }
+
 
 //    inner class CacheResolver : CachedValueProvider<TolkTy> {
 //        override fun compute(): CachedValueProvider.Result<TolkTy?>? {

@@ -6,9 +6,8 @@ plugins {
 dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
-        intellijIdeaUltimate(version)
+        webstorm(version)
         bundledPlugin("JavaScript")
     }
     compileOnly(project(":util"))
 }
-

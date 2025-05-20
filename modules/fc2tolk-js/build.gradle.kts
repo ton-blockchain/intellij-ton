@@ -6,7 +6,7 @@ plugins {
 dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
-        intellijIdeaUltimate(version)
+        webstorm(version)
     }
 
     compileOnly(project(":util"))

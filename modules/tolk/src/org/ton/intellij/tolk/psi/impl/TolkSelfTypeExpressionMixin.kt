@@ -4,6 +4,7 @@ import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiReferenceBase
+import com.intellij.psi.impl.source.resolve.ResolveCache
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkSelfTypeExpression
@@ -14,16 +15,30 @@ abstract class TolkSelfTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement
     override val type: TolkTy
         get() = reference.resolve()?.type ?: TolkTy.Unknown
 
-    override fun getReference() = SelfTypeReference(this)
+    private val reference = SelfTypeReference(this)
+
+    override fun getReference() = reference
 
     class SelfTypeReference(
         element: TolkSelfTypeExpression
-    ) : PsiReferenceBase<TolkSelfTypeExpression>(
-        element, TextRange(0, element.textLength), false
-    ) {
-        override fun resolve(): TolkTypeExpression? {
-            val function = element.parentOfType<TolkFunction>()
-            return function?.functionReceiver?.typeExpression
+    ) : PsiReferenceBase<TolkSelfTypeExpression>(element) {
+        private val project = element.project
+        private val resolveCache = ResolveCache.getInstance(project)
+
+        override fun resolve(): TolkTypeExpression? =
+            resolveCache.resolveWithCaching(this, Resolver(), false, false)
+
+        override fun calculateDefaultRangeInElement(): TextRange =
+            TextRange(0, element.textLength)
+
+        private inner class Resolver() : ResolveCache.AbstractResolver<SelfTypeReference, TolkTypeExpression?> {
+            override fun resolve(
+                ref: SelfTypeReference,
+                incompleteCode: Boolean
+            ): TolkTypeExpression? {
+                val function = element.parentOfType<TolkFunction>()
+                return function?.functionReceiver?.typeExpression
+            }
         }
     }
 }

@@ -1,0 +1,6 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij.dev">
+        <psiViewer.propertyNodeFactory
+                implementation="org.ton.intellij.tolk.dev.psiviewer.PsiViewerTolkTypeNode$Factory"/>
+    </extensions>
+</idea-plugin>

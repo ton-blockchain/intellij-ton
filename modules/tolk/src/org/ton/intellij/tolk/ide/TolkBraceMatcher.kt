@@ -14,6 +14,7 @@ class TolkBraceMatcher : PairedBraceMatcher {
         BracePair(TolkElementTypes.LBRACE, TolkElementTypes.RBRACE, true),
         BracePair(TolkElementTypes.LPAREN, TolkElementTypes.RPAREN, false),
         BracePair(TolkElementTypes.LBRACK, TolkElementTypes.RBRACK, false),
+        BracePair(TolkElementTypes.LT, TolkElementTypes.GT, false),
     )
 
     override fun getPairs(): Array<BracePair> = pairs
@@ -27,6 +28,8 @@ class TolkBraceMatcher : PairedBraceMatcher {
                 || contextType == TolkElementTypes.RBRACK
                 || contextType == TolkElementTypes.RBRACE
                 || contextType == TolkElementTypes.LBRACE
+                || contextType == TolkElementTypes.LT
+                || contextType == TolkElementTypes.GT
     }
 
     override fun getCodeConstructStart(file: PsiFile?, openingBraceOffset: Int): Int {

@@ -12,6 +12,7 @@ import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
 import org.ton.intellij.tolk.type.TolkPrimitiveTy
 import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.psiElement
 
@@ -108,7 +109,7 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
 }
 
 fun TolkPrimitiveTy.toLookupElement(): LookupElementBuilder {
-    return LookupElementBuilder.create(this.toString()).withBoldness(true)
+    return LookupElementBuilder.create(this.render()).withBoldness(true)
 }
 
 fun TolkSymbolElement.toLookupElement(): LookupElementBuilder {

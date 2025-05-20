@@ -98,9 +98,6 @@ val TolkFunction.hasAsm: Boolean
 val TolkFunction.isBuiltin: Boolean
     get() = greenStub?.isBuiltin ?: (functionBody?.builtinKeyword != null)
 
-val TolkFunction.isGeneric: Boolean
-    get() = greenStub?.isGeneric ?: typeParameterList?.typeParameterList?.isNotEmpty() ?: false
-
 val TolkFunction.hasSelf: Boolean
     get() = greenStub?.hasSelf ?: (parameterList?.selfParameter != null)
 
@@ -109,14 +106,7 @@ val TolkFunction.parameters: List<TolkParameter>
 
 fun TolkFunction.toLookupElement(): LookupElement {
     val typeText = perf("type text") {
-//        val type = perf("get function type") {
-////            (returnType?.typeExpression?.type ?: (this.type as? TolkFunctionTy)?.returnType)
-//            returnType?.typeExpression?.type // triggers inference for all project, causes lags
-//        }
-//        perf("render function type") {
-//            type?.render()
-//        } ?: "<unknown>"
-        returnType?.typeExpression?.text // triggers inference for all project, causes lags
+        returnType?.typeExpression?.type?.render()
     }
     return PrioritizedLookupElement.withPriority(
         LookupElementBuilder.createWithIcon(this)

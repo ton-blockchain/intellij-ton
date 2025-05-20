@@ -1,0 +1,6 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij.dev">
+        <psiViewer.propertyNodeFactory
+                implementation="org.ton.intellij.tlb.dev.PsiViewerTlbSizeNode$Factory"/>
+    </extensions>
+</idea-plugin>

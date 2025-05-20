@@ -65,7 +65,7 @@ class TolkProjectConfigurable(
 
         val setting = project.tolkSettings
         onApply {
-            setting.toolchain = data.toolchain
+            setting.toolchain = data.toolchain ?: TolkToolchain.NULL
             setting.explicitPathToStdlib = data.explicitPathToStdlib
         }
         onReset {
@@ -82,7 +82,7 @@ class TolkProjectConfigurable(
         }
         onIsModified {
             val data = data
-            data.toolchain?.homePath != setting.toolchain?.homePath || data.explicitPathToStdlib != setting.explicitPathToStdlib
+            data.toolchain?.homePath != setting.toolchain.homePath || data.explicitPathToStdlib != setting.explicitPathToStdlib
         }
 
         pathToToolchainComboBox.addToolchainsAsync {

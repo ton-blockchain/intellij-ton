@@ -61,7 +61,7 @@ class TonBlueprintProjectGenerator(
 
     override fun packageName(): String = CREATE_TON_PACKAGE_NAME
 
-    override fun generatorArgs(project: Project?, dir: VirtualFile, settings: Settings): Array<String> {
+    override fun generatorArgs(project: Project, dir: VirtualFile, settings: Settings): Array<String> {
         val workingDir = if (generateInTemp()) dir.name else "."
         val packageName = settings.myPackage.name
         val addSampleCode = settings.getUserData(ADD_SAMPLE_CODE) ?: false
@@ -78,7 +78,7 @@ class TonBlueprintProjectGenerator(
         )
     }
 
-    override fun postInstall(project: Project, baseDir: VirtualFile, workingDir: File?): Runnable = Runnable {
+    override fun postInstall(project: Project, baseDir: VirtualFile, workingDir: File): Runnable = Runnable {
         super.postInstall(project, baseDir, workingDir).run()
         createRunConfigurations(project, baseDir)
     }

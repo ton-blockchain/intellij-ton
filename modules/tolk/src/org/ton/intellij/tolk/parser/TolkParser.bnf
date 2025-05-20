@@ -278,7 +278,11 @@ private get ::= <<getKeyword>>
 ReturnType ::= ':' (TypeExpression | 'self') {
     pin = 1
     recoverWhile = ReturnType_recovery
+    extends = "org.ton.intellij.tolk.psi.impl.TolkStubbedElementImpl<?>"
+    stubClass = "org.ton.intellij.tolk.stub.TolkPlaceholderStub<?>"
+    elementTypeFactory = "org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
+
 private ReturnType_recovery ::= !(FunctionBody_first|TopLevelDefinition_first)
 
 Annotation ::= '@' IDENTIFIER AnnotationParamList? {
@@ -777,9 +781,8 @@ TypeExpression ::=
     | NullableTypeExpression
     | SimpleTypeExpression
 {
-    implements=[
-        "org.ton.intellij.tolk.psi.TolkTypedElement"
-    ]
+    implements = "org.ton.intellij.tolk.psi.TolkTypedElement"
+    name = "type"
 }
 
 NullableTypeExpression ::= SimpleTypeExpression '?' {
@@ -856,7 +859,6 @@ VoidTypeExpression ::= 'void' | ('(' ')') {
 
 ReferenceTypeExpression ::= IDENTIFIER TypeArgumentList_pinned? {
     mixin="org.ton.intellij.tolk.psi.impl.TolkReferenceTypeExpressionMixin"
-    extends=TypeExpression
 }
 
 fake TensorTypeExpression ::= '(' [ <<comma_separated_list TypeExpression>> ] ')' {
@@ -877,11 +879,7 @@ upper TensorType_upper ::= ',' [ TypeExpression (',' TypeExpression)* ] ')' {
     elementType = TensorTypeExpression
 }
 
-private meta comma_separated_list ::= (<<comma_separated_list_with_two_params <<param>>>>) | (<<param>> (',' <<param>>)* ','?)
-
-private meta comma_separated_list_with_two_params ::= <<param>> ',' (<<param>> (',' <<param>>)* ','?)? {
-    pin = 2
-}
+private meta comma_separated_list ::= <<param>> (',' <<param>>)* ','?
 
 private meta list_with_recover ::= <<comma_separated_list <<param>>>> {
     recoverWhile=paren_list_element_recover

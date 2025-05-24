@@ -15,7 +15,7 @@ interface TolkTy : TypeFoldable<TolkTy> {
 
     open fun removeNullability(): TolkTy = this
 
-    open fun actualType(): TolkTy = unwrapTypeAlias()
+    open fun actualType(): TolkTy = this
 
     open fun unwrapTypeAlias(): TolkTy = this
 
@@ -144,6 +144,10 @@ interface TolkTy : TypeFoldable<TolkTy> {
 
         fun struct(struct: TolkStruct): TolkStructTy = TolkStructTy.create(struct)
     }
+}
+
+fun TolkTy?.isKnown(): Boolean {
+    return !(this == null || this == TolkTy.Unknown)
 }
 
 fun TolkTy?.join(other: TolkTy?): TolkTy? {
@@ -328,8 +332,6 @@ data class TolkBitsNTy(
 ) : TolkTy {
     override fun toString(): String = "bits$n"
 
-    override fun actualType(): TolkTy = this
-
     override fun join(other: TolkTy): TolkTy {
         if (this == other) return this
         return TolkUnionTy.create(this, other)
@@ -340,8 +342,6 @@ data class TolkBytesNTy(
     val n: Int,
 ) : TolkTy {
     override fun toString(): String = "bytes$n"
-
-    override fun actualType(): TolkTy = this
 
     override fun join(other: TolkTy): TolkTy {
         if (this == other) return this
@@ -358,8 +358,6 @@ data class TolkVarInt32Ty(
 ) : TolkIntTy {
     override fun negate(): TolkIntTy = TolkVarInt32Ty(range.unaryMinus())
 
-    override fun actualType(): TolkTy = this
-
     override fun toString(): String = "varint32"
 }
 
@@ -367,8 +365,6 @@ data class TolkVarInt16Ty(
     override val range: TvmIntRangeSet = TvmIntRangeSet.ALL
 ) : TolkIntTy {
     override fun negate(): TolkIntTy = TolkVarInt16Ty(range.unaryMinus())
-
-    override fun actualType(): TolkTy = this
 
     override fun toString(): String = "varint16"
 }

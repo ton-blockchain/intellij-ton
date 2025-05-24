@@ -10,6 +10,13 @@ data class TolkFunctionTy(
 
     override fun hasGenerics(): Boolean = hasGenerics
 
+    override fun actualType(): TolkTy {
+        return TolkFunctionTy(
+            inputType = inputType.actualType(),
+            returnType = returnType.actualType()
+        )
+    }
+
     val parameters: List<TolkTy> = if (inputType is TolkTensorTy) inputType.elements else listOf(inputType)
 
     override fun superFoldWith(folder: TypeFolder): TolkTy {

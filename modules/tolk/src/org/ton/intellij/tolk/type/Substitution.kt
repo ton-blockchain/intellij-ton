@@ -47,15 +47,15 @@ open class Substitution(
 
             paramType is TolkUnionTy && argType is TolkUnionTy -> {
                 paramType.variants.zip(argType.variants).fold(this) { sub, (a, b) ->
-                    deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
+                    deduce(a.actualType(), b.actualType())
                 }
             }
 
             paramType is TolkTypeParameterTy -> {
                 if (!typeSubst.containsKey(paramType)) {
                     val newType =
-                        if (argType == TolkTy.Unknown && paramType.parameter is TolkTypeParameterTy.NamedTypeParameter) {
-                            paramType.parameter.psi.defaultTypeParameter?.typeExpression?.type ?: argType
+                        if ((argType == paramType || argType == TolkTy.Unknown) && paramType.parameter is TolkTypeParameterTy.NamedTypeParameter) {
+                            paramType.parameter.psi.defaultTypeParameter?.typeExpression?.type ?: return this
                         } else {
                             argType
                         }

@@ -1,11 +1,10 @@
 package org.ton.intellij.tolk.type
 
-import org.ton.intellij.tolk.psi.TolkElement
-
 class TolkUnionTy private constructor(
     val variants: Set<TolkTy>,
-    private val hasGenerics: Boolean,
 ) : TolkTy {
+    private val hasGenerics: Boolean = variants.any { it.hasGenerics() }
+
     override fun hasGenerics(): Boolean = hasGenerics
 
     override fun superFoldWith(folder: TypeFolder): TolkTy {
@@ -119,7 +118,7 @@ class TolkUnionTy private constructor(
         fun create(elements: Collection<TolkTy>): TolkTy {
             val elements = joinUnions(elements)
             if (elements.size == 1) return elements.first()
-            return TolkUnionTy(elements, elements.any { it.hasGenerics() })
+            return TolkUnionTy(elements)
         }
 
         private fun joinUnions(set: Collection<TolkTy>): Set<TolkTy> {
@@ -148,48 +147,6 @@ class TolkUnionTy private constructor(
                 }
             }
             return flatVariants.values.toSet()
-        }
-
-
-        private fun simplify(elements: Set<TolkTy>): TolkTy {
-            when (elements.size) {
-                1 -> {
-                    return elements.single()
-                }
-
-                else -> {
-                    val unique: MutableList<TolkTy> = ArrayList(elements)
-                    var changed = true
-                    while (changed) {
-                        changed = false
-                        outer@ for (i in 0 until unique.size) {
-                            for (j in 0 until unique.size) {
-                                if (i == j) continue
-                                val iType = unique[i]
-                                val jType = unique[j]
-                                val joined = iType.join(jType)
-                                if (joined !is TolkUnionTy) {
-                                    unique[i] = joined
-                                    unique.removeAt(j)
-                                    changed = true
-                                    break@outer
-                                }
-                            }
-                        }
-                    }
-
-                    if (unique.size == 1) return unique.single()
-                    var hasGenerics = false
-                    val uniqueSet = LinkedHashSet<TolkTy>(unique.size)
-                    for (type in unique) {
-                        if (type.hasGenerics()) {
-                            hasGenerics = true
-                        }
-                        uniqueSet.add(type)
-                    }
-                    return TolkUnionTy(uniqueSet, hasGenerics)
-                }
-            }
         }
     }
 }

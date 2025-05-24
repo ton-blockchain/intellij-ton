@@ -7,6 +7,7 @@ import com.intellij.psi.LiteralTextEscaper
 import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.PsiReference
 import org.ton.intellij.tolk.psi.TolkAsmBody
+import org.ton.intellij.tolk.psi.TolkIncludeDefinition
 import org.ton.intellij.tolk.psi.TolkStringLiteral
 import org.ton.intellij.tolk.psi.reference.TolkLiteralFileReferenceSet
 
@@ -20,10 +21,13 @@ abstract class TolkStringLiteralMixin(node: ASTNode) : ASTWrapperPsiElement(node
     }
 
     override fun getReferences(): Array<out PsiReference?> {
-        val rawString = rawString ?: return PsiReference.EMPTY_ARRAY
-        val contents = rawString.text
-        val fileSet = TolkLiteralFileReferenceSet(contents, this, rawString.startOffsetInParent)
-        return fileSet.allReferences
+        if (parent is TolkIncludeDefinition) {
+            val rawString = rawString ?: return PsiReference.EMPTY_ARRAY
+            val contents = rawString.text
+            val fileSet = TolkLiteralFileReferenceSet(contents, this, rawString.startOffsetInParent)
+            return fileSet.allReferences
+        }
+        return PsiReference.EMPTY_ARRAY
     }
 
     override fun createLiteralTextEscaper() = object : LiteralTextEscaper<TolkStringLiteralMixin>(this) {

@@ -1,7 +1,5 @@
 package org.ton.intellij.tolk.type
 
-import org.ton.intellij.tolk.psi.TolkElement
-
 data class TolkFunctionTy(
     val inputType: TolkTy,
     val returnType: TolkTy
@@ -38,11 +36,6 @@ data class TolkFunctionTy(
         return TolkTy.Never
     }
 
-    override fun substitute(substitution: Map<TolkElement, TolkTy>): TolkFunctionTy {
-        val inputType = inputType.substitute(substitution)
-        val returnType = returnType.substitute(substitution)
-        return TolkFunctionTy(inputType, returnType)
-    }
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (this == other) return true

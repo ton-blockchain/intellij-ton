@@ -1,7 +1,6 @@
 package org.ton.intellij.tolk.type
 
 
-import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.type.range.TvmIntRangeSet
 
@@ -33,15 +32,6 @@ interface TolkTy : TypeFoldable<TolkTy> {
     open fun meet(other: TolkTy): TolkTy = if (other.isSuperType(this)) this else TolkNeverTy
 
     open fun hasGenerics(): Boolean = false
-
-    open fun substitute(substitution: Map<TolkElement, TolkTy>): TolkTy {
-        return when (this) {
-            is TolkTensorTy -> tensor(elements.map { it.substitute(substitution) })
-            is TolkTypedTupleTy -> TolkTypedTupleTy.create(elements.map { it.substitute(substitution) })
-            is TolkTypeParameterTy -> substitution[this.parameter.psi] ?: this
-            else -> this
-        }
-    }
 
     open fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true

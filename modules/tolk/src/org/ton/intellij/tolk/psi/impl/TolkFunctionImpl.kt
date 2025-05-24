@@ -16,7 +16,6 @@ import org.ton.intellij.tolk.presentation.renderTypeExpression
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkFunction
-import org.ton.intellij.tolk.psi.TolkParameter
 import org.ton.intellij.tolk.stub.TolkFunctionStub
 import org.ton.intellij.tolk.type.*
 import org.ton.intellij.util.greenStub
@@ -36,19 +35,46 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
 
     override fun getBaseIcon(): Icon? = TolkIcons.FUNCTION
 
-    val parameters: List<TolkParameter>
-        get() = parameterList?.parameterList ?: emptyList()
 
     override val type: TolkFunctionTy
         get() = CachedValuesManager.getCachedValue(this) {
-            val parameters = parameters.map { parameter ->
-                parameter.typeExpression.type ?: TolkTy.Unknown
+            val returnTy = this@TolkFunctionMixin.returnTy
+            val parameterList = parameterList ?: return@getCachedValue CachedValueProvider.Result.create(
+                TolkFunctionTy(
+                    TolkTy.Unit,
+                    returnTy
+                ), this
+            )
+            val selfParameter = parameterList.selfParameter
+            val parameters = parameterList.parameterList
+            val tensor: ArrayList<TolkTy>
+            if (selfParameter != null) {
+                tensor = ArrayList(parameters.size + 1)
+                tensor.add(selfParameter.type ?: TolkTy.Unknown)
+            } else {
+                tensor = ArrayList(parameters.size)
             }
-            val parameterType = TolkTy.tensor(parameters)
-            val returnType = resolveReturnType() ?: TolkTy.Unknown
-            val type = TolkFunctionTy(parameterType, returnType)
+            parameters.forEach {
+                val type = it.typeExpression.type ?: TolkTy.Unknown
+                tensor.add(type)
+            }
+
+            val parameterTy = TolkTy.tensor(tensor)
+            val type = TolkFunctionTy(parameterTy, returnTy)
 
             CachedValueProvider.Result.create(type, this)
+        }
+
+    val returnTy: TolkTy
+        get() = CachedValuesManager.getCachedValue(this) {
+            val returnType = resolveReturnType() ?: TolkTy.Unknown
+            CachedValueProvider.Result.create(returnType, this)
+        }
+
+    val receiverTy: TolkTy?
+        get() = CachedValuesManager.getCachedValue(this) {
+            val receiverType = functionReceiver?.typeExpression?.type ?: TolkTy.Unknown
+            CachedValueProvider.Result.create(receiverType, this)
         }
 
     private fun resolveReturnType(): TolkTy? {
@@ -101,9 +127,6 @@ val TolkFunction.isBuiltin: Boolean
 val TolkFunction.hasSelf: Boolean
     get() = greenStub?.hasSelf ?: (parameterList?.selfParameter != null)
 
-val TolkFunction.parameters: List<TolkParameter>
-    get() = (this as? TolkFunctionMixin)?.parameters ?: (parameterList?.parameterList ?: emptyList())
-
 fun TolkFunction.toLookupElement(): LookupElement {
     val typeText = perf("type text") {
         returnType?.typeExpression?.type?.render()
@@ -131,7 +154,7 @@ fun TolkFunction.toLookupElement(): LookupElement {
                 val hasOpenBracket = chars.indexOfSkippingSpace('(', offset) != null
 
                 if (!hasOpenBracket) {
-                    val offset = if (this.parameters.isEmpty()) 2 else 1
+                    val offset = if (parameterList?.parameterList.isNullOrEmpty()) 2 else 1
                     context.document.insertString(context.editor.caretModel.offset, "()")
                     context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
                     context.commitDocument()

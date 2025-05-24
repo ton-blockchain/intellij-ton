@@ -20,59 +20,65 @@ open class Substitution(
 
     override fun hashCode(): Int = typeSubst.hashCode()
 
-    companion object {
-        fun instantiate(paramType: TolkTy, argType: TolkTy): Substitution {
-            val substitution = mutableMapOf<TolkTypeParameterTy, TolkTy>()
-
-            fun deduce(paramType: TolkTy, argType: TolkTy) {
-                when {
-                    paramType is TolkStructTy && argType is TolkStructTy -> {
-                        paramType.typeArguments.zip(argType.typeArguments).forEach { (a, b) ->
-                            deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
-                        }
-                    }
-
-                    paramType is TolkFunctionTy && argType is TolkFunctionTy -> {
-                        deduce(paramType.inputType.unwrapTypeAlias(), argType.inputType.unwrapTypeAlias())
-                        deduce(paramType.returnType.unwrapTypeAlias(), argType.returnType.unwrapTypeAlias())
-                    }
-
-                    paramType is TolkTensorTy && argType is TolkTensorTy -> {
-                        paramType.elements.zip(argType.elements)
-                            .forEach { (a, b) -> deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
-                    }
-
-                    paramType is TolkTypedTupleTy && argType is TolkTypedTupleTy -> {
-                        paramType.elements.zip(argType.elements)
-                            .forEach { (a, b) -> deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
-                    }
-
-                    paramType is TolkUnionTy && argType is TolkUnionTy -> {
-                        paramType.variants.zip(argType.variants).forEach { (a, b) ->
-                            deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
-                        }
-                    }
-
-                    paramType is TolkTypeParameterTy -> {
-                        if (!substitution.containsKey(paramType)) {
-                            val newType =
-                                if (argType == TolkTy.Unknown && paramType.parameter is TolkTypeParameterTy.NamedTypeParameter) {
-                                    paramType.parameter.psi.defaultTypeParameter?.typeExpression?.type
-                                } else {
-                                    argType
-                                }
-                            if (newType != null) {
-                                substitution[paramType] = newType
-                            }
-                        }
-                    }
-
-                    else -> {}
+    fun deduce(paramType: TolkTy, argType: TolkTy): Substitution {
+        return when {
+            paramType is TolkStructTy && argType is TolkStructTy -> {
+                paramType.typeArguments.zip(argType.typeArguments).fold(this) { sub, (a, b) ->
+                    sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
                 }
             }
 
-            deduce(paramType.unwrapTypeAlias(), argType.unwrapTypeAlias())
-            return Substitution(substitution)
+            paramType is TolkFunctionTy && argType is TolkFunctionTy -> {
+                deduce(
+                    paramType.inputType.unwrapTypeAlias(),
+                    argType.inputType.unwrapTypeAlias()
+                ) + deduce(paramType.returnType.unwrapTypeAlias(), argType.returnType.unwrapTypeAlias())
+            }
+
+            paramType is TolkTensorTy && argType is TolkTensorTy -> {
+                paramType.elements.zip(argType.elements)
+                    .fold(this) { sub, (a, b) -> sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
+            }
+
+            paramType is TolkTypedTupleTy && argType is TolkTypedTupleTy -> {
+                paramType.elements.zip(argType.elements)
+                    .fold(this) { sub, (a, b) -> sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
+            }
+
+            paramType is TolkUnionTy && argType is TolkUnionTy -> {
+                paramType.variants.zip(argType.variants).fold(this) { sub, (a, b) ->
+                    deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
+                }
+            }
+
+            paramType is TolkTypeParameterTy -> {
+                if (!typeSubst.containsKey(paramType)) {
+                    val newType =
+                        if (argType == TolkTy.Unknown && paramType.parameter is TolkTypeParameterTy.NamedTypeParameter) {
+                            paramType.parameter.psi.defaultTypeParameter?.typeExpression?.type ?: argType
+                        } else {
+                            argType
+                        }
+
+                    val size = typeSubst.size
+                    if (size == 0) {
+                        return Substitution(mapOf(paramType to newType))
+                    }
+                    val map = HashMap<TolkTypeParameterTy, TolkTy>(size + 1)
+                    map.putAll(typeSubst)
+                    map[paramType] = newType
+                    Substitution(map)
+                } else {
+                    this
+                }
+            }
+            else -> this
+        }
+    }
+
+    companion object {
+        fun instantiate(paramType: TolkTy, argType: TolkTy): Substitution {
+            return EmptySubstitution.deduce(paramType, argType)
         }
     }
 }

@@ -16,7 +16,6 @@ import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.ide.completion.TolkCommonCompletionProvider.TolkCompletionContext
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.hasSelf
-import org.ton.intellij.tolk.psi.impl.parameters
 import org.ton.intellij.tolk.psi.impl.toLookupElement
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
 import org.ton.intellij.tolk.type.TolkFunctionTy
@@ -245,7 +244,7 @@ fun TolkNamedElement.toLookupElementBuilder(
                             absoluteOpeningBracketOffset?.let { chars.indexOfSkippingSpace(')', it + 1) }
 
                         if (absoluteOpeningBracketOffset == null) {
-                            val offset = if (this.parameters.isEmpty()) 2 else 1
+                            val offset = if (this.parameterList?.parameterList.isNullOrEmpty()) 2 else 1
                             context.editor.document.insertString(context.editor.caretModel.offset, "()")
                             context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
                             context.commitDocument()

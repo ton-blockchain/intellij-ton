@@ -1,17 +1,11 @@
 package org.ton.intellij.tolk.type
 
-import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkTypeDef
 
 class TolkTypeAliasTy(
     val psi: TolkTypeDef,
     val underlyingType: TolkTy
 ) : TolkTy {
-
-    override fun substitute(substitution: Map<TolkElement, TolkTy>): TolkTy {
-        return this
-    }
-
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
         return underlyingType.canRhsBeAssigned(other)

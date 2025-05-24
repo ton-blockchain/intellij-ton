@@ -16,7 +16,9 @@ data class TolkStructTy private constructor(
     }
 
     override fun superFoldWith(folder: TypeFolder): TolkTy {
-        val newTypeArguments = typeArguments.map { it.foldWith(folder) }
+        val newTypeArguments = typeArguments.map {
+            it.foldWith(folder)
+        }
         return TolkStructTy(psi, newTypeArguments)
     }
 

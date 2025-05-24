@@ -52,14 +52,6 @@ class TolkUnionTy private constructor(
         return create(variants.filter { it.isSuperType(other) })
     }
 
-    override fun substitute(substitution: Map<TolkElement, TolkTy>): TolkTy {
-        val newElements = LinkedHashSet<TolkTy>()
-        variants.forEach {
-            newElements.add(it.substitute(substitution))
-        }
-        return simplify(newElements)
-    }
-
     override fun isEquivalentToInner(other: TolkTy): Boolean {
         if (this === other) return true
         if (other !is TolkUnionTy) return false

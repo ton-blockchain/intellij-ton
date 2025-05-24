@@ -488,7 +488,7 @@ fake BinaryOp ::= '=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '^/=' | '%=' | '~%='
 | '||'
 | '&&'
 
-VarExpression ::= ('var'|'val') VarDefinition '=' Expression {
+VarExpression ::= ('var'|'val') VarDefinition ('=' Expression)? {
     pin = 1
 }
 AssignBinExpression ::= Expression AssignBinOp Expression {
@@ -745,7 +745,7 @@ ParameterList ::= '(' !',' SelfParameter_with_comma? Parameter_with_recover* ')'
     pin = 1
 }
 
-Parameter ::= 'mutate'? IDENTIFIER ':' TypeExpression {
+Parameter ::= 'mutate'? IDENTIFIER ':' TypeExpression ParameterDefault? {
     mixin="org.ton.intellij.tolk.psi.impl.TolkParameterMixin"
     implements=[
         "org.ton.intellij.tolk.psi.TolkParameterElement"
@@ -753,6 +753,14 @@ Parameter ::= 'mutate'? IDENTIFIER ':' TypeExpression {
     stubClass="org.ton.intellij.tolk.stub.TolkParameterStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
+
+ParameterDefault ::= '=' Expression {
+    pin = 1
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
+    ]
+}
+
 private Parameter_with_recover ::= !(')'|'{'|';') Parameter (','|&')') {
     pin = 1
     recoverWhile = Parameter_recover

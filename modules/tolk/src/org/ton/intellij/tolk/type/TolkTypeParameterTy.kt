@@ -19,7 +19,7 @@ class TolkTypeParameterTy private constructor(
         return TolkUnionTy.create(this, other)
     }
 
-    override fun equals(other: Any?): Boolean = other is TolkTypeParameterTy && other.parameter == parameter
+    override fun equals(other: Any?): Boolean = other is TolkTypeParameterTy && other.parameter == this.parameter
 
     override fun hashCode(): Int = parameter.hashCode()
 
@@ -32,12 +32,30 @@ class TolkTypeParameterTy private constructor(
         override val psi: TolkReferenceTypeExpression
     ) : TypeParameter() {
         override val name: String get() = psi.identifier.text.removeSurrounding("`")
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            other as ReceiverTypeParameter
+            return psi.manager.areElementsEquivalent(psi, other.psi)
+        }
+
+        override fun hashCode(): Int = psi.hashCode()
     }
 
     data class NamedTypeParameter(
         override val psi: TolkTypeParameter
     ) : TypeParameter() {
         override val name: String? get() = psi.name
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            other as NamedTypeParameter
+            return psi.manager.areElementsEquivalent(psi, other.psi)
+        }
+
+        override fun hashCode(): Int = psi.hashCode()
     }
 
     companion object {

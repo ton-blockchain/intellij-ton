@@ -8,7 +8,9 @@ data class TolkStructTy private constructor(
     val psi: TolkStruct,
     val typeArguments: List<TolkTy> = emptyList(),
 ) : TolkTy {
-    override fun hasGenerics(): Boolean = typeArguments.any { it.hasGenerics() }
+    private val hasGenerics = typeArguments.any { it.hasGenerics() }
+
+    override fun hasGenerics(): Boolean = hasGenerics
 
     override fun join(other: TolkTy): TolkTy {
         if (other.unwrapTypeAlias() == this) return other

@@ -4,11 +4,11 @@ data class TolkFunctionTy(
     val inputType: TolkTy,
     val returnType: TolkTy
 ) : TolkTy {
+    private val hasGenerics = inputType.hasGenerics() || returnType.hasGenerics()
+
     override fun toString(): String = "$inputType -> $returnType"
 
-    override fun hasGenerics(): Boolean {
-        return inputType.hasGenerics() || returnType.hasGenerics()
-    }
+    override fun hasGenerics(): Boolean = hasGenerics
 
     val parameters: List<TolkTy> = if (inputType is TolkTensorTy) inputType.elements else listOf(inputType)
 

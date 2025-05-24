@@ -2,7 +2,7 @@ package org.ton.intellij.tolk.type
 
 class TolkTypedTupleTy private constructor(
     val elements: List<TolkTy>,
-    private val hasGenerics: Boolean
+    private val hasGenerics: Boolean = elements.any { it.hasGenerics() }
 ) : TolkTy {
     override fun toString(): String = "[${elements.joinToString()}]"
 
@@ -85,7 +85,7 @@ class TolkTypedTupleTy private constructor(
         }
 
         fun create(elements: List<TolkTy>): TolkTy {
-            return TolkTypedTupleTy(elements, elements.any { it.hasGenerics() })
+            return TolkTypedTupleTy(elements)
         }
     }
 }

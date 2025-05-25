@@ -26,10 +26,9 @@ class TolkDeprecationInspection : TolkInspectionBase() {
 
             override fun visitFunction(o: TolkFunction) {
                 if (o.isDeprecated) {
-                    val message = "Deprecated function: ${o.name}"
                     holder.registerProblem(
-                        o.nameIdentifier ?: o,
-                        message,
+                        o.nameIdentifier ?: return,
+                        "Deprecated function: ${o.name}",
                         ProblemHighlightType.LIKE_DEPRECATED
                     )
                 }

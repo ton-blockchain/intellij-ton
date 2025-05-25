@@ -28,6 +28,19 @@ class TolkFormatter : FormattingModelBuilder {
     private fun createSpacingBuilder(codeStyleSettings: CodeStyleSettings): SpacingBuilder {
         return SpacingBuilder(codeStyleSettings, TolkLanguage)
             .after(TokenSet.create(LPAREN, LBRACK)).none()
+            .around(EQ).spaces(1)
+
+            .aroundInside(IDENTIFIER, ANNOTATION).none()
+            .after(TokenSet.create(ANNOTATION, GET_KEYWORD, FUN_KEYWORD, FUNCTION_RECEIVER, RETURN_TYPE, PARAMETER_LIST)).spaces(1)
+            .around(FUNCTION_BODY).spaces(1)
+
+            .before(STRUCT_CONSTRUCTOR_TAG).none()
+            .beforeInside(IDENTIFIER, STRUCT).spaces(1)
+            .around(STRUCT_BODY).spaces(1)
+
+            .afterInside(IDENTIFIER, STRUCT_FIELD).none()
+            .afterInside(COLON, STRUCT_FIELD).spaces(1)
+
             .after(
                 TokenSet.create(
                     RETURN_KEYWORD,
@@ -67,9 +80,13 @@ class TolkFormatter : FormattingModelBuilder {
             .beforeInside(UNIT_EXPRESSION, CALL_EXPRESSION).none()
             .beforeInside(TENSOR_EXPRESSION, DOT_EXPRESSION).none()
             .beforeInside(UNIT_EXPRESSION, DOT_EXPRESSION).none()
-            .beforeInside(RPAREN, TokenSet.create(TENSOR_EXPRESSION, TENSOR_TYPE_EXPRESSION)).none()
+            .before(RPAREN).none()
             .beforeInside(RBRACK, TokenSet.create(TUPLE_EXPRESSION, TUPLE_TYPE_EXPRESSION)).none()
             .aroundInside(TokenSet.create(QUEST, COLON), TERNARY_EXPRESSION).spaces(1)
+            .beforeInside(GT, TYPE_PARAMETER_LIST).none()
+            .aroundInside(LT, TYPE_PARAMETER_LIST).none()
+            .before(TYPE_PARAMETER_LIST).none()
+            .beforeInside(DEFAULT_TYPE_PARAMETER, TYPE_PARAMETER).spaces(1)
             .aroundInside(
                 tokenSetOf(
                     EQ, PLUSLET, MINUSLET, TIMESLET, DIVLET, DIVCLET, DIVRLET, MODLET, MODCLET, MODRLET,

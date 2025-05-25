@@ -70,6 +70,7 @@ class TolkFormattingBlock(
             when (node.elementType) {
                 BLOCK_STATEMENT -> Indent.getNormalIndent()
                 DOC_COMMENT -> Indent.getNoneIndent()
+                FUNCTION -> Indent.getNoneIndent()
                 else -> Indent.getNormalIndent()
             }
         val wrap = calcWrap(node)
@@ -89,7 +90,8 @@ class TolkFormattingBlock(
         val parent = child.treeParent
         val parentType = parent.elementType
         when (parentType) {
-            ANNOTATION -> return null
+            ANNOTATION -> return Indent.getNoneIndent()
+            FUNCTION -> return indentForFunctionChild(child)
             MATCH_EXPRESSION -> if (type != MATCH_KEYWORD) return indentIfNotBrace(child)
             PARAMETER_LIST, BLOCK_STATEMENT, STRUCT_EXPRESSION_BODY, STRUCT_BODY -> return indentIfNotBrace(child)
             DOT_EXPRESSION, TERNARY_EXPRESSION -> if (parent.firstChildNode != child) return Indent.getNormalIndent()
@@ -106,16 +108,33 @@ class TolkFormattingBlock(
         return null
     }
 
-    private val BRACES_TOKEN_SET = TokenSet.create(
-        LBRACE,
-        RBRACE,
-        LBRACK,
-        RBRACK,
-        LPAREN,
-        RPAREN
-    )
+    companion object {
+        private val BRACES_TOKEN_SET = TokenSet.create(
+            LBRACE,
+            RBRACE,
+            LBRACK,
+            RBRACK,
+            LPAREN,
+            RPAREN
+        )
 
-    private fun indentIfNotBrace(child: ASTNode): Indent =
-        if (BRACES_TOKEN_SET.contains(child.elementType)) Indent.getNoneIndent()
-        else Indent.getNormalIndent()
+        private val FUNCTION_PARTS = TokenSet.create(
+            FUNCTION_RECEIVER,
+            IDENTIFIER,
+            TYPE_PARAMETER_LIST,
+            PARAMETER_LIST,
+            RETURN_TYPE
+        )
+
+        private fun indentIfNotBrace(child: ASTNode): Indent =
+            if (BRACES_TOKEN_SET.contains(child.elementType)) Indent.getNoneIndent()
+            else Indent.getNormalIndent()
+
+        private fun indentForFunctionChild(child: ASTNode): Indent {
+            return when {
+                FUNCTION_PARTS.contains(child.elementType) -> Indent.getNormalIndent()
+                else -> Indent.getNoneIndent()
+            }
+        }
+    }
 }

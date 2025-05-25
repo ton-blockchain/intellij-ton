@@ -139,7 +139,7 @@
 private root ::= TopLevelDefinition_with_recover*
 
 private TopLevelDefinition ::= (IncludeDefinition | VersionDefinition | GlobalVar | ConstVar | TypeDef | Struct | Function | EmptyStatement)
-private TopLevelDefinition_with_recover ::= !(<<eof>>) (TopLevelDefinition) {
+private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelDefinition {
     pin = 1
     recoverWhile = TopLevelDefinition_recover
 }
@@ -214,7 +214,9 @@ Struct ::= 'struct' StructConstructorTag? IDENTIFIER TypeParameterList? (StructB
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
 
-StructConstructorTag ::= '(' INTEGER_LITERAL ')'
+StructConstructorTag ::= '(' INTEGER_LITERAL ')' {
+    pin = 1
+}
 
 StructBody ::= '{' StructBodyElements? '}' {
     pin = 1
@@ -256,8 +258,8 @@ private StructFieldDefault ::= '=' Expression {
 //PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
 //Function ::= (TypeParameterList|'get')? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
-Function ::= Annotation* ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypeParameterList? ParameterList ReturnType? FunctionBody {
-    pin = 2
+Function ::= Annotations ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypeParameterList? ParameterList ReturnType? FunctionBody {
+    pin = 1
     implements = [
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
@@ -266,10 +268,8 @@ Function ::= Annotation* ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER T
     mixin = "org.ton.intellij.tolk.psi.impl.TolkFunctionMixin"
     stubClass = "org.ton.intellij.tolk.stub.TolkFunctionStub"
     elementTypeFactory = "org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
-//    hooks = [
-//        leftBinder = "ADJACENT_LINE_COMMENTS"
-//    ]
 }
+private Annotations ::= Annotation*
 
 FunctionReceiver ::= TypeExpression '.'
 
@@ -288,6 +288,7 @@ private ReturnType_recovery ::= !(FunctionBody_first|TopLevelDefinition_first)
 Annotation ::= '@' IDENTIFIER AnnotationParamList? {
     pin = 1
 }
+
 AnnotationParamList ::= '(' << comma_separated_list AnnotationParam >> ')' {
     pin = 1
 }

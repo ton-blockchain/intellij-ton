@@ -9,4 +9,6 @@ dependencies {
         intellijIdeaCommunity(version)
     }
     compileOnly(project(":util"))
+    implementation("com.github.espritoxyz.ton-disassembler:tvm-opcodes:07ccc49")
+    implementation("org.ton:ton-kotlin-tvm:0.3.1")
 }

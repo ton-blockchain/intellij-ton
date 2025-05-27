@@ -15,7 +15,7 @@
                                        implementationClass="org.ton.intellij.tolk.highlighting.TolkSyntaxHighlighterFactory"/>
         <lang.commenter language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkCommenter"/>
 
-        <lang.braceMatcher language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkBraceMatcher"/>
+        <lang.braceMatcher language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkPairedBraceMatcher"/>
         <lang.quoteHandler language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkQuoteHandler"/>
         <lang.foldingBuilder language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkFoldingBuilder"/>
         <lang.psiStructureViewFactory language="Tolk"

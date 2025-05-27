@@ -24,12 +24,11 @@ class TolkBraceMatcher : PairedBraceMatcher {
                 || contextType == TolkElementTypes.COLON
                 || contextType == TolkElementTypes.SEMICOLON
                 || contextType == TolkElementTypes.COMMA
+                || contextType == TolkElementTypes.DOT
                 || contextType == TolkElementTypes.RPAREN
                 || contextType == TolkElementTypes.RBRACK
                 || contextType == TolkElementTypes.RBRACE
                 || contextType == TolkElementTypes.LBRACE
-                || contextType == TolkElementTypes.LT
-                || contextType == TolkElementTypes.GT
     }
 
     override fun getCodeConstructStart(file: PsiFile?, openingBraceOffset: Int): Int {

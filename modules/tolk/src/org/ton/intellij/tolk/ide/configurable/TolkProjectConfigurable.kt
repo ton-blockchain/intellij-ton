@@ -71,9 +71,7 @@ class TolkProjectConfigurable(
         onReset {
             val currentData = data
             val newData = Data(
-                toolchain = setting.toolchain ?: project.let {
-                    TolkToolchain.suggest(project)
-                },
+                toolchain = setting.toolchain,
                 explicitPathToStdlib = setting.explicitPathToStdlib
             )
             if (currentData != newData) {

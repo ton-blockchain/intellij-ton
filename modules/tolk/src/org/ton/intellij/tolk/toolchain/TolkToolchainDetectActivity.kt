@@ -29,10 +29,19 @@ class TolkToolchainDetectActivity : ProjectActivity {
             return
         }
 
-        if (tolkToolchainService.toolchain == TolkToolchain.NULL && knownToolchains.isNotEmpty()) {
-            LOG.warn("No toolchain selected, using the first known toolchain")
-            tolkToolchainService.toolchain = TolkToolchain.fromPath(knownToolchains.first())
-            LOG.warn("Selected toolchain: ${tolkToolchainService.toolchain}")
+        if (tolkToolchainService.toolchain == TolkToolchain.NULL) {
+            val suggested = TolkToolchain.suggest(project)
+            if (suggested != null) {
+                LOG.warn("Suggested toolchain: $suggested")
+                tolkToolchainService.toolchain = suggested
+                return
+            }
+
+            if (knownToolchains.isNotEmpty()) {
+                LOG.warn("No toolchain selected, using the first known toolchain")
+                tolkToolchainService.toolchain = TolkToolchain.fromPath(knownToolchains.first())
+                LOG.warn("Selected toolchain: ${tolkToolchainService.toolchain}")
+            }
             return
         }
 

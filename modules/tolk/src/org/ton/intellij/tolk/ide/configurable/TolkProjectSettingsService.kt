@@ -1,14 +1,7 @@
 package org.ton.intellij.tolk.ide.configurable
 
-import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
-import com.intellij.execution.RunManager
-import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.RootsChangeRescanningInfo
-import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.openapi.roots.ex.ProjectRootManagerEx
-import com.intellij.openapi.util.EmptyRunnable
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -64,10 +57,11 @@ class TolkProjectSettingsService(
     }
 
     private fun reloadProject() {
-        runWriteAction {
-            DaemonCodeAnalyzer.getInstance(project).restart()
-            ProjectRootManagerEx.getInstanceEx(project).makeRootsChange(EmptyRunnable.INSTANCE, RootsChangeRescanningInfo.RESCAN_DEPENDENCIES_IF_NEEDED)
-        }
+//        DaemonCodeAnalyzer.getInstance(project).restart()
+//        runWriteAction {
+//            ProjectRootManagerEx.getInstanceEx(project)
+//                .makeRootsChange(EmptyRunnable.INSTANCE, RootsChangeRescanningInfo.RESCAN_DEPENDENCIES_IF_NEEDED)
+//        }
     }
 
     class TolkProjectSettings : BaseState() {

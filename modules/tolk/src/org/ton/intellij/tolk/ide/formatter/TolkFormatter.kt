@@ -24,7 +24,6 @@ class TolkFormatter : FormattingModelBuilder {
         return FormattingModelProvider.createFormattingModelForPsiFile(containingFile, block, settings)
     }
 
-    // TODO: remake space builder for new tolk syntax
     private fun createSpacingBuilder(codeStyleSettings: CodeStyleSettings): SpacingBuilder {
         return SpacingBuilder(codeStyleSettings, TolkLanguage)
             .after(TokenSet.create(LPAREN, LBRACK)).none()
@@ -34,8 +33,7 @@ class TolkFormatter : FormattingModelBuilder {
             .after(TokenSet.create(ANNOTATION, GET_KEYWORD, FUN_KEYWORD, FUNCTION_RECEIVER, RETURN_TYPE, PARAMETER_LIST)).spaces(1)
             .around(FUNCTION_BODY).spaces(1)
 
-            .before(STRUCT_CONSTRUCTOR_TAG).none()
-            .beforeInside(IDENTIFIER, STRUCT).spaces(1)
+            .beforeInside(TokenSet.create(IDENTIFIER, STRUCT_CONSTRUCTOR_TAG), STRUCT).spaces(1)
             .around(STRUCT_BODY).spaces(1)
 
             .afterInside(IDENTIFIER, STRUCT_FIELD).none()

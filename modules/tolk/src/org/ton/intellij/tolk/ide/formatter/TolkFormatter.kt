@@ -30,7 +30,8 @@ class TolkFormatter : FormattingModelBuilder {
             .around(EQ).spaces(1)
 
             .aroundInside(IDENTIFIER, ANNOTATION).none()
-            .after(TokenSet.create(ANNOTATION, GET_KEYWORD, FUN_KEYWORD, FUNCTION_RECEIVER, RETURN_TYPE, PARAMETER_LIST)).spaces(1)
+            .after(TokenSet.create(ANNOTATION, GET_KEYWORD, FUN_KEYWORD, RETURN_TYPE, PARAMETER_LIST)).spaces(1)
+            .after(FUNCTION_RECEIVER).none()
             .around(FUNCTION_BODY).spaces(1)
 
             .beforeInside(TokenSet.create(IDENTIFIER, STRUCT_CONSTRUCTOR_TAG), STRUCT).spaces(1)

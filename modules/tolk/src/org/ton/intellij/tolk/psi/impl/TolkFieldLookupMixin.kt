@@ -8,9 +8,7 @@ import org.ton.intellij.tolk.psi.TolkFieldLookup
 import org.ton.intellij.tolk.psi.reference.TolkFieldLookupReference
 
 abstract class TolkFieldLookupMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkFieldLookup {
-    override val referenceNameElement: PsiElement get() = requireNotNull(identifier ?: integerLiteral) {
-        // unreachable
-    }
+    override val referenceNameElement: PsiElement? get() = identifier ?: integerLiteral
 
     override fun getReference() = TolkFieldLookupReference(this)
 }

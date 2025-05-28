@@ -458,11 +458,11 @@ Expression ::=
     | IsExpression // expr40
     | PrefixExpression // expr75
     | NotNullExpression
-    | DotExpression // expr80
     | CallExpression
     | StructExpression
     | AtomicExpression
     | MatchExpression
+    | DotExpression // expr80
 {
     implements=[
         "org.ton.intellij.tolk.psi.TolkTypedElement"
@@ -588,16 +588,14 @@ CallExpression ::= Expression ArgumentList {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkCallExpressionMixin"
 }
 
-DotExpression ::= Expression '.' FieldLookup {
-    pin = 2
+DotExpression ::= Expression DotFieldLookup {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkDotExpressionMixin"
 }
 
-//private MethodOrField ::= () (FieldLookup | MethodCall) {
-//    pin = 1
-//}
-
-FieldLookup ::= ((IDENTIFIER TypeArgumentList?) | INTEGER_LITERAL) {
+private DotFieldLookup ::= '.' FieldLookup {
+    pin = 1
+}
+FieldLookup ::=  ((IDENTIFIER TypeArgumentList?) | INTEGER_LITERAL) {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkFieldLookupMixin"
     implements = "org.ton.intellij.tolk.psi.TolkReferenceElement"
 }

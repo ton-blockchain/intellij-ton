@@ -38,6 +38,7 @@
         <completion.confidence language="Tolk" order="last"
                                implementationClass="org.ton.intellij.tolk.ide.completion.TolkCompletionConfidence"/>
         <lookup.charFilter implementation="org.ton.intellij.tolk.ide.completion.TolkCharFilter"/>
+        <typedHandler implementation="org.ton.intellij.tolk.codeInsight.editorActions.TolkTypedHandler"/>
 
         <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkNamedElementIndex"/>
         <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkTypeDefIndex"/>

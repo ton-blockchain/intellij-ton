@@ -1,10 +1,12 @@
 package org.ton.intellij.tolk.ide.completion
 
+import com.intellij.analysis.AnalysisBundle
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.openapi.util.registry.Registry
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
@@ -14,6 +16,7 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.ide.completion.TolkCommonCompletionProvider.TolkCompletionContext
+import org.ton.intellij.tolk.perf
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.hasSelf
 import org.ton.intellij.tolk.psi.impl.toLookupElement
@@ -52,8 +55,24 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         val project = parameters.position.project
         val file = element.containingFile.originalFile as? TolkFile ?: return
 
-        collectLocalVariables(element) { localSymbol ->
-            result.addElement(localSymbol.toLookupElement())
+        val completionLimit = Registry.intValue("ide.completion.variant.limit") / 2
+        var addedElements = 0
+        fun checkLimit(): Boolean {
+            if (addedElements >= completionLimit) {
+                result.restartCompletionOnAnyPrefixChange()
+                result.addLookupAdvertisement(AnalysisBundle.message("completion.not.all.variants.are.shown"))
+                return false
+            }
+            addedElements++
+            return true
+        }
+
+        perf("current context completion") {
+            collectLocalVariables(element) { localSymbol ->
+                if (!checkLimit()) return@collectLocalVariables false
+                result.addElement(localSymbol.toLookupElement())
+                true
+            }
         }
 
         result.addElement(
@@ -76,15 +95,16 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         )
 
         val fileResolveScope = file.resolveScope
-        val addedElements = HashSet<TolkNamedElement>()
+        val addedNamedElements = HashSet<TolkNamedElement>()
         val prefixMatcher = result.prefixMatcher
 
-        fun processNamedElement(namedElement: TolkNamedElement, isImported: Boolean) {
-            val name = namedElement.name ?: return
-            if (!prefixMatcher.prefixMatches(name)) return
-            if (!addedElements.add(namedElement)) return
+        fun processNamedElement(namedElement: TolkNamedElement, isImported: Boolean): Boolean {
+            val name = namedElement.name ?: return true
+            if (!prefixMatcher.prefixMatches(name)) return true
+            if (!addedNamedElements.add(namedElement)) return true
 
-            if (namedElement is TolkFunction && namedElement.hasSelf) return
+            if (namedElement is TolkFunction && namedElement.hasSelf) return true
+            if (!checkLimit()) return false
             when (namedElement) {
                 is TolkFunction -> if (!namedElement.hasSelf) {
                     result.addElement(
@@ -127,16 +147,20 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                         )
                     )
                 }
+            }
+            return true
+        }
 
-                else -> return
+        perf("local scope completion") {
+            TolkNamedElementIndex.processAllElements(project, fileResolveScope) {
+                processNamedElement(it, true)
             }
         }
 
-        TolkNamedElementIndex.processAllElements(project, fileResolveScope) {
-            processNamedElement(it, true)
-        }
-        TolkNamedElementIndex.processAllElements(project) {
-            processNamedElement(it, false)
+        perf("global scope completion") {
+            TolkNamedElementIndex.processAllElements(project) {
+                processNamedElement(it, false)
+            }
         }
     }
 
@@ -155,14 +179,14 @@ fun TolkLocalSymbolElement.toLookupElement(): LookupElement {
         }
 
         is TolkSelfParameter -> {
-            return        PrioritizedLookupElement.withPriority(
+            return PrioritizedLookupElement.withPriority(
                 LookupElementBuilder.create("self").bold(),
                 TolkCompletionPriorities.PARAMETER
             )
         }
 
         is TolkCatchParameter -> {
-            return   PrioritizedLookupElement.withPriority(
+            return PrioritizedLookupElement.withPriority(
                 toLookupElementBuilder(TolkCompletionContext(this), true),
                 TolkCompletionPriorities.LOCAL_VAR
             )
@@ -329,24 +353,24 @@ private fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
 
 fun collectLocalVariables(
     startFrom: PsiElement,
-    processor: (TolkLocalSymbolElement) -> Unit
-) {
-    PsiTreeUtil.treeWalkUp(startFrom, null) { scope, lastParent ->
+    processor: (TolkLocalSymbolElement) -> Boolean
+): Boolean {
+   return PsiTreeUtil.treeWalkUp(startFrom, null) { scope, lastParent ->
         if (scope is TolkFunction) {
             val parameterList = scope.parameterList
             if (parameterList != null) {
                 parameterList.parameterList.forEach {
-                    processor(it)
-
+                    if (!processor(it)) return@treeWalkUp false
                 }
                 parameterList.selfParameter?.let {
-                    processor(it)
+                    if (!processor(it)) return@treeWalkUp false
                 }
             }
+            return@treeWalkUp false
         }
         if (scope is TolkCatch && lastParent is TolkBlockStatement) {
             scope.catchParameterList.forEach { catchParameter ->
-                processor(catchParameter)
+                if (!processor(catchParameter)) return@treeWalkUp false
             }
         }
         if (scope is TolkInferenceContextOwner) {
@@ -358,26 +382,28 @@ fun collectLocalVariables(
                 if (statement !is TolkExpressionStatement) return@forEach
                 val expression = statement.expression
                 if (expression is TolkVarExpression) {
-                    fun processVarDefinition(varDefinition: TolkVarDefinition?) {
-                        when (varDefinition) {
-                            is TolkVar -> {
+                    fun processVarDefinition(varDefinition: TolkVarDefinition?): Boolean {
+                        return when (varDefinition) {
+                            is TolkVar ->
                                 processor(varDefinition)
-                            }
 
                             is TolkVarTuple -> {
                                 varDefinition.varDefinitionList.forEach {
-                                    processVarDefinition(it)
+                                    if (!processVarDefinition(it)) return false
                                 }
+                                true
                             }
 
                             is TolkVarTensor -> {
                                 varDefinition.varDefinitionList.forEach {
-                                    processVarDefinition(it)
+                                    if (!processVarDefinition(it)) return false
                                 }
+                                true
                             }
+                            else -> true
                         }
                     }
-                    processVarDefinition(expression.varDefinition)
+                    if (!processVarDefinition(expression.varDefinition)) return@treeWalkUp false
                 }
             }
         }

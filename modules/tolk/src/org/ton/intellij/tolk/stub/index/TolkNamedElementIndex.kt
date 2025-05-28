@@ -18,13 +18,14 @@ class TolkNamedElementIndex : StringStubIndexExtension<TolkNamedElement>() {
         val KEY: StubIndexKey<String, TolkNamedElement> =
             StubIndexKey.createIndexKey("org.ton.intellij.tolk.stub.index.TolkNamedElementIndex")
 
+
         fun processElements(
             project: Project,
             target: String,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: (TolkNamedElement) -> Unit
-        ) {
-            StubIndex.getInstance().processElements(
+            processor: (TolkNamedElement) -> Boolean
+        ): Boolean {
+            return StubIndex.getInstance().processElements(
                 KEY,
                 target,
                 project,
@@ -32,18 +33,16 @@ class TolkNamedElementIndex : StringStubIndexExtension<TolkNamedElement>() {
                 TolkNamedElement::class.java
             ) { element ->
                 processor(element)
-                true
             }
         }
 
         fun processAllElements(
             project: Project,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: (TolkNamedElement) -> Unit
+            processor: (TolkNamedElement) -> Boolean
         ) {
             StubIndex.getInstance().processAllKeys(KEY, Processor { key ->
                 processElements(project, key, scope, processor)
-                true
             }, scope)
         }
     }

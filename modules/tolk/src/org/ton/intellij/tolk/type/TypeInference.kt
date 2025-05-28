@@ -3,7 +3,6 @@ package org.ton.intellij.tolk.type
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElementResolveResult
-import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.SmartList
 import com.intellij.util.containers.OrderedSet
@@ -197,15 +196,13 @@ class TolkInferenceWalker(
     private val project = ctx.project
     private val importFiles = LinkedHashSet<VirtualFile>()
     private var currentFunction: TolkFunction? = null
-    private var currentResolveScope: GlobalSearchScope? = null
 
     fun inferFunction(element: TolkFunction, flow: TolkFlowContext): TolkFlowContext {
         currentFunction = element
-        currentResolveScope = element.containingFile.originalFile.resolveScope
 
         try {
             var nextFlow = flow
-            val selfType = element.functionReceiver?.typeExpression?.type ?: TolkTy.Unknown
+            val selfType = element.receiverTy
             ctx.declaredReturnType = element.returnType?.let {
                 if (it.selfKeyword != null) {
                     selfType
@@ -231,7 +228,6 @@ class TolkInferenceWalker(
             return nextFlow
         } finally {
             currentFunction = null
-            currentResolveScope = null
         }
     }
 

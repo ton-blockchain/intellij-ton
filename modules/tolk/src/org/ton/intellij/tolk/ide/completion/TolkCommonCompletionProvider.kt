@@ -25,6 +25,7 @@ import org.ton.intellij.tolk.type.TolkFunctionTy
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.psiElement
+import kotlin.time.Duration.Companion.milliseconds
 
 object TolkCommonCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
@@ -98,7 +99,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         val addedNamedElements = HashSet<TolkNamedElement>()
         val prefixMatcher = result.prefixMatcher
 
-        fun processNamedElement(namedElement: TolkNamedElement, isImported: Boolean): Boolean {
+        fun processNamedElement(namedElement: TolkSymbolElement, isImported: Boolean): Boolean {
             val name = namedElement.name ?: return true
             if (!prefixMatcher.prefixMatches(name)) return true
             if (!addedNamedElements.add(namedElement)) return true
@@ -106,60 +107,60 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             if (namedElement is TolkFunction && namedElement.hasSelf) return true
             if (!checkLimit()) return false
             when (namedElement) {
-                is TolkFunction -> if (!namedElement.hasSelf) {
-                    result.addElement(
-                        PrioritizedLookupElement.withPriority(
-                            namedElement.toLookupElement(),
-                            if (isImported) TolkCompletionContributor.FUNCTION_PRIORITY
-                            else TolkCompletionContributor.NOT_IMPORTED_FUNCTION_PRIORITY
-                        )
+                is TolkFunction -> result.addElement(
+                    PrioritizedLookupElement.withPriority(
+                        namedElement.toLookupElement(),
+                        if (isImported) TolkCompletionContributor.FUNCTION_PRIORITY
+                        else TolkCompletionContributor.NOT_IMPORTED_FUNCTION_PRIORITY
                     )
-                }
+                )
 
-                is TolkConstVar -> {
-                    result.addElement(
-                        namedElement.toLookupElementBuilder(TolkCompletionContext(element), isImported)
-                    )
-                }
+                is TolkConstVar -> result.addElement(
+                    namedElement.toLookupElementBuilder(TolkCompletionContext(element), isImported)
+                )
 
-                is TolkGlobalVar -> {
-                    result.addElement(
-                        namedElement.toLookupElementBuilder(TolkCompletionContext(element), isImported)
-                    )
-                }
+                is TolkGlobalVar -> result.addElement(
+                    namedElement.toLookupElementBuilder(TolkCompletionContext(element), isImported)
+                )
 
-                is TolkStruct -> {
-                    result.addElement(
-                        PrioritizedLookupElement.withPriority(
-                            namedElement.toLookupElementBuilder(TolkCompletionContext(element), isImported),
-                            if (isImported) TolkCompletionPriorities.IMPORTED_TYPE
-                            else TolkCompletionPriorities.NOT_IMPORTED_TYPE
-                        )
+                is TolkStruct -> result.addElement(
+                    PrioritizedLookupElement.withPriority(
+                        namedElement.toLookupElementBuilder(TolkCompletionContext(element), isImported),
+                        if (isImported) TolkCompletionPriorities.IMPORTED_TYPE
+                        else TolkCompletionPriorities.NOT_IMPORTED_TYPE
                     )
-                }
+                )
 
-                is TolkTypeDef -> {
-                    result.addElement(
-                        PrioritizedLookupElement.withPriority(
-                            namedElement.toLookupElementBuilder(TolkCompletionContext(element), isImported),
-                            if (isImported) TolkCompletionPriorities.IMPORTED_TYPE
-                            else TolkCompletionPriorities.NOT_IMPORTED_TYPE
-                        )
+                is TolkTypeDef -> result.addElement(
+                    PrioritizedLookupElement.withPriority(
+                        namedElement.toLookupElementBuilder(TolkCompletionContext(element), isImported),
+                        if (isImported) TolkCompletionPriorities.IMPORTED_TYPE
+                        else TolkCompletionPriorities.NOT_IMPORTED_TYPE
                     )
-                }
+                )
             }
             return true
         }
 
         perf("local scope completion") {
             TolkNamedElementIndex.processAllElements(project, fileResolveScope) {
-                processNamedElement(it, true)
+                if (it is TolkSymbolElement) {
+                    processNamedElement(it, true)
+                } else {
+                    // Skip non-symbol elements
+                    true
+                }
             }
         }
 
-        perf("global scope completion") {
+        perf("global scope completion", 0.milliseconds) {
             TolkNamedElementIndex.processAllElements(project) {
-                processNamedElement(it, false)
+                if (it is TolkSymbolElement) {
+                    processNamedElement(it, false)
+                } else {
+                    // Skip non-symbol elements
+                    true
+                }
             }
         }
     }
@@ -355,7 +356,7 @@ fun collectLocalVariables(
     startFrom: PsiElement,
     processor: (TolkLocalSymbolElement) -> Boolean
 ): Boolean {
-   return PsiTreeUtil.treeWalkUp(startFrom, null) { scope, lastParent ->
+    return PsiTreeUtil.treeWalkUp(startFrom, null) { scope, lastParent ->
         if (scope is TolkFunction) {
             val parameterList = scope.parameterList
             if (parameterList != null) {
@@ -400,6 +401,7 @@ fun collectLocalVariables(
                                 }
                                 true
                             }
+
                             else -> true
                         }
                     }

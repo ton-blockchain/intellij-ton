@@ -32,7 +32,6 @@ class TolkSyntaxHighlighter : SyntaxHighlighterBase() {
             in TOLK_KEYWORDS -> TolkColor.KEYWORD
             TolkElementTypes.TRUE_KEYWORD, TolkElementTypes.FALSE_KEYWORD -> TolkColor.KEYWORD
             in TolkParserDefinition.STRING_LITERALS -> TolkColor.STRING
-            TolkElementTypes.SHA -> TolkColor.MACRO
             in TolkParserDefinition.OPERATORS -> TolkColor.OPERATION_SIGN
             in TolkParserDefinition.ANNOTATIONS -> TolkColor.ANNOTATION
             else -> null

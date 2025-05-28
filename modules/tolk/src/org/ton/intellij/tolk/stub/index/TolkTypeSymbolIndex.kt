@@ -18,41 +18,27 @@ class TolkTypeSymbolIndex : StringStubIndexExtension<TolkTypeSymbolElement>() {
         val KEY: StubIndexKey<String, TolkTypeSymbolElement> =
             StubIndexKey.createIndexKey("org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex")
 
-        fun findElements(
-            project: Project,
-            target: String,
-            scope: GlobalSearchScope = GlobalSearchScope.allScope(project)
-        ): Collection<TolkTypeSymbolElement> {
-            return StubIndex.getElements(KEY, target, project, scope, TolkTypeSymbolElement::class.java)
-        }
-
         fun processElements(
             project: Project,
             target: String,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: (TolkTypeSymbolElement) -> Unit
-        ) {
-            StubIndex.getInstance().processElements(
-                KEY,
-                target,
-                project,
-                scope,
-                TolkTypeSymbolElement::class.java
-            ) { element ->
-                processor(element)
-                true
-            }
+            processor: (TolkTypeSymbolElement) -> Boolean
+        ): Boolean = StubIndex.getInstance().processElements(
+            KEY,
+            target,
+            project,
+            scope,
+            TolkTypeSymbolElement::class.java
+        ) { element ->
+            processor(element)
         }
 
         fun processAllElements(
             project: Project,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: (TolkTypeSymbolElement) -> Unit
-        ) {
-            StubIndex.getInstance().processAllKeys(KEY, Processor { key ->
-                processElements(project, key, scope, processor)
-                true
-            }, scope)
-        }
+            processor: (TolkTypeSymbolElement) -> Boolean
+        ): Boolean = StubIndex.getInstance().processAllKeys(KEY, Processor { key ->
+            processElements(project, key, scope, processor)
+        }, scope)
     }
 }

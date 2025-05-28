@@ -92,13 +92,12 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
 
     val globalVars: List<TolkGlobalVar>
         get() = CachedValuesManager.getCachedValue(this) {
-            val stub = stub
-            val constVars = if (stub != null) {
-                getChildrenByType(stub, TolkElementTypes.GLOBAL_VAR, TolkGlobalVarStub.ARRAY_FACTORY)
-            } else {
-                findChildrenByClass(TolkGlobalVar::class.java).toList()
-            }
-            CachedValueProvider.Result.create(constVars, this)
+            val result = withGreenStubOrAst(TolkFileStub::class.java, { stub ->
+               getChildrenByType(stub, TolkElementTypes.GLOBAL_VAR, TolkGlobalVarStub.ARRAY_FACTORY)
+            }, {
+                children.filterIsInstance<TolkGlobalVar>()
+            })
+            CachedValueProvider.Result.create(result, this)
         }
 
     val typeDefs: List<TolkTypeDef>

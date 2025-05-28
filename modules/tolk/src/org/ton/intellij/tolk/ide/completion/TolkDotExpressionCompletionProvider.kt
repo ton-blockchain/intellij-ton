@@ -19,6 +19,7 @@ import org.ton.intellij.tolk.psi.TolkTypeSymbolElement
 import org.ton.intellij.tolk.psi.impl.declaredType
 import org.ton.intellij.tolk.psi.impl.hasSelf
 import org.ton.intellij.tolk.psi.impl.isDeprecated
+import org.ton.intellij.tolk.psi.impl.receiverTy
 import org.ton.intellij.tolk.psi.impl.toLookupElement
 import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 import org.ton.intellij.tolk.type.*
@@ -84,7 +85,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
             if (function.hasSelf != !isStaticReceiver) return true
 
             val receiverType =
-                function.functionReceiver?.typeExpression?.type?.unwrapTypeAlias()?.actualType() ?: return true
+                function.receiverTy.unwrapTypeAlias().actualType()
 
             fun canBeAdded(): Boolean {
                 if (receiverType.canRhsBeAssigned(calledType)) return true

@@ -16,7 +16,7 @@ abstract class TolkSelfParameterMixin : StubBasedPsiElementBase<TolkSelfParamete
     constructor(stub: TolkSelfParameterStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
 
     override val type: TolkTy?
-        get() = parentOfType<TolkFunction>()?.functionReceiver?.typeExpression?.type
+        get() = parentOfType<TolkFunction>()?.receiverTy
 
     override fun getNameIdentifier(): PsiElement = selfTypeExpression
 

@@ -70,11 +70,10 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
             this, RETURN_TYPE_KEY, RETURN_TYPE_PROVIDER, false, this
         )
 
-    val receiverTy: TolkTy?
-        get() = CachedValuesManager.getCachedValue(this) {
-            val receiverType = functionReceiver?.typeExpression?.type ?: TolkTy.Unknown
-            CachedValueProvider.Result.create(receiverType, this)
-        }
+    val receiverTy: TolkTy
+        get() = CachedValuesManager.getManager(project).getParameterizedCachedValue(
+            this, RECEIVER_TYPE_KEY, RECEIVER_TYPE_PROVIDER, false, this
+        )
 }
 
 private val RETURN_TYPE_KEY = Key.create<ParameterizedCachedValue<TolkTy, TolkFunction>>("tolk.function.return_type")
@@ -87,7 +86,7 @@ private val RETURN_TYPE_PROVIDER = object : ParameterizedCachedValueProvider<Tol
         val returnTypePsi = returnType
         if (returnTypePsi != null) {
             return if (returnTypePsi.selfKeyword != null) {
-                functionReceiver?.typeExpression?.type ?: TolkTy.Unknown
+                receiverTy
             } else {
                 returnTypePsi.typeExpression?.type ?: TolkTy.Unknown
             }
@@ -110,6 +109,12 @@ private val RETURN_TYPE_PROVIDER = object : ParameterizedCachedValueProvider<Tol
         }
         return result
     }
+}
+
+private val RECEIVER_TYPE_KEY = Key.create<ParameterizedCachedValue<TolkTy, TolkFunction>>("tolk.function.receiver_type")
+private val RECEIVER_TYPE_PROVIDER = ParameterizedCachedValueProvider<TolkTy, TolkFunction> { param ->
+    val receiverType = param.functionReceiver?.typeExpression?.type ?: TolkTy.Unknown
+    CachedValueProvider.Result.create(receiverType, param)
 }
 
 val TolkFunction.declaredType: TolkFunctionTy get() = (this as TolkFunctionMixin).type
@@ -139,6 +144,8 @@ val TolkFunction.hasSelf: Boolean
     get() = greenStub?.hasSelf ?: (parameterList?.selfParameter != null)
 
 val TolkFunction.returnTy get() = (this as TolkFunctionMixin).returnTy
+
+val TolkFunction.receiverTy get() = (this as TolkFunctionMixin).receiverTy
 
 fun TolkFunction.toLookupElement(): LookupElement {
     val typeText = perf("function return type render") {

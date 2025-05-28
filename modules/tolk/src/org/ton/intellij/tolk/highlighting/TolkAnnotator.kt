@@ -97,14 +97,6 @@ class TolkAnnotator : Annotator {
                 highlight(identifier, holder, color.textAttributesKey)
             }
 
-            is TolkIncludeDefinition -> {
-                val sha = element.node.firstChildNode
-                val macroName = sha.treeNext
-
-                highlight(macroName.textRange, holder, TolkColor.MACRO.textAttributesKey)
-                return
-            }
-
             is TolkGlobalVar -> {
                 highlight(
                     element.identifier ?: return,
@@ -159,7 +151,7 @@ class TolkAnnotator : Annotator {
 
             is TolkLiteralExpression -> {
                 val value = element.value
-                if (value is TolkIntValue && (value.value < TVM_INT_MIN_VALUE || value.value > TVM_INT_MAX_VALUE)) {
+                if (value is TolkIntValue && (value.value !in TVM_INT_MIN_VALUE..TVM_INT_MAX_VALUE)) {
                     holder.newAnnotation(
                         HighlightSeverity.ERROR,
                         TolkBundle.message("inspection.int_literal_out_of_range")

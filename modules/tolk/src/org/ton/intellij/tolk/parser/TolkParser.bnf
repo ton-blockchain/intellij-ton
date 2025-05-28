@@ -159,7 +159,7 @@ StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE {
     mixin="org.ton.intellij.tolk.psi.impl.TolkStringLiteralMixin"
 }
 
-GlobalVar ::= 'global' IDENTIFIER GlobalVarType ';'  {
+upper GlobalVar ::= 'global' IDENTIFIER GlobalVarType ';'  {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkGlobalVarMixin"
     implements=[

@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.declaredType
 import org.ton.intellij.tolk.psi.impl.hasSelf
+import org.ton.intellij.tolk.psi.impl.receiverTy
 import org.ton.intellij.tolk.psi.impl.structFields
 import org.ton.intellij.tolk.type.*
 
@@ -65,8 +66,7 @@ fun collectFunctionCandidates(
 
     // step2: find all methods where a receiver can accept provided, e.g. `int8.copy` / `int?.copy` / `(int|slice).copy`
     for (function in namedFunctions) {
-        val functionReceiver = function.functionReceiver?.typeExpression ?: continue
-        val functionReceiverType = functionReceiver.type ?: continue
+        val functionReceiverType = function.receiverTy
         if (!functionReceiverType.hasGenerics() && functionReceiverType.canRhsBeAssigned(calledReceiver)) {
             candidates.add(function to EmptySubstitution)
         }
@@ -79,7 +79,7 @@ fun collectFunctionCandidates(
     // step 3: try to match generic receivers, e.g. `Container<T>.copy` / `(T?|slice).copy` but NOT `T.copy`
     val actualCalledReceiver = calledReceiver.actualType()
     for (function in namedFunctions) {
-        val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
+        val functionReceiver = function.receiverTy
         val actualFunctionReceiver = functionReceiver.actualType()
         if (functionReceiver.hasGenerics() && functionReceiver !is TolkTypeParameterTy) {
             if (actualFunctionReceiver is TolkStructTy && actualCalledReceiver is TolkStructTy) {
@@ -102,7 +102,7 @@ fun collectFunctionCandidates(
 
     // step 4: try to match `T.copy`
     for (function in namedFunctions) {
-        val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
+        val functionReceiver = function.receiverTy
         if (functionReceiver is TolkTypeParameterTy) {
             candidates.add(function to Substitution(mapOf(functionReceiver to calledReceiver)))
         }

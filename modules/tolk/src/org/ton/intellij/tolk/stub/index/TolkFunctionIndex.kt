@@ -18,32 +18,32 @@ class TolkFunctionIndex : StringStubIndexExtension<TolkFunction>() {
         val KEY: StubIndexKey<String, TolkFunction> =
             StubIndexKey.createIndexKey("org.ton.intellij.tolk.stub.index.TolkFunctionIndex")
 
-        fun findElements(
-            project: Project,
-            target: String,
-            scope: GlobalSearchScope = GlobalSearchScope.allScope(project)
-        ): Collection<TolkFunction> {
-           return StubIndex.getElements(KEY, target, project, scope, TolkFunction::class.java)
-        }
-
         fun processAllElements(
             project: Project,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: (TolkFunction) -> Unit
-        ) {
-            StubIndex.getInstance().processAllKeys(KEY, Processor { key ->
-                StubIndex.getInstance().processElements(
-                    KEY,
-                    key,
-                    project,
-                    scope,
-                    TolkFunction::class.java
-                ) { element ->
-                    processor(element)
-                    true
-                }
-                true
-            }, scope)
+            processor: Processor<TolkFunction>
+        ): Boolean = processAllKeys(project, scope) {
+            processElements(project, it, scope, processor)
         }
+
+        fun processElements(
+            project: Project,
+            target: String,
+            scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
+            processor: Processor<TolkFunction>
+        ): Boolean = StubIndex.getInstance().processElements(
+            KEY,
+            target,
+            project,
+            scope,
+            TolkFunction::class.java,
+            processor
+        )
+
+        fun processAllKeys(
+            project: Project,
+            scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
+            processor: Processor<String>
+        ): Boolean = StubIndex.getInstance().processAllKeys(KEY, processor, scope)
     }
 }

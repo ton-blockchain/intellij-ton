@@ -3,6 +3,7 @@ package org.ton.intellij.tolk.type
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkSymbolElement
 import org.ton.intellij.tolk.psi.impl.hasSelf
+import org.ton.intellij.tolk.psi.impl.receiverTy
 
 class TolkFlowContext(
     val functions: MutableMap<String, MutableCollection<TolkFunction>> = HashMap(),
@@ -38,7 +39,7 @@ class TolkFlowContext(
         val candidates = ArrayList<Pair<TolkFunction, Substitution>>()
         // step1: find all methods where a receiver equals to provided, e.g. `MInt.copy`
         for (function in namedFunctions) {
-            val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
+            val functionReceiver = function.receiverTy
 //            if (!functionReceiver.hasGenerics() && functionReceiver.isEquivalentTo(calledReceiver)) {
             if (!functionReceiver.hasGenerics() && functionReceiver == calledReceiver) {
                 candidates.add(function to EmptySubstitution)
@@ -50,7 +51,7 @@ class TolkFlowContext(
 
         // step2: find all methods where a receiver can accept provided, e.g. `int8.copy` / `int?.copy` / `(int|slice).copy`
         for (function in namedFunctions) {
-            val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
+            val functionReceiver = function.receiverTy
             if (!functionReceiver.hasGenerics() && functionReceiver.canRhsBeAssigned(calledReceiver)) {
                 candidates.add(function to EmptySubstitution)
             }
@@ -63,7 +64,7 @@ class TolkFlowContext(
         // step 3: try to match generic receivers, e.g. `Container<T>.copy` / `(T?|slice).copy` but NOT `T.copy`
         val actualCalledReceiver = calledReceiver.actualType()
         for (function in namedFunctions) {
-            val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
+            val functionReceiver = function.receiverTy
             val actualFunctionReceiver = functionReceiver.actualType()
             if (functionReceiver.hasGenerics() && functionReceiver !is TolkTypeParameterTy) {
                 if (actualFunctionReceiver is TolkStructTy && actualCalledReceiver is TolkStructTy) {
@@ -86,7 +87,7 @@ class TolkFlowContext(
 
         // step 4: try to match `T.copy`
         for (function in namedFunctions) {
-            val functionReceiver = function.functionReceiver?.typeExpression?.type ?: continue
+            val functionReceiver = function.receiverTy
             if (functionReceiver is TolkTypeParameterTy) {
                 candidates.add(function to Substitution(mapOf(functionReceiver to calledReceiver)))
             }

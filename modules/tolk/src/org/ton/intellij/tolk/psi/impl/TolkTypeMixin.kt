@@ -4,13 +4,16 @@ import com.intellij.lang.ASTNode
 import com.intellij.navigation.ItemPresentation
 import com.intellij.psi.search.SearchScope
 import com.intellij.psi.stubs.IStubElementType
+import com.intellij.psi.util.PsiTreeUtil
 import org.ton.intellij.tolk.TolkIcons
+import org.ton.intellij.tolk.psi.TolkAnnotation
 import org.ton.intellij.tolk.psi.TolkTypeDef
 import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.stub.TolkTypeDefStub
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkTypeAliasTy
 import org.ton.intellij.tolk.type.render
+import org.ton.intellij.util.greenStub
 import org.ton.intellij.util.recursionGuard
 import javax.swing.Icon
 
@@ -39,7 +42,7 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
         return object : ItemPresentation {
             override fun getPresentableText(): String = buildString {
                 append(name)
-                type?.let {
+                type.let {
                     append(" = ")
                     it.underlyingType.render()
                 }
@@ -49,3 +52,9 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
         }
     }
 }
+
+val TolkTypeDef.annotationList
+    get() = PsiTreeUtil.getChildrenOfTypeAsList(this, TolkAnnotation::class.java)
+
+val TolkTypeDef.isDeprecated: Boolean
+    get() = greenStub?.isDeprecated ?: annotationList.any { it.identifier?.textMatches("deprecated") == true }

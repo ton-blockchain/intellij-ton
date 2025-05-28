@@ -138,13 +138,19 @@
 
 private root ::= TopLevelDefinition_with_recover*
 
-private TopLevelDefinition ::= (IncludeDefinition | VersionDefinition | GlobalVar | ConstVar | TypeDef | Struct | Function | EmptyStatement)
+private TopLevelDefinition ::= (IncludeDefinition | VersionDefinition | Item)
 private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelDefinition {
     pin = 1
     recoverWhile = TopLevelDefinition_recover
 }
 private TopLevelDefinition_recover ::= !(TopLevelDefinition_first)
 private TopLevelDefinition_first ::= 'tolk' | 'fun' | 'import' | 'global' | 'const' | ';' | '@' | 'enum' | 'struct' | 'type' | "get"
+
+Item ::= Annotations (ConstVar | GlobalVar | TypeDef | Struct | Function) {
+    name = "item"
+    elementType = ToBeUpped
+}
+private Annotations ::= Annotation*
 
 RawString ::= RAW_STRING_ELEMENT*
 StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE {
@@ -166,7 +172,7 @@ private GlobalVarType ::= ':' TypeExpression {
     pin = 1
 }
 
-ConstVar ::= 'const' IDENTIFIER ConstVarType? '=' Expression ';' {
+upper ConstVar ::= 'const' IDENTIFIER ConstVarType? '=' Expression ';' {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkConstVarMixin"
     implements=[
@@ -192,7 +198,7 @@ VersionDefinition ::= 'tolk' VersionValue {
 }
 VersionValue ::= ('='|'>'|'>='|'<'|'<='|'^')? INTEGER_LITERAL ('.' INTEGER_LITERAL)*
 
-TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpression {
+upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpression ';' {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkTypeMixin"
     implements = [
@@ -203,7 +209,7 @@ TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpression {
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
 
-Struct ::= 'struct' StructConstructorTag? IDENTIFIER TypeParameterList? (StructBody | ';') {
+upper Struct ::= 'struct' StructConstructorTag? IDENTIFIER TypeParameterList? (StructBody | ';') {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkStructMixin"
     implements = [
@@ -258,7 +264,7 @@ private StructFieldDefault ::= '=' Expression {
 //PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
 //Function ::= (TypeParameterList|'get')? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
-Function ::= Annotations ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypeParameterList? ParameterList ReturnType? FunctionBody {
+upper Function ::= ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypeParameterList? ParameterList ReturnType? FunctionBody {
     pin = 1
     implements = [
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
@@ -269,7 +275,6 @@ Function ::= Annotations ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER T
     stubClass = "org.ton.intellij.tolk.stub.TolkFunctionStub"
     elementTypeFactory = "org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
-private Annotations ::= Annotation*
 
 FunctionReceiver ::= TypeExpression '.'
 
@@ -894,3 +899,9 @@ private meta list_with_recover ::= <<comma_separated_list <<param>>>> {
     recoverWhile=paren_list_element_recover
 }
 private paren_list_element_recover ::= !(')'|']'|'>'|';'|'{'|'}'|'|')
+
+// Use as an `elementType` for always upped rules like `Rule ::= FOO BAR ( upper1 | upper2 )`
+// (without an `elementType` upper rules won't work, GK can change element type of the frame
+// only if it already has some type)
+// https://github.com/JetBrains/Grammar-Kit/blob/d716ade658/src/org/intellij/grammar/parser/GeneratedParserUtilBase.java#L656
+fake ToBeUpped ::=

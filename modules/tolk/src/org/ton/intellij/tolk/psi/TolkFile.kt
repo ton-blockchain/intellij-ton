@@ -11,8 +11,9 @@ import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.impl.resolveFile
-import org.ton.intellij.tolk.stub.TolkFileStub
-import org.ton.intellij.tolk.stub.type.*
+import org.ton.intellij.tolk.stub.*
+import org.ton.intellij.tolk.stub.type.TolkFunctionStubElementType
+import org.ton.intellij.tolk.stub.type.TolkIncludeDefinitionStubElementType
 import org.ton.intellij.util.getChildrenByType
 import java.util.*
 
@@ -82,7 +83,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         get() = CachedValuesManager.getCachedValue(this) {
             val stub = stub
             val constVars = if (stub != null) {
-                getChildrenByType(stub, TolkElementTypes.CONST_VAR, TolkConstVarStubElementType.ARRAY_FACTORY)
+                getChildrenByType(stub, TolkElementTypes.CONST_VAR, TolkConstVarStub.ARRAY_FACTORY)
             } else {
                 findChildrenByClass(TolkConstVar::class.java).toList()
             }
@@ -93,7 +94,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         get() = CachedValuesManager.getCachedValue(this) {
             val stub = stub
             val constVars = if (stub != null) {
-                getChildrenByType(stub, TolkElementTypes.GLOBAL_VAR, TolkGlobalVarStubElementType.ARRAY_FACTORY)
+                getChildrenByType(stub, TolkElementTypes.GLOBAL_VAR, TolkGlobalVarStub.ARRAY_FACTORY)
             } else {
                 findChildrenByClass(TolkGlobalVar::class.java).toList()
             }
@@ -104,7 +105,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         get() = CachedValuesManager.getCachedValue(this) {
             val stub = stub
             val typeDefs = if (stub != null) {
-                getChildrenByType(stub, TolkElementTypes.TYPE_DEF, TolkTypeDefStubElementType.ARRAY_FACTORY)
+                getChildrenByType(stub, TolkElementTypes.TYPE_DEF, TolkTypeDefStub.ARRAY_FACTORY)
             } else {
                 findChildrenByClass(TolkTypeDef::class.java).toList()
             }
@@ -115,7 +116,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         get() = CachedValuesManager.getCachedValue(this) {
             val stub = stub
             val typeDefs = if (stub != null) {
-                getChildrenByType(stub, TolkElementTypes.STRUCT, TolkStructStubElementType.ARRAY_FACTORY)
+                getChildrenByType(stub, TolkElementTypes.STRUCT, TolkStructStub.ARRAY_FACTORY)
             } else {
                 findChildrenByClass(TolkStruct::class.java).toList()
             }
@@ -171,7 +172,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         if (!needImport) return
 
         val factory = TolkPsiFactory[project]
-        val sdk = project.tolkSettings.toolchain?.stdlibDir
+        val sdk = project.tolkSettings.toolchain.stdlibDir
         if (sdk != null && VfsUtil.isAncestor(sdk, file.virtualFile, false)) {
             val sdkPath = sdk.path
             path = file.virtualFile.path.replace(sdkPath, "@stdlib")

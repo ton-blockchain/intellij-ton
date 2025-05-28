@@ -70,7 +70,7 @@ class TolkFormattingBlock(
             when (node.elementType) {
                 BLOCK_STATEMENT -> Indent.getNormalIndent()
                 DOC_COMMENT -> Indent.getNoneIndent()
-                FUNCTION -> Indent.getNoneIndent()
+                FUNCTION, STRUCT, TYPE_DEF, GLOBAL_VAR, CONST_VAR -> Indent.getNoneIndent()
                 else -> Indent.getNormalIndent()
             }
         val wrap = calcWrap(node)
@@ -92,6 +92,9 @@ class TolkFormattingBlock(
         when (parentType) {
             ANNOTATION -> return Indent.getNoneIndent()
             FUNCTION -> return indentForFunctionChild(child)
+            CONST_VAR -> return indentForConstantChild(child)
+            GLOBAL_VAR -> return indentForGlobalVarChild(child)
+            TYPE_DEF -> return indentForTypeDefChild(child)
             MATCH_EXPRESSION -> if (type != MATCH_KEYWORD) return indentIfNotBrace(child)
             PARAMETER_LIST, BLOCK_STATEMENT, STRUCT_EXPRESSION_BODY, STRUCT_BODY -> return indentIfNotBrace(child)
             DOT_EXPRESSION, TERNARY_EXPRESSION -> if (parent.firstChildNode != child) return Indent.getNormalIndent()
@@ -126,15 +129,47 @@ class TolkFormattingBlock(
             RETURN_TYPE
         )
 
-        private fun indentIfNotBrace(child: ASTNode): Indent =
-            if (BRACES_TOKEN_SET.contains(child.elementType)) Indent.getNoneIndent()
-            else Indent.getNormalIndent()
+        private val CONST_PARTS = TokenSet.create(
+            ANNOTATION,
+            CONST_KEYWORD,
+            IDENTIFIER
+        )
 
-        private fun indentForFunctionChild(child: ASTNode): Indent {
-            return when {
-                FUNCTION_PARTS.contains(child.elementType) -> Indent.getNormalIndent()
-                else -> Indent.getNoneIndent()
-            }
+        private val GLOBAL_VAR_PARTS = TokenSet.create(
+            ANNOTATION,
+            GLOBAL_KEYWORD,
+            IDENTIFIER,
+        )
+
+        private val TYPE_DEF_PARTS = TokenSet.create(
+            ANNOTATION,
+            TYPE_KEYWORD,
+            IDENTIFIER,
+        )
+
+        private fun indentIfNotBrace(child: ASTNode): Indent = when {
+            BRACES_TOKEN_SET.contains(child.elementType) -> Indent.getNoneIndent()
+            else -> Indent.getNormalIndent()
+        }
+
+        private fun indentForFunctionChild(child: ASTNode): Indent = when {
+            FUNCTION_PARTS.contains(child.elementType) -> Indent.getNormalIndent()
+            else -> Indent.getNoneIndent()
+        }
+
+        private fun indentForConstantChild(child: ASTNode): Indent = when {
+            CONST_PARTS.contains(child.elementType) -> Indent.getNoneIndent()
+            else -> Indent.getNormalIndent()
+        }
+
+        private fun indentForGlobalVarChild(child: ASTNode): Indent = when {
+            GLOBAL_VAR_PARTS.contains(child.elementType) -> Indent.getNoneIndent()
+            else -> Indent.getNormalIndent()
+        }
+
+        private fun indentForTypeDefChild(child: ASTNode): Indent = when {
+            TYPE_DEF_PARTS.contains(child.elementType) -> Indent.getNoneIndent()
+            else -> Indent.getNormalIndent()
         }
     }
 }

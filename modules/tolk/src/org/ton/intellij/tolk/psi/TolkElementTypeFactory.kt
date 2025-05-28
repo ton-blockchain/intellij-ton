@@ -2,8 +2,7 @@ package org.ton.intellij.tolk.psi
 
 import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.psi.impl.TolkReturnTypeImpl
-import org.ton.intellij.tolk.stub.TolkPlaceholderStub
-import org.ton.intellij.tolk.stub.TolkSelfParameterStub
+import org.ton.intellij.tolk.stub.*
 import org.ton.intellij.tolk.stub.type.*
 
 object TolkElementTypeFactory {
@@ -13,11 +12,11 @@ object TolkElementTypeFactory {
         "FUNCTION" -> TolkFunctionStubElementType(name)
         "PARAMETER" -> TolkParameterStubElementType(name)
         "SELF_PARAMETER" -> TolkSelfParameterStub.Type
-        "GLOBAL_VAR" -> TolkGlobalVarStubElementType(name)
-        "CONST_VAR" -> TolkConstVarStubElementType(name)
+        "GLOBAL_VAR" -> TolkGlobalVarStub.Type
+        "CONST_VAR" -> TolkConstVarStub.Type
         "TYPE_PARAMETER" -> TolkTypeParameterStubElementType(name)
-        "TYPE_DEF" -> TolkTypeDefStubElementType(name)
-        "STRUCT" -> TolkStructStubElementType(name)
+        "TYPE_DEF" -> TolkTypeDefStub.Type
+        "STRUCT" -> TolkStructStub.Type
         "STRUCT_FIELD" -> TolkStructFieldStubElementType(name)
         "RETURN_TYPE" -> TolkPlaceholderStub.Type(name, ::TolkReturnTypeImpl)
         else -> throw RuntimeException("Unknown element type: $name")

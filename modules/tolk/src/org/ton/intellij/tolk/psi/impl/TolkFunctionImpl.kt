@@ -4,15 +4,16 @@ import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.lang.ASTNode
+import com.intellij.openapi.util.Key
 import com.intellij.psi.stubs.IStubElementType
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.*
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.ide.completion.TolkCompletionContributor
 import org.ton.intellij.tolk.perf
 import org.ton.intellij.tolk.presentation.TolkPsiRenderer
 import org.ton.intellij.tolk.presentation.renderParameterList
 import org.ton.intellij.tolk.presentation.renderTypeExpression
+import org.ton.intellij.tolk.psi.TolkAnnotation
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkFunction
@@ -34,7 +35,6 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
     }
 
     override fun getBaseIcon(): Icon? = TolkIcons.FUNCTION
-
 
     override val type: TolkFunctionTy
         get() = CachedValuesManager.getCachedValue(this) {
@@ -66,37 +66,45 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
         }
 
     val returnTy: TolkTy
-        get() = CachedValuesManager.getCachedValue(this) {
-            val returnType = resolveReturnType() ?: TolkTy.Unknown
-            CachedValueProvider.Result.create(returnType, this)
-        }
+        get() = CachedValuesManager.getManager(project).getParameterizedCachedValue(
+            this, RETURN_TYPE_KEY, RETURN_TYPE_PROVIDER, false, this
+        )
 
     val receiverTy: TolkTy?
         get() = CachedValuesManager.getCachedValue(this) {
             val receiverType = functionReceiver?.typeExpression?.type ?: TolkTy.Unknown
             CachedValueProvider.Result.create(receiverType, this)
         }
+}
 
-    private fun resolveReturnType(): TolkTy? {
+private val RETURN_TYPE_KEY = Key.create<ParameterizedCachedValue<TolkTy, TolkFunction>>("tolk.function.return_type")
+private val RETURN_TYPE_PROVIDER = object : ParameterizedCachedValueProvider<TolkTy, TolkFunction> {
+    override fun compute(param: TolkFunction): CachedValueProvider.Result<TolkTy> {
+        return CachedValueProvider.Result.create(param.resolveReturnType(), param)
+    }
+
+    private fun TolkFunction.resolveReturnType(): TolkTy {
         val returnTypePsi = returnType
         if (returnTypePsi != null) {
             return if (returnTypePsi.selfKeyword != null) {
-                functionReceiver?.typeExpression?.type
+                functionReceiver?.typeExpression?.type ?: TolkTy.Unknown
             } else {
-                returnTypePsi.typeExpression?.type
+                returnTypePsi.typeExpression?.type ?: TolkTy.Unknown
             }
         }
         val inference = try {
             inference
         } catch (e: CyclicReferenceException) {
             null
-        } ?: return null
-        val result = if (inference.returnStatements.isNotEmpty()) {
+        } ?: return TolkTy.Unknown
+        val result = if (inference.unreachable == TolkUnreachableKind.ThrowStatement) {
+            TolkTy.Never
+        } else if (inference.returnStatements.isNotEmpty()) {
             inference.returnStatements.asSequence().map {
                 it.expression?.type
-            }.filterNotNull().fold(null) { a, b -> a?.join(b) ?: b }
-        } else if (inference.unreachable == TolkUnreachableKind.ThrowStatement) {
-            TolkTy.Never
+            }.filterNotNull().fold<TolkTy, TolkTy?>(null) { a, b ->
+                a?.join(b) ?: b
+            } ?: TolkTy.Unit
         } else {
             TolkTy.Unit
         }
@@ -108,6 +116,9 @@ val TolkFunction.declaredType: TolkFunctionTy get() = (this as TolkFunctionMixin
 
 val TolkFunction.isMutable: Boolean
     get() = greenStub?.isMutable ?: (node.findChildByType(TolkElementTypes.TILDE) != null)
+
+val TolkFunction.annotationList: List<TolkAnnotation>
+    get() = PsiTreeUtil.getChildrenOfTypeAsList(this, TolkAnnotation::class.java)
 
 val TolkFunction.isDeprecated: Boolean
     get() = greenStub?.isDeprecated ?: annotationList.any { it.identifier?.textMatches("deprecated") == true }

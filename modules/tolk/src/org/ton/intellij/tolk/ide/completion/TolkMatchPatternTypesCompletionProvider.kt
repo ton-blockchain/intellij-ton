@@ -42,6 +42,7 @@ object TolkMatchPatternTypesCompletionProvider : TolkCompletionProvider() {
             } else {
                 collectLocalVariables(matchExpr) {
                     result.addElement(it.toLookupElement())
+                    true
                 }
             }
         }

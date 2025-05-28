@@ -138,9 +138,11 @@ val TolkFunction.isBuiltin: Boolean
 val TolkFunction.hasSelf: Boolean
     get() = greenStub?.hasSelf ?: (parameterList?.selfParameter != null)
 
+val TolkFunction.returnTy get() = (this as TolkFunctionMixin).returnTy
+
 fun TolkFunction.toLookupElement(): LookupElement {
-    val typeText = perf("type text") {
-        returnType?.typeExpression?.type?.render()
+    val typeText = perf("function return type render") {
+        returnTy.render()
     }
     return PrioritizedLookupElement.withPriority(
         LookupElementBuilder.createWithIcon(this)

@@ -1,15 +1,18 @@
 package org.ton.intellij.tolk.ide.completion
 
+import com.intellij.analysis.AnalysisBundle
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.openapi.util.registry.Registry
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
+import org.ton.intellij.tolk.perf
 import org.ton.intellij.tolk.psi.TolkDotExpression
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkTypeSymbolElement
@@ -44,9 +47,22 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         val calledType = left.type?.actualType() ?: return
         val isStaticReceiver = resolvedReceiver is TolkTypeSymbolElement
 
+        val completionLimit = Registry.intValue("ide.completion.variant.limit") / 2
+        var addedElements = 0
+        fun checkLimit(): Boolean {
+            if (addedElements >= completionLimit) {
+                result.restartCompletionOnAnyPrefixChange()
+                result.addLookupAdvertisement(AnalysisBundle.message("completion.not.all.variants.are.shown"))
+                return false
+            }
+            addedElements++
+            return true
+        }
+
         if (calledType is TolkStructTy && !isStaticReceiver) {
             val sub = Substitution.instantiate(calledType.psi.declaredType, calledType)
-            calledType.psi.structBody?.structFieldList?.forEach { field ->
+            for (field in calledType.psi.structBody?.structFieldList.orEmpty()) {
+                if (!checkLimit()) return
                 result.addElement(
                     PrioritizedLookupElement.withPriority(
                         LookupElementBuilder
@@ -61,15 +77,14 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         val prefixMatcher = result.prefixMatcher
         val functions = HashSet<TolkFunction>()
 
-        fun addFunction(function: TolkFunction) {
-            val name = function.name ?: return
-
-            if (!prefixMatcher.prefixMatches(name)) return
-            if (function.hasSelf != !isStaticReceiver) return
-            if (!functions.add(function)) return
+        fun addFunction(function: TolkFunction): Boolean {
+            val name = function.name ?: return true
+            if (!prefixMatcher.prefixMatches(name)) return true
+            if (!functions.add(function)) return true
+            if (function.hasSelf != !isStaticReceiver) return true
 
             val receiverType =
-                function.functionReceiver?.typeExpression?.type?.unwrapTypeAlias()?.actualType() ?: return
+                function.functionReceiver?.typeExpression?.type?.unwrapTypeAlias()?.actualType() ?: return true
 
             fun canBeAdded(): Boolean {
                 if (receiverType.canRhsBeAssigned(calledType)) return true
@@ -83,6 +98,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
             }
 
             if (canBeAdded()) {
+                if (!checkLimit()) return false
                 val deprecatedPriority = if (function.isDeprecated) 0.0 else -TolkCompletionPriorities.DEPRECATED
                 val memberPriority = if (isStaticReceiver) TolkCompletionPriorities.STATIC_FUNCTION
                 else TolkCompletionPriorities.INSTANCE_METHOD
@@ -94,9 +110,12 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                     )
                 )
             }
+
+            return true
         }
 
-        TolkFunctionIndex.processAllElements(project, file.resolveScope, ::addFunction)
-        TolkFunctionIndex.processAllElements(project, processor = ::addFunction)
+        perf("dot completion global") {
+            TolkFunctionIndex.processAllElements(project, processor = ::addFunction)
+        }
     }
 }

@@ -2,7 +2,6 @@
 
 ## [2.5.6]
 - [Tolk 0.13](https://github.com/ton-blockchain/ton/pull/1694) support
-- .boc TVM disassembler support, thanks to [@SibSurfer](https://github.com/ton-blockchain/intellij-ton/pull/217)
 
 ## [2.5.5]
 

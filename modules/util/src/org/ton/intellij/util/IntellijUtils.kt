@@ -135,3 +135,7 @@ fun ASTNode.shouldCreateStubIfParentIsStub(): Boolean {
     return (parentType is IStubElementType<*, *> && parentType.shouldCreateStub(parent)) ||
             parentType is IStubFileElementType<*>
 }
+
+// Registry.intValue("ide.completion.variant.limit") / 2,
+// TODO: 2024.2 - verifier fails because in 2024.3 rewritten to Kotlin companion object
+val REGISTRY_IDE_COMPLETION_VARIANT_LIMIT = 500

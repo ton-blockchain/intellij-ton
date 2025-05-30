@@ -4,6 +4,5 @@
                   implementationClass="org.ton.intellij.boc.BocFileType"
                   fieldName="INSTANCE"
                   extensions="boc"/>
-        <fileEditorProvider implementation="org.ton.intellij.boc.BocFileEditorProvider"/>
     </extensions>
 </idea-plugin>

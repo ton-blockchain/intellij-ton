@@ -1,6 +1,4 @@
 <idea-plugin>
-    <depends optional="true" config-file="tolk.dev.xml">com.intellij.dev</depends>
-
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="Tolk"
                   implementationClass="org.ton.intellij.tolk.TolkFileType"

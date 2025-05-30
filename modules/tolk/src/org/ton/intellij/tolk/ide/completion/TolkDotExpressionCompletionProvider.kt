@@ -5,7 +5,6 @@ import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
-import com.intellij.openapi.util.registry.Registry
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.patterns.StandardPatterns
@@ -23,6 +22,7 @@ import org.ton.intellij.tolk.psi.impl.receiverTy
 import org.ton.intellij.tolk.psi.impl.toLookupElement
 import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 import org.ton.intellij.tolk.type.*
+import org.ton.intellij.util.REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
 
 object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement>
@@ -48,7 +48,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         val calledType = left.type?.actualType() ?: return
         val isStaticReceiver = resolvedReceiver is TolkTypeSymbolElement
 
-        val completionLimit = Registry.intValue("ide.completion.variant.limit") / 2
+        val completionLimit = REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
         var addedElements = 0
         fun checkLimit(): Boolean {
             if (addedElements >= completionLimit) {

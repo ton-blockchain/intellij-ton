@@ -6,7 +6,6 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
-import com.intellij.openapi.util.registry.Registry
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
@@ -24,6 +23,7 @@ import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
 import org.ton.intellij.tolk.type.TolkFunctionTy
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.render
+import org.ton.intellij.util.REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
 import org.ton.intellij.util.psiElement
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -56,7 +56,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         val project = parameters.position.project
         val file = element.containingFile.originalFile as? TolkFile ?: return
 
-        val completionLimit = Registry.intValue("ide.completion.variant.limit") / 2
+        val completionLimit = REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
         var addedElements = 0
         fun checkLimit(): Boolean {
             if (addedElements >= completionLimit) {

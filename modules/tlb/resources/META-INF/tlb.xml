@@ -1,5 +1,4 @@
 <idea-plugin>
-    <depends optional="true" config-file="tlb.dev.xml">com.intellij.dev</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <notificationGroup id="TL-B Generator" displayType="BALLOON"/>

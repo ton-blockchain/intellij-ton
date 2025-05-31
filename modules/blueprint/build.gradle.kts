@@ -10,4 +10,6 @@ dependencies {
         bundledPlugin("JavaScript")
     }
     compileOnly(project(":util"))
+    compileOnly(project(":tolk"))
+    compileOnly(project(":func"))
 }

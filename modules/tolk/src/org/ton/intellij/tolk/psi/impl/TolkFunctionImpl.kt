@@ -161,6 +161,19 @@ val TolkFunction.isGetMethod: Boolean
     get() = greenStub?.isGetMethod
         ?: (getKeyword != null || annotationList.any { it.identifier?.textMatches("method_id") == true })
 
+val TolkFunction.isEntryPoint: Boolean
+    get() = greenStub?.isEntryPoint ?: run {
+        return when(name ?: return false) {
+            "main",
+            "onInternalMessage" ,
+            "onExternalMessage" ,
+            "onRunTickTock" ,
+            "onSplitPrepare" ,
+            "onSplitInstall" -> true
+            else -> false
+        }
+    }
+
 val TolkFunction.hasAsm: Boolean
     get() = greenStub?.hasAsm ?: (functionBody?.asmDefinition != null)
 

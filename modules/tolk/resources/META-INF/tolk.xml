@@ -57,6 +57,7 @@
         <!--        TODO: fix-->
         <!--        <codeInsight.parameterInfo language="Tolk"-->
         <!--                                   implementationClass="org.ton.intellij.tolk.ide.TolkParameterInfoHandler"/>-->
+        <codeInsight.daemonBoundCodeVisionProvider implementation="org.ton.intellij.tolk.codeInsight.hint.codeVision.TolkReferencesCodeVisionProvider"/>
         <codeInsight.typeInfo language="Tolk"
                               implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkTypeProvider"/>
         <codeInsight.declarativeInlayProvider

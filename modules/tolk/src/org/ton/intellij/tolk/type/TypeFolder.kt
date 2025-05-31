@@ -10,10 +10,12 @@ interface TypeFoldable<out Self> {
     fun superFoldWith(folder: TypeFolder): Self
 }
 
-fun <T : TypeFoldable<T>> T.substitute(substitution: Substitution): T =
-    foldWith(object : TypeFolder {
+fun <T : TypeFoldable<T>> T.substitute(substitution: Substitution): T {
+    if (substitution.isEmpty()) return this
+    return foldWith(object : TypeFolder {
         override fun foldType(ty: TolkTy): TolkTy = when {
             ty is TolkTypeParameterTy -> substitution[ty] ?: ty
             else -> ty.superFoldWith(this)
         }
     })
+}

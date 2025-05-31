@@ -3,6 +3,8 @@ package org.ton.intellij.tolk.type
 class TolkUnionTy private constructor(
     val variants: Set<TolkTy>,
 ) : TolkTy {
+    private var hashCode: Int = 0
+
     private val hasGenerics: Boolean = variants.any { it.hasGenerics() }
 
     override fun hasGenerics(): Boolean = hasGenerics
@@ -27,6 +29,23 @@ class TolkUnionTy private constructor(
             return "$orNull?"
         }
         return variants.joinToString(" | ")
+    }
+
+    override fun hashCode(): Int {
+        var result = hashCode
+        if (result == 0) {
+            result = variants.hashCode()
+            hashCode = result
+        }
+        return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TolkUnionTy) return false
+        if (variants.size != other.variants.size) return false
+        if (hashCode != 0 && other.hashCode != 0 && hashCode != other.hashCode) return false
+        return variants == other.variants
     }
 
     override fun removeNullability(): TolkTy {
@@ -116,6 +135,7 @@ class TolkUnionTy private constructor(
         }
 
         fun create(elements: Collection<TolkTy>): TolkTy {
+            if (elements.size == 1) return elements.first()
             val elements = joinUnions(elements)
             if (elements.size == 1) return elements.first()
             return TolkUnionTy(elements)

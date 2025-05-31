@@ -268,6 +268,7 @@ upper Function ::= ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypePar
     pin = 1
     implements = [
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
+        "org.ton.intellij.tolk.psi.TolkModificationTrackerOwner"
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
     ]

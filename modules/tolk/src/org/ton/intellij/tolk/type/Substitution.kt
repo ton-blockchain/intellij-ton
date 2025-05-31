@@ -2,7 +2,7 @@ package org.ton.intellij.tolk.type
 
 
 open class Substitution(
-    val typeSubst: Map<TolkTypeParameterTy, TolkTy> = emptyMap()
+    val typeSubst: Map<TolkTypeParameterTy, TolkTy>
 ) {
     operator fun plus(other: Substitution): Substitution =
         Substitution(
@@ -10,6 +10,8 @@ open class Substitution(
         )
 
     operator fun get(key: TolkTypeParameterTy) = typeSubst[key]
+
+    open fun isEmpty() = typeSubst.isEmpty()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -83,6 +85,8 @@ open class Substitution(
     }
 }
 
-object EmptySubstitution : Substitution()
+object EmptySubstitution : Substitution(emptyMap()) {
+    override fun isEmpty(): Boolean = true
+}
 
 fun Map<TolkTypeParameterTy, TolkTy>.toSubstitution() = Substitution(this)

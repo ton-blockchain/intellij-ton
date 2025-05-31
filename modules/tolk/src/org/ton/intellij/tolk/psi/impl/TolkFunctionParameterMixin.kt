@@ -29,6 +29,4 @@ abstract class TolkParameterMixin : TolkNamedElementImpl<TolkParameterStub>, Tol
     }
 }
 
-val TolkParameter.isMutable: Boolean
-    get() =
-        (this as? TolkParameterMixin)?.isMutable ?: (mutateKeyword != null)
+inline val TolkParameter.isMutable: Boolean get() = (this as TolkParameterMixin).isMutable

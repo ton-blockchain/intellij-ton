@@ -4,7 +4,10 @@ import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.lang.ASTNode
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.util.Key
+import com.intellij.openapi.util.SimpleModificationTracker
+import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.util.*
 import org.ton.intellij.tolk.TolkIcons
@@ -13,10 +16,7 @@ import org.ton.intellij.tolk.perf
 import org.ton.intellij.tolk.presentation.TolkPsiRenderer
 import org.ton.intellij.tolk.presentation.renderParameterList
 import org.ton.intellij.tolk.presentation.renderTypeExpression
-import org.ton.intellij.tolk.psi.TolkAnnotation
-import org.ton.intellij.tolk.psi.TolkElementTypes
-import org.ton.intellij.tolk.psi.TolkFile
-import org.ton.intellij.tolk.psi.TolkFunction
+import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.TolkFunctionStub
 import org.ton.intellij.tolk.type.*
 import org.ton.intellij.util.greenStub
@@ -37,8 +37,8 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
     override fun getBaseIcon(): Icon? = TolkIcons.FUNCTION
 
     override val type: TolkFunctionTy
-        get() = CachedValuesManager.getCachedValue(this) {
-            val returnTy = this@TolkFunctionMixin.returnTy
+        get() = CachedValuesManager.getCachedValue(this, FUNCTION_TYPE) {
+            val returnTy = returnTy
             val parameterList = parameterList ?: return@getCachedValue CachedValueProvider.Result.create(
                 TolkFunctionTy(
                     TolkTy.Unit,
@@ -62,59 +62,86 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
             val parameterTy = TolkTy.tensor(tensor)
             val type = TolkFunctionTy(parameterTy, returnTy)
 
-            CachedValueProvider.Result.create(type, this)
+            createCachedResult(type)
         }
 
     val returnTy: TolkTy
-        get() = CachedValuesManager.getManager(project).getParameterizedCachedValue(
-            this, RETURN_TYPE_KEY, RETURN_TYPE_PROVIDER, false, this
-        )
+        get() = CachedValuesManager.getCachedValue(this, RETURN_TYPE_KEY) {
+            val returnType = resolveReturnType()
+            createCachedResult(returnType)
+        }
 
     val receiverTy: TolkTy
-        get() = CachedValuesManager.getManager(project).getParameterizedCachedValue(
-            this, RECEIVER_TYPE_KEY, RECEIVER_TYPE_PROVIDER, false, this
-        )
-}
+        get() = CachedValuesManager.getCachedValue(this, RECEIVER_TYPE_KEY) {
+            val receiverType = functionReceiver?.typeExpression?.type ?: TolkTy.Unknown
+            createCachedResult(receiverType)
+        }
 
-private val RETURN_TYPE_KEY = Key.create<ParameterizedCachedValue<TolkTy, TolkFunction>>("tolk.function.return_type")
-private val RETURN_TYPE_PROVIDER = object : ParameterizedCachedValueProvider<TolkTy, TolkFunction> {
-    override fun compute(param: TolkFunction): CachedValueProvider.Result<TolkTy> {
-        return CachedValueProvider.Result.create(param.resolveReturnType(), param)
+    override val modificationTracker = SimpleModificationTracker()
+
+    override fun incModificationCount(element: PsiElement): Boolean {
+        val returnType = returnType
+        if (returnType == null) {
+//            val searchScope = GlobalSearchScope.projectScope(project)
+//            val references = ReferencesSearch.search(this, searchScope)
+//            references.forEach { reference ->
+//                val element = reference.element
+//                val trackerOwner = element.findTolkModificationTrackerOwner(true)
+//                if (trackerOwner is TolkFunctionMixin) {
+////                    LOG.warn("${trackerOwner.containingFile.name}$$trackerOwner incModificationCount because of reference to ${containingFile.name}$$this")
+//                    trackerOwner.modificationTracker.incModificationCount()
+//                }
+//            }
+//            modificationTracker.incModificationCount()
+//            return true
+            return false
+        }
+
+        val shouldInc = functionBody?.blockStatement?.isAncestor(element) == true
+        if (shouldInc) {
+//            LOG.warn("${containingFile.name}$$this incModificationCount")
+            modificationTracker.incModificationCount()
+        }
+        return shouldInc
     }
 
-    private fun TolkFunction.resolveReturnType(): TolkTy {
-        val returnTypePsi = returnType
-        if (returnTypePsi != null) {
-            return if (returnTypePsi.selfKeyword != null) {
-                receiverTy
-            } else {
-                returnTypePsi.typeExpression?.type ?: TolkTy.Unknown
-            }
-        }
-        val inference = try {
-            inference
-        } catch (e: CyclicReferenceException) {
-            null
-        } ?: return TolkTy.Unknown
-        val result = if (inference.unreachable == TolkUnreachableKind.ThrowStatement) {
-            TolkTy.Never
-        } else if (inference.returnStatements.isNotEmpty()) {
-            inference.returnStatements.asSequence().map {
-                it.expression?.type
-            }.filterNotNull().fold<TolkTy, TolkTy?>(null) { a, b ->
-                a?.join(b) ?: b
-            } ?: TolkTy.Unit
+    override fun toString(): String = "TolkFunction:$name"
+
+    companion object {
+        val LOG = logger<TolkFunctionMixin>()
+    }
+}
+
+private val FUNCTION_TYPE = Key.create<CachedValue<TolkFunctionTy>>("tolk.function.function_type")
+private val RETURN_TYPE_KEY = Key.create<CachedValue<TolkTy>>("tolk.function.return_type")
+private val RECEIVER_TYPE_KEY = Key.create<CachedValue<TolkTy>>("tolk.function.receiver_type")
+
+private fun TolkFunction.resolveReturnType(): TolkTy {
+    val returnTypePsi = returnType
+    if (returnTypePsi != null) {
+        return if (returnTypePsi.selfKeyword != null) {
+            receiverTy
         } else {
-            TolkTy.Unit
+            returnTypePsi.typeExpression?.type ?: TolkTy.Unknown
         }
-        return result
     }
-}
-
-private val RECEIVER_TYPE_KEY = Key.create<ParameterizedCachedValue<TolkTy, TolkFunction>>("tolk.function.receiver_type")
-private val RECEIVER_TYPE_PROVIDER = ParameterizedCachedValueProvider<TolkTy, TolkFunction> { param ->
-    val receiverType = param.functionReceiver?.typeExpression?.type ?: TolkTy.Unknown
-    CachedValueProvider.Result.create(receiverType, param)
+    val inference = try {
+        inference
+    } catch (e: CyclicReferenceException) {
+        null
+    } ?: return TolkTy.Unknown
+    val result = if (inference.unreachable == TolkUnreachableKind.ThrowStatement) {
+        TolkTy.Never
+    } else if (inference.returnStatements.isNotEmpty()) {
+        inference.returnStatements.asSequence().map {
+            it.expression?.type
+        }.filterNotNull().fold<TolkTy, TolkTy?>(null) { a, b ->
+            a?.join(b) ?: b
+        } ?: TolkTy.Unit
+    } else {
+        TolkTy.Unit
+    }
+    return result
 }
 
 val TolkFunction.declaredType: TolkFunctionTy get() = (this as TolkFunctionMixin).type

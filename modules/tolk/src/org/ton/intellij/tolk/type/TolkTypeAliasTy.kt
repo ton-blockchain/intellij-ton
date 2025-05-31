@@ -2,7 +2,7 @@ package org.ton.intellij.tolk.type
 
 import org.ton.intellij.tolk.psi.TolkTypeDef
 
-class TolkTypeAliasTy(
+data class TolkTypeAliasTy(
     val psi: TolkTypeDef,
     val underlyingType: TolkTy
 ) : TolkTy {

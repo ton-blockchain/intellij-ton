@@ -52,16 +52,15 @@ abstract class TolkReferenceTypeExpressionMixin : ASTWrapperPsiElement, TolkRefe
         if (primitiveType != null) return primitiveType
 
         val resolved = reference?.resolve()
-        if (resolved is TolkStruct) {
-            return TolkStructTy.create(resolved, typeArgumentList?.typeExpressionList)
+        return when {
+            resolved is TolkStruct -> TolkStructTy.create(resolved, typeArgumentList?.typeExpressionList)
+
+            resolved is TolkTypedElement -> resolved.type
+
+            parentOfType<TolkFunctionReceiver>() != null -> TolkTypeParameterTy.create(this)
+
+            else -> TolkTy.Unknown
         }
-        if (resolved is TolkTypedElement) {
-            return resolved.type
-        }
-        if (parentOfType<TolkFunctionReceiver>() != null) {
-            return TolkTypeParameterTy.create(this)
-        }
-        return TolkTy.Unknown
     }
 
 

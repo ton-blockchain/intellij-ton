@@ -15,8 +15,8 @@
     <xi:include href="/META-INF/fift.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/boc.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <depends>com.intellij.modules.platform</depends>
-    <depends optional="true" config-file="dev.xml">com.intellij.dev</depends>
-    <depends optional="true" config-file="javascript.xml">JavaScript</depends>
+    <depends optional="true" config-file="org.ton.intellij-ton.dev.xml">com.intellij.dev</depends>
+    <depends optional="true" config-file="org.ton.intellij-ton.javascript.xml">JavaScript</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <spellchecker.bundledDictionaryProvider

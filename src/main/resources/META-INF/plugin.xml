@@ -7,14 +7,14 @@
         including Tolk, FunC, Fift, and TL-B schemas.
         Ideal for Web3 developers working within the TON ecosystem.
     </description>
-
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
     <xi:include href="/META-INF/asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/tolk.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/func.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/tlb.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/fift.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/boc.xml" xpointer="xpointer(/idea-plugin/*)"/>
-    <depends>com.intellij.modules.platform</depends>
     <depends optional="true" config-file="org.ton.intellij-ton.dev.xml">com.intellij.dev</depends>
     <depends optional="true" config-file="org.ton.intellij-ton.javascript.xml">JavaScript</depends>
 

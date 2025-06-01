@@ -11,10 +11,7 @@ import com.intellij.psi.search.PsiSearchHelper.SearchCostResult
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.util.Processor
 import org.ton.intellij.tolk.TolkBundle
-import org.ton.intellij.tolk.psi.TolkFile
-import org.ton.intellij.tolk.psi.TolkFunction
-import org.ton.intellij.tolk.psi.TolkLocalSymbolElement
-import org.ton.intellij.tolk.psi.TolkSymbolElement
+import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.isEntryPoint
 import org.ton.intellij.tolk.psi.impl.isGetMethod
 import java.util.concurrent.atomic.AtomicInteger
@@ -28,10 +25,15 @@ class TolkReferencesCodeVisionProvider : ReferencesCodeVisionProvider() {
     override fun acceptsFile(file: PsiFile): Boolean = file is TolkFile
 
     override fun acceptsElement(element: PsiElement): Boolean {
-        if (element is TolkFunction) {
-            return !element.isGetMethod && !element.isEntryPoint
+        return when (element) {
+            is TolkFunction -> !element.isGetMethod && !element.isEntryPoint
+            is TolkStruct,
+            is TolkTypeDef,
+            is TolkGlobalVar,
+            is TolkConstVar -> true
+
+            else -> false
         }
-        return element is TolkSymbolElement && element !is TolkLocalSymbolElement
     }
 
     override fun getHint(element: PsiElement, file: PsiFile): String? = getVisionInfo(element, file)?.text
@@ -58,7 +60,11 @@ class TolkReferencesCodeVisionProvider : ReferencesCodeVisionProvider() {
 
         val usagesCountValue = usagesCount.get()
         return CodeVisionInfo(
-            text = TolkBundle.message("inlay.hints.usages.text", usagesCountValue, if (usagesCountValue >= limit) 1 else 0),
+            text = TolkBundle.message(
+                "inlay.hints.usages.text",
+                usagesCountValue,
+                if (usagesCountValue >= limit) 1 else 0
+            ),
             count = usagesCountValue,
             countIsExact = usagesCountValue < limit
         )

@@ -17,8 +17,6 @@ import org.ton.intellij.tolk.toolchain.TolkToolchain
 
 val Project.tolkSettings: TolkProjectSettingsService get() = service()
 
-val Project.tolkToolchain: TolkToolchain? get() = tolkSettings.toolchain
-
 @State(
     name = "TolkProjectSettings",
     storages = [Storage(StoragePathMacros.WORKSPACE_FILE)]
@@ -27,9 +25,20 @@ val Project.tolkToolchain: TolkToolchain? get() = tolkSettings.toolchain
 class TolkProjectSettingsService(
     private val project: Project
 ) : SimplePersistentStateComponent<TolkProjectSettingsService.TolkProjectSettings>(TolkProjectSettings()) {
+    private var _toolchain: TolkToolchain? = null
+
     var toolchain: TolkToolchain
-        get() = state.toolchainLocation?.let { TolkToolchain.fromPath(it) } ?: TolkToolchain.NULL
+        get() {
+            var currentToolchain = _toolchain
+            val currentLocation = state.toolchainLocation
+            if (currentToolchain == null && !currentLocation.isNullOrEmpty()) {
+                currentToolchain = TolkToolchain.fromPath(currentLocation)
+                _toolchain = currentToolchain
+            }
+            return currentToolchain ?: TolkToolchain.NULL
+        }
         set(value) {
+            _toolchain = value
             state.toolchainLocation = value.homePath.ifEmpty { null }
             defaultImport = null
             reloadProject()

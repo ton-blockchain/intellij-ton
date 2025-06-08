@@ -10,6 +10,7 @@ import com.intellij.openapi.util.SimpleModificationTracker
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.util.*
+import com.intellij.util.SmartList
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.ide.completion.TolkCompletionContributor
 import org.ton.intellij.tolk.perf
@@ -125,6 +126,22 @@ private fun TolkFunction.resolveReturnType(): TolkTy {
             returnTypePsi.typeExpression?.type ?: TolkTy.Unknown
         }
     }
+
+    val statements = SmartList<TolkReturnStatement>()
+    val visitor = object : TolkRecursiveElementWalkingVisitor() {
+        override fun visitExpressionStatement(o: TolkExpressionStatement) {
+        }
+
+        override fun visitReturnStatement(o: TolkReturnStatement) {
+            statements.add(o)
+        }
+    }
+    functionBody?.blockStatement?.accept(visitor)
+
+    if (statements.isEmpty() || statements.all { it.expression == null }) {
+        return TolkTy.Unit
+    }
+
     val inference = try {
         inference
     } catch (e: CyclicReferenceException) {
@@ -163,13 +180,14 @@ val TolkFunction.isGetMethod: Boolean
 
 val TolkFunction.isEntryPoint: Boolean
     get() = greenStub?.isEntryPoint ?: run {
-        return when(name ?: return false) {
+        return when (name ?: return false) {
             "main",
-            "onInternalMessage" ,
-            "onExternalMessage" ,
-            "onRunTickTock" ,
-            "onSplitPrepare" ,
+            "onInternalMessage",
+            "onExternalMessage",
+            "onRunTickTock",
+            "onSplitPrepare",
             "onSplitInstall" -> true
+
             else -> false
         }
     }

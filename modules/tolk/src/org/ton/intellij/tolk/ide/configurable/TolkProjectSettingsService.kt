@@ -7,6 +7,7 @@ import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.RootsChangeRescanningInfo
 import com.intellij.openapi.roots.ex.ProjectRootManagerEx
+import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.findFile
@@ -49,11 +50,13 @@ class TolkProjectSettingsService(
             defaultImport = null
             reloadProject()
         }
-    val stdlibDir: VirtualFile? get() {
-        return explicitPathToStdlib?.let {
-            VirtualFileManager.getInstance().findFileByUrl(it)
-        } ?: toolchain.stdlibDir
-    }
+    val stdlibDir: VirtualFile?
+        get() {
+            return explicitPathToStdlib?.let {
+                val vfm = VirtualFileManager.getInstance()
+                vfm.findFileByUrl(it) ?: vfm.findFileByNioPath(it.toNioPathOrNull() ?: return null)
+            } ?: toolchain.stdlibDir
+        }
 
     private var defaultImport: TolkFile? = null
 
@@ -73,6 +76,7 @@ class TolkProjectSettingsService(
 //            ProjectRootManagerEx.getInstanceEx(project)
 //                .makeRootsChange(EmptyRunnable.INSTANCE, RootsChangeRescanningInfo.RESCAN_DEPENDENCIES_IF_NEEDED)
 //        }
+        println("reload project: ${project.name} stdlib: ${explicitPathToStdlib} dir:${stdlibDir}")
         invokeLater(modalityState = ModalityState.nonModal()) {
             WriteAction.run<RuntimeException> {
                 ProjectRootManagerEx.getInstanceEx(project).makeRootsChange({}, RootsChangeRescanningInfo.TOTAL_RESCAN)

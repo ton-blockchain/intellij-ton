@@ -37,11 +37,11 @@ class TolkToolchainDetectActivity : ProjectActivity {
                 return
             }
 
-            if (knownToolchains.isNotEmpty()) {
-                LOG.warn("No toolchain selected, using the first known toolchain")
-                tolkToolchainService.toolchain = TolkToolchain.fromPath(knownToolchains.first())
-                LOG.warn("Selected toolchain: ${tolkToolchainService.toolchain}")
-            }
+//            if (knownToolchains.isNotEmpty()) {
+//                LOG.warn("No toolchain selected, using the first known toolchain")
+//                tolkToolchainService.toolchain = TolkToolchain.fromPath(knownToolchains.first())
+//                LOG.warn("Selected toolchain: ${tolkToolchainService.toolchain}")
+//            }
             return
         }
 

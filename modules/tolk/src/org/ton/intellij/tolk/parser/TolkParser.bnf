@@ -124,6 +124,7 @@
             CONST_KEYWORD               = 'const'
             BUILTIN_KEYWORD             = 'builtin'
             GET_KEYWORD                 = 'GET_KEYWORD'
+            LAZY_KEYWORD                 = 'LAZY_KEYWORD'
             IMPORT_KEYWORD              = 'import'
             TOLK_KEYWORD                = 'tolk'
 
@@ -280,6 +281,7 @@ upper Function ::= ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypePar
 FunctionReceiver ::= TypeExpression '.'
 
 private get ::= <<getKeyword>>
+private lazy ::= <<lazyKeyword>>
 
 ReturnType ::= ':' (TypeExpression | 'self') {
     pin = 1
@@ -520,7 +522,7 @@ ShiftBinExpression ::= Expression ShiftBinOp Expression
 CompBinExpression ::= Expression CompBinOp Expression
 AddBinExpression ::= Expression AddBinOp Expression
 MulBinExpression ::= Expression MulBinOp Expression
-PrefixExpression ::= ('!'|'~'|'-'|'+') Expression {
+PrefixExpression ::= ('!'|'~'|'-'|'+'| lazy) Expression {
     mixin="org.ton.intellij.tolk.psi.impl.TolkPrefixExpressionMixin"
 }
 NotNullExpression ::= Expression '!' {

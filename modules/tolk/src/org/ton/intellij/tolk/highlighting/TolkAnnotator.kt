@@ -28,6 +28,7 @@ import org.ton.intellij.util.TVM_INT_MIN_VALUE
 class TolkAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         when (element) {
+
             is TolkTypeParameter -> {
                 return highlight(element.identifier, holder, TolkColor.TYPE_PARAMETER.textAttributesKey)
             }
@@ -178,10 +179,18 @@ class TolkAnnotator : Annotator {
                     }
                 }
             }
+
+            else -> {
+                val elementType = element.elementType ?: return
+                when(elementType) {
+                    TolkElementTypes.GET_KEYWORD,
+                    TolkElementTypes.LAZY_KEYWORD -> {
+                        return highlight(element, holder, TolkColor.KEYWORD.textAttributesKey)
+                    }
+                }
+            }
         }
-        if (element.elementType == TolkElementTypes.GET_KEYWORD) {
-            return highlight(element, holder, TolkColor.KEYWORD.textAttributesKey)
-        }
+
         val parent = element.parent
         when (parent) {
             is TolkFunction -> {

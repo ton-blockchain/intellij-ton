@@ -1372,6 +1372,11 @@ class TolkInferenceWalker(
             in INT_PREFIX_OPERATORS -> {
                 ctx.setType(element, TolkTy.Int)
             }
+
+            else -> {
+                val expressionType = ctx.getType(expression)
+                ctx.setType(element, expressionType)
+            }
         }
 
         return afterExpr

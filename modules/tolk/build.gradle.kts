@@ -1,5 +1,6 @@
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -12,9 +13,12 @@ dependencies {
         val version = providers.gradleProperty("platformVersion")
         webstorm(version)
         bundledPlugin("com.intellij.dev")
+        testFramework(TestFrameworkType.Platform)
     }
-    compileOnly(project(":asm"))
-    compileOnly(project(":util"))
+
+    implementation(project(":asm"))
+    implementation(project(":util"))
+    testImplementation(project(":util"))
 }
 
 val generateTolkParser = task<GenerateParserTask>("generateTolkParser") {

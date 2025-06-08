@@ -291,14 +291,19 @@ ReturnType ::= ':' (TypeExpression | 'self') {
 
 private ReturnType_recovery ::= !(FunctionBody_first|TopLevelDefinition_first)
 
-Annotation ::= '@' IDENTIFIER AnnotationParamList? {
+Annotation ::= '@' IDENTIFIER AnnotationArgumentList? {
     pin = 1
 }
 
-AnnotationParamList ::= '(' << comma_separated_list AnnotationParam >> ')' {
+AnnotationArgumentList ::= '(' [<<list_with_recover AnnotationArgument>>] ')' {
     pin = 1
+    elementType = ArgumentList
 }
-AnnotationParam ::= INTEGER_LITERAL | StringLiteral
+
+AnnotationArgument ::= !'mutate' Expression {
+    pin = 1
+    elementType = Argument
+}
 
 FunctionBody ::= ';' | AsmDefinition | BlockStatement | ('builtin' ';')
 private FunctionBody_first ::= ';' | 'asm' | '{' | 'builtin'
@@ -659,11 +664,6 @@ MatchPatternReference ::= IDENTIFIER TypeArgumentList_pinned? {
 ArgumentList ::= '(' [<<list_with_recover Argument>>] ')' {
     pin = 1
 }
-//private args ::= <<comma_separated_list Argument>> {
-//    recoverWhile = recoverArgs
-//}
-//private recoverArgs ::= !(')'|';')
-
 
 Argument ::= 'mutate'? Expression
 

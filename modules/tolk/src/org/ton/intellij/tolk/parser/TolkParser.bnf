@@ -138,7 +138,7 @@
 
 private root ::= TopLevelDefinition_with_recover*
 
-private TopLevelDefinition ::= (IncludeDefinition | VersionDefinition | Item)
+private TopLevelDefinition ::= (IncludeDefinition | VersionDefinition | Item | ';')
 private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelDefinition {
     pin = 1
     recoverWhile = TopLevelDefinition_recover

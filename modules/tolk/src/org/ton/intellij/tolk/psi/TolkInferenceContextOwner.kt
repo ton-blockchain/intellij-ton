@@ -27,7 +27,7 @@ val TolkInferenceContextOwner.selfInferenceResult: TolkInferenceResult
                         throw e
                     }
                 }
-                LOG.warn("Inference cache miss: ${containingFile.name}$${toString()} in $time")
+//                LOG.warn("Inference cache miss: ${containingFile.name}$${toString()} in $time")
                 createCachedResult(inferred)
             }
         }

@@ -7,7 +7,6 @@ import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.RootsChangeRescanningInfo
 import com.intellij.openapi.roots.ex.ProjectRootManagerEx
-import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.findFile
@@ -52,9 +51,7 @@ class TolkProjectSettingsService(
         }
     val stdlibDir: VirtualFile? get() {
         return explicitPathToStdlib?.let {
-            it.toNioPathOrNull()?.let {  path ->
-                VirtualFileManager.getInstance().findFileByNioPath(path)
-            }
+            VirtualFileManager.getInstance().findFileByUrl(it)
         } ?: toolchain.stdlibDir
     }
 

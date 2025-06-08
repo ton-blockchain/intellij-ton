@@ -34,6 +34,10 @@ allprojects {
         compilerOptions.freeCompilerArgs.add("-Xjvm-default=all")
     }
 
+    tasks.withType<Test>().configureEach {
+        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+    }
+
     dependencies {
         testImplementation("junit:junit:4.13.2")
     }

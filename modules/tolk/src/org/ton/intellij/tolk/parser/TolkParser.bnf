@@ -300,8 +300,7 @@ AnnotationArgumentList ::= '(' [<<list_with_recover AnnotationArgument>>] ')' {
     elementType = ArgumentList
 }
 
-AnnotationArgument ::= !'mutate' Expression {
-    pin = 1
+AnnotationArgument ::= Expression {
     elementType = Argument
 }
 
@@ -452,8 +451,8 @@ CatchParameter ::= IDENTIFIER {
 
 Expression ::=
     VarExpression
-    | AssignBinExpression // expr10
     | TernaryExpression // expr10
+    | AssignBinExpression // expr10
     | LogicalBinExpression //expr13
     | BitwiseBinExpression // expr14
     | ShiftBinExpression // expr17
@@ -649,12 +648,13 @@ private MatchExpressionArm ::= Expression (&'}' | ',') {
     pin = 1
 }
 
-MatchPattern ::= MatchPatternReference | TypeExpression | AtomicExpression | 'else' {
+MatchPattern ::= 'else' | MatchPatternReference | MatchPatternType | Expression  {
     recoverWhile=MatchPattern_recover
 }
 private MatchPattern_recover ::= !('{'|'=>'|'}'|'return')
+private MatchPatternType ::= TypeExpression &'=>'
 
-MatchPatternReference ::= IDENTIFIER TypeArgumentList_pinned? {
+MatchPatternReference ::= IDENTIFIER TypeArgumentList_pinned? &'=>' {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkMatchPatternReferenceMixin"
     implements = [
         "org.ton.intellij.tolk.psi.TolkTypedElement"

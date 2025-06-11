@@ -57,8 +57,7 @@ fun collectFunctionCandidates(
     for (function in namedFunctions) {
         val functionReceiver = function.functionReceiver?.typeExpression ?: continue
         val functionReceiverType = functionReceiver.type ?: continue
-//            if (!functionReceiver.hasGenerics() && functionReceiver.isEquivalentTo(calledReceiver)) {
-        if (!functionReceiverType.hasGenerics() && functionReceiver == calledReceiver) {
+        if (!functionReceiverType.hasGenerics() && functionReceiverType == calledReceiver) {
             candidates.add(function to EmptySubstitution)
         }
     }

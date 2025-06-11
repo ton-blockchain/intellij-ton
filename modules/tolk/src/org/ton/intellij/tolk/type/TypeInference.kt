@@ -1027,11 +1027,11 @@ class TolkInferenceWalker(
     ): TolkExpressionFlowContext {
         val afterExpr = inferExpression(expression, flow, false)
 
-        val exprType = ctx.getType(expression) ?: return afterExpr
-        val notNullType = exprType.removeNullability()
+        val exprType = ctx.getType(expression)?.unwrapTypeAlias() ?: return afterExpr
+        val notNullType = exprType.subtract(TolkTy.Null)
         val resultType = if (exprType == TolkTy.Null) { // `expr == null` is always true
             if (isInverted) TolkTy.FALSE else TolkTy.TRUE
-        } else if (notNullType == TolkTy.Never || notNullType == exprType) { // `expr == null` is always false
+        } else if (notNullType == TolkTy.Never) { // `expr == null` is always false
             if (isInverted) TolkTy.TRUE else TolkTy.FALSE
         } else {
             TolkTy.Bool
@@ -1511,12 +1511,10 @@ class TolkInferenceWalker(
     ): TolkExpressionFlowContext {
         val expression = element.expression
         val afterExpr = inferExpression(expression, flow, false)
-        val type = ctx.getType(expression)
-        if (type != null && type.isNullable()) {
-            ctx.setType(element, type.removeNullability())
-        } else {
-            ctx.setType(element, type)
-        }
+        val exprType = ctx.getType(expression)
+        val withoutNull = exprType?.unwrapTypeAlias()?.subtract(TolkTy.Null)
+        val actualType = if (withoutNull != TolkTy.Never) withoutNull else exprType
+        ctx.setType(element, actualType)
         if (!usedAsCondition) {
             return afterExpr
         }

@@ -54,11 +54,16 @@ fun collectFunctionCandidates(
     }
 
     val candidates = ArrayList<Pair<TolkFunction, Substitution>>()
+    for (function in namedFunctions) {
+
+    }
+
     // step1: find all methods where a receiver equals to provided, e.g. `MInt.copy`
+    val calledReceiverActualUnwrappedType = calledReceiver.unwrapTypeAlias().actualType()
     for (function in namedFunctions) {
         val functionReceiver = function.functionReceiver?.typeExpression ?: continue
-        val functionReceiverType = functionReceiver.type ?: continue
-        if (!functionReceiverType.hasGenerics() && functionReceiverType == calledReceiver) {
+        val functionReceiverType = functionReceiver.type?.unwrapTypeAlias() ?: continue
+        if (!functionReceiverType.hasGenerics() && functionReceiverType == calledReceiverActualUnwrappedType) {
             candidates.add(function to EmptySubstitution)
         }
     }
@@ -110,5 +115,14 @@ fun collectFunctionCandidates(
             candidates.add(function to Substitution(mapOf(functionReceiver to calledReceiver)))
         }
     }
-    return candidates
+
+    if (candidates.isNotEmpty()) {
+        return candidates
+    }
+
+    TolkBuiltins[project].getFunction(name)?.let {
+        return listOf(it to EmptySubstitution)
+    }
+
+    return emptyList()
 }

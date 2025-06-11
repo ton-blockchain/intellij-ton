@@ -169,12 +169,12 @@
         <!-- control flow issues -->
 
         <!-- general -->
-        <localInspection language="Tolk" displayName="Unresolved reference inspection" groupPath="Tolk"
-                         groupName="General" enabledByDefault="true" level="ERROR"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnresolvedReferenceInspection"/>
-        <localInspection language="Tolk" displayName="Unresolved type identifier" groupPath="Tolk"
-                         groupName="General" enabledByDefault="true" level="ERROR"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnresolvedTypeIdentifierInspection"/>
+<!--        <localInspection language="Tolk" displayName="Unresolved reference inspection" groupPath="Tolk"-->
+<!--                         groupName="General" enabledByDefault="true" level="ERROR"-->
+<!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnresolvedReferenceInspection"/>-->
+<!--        <localInspection language="Tolk" displayName="Unresolved type identifier" groupPath="Tolk"-->
+<!--                         groupName="General" enabledByDefault="true" level="ERROR"-->
+<!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnresolvedTypeIdentifierInspection"/>-->
         <localInspection language="Tolk" groupPath="Tolk" displayName="Deprecation function" groupName="General" enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.tolk.inspection.TolkDeprecationInspection"/>
         <!-- Completion -->

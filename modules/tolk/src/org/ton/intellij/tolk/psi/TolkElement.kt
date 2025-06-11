@@ -14,3 +14,11 @@ interface TolkElement : PsiElement
 //
 //val TolkElement.inference: TolkInferenceResult?
 //    get() = inferenceContextOwner?.selfInferenceResult
+
+fun TolkExpression.unwrapParentheses(): TolkExpression? {
+    var current: TolkExpression? = this
+    while (current is TolkParenExpression) {
+        current = current.expression
+    }
+    return current
+}

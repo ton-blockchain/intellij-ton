@@ -1421,8 +1421,14 @@ class TolkInferenceWalker(
         }
 
         val fieldLookup = element.fieldLookup ?: return TolkExpressionFlowContext(nextFlow, usedAsCondition)
-        val fieldType = inferFieldLookup(receiverType, fieldLookup, hint)
-        ctx.setType(element, fieldType)
+        var inferredType = inferFieldLookup(receiverType, fieldLookup, hint)
+        extractSinkExpression(element)?.let { sExpr ->
+            nextFlow.getType(sExpr)?.let { smartCasted ->
+                inferredType = smartCasted
+            }
+        }
+
+        ctx.setType(element, inferredType)
         return TolkExpressionFlowContext(nextFlow, usedAsCondition)
     }
 
@@ -1771,7 +1777,7 @@ class TolkInferenceWalker(
                     is TolkStructTy -> {
                         val right = expression.fieldLookup ?: return null
                         val field =
-                            ctx.getResolvedRefs(right).firstOrNull()?.element as? TolkStructField ?: return null
+                            ctx.getResolvedFields(right).firstOrNull() as? TolkStructField ?: return null
                         field.type
                     }
 

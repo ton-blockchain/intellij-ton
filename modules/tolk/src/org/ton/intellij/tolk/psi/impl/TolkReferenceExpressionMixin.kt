@@ -16,6 +16,7 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
 
     override fun getReferences(): Array<TolkSymbolReference> {
         val name = referenceName ?: return EMPTY_ARRAY
+        if (name == "_") return EMPTY_ARRAY
         if (TolkTy.byName(name) != null) return EMPTY_ARRAY
         return arrayOf(TolkSymbolReference(this))
     }

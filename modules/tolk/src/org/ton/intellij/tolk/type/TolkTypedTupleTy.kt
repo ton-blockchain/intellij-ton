@@ -4,6 +4,8 @@ class TolkTypedTupleTy private constructor(
     val elements: List<TolkTy>,
     private val hasGenerics: Boolean = elements.any { it.hasGenerics() }
 ) : TolkTy {
+    private var hashCode: Int = 0
+
     override fun toString(): String = "[${elements.joinToString()}]"
 
     override fun hasGenerics(): Boolean = hasGenerics
@@ -63,19 +65,20 @@ class TolkTypedTupleTy private constructor(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as TolkTypedTupleTy
+        if (other !is TolkTypedTupleTy) return false
 
         if (hasGenerics != other.hasGenerics) return false
-        if (elements != other.elements) return false
-
-        return true
+        if (elements.size != other.elements.size) return false
+        if (hashCode != 0 && other.hashCode != 0 && hashCode != other.hashCode) return false
+        return elements != other.elements
     }
 
     override fun hashCode(): Int {
-        var result = hasGenerics.hashCode()
-        result = 31 * result + elements.hashCode()
+        var result = hashCode
+        if (result == 0) {
+            result = elements.hashCode() * 31 + hasGenerics.hashCode()
+            hashCode = result
+        }
         return result
     }
 

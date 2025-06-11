@@ -35,6 +35,10 @@ class TolkFindUsagesProvider : FindUsagesProvider {
             is TolkTypeParameter -> "Type parameter"
             is TolkTypeDef -> "Type alias"
             is TolkStruct -> "Structure"
+            is TolkStructField -> "Structure field"
+            is TolkVar -> "Variable"
+            is TolkParameterElement -> "Parameter"
+            is TolkCatchParameter -> "Catch parameter"
             else -> return "<TYPE $element>"
         }
     }

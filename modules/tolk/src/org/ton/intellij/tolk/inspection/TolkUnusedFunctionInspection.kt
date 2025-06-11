@@ -7,6 +7,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.search.searches.ReferencesSearch
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkVisitor
+import org.ton.intellij.tolk.psi.impl.isEntryPoint
 import org.ton.intellij.tolk.psi.impl.isGetMethod
 
 class TolkUnusedFunctionInspection : TolkInspectionBase() {
@@ -15,14 +16,7 @@ class TolkUnusedFunctionInspection : TolkInspectionBase() {
         session: LocalInspectionToolSession,
     ): TolkVisitor = object : TolkVisitor() {
         override fun visitFunction(o: TolkFunction) {
-            val name = o.name ?: return
-            if (o.isGetMethod) return
-            if (name == "main") return
-            if (name == "onInternalMessage") return
-            if (name == "onExternalMessage") return
-            if (name == "onRunTickTock") return
-            if (name == "onSplitPrepare") return
-            if (name == "onSplitInstall") return
+            if (o.isGetMethod || o.isEntryPoint) return
             val containingDirectory = o.containingFile.containingDirectory ?: return
             if (containingDirectory.name.startsWith("tolk-stdlib")) return
             if (ReferencesSearch.search(o, o.useScope).findFirst() == null) {

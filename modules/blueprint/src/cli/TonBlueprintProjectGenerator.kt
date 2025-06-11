@@ -2,50 +2,51 @@ package org.ton.intellij.blueprint.cli
 
 import com.intellij.execution.RunManager
 import com.intellij.execution.filters.Filter
-import com.intellij.ide.util.projectWizard.MultiWebTemplateNewProjectWizard
 import com.intellij.ide.util.projectWizard.SettingsStep
+import com.intellij.ide.util.projectWizard.WebTemplateNewProjectWizardBase
 import com.intellij.ide.util.projectWizard.WebTemplateProjectWizardStep
-import com.intellij.ide.wizard.AbstractNewProjectWizardMultiStepBase
 import com.intellij.ide.wizard.GeneratorNewProjectWizardBuilderAdapter
 import com.intellij.ide.wizard.NewProjectWizardBaseStep
 import com.intellij.ide.wizard.NewProjectWizardStep
+import com.intellij.javascript.nodejs.npm.InstallNodeLocalDependenciesAction
 import com.intellij.javascript.nodejs.packages.NodePackageUtil
 import com.intellij.lang.javascript.boilerplate.NpmPackageProjectGenerator
 import com.intellij.lang.javascript.boilerplate.NpxPackageDescriptor
 import com.intellij.lang.javascript.buildTools.npm.PackageJsonUtil
 import com.intellij.lang.javascript.buildTools.npm.rc.NpmRunConfigurationBuilder
+import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ContentEntry
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ProjectGeneratorPeer
-import com.intellij.ui.UIBundle
-import com.intellij.ui.components.JBCheckBox
+import com.intellij.ui.dsl.builder.RightGap
+import com.intellij.ui.dsl.builder.TopGap
+import com.intellij.ui.dsl.builder.bindSelected
+import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.PathUtil
 import org.ton.intellij.blueprint.BlueprintIcons
+import org.ton.intellij.tolk.ide.configurable.tolkSettings
+import org.ton.intellij.tolk.toolchain.TolkToolchain
 import java.io.File
 import javax.swing.Icon
-import javax.swing.JPanel
 
-class TonBlueprintProjectGenerator(
-    val projectType: ProjectType
-) : NpmPackageProjectGenerator() {
-
-    override fun getId(): String = "ton-blueprint-${projectType.id}"
+class TonBlueprintProjectGenerator() : NpmPackageProjectGenerator() {
+    override fun getId(): String = "create-ton"
 
     @Suppress("DialogTitleCapitalization")
-    override fun getName(): String = projectType.displayName
+    override fun getName(): String = "TON"
 
     override fun getDescription(): String =
         "Create a new <a href='https://github.com/ton-org/blueprint'>TON Blueprint</a> project using CLI"
 
-    override fun getIcon(): Icon = BlueprintIcons.BLUEPRINT
+    override fun getIcon(): Icon = BlueprintIcons.TON_SYMBOL
 
-    override fun presentablePackageName(): String = "TON"
+    override fun presentablePackageName(): String = "create-ton"
 
-    override fun filters(p0: Project, p1: VirtualFile): Array<Filter> = emptyArray()
+    override fun filters(project: Project, baseDir: VirtualFile): Array<Filter> = emptyArray()
 
-    override fun customizeModule(p0: VirtualFile, p1: ContentEntry?) {
+    override fun customizeModule(baseDir: VirtualFile, entry: ContentEntry?) {
     }
 
     override fun getNpxCommands(): List<NpxPackageDescriptor.NpxCommand> {
@@ -65,6 +66,7 @@ class TonBlueprintProjectGenerator(
         val workingDir = if (generateInTemp()) dir.name else "."
         val packageName = settings.myPackage.name
         val addSampleCode = settings.getUserData(ADD_SAMPLE_CODE) ?: false
+        val projectType = settings.getUserData(LANGUAGE) ?: ProjectType.TOLK
         if (packageName.contains(CREATE_TON_PACKAGE_NAME)) {
             return arrayOf(workingDir, "--type", projectType.argument(addSampleCode), "--contractName", "Main")
         }
@@ -80,48 +82,70 @@ class TonBlueprintProjectGenerator(
 
     override fun postInstall(project: Project, baseDir: VirtualFile, workingDir: File): Runnable = Runnable {
         super.postInstall(project, baseDir, workingDir).run()
+        val tolkToolchain = TolkToolchain.suggest(project)
+        if (tolkToolchain != null) {
+            project.tolkSettings.toolchain = tolkToolchain
+        }
+    }
+
+    override fun configureProject(project: Project, baseDir: VirtualFile) {
+        val packageJson = PackageJsonUtil.findChildPackageJsonFile(baseDir) ?: return
         createRunConfigurations(project, baseDir)
+        InstallNodeLocalDependenciesAction.runAndShowConsole(project, packageJson)
     }
 
     private fun createRunConfigurations(project: Project, baseDir: VirtualFile) {
         val packageJson = PackageJsonUtil.findChildPackageJsonFile(baseDir) ?: return
         val build = NpmRunConfigurationBuilder(project)
-            .createRunConfiguration("Build", baseDir, packageJson.path, mapOf(
-                "run-script" to "build"
-            ))
+            .createRunConfiguration(
+                "Build", baseDir, packageJson.path, mapOf(
+                    "run-script" to "build"
+                )
+            )
         NpmRunConfigurationBuilder(project)
-            .createRunConfiguration("Test", baseDir, packageJson.path, mapOf(
-                "run-script" to "test"
-            ))
+            .createRunConfiguration(
+                "Test", baseDir, packageJson.path, mapOf(
+                    "run-script" to "test"
+                )
+            )
         NpmRunConfigurationBuilder(project)
-            .createRunConfiguration("Deploy", baseDir, packageJson.path, mapOf(
-                "run-script" to "start"
-            ))
+            .createRunConfiguration(
+                "Deploy", baseDir, packageJson.path, mapOf(
+                    "run-script" to "start"
+                )
+            )
         RunManager.getInstance(project).selectedConfiguration = build
     }
 
 
     override fun createPeer(): ProjectGeneratorPeer<Settings> {
         return object : NpmPackageGeneratorPeer() {
-            private lateinit var sampleCode: JBCheckBox
-//            private var newCamelCaseCodeStyle: JBCheckBox? = null
+            private val propertyGraph = PropertyGraph()
+            private val generateSampleCode = propertyGraph.property(true)
+            private val language = propertyGraph.property(ProjectType.TOLK)
 
-            override fun createPanel(): JPanel {
-                return super.createPanel().apply {
-                    sampleCode = JBCheckBox("Add sample code").also {
-                        add(it)
-                    }
+            private val sampleCode = panel {
+                row {
+                    checkBox("Add sample code").bindSelected(generateSampleCode)
                 }
+            }
+            private val languageButton = panel {
+                row {
+                    segmentedButton(listOf(ProjectType.TOLK, ProjectType.FUNC)) { text = it.displayName }
+                        .bind(language).gap(RightGap.SMALL)
+                }.topGap(TopGap.NONE)
             }
 
             override fun buildUI(settingsStep: SettingsStep) {
                 super.buildUI(settingsStep)
+                settingsStep.addSettingsField("Language", languageButton)
                 settingsStep.addSettingsComponent(sampleCode)
             }
 
             override fun getSettings(): Settings {
                 return super.getSettings().apply {
-                    putUserData(ADD_SAMPLE_CODE, sampleCode.isSelected)
+                    putUserData(ADD_SAMPLE_CODE, generateSampleCode.get())
+                    putUserData(LANGUAGE, language.get())
                 }
             }
         }
@@ -131,8 +155,7 @@ class TonBlueprintProjectGenerator(
 
     companion object {
         private val ADD_SAMPLE_CODE = Key.create<Boolean>("create.ton.blueprint.add_sample_code")
-        private val ADD_NEW_CAMEL_CASE_CODE_STYLE =
-            Key.create<Boolean>("create.ton.blueprint.func.new_camel_case_code_style")
+        private val LANGUAGE = Key.create<ProjectType>("create.ton.blueprint.language")
 
         const val CREATE_TON_PACKAGE_NAME = "create-ton"
         const val CREATE_COMMAND = "create"
@@ -142,9 +165,9 @@ class TonBlueprintProjectGenerator(
         val id: String,
         val displayName: String,
     ) {
-        FUNC("func", "FunC"),
         TOLK("tolk", "Tolk"),
-        TACT("tact", "Tact");
+        FUNC("func", "FunC"),
+        ;
 
         fun argument(addSampleCode: Boolean): String {
             return if (addSampleCode) {
@@ -156,28 +179,15 @@ class TonBlueprintProjectGenerator(
     }
 }
 
-class TonBlueprintProjectWizard : MultiWebTemplateNewProjectWizard(
-    listOf(
-        TonBlueprintProjectGenerator(TonBlueprintProjectGenerator.ProjectType.FUNC),
-        TonBlueprintProjectGenerator(TonBlueprintProjectGenerator.ProjectType.TOLK),
-        TonBlueprintProjectGenerator(TonBlueprintProjectGenerator.ProjectType.TACT)
-    )
-) {
-    override val icon: Icon
-        get() = BlueprintIcons.TON_SYMBOL
-    override val id: String
-        get() = "ton-blueprint"
-    override val name: String
-        get() = "TON"
+class TonBlueprintProjectWizard : WebTemplateNewProjectWizardBase() {
+    private val template = TonBlueprintProjectGenerator()
 
-    override fun createTemplateStep(parent: NewProjectWizardBaseStep): NewProjectWizardStep {
-        return object : AbstractNewProjectWizardMultiStepBase(parent) {
-            override val label: String
-                get() = UIBundle.message("label.project.wizard.new.project.language")
+    override val id: String get() = template.id
+    override val name: String get() = template.name
+    override val icon: Icon get() = template.icon
 
-            override fun initSteps() = templates.associateBy({ it.name }, { WebTemplateProjectWizardStep(parent, it) })
-        }
-    }
+    override fun createTemplateStep(parent: NewProjectWizardBaseStep): NewProjectWizardStep =
+        WebTemplateProjectWizardStep(parent, template)
 }
 
 class TonBlueprintProjectModuleBuilder : GeneratorNewProjectWizardBuilderAdapter(TonBlueprintProjectWizard()) {

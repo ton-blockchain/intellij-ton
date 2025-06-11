@@ -22,9 +22,9 @@ interface TolkIntTy : TolkPrimitiveTy {
         if (other == TolkTy.Never) return this
         if (other is TolkTypeAliasTy) return join(other.underlyingType)
         if (other !is TolkIntTy) return TolkUnionTy.create(this, other)
-        val range = this.range.join(other.range)
-        if (range is TvmIntRangeSet.Point) return TolkConstantIntTy(range.value)
-        return TolkIntRangeTy(range)
+//        val range = this.range.join(other.range)
+//        if (range is TvmIntRangeSet.Point) return TolkConstantIntTy(range.value)
+        return TolkTy.Int
     }
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {

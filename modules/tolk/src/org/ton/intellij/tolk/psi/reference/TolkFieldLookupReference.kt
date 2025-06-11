@@ -3,10 +3,7 @@ package org.ton.intellij.tolk.psi.reference
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.psi.impl.declaredType
-import org.ton.intellij.tolk.psi.impl.hasSelf
-import org.ton.intellij.tolk.psi.impl.receiverTy
-import org.ton.intellij.tolk.psi.impl.structFields
+import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.type.*
 
 class TolkFieldLookupReference(
@@ -25,9 +22,10 @@ fun resolveFieldLookupReferenceWithReceiver(
     fieldLookup: TolkFieldLookup,
 ): List<Pair<TolkTypedElement, Substitution>> {
     val name = fieldLookup.referenceName ?: return emptyList()
-    if (receiverType is TolkStructTy) {
-        val sub = Substitution.instantiate(receiverType.psi.declaredType, receiverType)
-        receiverType.psi.structFields.forEachIndexed { index, field ->
+    val unwrappedReceiverType = receiverType.unwrapTypeAlias()
+    if (unwrappedReceiverType is TolkStructTy) {
+        val sub = Substitution.instantiate(unwrappedReceiverType.psi.declaredType, receiverType)
+        unwrappedReceiverType.psi.structFields.forEachIndexed { index, field ->
             if (index.toString() != name && field.name != name) {
                 return@forEachIndexed
             }
@@ -44,19 +42,28 @@ fun collectFunctionCandidates(
     name: String,
     containingFile: TolkFile
 ): List<Pair<TolkFunction, Substitution>> {
-    val namedFunctions = containingFile.resolveSymbols(name).filterIsInstance<TolkFunction>()
+    val namedFunctionsSeq = containingFile.resolveSymbols(name)
+        .asSequence()
+        .filterIsInstance<TolkFunction>()
 
-    if (calledReceiver == null) {
-        return namedFunctions.asSequence().filter { !it.hasSelf }.map { it to EmptySubstitution }.toList()
+    val namedFunctions: List<TolkFunction>
+    if (calledReceiver != null) {
+        namedFunctions = namedFunctionsSeq.filter { it.hasReceiver }.toList()
+    } else {
+        return namedFunctionsSeq.filter { !it.hasSelf }.map { it to EmptySubstitution }.toList()
     }
 
     val candidates = ArrayList<Pair<TolkFunction, Substitution>>()
+    for (function in namedFunctions) {
+
+    }
+
     // step1: find all methods where a receiver equals to provided, e.g. `MInt.copy`
+    val calledReceiverActualUnwrappedType = calledReceiver.unwrapTypeAlias().actualType()
     for (function in namedFunctions) {
         val functionReceiver = function.functionReceiver?.typeExpression ?: continue
-        val functionReceiverType = functionReceiver.type ?: continue
-//            if (!functionReceiver.hasGenerics() && functionReceiver.isEquivalentTo(calledReceiver)) {
-        if (!functionReceiverType.hasGenerics() && functionReceiver == calledReceiver) {
+        val functionReceiverType = functionReceiver.type?.unwrapTypeAlias() ?: continue
+        if (!functionReceiverType.hasGenerics() && functionReceiverType == calledReceiverActualUnwrappedType) {
             candidates.add(function to EmptySubstitution)
         }
     }
@@ -80,6 +87,7 @@ fun collectFunctionCandidates(
     val actualCalledReceiver = calledReceiver.actualType()
     for (function in namedFunctions) {
         val functionReceiver = function.receiverTy
+
         val actualFunctionReceiver = functionReceiver.actualType()
         if (functionReceiver.hasGenerics() && functionReceiver !is TolkTypeParameterTy) {
             if (actualFunctionReceiver is TolkStructTy && actualCalledReceiver is TolkStructTy) {
@@ -107,5 +115,14 @@ fun collectFunctionCandidates(
             candidates.add(function to Substitution(mapOf(functionReceiver to calledReceiver)))
         }
     }
-    return candidates
+
+    if (candidates.isNotEmpty()) {
+        return candidates
+    }
+
+    TolkBuiltins[project].getFunction(name)?.let {
+        return listOf(it to EmptySubstitution)
+    }
+
+    return emptyList()
 }

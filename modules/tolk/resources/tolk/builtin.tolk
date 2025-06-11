@@ -101,8 +101,21 @@ fun `_>=_`(x: int, y: int): bool builtin;
 @pure
 fun `_<=>_`(x: int, y: int): int builtin;
 
+@pure
+fun T.estimatePackSize(self): [int, int, int, int]
+    builtin;
+
 // functions not presented in stdlib at all
 // used in tolk-tester to check/expose internal compiler state
 // each of them is handled in a special way, search by its name
 @pure
 fun __expect_type<T>(actual: T, expect: slice) builtin;
+
+@pure
+fun T.__toTuple(self): tuple builtin;
+
+@pure
+fun __expect_lazy<T>(value: T) builtin;
+
+@pure
+fun __expect_inline<T>(value: T) builtin;

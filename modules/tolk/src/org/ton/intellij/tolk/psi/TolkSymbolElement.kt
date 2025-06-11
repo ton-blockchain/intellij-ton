@@ -9,4 +9,4 @@ interface TolkTypeSymbolElement : TolkSymbolElement {
     override val type: TolkTy
 }
 
-interface TolkLocalSymbolElement : TolkSymbolElement
+interface TolkLocalSymbolElement : TolkSymbolElement, TolkNamedElement

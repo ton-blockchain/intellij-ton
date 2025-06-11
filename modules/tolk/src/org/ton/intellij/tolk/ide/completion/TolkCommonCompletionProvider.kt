@@ -68,12 +68,12 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             return true
         }
 
-        perf("current context completion") {
-            collectLocalVariables(element) { localSymbol ->
+        if (!collectLocalVariables(element) { localSymbol ->
                 if (!checkLimit()) return@collectLocalVariables false
                 result.addElement(localSymbol.toLookupElement())
                 true
-            }
+            }) {
+            return
         }
 
         result.addElement(
@@ -143,25 +143,25 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         }
 
         perf("local scope completion") {
-            TolkNamedElementIndex.processAllElements(project, fileResolveScope) {
-                if (it is TolkSymbolElement) {
-                    processNamedElement(it, true)
-                } else {
-                    // Skip non-symbol elements
-                    true
-                }
-            }
+            if (!TolkNamedElementIndex.processAllElements(project, fileResolveScope) {
+                    if (it is TolkSymbolElement) {
+                        processNamedElement(it, true)
+                    } else {
+                        // Skip non-symbol elements
+                        true
+                    }
+                }) return
         }
 
         perf("global scope completion", 0.milliseconds) {
-            TolkNamedElementIndex.processAllElements(project) {
-                if (it is TolkSymbolElement) {
-                    processNamedElement(it, false)
-                } else {
-                    // Skip non-symbol elements
-                    true
-                }
-            }
+            if (!TolkNamedElementIndex.processAllElements(project) {
+                    if (it is TolkSymbolElement) {
+                        processNamedElement(it, false)
+                    } else {
+                        // Skip non-symbol elements
+                        true
+                    }
+                }) return
         }
     }
 

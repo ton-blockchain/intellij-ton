@@ -34,6 +34,10 @@ allprojects {
         compilerOptions.freeCompilerArgs.add("-Xjvm-default=all")
     }
 
+    dependencies {
+        testImplementation("junit:junit:4.13.2")
+    }
+
     java {
         toolchain.languageVersion.set(JavaLanguageVersion.of(17))
     }
@@ -47,11 +51,6 @@ allprojects {
         test {
             kotlin.srcDir("test")
             resources.srcDir("testResources")
-        }
-    }
-    tasks {
-        test {
-            useJUnitPlatform()
         }
     }
 }

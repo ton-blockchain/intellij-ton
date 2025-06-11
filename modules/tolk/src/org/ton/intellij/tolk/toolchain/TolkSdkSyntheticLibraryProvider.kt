@@ -17,19 +17,19 @@ class TolkSdkSyntheticLibraryProvider : AdditionalLibraryRootsProvider() {
 
         val stdlibDir = settings.stdlibDir
         if (stdlibDir == null) {
-            LOG.warn("Tolk stdlib dir is null, toolchain: ${settings.toolchain}")
+//            LOG.warn("Tolk stdlib dir is null, toolchain: ${settings.toolchain}")
             return emptyList()
         }
 
         val toolchain = settings.toolchain
-        if (toolchain != null && toolchain.stdlibDir == stdlibDir) {
+        if (toolchain.stdlibDir == stdlibDir) {
             val library = TolkLibrary(toolchain)
-            LOG.warn("Found Tolk stdlib: $stdlibDir")
+//            LOG.warn("Found Tolk stdlib: $stdlibDir")
             return listOf(library)
         }
 
         val library = TolkLibrary("Tolk stdlib", stdlibDir)
-        LOG.warn("Found unversioned Tolk stdlib: $stdlibDir")
+//        LOG.warn("Found unversioned Tolk stdlib: $stdlibDir")
         return listOf(library)
     }
 

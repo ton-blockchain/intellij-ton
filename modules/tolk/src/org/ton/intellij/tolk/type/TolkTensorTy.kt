@@ -4,7 +4,29 @@ data class TolkTensorTy private constructor(
     val elements: List<TolkTy>,
     val hasGenerics: Boolean
 ) : TolkTy {
+    private var hashCode: Int = 0
+
     override fun toString(): String = "(${elements.joinToString()})"
+
+    override fun hasGenerics(): Boolean = hasGenerics
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TolkTensorTy) return false
+        if (hasGenerics != other.hasGenerics) return false
+        if (elements.size != other.elements.size) return false
+        if (hashCode != 0 && other.hashCode != 0 && hashCode != other.hashCode) return false
+        return elements == other.elements
+    }
+
+    override fun hashCode(): Int {
+        var result = hashCode
+        if (result == 0) {
+            result = elements.hashCode() * 31 + hasGenerics.hashCode()
+            hashCode = result
+        }
+        return result
+    }
 
     override fun superFoldWith(folder: TypeFolder): TolkTy {
         return create(

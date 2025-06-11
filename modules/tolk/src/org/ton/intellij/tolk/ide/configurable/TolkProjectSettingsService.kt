@@ -1,7 +1,12 @@
 package org.ton.intellij.tolk.ide.configurable
 
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.WriteAction
+import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.components.*
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.RootsChangeRescanningInfo
+import com.intellij.openapi.roots.ex.ProjectRootManagerEx
 import com.intellij.openapi.util.io.toNioPathOrNull
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
@@ -12,8 +17,6 @@ import org.ton.intellij.tolk.toolchain.TolkToolchain
 
 val Project.tolkSettings: TolkProjectSettingsService get() = service()
 
-val Project.tolkToolchain: TolkToolchain? get() = tolkSettings.toolchain
-
 @State(
     name = "TolkProjectSettings",
     storages = [Storage(StoragePathMacros.WORKSPACE_FILE)]
@@ -22,9 +25,20 @@ val Project.tolkToolchain: TolkToolchain? get() = tolkSettings.toolchain
 class TolkProjectSettingsService(
     private val project: Project
 ) : SimplePersistentStateComponent<TolkProjectSettingsService.TolkProjectSettings>(TolkProjectSettings()) {
+    private var _toolchain: TolkToolchain? = null
+
     var toolchain: TolkToolchain
-        get() = state.toolchainLocation?.let { TolkToolchain.fromPath(it) } ?: TolkToolchain.NULL
+        get() {
+            var currentToolchain = _toolchain
+            val currentLocation = state.toolchainLocation
+            if (currentToolchain == null && !currentLocation.isNullOrEmpty()) {
+                currentToolchain = TolkToolchain.fromPath(currentLocation)
+                _toolchain = currentToolchain
+            }
+            return currentToolchain ?: TolkToolchain.NULL
+        }
         set(value) {
+            _toolchain = value
             state.toolchainLocation = value.homePath.ifEmpty { null }
             defaultImport = null
             reloadProject()
@@ -36,13 +50,13 @@ class TolkProjectSettingsService(
             defaultImport = null
             reloadProject()
         }
-    val stdlibDir: VirtualFile? get() {
-        return explicitPathToStdlib?.let {
-            it.toNioPathOrNull()?.let {  path ->
-                VirtualFileManager.getInstance().findFileByNioPath(path)
-            }
-        } ?: toolchain.stdlibDir
-    }
+    val stdlibDir: VirtualFile?
+        get() {
+            return explicitPathToStdlib?.let {
+                val vfm = VirtualFileManager.getInstance()
+                vfm.findFileByUrl(it) ?: vfm.findFileByNioPath(it.toNioPathOrNull() ?: return null)
+            } ?: toolchain.stdlibDir
+        }
 
     private var defaultImport: TolkFile? = null
 
@@ -62,6 +76,12 @@ class TolkProjectSettingsService(
 //            ProjectRootManagerEx.getInstanceEx(project)
 //                .makeRootsChange(EmptyRunnable.INSTANCE, RootsChangeRescanningInfo.RESCAN_DEPENDENCIES_IF_NEEDED)
 //        }
+        println("reload project: ${project.name} stdlib: ${explicitPathToStdlib} dir:${stdlibDir}")
+        invokeLater(modalityState = ModalityState.nonModal()) {
+            WriteAction.run<RuntimeException> {
+                ProjectRootManagerEx.getInstanceEx(project).makeRootsChange({}, RootsChangeRescanningInfo.TOTAL_RESCAN)
+            }
+        }
     }
 
     class TolkProjectSettings : BaseState() {

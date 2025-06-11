@@ -22,11 +22,9 @@ abstract class TolkSelfTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement
     class SelfTypeReference(
         element: TolkSelfTypeExpression
     ) : PsiReferenceBase<TolkSelfTypeExpression>(element) {
-        private val project = element.project
-        private val resolveCache = ResolveCache.getInstance(project)
 
         override fun resolve(): TolkTypeExpression? =
-            resolveCache.resolveWithCaching(this, Resolver(), false, false)
+            ResolveCache.getInstance(element.project).resolveWithCaching(this, Resolver(), false, false)
 
         override fun calculateDefaultRangeInElement(): TextRange =
             TextRange(0, element.textLength)

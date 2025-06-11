@@ -124,6 +124,7 @@
             CONST_KEYWORD               = 'const'
             BUILTIN_KEYWORD             = 'builtin'
             GET_KEYWORD                 = 'GET_KEYWORD'
+            LAZY_KEYWORD                 = 'LAZY_KEYWORD'
             IMPORT_KEYWORD              = 'import'
             TOLK_KEYWORD                = 'tolk'
 
@@ -138,7 +139,7 @@
 
 private root ::= TopLevelDefinition_with_recover*
 
-private TopLevelDefinition ::= (IncludeDefinition | VersionDefinition | Item)
+private TopLevelDefinition ::= (IncludeDefinition | VersionDefinition | Item | ';')
 private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelDefinition {
     pin = 1
     recoverWhile = TopLevelDefinition_recover
@@ -268,6 +269,7 @@ upper Function ::= ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypePar
     pin = 1
     implements = [
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
+        "org.ton.intellij.tolk.psi.TolkModificationTrackerOwner"
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
     ]
@@ -279,6 +281,7 @@ upper Function ::= ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypePar
 FunctionReceiver ::= TypeExpression '.'
 
 private get ::= <<getKeyword>>
+private lazy ::= <<lazyKeyword>>
 
 ReturnType ::= ':' (TypeExpression | 'self') {
     pin = 1
@@ -290,14 +293,18 @@ ReturnType ::= ':' (TypeExpression | 'self') {
 
 private ReturnType_recovery ::= !(FunctionBody_first|TopLevelDefinition_first)
 
-Annotation ::= '@' IDENTIFIER AnnotationParamList? {
+Annotation ::= '@' IDENTIFIER AnnotationArgumentList? {
     pin = 1
 }
 
-AnnotationParamList ::= '(' << comma_separated_list AnnotationParam >> ')' {
+AnnotationArgumentList ::= '(' [<<list_with_recover AnnotationArgument>>] ')' {
     pin = 1
+    elementType = ArgumentList
 }
-AnnotationParam ::= INTEGER_LITERAL | StringLiteral
+
+AnnotationArgument ::= Expression {
+    elementType = Argument
+}
 
 FunctionBody ::= ';' | AsmDefinition | BlockStatement | ('builtin' ';')
 private FunctionBody_first ::= ';' | 'asm' | '{' | 'builtin'
@@ -446,8 +453,8 @@ CatchParameter ::= IDENTIFIER {
 
 Expression ::=
     VarExpression
-    | AssignBinExpression // expr10
     | TernaryExpression // expr10
+    | AssignBinExpression // expr10
     | LogicalBinExpression //expr13
     | BitwiseBinExpression // expr14
     | ShiftBinExpression // expr17
@@ -515,7 +522,7 @@ ShiftBinExpression ::= Expression ShiftBinOp Expression
 CompBinExpression ::= Expression CompBinOp Expression
 AddBinExpression ::= Expression AddBinOp Expression
 MulBinExpression ::= Expression MulBinOp Expression
-PrefixExpression ::= ('!'|'~'|'-'|'+') Expression {
+PrefixExpression ::= ('!'|'~'|'-'|'+'| lazy) Expression {
     mixin="org.ton.intellij.tolk.psi.impl.TolkPrefixExpressionMixin"
 }
 NotNullExpression ::= Expression '!' {
@@ -626,9 +633,10 @@ private MatchArms ::= MatchArm* {
 
 private MatchArms_recovery ::= !('}'|';')
 
-MatchArm ::= MatchPattern '=>' (MatchThrowArm | MatchReturnArm | MatchBlockArm | MatchExpressionArm) {
+MatchArm ::= MatchPattern '=>' MatchBody {
     pin = 1
 }
+MatchBody ::= (MatchThrowArm | MatchReturnArm | MatchBlockArm | MatchExpressionArm)
 
 private MatchThrowArm ::= ThrowStatement (&'}' | ',') {
     pin = 1
@@ -643,26 +651,23 @@ private MatchExpressionArm ::= Expression (&'}' | ',') {
     pin = 1
 }
 
-MatchPattern ::= MatchPatternReference | TypeExpression | AtomicExpression | 'else' {
+MatchPattern ::= 'else' | MatchPatternReference | MatchPatternType | Expression  {
     recoverWhile=MatchPattern_recover
 }
 private MatchPattern_recover ::= !('{'|'=>'|'}'|'return')
+private MatchPatternType ::= TypeExpression &'=>'
 
-MatchPatternReference ::= IDENTIFIER TypeArgumentList_pinned? {
+MatchPatternReference ::= IDENTIFIER TypeArgumentList_pinned? &'=>' {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkMatchPatternReferenceMixin"
     implements = [
         "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkReferenceElement"
     ]
 }
 
 ArgumentList ::= '(' [<<list_with_recover Argument>>] ')' {
     pin = 1
 }
-//private args ::= <<comma_separated_list Argument>> {
-//    recoverWhile = recoverArgs
-//}
-//private recoverArgs ::= !(')'|';')
-
 
 Argument ::= 'mutate'? Expression
 

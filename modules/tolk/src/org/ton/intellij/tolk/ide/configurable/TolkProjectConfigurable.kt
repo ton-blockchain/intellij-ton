@@ -37,10 +37,7 @@ class TolkProjectConfigurable(
     var data: Data
         get() {
             val toolchain = pathToToolchainComboBox.selectedPath?.let { TolkToolchain.fromPath(it.pathString) }
-            var explicitPathToStdlib = pathToStdlibField.text.ifBlank { null }
-            if (explicitPathToStdlib != null && toolchain?.stdlibDir == null) {
-                explicitPathToStdlib = null
-            }
+            val explicitPathToStdlib = pathToStdlibField.text.ifBlank { null }
             return Data(
                 toolchain = toolchain,
                 explicitPathToStdlib = explicitPathToStdlib

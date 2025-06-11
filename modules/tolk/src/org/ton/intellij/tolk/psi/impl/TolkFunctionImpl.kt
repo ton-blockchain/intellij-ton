@@ -201,6 +201,9 @@ val TolkFunction.isBuiltin: Boolean
 val TolkFunction.hasSelf: Boolean
     get() = greenStub?.hasSelf ?: (parameterList?.selfParameter != null)
 
+val TolkFunction.hasReceiver: Boolean
+    get() = functionReceiver != null
+
 val TolkFunction.returnTy get() = (this as TolkFunctionMixin).returnTy
 
 val TolkFunction.receiverTy get() = (this as TolkFunctionMixin).receiverTy

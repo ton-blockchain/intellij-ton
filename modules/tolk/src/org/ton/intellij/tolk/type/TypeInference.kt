@@ -18,7 +18,8 @@ import java.util.*
 
 val TolkElement.inference: TolkInferenceResult?
     get() {
-        return parentOfType<TolkInferenceContextOwner>(true)?.selfInferenceResult
+        val contextOwner = parentOfType<TolkInferenceContextOwner>(true) ?: return null
+        return contextOwner.selfInferenceResult
     }
 
 fun inferTypesIn(element: TolkInferenceContextOwner): TolkInferenceResult {
@@ -190,6 +191,117 @@ class TolkInferenceContext(
 
 }
 
+private typealias LocalSymbolsScopes = ArrayDeque<MutableMap<String, TolkLocalSymbolElement>>
+
+private fun LocalSymbolsScopes.openScope() = add(HashMap()).also {
+//    println("Opened new scope: ${this.size} scopes: ${toString()}")
+}
+
+private fun LocalSymbolsScopes.closeScope() = removeLast().also {
+//    println("Closed scope: ${this.size} scopes left, ${toString()}")
+}
+
+private fun LocalSymbolsScopes.lookupSymbol(name: String?): TolkLocalSymbolElement? {
+    if (name == null) return null
+    for (scope in this) {
+        val symbol = scope[name]
+        if (symbol != null) {
+            return symbol
+        }
+    }
+    return null
+}
+
+private fun LocalSymbolsScopes.addLocalSymbol(symbol: TolkLocalSymbolElement): Boolean {
+    val currentScope = last()
+    val result = currentScope.put(symbol.name ?: return false, symbol) != null
+//    println("adding symbol: $symbol; ${this}")
+    return result
+}
+
+private inline fun <T> LocalSymbolsScopes.useScope(block: LocalSymbolsScopes.() -> T): T {
+    openScope()
+    try {
+        return block()
+    } finally {
+        closeScope()
+    }
+}
+
+class AssignLocalSymbolsVisitor : TolkVisitor() {
+    private val currentScope = LocalSymbolsScopes()
+    val resolvedSymbols = HashMap<TolkReferenceElement, TolkLocalSymbolElement>()
+
+    override fun visitElement(o: TolkElement) {
+        o.acceptChildren(this)
+    }
+
+    override fun visitVar(o: TolkVar) {
+        currentScope.addLocalSymbol(o)
+    }
+
+    override fun visitBinExpression(o: TolkBinExpression) {
+        o.right?.accept(this) // in this order, so that `var x = x` is invalid, "x" on the right unknown
+        o.left.accept(this)
+    }
+
+    override fun visitReferenceExpression(o: TolkReferenceExpression) {
+        val symbol = currentScope.lookupSymbol(o.referenceName) ?: return
+        resolvedSymbols[o] = symbol
+    }
+
+    override fun visitBlockStatement(o: TolkBlockStatement) {
+        currentScope.useScope {
+            o.acceptChildren(this@AssignLocalSymbolsVisitor)
+        }
+    }
+
+    override fun visitDoStatement(o: TolkDoStatement) {
+        currentScope.useScope {
+            o.blockStatement?.acceptChildren(this@AssignLocalSymbolsVisitor)
+            o.expression?.accept(this@AssignLocalSymbolsVisitor)
+            // in 'while' condition it's ok to use variables declared inside do
+        }
+    }
+
+    override fun visitMatchExpression(o: TolkMatchExpression) {
+        currentScope.useScope {
+            o.acceptChildren(this@AssignLocalSymbolsVisitor)
+        }
+    }
+
+    override fun visitMatchArm(o: TolkMatchArm) {
+        o.matchBody?.accept(this)
+        o.matchPattern.accept(this)
+    }
+
+    override fun visitMatchPatternReference(o: TolkMatchPatternReference) {
+        val symbol = currentScope.lookupSymbol(o.referenceName) ?: return
+        resolvedSymbols[o] = symbol
+    }
+
+    override fun visitCatchParameter(o: TolkCatchParameter) {
+        currentScope.addLocalSymbol(o)
+    }
+
+    override fun visitCatch(o: TolkCatch) {
+        currentScope.useScope {
+            o.acceptChildren(this@AssignLocalSymbolsVisitor)
+        }
+    }
+
+    override fun visitParameterElement(o: TolkParameterElement) {
+        currentScope.addLocalSymbol(o)
+    }
+
+    override fun visitFunction(o: TolkFunction) {
+        currentScope.useScope {
+            o.parameterList?.accept(this@AssignLocalSymbolsVisitor)
+            o.functionBody?.blockStatement?.accept(this@AssignLocalSymbolsVisitor)
+        }
+    }
+}
+
 class TolkInferenceWalker(
     val ctx: TolkInferenceContext,
 //    val parent: TolkInferenceWalker? = null,
@@ -198,6 +310,7 @@ class TolkInferenceWalker(
     private val project = ctx.project
     private val importFiles = LinkedHashSet<VirtualFile>()
     private var currentFunction: TolkFunction? = null
+    private var localSymbols: Map<TolkReferenceElement, TolkLocalSymbolElement> = emptyMap()
 
     fun inferFunction(element: TolkFunction, flow: TolkFlowContext): TolkFlowContext {
         currentFunction = element
@@ -214,6 +327,13 @@ class TolkInferenceWalker(
             }
             element.typeParameterList?.typeParameterList?.forEach { typeParameter ->
                 nextFlow.setSymbol(typeParameter, typeParameter.type ?: TolkTy.Unknown)
+            }
+            AssignLocalSymbolsVisitor().run {
+                visitFunction(element)
+                localSymbols = resolvedSymbols
+                localSymbols.forEach { (ref, symbol) ->
+                    ctx.setResolvedRefs(ref, listOf(PsiElementResolveResult(symbol)))
+                }
             }
             val parameterList = element.parameterList
             if (parameterList != null) {
@@ -279,13 +399,12 @@ class TolkInferenceWalker(
     }
 
     private fun processBlockStatement(element: TolkBlockStatement, flow: TolkFlowContext): TolkFlowContext {
+        val statements = element.statementList
+        if (statements.isEmpty()) return flow
         var nextFlow = flow
-        val oldSymbols = LinkedHashMap(flow.symbols)
-        for (statement in element.statementList) {
+        for (statement in statements) {
             nextFlow = inferStatement(statement, nextFlow)
         }
-        nextFlow.symbols.clear()
-        nextFlow.symbols.putAll(oldSymbols)
         return nextFlow
     }
 
@@ -335,11 +454,12 @@ class TolkInferenceWalker(
 
     private fun processDoStatement(element: TolkDoStatement, flow: TolkFlowContext): TolkFlowContext {
         val body = element.blockStatement ?: return flow
+        // do while is also handled twice; read comments above
         val loopEntryFacts = TolkFlowContext(flow)
         var nextFlow = processBlockStatement(body, flow)
         val condition = element.expression ?: return nextFlow
-        val afterCond = inferExpression(condition, loopEntryFacts, true)
-
+        val afterCond = inferExpression(condition, nextFlow, true)
+        // second time
         nextFlow = loopEntryFacts.join(afterCond.trueFlow)
         nextFlow = processBlockStatement(body, nextFlow)
         val afterCond2 = inferExpression(condition, nextFlow, true)
@@ -395,7 +515,10 @@ class TolkInferenceWalker(
         return tryEnd.join(catchEnd)
     }
 
-    private fun processExpressionStatement(element: TolkExpressionStatement, flow: TolkFlowContext): TolkFlowContext {
+    private fun processExpressionStatement(
+        element: TolkExpressionStatement,
+        flow: TolkFlowContext
+    ): TolkFlowContext {
         val nextFlow = inferExpression(element.expression, flow, false).outFlow
         return nextFlow
     }
@@ -1018,9 +1141,8 @@ class TolkInferenceWalker(
         val nextFlow = TolkExpressionFlowContext(flow, usedAsCondition)
         val name = element.referenceName ?: return nextFlow
 
-        val variableCandidate = resolveToVariable(element, flow)
+        val variableCandidate = localSymbols[element]
         if (variableCandidate != null) {
-            ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(variableCandidate)))
             val variableType = flow.getType(TolkSinkExpression(variableCandidate)) ?: try {
                 variableCandidate.type
             } catch (_: CyclicReferenceException) {
@@ -1058,12 +1180,6 @@ class TolkInferenceWalker(
             }
 
             ctx.setType(element, type)
-            return nextFlow
-        }
-
-        val primitiveType = TolkTy.byName(name)
-        if (primitiveType != null) {
-            ctx.setType(element, primitiveType)
             return nextFlow
         }
 
@@ -1159,7 +1275,8 @@ class TolkInferenceWalker(
         val typesList = ArrayList<TolkTy>(element.expressionList.size)
         var nextFlow = flow
         for (item in element.expressionList) {
-            nextFlow = inferExpression(item, nextFlow, false, tupleHint?.elements?.getOrNull(typesList.size)).outFlow
+            nextFlow =
+                inferExpression(item, nextFlow, false, tupleHint?.elements?.getOrNull(typesList.size)).outFlow
             val type = ctx.getType(item) ?: TolkTy.Unknown
             typesList.add(type)
         }
@@ -1296,7 +1413,12 @@ class TolkInferenceWalker(
         var nextFlow = flow
         val receiver = element.expression
         nextFlow = inferExpression(receiver, nextFlow, false).outFlow
-        val receiverType = ctx.getType(receiver) ?: TolkTy.Unknown
+        val receiverSymbol = ctx.getResolvedRefs(receiver).singleOrNull()?.element
+        val receiverType = if (receiver is TolkReferenceExpression &&( receiverSymbol == null || receiverSymbol is TolkFunction)) {
+            TolkTy.byName(receiver.referenceName ?: "") ?: TolkTy.Unknown
+        } else {
+            ctx.getType(receiver) ?: TolkTy.Unknown
+        }
 
         val fieldLookup = element.fieldLookup ?: return TolkExpressionFlowContext(nextFlow, usedAsCondition)
         val fieldType = inferFieldLookup(receiverType, fieldLookup, hint)
@@ -1437,7 +1559,8 @@ class TolkInferenceWalker(
         var matchOutFlow: TolkFlowContext? = null
         var unifiedType: TolkTy? = null
         element.matchArmList.forEach { matchArm ->
-            val matchExpression = matchArm.expression
+            val matchBody = matchArm.matchBody
+            val matchExpression = matchBody?.expression
             val matchPattern = matchArm.matchPattern
 
             var armFlow: TolkFlowContext? = null
@@ -1482,19 +1605,19 @@ class TolkInferenceWalker(
                 unifiedType = exprType.join(unifiedType ?: hint)
                 return@forEach
             }
-            val returnStatement = matchArm.returnStatement
+            val returnStatement = matchBody?.returnStatement
             if (returnStatement != null) {
                 armFlow = inferStatement(returnStatement, armFlow)
                 matchOutFlow = matchOutFlow.join(armFlow)
                 return@forEach
             }
-            val throwStatement = matchArm.throwStatement
+            val throwStatement = matchBody?.throwStatement
             if (throwStatement != null) {
                 armFlow = inferStatement(throwStatement, armFlow)
                 matchOutFlow = matchOutFlow.join(armFlow)
                 return@forEach
             }
-            val blockStatement = matchArm.blockStatement
+            val blockStatement = matchBody?.blockStatement
             if (blockStatement != null) {
                 val armFlow = inferStatement(blockStatement, armFlow)
                 matchOutFlow = matchOutFlow.join(armFlow)
@@ -1596,7 +1719,8 @@ class TolkInferenceWalker(
             }
 
             is TolkReferenceExpression -> {
-                val symbol = ctx.getResolvedRefs(expression).firstOrNull()?.element as? TolkSymbolElement ?: return null
+                val symbol =
+                    ctx.getResolvedRefs(expression).firstOrNull()?.element as? TolkSymbolElement ?: return null
                 return TolkSinkExpression(symbol)
             }
 
@@ -1607,7 +1731,8 @@ class TolkInferenceWalker(
                     var indexAt = currentDot.targetIndex
                     if (indexAt == null) {
                         val fieldLookup = expression.fieldLookup ?: break
-                        val structField = ctx.getResolvedFields(fieldLookup).firstOrNull() as? TolkStructField ?: break
+                        val structField =
+                            ctx.getResolvedFields(fieldLookup).firstOrNull() as? TolkStructField ?: break
                         indexAt = structField.parent.children.indexOf(structField)
                     }
                     if (indexAt !in 0..255) break
@@ -1616,7 +1741,8 @@ class TolkInferenceWalker(
                 }
                 if (indexPath == 0L) return null
                 val ref = currentDot.expression.unwrapNotNull() as? TolkReferenceExpression ?: return null
-                val symbol = ctx.getResolvedRefs(ref).firstOrNull()?.element as? TolkLocalSymbolElement ?: return null
+                val symbol =
+                    ctx.getResolvedRefs(ref).firstOrNull()?.element as? TolkLocalSymbolElement ?: return null
                 return TolkSinkExpression(symbol, indexPath)
             }
 
@@ -1646,7 +1772,8 @@ class TolkInferenceWalker(
                 return when (leftType) {
                     is TolkStructTy -> {
                         val right = expression.fieldLookup ?: return null
-                        val field = ctx.getResolvedRefs(right).firstOrNull()?.element as? TolkStructField ?: return null
+                        val field =
+                            ctx.getResolvedRefs(right).firstOrNull()?.element as? TolkStructField ?: return null
                         field.type
                     }
 

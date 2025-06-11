@@ -41,6 +41,8 @@ enum class TolkColor(
     FUNCTION_CALL("Function call", Default.FUNCTION_CALL),
     FUNCTION_STATIC("Function static", Default.STATIC_METHOD),
     CONSTANT("Constant", Default.CONSTANT),
+    STRUCT("Struct", Default.CLASS_NAME),
+    TYPE_ALIAS("Type alias", Default.INTERFACE_NAME),
     GLOBAL_VARIABLE("Global variable", Default.GLOBAL_VARIABLE),
     LOCAL_VARIABLE("Local variable", Default.LOCAL_VARIABLE),
     FIELD("Field", Default.INSTANCE_FIELD),

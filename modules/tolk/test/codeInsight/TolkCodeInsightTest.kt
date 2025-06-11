@@ -9,6 +9,7 @@ class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
         super.setUp()
         val file = myFixture.copyDirectoryToProject("../tolk-stdlib", "tolk-stdlib")
         project.tolkSettings.explicitPathToStdlib = file.url
+        myFixture.copyDirectoryToProject("imports", "imports")
     }
 
     fun `test a-tests`() = doTest()
@@ -56,6 +57,9 @@ class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
     fun `test pure-functions`() = doTest()
     fun `test remove-unused-functions`() = doTest()
     fun `test self-keyword`() = doTest()
+    fun `test send-msg-1`() = doTest()
+    fun `test send-msg-2`() = doTest()
+    fun `test send-msg-3`() = doTest()
     fun `test smart-cast-tests`() = doTest()
     fun `test some-tests-1`() = doTest()
     fun `test some-tests-2`() = doTest()

@@ -633,9 +633,10 @@ private MatchArms ::= MatchArm* {
 
 private MatchArms_recovery ::= !('}'|';')
 
-MatchArm ::= MatchPattern '=>' (MatchThrowArm | MatchReturnArm | MatchBlockArm | MatchExpressionArm) {
+MatchArm ::= MatchPattern '=>' MatchBody {
     pin = 1
 }
+MatchBody ::= (MatchThrowArm | MatchReturnArm | MatchBlockArm | MatchExpressionArm)
 
 private MatchThrowArm ::= ThrowStatement (&'}' | ',') {
     pin = 1
@@ -660,6 +661,7 @@ MatchPatternReference ::= IDENTIFIER TypeArgumentList_pinned? &'=>' {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkMatchPatternReferenceMixin"
     implements = [
         "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkReferenceElement"
     ]
 }
 

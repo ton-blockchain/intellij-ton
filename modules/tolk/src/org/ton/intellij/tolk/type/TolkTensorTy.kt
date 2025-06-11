@@ -8,6 +8,8 @@ data class TolkTensorTy private constructor(
 
     override fun toString(): String = "(${elements.joinToString()})"
 
+    override fun hasGenerics(): Boolean = hasGenerics
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is TolkTensorTy) return false

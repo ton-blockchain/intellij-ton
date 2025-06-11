@@ -22,7 +22,7 @@ class TolkSyntaxHighlighter : SyntaxHighlighterBase() {
             TolkElementTypes.INTEGER_LITERAL -> TolkColor.NUMBER
             TolkElementTypes.SEMICOLON -> TolkColor.SEMICOLON
             TolkElementTypes.COMMA -> TolkColor.COMMA
-//            TolkElementTypes.DOT -> TolkColor.DOT
+            TolkElementTypes.AT -> TolkColor.ANNOTATION
             TolkParserDefinition.EOL_COMMENT -> TolkColor.LINE_COMMENT
             TolkParserDefinition.BLOCK_COMMENT -> TolkColor.BLOCK_COMMENT
             in TOLK_DOC_COMMENTS -> TolkColor.DOC_COMMENT

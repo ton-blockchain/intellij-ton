@@ -23,6 +23,7 @@ class TolkTypeReference(
     }
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
+        val myElement = myElement
         return buildList<ResolveResult> {
             val typeParameterName = identifier.text.removeSurrounding("`")
             val owner = myElement.parentOfType<TolkTypeParameterListOwner>()
@@ -34,7 +35,7 @@ class TolkTypeReference(
                     }
                 }
 
-                if (myElement.parentOfType<TolkFunctionReceiver>() == null) {
+                if ((myElement !is TolkReferenceTypeExpression || myElement.typeArgumentList == null) && myElement.parentOfType<TolkFunctionReceiver>() == null) {
                     val genericType = owner.resolveGenericType(typeParameterName)
                     if (genericType != null && genericType.parameter.psi != element) {
                         add(PsiElementResolveResult(genericType.parameter.psi))

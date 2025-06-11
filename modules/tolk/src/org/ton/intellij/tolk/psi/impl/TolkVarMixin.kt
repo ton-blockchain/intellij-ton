@@ -9,7 +9,7 @@ import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.inference
 
 abstract class TolkVarMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkVar {
-    override fun getName(): String = identifier.text
+    override fun getName(): String = identifier.text.removeSurrounding("`")
 
     override fun setName(name: String): PsiElement {
         identifier.replace(TolkPsiFactory[project].createIdentifier(name))

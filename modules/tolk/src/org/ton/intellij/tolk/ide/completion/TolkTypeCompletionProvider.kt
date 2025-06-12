@@ -44,7 +44,6 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         "int64",
         "int128",
         "int256",
-        "bits",
         "bytes",
     )
 

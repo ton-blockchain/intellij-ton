@@ -18,7 +18,7 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
             element
         ) { parameter, argument ->
             val parameterName = parameter.name ?: return@iterateOverParameters
-            val expression = argument.expression.unwrapParentheses() ?: return@iterateOverParameters
+            val expression = argument?.expression?.unwrapParentheses() ?: return@iterateOverParameters
             if (expression !is TolkReferenceElement || expression.referenceName != parameterName) {
                 sink.addPresentation(
                     position = InlineInlayPosition(argument.textRange.startOffset, false),

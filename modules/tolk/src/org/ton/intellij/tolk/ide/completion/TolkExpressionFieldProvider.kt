@@ -29,8 +29,13 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         val structExpr = parent.parentOfType<TolkStructExpression>() ?: return
         val structTy = structExpr.type?.unwrapTypeAlias() as? TolkStructTy ?: return
         val ctx = TolkCompletionContext(parent)
+        val existedFields = structExpr.structExpressionBody.structExpressionFieldList.mapNotNull {
+            if (it == parent) return@mapNotNull null
+            it.identifier.text.removeSurrounding("`")
+        }
 
         structTy.psi.structFields.forEach { field ->
+            if (field.name in existedFields) return@forEach
             result.addElement(
                 field.toLookupElementBuilder(ctx, true)
             )

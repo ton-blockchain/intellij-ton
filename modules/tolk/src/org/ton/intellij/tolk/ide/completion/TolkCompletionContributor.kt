@@ -25,7 +25,9 @@ class TolkCompletionContributor : CompletionContributor() {
                 "repeat",
                 "do",
                 "while",
-                "try"
+                "try",
+                "assert",
+                "throw"
             )
         )
         extend(TolkFunCompletionProvider)
@@ -111,15 +113,5 @@ class TolkCompletionContributor : CompletionContributor() {
         const val FUNCTION_PRIORITY = NOT_IMPORTED_FUNCTION_PRIORITY + 10.0
         const val NOT_IMPORTED_VAR_PRIORITY = 5.0
         const val VAR_PRIORITY = NOT_IMPORTED_VAR_PRIORITY + 10.0
-
-        private val funcPrimitiveTypes
-            get() = listOf(
-                "cell",
-                "builder",
-                "slice",
-                "int",
-                "tuple",
-                "continuation"
-            )
     }
 }

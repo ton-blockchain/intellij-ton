@@ -5,7 +5,7 @@ import org.ton.intellij.util.nextOrNull
 
 internal fun iterateOverParameters(
     callExpression: TolkCallExpression,
-    processor: (TolkParameterElement, TolkArgument) -> Unit
+    processor: (TolkParameterElement, TolkArgument?) -> Unit
 ) {
     val calleeExpression = callExpression.expression
     val argumentIterator = callExpression.argumentList.argumentList.iterator()
@@ -35,9 +35,14 @@ internal fun iterateOverParameters(
         else -> return
     }
 
-    while (parameterIterator.hasNext() && argumentIterator.hasNext()) {
+    while (parameterIterator.hasNext()) {
         val parameter = parameterIterator.next()
-        val argument = argumentIterator.next()
+        val argument = argumentIterator.nextOrNull()
         processor(parameter, argument)
+        if (argument == null) {
+            // If there are more parameters than arguments, we can stop processing
+            // as the remaining parameters will not have corresponding arguments.
+            break
+        }
     }
 }

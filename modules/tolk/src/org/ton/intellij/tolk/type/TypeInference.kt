@@ -1634,7 +1634,7 @@ class TolkInferenceWalker(
                     ctx.setResolvedRefs(matchPatternReference, listOf(PsiElementResolveResult(symbol)))
                     ctx.getType(symbol) ?: symbol.type
                 } else {
-                    var exactType = TolkTy.byName(name)
+                    var exactType: TolkTy? = TolkPrimitiveTy.fromName(name)
                     if (exactType == null) {
                         val result = TolkTypeReference(matchPatternReference)
                             .multiResolve(false).firstOrNull()?.element as? TolkTypedElement
@@ -1688,7 +1688,7 @@ class TolkInferenceWalker(
         flow: TolkFlowContext,
         usedAsCondition: Boolean
     ): TolkExpressionFlowContext {
-        ctx.setType(element, TolkTy.Unit)
+        ctx.setType(element, TolkTy.Void)
         return TolkExpressionFlowContext(flow, usedAsCondition)
     }
 

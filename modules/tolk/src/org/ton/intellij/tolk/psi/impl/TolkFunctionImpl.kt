@@ -42,7 +42,7 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
             val returnTy = returnTy
             val parameterList = parameterList ?: return@getCachedValue CachedValueProvider.Result.create(
                 TolkFunctionTy(
-                    TolkTy.Unit,
+                    TolkTy.Void,
                     returnTy
                 ), this
             )
@@ -139,7 +139,7 @@ private fun TolkFunction.resolveReturnType(): TolkTy {
     functionBody?.blockStatement?.accept(visitor)
 
     if (statements.isEmpty() || statements.all { it.expression == null }) {
-        return TolkTy.Unit
+        return TolkTy.Void
     }
 
     val inference = try {
@@ -147,16 +147,14 @@ private fun TolkFunction.resolveReturnType(): TolkTy {
     } catch (e: CyclicReferenceException) {
         null
     } ?: return TolkTy.Unknown
-    val result = if (inference.unreachable == TolkUnreachableKind.ThrowStatement) {
-        TolkTy.Never
-    } else if (inference.returnStatements.isNotEmpty()) {
+    val result = if (inference.returnStatements.isNotEmpty()) {
         inference.returnStatements.asSequence().map {
             it.expression?.type
         }.filterNotNull().fold<TolkTy, TolkTy?>(null) { a, b ->
             a?.join(b) ?: b
-        } ?: TolkTy.Unit
+        } ?: TolkTy.Void
     } else {
-        TolkTy.Unit
+        TolkTy.Void
     }
     return result
 }
@@ -202,7 +200,7 @@ val TolkFunction.hasSelf: Boolean
     get() = greenStub?.hasSelf ?: (parameterList?.selfParameter != null)
 
 val TolkFunction.hasReceiver: Boolean
-    get() = functionReceiver != null
+    get() = greenStub?.hasReceiver ?: (functionReceiver != null)
 
 val TolkFunction.returnTy get() = (this as TolkFunctionMixin).returnTy
 

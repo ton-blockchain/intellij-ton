@@ -18,7 +18,7 @@ class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<Str
         val callExpression = argumentList.parentOfType<TolkCallExpression>() ?: return null
 
         val parameterInfos: ArrayList<String> = ArrayList()
-        iterateOverParameters(callExpression) { parameter, argument ->
+        iterateOverParameters(callExpression) { parameter, _ ->
             val parameterInfo = buildString {
                 append(parameter.name)
                 if (parameter is TolkParameter) {

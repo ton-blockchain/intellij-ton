@@ -17,139 +17,25 @@ import com.intellij.psi.util.elementType
 import com.intellij.psi.util.isAncestor
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.TolkBundle
-import org.ton.intellij.tolk.eval.TolkIntValue
-import org.ton.intellij.tolk.eval.value
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.hasSelf
 import org.ton.intellij.tolk.psi.impl.isDeprecated
-import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.psi.impl.parentDotExpression
+import org.ton.intellij.tolk.type.TolkPrimitiveTy
 import org.ton.intellij.tolk.type.TolkTypeParameterTy
-import org.ton.intellij.util.TVM_INT_MAX_VALUE
-import org.ton.intellij.util.TVM_INT_MIN_VALUE
 
 class TolkAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
-        val elementType = element.elementType ?: return
-        when (elementType) {
-            TolkElementTypes.GET_KEYWORD,
-            TolkElementTypes.LAZY_KEYWORD -> {
-                holder.info(TolkColor.KEYWORD.textAttributesKey)
-                return
-            }
-
-            TolkElementTypes.IDENTIFIER -> {
-                when (val parent = element.parent) {
-                    is TolkMatchPatternReference -> {
-                        val name = element.text
-                        if (TolkTy.byName(name) != null) {
-                            return holder.info(TolkColor.PRIMITIVE.textAttributesKey)
-                        }
-                        val resolved = parent.reference?.resolve()
-                        if (resolved != null) {
-                            val color = identifierColor(resolved)
-                            if (color != null) {
-                                return holder.info(color)
-                            }
-                        } else {
-                            return holder.error("Unresolved reference: $name", ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
-                        }
-                    }
-
-                    is TolkFieldLookup -> {
-                        val resolvedElement = parent.reference?.resolve()
-                        when (resolvedElement) {
-                            is TolkStructField,
-                            is TolkFunction -> {
-                                val enforcedAttributes = identifierColor(resolvedElement) ?: return
-                                holder.info(enforcedAttributes)
-                            }
-                            null -> {
-                                val dotExpr = parent.parent as? TolkDotExpression
-                                if (dotExpr != null && dotExpr.expression.type is TolkTypeParameterTy) {
-                                    holder.info(TolkColor.IDENTIFIER.textAttributesKey)
-                                } else {
-                                    holder.error(
-                                        "Unresolved member: ${element.text}",
-                                        ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    is TolkReferenceTypeExpression -> {
-                        val reference = parent.reference
-                        if (reference == null) { // primitive type
-                            holder.info(TolkColor.PRIMITIVE.textAttributesKey)
-                        } else {
-                            val resolvedType = reference.resolve()
-                            when (resolvedType) {
-                                is TolkTypeParameter -> {
-                                    holder.info(TolkColor.TYPE_PARAMETER.textAttributesKey)
-                                }
-
-                                null -> {
-                                    val function = parent.parentOfType<TolkFunction>()
-                                    if (function != null) {
-                                        val receiver = function.functionReceiver
-                                        if (receiver != null && receiver.isAncestor(parent, true)) {
-                                            return holder.info(TolkColor.TYPE_PARAMETER.textAttributesKey)
-                                        }
-                                    }
-
-                                    reference.resolve()
-
-                                    holder.error(
-                                        "Unresolved type: ${element.text}",
-                                        ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    is TolkReferenceExpression -> {
-                        val reference = parent.reference ?: return
-                        val resolved = reference.resolve() ?: return holder.error(
-                            "Unresolved reference: ${element.text}",
-                            ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
-                        )
-                        val color = identifierColor(resolved)
-                        if (color != null) {
-                            holder.info(color)
-                        }
-                        val isDeprecated = (resolved is TolkFunction && resolved.isDeprecated) ||
-                                (resolved is TolkTypeDef && resolved.isDeprecated) ||
-                                (resolved is TolkStruct && resolved.isDeprecated) ||
-                                (resolved is TolkGlobalVar && resolved.isDeprecated) ||
-                                (resolved is TolkConstVar && resolved.isDeprecated)
-                        if (isDeprecated) {
-                            holder.info(CodeInsightColors.DEPRECATED_ATTRIBUTES)
-                        }
-                    }
-
-                    else -> {
-                        val color = identifierColor(parent)
-                        if (color != null) {
-                            holder.info(color)
-                        }
-                    }
-                }
-                return
-            }
-        }
-
         when (element) {
-            is TolkLiteralExpression -> {
-                val value = element.value
-                if (value is TolkIntValue && (value.value !in TVM_INT_MIN_VALUE..TVM_INT_MAX_VALUE)) {
-                    holder.newAnnotation(
-                        HighlightSeverity.ERROR,
-                        TolkBundle.message("inspection.int_literal_out_of_range")
-                    ).range(element).create()
-                }
-            }
-
+//            is TolkLiteralExpression -> {
+//                val value = element.value
+//                if (value is TolkIntValue && (value.value !in TVM_INT_MIN_VALUE..TVM_INT_MAX_VALUE)) {
+//                    holder.newAnnotation(
+//                        HighlightSeverity.ERROR,
+//                        TolkBundle.message("inspection.int_literal_out_of_range")
+//                    ).range(element).create()
+//                }
+//            }
             is PsiComment -> {
                 val text = element.text
                 if (text.startsWith("/*") && text.endsWith("*/")) {
@@ -167,6 +53,134 @@ class TolkAnnotator : Annotator {
                             .withFix(RemoveNestedComments(element, nestedRange))
                             .create()
                     }
+                }
+            }
+        }
+
+        val elementType = element.elementType ?: return
+        when (elementType) {
+            TolkElementTypes.GET_KEYWORD,
+            TolkElementTypes.LAZY_KEYWORD -> {
+                return holder.info(TolkColor.KEYWORD.textAttributesKey)
+            }
+            TolkElementTypes.IDENTIFIER -> {
+                val parent = element.parent as? TolkElement ?: return
+                return highlightIdentifier(element, parent, holder)
+            }
+        }
+    }
+
+    fun highlightIdentifier(element: PsiElement, parent: TolkElement, holder: AnnotationHolder) {
+        when (parent) {
+            is TolkReferenceElement -> highlightReference(parent, holder)
+            is TolkReferenceTypeExpression -> {
+                val reference = parent.reference
+                if (reference == null) { // primitive type
+                    holder.info(TolkColor.PRIMITIVE.textAttributesKey)
+                } else {
+                    val resolvedType = reference.resolve()
+                    when (resolvedType) {
+                        is TolkTypeParameter -> {
+                            holder.info(TolkColor.TYPE_PARAMETER.textAttributesKey)
+                        }
+
+                        null -> {
+                            val function = parent.parentOfType<TolkFunction>()
+                            if (function != null) {
+                                val receiver = function.functionReceiver
+                                if (receiver != null && receiver.isAncestor(parent, true)) {
+                                    return holder.info(TolkColor.TYPE_PARAMETER.textAttributesKey)
+                                }
+                            }
+
+                            holder.error(
+                                "Unresolved type: ${element.text}",
+                                ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
+                            )
+                        }
+                    }
+                }
+            }
+
+            else -> {
+                val color = identifierColor(parent)
+                if (color != null) {
+                    holder.info(color)
+                }
+            }
+        }
+    }
+
+    private fun highlightReference(
+        element: TolkReferenceElement,
+        holder: AnnotationHolder,
+    ) {
+        val reference = element.reference
+        if (reference == null) {
+            val isPrimitiveType = TolkPrimitiveTy.fromReference(element) != null
+            if (isPrimitiveType) {
+                return holder.info(TolkColor.PRIMITIVE.textAttributesKey)
+            }
+            return holder.error(
+                "Unknown type: ${element.text}",
+                ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
+            )
+        }
+
+        when (element) {
+            is TolkReferenceExpression -> {
+                val resolved = reference.resolve() ?: return holder.error(
+                    "Unresolved reference: ${element.text}",
+                    ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
+                )
+                val color = identifierColor(resolved)
+                if (color != null) {
+                    holder.info(color)
+                }
+                val isDeprecated = (resolved is TolkFunction && resolved.isDeprecated) ||
+                        (resolved is TolkTypeDef && resolved.isDeprecated) ||
+                        (resolved is TolkStruct && resolved.isDeprecated) ||
+                        (resolved is TolkGlobalVar && resolved.isDeprecated) ||
+                        (resolved is TolkConstVar && resolved.isDeprecated)
+                if (isDeprecated) {
+                    holder.info(CodeInsightColors.DEPRECATED_ATTRIBUTES)
+                }
+            }
+
+            is TolkFieldLookup -> {
+                when (val resolved = reference.resolve()) {
+                    is TolkStructField,
+                    is TolkFunction -> {
+                        val enforcedAttributes = identifierColor(resolved) ?: return
+                        holder.info(enforcedAttributes)
+                    }
+
+                    null -> {
+                        val dotExpr = element.parentDotExpression
+                        if (dotExpr.expression.type is TolkTypeParameterTy) {
+                            holder.info(TolkColor.IDENTIFIER.textAttributesKey)
+                        } else {
+                            holder.error(
+                                "Unresolved member: ${element.text}",
+                                ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
+                            )
+                        }
+                    }
+                }
+            }
+
+            is TolkMatchPatternReference -> {
+                val resolved = reference.resolve()
+                if (resolved != null) {
+                    val color = identifierColor(resolved)
+                    if (color != null) {
+                        return holder.info(color)
+                    }
+                } else {
+                    return holder.error(
+                        "Unresolved reference: ${element.referenceName}",
+                        ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
+                    )
                 }
             }
         }
@@ -196,6 +210,7 @@ class TolkAnnotator : Annotator {
             is TolkStructExpressionField -> TolkColor.FIELD.textAttributesKey
             is TolkVar -> TolkColor.LOCAL_VARIABLE.textAttributesKey
             is TolkCatchParameter -> TolkColor.LOCAL_VARIABLE.textAttributesKey
+            is TolkSelfParameter -> TolkColor.SELF_PARAMETER.textAttributesKey
             is TolkParameter -> TolkColor.PARAMETER.textAttributesKey
             is TolkFunction -> {
                 if (element.hasSelf) {
@@ -206,6 +221,7 @@ class TolkAnnotator : Annotator {
                     TolkColor.FUNCTION_DECLARATION.textAttributesKey
                 }
             }
+
             else -> null
         }
     }

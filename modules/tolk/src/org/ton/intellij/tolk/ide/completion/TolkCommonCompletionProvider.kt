@@ -17,7 +17,7 @@ import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.ide.completion.TolkCommonCompletionProvider.TolkCompletionContext
 import org.ton.intellij.tolk.perf
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.psi.impl.hasSelf
+import org.ton.intellij.tolk.psi.impl.hasReceiver
 import org.ton.intellij.tolk.psi.impl.toLookupElement
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
 import org.ton.intellij.tolk.type.TolkFunctionTy
@@ -72,7 +72,8 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 if (!checkLimit()) return@collectLocalVariables false
                 result.addElement(localSymbol.toLookupElement())
                 true
-            }) {
+            }
+        ) {
             return
         }
 
@@ -104,7 +105,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             if (!prefixMatcher.prefixMatches(name)) return true
             if (!addedNamedElements.add(namedElement)) return true
 
-            if (namedElement is TolkFunction && namedElement.hasSelf) return true
+            if (namedElement is TolkFunction && namedElement.hasReceiver) return true
             if (!checkLimit()) return false
             when (namedElement) {
                 is TolkFunction -> result.addElement(
@@ -342,7 +343,7 @@ fun TolkNamedElement.toLookupElementBuilder(
     }
 }
 
-private fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
+public fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
     for (i in startIndex until this.length) {
         val currentChar = this[i]
         if (c == currentChar) return i
@@ -356,7 +357,8 @@ fun collectLocalVariables(
     startFrom: PsiElement,
     processor: (TolkLocalSymbolElement) -> Boolean
 ): Boolean {
-    return PsiTreeUtil.treeWalkUp(startFrom, null) { scope, lastParent ->
+    var exitFromFunction = false
+    val result =  PsiTreeUtil.treeWalkUp(startFrom, null) { scope, lastParent ->
         if (scope is TolkFunction) {
             val parameterList = scope.parameterList
             if (parameterList != null) {
@@ -367,6 +369,7 @@ fun collectLocalVariables(
                     if (!processor(it)) return@treeWalkUp false
                 }
             }
+            exitFromFunction = true
             return@treeWalkUp false
         }
         if (scope is TolkCatch && lastParent is TolkBlockStatement) {
@@ -412,4 +415,5 @@ fun collectLocalVariables(
 
         true
     }
+    return exitFromFunction || result
 }

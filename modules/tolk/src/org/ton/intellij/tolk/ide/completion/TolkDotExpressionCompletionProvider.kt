@@ -18,7 +18,6 @@ import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.TolkTypeSymbolElement
 import org.ton.intellij.tolk.psi.impl.declaredType
 import org.ton.intellij.tolk.psi.impl.hasReceiver
-import org.ton.intellij.tolk.psi.impl.isDeprecated
 import org.ton.intellij.tolk.psi.impl.receiverTy
 import org.ton.intellij.tolk.psi.impl.toLookupElement
 import org.ton.intellij.tolk.stub.index.TolkFunctionIndex

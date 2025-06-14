@@ -7,69 +7,71 @@
     </option>
     <option name="org.ton.tolk.ASSOC_FUNCTION">
         <value>
-            <option name="FOREGROUND" value="6aa2d7" />
+            <option name="FOREGROUND" value="6aa2d7"/>
+            <option name="FONT_TYPE" value="2"/>
         </value>
     </option>
     <option name="org.ton.tolk.ASSOC_FUNCTION_CALL">
         <value>
-            <option name="FOREGROUND" value="6aa2d7" />
+            <option name="FOREGROUND" value="6aa2d7"/>
+            <option name="FONT_TYPE" value="2"/>
         </value>
     </option>
     <option name="org.ton.tolk.CONSTANT">
         <value>
-            <option name="FOREGROUND" value="c77dbb" />
+            <option name="FOREGROUND" value="c77dbb"/>
         </value>
     </option>
     <option name="org.ton.tolk.FUNCTION">
         <value>
-            <option name="FOREGROUND" value="6aa2d7" />
+            <option name="FOREGROUND" value="6aa2d7"/>
         </value>
     </option>
     <option name="org.ton.tolk.FUNCTION_CALL">
         <value>
-            <option name="FOREGROUND" value="6aa2d7" />
+            <option name="FOREGROUND" value="6aa2d7"/>
         </value>
     </option>
     <option name="org.ton.tolk.METHOD">
         <value>
-            <option name="FOREGROUND" value="6aa2d7" />
+            <option name="FOREGROUND" value="6aa2d7"/>
         </value>
     </option>
     <option name="org.ton.tolk.METHOD_CALL">
         <value>
-            <option name="FOREGROUND" value="6aa2d7" />
+            <option name="FOREGROUND" value="6aa2d7"/>
         </value>
     </option>
     <option name="org.ton.tolk.MUT_SELF_PARAMETER">
         <value>
-            <option name="FOREGROUND" value="e59eae" />
-            <option name="EFFECT_COLOR" value="bcbec4" />
-            <option name="EFFECT_TYPE" value="1" />
+            <option name="FOREGROUND" value="e59eae"/>
+            <option name="EFFECT_COLOR" value="bcbec4"/>
+            <option name="EFFECT_TYPE" value="1"/>
         </value>
     </option>
     <option name="org.ton.tolk.NUMBER">
         <value>
-            <option name="FOREGROUND" value="2aacb8" />
+            <option name="FOREGROUND" value="2aacb8"/>
         </value>
     </option>
     <option name="org.ton.tolk.SELF_EXPRESSION">
         <value>
-            <option name="FOREGROUND" value="e59eae" />
+            <option name="FOREGROUND" value="e59eae"/>
         </value>
     </option>
     <option name="org.ton.tolk.SELF_PARAMETER">
         <value>
-            <option name="FOREGROUND" value="e59eae" />
+            <option name="FOREGROUND" value="e59eae"/>
         </value>
     </option>
     <option name="org.ton.tolk.STRUCT">
         <value>
-            <option name="FOREGROUND" value="a6bb77" />
+            <option name="FOREGROUND" value="a6bb77"/>
         </value>
     </option>
     <option name="org.ton.tolk.TYPE_ALIAS">
         <value>
-            <option name="FOREGROUND" value="a6bb77" />
+            <option name="FOREGROUND" value="a6bb77"/>
         </value>
     </option>
 </list>

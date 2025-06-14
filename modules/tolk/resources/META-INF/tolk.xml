@@ -47,6 +47,7 @@
         <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkIncludeDefinition"
                                  implementationClass="org.ton.intellij.tolk.psi.impl.TolkIncludePathElementManipulator"/>
 
+        <colorSettingsPage implementation="org.ton.intellij.tolk.ide.colors.TolkColorSettingsPage"/>
         <additionalTextAttributes scheme="Default" file="colorSchemes/TolkDefault.xml"/>
         <additionalTextAttributes scheme="Dark" file="colorSchemes/TolkDark.xml"/>
 
@@ -107,6 +108,7 @@
         <!--        </codeInsight.declarativeInlayProvider>-->
 
 
+        <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkDumbAnnotator"/>
         <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkAnnotator"/>
         <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkDocAnnotator"/>
 

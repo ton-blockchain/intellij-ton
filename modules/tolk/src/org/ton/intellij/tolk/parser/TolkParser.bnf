@@ -165,6 +165,7 @@ upper GlobalVar ::= 'global' IDENTIFIER GlobalVarType ';'  {
     mixin = "org.ton.intellij.tolk.psi.impl.TolkGlobalVarMixin"
     implements=[
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkAnnotationHolder"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkGlobalVarStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -179,6 +180,7 @@ upper ConstVar ::= 'const' IDENTIFIER ConstVarType? '=' Expression ';' {
     implements=[
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
+        "org.ton.intellij.tolk.psi.TolkAnnotationHolder"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkConstVarStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -205,6 +207,7 @@ upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpressio
     implements = [
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
         "org.ton.intellij.tolk.psi.TolkTypeSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkAnnotationHolder"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkTypeDefStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -216,6 +219,7 @@ upper Struct ::= 'struct' StructConstructorTag? IDENTIFIER TypeParameterList? (S
     implements = [
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
         "org.ton.intellij.tolk.psi.TolkTypeSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkAnnotationHolder"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkStructStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -272,6 +276,7 @@ upper Function ::= ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypePar
         "org.ton.intellij.tolk.psi.TolkModificationTrackerOwner"
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkAnnotationHolder"
     ]
     mixin = "org.ton.intellij.tolk.psi.impl.TolkFunctionMixin"
     stubClass = "org.ton.intellij.tolk.stub.TolkFunctionStub"
@@ -876,6 +881,9 @@ VoidTypeExpression ::= 'void' | ('(' ')') {
 
 ReferenceTypeExpression ::= IDENTIFIER TypeArgumentList_pinned? {
     mixin="org.ton.intellij.tolk.psi.impl.TolkReferenceTypeExpressionMixin"
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkReferenceElement"
+    ]
 }
 
 fake TensorTypeExpression ::= '(' [ <<comma_separated_list TypeExpression>> ] ')' {

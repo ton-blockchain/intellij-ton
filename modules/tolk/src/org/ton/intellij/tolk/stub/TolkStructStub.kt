@@ -9,7 +9,6 @@ import com.intellij.util.ArrayFactory
 import com.intellij.util.io.StringRef
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.impl.TolkStructImpl
-import org.ton.intellij.tolk.psi.impl.isDeprecated
 import org.ton.intellij.tolk.stub.index.TolkStructIndex
 import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
 import org.ton.intellij.tolk.stub.type.TolkNamedStubElementType

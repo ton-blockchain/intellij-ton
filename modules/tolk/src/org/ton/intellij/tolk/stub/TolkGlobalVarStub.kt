@@ -9,7 +9,6 @@ import com.intellij.util.ArrayFactory
 import com.intellij.util.io.StringRef
 import org.ton.intellij.tolk.psi.TolkGlobalVar
 import org.ton.intellij.tolk.psi.impl.TolkGlobalVarImpl
-import org.ton.intellij.tolk.psi.impl.isDeprecated
 import org.ton.intellij.tolk.stub.type.TolkNamedStubElementType
 
 class TolkGlobalVarStub(

@@ -3,11 +3,9 @@ package org.ton.intellij.tolk.psi.impl
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import org.ton.intellij.tolk.psi.TolkDotExpression
 import org.ton.intellij.tolk.psi.TolkReferenceElement
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.reference.TolkSymbolReference
-import org.ton.intellij.tolk.type.TolkPrimitiveTy
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.inference
 
@@ -19,7 +17,7 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
     override fun getReferences(): Array<TolkSymbolReference> {
         val name = referenceName ?: return EMPTY_ARRAY
         if (name == "_") return EMPTY_ARRAY
-        if (parent is TolkDotExpression && TolkPrimitiveTy.fromName(name) != null) return EMPTY_ARRAY
+        if (TolkTy.byName(name) != null) return EMPTY_ARRAY
         return arrayOf(TolkSymbolReference(this))
     }
 

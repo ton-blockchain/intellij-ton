@@ -75,7 +75,7 @@ class TolkAnnotator : Annotator {
             }
             if (element.referenceName == "_") return
             return holder.error(
-                "Unknown type: ${element.text}",
+                "Unknown type: `${element.text}`",
                 ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
             )
         }
@@ -96,16 +96,15 @@ class TolkAnnotator : Annotator {
                     return holder.info(TolkColor.PRIMITIVE.textAttributesKey)
                 }
                 val function = parent.parentOfType<TolkFunction>()
-                if (function != null && function.resolveGenericType(
-                        element.referenceName ?: ""
-                    )?.parameter?.psi == element
+                val referenceName = element.referenceName ?: return
+                if (function != null && function.resolveGenericType(referenceName)?.parameter?.psi == element
                 ) {
                     return holder.info(TolkColor.TYPE_PARAMETER.textAttributesKey)
                 }
 
                 if (element !is TolkFieldLookup || parent !is TolkDotExpression || parent.expression.type !is TolkTypeParameterTy) {
                     return holder.error(
-                        "Unresolved reference: ${element.text}",
+                        "Unresolved reference: `$referenceName`",
                         ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
                     )
                 }

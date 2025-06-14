@@ -27,7 +27,7 @@ class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
     fun `test constants-tests`() = doTest()
     fun `test dicts-demo`() = doTest()
     fun `test generics-1`() = doTest()
-    fun `test generics-2`() = doTest()
+    fun `test generics-2`() = doTest() // todo: fix test4
     fun `test generics-3`() = doTest()
     fun `test generics-4`() = doTest()
     fun `test if-else-tests`() = doTest()
@@ -48,7 +48,7 @@ class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
     fun `test numbers-tests`() = doTest()
     fun `test op-priority`() = doTest()
     fun `test pack-unpack-1`() = doTest()
-    fun `test pack-unpack-2`() = doTest()
+    fun `test pack-unpack-2`() = doTest() // todo: fix test_IntAndMaybeMaybe8
     fun `test pack-unpack-3`() = doTest()
     fun `test pack-unpack-4`() = doTest()
     fun `test pack-unpack-5`() = doTest()

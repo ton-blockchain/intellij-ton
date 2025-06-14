@@ -14,6 +14,7 @@ import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.hasReceiver
 import org.ton.intellij.tolk.psi.impl.hasSelf
 import org.ton.intellij.tolk.psi.impl.isMutable
+import org.ton.intellij.util.childOfType
 
 class TolkDumbAnnotator : Annotator, DumbAware {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
@@ -54,7 +55,14 @@ class TolkDumbAnnotator : Annotator, DumbAware {
                 is TolkAnnotation -> TolkColor.ANNOTATION.textAttributesKey
                 is TolkGlobalVar -> TolkColor.GLOBAL_VARIABLE.textAttributesKey
                 is TolkConstVar -> TolkColor.CONSTANT.textAttributesKey
-                is TolkStruct -> TolkColor.STRUCT.textAttributesKey
+                is TolkStruct -> {
+                    val body = element.structBody
+                    if (body == null || body.childOfType<TolkStructField>() == null) {
+                        TolkColor.EMPTY_STRUCT.textAttributesKey
+                    } else {
+                        TolkColor.STRUCT.textAttributesKey
+                    }
+                }
                 is TolkTypeDef -> TolkColor.TYPE_ALIAS.textAttributesKey
                 is TolkStructField -> TolkColor.FIELD.textAttributesKey
                 is TolkStructExpressionField -> TolkColor.FIELD.textAttributesKey

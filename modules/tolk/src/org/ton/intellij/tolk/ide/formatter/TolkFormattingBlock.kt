@@ -5,7 +5,8 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.TokenType
 import com.intellij.psi.formatter.common.AbstractBlock
 import com.intellij.psi.tree.TokenSet
-import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_COMMENT
+import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_BLOCK_COMMENT
+import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_EOL_COMMENT
 import org.ton.intellij.tolk.psi.TolkElementTypes.*
 import java.util.*
 
@@ -69,7 +70,7 @@ class TolkFormattingBlock(
         val childIndent =
             when (node.elementType) {
                 BLOCK_STATEMENT -> Indent.getNormalIndent()
-                DOC_COMMENT -> Indent.getNoneIndent()
+                DOC_BLOCK_COMMENT, DOC_EOL_COMMENT -> Indent.getNoneIndent()
                 FUNCTION, STRUCT, TYPE_DEF, GLOBAL_VAR, CONST_VAR -> Indent.getNoneIndent()
                 else -> Indent.getNormalIndent()
             }

@@ -69,6 +69,12 @@
             <option name="FOREGROUND" value="a6bb77"/>
         </value>
     </option>
+    <option name="org.ton.tolk.EMPTY_STRUCT">
+        <value>
+            <option name="FOREGROUND" value="8cc8d4" />
+            <option name="FONT_TYPE" value="2" />
+        </value>
+    </option>
     <option name="org.ton.tolk.TYPE_ALIAS">
         <value>
             <option name="FOREGROUND" value="a6bb77"/>

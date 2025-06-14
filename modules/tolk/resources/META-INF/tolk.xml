@@ -12,6 +12,8 @@
         <lang.syntaxHighlighterFactory language="Tolk"
                                        implementationClass="org.ton.intellij.tolk.highlighting.TolkSyntaxHighlighterFactory"/>
         <lang.commenter language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkCommenter"/>
+        <enterHandlerDelegate implementation="org.ton.intellij.tolk.ide.typing.TolkEnterInLineCommentHandler"
+                              id="TolkEnterInLineCommentHandler"/>
 
         <lang.braceMatcher language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkPairedBraceMatcher"/>
         <lang.quoteHandler language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkQuoteHandler"/>

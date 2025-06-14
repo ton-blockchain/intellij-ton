@@ -5,7 +5,7 @@ import com.intellij.lang.WhitespacesAndCommentsBinder
 import com.intellij.lang.parser.GeneratedParserUtilBase
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
-import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_COMMENT
+import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_BLOCK_COMMENT
 import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.EOL_COMMENT
 import org.ton.intellij.tolk.psi.TolkElementTypes
 
@@ -15,7 +15,7 @@ object TolkParserUtil : GeneratedParserUtilBase() {
         var candidate = tokens.size
         for (i in 0 until tokens.size) {
             val token = tokens[i]
-            if (DOC_COMMENT == token) {
+            if (DOC_BLOCK_COMMENT == token) {
                 candidate = minOf(candidate, i)
                 break
             }

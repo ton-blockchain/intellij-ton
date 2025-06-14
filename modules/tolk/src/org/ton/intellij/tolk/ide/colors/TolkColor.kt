@@ -34,6 +34,7 @@ enum class TolkColor(
 
     PRIMITIVE(TolkBundle.messagePointer("settings.tolk.color.primitive"), Default.KEYWORD),
     STRUCT(TolkBundle.messagePointer("settings.tolk.color.struct"), Default.CLASS_NAME),
+    EMPTY_STRUCT(TolkBundle.messagePointer("settings.tolk.color.empty_struct"), Default.CLASS_NAME),
     TYPE_ALIAS(TolkBundle.messagePointer("settings.tolk.color.type_alias"), Default.CLASS_NAME),
 
     KEYWORD(TolkBundle.messagePointer("settings.tolk.color.keyword"), Default.KEYWORD),

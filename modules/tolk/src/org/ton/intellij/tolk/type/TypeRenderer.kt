@@ -58,9 +58,16 @@ private class TypeRenderer(
             is TolkBytesNTy -> "bytes${ty.n}"
             is TolkIntTy -> "int"
             is TolkBuilderTy -> "builder"
+            is TolkUnitTy -> "void"
             is TolkTensorTy -> ty.elements.joinToString(", ", "(", ")", transform = render)
             is TolkTypedTupleTy -> ty.elements.joinToString(", ", "[", "]", transform = render)
-            is TolkFunctionTy -> "${render(ty.inputType)} -> ${render(ty.returnType)}"
+            is TolkFunctionTy -> {
+                if (ty.inputType == TolkUnitTy) {
+                    "() -> ${render(ty.returnType)}"
+                } else {
+                    "${render(ty.inputType)} -> ${render(ty.returnType)}"
+                }
+            }
             is TolkUnionTy -> buildString {
                 val orNull = ty.orNull
                 if (orNull != null) {

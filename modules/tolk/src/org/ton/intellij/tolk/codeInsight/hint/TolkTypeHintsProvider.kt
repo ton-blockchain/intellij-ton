@@ -83,7 +83,7 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         val parameters = element.parameterList ?: return
         val returnType = (element.type as? TolkFunctionTy)?.returnType ?: return
         when (returnType) {
-            TolkTy.Unit,
+            TolkTy.Void,
             TolkTy.Unknown -> return
             else -> {}
         }

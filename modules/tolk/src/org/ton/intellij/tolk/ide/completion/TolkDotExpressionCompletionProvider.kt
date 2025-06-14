@@ -14,9 +14,10 @@ import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.perf
 import org.ton.intellij.tolk.psi.TolkDotExpression
 import org.ton.intellij.tolk.psi.TolkFunction
+import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.TolkTypeSymbolElement
 import org.ton.intellij.tolk.psi.impl.declaredType
-import org.ton.intellij.tolk.psi.impl.hasSelf
+import org.ton.intellij.tolk.psi.impl.hasReceiver
 import org.ton.intellij.tolk.psi.impl.isDeprecated
 import org.ton.intellij.tolk.psi.impl.receiverTy
 import org.ton.intellij.tolk.psi.impl.toLookupElement
@@ -46,6 +47,9 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         val left = dotExpression.expression
         val resolvedReceiver = left.reference?.resolve()
         val calledType = left.type?.actualType() ?: return
+        val possiblePrimitiveCalledType = (left as? TolkReferenceExpression)?.let {
+            TolkPrimitiveTy.fromReference(it)
+        }
         val isStaticReceiver = resolvedReceiver is TolkTypeSymbolElement
 
         val completionLimit = REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
@@ -80,15 +84,16 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
 
         fun addFunction(function: TolkFunction): Boolean {
             val name = function.name ?: return true
+
             if (!prefixMatcher.prefixMatches(name)) return true
             if (!functions.add(function)) return true
-            if (function.hasSelf != !isStaticReceiver) return true
+            if (function.hasReceiver != !isStaticReceiver) return true
 
             val receiverType =
                 function.receiverTy.unwrapTypeAlias().actualType()
 
             fun canBeAdded(): Boolean {
-                if (receiverType.canRhsBeAssigned(calledType)) return true
+                if (receiverType.canRhsBeAssigned(calledType) || receiverType == possiblePrimitiveCalledType) return true
                 if (receiverType is TolkTypeParameterTy) return true
                 if (receiverType.hasGenerics() &&
                     receiverType is TolkStructTy &&

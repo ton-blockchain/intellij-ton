@@ -1,7 +1,11 @@
 package org.ton.intellij.tolk.type
 
 
+import org.ton.intellij.tolk.psi.TolkReferenceElement
 import org.ton.intellij.tolk.psi.TolkStruct
+import org.ton.intellij.tolk.type.TolkTy.Companion.Cell
+import org.ton.intellij.tolk.type.TolkTy.Companion.Never
+import org.ton.intellij.tolk.type.TolkTy.Companion.Slice
 import org.ton.intellij.tolk.type.range.TvmIntRangeSet
 
 interface TolkTy : TypeFoldable<TolkTy> {
@@ -13,27 +17,27 @@ interface TolkTy : TypeFoldable<TolkTy> {
         return this is TolkUnionTy && variants.contains(Null)
     }
 
-    open fun removeNullability(): TolkTy = this
+    fun removeNullability(): TolkTy = this
 
-    open fun actualType(): TolkTy = this
+    fun actualType(): TolkTy = this
 
-    open fun unwrapTypeAlias(): TolkTy = this
+    fun unwrapTypeAlias(): TolkTy = this
 
     /**
      * if A.isSuperType(B) then A.join(B) is A and A.meet(B) is B.
      */
-    open fun isSuperType(other: TolkTy): Boolean {
+    fun isSuperType(other: TolkTy): Boolean {
         if (other is TolkTypeAliasTy) return isSuperType(other.underlyingType)
-        return other == this || other == TolkNeverTy
+        return other == this || other == TolkTy.Never
     }
 
-    abstract fun join(other: TolkTy): TolkTy
+    fun join(other: TolkTy): TolkTy
 
-    open fun meet(other: TolkTy): TolkTy = if (other.isSuperType(this)) this else TolkNeverTy
+    fun meet(other: TolkTy): TolkTy = if (other.isSuperType(this)) this else TolkNeverTy
 
-    open fun hasGenerics(): Boolean = false
+    fun hasGenerics(): Boolean = false
 
-    open fun canRhsBeAssigned(other: TolkTy): Boolean {
+    fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
         if (other is TolkTypeAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
         return other == Never
@@ -41,7 +45,7 @@ interface TolkTy : TypeFoldable<TolkTy> {
 
     fun isEquivalentTo(other: TolkTy?): Boolean = other != null && isEquivalentToInner(other.unwrapTypeAlias())
 
-    open fun isEquivalentToInner(other: TolkTy): Boolean = equals(other)
+    fun isEquivalentToInner(other: TolkTy): Boolean = equals(other)
 
     override fun foldWith(folder: TypeFolder): TolkTy = folder.foldType(this)
 
@@ -53,7 +57,7 @@ interface TolkTy : TypeFoldable<TolkTy> {
         val FALSE = TolkConstantBoolTy(false)
         val Bool = TolkBoolTy
         val Null = TolkNullTy
-        val Unit = TolkUnitTy
+        val Void = TolkUnitTy
         val Cell = TolkCellTy
         val Slice = TolkSliceTy
         val Builder = TolkBuilderTy
@@ -67,60 +71,7 @@ interface TolkTy : TypeFoldable<TolkTy> {
         val Address = TolkAddressTy
 
         // add to TolkTypeCompletionProvider also
-        fun byName(text: String): TolkTy? {
-            return when (text) {
-                "int" -> Int
-                "cell" -> Cell
-                "slice" -> Slice
-                "builder" -> Builder
-                "continuation" -> Continuation
-                "tuple" -> Tuple
-                "void" -> Unit
-                "bool" -> Bool
-                "never" -> Never
-                "coins" -> Coins
-                "varint16" -> VarInt16
-                "varint32" -> VarInt32
-                "address" -> Address
-                else -> {
-                    when {
-                        text.startsWith("uint") -> {
-                            val n = text.removePrefix("uint").toIntOrNull() ?: return null
-                            if (n in 1..1023) {
-                                return uint(n)
-                            }
-                            return null
-                        }
-
-                        text.startsWith("int") -> {
-                            val n = text.removePrefix("int").toIntOrNull() ?: return null
-                            if (n in 1..1023) {
-                                return int(n)
-                            }
-                            return null
-                        }
-
-                        text.startsWith("bits") -> {
-                            val n = text.removePrefix("bits").toIntOrNull() ?: return null
-                            if (n in 1..1023) {
-                                return bits(n)
-                            }
-                            return null
-                        }
-
-                        text.startsWith("bytes") -> {
-                            val n = text.removePrefix("bytes").toIntOrNull() ?: return null
-                            if (n in 1..128) {
-                                return bytes(n)
-                            }
-                            return null
-                        }
-
-                        else -> null
-                    }
-                }
-            }
-        }
+        fun byName(text: String) = TolkPrimitiveTy.fromName(text)
 
         fun bool(value: Boolean): TolkTy = if (value) TRUE else FALSE
 
@@ -156,10 +107,42 @@ fun TolkTy?.join(other: TolkTy?): TolkTy? {
     return this.join(other)
 }
 
- interface TolkPrimitiveTy : TolkTy
+interface TolkPrimitiveTy : TolkTy {
+    companion object {
+        fun fromReference(element: TolkReferenceElement): TolkPrimitiveTy? {
+            val name = element.referenceName ?: return null
+            val result = fromName(name) ?: return null
+            return result
+        }
+
+        fun fromName(text: String): TolkPrimitiveTy? {
+            TolkIntNTy.fromName(text)?.let { return it }
+            TolkBytesNTy.fromName(text)?.let { return it }
+            TolkBitsNTy.fromName(text)?.let { return it }
+
+            return when (text) {
+                "int" -> TolkTy.Int
+                "cell" -> Cell
+                "slice" -> Slice
+                "builder" -> TolkTy.Builder
+                "continuation" -> TolkTy.Continuation
+                "tuple" -> TolkTy.Tuple
+                "void" -> TolkTy.Void
+                "bool" -> TolkTy.Bool
+                "never" -> TolkTy.Never
+                "coins" -> TolkTy.Coins
+                "varint16" -> TolkTy.VarInt16
+                "varint32" -> TolkTy.VarInt32
+                "address" -> TolkTy.Address
+                else -> null
+            }
+        }
+    }
+}
+
 
 interface TolkConstantTy<T> : TolkTy {
-    abstract val value: T
+    val value: T
 }
 
 object TolkUnitTy : TolkPrimitiveTy {
@@ -168,7 +151,7 @@ object TolkUnitTy : TolkPrimitiveTy {
         return TolkTy.union(other, this)
     }
 
-    override fun toString(): String = "()"
+    override fun toString(): String = "void"
 }
 
 object TolkNullTy : TolkPrimitiveTy {
@@ -177,7 +160,7 @@ object TolkNullTy : TolkPrimitiveTy {
         return TolkTy.union(other, this)
     }
 
-    override fun removeNullability(): TolkTy = TolkTy.Never
+    override fun removeNullability(): TolkTy = Never
 
     override fun toString(): String = "null"
 }
@@ -270,7 +253,7 @@ object TolkUnknownTy : TolkTy {
     override fun toString(): String = "unknown"
 }
 
-object TolkNeverTy : TolkTy {
+object TolkNeverTy : TolkTy, TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
     override fun join(other: TolkTy): TolkTy = other
     override fun meet(other: TolkTy): TolkTy = this
@@ -323,24 +306,107 @@ data class TolkIntNTy(
         if (other == this) return true
         if (other.actualType() == TolkTy.Int) return true
         if (other is TolkTypeAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
-        return other == TolkTy.Never
+        return other == Never
+    }
+
+    companion object {
+        val UINT8 = TolkIntNTy(8, unsigned = true)
+        val UINT16 = TolkIntNTy(16, unsigned = true)
+        val UINT32 = TolkIntNTy(32, unsigned = true)
+        val UINT64 = TolkIntNTy(64, unsigned = true)
+        val UINT128 = TolkIntNTy(128, unsigned = true)
+        val UINT256 = TolkIntNTy(256, unsigned = true)
+
+        val INT8 = TolkIntNTy(8, unsigned = false)
+        val INT16 = TolkIntNTy(16, unsigned = false)
+        val INT32 = TolkIntNTy(32, unsigned = false)
+        val INT64 = TolkIntNTy(64, unsigned = false)
+        val INT128 = TolkIntNTy(128, unsigned = false)
+        val INT256 = TolkIntNTy(256, unsigned = false)
+
+        fun uint(n: Int): TolkIntNTy = when (n) {
+            8 -> UINT8
+            16 -> UINT16
+            32 -> UINT32
+            64 -> UINT64
+            128 -> UINT128
+            256 -> UINT256
+            else -> TolkIntNTy(n, unsigned = true)
+        }
+
+        fun int(n: Int): TolkIntNTy = when (n) {
+            8 -> INT8
+            16 -> INT16
+            32 -> INT32
+            64 -> INT64
+            128 -> INT128
+            256 -> INT256
+            else -> TolkIntNTy(n, unsigned = false)
+        }
+
+        fun fromName(text: String): TolkIntNTy? {
+            when (text) {
+                "uint8" -> return UINT8
+                "uint16" -> return UINT16
+                "uint32" -> return UINT32
+                "uint64" -> return UINT64
+                "uint128" -> return UINT128
+                "uint256" -> return UINT256
+                "int8" -> return INT8
+                "int16" -> return INT16
+                "int32" -> return INT32
+                "int64" -> return INT64
+                "int128" -> return INT128
+                "int256" -> return INT256
+            }
+            when {
+                text.startsWith("uint") -> {
+                    val n = text.removePrefix("uint").toIntOrNull() ?: return null
+                    if (n in 1..1023) {
+                        return TolkIntNTy(n, unsigned = true)
+                    }
+                    return null
+                }
+
+                text.startsWith("int") -> {
+                    val n = text.removePrefix("int").toIntOrNull() ?: return null
+                    if (n in 1..1023) {
+                        return TolkIntNTy(n, unsigned = false)
+                    }
+                    return null
+                }
+
+                else -> return null
+            }
+        }
     }
 }
 
 data class TolkBitsNTy(
     val n: Int,
-) : TolkTy {
+) : TolkPrimitiveTy {
     override fun toString(): String = "bits$n"
 
     override fun join(other: TolkTy): TolkTy {
         if (this == other) return this
         return TolkUnionTy.create(this, other)
     }
+
+    companion object {
+        fun fromName(text: String): TolkBitsNTy? {
+            if (!text.startsWith("bits")) return null
+            val n = text.removePrefix("bits").toIntOrNull() ?: return null
+            if (n in 1..1024) {
+                return TolkBitsNTy(n)
+            }
+            return null
+        }
+    }
 }
 
 data class TolkBytesNTy(
     val n: Int,
-) : TolkTy {
+) : TolkPrimitiveTy {
     override fun toString(): String = "bytes$n"
 
     override fun join(other: TolkTy): TolkTy {
@@ -350,6 +416,17 @@ data class TolkBytesNTy(
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         return other.unwrapTypeAlias() == this
+    }
+
+    companion object {
+        fun fromName(text: String): TolkBytesNTy? {
+            if (!text.startsWith("bytes")) return null
+            val n = text.removePrefix("bytes").toIntOrNull() ?: return null
+            if (n in 1..1024) {
+                return TolkBytesNTy(n)
+            }
+            return null
+        }
     }
 }
 

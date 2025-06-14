@@ -31,7 +31,6 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         TolkTy.Coins,
         TolkTy.Address,
     ).map { it.toString() } + listOf(
-        "uint",
         "uint8",
         "uint16",
         "uint32",
@@ -45,7 +44,6 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         "int64",
         "int128",
         "int256",
-        "bits",
         "bytes",
     )
 

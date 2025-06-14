@@ -73,6 +73,7 @@ class TolkAnnotator : Annotator {
             if (isPrimitiveType) {
                 return holder.info(TolkColor.PRIMITIVE.textAttributesKey)
             }
+            if (element.referenceName == "_") return
             return holder.error(
                 "Unknown type: ${element.text}",
                 ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
@@ -91,6 +92,9 @@ class TolkAnnotator : Annotator {
 
             null -> {
                 val parent = element.parent
+                if (parent is TolkMatchPattern && TolkPrimitiveTy.fromReference(element) != null) {
+                    return holder.info(TolkColor.PRIMITIVE.textAttributesKey)
+                }
                 val function = parent.parentOfType<TolkFunction>()
                 if (function != null && function.resolveGenericType(
                         element.referenceName ?: ""

@@ -19,7 +19,9 @@ import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.tolk.eval.TolkIntValue
 import org.ton.intellij.tolk.eval.value
+import org.ton.intellij.tolk.ide.colors.TolkColor
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.impl.hasReceiver
 import org.ton.intellij.tolk.psi.impl.hasSelf
 import org.ton.intellij.tolk.psi.impl.isDeprecated
 import org.ton.intellij.tolk.type.TolkTy
@@ -65,9 +67,7 @@ class TolkAnnotator : Annotator {
                             }
                             null -> {
                                 val dotExpr = parent.parent as? TolkDotExpression
-                                if (dotExpr != null && dotExpr.expression.type is TolkTypeParameterTy) {
-                                    holder.info(TolkColor.IDENTIFIER.textAttributesKey)
-                                } else {
+                                if (dotExpr == null || dotExpr.expression.type !is TolkTypeParameterTy) {
                                     holder.error(
                                         "Unresolved member: ${element.text}",
                                         ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
@@ -194,17 +194,13 @@ class TolkAnnotator : Annotator {
             is TolkTypeDef -> TolkColor.TYPE_ALIAS.textAttributesKey
             is TolkStructField -> TolkColor.FIELD.textAttributesKey
             is TolkStructExpressionField -> TolkColor.FIELD.textAttributesKey
-            is TolkVar -> TolkColor.LOCAL_VARIABLE.textAttributesKey
-            is TolkCatchParameter -> TolkColor.LOCAL_VARIABLE.textAttributesKey
+            is TolkVar -> TolkColor.VARIABLE.textAttributesKey
+            is TolkCatchParameter -> TolkColor.VARIABLE.textAttributesKey
             is TolkParameter -> TolkColor.PARAMETER.textAttributesKey
-            is TolkFunction -> {
-                if (element.hasSelf) {
-                    TolkColor.METHOD.textAttributesKey
-                } else if (element.functionReceiver != null) {
-                    TolkColor.FUNCTION_STATIC.textAttributesKey
-                } else {
-                    TolkColor.FUNCTION_DECLARATION.textAttributesKey
-                }
+            is TolkFunction -> when {
+                element.hasSelf -> TolkColor.METHOD.textAttributesKey
+                element.hasReceiver -> TolkColor.ASSOC_FUNCTION.textAttributesKey
+                else -> TolkColor.FUNCTION.textAttributesKey
             }
             else -> null
         }

@@ -1,0 +1,66 @@
+package org.ton.intellij.tolk.ide.colors
+
+import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.openapi.editor.colors.TextAttributesKey
+import com.intellij.openapi.options.colors.AttributesDescriptor
+import org.ton.intellij.tolk.TolkBundle
+import java.util.function.Supplier
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default
+
+
+enum class TolkColor(
+    displayName: Supplier<String>,
+    default: TextAttributesKey,
+) {
+    VARIABLE(TolkBundle.messagePointer("settings.tolk.color.variable"), Default.IDENTIFIER),
+    FIELD(TolkBundle.messagePointer("settings.tolk.color.field"), Default.INSTANCE_FIELD),
+    CONSTANT(TolkBundle.messagePointer("settings.tolk.color.constant"), Default.CONSTANT),
+    GLOBAL_VARIABLE(TolkBundle.messagePointer("settings.tolk.color.global"), Default.GLOBAL_VARIABLE),
+
+    FUNCTION(TolkBundle.messagePointer("settings.tolk.color.function.declaration"), Default.FUNCTION_DECLARATION),
+    METHOD(TolkBundle.messagePointer("settings.tolk.color.method.declaration"), Default.INSTANCE_METHOD),
+    ASSOC_FUNCTION(TolkBundle.messagePointer("settings.tolk.color.assoc_function.declaration"), Default.STATIC_METHOD),
+    FUNCTION_CALL(TolkBundle.messagePointer("settings.tolk.color.function.call"), Default.FUNCTION_CALL),
+    METHOD_CALL(TolkBundle.messagePointer("settings.tolk.color.method.call"), Default.FUNCTION_CALL),
+    ASSOC_FUNCTION_CALL(TolkBundle.messagePointer("settings.tolk.color.assoc_function.call"), Default.STATIC_METHOD),
+
+    PARAMETER(TolkBundle.messagePointer("settings.tolk.color.parameter"), Default.PARAMETER),
+    MUT_PARAMETER(TolkBundle.messagePointer("settings.tolk.color.mutable_parameter"), Default.PARAMETER),
+    SELF_PARAMETER(TolkBundle.messagePointer("settings.tolk.color.self_parameter"), Default.KEYWORD),
+    TYPE_PARAMETER(
+        TolkBundle.messagePointer("settings.tolk.color.type_parameter"),
+        TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")
+    ),
+
+    PRIMITIVE(TolkBundle.messagePointer("settings.tolk.color.primitive"), Default.KEYWORD),
+    STRUCT(TolkBundle.messagePointer("settings.tolk.color.struct"), Default.CLASS_NAME),
+    TYPE_ALIAS(TolkBundle.messagePointer("settings.tolk.color.type_alias"), Default.CLASS_NAME),
+
+    KEYWORD(TolkBundle.messagePointer("settings.tolk.color.keyword"), Default.KEYWORD),
+    NUMBER(TolkBundle.messagePointer("settings.tolk.color.number"), Default.NUMBER),
+    STRING(TolkBundle.messagePointer("settings.tolk.color.string"), Default.STRING),
+    
+    LINE_COMMENT("Line comment", Default.LINE_COMMENT),
+    BLOCK_COMMENT("Block comment", Default.BLOCK_COMMENT),
+    DOC_COMMENT("Documentation", Default.DOC_COMMENT),
+    DOC_CODE("Documentation Code", Default.DOC_COMMENT_MARKUP),
+    DOC_LINK("Documentation Link", Default.DOC_COMMENT_TAG_VALUE),
+
+    BRACES("Braces", Default.BRACES),
+    BRACKETS("Brackets", Default.BRACKETS),
+    PARENTHESES("Parentheses", Default.PARENTHESES),
+    SEMICOLON("Semicolon", Default.SEMICOLON),
+    COMMA("Comma", Default.COMMA),
+    DOT("Dot", Default.DOT),
+    OPERATION_SIGN("Operation signs", Default.OPERATION_SIGN),
+    
+    ANNOTATION(TolkBundle.messagePointer("settings.tolk.color.annotation"), Default.METADATA),
+    ;
+
+    val textAttributesKey =
+        TextAttributesKey.createTextAttributesKey("org.ton.tolk.$name", default)
+    val attributesDescriptor = AttributesDescriptor(displayName, textAttributesKey)
+
+    val attributes
+        get() = EditorColorsManager.getInstance().globalScheme.getAttributes(textAttributesKey)
+}

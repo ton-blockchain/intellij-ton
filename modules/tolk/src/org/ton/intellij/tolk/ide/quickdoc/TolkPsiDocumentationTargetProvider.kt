@@ -18,7 +18,7 @@ import com.intellij.psi.util.elementType
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
 import org.intellij.markdown.parser.MarkdownParser
 import org.ton.intellij.tolk.TolkLanguage
-import org.ton.intellij.tolk.highlighting.TolkColor
+import org.ton.intellij.tolk.ide.colors.TolkColor
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.isMutable
 import java.util.*
@@ -166,7 +166,7 @@ class TolkDocumentationTarget(val element: PsiElement, val originalElement: PsiE
         if (function.isMutable) {
             append("~")
         }
-        appendStyledSpan(TolkColor.FUNCTION_DECLARATION.attributes, function.name)
+        appendStyledSpan(TolkColor.FUNCTION.attributes, function.name)
         appendStyledSpan(TolkColor.PARENTHESES.attributes, "(")
         function.parameterList?.parameterList?.joinTo(this) { param ->
             buildString {

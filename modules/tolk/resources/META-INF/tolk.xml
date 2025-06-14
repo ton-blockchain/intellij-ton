@@ -47,6 +47,8 @@
         <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkIncludeDefinition"
                                  implementationClass="org.ton.intellij.tolk.psi.impl.TolkIncludePathElementManipulator"/>
 
+        <additionalTextAttributes scheme="Default" file="colorSchemes/TolkDefault.xml"/>
+        <additionalTextAttributes scheme="Dark" file="colorSchemes/TolkDark.xml"/>
 
         <liveTemplateContext
                 contextId="tolk"

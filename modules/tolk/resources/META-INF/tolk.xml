@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin package="org.ton.intellij.tolk">
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="Tolk"
                   implementationClass="org.ton.intellij.tolk.TolkFileType"

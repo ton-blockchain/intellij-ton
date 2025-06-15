@@ -111,6 +111,9 @@ intellijPlatform {
     pluginVerification {
         ides {
             recommended()
+            select {
+
+            }
         }
     }
 }

@@ -58,4 +58,4 @@ jobs:
         if: matrix.verify-plugin
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: ":plugin:verifyPlugin"
+          arguments: ":verifyPlugin"

@@ -54,7 +54,7 @@ abstract class TolkReferenceTypeExpressionMixin : ASTWrapperPsiElement, TolkRefe
 
             resolved is TolkTypedElement -> resolved.type
 
-            parentOfType<TolkFunctionReceiver>() != null -> TolkTypeParameterTy.create(this)
+            parentOfType<TolkFunctionReceiver>() != null && typeArgumentList == null -> TolkTypeParameterTy.create(this)
 
             else -> TolkTy.Unknown
         }

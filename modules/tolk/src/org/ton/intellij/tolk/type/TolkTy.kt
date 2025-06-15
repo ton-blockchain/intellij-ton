@@ -324,6 +324,11 @@ data class TolkIntNTy(
         val INT128 = TolkIntNTy(128, unsigned = false)
         val INT256 = TolkIntNTy(256, unsigned = false)
 
+        val VALUES = listOf(
+            UINT8, UINT16, UINT32, UINT64, UINT128, UINT256,
+            INT8, INT16, INT32, INT64, INT128, INT256
+        )
+
         fun uint(n: Int): TolkIntNTy = when (n) {
             8 -> UINT8
             16 -> UINT16

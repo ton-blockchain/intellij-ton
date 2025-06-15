@@ -10,7 +10,7 @@ class TolkFieldLookupReference(
     element: TolkFieldLookup
 ) : TolkReferenceBase<TolkFieldLookup>(element) {
     override fun multiResolve(): List<TolkElement> =
-        element.inference?.getResolvedField(element) ?: emptyList()
+        element.inference?.getResolvedRefs(element)?.mapNotNull { it.element as? TolkElement } ?: emptyList()
 
     override fun isReferenceTo(element: PsiElement): Boolean {
         return (element is TolkStructField || element is TolkFunction) && super.isReferenceTo(element)
@@ -33,7 +33,12 @@ fun resolveFieldLookupReferenceWithReceiver(
         }
     }
 
-    return collectFunctionCandidates(fieldLookup.project, receiverType, name, fieldLookup.containingFile as TolkFile)
+    return collectFunctionCandidates(
+        fieldLookup.project,
+        receiverType,
+        name,
+        fieldLookup.containingFile as TolkFile
+    )
 }
 
 fun collectFunctionCandidates(
@@ -54,9 +59,6 @@ fun collectFunctionCandidates(
     }
 
     val candidates = ArrayList<Pair<TolkFunction, Substitution>>()
-    for (function in namedFunctions) {
-
-    }
 
     // step1: find all methods where a receiver equals to provided, e.g. `MInt.copy`
     val calledReceiverActualUnwrappedType = calledReceiver.unwrapTypeAlias().actualType()

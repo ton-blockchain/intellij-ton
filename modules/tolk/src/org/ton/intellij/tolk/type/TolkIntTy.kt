@@ -40,6 +40,10 @@ interface TolkIntTy : TolkPrimitiveTy {
         if (this === other) return true
         return actualType() == other.actualType()
     }
+
+    companion object {
+        val VALUES get() = listOf(TolkTy.Int) + TolkIntNTy.VALUES
+    }
 }
 
 data class TolkConstantIntTy(

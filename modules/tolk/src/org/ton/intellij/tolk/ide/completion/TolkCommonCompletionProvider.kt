@@ -343,16 +343,6 @@ fun TolkNamedElement.toLookupElementBuilder(
     }
 }
 
-public fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
-    for (i in startIndex until this.length) {
-        val currentChar = this[i]
-        if (c == currentChar) return i
-        if (currentChar != ' ' && currentChar != '\t') return null
-    }
-
-    return null
-}
-
 fun collectLocalVariables(
     startFrom: PsiElement,
     processor: (TolkLocalSymbolElement) -> Boolean

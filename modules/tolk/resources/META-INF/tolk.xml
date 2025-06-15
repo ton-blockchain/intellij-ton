@@ -56,7 +56,6 @@
         <liveTemplateContext
                 contextId="tolk"
                 implementation="org.ton.intellij.tolk.template.TolkEverywhereContextType"/>
-        <defaultLiveTemplates file="/liveTemplates/tolkHidden.xml" hidden="true"/>
 
         <vcs.codeVisionLanguageContext language="Tolk"
                                        implementationClass="org.ton.intellij.tolk.codeInsight.hint.codeVision.TolkVcsCodeVisionContext"/>

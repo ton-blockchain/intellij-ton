@@ -535,17 +535,23 @@ NotNullExpression ::= Expression '!' {
 }
 
 StructExpression ::= ReferenceTypeExpression? StructExpressionBody
-StructExpressionBody ::= '{' StructExpressionFields? '}' {
+StructExpressionBody ::= '{' StructExpressionField_with_recover* '}' {
     pin = 1
 }
 
-private StructExpressionFields ::= StructExpressionField (',' StructExpressionField)* ','? {
+private StructExpressionField_with_recover ::= !('}') StructExpressionField (',' | &'}') {
     pin = 1
+    recoverWhile=StructExpressionField_recover
 }
-
-StructExpressionField ::= IDENTIFIER (':' Expression)? {
-    pin = 1
+private StructExpressionField_recover ::= !(IDENTIFIER | ',' | '}')
+StructExpressionField ::= IDENTIFIER StructExpressionFieldSuffix? {
     mixin="org.ton.intellij.tolk.psi.impl.TolkStructExpressionFieldMixin"
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkReferenceElement"
+    ]
+}
+private StructExpressionFieldSuffix ::= ':' Expression {
+    pin = 1
 }
 
 //private StructExpressionField_recover ::= !(','|'}'|';'|')'|']')

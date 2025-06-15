@@ -20,6 +20,7 @@ import org.ton.intellij.tolk.ide.colors.TolkColor
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.hasReceiver
 import org.ton.intellij.tolk.psi.impl.hasSelf
+import org.ton.intellij.tolk.psi.reference.TolkStructFieldReference
 import org.ton.intellij.tolk.type.TolkPrimitiveTy
 import org.ton.intellij.tolk.type.TolkTypeParameterTy
 
@@ -79,7 +80,12 @@ class TolkAnnotator : Annotator {
                 ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
             )
         }
-        val resolved = reference.resolve()
+
+        val resolved = if (reference is TolkStructFieldReference) {
+            reference.multiResolve(false).firstOrNull()?.element
+        } else {
+            reference.resolve()
+        }
         when (resolved) {
             is TolkFunction -> {
                 val color = when {

@@ -17,7 +17,7 @@ import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.TolkTypeSymbolElement
 import org.ton.intellij.tolk.psi.impl.declaredType
-import org.ton.intellij.tolk.psi.impl.hasReceiver
+import org.ton.intellij.tolk.psi.impl.isStatic
 import org.ton.intellij.tolk.psi.impl.receiverTy
 import org.ton.intellij.tolk.psi.impl.toLookupElement
 import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
@@ -50,6 +50,11 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
             TolkPrimitiveTy.fromReference(it)
         }
         val isStaticReceiver = resolvedReceiver is TolkTypeSymbolElement
+        val isBeforeParenthesis = parameters.originalPosition?.let {
+            val text = it.containingFile.text
+            val offset = it.textOffset + it.textLength
+            offset < text.length && text[offset] == '('
+        } ?: false
 
         val completionLimit = REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
         var addedElements = 0
@@ -63,18 +68,40 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
             return true
         }
 
-        if (calledType is TolkStructTy && !isStaticReceiver) {
-            val sub = Substitution.instantiate(calledType.psi.declaredType, calledType)
-            for (field in calledType.psi.structBody?.structFieldList.orEmpty()) {
-                if (!checkLimit()) return
-                result.addElement(
-                    PrioritizedLookupElement.withPriority(
-                        LookupElementBuilder
-                            .createWithIcon(field)
-                            .withTypeText(field.type?.substitute(sub)?.render()),
-                        TolkCompletionPriorities.INSTANCE_FIELD
-                    )
-                )
+        if (!isStaticReceiver && !isBeforeParenthesis) {
+            when(calledType) {
+                is TolkStructTy -> {
+                    val sub = Substitution.instantiate(calledType.psi.declaredType, calledType)
+                    for (field in calledType.psi.structBody?.structFieldList.orEmpty()) {
+                        if (!checkLimit()) return
+                        result.addElement(
+                            PrioritizedLookupElement.withPriority(
+                                LookupElementBuilder
+                                    .createWithIcon(field)
+                                    .withTypeText(field.type?.substitute(sub)?.render()),
+                                TolkCompletionPriorities.INSTANCE_FIELD
+                            )
+                        )
+                    }
+                }
+                is TolkTypedTupleTy, is TolkTensorTy -> {
+                    val elements = when (calledType) {
+                        is TolkTypedTupleTy -> calledType.elements
+                        is TolkTensorTy -> calledType.elements
+                        else -> emptyList()
+                    }
+                    for ((index, element) in elements.withIndex()) {
+                        if (!checkLimit()) return
+                        result.addElement(
+                            PrioritizedLookupElement.withPriority(
+                                LookupElementBuilder
+                                    .create("$index")
+                                    .withTypeText(element.render()),
+                                TolkCompletionPriorities.INSTANCE_FIELD
+                            )
+                        )
+                    }
+                }
             }
         }
 
@@ -86,13 +113,18 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
 
             if (!prefixMatcher.prefixMatches(name)) return true
             if (!functions.add(function)) return true
-            if (function.hasReceiver != !isStaticReceiver) return true
+            val isStatic = function.isStatic
+            if (isStatic != isStaticReceiver && possiblePrimitiveCalledType == null) return true
 
             val receiverType =
                 function.receiverTy.unwrapTypeAlias().actualType()
 
+            val canBeAssigned = receiverType.canRhsBeAssigned(calledType)
+
+            if (!canBeAssigned && !isStatic && possiblePrimitiveCalledType != null) return true
+
             fun canBeAdded(): Boolean {
-                if (receiverType.canRhsBeAssigned(calledType) || receiverType == possiblePrimitiveCalledType) return true
+                if ((canBeAssigned && isStatic == isStaticReceiver) || (receiverType == possiblePrimitiveCalledType && isStatic)) return true
                 if (receiverType is TolkTypeParameterTy) return true
                 if (receiverType.hasGenerics() &&
                     receiverType is TolkStructTy &&
@@ -107,7 +139,8 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                 val deprecatedPriority = if (function.isDeprecated) 0.0 else -TolkCompletionPriorities.DEPRECATED
                 val memberPriority = if (isStaticReceiver) TolkCompletionPriorities.STATIC_FUNCTION
                 else TolkCompletionPriorities.INSTANCE_METHOD
-                val priority = memberPriority + deprecatedPriority
+                var priority = memberPriority + deprecatedPriority
+                if (canBeAssigned) priority += 1
                 result.addElement(
                     PrioritizedLookupElement.withPriority(
                         function.toLookupElement(),

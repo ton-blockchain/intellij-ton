@@ -55,12 +55,6 @@ allprojects {
     }
 }
 
-tasks {
-    buildSearchableOptions {
-        enabled = false
-    }
-}
-
 task("resolveDependencies") {
     doLast {
         rootProject.allprojects
@@ -88,6 +82,8 @@ dependencies {
 }
 
 intellijPlatform {
+    buildSearchableOptions = false
+    instrumentCode = false
     pluginConfiguration {
         id = "org.ton.intellij-ton"
         name = "TON"
@@ -110,6 +106,14 @@ intellijPlatform {
             name = "TON Core"
             url = "https://github.com/ton-blockchain/intellij-ton"
             email = "andreypfau@ton.org"
+        }
+    }
+    pluginVerification {
+        ides {
+            recommended()
+            select {
+
+            }
         }
     }
 }

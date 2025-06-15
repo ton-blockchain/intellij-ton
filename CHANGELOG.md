@@ -1,5 +1,7 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [Unreleased]
+
 ## [2.5.7]
 - [Tolk 0.99](https://github.com/ton-blockchain/ton/pull/1707) support
 

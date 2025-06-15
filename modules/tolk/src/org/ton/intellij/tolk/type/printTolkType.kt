@@ -30,7 +30,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
         }
         is TolkFunctionTy -> {
             val inputType = type.inputType
-            if (inputType is TolkTensorTy || inputType is TolkUnitTy) {
+            if (inputType is TolkTensorTy || inputType is TolkVoidTy) {
                 printTolkType(inputType)
             } else {
                 text("(")
@@ -39,7 +39,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
             }
             text(" -> ")
             val returnType = type.returnType
-            if (returnType is TolkUnitTy) {
+            if (returnType is TolkVoidTy) {
                 text("void")
             } else {
                 printTolkType(returnType)

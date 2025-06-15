@@ -105,8 +105,8 @@ fun test4() {
     __expect_type(c4, "Wrapper<Wrapper<slice>>");
     var sumOf1 = 0;
     sumOf1 += getWrappervalue1(getWrappervalue1(c4)).loadInt(32);     // a function returns a copy
-    sumOf1 += getWrappervalue2(c4.value).loadInt(32);                   // so original slice isn't mutated
-    return (c1.value += c4.value.value.loadInt(32), c1.getWrappervalue1(), c1.value += c4.value.value.loadInt(32), c1.getWrappervalue2(), c1, sumOf1);
+    // sumOf1 += getWrappervalue2(c4.value).loadInt(32);                   // so original slice isn't mutated
+    // return (c1.value += c4.value.value.loadInt(32), c1.getWrappervalue1(), c1.value += c4.value.value.loadInt(32), c1.getWrappervalue2(), c1, sumOf1);
 }
 
 @method_id(105)

@@ -49,7 +49,7 @@ class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
     fun `test op-priority`() = doTest()
     fun `test pack-unpack-1`() = doTest()
     fun `test pack-unpack-2`() = doTest() // todo: fix test_IntAndMaybeMaybe8
-    fun `test pack-unpack-3`() = doTest()
+    fun `test pack-unpack-3`() = doTest() // todo: fix test_MsgTransfer
     fun `test pack-unpack-4`() = doTest()
     fun `test pack-unpack-5`() = doTest()
     fun `test pack-unpack-6`() = doTest()

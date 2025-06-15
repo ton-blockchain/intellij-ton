@@ -484,12 +484,12 @@ fun test_SomeBytesFields() {
 
 @method_id(214)
 fun test_IntAndMaybeMaybe8() {
-    // run<IntAndMaybeMaybe8>({ value: MaybeJust { value: MaybeJust { value: 88 } }, op: 123 }, stringHexToSlice("D60000001EE_"));
-    // run<IntAndMaybeMaybe8>({ value: MaybeJust { value: MaybeNothing{} }, op: 123 }, stringHexToSlice("8000001EE_"));
-    //
-    // val t1 = IntAndMaybeMaybe8.fromSlice(stringHexToSlice("D60000001EE_"));  // (88) 123
-    // val v1 = t1.value;
-    // __expect_type(v1, "Maybe<Maybe<int8>>");
+    run<IntAndMaybeMaybe8>({ value: MaybeJust { value: MaybeJust { value: 88 } }, op: 123 }, stringHexToSlice("D60000001EE_"));
+    run<IntAndMaybeMaybe8>({ value: MaybeJust { value: MaybeNothing{} }, op: 123 }, stringHexToSlice("8000001EE_"));
+
+    val t1 = IntAndMaybeMaybe8.fromSlice(stringHexToSlice("D60000001EE_"));  // (88) 123
+    val v1 = t1.value;
+    __expect_type(v1, "Maybe<Maybe<int8>>");
     // assert(v1 is MaybeJust && v1.value is MaybeJust && v1.value.value == 88 && t1.op == 123, 400);
     // __expect_type(v1, "MaybeJust<Maybe<int8>>");
     // __expect_type(v1.value, "MaybeJust<int8>");

@@ -15,4 +15,3 @@ fun List<TolkAnnotation>.findAnnotation(name: String): TolkAnnotation? {
 }
 
 fun List<TolkAnnotation>.hasDeprecatedAnnotation(): Boolean = findAnnotation("deprecated") != null
-fun List<TolkAnnotation>.getMethodIdAnnotation(): TolkAnnotation? = findAnnotation("method_id")

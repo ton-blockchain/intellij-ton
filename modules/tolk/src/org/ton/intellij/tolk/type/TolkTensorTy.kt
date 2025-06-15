@@ -84,7 +84,7 @@ data class TolkTensorTy private constructor(
         }
 
         fun create(elements: List<TolkTy>): TolkTy {
-            if (elements.isEmpty()) return TolkUnitTy
+            if (elements.isEmpty()) return TolkVoidTy
             if (elements.size == 1) {
                 return elements.single()
             }

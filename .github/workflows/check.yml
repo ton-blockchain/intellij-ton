@@ -1,0 +1,61 @@
+name: Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+# Allow cancelling all previous runs for the same branch
+# See https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-plugin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        verify-plugin: [ true ]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: corretto
+          java-version: 17
+
+      - name: Download dependencies
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: ":resolveDependencies -Pkotlin.incremental=false --no-daemon"
+
+      - name: Build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: "assemble testClasses -Pkotlin.incremental=false --no-daemon"
+
+      - name: Check
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: "check --continue -Pkotlin.incremental=false --no-daemon"
+
+      - name: Collect fail reports
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: fail-reports
+          path: |
+            build/reports/tests
+            */build/reports/tests
+            build/*sandbox*/system-test/testlog/idea.log
+            */build/*sandbox*/system-test/testlog/idea.log
+
+      - name: Verify plugin
+        if: matrix.verify-plugin
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: ":plugin:verifyPlugin"

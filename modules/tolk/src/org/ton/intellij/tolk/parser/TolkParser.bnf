@@ -458,8 +458,8 @@ CatchParameter ::= IDENTIFIER {
 
 Expression ::=
     VarExpression
-    | TernaryExpression // expr10
     | AssignBinExpression // expr10
+    | TernaryExpression // expr10
     | LogicalBinExpression //expr13
     | BitwiseBinExpression // expr14
     | ShiftBinExpression // expr17
@@ -482,6 +482,23 @@ Expression ::=
     recoverWhile=Expression_recover
 }
 private Expression_recover ::= !(';'|'}'|',')
+
+private SimpleExpression ::=
+    LogicalBinExpression //expr13
+    | BitwiseBinExpression // expr14
+    | ShiftBinExpression // expr17
+    | CompBinExpression // expr15
+    | AddBinExpression // expr20
+    | MulBinExpression // expr30
+    | AsExpression // expr40
+    | IsExpression // expr40
+    | PrefixExpression // expr75
+    | NotNullExpression
+    | CallExpression
+    | StructExpression
+    | AtomicExpression
+    | MatchExpression
+    | DotExpression // expr80
 
 fake BinExpression ::= Expression BinaryOp Expression {
     mixin="org.ton.intellij.tolk.psi.impl.TolkBinExpressionMixin"
@@ -510,17 +527,17 @@ VarExpression ::= ('var'|'val') VarDefinition ('=' Expression)? {
     pin = 1
 }
 AssignBinExpression ::= Expression AssignBinOp Expression {
-    rightAssociative=true
     pin=2
 }
-TernaryExpression ::= Expression '?' Expression ':' Expression {
+TernaryExpression ::= Expression '?' TernaryExpressionBranch ':' TernaryExpressionBranch {
     methods=[
         condition="/Expression[0]"
         thenBranch="/Expression[1]"
         elseBranch="/Expression[2]"
     ]
-    rightAssociative=true
 }
+private TernaryExpressionBranch ::= Expression | AssignBinExpression
+
 LogicalBinExpression ::= Expression LogicalBinOp Expression
 BitwiseBinExpression ::= Expression BitwiseBinOp Expression
 ShiftBinExpression ::= Expression ShiftBinOp Expression
@@ -549,6 +566,7 @@ StructExpressionField ::= IDENTIFIER StructExpressionFieldSuffix? {
     implements=[
         "org.ton.intellij.tolk.psi.TolkReferenceElement"
     ]
+    pin = 1
 }
 private StructExpressionFieldSuffix ::= ':' Expression {
     pin = 1

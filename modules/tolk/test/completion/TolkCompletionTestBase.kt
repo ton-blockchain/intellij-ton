@@ -4,7 +4,7 @@ import com.intellij.codeInsight.lookup.LookupElement
 import org.intellij.lang.annotations.Language
 import org.ton.intellij.tolk.TolkTestBase
 
-open class TolkCompletionTestBase : TolkTestBase() {
+abstract class TolkCompletionTestBase : TolkTestBase() {
     protected lateinit var completionFixture: TolkCompletionTestFixture
 
     override fun setUp() {

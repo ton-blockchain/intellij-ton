@@ -38,8 +38,8 @@ class TolkStructFieldReference(val field: TolkStructExpressionField) :
         val structType =
             structExpression.type?.unwrapTypeAlias() as? TolkStructTy ?: return ResolveResult.EMPTY_ARRAY
 
-        val name = field.identifier.text.removeSurrounding("`")
-        val field = structType.psi?.structBody?.structFieldList?.find {
+        val name = field.referenceName
+        val field = structType.psi.structBody?.structFieldList?.find {
             it.name == name
         } ?: return ResolveResult.EMPTY_ARRAY
         return (resolvedRefs + PsiElementResolveResult(field)).toTypedArray()

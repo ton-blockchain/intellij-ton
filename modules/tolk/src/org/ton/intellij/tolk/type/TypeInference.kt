@@ -1349,6 +1349,7 @@ class TolkInferenceWalker(
         val callee = element.expression
         var functionSymbol: TolkFunction? = null
         var sub: Substitution = EmptySubstitution
+        var functionType: TolkFunctionTy? = null
 
         when (callee) {
             is TolkReferenceExpression -> {
@@ -1356,6 +1357,10 @@ class TolkInferenceWalker(
                 nextFlow = refInfResult.context.outFlow
                 functionSymbol = ctx.getResolvedRefs(callee).firstOrNull()?.element as? TolkFunction
                 sub = refInfResult.substitution
+                functionType = (refInfResult.inferredType as? TolkFunctionTy)?.let {
+                    sub = sub.deduce(functionSymbol?.type as? TolkFunctionTy ?: it, it)
+                    it
+                }
             }
 
             is TolkDotExpression -> {
@@ -1363,6 +1368,10 @@ class TolkInferenceWalker(
                 val calleeRight = callee.fieldLookup
                 if (calleeRight != null) {
                     functionSymbol = ctx.getResolvedFields(calleeRight).firstOrNull() as? TolkFunction
+                    functionType = (ctx.getType(callee) as? TolkFunctionTy)?.let {
+                        sub = sub.deduce(functionSymbol?.type as? TolkFunctionTy ?: it, it)
+                        it
+                    }
                 }
             }
 
@@ -1425,7 +1434,7 @@ class TolkInferenceWalker(
             }
         }
 
-        val functionDeclaredType = functionSymbol.declaredType
+        val functionDeclaredType = functionType ?: functionSymbol.declaredType
         val functionSubType = if (functionDeclaredType.hasGenerics()) {
             functionSymbol.declaredType.substitute(sub) as TolkFunctionTy
         } else {

@@ -82,6 +82,7 @@ class TolkAnnotator : Annotator {
         }
 
         val resolved = if (reference is TolkStructFieldReference) {
+            if (element.parentOfType<TolkAnnotation>() != null) return
             reference.multiResolve(false).firstOrNull()?.element
         } else {
             reference.resolve()

@@ -1,6 +1,8 @@
 
+import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.time.Clock
@@ -65,20 +67,21 @@ dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
         create(IntelliJPlatformType.WebStorm, version)
-
-        pluginModule(implementation(project(":util")))
-        pluginModule(implementation(project(":asm")))
-        pluginModule(implementation(project(":tolk")))
-        pluginModule(implementation(project(":func")))
-        pluginModule(implementation(project(":boc")))
-        pluginModule(implementation(project(":tlb")))
-        pluginModule(implementation(project(":fift")))
-        pluginModule(implementation(project(":blueprint")))
-        pluginModule(implementation(project(":fc2tolk-js")))
     }
+    implementation(project(":util"))
+    implementation(project(":blueprint"))
+    implementation(project(":asm"))
+    implementation(project(":boc"))
+    implementation(project(":tolk"))
+    implementation(project(":fift"))
+    implementation(project(":func"))
+    implementation(project(":tlb"))
 }
 
 intellijPlatform {
+    autoReload.set(false)
+    instrumentCode.set(false)
+    buildSearchableOptions.set(false)
     pluginConfiguration {
         id = "org.ton.intellij-ton"
         name = "TON"
@@ -105,6 +108,47 @@ intellijPlatform {
     }
 }
 
+val mergePluginJarsTask = task<Jar>("mergePluginJars") {
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    archiveBaseName.set("intellij-ton")
+
+    exclude("META-INF/MANIFEST.MF")
+    exclude("**/classpath.index")
+
+    val pluginLibDir by lazy {
+        val sandboxTask = tasks.prepareSandbox.get()
+        sandboxTask.destinationDir.resolve("${sandboxTask.pluginName.get()}/lib")
+    }
+
+    val pluginJars  = {
+        val files = pluginLibDir.listFiles().orEmpty().filter { it.isPluginJar() }
+        files
+    }
+
+    doFirst {
+        val pluginJars = pluginJars()
+        for (file in pluginJars) {
+            from(zipTree(file))
+        }
+    }
+}
+
+tasks {
+    prepareSandbox {
+        finalizedBy(mergePluginJarsTask)
+        enabled = true
+    }
+    withType<RunIdeTask> {
+        // Force `mergePluginJarTask` be executed before any task based on `RunIdeBase` (for example, `runIde` or `buildSearchableOptions`).
+        // Otherwise, these tasks fail because of implicit dependency.
+        // Should be dropped when jar merging is implemented in `gradle-intellij-plugin` itself
+        dependsOn(mergePluginJarsTask)
+    }
+    verifyPlugin {
+        dependsOn(mergePluginJarsTask)
+    }
+}
+
 changelog {
     version.set(version)
     path.set("${project.projectDir}/CHANGELOG.md")
@@ -117,3 +161,21 @@ changelog {
 
 fun prop(name: String, default: (() -> String?)? = null) = extra.properties[name] as? String
     ?: default?.invoke() ?: error("Property `$name` is not defined in gradle.properties")
+
+fun File.isPluginJar(): Boolean {
+    if (!isFile) return false
+    if (extension != "jar") return false
+    return zipTree(this).files.any { it.isManifestFile() }
+}
+
+fun File.isManifestFile(): Boolean {
+    if (extension != "xml") return false
+    val rootNode = try {
+        val parser = XmlParser()
+        parser.parse(this)
+    } catch (e: Exception) {
+        logger.error("Failed to parse $path", e)
+        return false
+    }
+    return rootNode.name() == "idea-plugin"
+}

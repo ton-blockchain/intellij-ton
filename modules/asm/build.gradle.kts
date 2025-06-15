@@ -24,8 +24,6 @@ val generateAsmParser = task<GenerateParserTask>("generateAsmParser") {
     dependsOn(":util:composedJar")
 }
 
-//tasks.findByPath(":util:composedJar")?.mustRunAfter(generateAsmParser)
-
 val generateAsmLexer = task<GenerateLexerTask>("generateAsmLexer") {
     sourceFile.set(file("src/org/ton/intellij/asm/lexer/AsmLexer.flex"))
     targetOutputDir.set(file("gen/org/ton/intellij/asm/lexer"))

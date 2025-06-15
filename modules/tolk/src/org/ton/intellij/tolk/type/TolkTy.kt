@@ -57,7 +57,7 @@ interface TolkTy : TypeFoldable<TolkTy> {
         val FALSE = TolkConstantBoolTy(false)
         val Bool = TolkBoolTy
         val Null = TolkNullTy
-        val Void = TolkUnitTy
+        val Void = TolkVoidTy
         val Cell = TolkCellTy
         val Slice = TolkSliceTy
         val Builder = TolkBuilderTy
@@ -145,7 +145,7 @@ interface TolkConstantTy<T> : TolkTy {
     val value: T
 }
 
-object TolkUnitTy : TolkPrimitiveTy {
+object TolkVoidTy : TolkPrimitiveTy {
     override fun join(other: TolkTy): TolkTy {
         if (other == this) return this
         return TolkTy.union(other, this)

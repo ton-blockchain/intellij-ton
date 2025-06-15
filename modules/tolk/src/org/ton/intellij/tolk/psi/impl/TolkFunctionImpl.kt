@@ -42,7 +42,7 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
             val returnTy = returnTy
             val parameterList = parameterList ?: return@getCachedValue CachedValueProvider.Result.create(
                 TolkFunctionTy(
-                    TolkTy.Unit,
+                    TolkTy.Void,
                     returnTy
                 ), this
             )
@@ -139,7 +139,7 @@ private fun TolkFunction.resolveReturnType(): TolkTy {
     functionBody?.blockStatement?.accept(visitor)
 
     if (statements.isEmpty() || statements.all { it.expression == null }) {
-        return TolkTy.Unit
+        return TolkTy.Void
     }
 
     val inference = try {
@@ -154,9 +154,9 @@ private fun TolkFunction.resolveReturnType(): TolkTy {
             it.expression?.type
         }.filterNotNull().fold<TolkTy, TolkTy?>(null) { a, b ->
             a?.join(b) ?: b
-        } ?: TolkTy.Unit
+        } ?: TolkTy.Void
     } else {
-        TolkTy.Unit
+        TolkTy.Void
     }
     return result
 }

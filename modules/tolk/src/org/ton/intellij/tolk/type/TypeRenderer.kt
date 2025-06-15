@@ -58,11 +58,11 @@ private class TypeRenderer(
             is TolkBytesNTy -> "bytes${ty.n}"
             is TolkIntTy -> "int"
             is TolkBuilderTy -> "builder"
-            is TolkUnitTy -> "void"
+            is TolkVoidTy -> "void"
             is TolkTensorTy -> ty.elements.joinToString(", ", "(", ")", transform = render)
             is TolkTypedTupleTy -> ty.elements.joinToString(", ", "[", "]", transform = render)
             is TolkFunctionTy -> {
-                if (ty.inputType == TolkUnitTy) {
+                if (ty.inputType == TolkVoidTy) {
                     "() -> ${render(ty.returnType)}"
                 } else {
                     "${render(ty.inputType)} -> ${render(ty.returnType)}"

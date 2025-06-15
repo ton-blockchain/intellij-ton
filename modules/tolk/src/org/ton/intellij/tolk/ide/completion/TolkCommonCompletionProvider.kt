@@ -342,7 +342,7 @@ fun TolkNamedElement.toLookupElementBuilder(
     }
 }
 
-private fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
+fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
     for (i in startIndex until this.length) {
         val currentChar = this[i]
         if (c == currentChar) return i

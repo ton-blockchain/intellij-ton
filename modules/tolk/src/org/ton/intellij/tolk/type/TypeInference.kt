@@ -5,6 +5,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.SmartList
+import org.ton.intellij.tolk.codeInsight.hint.iterateOverParameters
 import org.ton.intellij.tolk.diagnostics.TolkDiagnostic
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.*
@@ -47,7 +48,6 @@ data class TolkInferenceResult(
     private val expressionTypes: Map<TolkTypedElement, TolkTy>,
     private val varTypes: Map<TolkVarDefinition, TolkTy>,
     private val constTypes: Map<TolkConstVar, TolkTy>,
-    private val resolvedFields: Map<TolkFieldLookup, List<TolkElement>>,
     private val resolvedFunctions: Map<TolkCallExpression, TolkFunction>,
     override val returnStatements: List<TolkReturnStatement>,
     val unreachable: TolkUnreachableKind? = null
@@ -65,10 +65,6 @@ data class TolkInferenceResult(
             return constTypes[element]
         }
         return expressionTypes[element ?: return null]
-    }
-
-    fun getResolvedField(element: TolkFieldLookup): List<TolkElement> {
-        return resolvedFields[element] ?: emptyList()
     }
 
     fun getResolvedFunction(expression: TolkCallExpression): TolkFunction? {
@@ -97,10 +93,10 @@ class TolkInferenceContext(
     }
 
     fun getResolvedFields(element: TolkFieldLookup): List<TolkElement> {
-        return resolvedFields[element].orEmpty()
+        return resolvedRefs[element]?.mapNotNull { it.element as? TolkElement }.orEmpty()
     }
 
-    fun setResolvedRefs(element: TolkElement, refs: Collection<PsiElementResolveResult>) {
+    fun setResolvedRefs(element: TolkReferenceElement, refs: Collection<PsiElementResolveResult>) {
         resolvedRefs[element] = refs
     }
 
@@ -178,17 +174,11 @@ class TolkInferenceContext(
             expressionTypes,
             varTypes,
             constTypes,
-            resolvedFields,
             resolvedFunctions,
             returnStatements,
             unreachable
         )
     }
-
-    fun writeResolvedField(fieldLookup: TolkFieldLookup, variants: List<TolkElement>) {
-        resolvedFields[fieldLookup] = variants
-    }
-
 }
 
 private typealias LocalSymbolsScopes = ArrayDeque<MutableMap<String, TolkLocalSymbolElement>>
@@ -1359,6 +1349,7 @@ class TolkInferenceWalker(
         val callee = element.expression
         var functionSymbol: TolkFunction? = null
         var sub: Substitution = EmptySubstitution
+        var functionType: TolkFunctionTy? = null
 
         when (callee) {
             is TolkReferenceExpression -> {
@@ -1366,13 +1357,21 @@ class TolkInferenceWalker(
                 nextFlow = refInfResult.context.outFlow
                 functionSymbol = ctx.getResolvedRefs(callee).firstOrNull()?.element as? TolkFunction
                 sub = refInfResult.substitution
+                functionType = (refInfResult.inferredType as? TolkFunctionTy)?.let {
+                    sub = sub.deduce(functionSymbol?.type as? TolkFunctionTy ?: it, it)
+                    it
+                }
             }
 
             is TolkDotExpression -> {
                 nextFlow = inferDotExpression(callee, nextFlow, false).outFlow
                 val calleeRight = callee.fieldLookup
                 if (calleeRight != null) {
-                    functionSymbol = ctx.getResolvedRefs(calleeRight).firstOrNull()?.element as? TolkFunction
+                    functionSymbol = ctx.getResolvedFields(calleeRight).firstOrNull() as? TolkFunction
+                    functionType = (ctx.getType(callee) as? TolkFunctionTy)?.let {
+                        sub = sub.deduce(functionSymbol?.type as? TolkFunctionTy ?: it, it)
+                        it
+                    }
                 }
             }
 
@@ -1407,34 +1406,35 @@ class TolkInferenceWalker(
         // we're going to iterate over passed arguments, and (if generic) infer substitutedTs
         // at first, check arguments count (Tolk doesn't have optional parameters, so just compare counts)
 
-        val arguments = element.argumentList.argumentList.iterator()
-        val parameters = functionSymbol.parameterList?.parameterList?.iterator()
-
-        if (parameters != null) {
-            while (arguments.hasNext() && parameters.hasNext()) {
-                val arg = arguments.next()
-                val param = parameters.next()
-                var paramType = param.type ?: TolkTy.Unknown
-                if (paramType.hasGenerics()) {
-                    paramType = paramType.substitute(sub)
-                }
-                val argExpr = arg.expression
-                nextFlow = inferExpression(argExpr, nextFlow, false, paramType).outFlow
-                var argType = ctx.getType(argExpr) ?: TolkTy.Unknown
-                sub = sub.deduce(paramType, argType)
-                argType = argType.substitute(sub)
-                ctx.setType(argExpr, argType)
-                if (param.isMutable && argType.unwrapTypeAlias() != paramType.unwrapTypeAlias()) {
-                    val sExpr = extractSinkExpression(argExpr)
-                    if (sExpr != null) {
-                        ctx.setType(argExpr, calcDeclaredTypeBeforeSmartCast(argExpr))
-                        nextFlow.setSymbol(sExpr, paramType)
-                    }
+        iterateOverParameters(
+            element,
+            referenceResolver = {
+                ctx.getResolvedRefs(it).firstOrNull()?.element
+            }
+        ) { param, arg ->
+            if (arg == null) {
+                return@iterateOverParameters
+            }
+            var paramType = param.type ?: TolkTy.Unknown
+            if (paramType.hasGenerics()) {
+                paramType = paramType.substitute(sub)
+            }
+            val argExpr = arg.expression
+            nextFlow = inferExpression(argExpr, nextFlow, false, paramType).outFlow
+            var argType = ctx.getType(argExpr) ?: TolkTy.Unknown
+            sub = sub.deduce(paramType, argType)
+            argType = argType.substitute(sub)
+            ctx.setType(argExpr, argType)
+            if (param.isMutable && argType.unwrapTypeAlias() != paramType.unwrapTypeAlias()) {
+                val sExpr = extractSinkExpression(argExpr)
+                if (sExpr != null) {
+                    ctx.setType(argExpr, calcDeclaredTypeBeforeSmartCast(argExpr))
+                    nextFlow.setSymbol(sExpr, paramType)
                 }
             }
         }
 
-        val functionDeclaredType = functionSymbol.declaredType
+        val functionDeclaredType = functionType ?: functionSymbol.declaredType
         val functionSubType = if (functionDeclaredType.hasGenerics()) {
             functionSymbol.declaredType.substitute(sub) as TolkFunctionTy
         } else {
@@ -1499,7 +1499,7 @@ class TolkInferenceWalker(
             val fieldIndex = fieldLookup.integerLiteral?.text?.toIntOrNull() ?: return TolkTy.Unknown
             return types.getOrNull(fieldIndex) ?: TolkTy.Unknown
         } else {
-            ctx.writeResolvedField(fieldLookup, variants.map { it.first })
+            ctx.setResolvedRefs(fieldLookup, variants.map { PsiElementResolveResult(it.first ) })
             val (resolved, sub) = firstVariant
             val rawFieldType = resolved.type ?: hint ?: TolkTy.Unknown
             return rawFieldType.substitute(sub)

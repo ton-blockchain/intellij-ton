@@ -24,6 +24,20 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
         LookupElementBuilder.create("method_id").withInsertHandler(ParInsertHandler),
         LookupElementBuilder.create("deprecated"),
         LookupElementBuilder.create("custom").withInsertHandler(ParInsertHandler),
+        LookupElementBuilder.create("overflow1023_policy")
+            .withTailText("(\"suppress\")")
+            .withInsertHandler { ctx, item ->
+            ParInsertHandler.handleInsert(ctx, item)
+
+            // Проверяем, находится ли курсор внутри пустых скобок
+            val offset = ctx.editor.caretModel.offset
+            val chars = ctx.document.charsSequence
+
+            if (offset < chars.length && chars[offset] == ')' && offset > 0 && chars[offset - 1] == '(') {
+                ctx.document.insertString(offset, "\"suppress\"")
+                ctx.editor.caretModel.moveToOffset(offset + "\"suppress\")".length)
+            }
+        }
     )
 
     override fun addCompletions(
@@ -54,4 +68,5 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
             }
         }
     }
+
 }

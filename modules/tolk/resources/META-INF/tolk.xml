@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin package="org.ton.intellij.tolk">
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="Tolk"
                   implementationClass="org.ton.intellij.tolk.TolkFileType"
@@ -12,6 +12,8 @@
         <lang.syntaxHighlighterFactory language="Tolk"
                                        implementationClass="org.ton.intellij.tolk.highlighting.TolkSyntaxHighlighterFactory"/>
         <lang.commenter language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkCommenter"/>
+        <enterHandlerDelegate implementation="org.ton.intellij.tolk.ide.typing.TolkEnterInLineCommentHandler"
+                              id="TolkEnterInLineCommentHandler"/>
 
         <lang.braceMatcher language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkPairedBraceMatcher"/>
         <lang.quoteHandler language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkQuoteHandler"/>
@@ -47,11 +49,13 @@
         <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkIncludeDefinition"
                                  implementationClass="org.ton.intellij.tolk.psi.impl.TolkIncludePathElementManipulator"/>
 
+        <colorSettingsPage implementation="org.ton.intellij.tolk.ide.colors.TolkColorSettingsPage"/>
+        <additionalTextAttributes scheme="Default" file="colorSchemes/TolkDefault.xml"/>
+        <additionalTextAttributes scheme="Dark" file="colorSchemes/TolkDark.xml"/>
 
         <liveTemplateContext
                 contextId="tolk"
                 implementation="org.ton.intellij.tolk.template.TolkEverywhereContextType"/>
-        <defaultLiveTemplates file="/liveTemplates/tolkHidden.xml" hidden="true"/>
 
         <vcs.codeVisionLanguageContext language="Tolk"
                                        implementationClass="org.ton.intellij.tolk.codeInsight.hint.codeVision.TolkVcsCodeVisionContext"/>
@@ -105,6 +109,7 @@
         <!--        </codeInsight.declarativeInlayProvider>-->
 
 
+        <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkDumbAnnotator"/>
         <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkAnnotator"/>
         <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkDocAnnotator"/>
 

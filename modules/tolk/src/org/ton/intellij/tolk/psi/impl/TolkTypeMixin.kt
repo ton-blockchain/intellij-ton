@@ -13,7 +13,6 @@ import org.ton.intellij.tolk.stub.TolkTypeDefStub
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkTypeAliasTy
 import org.ton.intellij.tolk.type.render
-import org.ton.intellij.util.greenStub
 import org.ton.intellij.util.recursionGuard
 import javax.swing.Icon
 
@@ -33,6 +32,9 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
             } ?: TolkTy.Unknown
             return TolkTypeAliasTy(this, typeExpressionType)
         }
+
+    override val isDeprecated: Boolean
+        get() = greenStub?.isDeprecated ?: super.isDeprecated
 
     override fun getBaseIcon() = TolkIcons.TYPE_ALIAS
 
@@ -55,6 +57,3 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
 
 val TolkTypeDef.annotationList
     get() = PsiTreeUtil.getChildrenOfTypeAsList(this, TolkAnnotation::class.java)
-
-val TolkTypeDef.isDeprecated: Boolean
-    get() = greenStub?.isDeprecated ?: annotationList.any { it.identifier?.textMatches("deprecated") == true }

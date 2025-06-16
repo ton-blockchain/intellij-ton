@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin package="org.ton.intellij.asm">
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="TVM assembly"
                   implementationClass="org.ton.intellij.asm.AsmFileType"

@@ -1,18 +1,26 @@
 package org.ton.intellij.tolk.psi.impl
 
+import com.intellij.codeInsight.AutoPopupController
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
+import com.intellij.codeInsight.editorActions.TabOutScopesTracker
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.SimpleModificationTracker
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
-import com.intellij.psi.util.*
+import com.intellij.psi.util.CachedValue
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.isAncestor
 import com.intellij.util.SmartList
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.ide.completion.TolkCompletionContributor
+import org.ton.intellij.tolk.ide.completion.alreadyHasCallParens
+import org.ton.intellij.tolk.ide.completion.getElementOfType
 import org.ton.intellij.tolk.perf
 import org.ton.intellij.tolk.presentation.TolkPsiRenderer
 import org.ton.intellij.tolk.presentation.renderParameterList
@@ -77,6 +85,9 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
             val receiverType = functionReceiver?.typeExpression?.type ?: TolkTy.Unknown
             createCachedResult(receiverType)
         }
+
+    override val isDeprecated: Boolean
+        get() = greenStub?.isDeprecated ?: annotationList.hasDeprecatedAnnotation()
 
     override val modificationTracker = SimpleModificationTracker()
 
@@ -147,9 +158,7 @@ private fun TolkFunction.resolveReturnType(): TolkTy {
     } catch (e: CyclicReferenceException) {
         null
     } ?: return TolkTy.Unknown
-    val result = if (inference.unreachable == TolkUnreachableKind.ThrowStatement) {
-        TolkTy.Never
-    } else if (inference.returnStatements.isNotEmpty()) {
+    val result = if (inference.returnStatements.isNotEmpty()) {
         inference.returnStatements.asSequence().map {
             it.expression?.type
         }.filterNotNull().fold<TolkTy, TolkTy?>(null) { a, b ->
@@ -166,17 +175,11 @@ val TolkFunction.declaredType: TolkFunctionTy get() = (this as TolkFunctionMixin
 val TolkFunction.isMutable: Boolean
     get() = greenStub?.isMutable ?: (node.findChildByType(TolkElementTypes.TILDE) != null)
 
-val TolkFunction.annotationList: List<TolkAnnotation>
-    get() = PsiTreeUtil.getChildrenOfTypeAsList(this, TolkAnnotation::class.java)
-
-val TolkFunction.isDeprecated: Boolean
-    get() = greenStub?.isDeprecated ?: annotationList.any { it.identifier?.textMatches("deprecated") == true }
-
 val TolkFunction.getKeyword get() = node.findChildByType(TolkElementTypes.GET_KEYWORD)
 
 val TolkFunction.isGetMethod: Boolean
     get() = greenStub?.isGetMethod
-        ?: (getKeyword != null || annotationList.any { it.identifier?.textMatches("method_id") == true })
+        ?: (getKeyword != null || this@isGetMethod.annotationList.any { it.identifier?.textMatches("method_id") == true })
 
 val TolkFunction.isEntryPoint: Boolean
     get() = greenStub?.isEntryPoint ?: run {
@@ -202,7 +205,10 @@ val TolkFunction.hasSelf: Boolean
     get() = greenStub?.hasSelf ?: (parameterList?.selfParameter != null)
 
 val TolkFunction.hasReceiver: Boolean
-    get() = functionReceiver != null
+    get() = greenStub?.hasReceiver ?: (functionReceiver != null)
+
+val TolkFunction.isStatic: Boolean
+    get() = !hasSelf && hasReceiver
 
 val TolkFunction.returnTy get() = (this as TolkFunctionMixin).returnTy
 
@@ -229,16 +235,19 @@ fun TolkFunction.toLookupElement(): LookupElement {
             .withTailText(getTailText())
             .appendTailText(getExtraTailText(), true)
             .withInsertHandler { context, item ->
-                val offset = context.editor.caretModel.offset
-                val chars = context.document.charsSequence
-
-                val hasOpenBracket = chars.indexOfSkippingSpace('(', offset) != null
-
-                if (!hasOpenBracket) {
-                    val offset = if (parameterList?.parameterList.isNullOrEmpty()) 2 else 1
-                    context.document.insertString(context.editor.caretModel.offset, "()")
-                    context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
-                    context.commitDocument()
+                val isMethodCall = context.getElementOfType<TolkFieldLookup>() != null
+                val document = context.document
+                if (!context.alreadyHasCallParens) {
+                    document.insertString(context.selectionEndOffset, "()")
+                }
+                val hasParameters = !parameterList?.parameterList.isNullOrEmpty()
+                val caretShift = if (!hasParameters && (isMethodCall || !hasSelf)) 2 else 1
+                EditorModificationUtil.moveCaretRelatively(context.editor, caretShift)
+                if (!context.alreadyHasCallParens && caretShift == 1) {
+                    TabOutScopesTracker.getInstance().registerEmptyScopeAtCaret(context.editor)
+                }
+                if (hasParameters) {
+                    AutoPopupController.getInstance(project)?.autoPopupParameterInfo(context.editor, this)
                 }
 
                 val insertFile = context.file as? TolkFile ?: return@withInsertHandler
@@ -257,14 +266,4 @@ private fun TolkFunction.getTailText(): String {
 private fun TolkFunction.getExtraTailText(): String {
     val receiver = functionReceiver?.typeExpression ?: return ""
     return " of ${TolkPsiRenderer().renderTypeExpression(receiver)}"
-}
-
-private fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
-    for (i in startIndex until this.length) {
-        val currentChar = this[i]
-        if (c == currentChar) return i
-        if (currentChar != ' ' && currentChar != '\t') return null
-    }
-
-    return null
 }

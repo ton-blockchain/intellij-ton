@@ -4,14 +4,15 @@ import com.intellij.psi.tree.IElementType
 import com.intellij.psi.tree.TokenSet
 import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.BLOCK_COMMENT
-import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_COMMENT
+import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_BLOCK_COMMENT
 import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.EOL_COMMENT
+import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_EOL_COMMENT
 import org.ton.intellij.util.tokenSetOf
 
 open class TolkTokenType(val name: String) : IElementType(name, TolkLanguage)
 
 val TOLK_REGULAR_COMMENTS get() = tokenSetOf(BLOCK_COMMENT, EOL_COMMENT)
-val TOLK_DOC_COMMENTS get() = tokenSetOf(DOC_COMMENT)
+val TOLK_DOC_COMMENTS get() = tokenSetOf(DOC_BLOCK_COMMENT, DOC_EOL_COMMENT)
 val TOLK_COMMENTS get() = TokenSet.orSet(TOLK_REGULAR_COMMENTS, TOLK_DOC_COMMENTS)
 
 val TOLK_KEYWORDS = tokenSetOf(

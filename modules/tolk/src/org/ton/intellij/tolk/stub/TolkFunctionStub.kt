@@ -14,6 +14,7 @@ class TolkFunctionStub(
     val isBuiltin: Boolean,
     val isDeprecated: Boolean,
     val hasSelf: Boolean,
+    val hasReceiver: Boolean,
     val isEntryPoint: Boolean
 ) : TolkNamedStub<TolkFunction>(parent, elementType, name) {
     override fun toString(): String = buildString {
@@ -25,6 +26,7 @@ class TolkFunctionStub(
         append("isBuiltin=").append(isBuiltin).append(", ")
         append("isDeprecated=").append(isDeprecated).append(", ")
         append("hasSelf=").append(hasSelf).append(", ")
+        append("hasReceiver=").append(hasReceiver).append(", ")
         append("isEntryPoint=").append(isEntryPoint)
         append(")")
     }

@@ -6,6 +6,7 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import org.ton.intellij.tolk.doc.psi.*
+import org.ton.intellij.tolk.ide.colors.TolkColor
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.util.ancestorStrict
 import org.ton.intellij.util.descendantOfTypeStrict

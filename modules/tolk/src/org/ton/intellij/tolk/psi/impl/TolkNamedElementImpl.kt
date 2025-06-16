@@ -34,7 +34,9 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
 
     override fun getPresentation(): ItemPresentation? {
         return object : ItemPresentation {
-            override fun getPresentableText(): String? = when(this@TolkNamedElementImpl) {
+            override fun getLocationString(): String = containingFile.name
+
+            override fun getPresentableText(): String? = when (this@TolkNamedElementImpl) {
                 is TolkFunction -> buildString {
                     append(name)
                     append("(")
@@ -49,28 +51,22 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
                         append(it.render())
                     } ?: append("): void")
                 }
+
                 is TolkConstVar -> buildString {
                     append(name)
                     append(": ")
                     append((type ?: TolkTy.Unknown).render())
                 }
+
                 is TolkGlobalVar -> buildString {
                     append(name)
                     append(": ")
                     append((type ?: TolkTy.Unknown).render())
                 }
+
                 is TolkTypeDef -> name
                 else -> name
             }
-
-//            override fun getIcon(unused: Boolean): Icon? = when (this@TolkNamedElementImpl) {
-//                is TolkFunction -> TolkIcons.FUNCTION
-//                is TolkParameter -> TolkIcons.PARAMETER
-//                is TolkTypeParameter -> TolkIcons.PARAMETER
-//                is TolkConstVar -> TolkIcons.CONSTANT
-//                is TolkGlobalVar -> TolkIcons.GLOBAL_VARIABLE
-//                else -> null
-//            }
 
             override fun getIcon(unused: Boolean): Icon? = this@TolkNamedElementImpl.getIcon(0)
         }

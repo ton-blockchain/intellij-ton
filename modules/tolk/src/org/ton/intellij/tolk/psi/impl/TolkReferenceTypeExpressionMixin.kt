@@ -33,13 +33,10 @@ abstract class TolkReferenceTypeExpressionMixin : ASTWrapperPsiElement, TolkRefe
             CachedValueProvider.Result.create(type, this)
         }
 
-     val referenceNameElement: PsiElement get() = identifier
-
-     val referenceName: String
-        get() = referenceNameElement.text.replace("`", "")
+     override val referenceNameElement: PsiElement get() = identifier
 
     override fun getReference(): TolkTypeReference? {
-        val referenceName = referenceName
+        val referenceName = referenceName ?: return null
         val primitiveType = TolkTy.byName(referenceName)
         if (primitiveType != null) {
             return null
@@ -57,7 +54,7 @@ abstract class TolkReferenceTypeExpressionMixin : ASTWrapperPsiElement, TolkRefe
 
             resolved is TolkTypedElement -> resolved.type
 
-            parentOfType<TolkFunctionReceiver>() != null -> TolkTypeParameterTy.create(this)
+            parentOfType<TolkFunctionReceiver>() != null && typeArgumentList == null -> TolkTypeParameterTy.create(this)
 
             else -> TolkTy.Unknown
         }

@@ -5,7 +5,6 @@ import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.functionSymbol
-import org.ton.intellij.tolk.psi.impl.isDeprecated
 
 class TolkDeprecationInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor {

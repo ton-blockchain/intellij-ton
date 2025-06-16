@@ -1,5 +1,7 @@
 package org.ton.intellij.util
 
+import com.intellij.codeInsight.lookup.LookupElement
+import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.extapi.psi.StubBasedPsiElementBase
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.application.ApplicationManager
@@ -134,6 +136,9 @@ fun ASTNode.shouldCreateStubIfParentIsStub(): Boolean {
     return (parentType is IStubElementType<*, *> && parentType.shouldCreateStub(parent)) ||
             parentType is IStubFileElementType<*>
 }
+
+val LookupElement.presentation: LookupElementPresentation
+    get() = LookupElementPresentation().also { renderElement(it) }
 
 // Registry.intValue("ide.completion.variant.limit") / 2,
 // TODO: 2024.2 - verifier fails because in 2024.3 rewritten to Kotlin companion object

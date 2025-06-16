@@ -1,4 +1,4 @@
-<idea-plugin url="https://ton.org" xmlns:xi="http://www.w3.org/2001/XInclude">
+<idea-plugin package="org.ton.intellij" url="https://ton.org" xmlns:xi="http://www.w3.org/2001/XInclude" allow-bundled-update="true">
     <id>org.ton.intellij-ton</id>
     <name>TON</name>
     <category>Languages</category>
@@ -9,6 +9,7 @@
     </description>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
+
     <xi:include href="/META-INF/asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/tolk.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/func.xml" xpointer="xpointer(/idea-plugin/*)"/>

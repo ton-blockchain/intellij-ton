@@ -42,7 +42,7 @@ import static org.ton.intellij.tolk.psi.TolkElementTypes.*;
           case IN_BLOCK_COMMENT:
               return BLOCK_COMMENT;
           case IN_BLOCK_DOC:
-              return DOC_COMMENT;
+              return DOC_BLOCK_COMMENT;
           default:
               throw new IllegalStateException("Unexpected state: " + state);
       }
@@ -54,7 +54,7 @@ import static org.ton.intellij.tolk.psi.TolkElementTypes.*;
       zzStartRead = zzPostponedMarkedPos;
       zzPostponedMarkedPos = -1;
 
-      return DOC_COMMENT;
+      return DOC_EOL_COMMENT;
   }
 %}
 

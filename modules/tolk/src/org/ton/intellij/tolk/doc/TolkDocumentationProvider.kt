@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.editor.richcopy.HtmlSyntaxInfoUtil
 import com.intellij.psi.*
 import org.ton.intellij.tolk.doc.psi.TolkDocComment
-import org.ton.intellij.tolk.highlighting.TolkColor
+import org.ton.intellij.tolk.ide.colors.TolkColor
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.isMutable
 import org.ton.intellij.util.markdown.MarkdownDocAstBuilder
@@ -105,7 +105,7 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
         if (function.isMutable) {
             append("~")
         }
-        appendStyledSpan(TolkColor.FUNCTION_DECLARATION.attributes, function.name)
+        appendStyledSpan(TolkColor.FUNCTION.attributes, function.name)
         appendStyledSpan(TolkColor.PARENTHESES.attributes, "(")
         function.parameterList?.parameterList?.joinTo(this) { param ->
             buildString {

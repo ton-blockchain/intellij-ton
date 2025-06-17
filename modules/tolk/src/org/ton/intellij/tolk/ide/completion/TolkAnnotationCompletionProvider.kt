@@ -11,6 +11,7 @@ import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
+import org.ton.intellij.tolk.TolkIcons
 
 object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
     override val elementPattern: ElementPattern<out PsiElement>
@@ -38,16 +39,16 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
                 ctx.editor.caretModel.moveToOffset(offset + "\"suppress\")".length)
             }
         }
-    )
+    ).map {
+        it.withIcon(TolkIcons.ANNOTATION)
+    }
 
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
         result: CompletionResultSet
     ) {
-        lookupElements.forEach {
-            result.addElement(it)
-        }
+        result.addAllElements(lookupElements)
     }
 
     private object ParInsertHandler : InsertHandler<LookupElement> {

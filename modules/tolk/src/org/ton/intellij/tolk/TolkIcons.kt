@@ -10,6 +10,7 @@ object TolkIcons {
     val PARAMETER = AllIcons.Nodes.Parameter
     val CONSTANT = AllIcons.Nodes.Constant
     val VARIABLE = AllIcons.Nodes.Variable
+    val ANNOTATION = AllIcons.Nodes.Annotationtype
     val FIELD = IconLoader.getIcon("/icons/field.svg", TolkIcons::class.java)
     val STRUCTURE = IconLoader.getIcon("/icons/struct.svg", TolkIcons::class.java)
     val TYPE_ALIAS = IconLoader.getIcon("/icons/typeAlias.svg", TolkIcons::class.java)

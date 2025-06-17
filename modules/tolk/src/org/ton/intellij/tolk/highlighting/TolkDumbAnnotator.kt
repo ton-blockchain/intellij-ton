@@ -10,8 +10,8 @@ import com.intellij.psi.util.elementType
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.ide.colors.TolkColor
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.psi.impl.hasReceiver
-import org.ton.intellij.tolk.psi.impl.hasSelf
+import org.ton.intellij.tolk.psi.impl.isMethod
+import org.ton.intellij.tolk.psi.impl.isStatic
 import org.ton.intellij.util.childOfType
 
 class TolkDumbAnnotator : Annotator, DumbAware {
@@ -69,8 +69,8 @@ class TolkDumbAnnotator : Annotator, DumbAware {
 
                 is TolkFunction -> {
                     when {
-                        element.hasSelf -> TolkColor.METHOD.textAttributesKey
-                        element.hasReceiver -> TolkColor.ASSOC_FUNCTION.textAttributesKey
+                        element.isMethod -> TolkColor.METHOD.textAttributesKey
+                        element.isStatic -> TolkColor.STATIC_FUNCTION.textAttributesKey
                         else -> TolkColor.FUNCTION.textAttributesKey
                     }
                 }

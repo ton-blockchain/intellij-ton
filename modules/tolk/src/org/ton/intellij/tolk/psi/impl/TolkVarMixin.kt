@@ -22,9 +22,7 @@ abstract class TolkVarMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkVar
 
     override fun getTextOffset(): Int = identifier.textOffset
 
-    override fun getBaseIcon() = TolkIcons.VARIABLE
-
-    override fun getIcon(flags: Int): Icon = getBaseIcon()
+    override fun getIcon(flags: Int): Icon = TolkIcons.VARIABLE
 
     override val type: TolkTy?
         get() = typeExpression?.type ?: inference?.getType(this)

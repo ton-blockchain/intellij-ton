@@ -92,7 +92,7 @@ class TolkAnnotator : Annotator {
             is TolkFunction -> {
                 val color = when {
                     resolved.hasSelf -> TolkColor.METHOD_CALL.textAttributesKey
-                    resolved.hasReceiver -> TolkColor.ASSOC_FUNCTION_CALL.textAttributesKey
+                    resolved.hasReceiver -> TolkColor.STATIC_FUNCTION_CALL.textAttributesKey
                     else -> TolkColor.FUNCTION_CALL.textAttributesKey
                 }
                 holder.info(color)

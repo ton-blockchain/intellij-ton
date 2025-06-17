@@ -19,10 +19,10 @@ enum class TolkColor(
 
     FUNCTION(TolkBundle.messagePointer("settings.tolk.color.function.declaration"), Default.FUNCTION_DECLARATION),
     METHOD(TolkBundle.messagePointer("settings.tolk.color.method.declaration"), Default.INSTANCE_METHOD),
-    ASSOC_FUNCTION(TolkBundle.messagePointer("settings.tolk.color.assoc_function.declaration"), Default.STATIC_METHOD),
+    STATIC_FUNCTION(TolkBundle.messagePointer("settings.tolk.color.static_function.declaration"), Default.STATIC_METHOD),
     FUNCTION_CALL(TolkBundle.messagePointer("settings.tolk.color.function.call"), Default.FUNCTION_CALL),
     METHOD_CALL(TolkBundle.messagePointer("settings.tolk.color.method.call"), Default.FUNCTION_CALL),
-    ASSOC_FUNCTION_CALL(TolkBundle.messagePointer("settings.tolk.color.assoc_function.call"), Default.STATIC_METHOD),
+    STATIC_FUNCTION_CALL(TolkBundle.messagePointer("settings.tolk.color.static_function.call"), Default.STATIC_METHOD),
 
     PARAMETER(TolkBundle.messagePointer("settings.tolk.color.parameter"), Default.PARAMETER),
     MUT_PARAMETER(TolkBundle.messagePointer("settings.tolk.color.mutable_parameter"), Default.PARAMETER),

@@ -65,7 +65,7 @@ class TolkFunctionStubElementType(
             isGetMethod = psi.isGetMethod,
             hasAsm = psi.hasAsm,
             isBuiltin = psi.isBuiltin,
-            isDeprecated = psi.isDeprecated,
+            isDeprecated = psi.annotations.hasDeprecatedAnnotation(),
             hasSelf = psi.hasSelf,
             hasReceiver = psi.hasReceiver,
             isEntryPoint = psi.isEntryPoint

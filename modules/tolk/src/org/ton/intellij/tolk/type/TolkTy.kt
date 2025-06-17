@@ -13,11 +13,16 @@ interface TolkTy : TypeFoldable<TolkTy> {
         return TolkUnionTy.create(this, Null)
     }
 
+    fun removeNullable(): TolkTy {
+        if (this is TolkUnionTy && variants.contains(Null)) {
+            return subtract(Null)
+        }
+        return this
+    }
+
     fun isNullable(): Boolean {
         return this is TolkUnionTy && variants.contains(Null)
     }
-
-    fun removeNullability(): TolkTy = this
 
     fun actualType(): TolkTy = this
 
@@ -97,6 +102,38 @@ interface TolkTy : TypeFoldable<TolkTy> {
     }
 }
 
+// return `T`, so that `T + subtract_type` = type
+// example: `int?` - `null` = `int`
+// example: `int | slice | builder | bool` - `bool | slice` = `int | builder`
+// what for: `if (x != null)` / `if (x is T)`, to smart cast x inside if
+fun TolkTy?.subtract(other: TolkTy?): TolkTy {
+    val lhsUnion = this as? TolkUnionTy ?: return TolkNeverTy
+
+    val restVariants = ArrayList<TolkTy>()
+    if (other is TolkUnionTy) {
+        if (lhsUnion.containsAll(other)) {
+            for (lhsVariant in lhsUnion.variants) {
+                if (!other.contains(lhsVariant)) {
+                    restVariants.add(lhsVariant)
+                }
+            }
+        }
+    } else if (other != null && lhsUnion.contains(other)) {
+        for (lhsVariant in lhsUnion.variants) {
+            if (lhsVariant.actualType() != other.actualType()) {
+                restVariants.add(lhsVariant)
+            }
+        }
+    }
+    if (restVariants.isEmpty()) {
+        return TolkNeverTy
+    }
+    if (restVariants.size == 1) {
+        return restVariants.first()
+    }
+    return TolkUnionTy.create(restVariants)
+}
+
 fun TolkTy?.isKnown(): Boolean {
     return !(this == null || this == TolkTy.Unknown)
 }
@@ -159,8 +196,6 @@ object TolkNullTy : TolkPrimitiveTy {
         if (other == this) return this
         return TolkTy.union(other, this)
     }
-
-    override fun removeNullability(): TolkTy = Never
 
     override fun toString(): String = "null"
 }

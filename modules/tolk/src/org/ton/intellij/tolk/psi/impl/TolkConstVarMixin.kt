@@ -17,8 +17,5 @@ abstract class TolkConstVarMixin : TolkNamedElementImpl<TolkConstVarStub>, TolkC
     override val type: TolkTy?
         get() = typeExpression?.type ?: inference?.getType(this)
 
-    override val isDeprecated: Boolean
-        get() = greenStub?.isDeprecated ?: super.isDeprecated
-
     override fun getIcon(flags: Int): Icon = TolkIcons.CONSTANT
 }

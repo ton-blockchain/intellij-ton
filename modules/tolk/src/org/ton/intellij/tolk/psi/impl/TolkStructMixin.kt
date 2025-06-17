@@ -23,12 +23,7 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
 
     override val type: TolkStructTy get() = declaredType
 
-    override val isDeprecated: Boolean
-        get() = greenStub?.isDeprecated ?: super.isDeprecated
-
-    override fun getBaseIcon() = TolkIcons.STRUCTURE
-
-    override fun getIcon(flags: Int): Icon? = getBaseIcon()
+    override fun getIcon(flags: Int): Icon? = TolkIcons.STRUCTURE
 
     override fun isEquivalentTo(another: PsiElement?): Boolean {
         if (this === another) return true

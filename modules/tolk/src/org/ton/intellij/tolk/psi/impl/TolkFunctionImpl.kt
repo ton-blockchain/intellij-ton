@@ -1,13 +1,7 @@
 package org.ton.intellij.tolk.psi.impl
 
-import com.intellij.codeInsight.AutoPopupController
-import com.intellij.codeInsight.completion.PrioritizedLookupElement
-import com.intellij.codeInsight.editorActions.TabOutScopesTracker
-import com.intellij.codeInsight.lookup.LookupElement
-import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.diagnostic.logger
-import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.SimpleModificationTracker
 import com.intellij.psi.PsiElement
@@ -18,16 +12,12 @@ import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.isAncestor
 import com.intellij.util.SmartList
 import org.ton.intellij.tolk.TolkIcons
-import org.ton.intellij.tolk.ide.completion.TolkCompletionContributor
-import org.ton.intellij.tolk.ide.completion.alreadyHasCallParens
-import org.ton.intellij.tolk.ide.completion.getElementOfType
-import org.ton.intellij.tolk.perf
-import org.ton.intellij.tolk.presentation.TolkPsiRenderer
-import org.ton.intellij.tolk.presentation.renderParameterList
-import org.ton.intellij.tolk.presentation.renderTypeExpression
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.TolkFunctionStub
-import org.ton.intellij.tolk.type.*
+import org.ton.intellij.tolk.type.CyclicReferenceException
+import org.ton.intellij.tolk.type.TolkFunctionTy
+import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.inference
 import org.ton.intellij.util.greenStub
 import javax.swing.Icon
 
@@ -42,8 +32,6 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
         }
         return TolkIcons.FUNCTION
     }
-
-    override fun getBaseIcon(): Icon? = TolkIcons.FUNCTION
 
     override val type: TolkFunctionTy
         get() = CachedValuesManager.getCachedValue(this, FUNCTION_TYPE) {
@@ -85,9 +73,6 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
             val receiverType = functionReceiver?.typeExpression?.type ?: TolkTy.Unknown
             createCachedResult(receiverType)
         }
-
-    override val isDeprecated: Boolean
-        get() = greenStub?.isDeprecated ?: annotationList.hasDeprecatedAnnotation()
 
     override val modificationTracker = SimpleModificationTracker()
 
@@ -179,7 +164,10 @@ val TolkFunction.getKeyword get() = node.findChildByType(TolkElementTypes.GET_KE
 
 val TolkFunction.isGetMethod: Boolean
     get() = greenStub?.isGetMethod
-        ?: (getKeyword != null || this@isGetMethod.annotationList.any { it.identifier?.textMatches("method_id") == true })
+        ?: (getKeyword != null || annotations.hasAnnotation("method_id"))
+
+val TolkFunction.hasDeprecatedAnnotation: Boolean
+    get() = greenStub?.isDeprecated ?: annotations.hasDeprecatedAnnotation()
 
 val TolkFunction.isEntryPoint: Boolean
     get() = greenStub?.isEntryPoint ?: run {
@@ -207,63 +195,12 @@ val TolkFunction.hasSelf: Boolean
 val TolkFunction.hasReceiver: Boolean
     get() = greenStub?.hasReceiver ?: (functionReceiver != null)
 
+val TolkFunction.isMethod: Boolean
+    get() = hasSelf && hasReceiver
+
 val TolkFunction.isStatic: Boolean
     get() = !hasSelf && hasReceiver
 
 val TolkFunction.returnTy get() = (this as TolkFunctionMixin).returnTy
 
 val TolkFunction.receiverTy get() = (this as TolkFunctionMixin).receiverTy
-
-fun TolkFunction.toLookupElement(): LookupElement {
-    val typeText = perf("function return type render") {
-        returnTy.render()
-    }
-    return PrioritizedLookupElement.withPriority(
-        LookupElementBuilder.createWithIcon(this)
-            .withTypeText(typeText)
-            .let { builder ->
-                typeParameterList?.let { list ->
-                    builder.appendTailText(
-                        list.typeParameterList.joinToString(
-                            prefix = "<",
-                            postfix = ">"
-                        ) { it.name.toString() },
-                        true
-                    )
-                } ?: builder
-            }
-            .withTailText(getTailText())
-            .appendTailText(getExtraTailText(), true)
-            .withInsertHandler { context, item ->
-                val isMethodCall = context.getElementOfType<TolkFieldLookup>() != null
-                val document = context.document
-                if (!context.alreadyHasCallParens) {
-                    document.insertString(context.selectionEndOffset, "()")
-                }
-                val hasParameters = !parameterList?.parameterList.isNullOrEmpty()
-                val caretShift = if (!hasParameters && (isMethodCall || !hasSelf)) 2 else 1
-                EditorModificationUtil.moveCaretRelatively(context.editor, caretShift)
-                if (!context.alreadyHasCallParens && caretShift == 1) {
-                    TabOutScopesTracker.getInstance().registerEmptyScopeAtCaret(context.editor)
-                }
-                if (hasParameters) {
-                    AutoPopupController.getInstance(project)?.autoPopupParameterInfo(context.editor, this)
-                }
-
-                val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-                val includeCandidateFile = this.originalElement.containingFile as? TolkFile ?: return@withInsertHandler
-                insertFile.import(includeCandidateFile)
-            },
-        TolkCompletionContributor.FUNCTION_PRIORITY
-    )
-}
-
-private fun TolkFunction.getTailText(): String {
-    val parameterList = parameterList ?: return "()"
-    return TolkPsiRenderer().renderParameterList(parameterList)
-}
-
-private fun TolkFunction.getExtraTailText(): String {
-    val receiver = functionReceiver?.typeExpression ?: return ""
-    return " of ${TolkPsiRenderer().renderTypeExpression(receiver)}"
-}

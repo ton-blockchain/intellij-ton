@@ -6,26 +6,20 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
-import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
-import org.ton.intellij.tolk.TolkIcons
-import org.ton.intellij.tolk.ide.completion.TolkCommonCompletionProvider.TolkCompletionContext
-import org.ton.intellij.tolk.perf
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.impl.hasDeprecatedAnnotation
 import org.ton.intellij.tolk.psi.impl.hasReceiver
-import org.ton.intellij.tolk.psi.impl.toLookupElement
+import org.ton.intellij.tolk.psi.impl.isStatic
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
-import org.ton.intellij.tolk.type.TolkFunctionTy
-import org.ton.intellij.tolk.type.TolkTy
-import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
 import org.ton.intellij.util.psiElement
-import kotlin.time.Duration.Companion.milliseconds
+import java.util.*
 
 object TolkCommonCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
@@ -54,10 +48,11 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         if (position != element.identifier) return
 
         val project = parameters.position.project
-        val file = element.containingFile.originalFile as? TolkFile ?: return
 
+        val ctx = TolkCompletionContext(element)
         val completionLimit = REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
         var addedElements = 0
+        val result = DeferredCompletionResultSet(result)
         fun checkLimit(): Boolean {
             if (addedElements >= completionLimit) {
                 result.restartCompletionOnAnyPrefixChange()
@@ -70,7 +65,11 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
 
         if (!collectLocalVariables(element) { localSymbol ->
                 if (!checkLimit()) return@collectLocalVariables false
-                result.addElement(localSymbol.toLookupElement())
+                result.addElement(localSymbol.toLookupElementBuilder(ctx)
+                    .toTolkLookupElement(TolkLookupElementData(
+                        isLocal = true,
+                        elementKind = TolkLookupElementData.ElementKind.VARIABLE
+                    )))
                 true
             }
         ) {
@@ -96,259 +95,84 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             )
         )
 
-        val fileResolveScope = file.resolveScope
         val addedNamedElements = HashSet<TolkNamedElement>()
         val prefixMatcher = result.prefixMatcher
+        val deferredElements = LinkedList<LookupElement>()
 
-        fun processNamedElement(namedElement: TolkSymbolElement, isImported: Boolean): Boolean {
-            val name = namedElement.name ?: return true
+        fun processNamedElement(element: TolkSymbolElement): Boolean {
+            val name = element.name ?: return true
             if (!prefixMatcher.prefixMatches(name)) return true
-            if (!addedNamedElements.add(namedElement)) return true
+            if (!addedNamedElements.add(element)) return true
 
-            if (namedElement is TolkFunction && namedElement.hasReceiver) return true
+            if (element is TolkFunction && element.hasReceiver) return true
             if (!checkLimit()) return false
-            when (namedElement) {
-                is TolkFunction -> result.addElement(
-                    PrioritizedLookupElement.withPriority(
-                        namedElement.toLookupElement(),
-                        if (isImported) TolkCompletionContributor.FUNCTION_PRIORITY
-                        else TolkCompletionContributor.NOT_IMPORTED_FUNCTION_PRIORITY
-                    )
-                )
+            when (element) {
+                is TolkFunction -> {
+                    if (!checkLimit()) return false
+                    val lookupElement = element.toLookupElementBuilder(ctx)
+                        .toTolkLookupElement(
+                            TolkLookupElementData(
+                                isDeferredLookup = when (name) {
+                                    "getDeclaredPackPrefix",
+                                    "getDeclaredPackPrefixLen",
+                                    "stackMoveToTop" -> true
 
-                is TolkConstVar -> result.addElement(
-                    namedElement.toLookupElementBuilder(TolkCompletionContext(element), isImported)
-                )
+                                    else -> false
+                                },
+                                elementKind = when {
+                                    element.hasDeprecatedAnnotation -> TolkLookupElementData.ElementKind.DEPRECATED
+                                    element.isStatic -> TolkLookupElementData.ElementKind.STATIC_FUNCTION
+                                    else -> TolkLookupElementData.ElementKind.DEFAULT
+                                },
+                            )
+                        )
+                    result.addElement(lookupElement)
+                }
 
-                is TolkGlobalVar -> result.addElement(
-                    namedElement.toLookupElementBuilder(TolkCompletionContext(element), isImported)
-                )
-
-                is TolkStruct -> result.addElement(
-                    PrioritizedLookupElement.withPriority(
-                        namedElement.toLookupElementBuilder(TolkCompletionContext(element), isImported),
-                        if (isImported) TolkCompletionPriorities.IMPORTED_TYPE
-                        else TolkCompletionPriorities.NOT_IMPORTED_TYPE
-                    )
-                )
-
-                is TolkTypeDef -> result.addElement(
-                    PrioritizedLookupElement.withPriority(
-                        namedElement.toLookupElementBuilder(TolkCompletionContext(element), isImported),
-                        if (isImported) TolkCompletionPriorities.IMPORTED_TYPE
-                        else TolkCompletionPriorities.NOT_IMPORTED_TYPE
-                    )
-                )
+                is TolkConstVar,
+                is TolkGlobalVar,
+                is TolkStruct ->  {
+                    element.toLookupElementBuilder(ctx)
+                        .toTolkLookupElement(TolkLookupElementData(
+                            elementKind = when {
+                                element.annotations.hasDeprecatedAnnotation() -> TolkLookupElementData.ElementKind.DEPRECATED
+                                else -> TolkLookupElementData.ElementKind.DEFAULT
+                            }
+                        ))
+                }
+                is TolkTypeDef -> result.addElement(element.toLookupElementBuilder(ctx))
             }
             return true
         }
 
-        perf("local scope completion") {
-            if (!TolkNamedElementIndex.processAllElements(project, fileResolveScope) {
-                    if (it is TolkSymbolElement) {
-                        processNamedElement(it, true)
-                    } else {
-                        // Skip non-symbol elements
-                        true
-                    }
-                }) return
-        }
+        if (!TolkNamedElementIndex.processAllElements(project) {
+                if (it is TolkSymbolElement) {
+                    processNamedElement(it)
+                } else {
+                    // Skip non-symbol elements
+                    true
+                }
+            }) return
 
-        perf("global scope completion", 0.milliseconds) {
-            if (!TolkNamedElementIndex.processAllElements(project) {
-                    if (it is TolkSymbolElement) {
-                        processNamedElement(it, false)
-                    } else {
-                        // Skip non-symbol elements
-                        true
-                    }
-                }) return
-        }
+        result.flushDeferredElements()
     }
-
-    data class TolkCompletionContext(
-        val context: TolkElement?
-    )
 }
 
 fun TolkLocalSymbolElement.toLookupElement(): LookupElement {
     return when (this) {
-        is TolkParameter -> {
-            return PrioritizedLookupElement.withPriority(
-                this.toLookupElementBuilder(TolkCompletionContext(this), true),
-                TolkCompletionPriorities.PARAMETER
-            )
-        }
-
-        is TolkSelfParameter -> {
-            return PrioritizedLookupElement.withPriority(
-                LookupElementBuilder.create("self").bold(),
-                TolkCompletionPriorities.PARAMETER
-            )
-        }
-
-        is TolkCatchParameter -> {
-            return PrioritizedLookupElement.withPriority(
-                toLookupElementBuilder(TolkCompletionContext(this), true),
-                TolkCompletionPriorities.LOCAL_VAR
-            )
-        }
-
-        is TolkVarDefinition -> {
-            val lookup =
-                this.toLookupElementBuilder(TolkCompletionContext(this), true)
-            PrioritizedLookupElement.withPriority(
-                lookup, TolkCompletionPriorities.LOCAL_VAR
-            )
-        }
-
         else -> {
             LookupElementBuilder.create(this.name.toString()).withIcon(this.getIcon(0))
         }
     }
 }
 
-fun TolkNamedElement.toLookupElementBuilder(
-    context: TolkCompletionContext,
-    isImported: Boolean
-): LookupElement {
-    val contextElement = context.context
-    val name = this.name ?: ""
-    val file = this.containingFile.originalFile
-    val contextFile = context.context?.containingFile?.originalFile
-    var includePath = if (file == contextFile || contextFile == null) ""
-    else {
-        val contextVirtualFile = contextFile.virtualFile
-        val elementVirtualFile = file.virtualFile
-        if (contextVirtualFile != null && elementVirtualFile != null) {
-            VfsUtilCore.findRelativePath(contextVirtualFile, elementVirtualFile, '/') ?: ""
-        } else {
-            this.containingFile.name
-        }
-    }
-
-    val base = LookupElementBuilder.create(name)
-        .withIcon(this.getIcon(0))
-
-    return when (this) {
-        is TolkFunction -> {
-            val returnType = (this.type as? TolkFunctionTy)?.returnType ?: TolkTy.Unknown
-            PrioritizedLookupElement.withPriority(
-                base
-                    .withTypeText(returnType.render())
-                    .let { builder ->
-                        typeParameterList?.let { list ->
-                            builder.appendTailText(
-                                list.typeParameterList.joinToString(
-                                    prefix = "<",
-                                    postfix = ">"
-                                ) {
-                                    it.name.toString()
-                                }, true
-                            )
-                        } ?: builder
-                    }
-                    .let { builder ->
-                        builder.appendTailText(
-                            parameterList?.parameterList?.joinToString(
-                                prefix = "(",
-                                postfix = ")"
-                            ) {
-                                buildString {
-                                    append(it.name)
-                                    append(": ")
-                                    append((it.type ?: TolkTy.Unknown).render())
-                                }
-                            } ?: "()", true)
-                    }
-                    .withInsertHandler { context, item ->
-                        val offset = context.editor.caretModel.offset
-                        val chars = context.document.charsSequence
-
-                        val absoluteOpeningBracketOffset = chars.indexOfSkippingSpace('(', offset)
-                        val absoluteCloseBracketOffset =
-                            absoluteOpeningBracketOffset?.let { chars.indexOfSkippingSpace(')', it + 1) }
-
-                        if (absoluteOpeningBracketOffset == null) {
-                            val offset = if (this.parameterList?.parameterList.isNullOrEmpty()) 2 else 1
-                            context.editor.document.insertString(context.editor.caretModel.offset, "()")
-                            context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
-                            context.commitDocument()
-                        }
-
-                        if (!isImported) {
-                            val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-                            val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-                            insertFile.import(includeCandidateFile)
-                        }
-                    },
-                if (isImported) TolkCompletionContributor.FUNCTION_PRIORITY
-                else TolkCompletionContributor.NOT_IMPORTED_FUNCTION_PRIORITY
-            )
-        }
-
-        is TolkConstVar -> {
-            PrioritizedLookupElement.withPriority(
-                base
-                    .withTypeText((type ?: TolkTy.Unknown).render())
-                    .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
-                    .withInsertHandler { context, item ->
-                        context.commitDocument()
-
-                        val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-                        val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-                        insertFile.import(includeCandidateFile)
-                    },
-                if (isImported) TolkCompletionContributor.VAR_PRIORITY
-                else TolkCompletionContributor.NOT_IMPORTED_VAR_PRIORITY
-            )
-        }
-
-        is TolkGlobalVar -> {
-            PrioritizedLookupElement.withPriority(
-                base
-                    .withTypeText((type ?: TolkTy.Unknown).render())
-                    .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
-                    .withInsertHandler { context, item ->
-                        context.commitDocument()
-
-                        val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-                        val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-                        insertFile.import(includeCandidateFile)
-                    },
-                if (isImported) TolkCompletionContributor.VAR_PRIORITY
-                else TolkCompletionContributor.NOT_IMPORTED_VAR_PRIORITY
-            )
-        }
-
-        is TolkVar -> {
-            PrioritizedLookupElement.withPriority(
-                base
-                    .withIcon(TolkIcons.VARIABLE)
-                    .withTypeText((type ?: TolkTy.Unknown).render()),
-                TolkCompletionContributor.VAR_PRIORITY
-            )
-        }
-
-        is TolkParameter -> {
-            PrioritizedLookupElement.withPriority(
-                base
-                    .withIcon(TolkIcons.PARAMETER)
-                    .withTypeText((type ?: TolkTy.Unknown).render()),
-                TolkCompletionContributor.VAR_PRIORITY
-            )
-        }
-
-        else -> LookupElementBuilder.create(this.name.toString()).withIcon(this.getIcon(0))
-    }
-}
 
 fun collectLocalVariables(
     startFrom: PsiElement,
     processor: (TolkLocalSymbolElement) -> Boolean
 ): Boolean {
     var exitFromFunction = false
-    val result =  PsiTreeUtil.treeWalkUp(startFrom, null) { scope, lastParent ->
+    val result = PsiTreeUtil.treeWalkUp(startFrom, null) { scope, lastParent ->
         if (scope is TolkFunction) {
             val parameterList = scope.parameterList
             if (parameterList != null) {

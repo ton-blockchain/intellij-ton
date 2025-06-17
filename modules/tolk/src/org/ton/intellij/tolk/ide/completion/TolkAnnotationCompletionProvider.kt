@@ -29,7 +29,6 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
             .withTailText("(\"suppress\")")
             .withInsertHandler { ctx, item ->
             ParInsertHandler.handleInsert(ctx, item)
-
             // Проверяем, находится ли курсор внутри пустых скобок
             val offset = ctx.editor.caretModel.offset
             val chars = ctx.document.charsSequence

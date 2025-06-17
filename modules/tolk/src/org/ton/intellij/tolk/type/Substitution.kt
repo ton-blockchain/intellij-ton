@@ -79,6 +79,8 @@ open class Substitution(
     }
 
     companion object {
+        fun empty(): Substitution = EmptySubstitution
+
         fun instantiate(paramType: TolkTy, argType: TolkTy): Substitution {
             return EmptySubstitution.deduce(paramType, argType)
         }

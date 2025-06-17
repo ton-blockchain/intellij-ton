@@ -18,9 +18,7 @@ abstract class TolkStructFieldMixin : TolkNamedElementImpl<TolkStructFieldStub>,
     override val type: TolkTy?
         get() = typeExpression?.type
 
-    override fun getBaseIcon() = TolkIcons.FIELD
-
-    override fun getIcon(flags: Int): Icon = getBaseIcon()
+    override fun getIcon(flags: Int): Icon = TolkIcons.FIELD
 }
 
 val TolkStructField.parentStruct: TolkStruct

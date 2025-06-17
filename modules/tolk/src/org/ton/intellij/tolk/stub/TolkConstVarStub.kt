@@ -30,7 +30,7 @@ class TolkConstVarStub(
         }
 
         override fun createStub(psi: TolkConstVar, parentStub: StubElement<out PsiElement>, ): TolkConstVarStub =
-            TolkConstVarStub(parentStub, this, StringRef.fromString(psi.name), psi.isDeprecated)
+            TolkConstVarStub(parentStub, this, StringRef.fromString(psi.name), psi.annotations.hasDeprecatedAnnotation())
 
         override fun createPsi(stub: TolkConstVarStub): TolkConstVar =
             TolkConstVarImpl(stub, this)

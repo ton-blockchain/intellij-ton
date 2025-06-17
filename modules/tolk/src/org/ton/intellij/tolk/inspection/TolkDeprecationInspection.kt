@@ -17,7 +17,7 @@ class TolkDeprecationInspection : TolkInspectionBase() {
                 val original = ref.reference?.resolve() ?: return
                 val identifier = ref.referenceNameElement ?: return
 
-                if (original is TolkAnnotationHolder && original.isDeprecated) {
+                if (original is TolkAnnotationHolder && original.annotations.hasDeprecatedAnnotation()) {
                     holder.registerProblem(identifier, "Deprecated", ProblemHighlightType.LIKE_DEPRECATED)
                 }
             }

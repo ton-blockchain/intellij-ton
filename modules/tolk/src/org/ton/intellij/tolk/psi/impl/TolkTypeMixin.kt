@@ -33,12 +33,7 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
             return TolkTypeAliasTy(this, typeExpressionType)
         }
 
-    override val isDeprecated: Boolean
-        get() = greenStub?.isDeprecated ?: super.isDeprecated
-
-    override fun getBaseIcon() = TolkIcons.TYPE_ALIAS
-
-    override fun getIcon(flags: Int) = getBaseIcon()
+    override fun getIcon(flags: Int) = TolkIcons.TYPE_ALIAS
 
     override fun getPresentation(): ItemPresentation? {
         return object : ItemPresentation {
@@ -50,7 +45,7 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
                 }
             }
 
-            override fun getIcon(unused: Boolean): Icon = getBaseIcon()
+            override fun getIcon(unused: Boolean): Icon = getIcon(0)
         }
     }
 }

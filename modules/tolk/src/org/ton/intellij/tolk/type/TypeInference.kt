@@ -1893,38 +1893,6 @@ class TolkInferenceWalker(
         }
         return null
     }
-
-    // return `T`, so that `T + subtract_type` = type
-    // example: `int?` - `null` = `int`
-    // example: `int | slice | builder | bool` - `bool | slice` = `int | builder`
-    // what for: `if (x != null)` / `if (x is T)`, to smart cast x inside if
-    private fun TolkTy?.subtract(other: TolkTy?): TolkTy {
-        val lhsUnion = this as? TolkUnionTy ?: return TolkNeverTy
-
-        val restVariants = ArrayList<TolkTy>()
-        if (other is TolkUnionTy) {
-            if (lhsUnion.containsAll(other)) {
-                for (lhsVariant in lhsUnion.variants) {
-                    if (!other.contains(lhsVariant)) {
-                        restVariants.add(lhsVariant)
-                    }
-                }
-            }
-        } else if (other != null && lhsUnion.contains(other)) {
-            for (lhsVariant in lhsUnion.variants) {
-                if (lhsVariant.actualType() != other.actualType()) {
-                    restVariants.add(lhsVariant)
-                }
-            }
-        }
-        if (restVariants.isEmpty()) {
-            return TolkNeverTy
-        }
-        if (restVariants.size == 1) {
-            return restVariants.first()
-        }
-        return TolkUnionTy.create(restVariants)
-    }
 }
 
 private val COMPARSION_OPERATORS = tokenSetOf(

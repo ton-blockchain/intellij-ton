@@ -8,6 +8,7 @@ import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
+import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkMatchExpression
 import org.ton.intellij.tolk.psi.TolkMatchPatternReference
 import org.ton.intellij.tolk.type.*
@@ -25,14 +26,15 @@ object TolkMatchPatternTypesCompletionProvider : TolkCompletionProvider() {
         val position = parameters.position
         val matchExpr = position.parentOfType<TolkMatchExpression>() ?: return
         val expr = matchExpr.expression
+        val ctx = TolkCompletionContext(position.parent as? TolkElement)
         if (expr != null) {
             val type = expr.type ?: TolkTy.Unknown
             val unwrappedType = type.unwrapTypeAlias()
             if (unwrappedType is TolkUnionTy) {
                 unwrappedType.variants.forEach { unionVariant ->
                     when(unionVariant) {
-                        is TolkStructTy -> result.addElement(unionVariant.psi.toLookupElement())
-                        is TolkTypeAliasTy -> result.addElement(unionVariant.psi.toLookupElement())
+                        is TolkStructTy -> result.addElement(unionVariant.psi.toLookupElementBuilder(ctx))
+                        is TolkTypeAliasTy -> result.addElement(unionVariant.psi.toLookupElementBuilder(ctx))
                         is TolkPrimitiveTy -> result.addElement(unionVariant.toLookupElement())
                         else -> result.addElement(
                             LookupElementBuilder.create(unionVariant.render())
@@ -41,7 +43,7 @@ object TolkMatchPatternTypesCompletionProvider : TolkCompletionProvider() {
                 }
             } else {
                 collectLocalVariables(matchExpr) {
-                    result.addElement(it.toLookupElement())
+                    result.addElement(it.toLookupElementBuilder(ctx))
                     true
                 }
             }

@@ -1,17 +1,24 @@
 package org.ton.intellij.tolk.psi
 
-import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.psi.util.siblings
 
 interface TolkAnnotationHolder : TolkNamedElement {
-    val annotationList: List<TolkAnnotation>
-        get() = PsiTreeUtil.getChildrenOfTypeAsList(this, TolkAnnotation::class.java)
-
-    val isDeprecated: Boolean
-        get() = annotationList.hasDeprecatedAnnotation()
+    val annotations get() = TolkAnnotationQuery(this)
 }
 
-fun List<TolkAnnotation>.findAnnotation(name: String): TolkAnnotation? {
-    return find { it.identifier?.text == name }
-}
+class TolkAnnotationQuery(
+    private val rawAnnotations: Sequence<TolkAnnotation>
+) {
+    constructor(holder: TolkAnnotationHolder) : this(
+        holder.firstChild?.siblings()?.filterIsInstance<TolkAnnotation>() ?: emptySequence()
+    )
 
-fun List<TolkAnnotation>.hasDeprecatedAnnotation(): Boolean = findAnnotation("deprecated") != null
+    fun hasDeprecatedAnnotation(): Boolean = hasAnnotation("deprecated")
+
+    fun hasAnnotation(annotationName: String): Boolean {
+        val annotation = annotationByName(annotationName)
+        return annotation.any()
+    }
+
+    fun annotationByName(name: String) = rawAnnotations.filter { it.identifier?.text == name }
+}

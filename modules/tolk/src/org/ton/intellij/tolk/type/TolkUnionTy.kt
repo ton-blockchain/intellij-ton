@@ -48,10 +48,6 @@ class TolkUnionTy private constructor(
         return variants == other.variants
     }
 
-    override fun removeNullability(): TolkTy {
-        return create(variants.filter { it != TolkTy.Null })
-    }
-
     override fun isSuperType(other: TolkTy): Boolean {
         return variants.all { it.isSuperType(other) }
     }

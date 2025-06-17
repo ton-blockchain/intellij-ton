@@ -34,7 +34,7 @@ class TolkStructStub(
         }
 
         override fun createStub(psi: TolkStruct, parentStub: StubElement<out PsiElement>): TolkStructStub =
-            TolkStructStub(parentStub, this, StringRef.fromString(psi.name), psi.isDeprecated)
+            TolkStructStub(parentStub, this, StringRef.fromString(psi.name), psi.annotations.hasDeprecatedAnnotation())
 
         override fun createPsi(stub: TolkStructStub): TolkStruct = TolkStructImpl(stub, this)
     }

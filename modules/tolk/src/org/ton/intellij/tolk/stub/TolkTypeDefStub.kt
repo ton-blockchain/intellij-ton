@@ -34,7 +34,7 @@ class TolkTypeDefStub(
         }
 
         override fun createStub(psi: TolkTypeDef, parentStub: StubElement<out PsiElement>): TolkTypeDefStub =
-            TolkTypeDefStub(parentStub, this, StringRef.fromString(psi.name), psi.isDeprecated)
+            TolkTypeDefStub(parentStub, this, StringRef.fromString(psi.name), psi.annotations.hasDeprecatedAnnotation())
 
         override fun createPsi(stub: TolkTypeDefStub): TolkTypeDef =
             TolkTypeDefImpl(stub, this)

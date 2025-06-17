@@ -5,13 +5,13 @@
             <option name="FOREGROUND" value="16BAAC"/>
         </value>
     </option>
-    <option name="org.ton.tolk.ASSOC_FUNCTION">
+    <option name="org.ton.tolk.STATIC_FUNCTION">
         <value>
             <option name="FOREGROUND" value="6aa2d7"/>
             <option name="FONT_TYPE" value="2"/>
         </value>
     </option>
-    <option name="org.ton.tolk.ASSOC_FUNCTION_CALL">
+    <option name="org.ton.tolk.STATIC_FUNCTION_CALL">
         <value>
             <option name="FOREGROUND" value="6aa2d7"/>
             <option name="FONT_TYPE" value="2"/>
@@ -78,6 +78,7 @@
     <option name="org.ton.tolk.TYPE_ALIAS">
         <value>
             <option name="FOREGROUND" value="a6bb77"/>
+            <option name="FONT_TYPE" value="2" />
         </value>
     </option>
 </list>

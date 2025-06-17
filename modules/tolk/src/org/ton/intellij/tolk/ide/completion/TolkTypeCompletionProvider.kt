@@ -8,11 +8,12 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubIndex
 import com.intellij.util.ProcessingContext
-import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
+import org.ton.intellij.tolk.psi.TolkSymbolElement
+import org.ton.intellij.tolk.psi.TolkTypeParameterListOwner
+import org.ton.intellij.tolk.psi.TolkTypeSymbolElement
 import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
-import org.ton.intellij.tolk.type.TolkPrimitiveTy
 import org.ton.intellij.tolk.type.TolkTy
-import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.psiElement
 
@@ -63,6 +64,7 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         val project = parameters.originalFile.project
         val position = parameters.position
         val parameterListOwner = position.parentOfType<TolkTypeParameterListOwner>()
+        val ctx = TolkCompletionContext(position.parent as? TolkSymbolElement)
 
         result.restartCompletionOnPrefixChange("cont")
         if (result.prefixMatcher.prefix == "cont") {
@@ -101,21 +103,7 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         }
 
         typeCandidates.forEach { typeDef ->
-            result.addElement(typeDef.toLookupElement())
+            result.addElement(typeDef.toLookupElementBuilder(ctx))
         }
     }
-}
-
-fun TolkPrimitiveTy.toLookupElement(): LookupElementBuilder {
-    return LookupElementBuilder.create(this.render()).withBoldness(true)
-}
-
-fun TolkSymbolElement.toLookupElement(): LookupElementBuilder {
-    return LookupElementBuilder.createWithIcon(this)
-        .withInsertHandler { context, item ->
-            val file = item.psiElement?.containingFile
-            val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-            val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-            insertFile.import(includeCandidateFile)
-        }
 }

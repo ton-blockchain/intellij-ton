@@ -7,7 +7,6 @@ import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
-import org.ton.intellij.tolk.ide.completion.TolkCommonCompletionProvider.TolkCompletionContext
 import org.ton.intellij.tolk.psi.TolkStructExpression
 import org.ton.intellij.tolk.psi.TolkStructExpressionField
 import org.ton.intellij.tolk.psi.impl.structFields
@@ -37,7 +36,7 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         structTy.psi.structFields.forEach { field ->
             if (field.name in existedFields) return@forEach
             result.addElement(
-                field.toLookupElementBuilder(ctx, true)
+                field.toLookupElementBuilder(ctx)
             )
         }
     }

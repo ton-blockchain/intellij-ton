@@ -483,23 +483,6 @@ Expression ::=
 }
 private Expression_recover ::= !(';'|'}'|',')
 
-private SimpleExpression ::=
-    LogicalBinExpression //expr13
-    | BitwiseBinExpression // expr14
-    | ShiftBinExpression // expr17
-    | CompBinExpression // expr15
-    | AddBinExpression // expr20
-    | MulBinExpression // expr30
-    | AsExpression // expr40
-    | IsExpression // expr40
-    | PrefixExpression // expr75
-    | NotNullExpression
-    | CallExpression
-    | StructExpression
-    | AtomicExpression
-    | MatchExpression
-    | DotExpression // expr80
-
 fake BinExpression ::= Expression BinaryOp Expression {
     mixin="org.ton.intellij.tolk.psi.impl.TolkBinExpressionMixin"
     methods=[

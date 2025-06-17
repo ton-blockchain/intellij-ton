@@ -2,7 +2,7 @@ package org.ton.intellij.tolk.psi
 
 import com.intellij.psi.util.PsiTreeUtil
 
-interface TolkAnnotationHolder : TolkElement {
+interface TolkAnnotationHolder : TolkNamedElement {
     val annotationList: List<TolkAnnotation>
         get() = PsiTreeUtil.getChildrenOfTypeAsList(this, TolkAnnotation::class.java)
 

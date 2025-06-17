@@ -6,7 +6,6 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
@@ -68,17 +67,19 @@ class TolkAnnotator : Annotator {
         element: TolkReferenceElement,
         holder: AnnotationHolder,
     ) {
+        val referenceName = element.referenceName ?: return
+        if (referenceName == "_") return
         val reference = element.reference
         if (reference == null) {
             val isPrimitiveType = TolkPrimitiveTy.fromReference(element) != null
             if (isPrimitiveType) {
-                return holder.info(TolkColor.PRIMITIVE.textAttributesKey)
+                holder.info(TolkColor.PRIMITIVE.textAttributesKey)
             }
-            if (element.referenceName == "_") return
-            return holder.error(
-                "Unknown type: `${element.text}`",
-                ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
-            )
+//            return holder.error(
+//                "Unknown type: `${element.text}`",
+//                ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
+//            )
+            return
         }
 
         val resolved = if (reference is TolkStructFieldReference) {
@@ -99,11 +100,11 @@ class TolkAnnotator : Annotator {
 
             null -> {
                 val parent = element.parent
-                if (parent is TolkMatchPattern && TolkPrimitiveTy.fromReference(element) != null) {
+                val isPrimitiveType = TolkPrimitiveTy.fromReference(element) != null
+                if (parent is TolkMatchPattern && isPrimitiveType) {
                     return holder.info(TolkColor.PRIMITIVE.textAttributesKey)
                 }
                 val function = parent.parentOfType<TolkFunction>()
-                val referenceName = element.referenceName ?: return
                 if (function != null && function.resolveGenericType(referenceName)?.parameter?.psi == element
                 ) {
                     return holder.info(TolkColor.TYPE_PARAMETER.textAttributesKey)
@@ -124,10 +125,7 @@ class TolkAnnotator : Annotator {
                 }
             }
         }
-        val isDeprecated = (resolved is TolkAnnotationHolder && resolved.isDeprecated)
-        if (isDeprecated) {
-            holder.info(CodeInsightColors.DEPRECATED_ATTRIBUTES)
-        }
+
     }
 
     private fun AnnotationHolder.info(key: TextAttributesKey) =

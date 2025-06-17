@@ -12,7 +12,7 @@ enum class TolkColor(
     displayName: Supplier<String>,
     default: TextAttributesKey,
 ) {
-    VARIABLE(TolkBundle.messagePointer("settings.tolk.color.variable"), Default.IDENTIFIER),
+    VARIABLE(TolkBundle.messagePointer("settings.tolk.color.variable"), Default.LOCAL_VARIABLE),
     FIELD(TolkBundle.messagePointer("settings.tolk.color.field"), Default.INSTANCE_FIELD),
     CONSTANT(TolkBundle.messagePointer("settings.tolk.color.constant"), Default.CONSTANT),
     GLOBAL_VARIABLE(TolkBundle.messagePointer("settings.tolk.color.global"), Default.GLOBAL_VARIABLE),
@@ -35,7 +35,7 @@ enum class TolkColor(
     PRIMITIVE(TolkBundle.messagePointer("settings.tolk.color.primitive"), Default.KEYWORD),
     STRUCT(TolkBundle.messagePointer("settings.tolk.color.struct"), Default.CLASS_NAME),
     EMPTY_STRUCT(TolkBundle.messagePointer("settings.tolk.color.empty_struct"), Default.CLASS_NAME),
-    TYPE_ALIAS(TolkBundle.messagePointer("settings.tolk.color.type_alias"), Default.CLASS_NAME),
+    TYPE_ALIAS(TolkBundle.messagePointer("settings.tolk.color.type_alias"), Default.INTERFACE_NAME),
 
     KEYWORD(TolkBundle.messagePointer("settings.tolk.color.keyword"), Default.KEYWORD),
     NUMBER(TolkBundle.messagePointer("settings.tolk.color.number"), Default.NUMBER),

@@ -3,7 +3,6 @@ package org.ton.intellij.tolk.highlighting
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
-import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.project.DumbAware
 import com.intellij.psi.PsiElement
@@ -13,7 +12,6 @@ import org.ton.intellij.tolk.ide.colors.TolkColor
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.hasReceiver
 import org.ton.intellij.tolk.psi.impl.hasSelf
-import org.ton.intellij.tolk.psi.impl.isMutable
 import org.ton.intellij.util.childOfType
 
 class TolkDumbAnnotator : Annotator, DumbAware {
@@ -23,12 +21,6 @@ class TolkDumbAnnotator : Annotator, DumbAware {
             TolkElementTypes.IDENTIFIER -> {
                 val parent = element.parent
                 if (parent is TolkReferenceElement) return
-                val isDeprecated = (parent is TolkAnnotationHolder && parent.isDeprecated)
-                if (isDeprecated) {
-                    holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
-                        .textAttributes(CodeInsightColors.DEPRECATED_ATTRIBUTES)
-                        .create()
-                }
                 identifierColor(parent) ?: return
             }
             TolkElementTypes.GET_KEYWORD,

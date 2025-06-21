@@ -6,7 +6,25 @@ import com.intellij.codeInsight.lookup.LookupElementDecorator
 class TolkLookupElement(
     delegate: LookupElement,
     val data: TolkLookupElementData
-) : LookupElementDecorator<LookupElement>(delegate)
+) : LookupElementDecorator<LookupElement>(delegate) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        if (!super.equals(other)) return false
+
+        other as TolkLookupElement
+
+        if (data != other.data) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + data.hashCode()
+        return result
+    }
+}
 
 fun LookupElement.toTolkLookupElement(data: TolkLookupElementData) = TolkLookupElement(this, data)
 

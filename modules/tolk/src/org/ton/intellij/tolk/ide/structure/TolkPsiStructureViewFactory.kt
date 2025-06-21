@@ -28,12 +28,29 @@ class TolkStructureViewModel(
     psiFile: TolkFile,
     editor: Editor?
 ) : StructureViewModelBase(psiFile, editor, TolkStructureViewElement(psiFile)), StructureViewModel.ElementInfoProvider {
+    init {
+        withSuitableClasses(
+            TolkFunction::class.java,
+            TolkGlobalVar::class.java,
+            TolkConstVar::class.java,
+            TolkTypeDef::class.java,
+            TolkStruct::class.java,
+            TolkStructField::class.java
+        )
+    }
+
     override fun isAlwaysShowsPlus(element: StructureViewTreeElement): Boolean =
         element.value is TolkFile
 
     override fun isAlwaysLeaf(element: StructureViewTreeElement): Boolean {
-        val value = element.value
-        return value is TolkGlobalVar || value is TolkConstVar
+        return when (element.value) {
+            is TolkStructField,
+            is TolkConstVar,
+            is TolkGlobalVar,
+            is TolkTypeDef -> true
+
+            else -> false
+        }
     }
 }
 
@@ -72,6 +89,7 @@ class TolkStructureViewElement(
                     else -> null
                 }
             }
+
             else -> emptyList()
         }
 }

@@ -19,7 +19,6 @@ import org.ton.intellij.tolk.psi.impl.isStatic
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
 import org.ton.intellij.util.REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
 import org.ton.intellij.util.psiElement
-import java.util.*
 
 object TolkCommonCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
@@ -52,7 +51,8 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         val ctx = TolkCompletionContext(element)
         val completionLimit = REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
         var addedElements = 0
-        val result = DeferredCompletionResultSet(result)
+
+        //        val result = DeferredCompletionResultSet(result)
         fun checkLimit(): Boolean {
             if (addedElements >= completionLimit) {
                 result.restartCompletionOnAnyPrefixChange()
@@ -65,11 +65,15 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
 
         if (!collectLocalVariables(element) { localSymbol ->
                 if (!checkLimit()) return@collectLocalVariables false
-                result.addElement(localSymbol.toLookupElementBuilder(ctx)
-                    .toTolkLookupElement(TolkLookupElementData(
-                        isLocal = true,
-                        elementKind = TolkLookupElementData.ElementKind.VARIABLE
-                    )))
+                result.addElement(
+                    localSymbol.toLookupElementBuilder(ctx)
+                        .toTolkLookupElement(
+                            TolkLookupElementData(
+                                isLocal = true,
+                                elementKind = TolkLookupElementData.ElementKind.VARIABLE
+                            )
+                        )
+                )
                 true
             }
         ) {
@@ -97,7 +101,6 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
 
         val addedNamedElements = HashSet<TolkNamedElement>()
         val prefixMatcher = result.prefixMatcher
-        val deferredElements = LinkedList<LookupElement>()
 
         fun processNamedElement(element: TolkSymbolElement): Boolean {
             val name = element.name ?: return true
@@ -131,15 +134,20 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
 
                 is TolkConstVar,
                 is TolkGlobalVar,
-                is TolkStruct ->  {
-                    element.toLookupElementBuilder(ctx)
-                        .toTolkLookupElement(TolkLookupElementData(
-                            elementKind = when {
-                                element.annotations.hasDeprecatedAnnotation() -> TolkLookupElementData.ElementKind.DEPRECATED
-                                else -> TolkLookupElementData.ElementKind.DEFAULT
-                            }
-                        ))
+                is TolkStruct -> {
+                    val lookupElement = element
+                        .toLookupElementBuilder(ctx)
+                        .toTolkLookupElement(
+                            TolkLookupElementData(
+                                elementKind = when {
+                                    element.annotations.hasDeprecatedAnnotation() -> TolkLookupElementData.ElementKind.DEPRECATED
+                                    else -> TolkLookupElementData.ElementKind.DEFAULT
+                                }
+                            )
+                        )
+                    result.addElement(lookupElement)
                 }
+
                 is TolkTypeDef -> result.addElement(element.toLookupElementBuilder(ctx))
             }
             return true
@@ -154,7 +162,9 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 }
             }) return
 
-        result.flushDeferredElements()
+        if (result is DeferredCompletionResultSet) {
+            result.flushDeferredElements()
+        }
     }
 }
 

@@ -55,7 +55,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
 
         val completionLimit = REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
         val ctx = TolkCompletionContext(element as? TolkElement)
-        val result = DeferredCompletionResultSet(result)
+//        val result = DeferredCompletionResultSet(result)
         val prefixMatcher = result.prefixMatcher
         var addedElements = 0
         fun checkLimit(): Boolean {
@@ -168,6 +168,8 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
             TolkFunctionIndex.processAllElements(project, processor = ::addFunction)
         }
 
-        result.flushDeferredElements()
+        if (result is DeferredCompletionResultSet) {
+            result.flushDeferredElements()
+        }
     }
 }

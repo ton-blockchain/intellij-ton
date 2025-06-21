@@ -89,7 +89,7 @@ class TolkStructureViewElement(
                     else -> null
                 }
             }
-
+            is TolkStruct -> psi.structBody?.structFieldList ?: emptyList()
             else -> emptyList()
         }
 }

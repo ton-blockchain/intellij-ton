@@ -64,6 +64,8 @@ class TolkProjectSettingsService(
 
     private var defaultImport: TolkFile? = null
 
+    val hasStdlib get() = getDefaultImport() != null
+
     fun getDefaultImport(): TolkFile? {
         val currentDefaultImport = defaultImport
         if (currentDefaultImport == null) {

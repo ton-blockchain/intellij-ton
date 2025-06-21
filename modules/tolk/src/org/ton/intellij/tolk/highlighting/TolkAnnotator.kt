@@ -16,6 +16,7 @@ import com.intellij.psi.util.elementType
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.tolk.ide.colors.TolkColor
+import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.hasReceiver
 import org.ton.intellij.tolk.psi.impl.hasSelf
@@ -111,10 +112,12 @@ class TolkAnnotator : Annotator {
                 }
 
                 if (element !is TolkFieldLookup || parent !is TolkDotExpression || parent.expression.type !is TolkTypeParameterTy) {
-                    return holder.error(
-                        "Unresolved reference: `$referenceName`",
-                        ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
-                    )
+                    if (element.project.tolkSettings.hasStdlib) {
+                        return holder.error(
+                            "Unresolved reference: `$referenceName`",
+                            ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
+                        )
+                    }
                 }
             }
 

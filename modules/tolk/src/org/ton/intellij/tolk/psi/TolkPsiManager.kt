@@ -15,9 +15,9 @@ import com.intellij.util.messages.MessageBusConnection
 import com.intellij.util.messages.Topic
 import org.ton.intellij.tolk.TolkFileType
 
-private val TOLK_STRUCTURE_CHANGE_TOPIC = Topic.create(
-    "TOLK_STRUCTURE_CHANGE_TOPIC",
-    TolkStructureChangeListener::class.java,
+private val TOLK_SIGNATURE_CHANGE_TOPIC = Topic.create(
+    "TOLK_SIGNATURE_CHANGE_TOPIC",
+    TolkSignatureChangeListener::class.java,
     Topic.BroadcastDirection.TO_PARENT
 )
 
@@ -27,8 +27,8 @@ private val TOLK_PSI_CHANGE_TOPIC = Topic.create(
     Topic.BroadcastDirection.TO_PARENT
 )
 
-fun interface TolkStructureChangeListener {
-    fun tolkStructureChanged(file: PsiFile?, changedElement: PsiElement?)
+fun interface TolkSignatureChangeListener {
+    fun tolkSignatureChanged(file: PsiFile?, changedElement: PsiElement?)
 }
 
 fun interface TolkPsiChangeListener {
@@ -50,11 +50,11 @@ class TolkPsiManager(
 
     override fun dispose() {}
 
-    fun subscribeTolkStructureChange(
+    fun subscribeTolkSignatureChange(
         connectionManager: MessageBusConnection,
-        listener: TolkStructureChangeListener,
+        listener: TolkSignatureChangeListener,
     ) {
-        connectionManager.subscribe(TOLK_STRUCTURE_CHANGE_TOPIC, listener)
+        connectionManager.subscribe(TOLK_SIGNATURE_CHANGE_TOPIC, listener)
     }
 
     fun subscribeTolkPsiChange(
@@ -66,7 +66,7 @@ class TolkPsiManager(
 
     inner class TolkModuleRootListener : ModuleRootListener {
         override fun rootsChanged(event: ModuleRootEvent) {
-            incTolkStructureModificationCount()
+            incTolkSignatureModificationCount()
         }
     }
 
@@ -101,9 +101,9 @@ class TolkPsiManager(
         fun handle(file: PsiFile?, element: PsiElement, isChildrenChange: Boolean = false) {
             // if file is null, this is an event about VFS changes
             if (file == null) {
-                val isStructureModification = element is TolkFile || element is PsiDirectory
-                if (isStructureModification) {
-                    incTolkStructureModificationCount(element as? TolkFile, element as? TolkFile)
+                val isSignatureModification = element is TolkFile || element is PsiDirectory
+                if (isSignatureModification) {
+                    incTolkSignatureModificationCount(element as? TolkFile, element as? TolkFile)
                 }
             } else {
                 if (file.fileType != TolkFileType) return
@@ -117,11 +117,9 @@ class TolkPsiManager(
         }
     }
 
-    fun incTolkStructureModificationCount(file: PsiFile? = null, psi: PsiElement? = null) {
+    fun incTolkSignatureModificationCount(file: PsiFile? = null, psi: PsiElement? = null) {
         tolkStructureModificationCount.incModificationCount()
-        project.messageBus.syncPublisher(TOLK_STRUCTURE_CHANGE_TOPIC).tolkStructureChanged(file, psi)
-
-//        LOG.warn("structure changed ${file?.name} $psi")
+        project.messageBus.syncPublisher(TOLK_SIGNATURE_CHANGE_TOPIC).tolkSignatureChanged(file, psi)
     }
 
     private fun updateModificationCount(
@@ -132,11 +130,9 @@ class TolkPsiManager(
         val owner = if (DumbService.isDumb(project)) null else psi.findTolkModificationTrackerOwner(!isChildrenChange)
         val isStructureModification = owner == null || !owner.incModificationCount(psi)
         if (isStructureModification) {
-            incTolkStructureModificationCount(file, psi)
+            incTolkSignatureModificationCount(file, psi)
         }
         project.messageBus.syncPublisher(TOLK_PSI_CHANGE_TOPIC).tolkPsiChanged(file, psi, isStructureModification)
-
-//        LOG.warn("psi changed ${file.name} $psi isStructureModification=$isStructureModification")
     }
 
     companion object {

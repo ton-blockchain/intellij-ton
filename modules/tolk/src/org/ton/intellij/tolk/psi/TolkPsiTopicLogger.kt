@@ -8,12 +8,12 @@ import com.intellij.psi.PsiFile
 
 class TolkPsiTopicLogger(
     val project: Project
-) : Disposable, TolkPsiChangeListener, TolkStructureChangeListener {
+) : Disposable, TolkPsiChangeListener, TolkSignatureChangeListener {
     init {
         val connection = project.messageBus.connect(this)
         val tolkPsiManager = project.tolkPsiManager
         tolkPsiManager.subscribeTolkPsiChange(connection, this)
-        tolkPsiManager.subscribeTolkStructureChange(connection, this)
+        tolkPsiManager.subscribeTolkSignatureChange(connection, this)
     }
 
     override fun dispose() {
@@ -27,7 +27,7 @@ class TolkPsiTopicLogger(
         LOG.warn("psi changed ${file.name} $element isStructureModification=$isStructureModification")
     }
 
-    override fun tolkStructureChanged(file: PsiFile?, changedElement: PsiElement?) {
+    override fun tolkSignatureChanged(file: PsiFile?, changedElement: PsiElement?) {
         LOG.warn("structure changed ${file?.name} $changedElement")
     }
 

@@ -77,26 +77,23 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
     override val modificationTracker = SimpleModificationTracker()
 
     override fun incModificationCount(element: PsiElement): Boolean {
-        val returnType = returnType
-        if (returnType == null) {
-//            val searchScope = GlobalSearchScope.projectScope(project)
-//            val references = ReferencesSearch.search(this, searchScope)
-//            references.forEach { reference ->
-//                val element = reference.element
-//                val trackerOwner = element.findTolkModificationTrackerOwner(true)
-//                if (trackerOwner is TolkFunctionMixin) {
-////                    LOG.warn("${trackerOwner.containingFile.name}$$trackerOwner incModificationCount because of reference to ${containingFile.name}$$this")
-//                    trackerOwner.modificationTracker.incModificationCount()
-//                }
-//            }
-//            modificationTracker.incModificationCount()
-//            return true
-            return false
-        }
+        val blockStatement = functionBody?.blockStatement
+        val shouldInc = blockStatement?.isAncestor(element) == true
 
-        val shouldInc = functionBody?.blockStatement?.isAncestor(element) == true
         if (shouldInc) {
-//            LOG.warn("${containingFile.name}$$this incModificationCount")
+            if (returnType == null) {
+                var hasReturn = false
+                blockStatement.accept(object : TolkRecursiveElementWalkingVisitor() {
+                    override fun visitExpression(o: TolkExpression) {}
+                    override fun visitReturnStatement(o: TolkReturnStatement) {
+                        hasReturn = true
+                        stopWalking()
+                    }
+                })
+                if (hasReturn) {
+                    return false
+                }
+            }
             modificationTracker.incModificationCount()
         }
         return shouldInc

@@ -4,6 +4,7 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.components.*
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.RootsChangeRescanningInfo
 import com.intellij.openapi.roots.ex.ProjectRootManagerEx
@@ -12,6 +13,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.findFile
 import com.intellij.openapi.vfs.findPsiFile
+import com.intellij.util.messages.Topic
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.toolchain.TolkToolchain
 
@@ -41,6 +43,7 @@ class TolkProjectSettingsService(
             _toolchain = value
             state.toolchainLocation = value.homePath.ifEmpty { null }
             defaultImport = null
+            notifySettingsChanged()
             reloadProject()
         }
     var explicitPathToStdlib: String?
@@ -48,6 +51,7 @@ class TolkProjectSettingsService(
         set(value) {
             state.explicitPathToStdlib = value
             defaultImport = null
+            notifySettingsChanged()
             reloadProject()
         }
     val stdlibDir: VirtualFile?
@@ -84,10 +88,30 @@ class TolkProjectSettingsService(
         }
     }
 
+    fun notifySettingsChanged() {
+        project.messageBus.syncPublisher(TolkSettingsListener.TOPIC).tolkSettingsChanged()
+    }
+
+    fun configureToolchain() {
+        ShowSettingsUtil.getInstance().showSettingsDialog(project, TolkProjectConfigurable::class.java)
+    }
+
     class TolkProjectSettings : BaseState() {
         var toolchainLocation by string()
         var explicitPathToStdlib by string()
 
         fun copy() = TolkProjectSettings().also { it.copyFrom(this) }
+    }
+
+    interface TolkSettingsListener {
+        fun tolkSettingsChanged()
+
+        companion object {
+            val TOPIC = Topic.create(
+                "Tolk settings changes",
+                TolkSettingsListener::class.java,
+                Topic.BroadcastDirection.TO_PARENT
+            )
+        }
     }
 }

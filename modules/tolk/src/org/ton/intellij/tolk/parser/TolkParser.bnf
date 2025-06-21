@@ -359,7 +359,7 @@ MatchStatement ::= MatchExpression ';'? {
     pin=1
 }
 
-ExpressionStatement ::= Expression (';' !'}')? {
+ExpressionStatement ::= Expression (&'}' | ';') {
     pin=1
 }
 

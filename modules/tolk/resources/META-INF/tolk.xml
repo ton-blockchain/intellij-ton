@@ -6,6 +6,7 @@
                   language="Tolk"
                   extensions="tolk"
         />
+        <consoleFilterProvider implementation="org.ton.intellij.tolk.ide.TolkConsoleFilterProvider"/>
 
         <lang.parserDefinition language="Tolk"
                                implementationClass="org.ton.intellij.tolk.parser.TolkParserDefinition"/>

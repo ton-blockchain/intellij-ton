@@ -7,6 +7,7 @@ import com.intellij.codeInsight.lookup.LookupElementWeigher
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.or
 import com.intellij.patterns.PlatformPatterns.psiElement
+import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.TokenType
 import org.ton.intellij.tolk.psi.*
@@ -97,6 +98,10 @@ class TolkCompletionContributor : CompletionContributor() {
                 psiElement(
                     TolkExpressionStatement::class.java
                 ).inside(TolkBlockStatement::class.java)
+            )
+        ).andNot(
+            psiElement().afterLeaf(
+                psiElement().withText(StandardPatterns.string().matches("\\d+"))
             )
         )
 

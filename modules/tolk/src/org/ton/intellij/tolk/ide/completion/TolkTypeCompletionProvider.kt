@@ -45,7 +45,12 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         "int64",
         "int128",
         "int256",
-        "bytes",
+        "bits8",
+        "bits16",
+        "bits32",
+        "bits64",
+        "bits128",
+        "bits256",
     )
 
     private val cachedPrimitiveElements = primitiveTypes.map {

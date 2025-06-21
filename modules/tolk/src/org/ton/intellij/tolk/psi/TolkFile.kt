@@ -3,6 +3,7 @@ package org.ton.intellij.tolk.psi
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.CachedValueProvider
@@ -230,3 +231,5 @@ private val INCLUDE_COMPARE: Comparator<TolkIncludeDefinition> =
             it.stringLiteral?.rawString?.text?.lowercase()
         }
     )
+
+val VirtualFile.isTolkFile: Boolean get() = fileType == TolkFileType

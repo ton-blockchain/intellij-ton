@@ -1,53 +1,58 @@
 package org.ton.intellij.tolk.ide.completion
 
-import com.intellij.codeInsight.completion.*
+import com.intellij.codeInsight.completion.CompletionParameters
+import com.intellij.codeInsight.completion.CompletionProvider
+import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
-import com.intellij.codeInsight.template.TemplateManager
-import com.intellij.codeInsight.template.impl.TemplateSettings
-import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.util.ProcessingContext
+import org.ton.intellij.tolk.ide.completion.TolkLookupElementData.KeywordKind.KEYWORD
+import org.ton.intellij.tolk.psi.TolkFunction
+import org.ton.intellij.tolk.psi.impl.returnTy
+import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.util.addSuffix
+import org.ton.intellij.util.ancestorStrict
 
 class TolkKeywordCompletionProvider(
     val priority: Double,
     val keywords: List<String> = emptyList(),
-    val insertHandler: InsertHandler<LookupElement>? = null,
-    val insertSpace: Boolean = true
 ) : CompletionProvider<CompletionParameters>() {
-    constructor(priority: Double, vararg keywords: String) : this(priority, keywords.toList(), null)
+    constructor(priority: Double, vararg keywords: String) : this(priority, keywords.toList())
 
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
         result: CompletionResultSet,
     ) {
-        parameters.position
-        keywords.asReversed().forEachIndexed { index, s ->
-            result.addElement(createKeywordLookupElement(s, priority + (index * 0.01)))
+        keywords.asReversed().forEach{ s ->
+            result.addElement(createKeywordLookupElement(s, parameters))
         }
     }
 
-    private fun createKeywordLookupElement(keyword: String, priority: Double): LookupElement {
-        val insertHandler = insertHandler ?: createTemplateBasedInsertHandler("tolk_lang_$keyword")
-        return PrioritizedLookupElement.withPriority(
-            LookupElementBuilder.create(keyword).withBoldness(true).withInsertHandler(insertHandler),
-            priority
+    private fun createKeywordLookupElement(
+        keyword: String,
+        parameters: CompletionParameters,
+    ): LookupElement {
+        var builder = LookupElementBuilder.create(keyword).bold()
+        builder = addInsertionHandler(keyword, builder, parameters)
+        return builder.toTolkLookupElement(
+            TolkLookupElementData(keywordKind = KEYWORD)
         )
     }
 
-    private fun createTemplateBasedInsertHandler(templateId: String): InsertHandler<LookupElement> =
-        InsertHandler { context, item ->
-            val editor = context.editor
-            val template = TemplateSettings.getInstance().getTemplateById(templateId)
-            if (template != null) {
-                editor.document.deleteString(context.startOffset, context.tailOffset)
-                TemplateManager.getInstance(context.project).startTemplate(editor, template)
-            } else {
-                val currentOffset = editor.caretModel.offset
-                val documentText = editor.document.immutableCharSequence
-                if (insertSpace && (documentText.length <= currentOffset || documentText[currentOffset] != ' ')) {
-                    EditorModificationUtil.insertStringAtCaret(editor, " ")
-                }
+    private fun addInsertionHandler(
+        keyword: String, builder: LookupElementBuilder, parameters: CompletionParameters
+    ): LookupElementBuilder {
+        val suffix = when (keyword) {
+            "return" -> {
+                val fn = parameters.position.ancestorStrict<TolkFunction>() ?: return builder
+                val returnTy = fn.returnTy
+                if (returnTy == TolkTy.Void) ";" else " "
             }
+            else -> " "
         }
+        return builder.withInsertHandler { ctx, _ ->
+            ctx.addSuffix(suffix)
+        }
+    }
 }

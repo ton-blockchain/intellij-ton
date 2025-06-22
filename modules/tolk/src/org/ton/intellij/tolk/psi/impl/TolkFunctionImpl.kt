@@ -12,12 +12,14 @@ import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.isAncestor
 import com.intellij.util.SmartList
 import org.ton.intellij.tolk.TolkIcons
+import org.ton.intellij.tolk.doc.psi.TolkDocComment
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.TolkFunctionStub
 import org.ton.intellij.tolk.type.CyclicReferenceException
 import org.ton.intellij.tolk.type.TolkFunctionTy
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.inference
+import org.ton.intellij.util.childOfType
 import org.ton.intellij.util.greenStub
 import javax.swing.Icon
 
@@ -25,6 +27,8 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TolkFunctionStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
+
+    override val doc: TolkDocComment? get() = childOfType()
 
     override fun getIcon(flags: Int): Icon? {
         if (hasSelf) {

@@ -150,6 +150,7 @@ private TopLevelDefinition_first ::= 'tolk' | 'fun' | 'import' | 'global' | 'con
 Item ::= Annotations (ConstVar | GlobalVar | TypeDef | Struct | Function) {
     name = "item"
     elementType = ToBeUpped
+    hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
 private Annotations ::= Annotation*
 
@@ -166,6 +167,7 @@ upper GlobalVar ::= 'global' IDENTIFIER GlobalVarType ';'  {
     implements=[
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
         "org.ton.intellij.tolk.psi.TolkAnnotationHolder"
+        "org.ton.intellij.tolk.psi.TolkDocOwner"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkGlobalVarStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -181,6 +183,7 @@ upper ConstVar ::= 'const' IDENTIFIER ConstVarType? '=' Expression ';' {
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
         "org.ton.intellij.tolk.psi.TolkAnnotationHolder"
+        "org.ton.intellij.tolk.psi.TolkDocOwner"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkConstVarStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -208,6 +211,7 @@ upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpressio
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
         "org.ton.intellij.tolk.psi.TolkTypeSymbolElement"
         "org.ton.intellij.tolk.psi.TolkAnnotationHolder"
+        "org.ton.intellij.tolk.psi.TolkDocOwner"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkTypeDefStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -220,6 +224,7 @@ upper Struct ::= 'struct' StructConstructorTag? IDENTIFIER TypeParameterList? (S
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
         "org.ton.intellij.tolk.psi.TolkTypeSymbolElement"
         "org.ton.intellij.tolk.psi.TolkAnnotationHolder"
+        "org.ton.intellij.tolk.psi.TolkDocOwner"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkStructStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -245,9 +250,11 @@ StructField ::= IDENTIFIER ':' TypeExpression StructFieldDefault? {
     implements=[
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
+        "org.ton.intellij.tolk.psi.TolkDocOwner"
     ]
     stubClass="org.ton.intellij.tolk.stub.TolkStructFieldStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+    hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
 private StructField_recover ::= !(';'|','|'}')
 private StructFieldDefault ::= '=' Expression {
@@ -277,6 +284,7 @@ upper Function ::= ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypePar
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
         "org.ton.intellij.tolk.psi.TolkAnnotationHolder"
+        "org.ton.intellij.tolk.psi.TolkDocOwner"
     ]
     mixin = "org.ton.intellij.tolk.psi.impl.TolkFunctionMixin"
     stubClass = "org.ton.intellij.tolk.stub.TolkFunctionStub"

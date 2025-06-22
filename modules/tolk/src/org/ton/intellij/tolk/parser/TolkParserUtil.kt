@@ -6,7 +6,7 @@ import com.intellij.lang.parser.GeneratedParserUtilBase
 import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IElementType
 import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_BLOCK_COMMENT
-import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.EOL_COMMENT
+import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_EOL_COMMENT
 import org.ton.intellij.tolk.psi.TolkElementTypes
 
 object TolkParserUtil : GeneratedParserUtilBase() {
@@ -19,7 +19,7 @@ object TolkParserUtil : GeneratedParserUtilBase() {
                 candidate = minOf(candidate, i)
                 break
             }
-            if (EOL_COMMENT == token) {
+            if (DOC_EOL_COMMENT == token) {
                 candidate = minOf(candidate, i)
             }
             if (TokenType.WHITE_SPACE == token && "\n\n" in getter[i]) {

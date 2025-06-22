@@ -2,6 +2,8 @@
 
 package org.ton.intellij.util
 
+import com.intellij.codeInsight.completion.InsertionContext
+import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
@@ -56,4 +58,9 @@ fun getAllFilesRecursively(filesOrDirs: Array<VirtualFile>): Collection<VirtualF
         })
     }
     return result
+}
+
+fun InsertionContext.addSuffix(suffix: String) {
+    document.insertString(selectionEndOffset, suffix)
+    EditorModificationUtil.moveCaretRelatively(editor, suffix.length)
 }

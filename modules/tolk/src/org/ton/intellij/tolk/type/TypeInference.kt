@@ -207,7 +207,8 @@ private fun LocalSymbolsScopes.lookupSymbol(name: String?): TolkLocalSymbolEleme
 
 private fun LocalSymbolsScopes.addLocalSymbol(symbol: TolkLocalSymbolElement): Boolean {
     val currentScope = last()
-    val result = currentScope.put(symbol.name ?: return false, symbol) != null
+    val name = symbol.name ?: return false
+    val result = currentScope.put(name, symbol) != null
 //    println("adding symbol: $symbol; ${this}")
     return result
 }

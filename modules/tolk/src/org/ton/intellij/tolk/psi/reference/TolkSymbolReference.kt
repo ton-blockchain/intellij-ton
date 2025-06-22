@@ -39,4 +39,8 @@ class TolkSymbolReference(
     override fun handleElementRename(newElementName: String): PsiElement {
         return identifier.replace(TolkPsiFactory.Companion[element.project].createIdentifier(newElementName))
     }
+
+    companion object {
+        val EMPTY_ARRAY = emptyArray<TolkSymbolReference>()
+    }
 }

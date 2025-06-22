@@ -5,11 +5,13 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.search.SearchScope
 import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.TolkIcons
+import org.ton.intellij.tolk.doc.psi.TolkDocComment
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.stub.TolkStructStub
 import org.ton.intellij.tolk.type.TolkStructTy
 import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.util.childOfType
 import javax.swing.Icon
 
 abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruct {
@@ -22,6 +24,8 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
     }
 
     override val type: TolkStructTy get() = declaredType
+
+    override val doc: TolkDocComment? get() = childOfType()
 
     override fun getIcon(flags: Int): Icon? = TolkIcons.STRUCTURE
 

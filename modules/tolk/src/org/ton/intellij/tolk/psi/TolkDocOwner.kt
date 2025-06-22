@@ -1,3 +1,7 @@
 package org.ton.intellij.tolk.psi
 
-interface TolkDocOwner : TolkElement
+import org.ton.intellij.tolk.doc.psi.TolkDocComment
+
+interface TolkDocOwner : TolkElement {
+    val doc: TolkDocComment?
+}

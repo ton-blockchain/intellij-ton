@@ -6,6 +6,7 @@ import com.intellij.psi.search.SearchScope
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.util.PsiTreeUtil
 import org.ton.intellij.tolk.TolkIcons
+import org.ton.intellij.tolk.doc.psi.TolkDocComment
 import org.ton.intellij.tolk.psi.TolkAnnotation
 import org.ton.intellij.tolk.psi.TolkTypeDef
 import org.ton.intellij.tolk.psi.TolkTypedElement
@@ -13,6 +14,7 @@ import org.ton.intellij.tolk.stub.TolkTypeDefStub
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkTypeAliasTy
 import org.ton.intellij.tolk.type.render
+import org.ton.intellij.util.childOfType
 import org.ton.intellij.util.recursionGuard
 import javax.swing.Icon
 
@@ -32,6 +34,8 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
             } ?: TolkTy.Unknown
             return TolkTypeAliasTy(this, typeExpressionType)
         }
+
+    override val doc: TolkDocComment? get() = childOfType()
 
     override fun getIcon(flags: Int) = TolkIcons.TYPE_ALIAS
 

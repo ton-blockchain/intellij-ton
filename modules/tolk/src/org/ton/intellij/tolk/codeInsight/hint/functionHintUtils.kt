@@ -25,7 +25,9 @@ internal fun iterateOverParameters(
             val selfParameter = parameterList.selfParameter
             if (selfParameter != null
                 && receiver is TolkReferenceExpression
-                && (receiver.references.isEmpty() || referenceResolver(receiver) is TolkTypeSymbolElement)
+                && (referenceResolver(receiver).let {
+                   it is TolkTypeSymbolElement || it == null
+                })
             ) {
                 val selfArg = argumentIterator.nextOrNull()
                 if (selfArg != null) {

@@ -1,4 +1,7 @@
-fun main(a: slice) {
-    val cell = a;
-    cell.loadUint()
+struct Foo;
+
+fun Foo.test();
+
+fun main() {
+    Foo.test()
 }

@@ -55,7 +55,7 @@ fun collectFunctionCandidates(
     if (calledReceiver != null) {
         namedFunctions = namedFunctionsSeq.filter { it.hasReceiver }.toList()
     } else {
-        return namedFunctionsSeq.filter { !it.hasSelf }.map { it to EmptySubstitution }.toList()
+        return namedFunctionsSeq.filter { !it.hasSelf && !it.hasReceiver }.map { it to EmptySubstitution }.toList()
     }
 
     val candidates = ArrayList<Pair<TolkFunction, Substitution>>()

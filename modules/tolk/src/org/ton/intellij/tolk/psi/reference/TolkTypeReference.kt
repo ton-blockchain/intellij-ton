@@ -58,14 +58,18 @@ class TolkTypeReference(
         val visitedFiles = HashSet<TolkFile>()
         if (visitedFiles.add(file)) {
             file.declaredSymbols[target]?.forEach {
-                result.add(PsiElementResolveResult(it))
+                if (it is TolkTypeSymbolElement) {
+                    result.add(PsiElementResolveResult(it))
+                }
             }
         }
 
         file.project.tolkSettings.getDefaultImport()?.let {
             if (visitedFiles.add(it)) {
                 it.declaredSymbols[target]?.forEach {
-                    result.add(PsiElementResolveResult(it))
+                    if (it is TolkTypeSymbolElement) {
+                        result.add(PsiElementResolveResult(it))
+                    }
                 }
             }
         }
@@ -73,7 +77,9 @@ class TolkTypeReference(
         file.getImportedFiles().forEach { importedFile ->
             if (visitedFiles.add(importedFile)) {
                 importedFile.declaredSymbols[target]?.forEach {
-                    result.add(PsiElementResolveResult(it))
+                    if (it is TolkTypeSymbolElement) {
+                        result.add(PsiElementResolveResult(it))
+                    }
                 }
             }
         }

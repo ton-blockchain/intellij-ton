@@ -1198,32 +1198,17 @@ class TolkInferenceWalker(
             val singleCandidate = functionCandidates.singleOrNull()
             if (singleCandidate != null) {
                 val (function, sub) = singleCandidate
-                val typeArgumentList = element.typeArgumentList?.typeExpressionList ?: emptyList()
-                val substituteMap = HashMap<TolkTyParam, TolkTy>()
-                val typeParameterList = function.typeParameterList?.typeParameterList ?: emptyList()
-                typeParameterList.zip(typeArgumentList).forEach { (typeParameter, typeArgument) ->
-                    substituteMap[TolkTyParam.create(typeParameter)] = typeArgument.type ?: TolkTy.Unknown
+                var inferredType = function.declaredType
+                if (inferredType.hasGenerics()) {
+                    inferredType = inferredType.substitute(sub) as? TolkTyFunction ?: inferredType
                 }
-                val functionDeclaredType = function.declaredType
-                if (functionDeclaredType.hasGenerics()) {
-                    val substitution = sub + Substitution(substituteMap)
-                    val subType = functionDeclaredType.substitute(substitution)
-                    ctx.setType(element, subType)
-                    return TolkExpressionInferenceResult(
-                        element,
-                        nextFlow,
-                        subType,
-                        substitution
-                    )
-                } else {
-                    ctx.setType(element, functionDeclaredType)
-                    return TolkExpressionInferenceResult(
-                        element,
-                        nextFlow,
-                        functionDeclaredType,
-                        sub
-                    )
-                }
+                ctx.setType(element, inferredType)
+                return TolkExpressionInferenceResult(
+                    element,
+                    nextFlow,
+                    inferredType,
+                    sub
+                )
             }
         }
 
@@ -1254,6 +1239,7 @@ class TolkInferenceWalker(
                 null,
                 name,
                 element.containingFile as TolkFile,
+                element.typeArgumentList
             )
         }
     }
@@ -1618,8 +1604,7 @@ class TolkInferenceWalker(
             val matchPatternReference = matchPattern.matchPatternReference
             if (matchPatternReference != null) {
                 val name = matchPatternReference.identifier.text.removeSurrounding("`")
-                val symbol = armsEntryFlow.getSymbol(name)
-
+                val symbol = localSymbols[matchPatternReference] ?: resolveToGlobalSymbols(matchPatternReference, name).firstOrNull()
                 val syncExprType = if (symbol != null) {
                     ctx.setResolvedRefs(matchPatternReference, listOf(PsiElementResolveResult(symbol)))
                     ctx.getType(symbol) ?: symbol.type

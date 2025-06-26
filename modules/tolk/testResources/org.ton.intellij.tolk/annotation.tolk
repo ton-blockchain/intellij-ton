@@ -1,34 +1,5 @@
-struct JustInt {
-    value: int;
-}
+import "@stdlib/tvm-dicts"
 
-struct JustIntWrapper {
-    int: JustInt;
-}
-
-type MIntN = MInt?;
-type MInt = int;
-type MNull = null;
-type JustIntAlias = JustInt;
-type JustIntAlias2 = JustIntAlias;
-type Pair2_v1 = (int, int);
-type Pair2_v2 = (MInt, MInt);
-
-fun eqUnion2<T1, T2>(v: T1 | T2): T2 | T1 { return v }
-
-type IntOrInt8OrInt16 = int | int8 | int16;
-
-fun analyzeTensor1<T1, T2>(a: (T1, T2)): (T1, T2) { return a; }
-fun analyzeTensor2<T1, T2>(a: (T1, T2)?): (T1, T2)? { return a; }
-fun getNullableInt(): int? { return 5; }
-
-struct Wrapper<T> {
-    value: T;
-}
-
-fun Wrapper<T>.equalsNotNull<U>(self, anotherW: Wrapper<U>): bool;
-
-fun test3() {
-    var eq = Wrapper<int8>.equalsNotNull<coins?>;
-    __expect_type(eq, "(Wrapper<int8>, Wrapper<coins?>) -> bool");
+fun cell?.addIntToIDict(mutate self, key: int, number: int, b: builder): void {
+    return self.iDictSetBuilder(32, key, b);
 }

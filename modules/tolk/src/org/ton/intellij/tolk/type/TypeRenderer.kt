@@ -32,15 +32,8 @@ private class TypeRenderer(
             is TolkTyAlias -> if (useAliasNames) buildString {
                 val psi = ty.psi
                 append(psi.name ?: return anonymous)
-                if (includeTypeArguments) {
-                    val typeParameters = psi.typeParameterList?.typeParameterList
-                    if (typeParameters != null && typeParameters.isNotEmpty()) {
-                        append(
-                            typeParameters.joinToString(", ", "<", ">") { typeParameter ->
-                                typeParameter.type?.let { render(it) } ?: return@joinToString anonymous
-                            }
-                        )
-                    }
+                if (includeTypeArguments && ty.typeArguments.isNotEmpty()) {
+                    append(ty.typeArguments.joinToString(", ", "<", ">", transform = render))
                 }
             } else {
                 render(ty.underlyingType, level)

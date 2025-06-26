@@ -1,4 +1,3 @@
-
 import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -131,7 +130,7 @@ val mergePluginJarsTask = task<Jar>("mergePluginJars") {
         sandboxTask.destinationDir.resolve("${sandboxTask.pluginName.get()}/lib")
     }
 
-    val pluginJars  = {
+    val pluginJars = {
         val files = pluginLibDir.listFiles().orEmpty().filter { it.isPluginJar() }
         files
     }
@@ -167,6 +166,7 @@ changelog {
     itemPrefix.set("-")
     keepUnreleasedSection.set(true)
     unreleasedTerm.set("[Unreleased]")
+    headerParserRegex.set("""(\d+(?:\.\d+)+)""".toRegex())
     groups.set(listOf("Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"))
 }
 

@@ -577,15 +577,33 @@ AddBinOp ::= '-' | '+' { name = "operator" }
 MulBinOp  ::= '*' | '/' | '%' | '/%' | '^/' | '~/' | '^%' | '~%' { name = "operator" }
 
 // vat_declaration_lhs
-VarDefinition ::= VarTensor | VarTuple | VarRedef | Var {
+VarDefinition ::= TensorOrParenVar | VarTuple | VarRedef | Var {
     implements=[
         "org.ton.intellij.tolk.psi.TolkTypedElement"
     ]
 }
 
-VarTensor ::= '(' <<list_with_recover VarDefinition>> ')' {
+fake VarTensor ::= '(' <<comma_separated_list VarDefinition>> ')' {
     pin = 1
     extends = VarDefinition
+}
+fake VarParen ::= '(' VarDefinition ')' {
+    pin = 1
+    extends = VarDefinition
+}
+
+TensorOrParenVar ::= '(' VarDefinition (VarTensor_upper | ',')? ')' {
+    pin = 1
+    elementType = VarParen
+}
+
+upper VarTensor_upper ::= ',' VarDefinition VarTensorElements* {
+    pin=2
+    elementType = VarTensor
+}
+
+private VarTensorElements ::= ',' (VarDefinition | &')') {
+    pin=1
 }
 
 VarTuple ::= '[' <<list_with_recover VarDefinition>> ']' {

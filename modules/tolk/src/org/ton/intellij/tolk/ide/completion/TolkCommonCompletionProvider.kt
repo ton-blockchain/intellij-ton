@@ -229,6 +229,13 @@ fun collectLocalVariables(
                                 true
                             }
 
+                            is TolkVarParen -> {
+                                varDefinition.varDefinition?.let {
+                                    if (!processVarDefinition(it)) return false
+                                }
+                                true
+                            }
+
                             else -> true
                         }
                     }

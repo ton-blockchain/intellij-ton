@@ -33,13 +33,29 @@ fun resolveFieldLookupReferenceWithReceiver(
         }
     }
 
-    val functionCandidates = collectFunctionCandidates(
+    return collectFunctionCandidates(
         fieldLookup.project,
         receiverType,
         name,
-        fieldLookup.containingFile as TolkFile
+        fieldLookup.containingFile as TolkFile,
+        fieldLookup.typeArgumentList
     )
-    val typeArgs = fieldLookup.typeArgumentList?.typeExpressionList?.map { it.type }
+}
+
+fun collectFunctionCandidates(
+    project: Project,
+    calledReceiver: TolkTy?,
+    name: String,
+    containingFile: TolkFile,
+    typeArgumentList: TolkTypeArgumentList?
+): List<Pair<TolkFunction, Substitution>> {
+    val functionCandidates = collectFunctionCandidates(
+        project,
+        calledReceiver,
+        name,
+        containingFile
+    )
+    val typeArgs = typeArgumentList?.typeExpressionList?.map { it.type }
     if (typeArgs != null) {
         return functionCandidates.map { (function, sub) ->
             var sub = sub
@@ -54,7 +70,6 @@ fun resolveFieldLookupReferenceWithReceiver(
             (function to sub)
         }
     }
-
     return functionCandidates
 }
 

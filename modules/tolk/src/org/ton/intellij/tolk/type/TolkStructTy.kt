@@ -25,10 +25,10 @@ data class TolkStructTy private constructor(
         if (this === other) return true
         if (other !is TolkStructTy) return false
         if (!psi.manager.areElementsEquivalent(psi,other.psi)) return false
-//        if (typeArguments.size != other.typeArguments.size) return false
-//        for (i in typeArguments.indices) {
-//            if (!typeArguments[i].unwrapTypeAlias().isEquivalentTo(other.typeArguments[i])) return false
-//        }
+        if (typeArguments.size != other.typeArguments.size) return false
+        for (i in typeArguments.indices) {
+            if (!typeArguments[i].isEquivalentTo(other.typeArguments[i])) return false
+        }
         return true
     }
 

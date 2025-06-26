@@ -119,7 +119,12 @@ private fun TolkFunction.resolveReturnType(): TolkTy {
         return if (returnTypePsi.selfKeyword != null) {
             receiverTy
         } else {
-            returnTypePsi.typeExpression?.type ?: TolkTy.Unknown
+            val typeExExpression = returnTypePsi.typeExpression
+            if (typeExExpression != null) {
+                typeExExpression.type ?: TolkTy.Unknown
+            } else {
+                TolkTy.Unknown
+            }
         }
     }
 

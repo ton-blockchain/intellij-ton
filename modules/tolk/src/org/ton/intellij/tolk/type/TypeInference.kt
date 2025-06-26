@@ -1242,7 +1242,7 @@ class TolkInferenceWalker(
     }
 
     private fun resolveToFunction(
-        element: TolkReferenceElement,
+        element: TolkReferenceExpression,
         name: String
     ): List<Pair<TolkFunction, Substitution>> {
         val builtinFunction = TolkBuiltins[project].getFunction(name)

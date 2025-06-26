@@ -33,12 +33,29 @@ fun resolveFieldLookupReferenceWithReceiver(
         }
     }
 
-    return collectFunctionCandidates(
+    val functionCandidates = collectFunctionCandidates(
         fieldLookup.project,
         receiverType,
         name,
         fieldLookup.containingFile as TolkFile
     )
+    val typeArgs = fieldLookup.typeArgumentList?.typeExpressionList?.map { it.type }
+    if (typeArgs != null) {
+        return functionCandidates.map { (function, sub) ->
+            var sub = sub
+            val typeParams = function.typeParameterList?.typeParameterList?.map { it.type }
+            if (typeParams != null && typeParams.size == typeArgs.size) {
+                for (i in typeArgs.indices) {
+                    val paramElement = typeParams[i] ?: continue
+                    val argElement = typeArgs[i] ?: continue
+                    sub = sub.deduce(paramElement, argElement)
+                }
+            }
+            (function to sub)
+        }
+    }
+
+    return functionCandidates
 }
 
 fun collectFunctionCandidates(
@@ -99,10 +116,6 @@ fun collectFunctionCandidates(
             }
 
             val sub = Substitution.instantiate(functionReceiver, calledReceiver)
-//                val subType = functionReceiver.substitute(sub)
-//                if (calledReceiver.unwrapTypeAlias().isEquivalentTo(subType)) {
-//                    candidates.add(function to sub)
-//                }
             candidates.add(function to sub)
         }
     }

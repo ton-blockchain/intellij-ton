@@ -13,7 +13,7 @@ import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.psi.reference.TolkTypeReference
 import org.ton.intellij.tolk.type.TolkStructTy
 import org.ton.intellij.tolk.type.TolkTy
-import org.ton.intellij.tolk.type.TolkTypeParameterTy
+import org.ton.intellij.tolk.type.TolkTyParam
 
 abstract class TolkReferenceTypeExpressionMixin : ASTWrapperPsiElement, TolkReferenceTypeExpression {
 
@@ -54,7 +54,7 @@ abstract class TolkReferenceTypeExpressionMixin : ASTWrapperPsiElement, TolkRefe
 
             resolved is TolkTypedElement -> resolved.type
 
-            parentOfType<TolkFunctionReceiver>() != null && typeArgumentList == null -> TolkTypeParameterTy.create(this)
+            parentOfType<TolkFunctionReceiver>() != null && typeArgumentList == null -> TolkTyParam.create(this)
 
             else -> TolkTy.Unknown
         }

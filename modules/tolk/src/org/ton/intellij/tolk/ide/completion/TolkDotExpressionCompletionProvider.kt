@@ -85,10 +85,10 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                     }
                 }
 
-                is TolkTypedTupleTy, is TolkTensorTy -> {
+                is TolkTyTypedTuple, is TolkTyTensor -> {
                     val elements = when (calledType) {
-                        is TolkTypedTupleTy -> calledType.elements
-                        is TolkTensorTy -> calledType.elements
+                        is TolkTyTypedTuple -> calledType.elements
+                        is TolkTyTensor -> calledType.elements
                         else -> emptyList()
                     }
                     for ((index, element) in elements.withIndex()) {
@@ -125,7 +125,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
 
             fun canBeAdded(): Boolean {
                 if ((canBeAssigned && isStatic == isStaticReceiver) || (receiverType == primitiveStaticReceiver && isStatic)) return true
-                if (receiverType is TolkTypeParameterTy) return true
+                if (receiverType is TolkTyParam) return true
                 if (receiverType.hasGenerics() &&
                     receiverType is TolkStructTy &&
                     calledType is TolkStructTy &&
@@ -142,8 +142,8 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                         TolkLookupElementData(
                             isSelfTypeCompatible = function.receiverTy == calledType,
                             isSelfTypeNullableCompatible = function.receiverTy.removeNullable() == calledTypeWithoutNull,
-                            isInherentUnionMember = receiverType is TolkUnionTy,
-                            isGeneric = receiverType is TolkTypeParameterTy,
+                            isInherentUnionMember = receiverType is TolkTyUnion,
+                            isGeneric = receiverType is TolkTyParam,
                             elementKind = when {
                                 function.hasDeprecatedAnnotation -> TolkLookupElementData.ElementKind.DEPRECATED
                                 isStatic -> TolkLookupElementData.ElementKind.STATIC_FUNCTION

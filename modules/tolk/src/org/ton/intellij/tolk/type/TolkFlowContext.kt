@@ -66,7 +66,7 @@ class TolkFlowContext(
         for (function in namedFunctions) {
             val functionReceiver = function.receiverTy
             val actualFunctionReceiver = functionReceiver.actualType()
-            if (functionReceiver.hasGenerics() && functionReceiver !is TolkTypeParameterTy) {
+            if (functionReceiver.hasGenerics() && functionReceiver !is TolkTyParam) {
                 if (actualFunctionReceiver is TolkStructTy && actualCalledReceiver is TolkStructTy) {
                     if (!actualFunctionReceiver.psi.isEquivalentTo(actualCalledReceiver.psi)) {
                         continue
@@ -88,7 +88,7 @@ class TolkFlowContext(
         // step 4: try to match `T.copy`
         for (function in namedFunctions) {
             val functionReceiver = function.receiverTy
-            if (functionReceiver is TolkTypeParameterTy) {
+            if (functionReceiver is TolkTyParam) {
                 candidates.add(function to Substitution(mapOf(functionReceiver to calledReceiver)))
             }
         }
@@ -153,14 +153,18 @@ class TolkFlowContext(
         } else {
             joinedSymbolTypes = HashMap(symbolTypes)
             other.symbolTypes.forEach { otherSymbol ->
-                joinedSymbolTypes[otherSymbol.key] =
-                    joinedSymbolTypes[otherSymbol.key]?.join(otherSymbol.value) ?: otherSymbol.value
+                val a = joinedSymbolTypes[otherSymbol.key]
+                val b = otherSymbol.value
+                val result = a.join(b) ?: b
+                joinedSymbolTypes[otherSymbol.key] = result
             }
             joinedSinkExpressionsMutableMap = HashMap()
             other.sinkExpressions.forEach { otherSExpr ->
-                val thisSExpr = sinkExpressions[otherSExpr.key]
-                if (thisSExpr != null) {
-                    joinedSinkExpressionsMutableMap[otherSExpr.key] = thisSExpr.join(otherSExpr.value)
+                val a = sinkExpressions[otherSExpr.key]
+                if (a != null) {
+                    val b = otherSExpr.value
+                    val result = a.join(b)
+                    joinedSinkExpressionsMutableMap[otherSExpr.key] = result
                 }
             }
         }

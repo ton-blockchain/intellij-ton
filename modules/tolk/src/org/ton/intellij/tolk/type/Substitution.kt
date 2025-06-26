@@ -2,14 +2,14 @@ package org.ton.intellij.tolk.type
 
 
 open class Substitution(
-    val typeSubst: Map<TolkTypeParameterTy, TolkTy>
+    val typeSubst: Map<TolkTyParam, TolkTy>
 ) {
     operator fun plus(other: Substitution): Substitution =
         Substitution(
             typeSubst + other.typeSubst
         )
 
-    operator fun get(key: TolkTypeParameterTy) = typeSubst[key]
+    operator fun get(key: TolkTyParam) = typeSubst[key]
 
     open fun isEmpty() = typeSubst.isEmpty()
 
@@ -25,38 +25,44 @@ open class Substitution(
     fun deduce(paramType: TolkTy, argType: TolkTy): Substitution {
         return when {
             paramType is TolkStructTy && argType is TolkStructTy -> {
-                paramType.typeArguments.zip(argType.typeArguments).fold(this) { sub, (a, b) ->
+                paramType.typeArguments.asSequence().zip(argType.typeArguments.asSequence()).fold(this) { sub, (a, b) ->
                     sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
                 }
             }
 
-            paramType is TolkFunctionTy && argType is TolkFunctionTy -> {
-                deduce(
-                    paramType.inputType.unwrapTypeAlias(),
-                    argType.inputType.unwrapTypeAlias()
-                ) + deduce(paramType.returnType.unwrapTypeAlias(), argType.returnType.unwrapTypeAlias())
+            paramType is TolkTyFunction && argType is TolkTyFunction -> {
+                paramType.parametersType.asSequence()
+                    .zip(argType.parametersType.asSequence())
+                    .fold(this) { sub, (a, b) ->
+                        sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
+                    } + deduce(paramType.returnType.unwrapTypeAlias(), argType.returnType.unwrapTypeAlias())
             }
 
-            paramType is TolkTensorTy && argType is TolkTensorTy -> {
-                paramType.elements.zip(argType.elements)
-                    .fold(this) { sub, (a, b) -> sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
+            paramType is TolkTyTensor && argType is TolkTyTensor -> {
+                paramType.elements.asSequence().zip(argType.elements.asSequence())
+                    .fold(this) { sub, (a, b) ->
+                        sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
+                    }
             }
 
-            paramType is TolkTypedTupleTy && argType is TolkTypedTupleTy -> {
-                paramType.elements.zip(argType.elements)
-                    .fold(this) { sub, (a, b) -> sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias()) }
+            paramType is TolkTyTypedTuple && argType is TolkTyTypedTuple -> {
+                paramType.elements.asSequence().zip(argType.elements.asSequence())
+                    .fold(this) { sub, (a, b) ->
+                        sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
+                    }
             }
 
-            paramType is TolkUnionTy && argType is TolkUnionTy -> {
-                paramType.variants.zip(argType.variants).fold(this) { sub, (a, b) ->
-                    deduce(a.actualType(), b.actualType())
-                }
+            paramType is TolkTyUnion && argType is TolkTyUnion -> {
+                paramType.variants.asSequence().zip(argType.variants.asSequence())
+                    .fold(this) { sub, (a, b) ->
+                        sub.deduce(a.actualType(), b.actualType())
+                    }
             }
 
-            paramType is TolkTypeParameterTy -> {
+            paramType is TolkTyParam -> {
                 if (!typeSubst.containsKey(paramType)) {
                     val newType =
-                        if ((argType == paramType || argType == TolkTy.Unknown) && paramType.parameter is TolkTypeParameterTy.NamedTypeParameter) {
+                        if ((argType == paramType || argType == TolkTy.Unknown) && paramType.parameter is TolkTyParam.NamedTypeParameter) {
                             paramType.parameter.psi.defaultTypeParameter?.typeExpression?.type ?: return this
                         } else {
                             argType
@@ -66,7 +72,7 @@ open class Substitution(
                     if (size == 0) {
                         return Substitution(mapOf(paramType to newType))
                     }
-                    val map = HashMap<TolkTypeParameterTy, TolkTy>(size + 1)
+                    val map = HashMap<TolkTyParam, TolkTy>(size + 1)
                     map.putAll(typeSubst)
                     map[paramType] = newType
                     Substitution(map)
@@ -74,6 +80,7 @@ open class Substitution(
                     this
                 }
             }
+
             else -> this
         }
     }
@@ -91,4 +98,4 @@ object EmptySubstitution : Substitution(emptyMap()) {
     override fun isEmpty(): Boolean = true
 }
 
-fun Map<TolkTypeParameterTy, TolkTy>.toSubstitution() = Substitution(this)
+fun Map<TolkTyParam, TolkTy>.toSubstitution() = Substitution(this)

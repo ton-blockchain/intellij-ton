@@ -890,7 +890,7 @@ private MapTypeArrow ::= (NullableTypeExpression|SimpleTypeExpression) '->' {
 }
 
 AutoTypeExpression ::= 'auto'
-VoidTypeExpression ::= 'void' | ('(' ')') {
+VoidTypeExpression ::= 'void' {
     mixin="org.ton.intellij.tolk.psi.impl.TolkVoidTypeExpressionMixin"
 }
 
@@ -910,9 +910,12 @@ fake ParenTypeExpression ::= '(' TypeExpression ')' {
     mixin="org.ton.intellij.tolk.psi.impl.TolkParenTypeExpressionMixin"
 }
 
-TensorOrParenTypeExpression ::= '(' !')' TypeExpression (TensorType_upper | ')') {
-    pin = 2
+TensorOrParenTypeExpression ::= '(' (TensorEmpty | (TypeExpression (TensorType_upper | ')'))) {
+    pin = 1
     elementType = ParenTypeExpression
+}
+upper TensorEmpty ::= ')' {
+    elementType = TensorTypeExpression
 }
 upper TensorType_upper ::= ',' [ TypeExpression (',' TypeExpression)* ] ')' {
     pin = 1

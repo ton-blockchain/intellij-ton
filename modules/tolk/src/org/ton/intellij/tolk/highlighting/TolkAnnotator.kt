@@ -22,7 +22,7 @@ import org.ton.intellij.tolk.psi.impl.hasReceiver
 import org.ton.intellij.tolk.psi.impl.hasSelf
 import org.ton.intellij.tolk.psi.reference.TolkStructFieldReference
 import org.ton.intellij.tolk.type.TolkPrimitiveTy
-import org.ton.intellij.tolk.type.TolkTypeParameterTy
+import org.ton.intellij.tolk.type.TolkTyParam
 
 class TolkAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
@@ -111,7 +111,7 @@ class TolkAnnotator : Annotator {
                     return holder.info(TolkColor.TYPE_PARAMETER.textAttributesKey)
                 }
 
-                if (element !is TolkFieldLookup || parent !is TolkDotExpression || parent.expression.type !is TolkTypeParameterTy) {
+                if (element !is TolkFieldLookup || parent !is TolkDotExpression || parent.expression.type !is TolkTyParam) {
                     if (element.project.tolkSettings.hasStdlib) {
                         return holder.error(
                             "Unresolved reference: `$referenceName`",

@@ -9,6 +9,6 @@ abstract class TolkTensorTypeExpressionMixin : TolkTypeExpressionImpl, TolkTenso
     constructor(node: ASTNode) : super(node)
 //    constructor(stub: TolkReferenceTypeExpressionStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
-    override val type: TolkTy?
-        get() = TolkTy.tensor(typeExpressionList.map { it.type ?: return null })
+    override val type: TolkTy
+        get() = TolkTy.tensor(typeExpressionList.map { it.type ?: TolkTy.Unknown })
 }

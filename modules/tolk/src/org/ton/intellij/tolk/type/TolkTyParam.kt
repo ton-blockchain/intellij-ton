@@ -5,21 +5,18 @@ import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
 import org.ton.intellij.tolk.psi.TolkTypeParameter
 
-class TolkTypeParameterTy private constructor(
-    val parameter: TypeParameter
+class TolkTyParam private constructor(
+    val parameter: TypeParameter,
 ) : TolkTy {
     val name: String? get() = parameter.name
+
+    override val hasTypeAlias: Boolean get() = false
 
     override fun toString(): String = name.toString()
 
     override fun hasGenerics(): Boolean = true
 
-    override fun join(other: TolkTy): TolkTy {
-        if (this == other) return this
-        return TolkUnionTy.create(this, other)
-    }
-
-    override fun equals(other: Any?): Boolean = other is TolkTypeParameterTy && other.parameter == this.parameter
+    override fun equals(other: Any?): Boolean = other is TolkTyParam && other.parameter == this.parameter
 
     override fun hashCode(): Int = parameter.hashCode()
 
@@ -59,16 +56,16 @@ class TolkTypeParameterTy private constructor(
     }
 
     companion object {
-        fun create(psi: TolkTypeParameter): TolkTypeParameterTy {
+        fun create(psi: TolkTypeParameter): TolkTyParam {
             val original = CompletionUtil.getOriginalOrSelf(psi)
-            return TolkTypeParameterTy(
+            return TolkTyParam(
                 NamedTypeParameter(original)
             )
         }
 
-        fun create(psi: TolkReferenceTypeExpression): TolkTypeParameterTy {
+        fun create(psi: TolkReferenceTypeExpression): TolkTyParam {
             val original = CompletionUtil.getOriginalOrSelf(psi)
-            return TolkTypeParameterTy(
+            return TolkTyParam(
                 ReceiverTypeParameter(original)
             )
         }

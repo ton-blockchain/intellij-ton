@@ -7,7 +7,7 @@ import org.ton.intellij.tolk.psi.TolkCatchParameter
 import org.ton.intellij.tolk.psi.TolkConstVar
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkVar
-import org.ton.intellij.tolk.type.TolkFunctionTy
+import org.ton.intellij.tolk.type.TolkTyFunction
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.printTolkType
 
@@ -81,7 +81,7 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         if (element.returnType != null) return
         element.functionBody?.blockStatement ?: return
         val parameters = element.parameterList ?: return
-        val returnType = (element.type as? TolkFunctionTy)?.returnType ?: return
+        val returnType = (element.type as? TolkTyFunction)?.returnType ?: return
         when (returnType) {
             TolkTy.Unknown -> return
             else -> {}

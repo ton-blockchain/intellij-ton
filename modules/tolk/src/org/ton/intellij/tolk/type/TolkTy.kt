@@ -9,48 +9,97 @@ import org.ton.intellij.tolk.type.TolkTy.Companion.Slice
 import org.ton.intellij.tolk.type.range.TvmIntRangeSet
 
 interface TolkTy : TypeFoldable<TolkTy> {
+    val hasTypeAlias: Boolean
+
     fun nullable(): TolkTy {
-        return TolkUnionTy.create(this, Null)
+        return TolkTyUnion.create(this, Null)
     }
 
     fun removeNullable(): TolkTy {
-        if (this is TolkUnionTy && variants.contains(Null)) {
+        if (this is TolkTyUnion && variants.contains(Null)) {
             return subtract(Null)
         }
         return this
     }
 
     fun isNullable(): Boolean {
-        return this is TolkUnionTy && variants.contains(Null)
+        return this is TolkTyUnion && variants.contains(Null)
     }
 
     fun actualType(): TolkTy = this
-
-    fun unwrapTypeAlias(): TolkTy = this
 
     /**
      * if A.isSuperType(B) then A.join(B) is A and A.meet(B) is B.
      */
     fun isSuperType(other: TolkTy): Boolean {
-        if (other is TolkTypeAliasTy) return isSuperType(other.underlyingType)
-        return other == this || other == TolkTy.Never
+        if (other is TolkTyAlias) return isSuperType(other.underlyingType)
+        return other == this || other == Never
     }
 
-    fun join(other: TolkTy): TolkTy
+    fun join(other: TolkTy): TolkTy {
+        if (this.isEquivalentTo(other)) return this
+        if (other == Unknown) return Unknown
+        if (other == Never) return this
+        if (other == Null) return TolkTyUnion.create(this, other)
 
-    fun meet(other: TolkTy): TolkTy = if (other.isSuperType(this)) this else TolkNeverTy
+        val tensor1 = this as? TolkTyTensor
+        val tensor2 = other as? TolkTyTensor
+        if (tensor1 != null && tensor2 != null && tensor1.elements.size == tensor2.elements.size) {
+            val types = ArrayList<TolkTy>(tensor1.elements.size)
+            for (i in tensor1.elements.indices) {
+                val type1 = tensor1.elements[i]
+                val type2 = tensor2.elements[i]
+                types.add(type1.join(type2))
+            }
+            return TolkTyTensor.create(types)
+        }
+
+        val tuple1 = this as? TolkTyTypedTuple
+        val tuple2 = other as? TolkTyTypedTuple
+        if (tuple1 != null && tuple2 != null && tuple1.elements.size == tuple2.elements.size) {
+            val types = ArrayList<TolkTy>(tuple1.elements.size)
+            for (i in tuple1.elements.indices) {
+                val type1 = tuple1.elements[i]
+                val type2 = tuple2.elements[i]
+                types.add(type1.join(type2))
+            }
+            return TolkTyTypedTuple.create(types)
+        }
+
+        if (this is TolkTyAlias) return this.underlyingType.join(other)
+        if (other is TolkTyAlias) return this.join(other.underlyingType)
+
+        return TolkTyUnion.create(this, other)
+    }
+
+    fun meet(other: TolkTy): TolkTy = if (other.isSuperType(this)) this else TolkTyNever
 
     fun hasGenerics(): Boolean = false
 
     fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
-        if (other is TolkTypeAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTyAlias) return canRhsBeAssigned(other.unwrapTypeAlias())
         return other == Never
     }
 
-    fun isEquivalentTo(other: TolkTy?): Boolean = other != null && isEquivalentToInner(other.unwrapTypeAlias())
+    fun isEquivalentTo(other: TolkTy?): Boolean = other != null && isEquivalentToInner(other)
 
-    fun isEquivalentToInner(other: TolkTy): Boolean = equals(other)
+    fun isEquivalentToInner(other: TolkTy): Boolean {
+        val actualType = this.actualType()
+        val otherActualType = other.actualType()
+
+        val unwrapped = actualType.unwrapTypeAliasDeeply()
+        val otherUnwrapped = otherActualType.unwrapTypeAliasDeeply()
+        return unwrapped == otherUnwrapped
+    }
+
+    fun unwrapTypeAlias(): TolkTy {
+        var unwrapped = this
+        while (unwrapped is TolkTyAlias) {
+            unwrapped = unwrapped.underlyingType
+        }
+        return unwrapped
+    }
 
     override fun foldWith(folder: TypeFolder): TolkTy = folder.foldType(this)
 
@@ -60,20 +109,20 @@ interface TolkTy : TypeFoldable<TolkTy> {
         val Int = TolkIntRangeTy(TvmIntRangeSet.ALL)
         val TRUE = TolkConstantBoolTy(true)
         val FALSE = TolkConstantBoolTy(false)
-        val Bool = TolkBoolTy
-        val Null = TolkNullTy
-        val Void = TolkVoidTy
+        val Bool = TolkTyBool
+        val Null = TolkTyNull
+        val Void = TolkTyVoid
         val Cell = TolkCellTy
         val Slice = TolkSliceTy
-        val Builder = TolkBuilderTy
-        val Continuation = TolkContinuationTy
-        val Tuple = TolkTupleTy
-        val Unknown = TolkUnknownTy
-        val Never = TolkNeverTy
-        val Coins = TolkCoinsTy()
-        val VarInt32 = TolkVarInt32Ty()
-        val VarInt16 = TolkVarInt16Ty()
-        val Address = TolkAddressTy
+        val Builder = TolkTyBuilder
+        val Continuation = TolkTyContinuation
+        val Tuple = TolkTyTuple
+        val Unknown = TolkTyUnknown
+        val Never = TolkTyNever
+        val Coins = TolkTyCoins
+        val VarInt32 = TolkTyVarInt32
+        val VarInt16 = TolkTyVarInt16
+        val Address = TolkTyAddress
 
         // add to TolkTypeCompletionProvider also
         fun byName(text: String) = TolkPrimitiveTy.fromName(text)
@@ -81,14 +130,14 @@ interface TolkTy : TypeFoldable<TolkTy> {
         fun bool(value: Boolean): TolkTy = if (value) TRUE else FALSE
 
         fun union(vararg elements: TolkTy): TolkTy {
-            return TolkUnionTy.create(elements.toList())
+            return TolkTyUnion.create(elements.toList())
         }
 
-        fun union(elements: Iterable<TolkTy>): TolkTy = TolkUnionTy.create(elements.toList())
+        fun union(elements: Iterable<TolkTy>): TolkTy = TolkTyUnion.create(elements.toList())
 
-        fun tensor(elements: List<TolkTy>): TolkTy = TolkTensorTy.create(elements)
+        fun tensor(elements: List<TolkTy>): TolkTy = TolkTyTensor.create(elements)
 
-        fun typedTuple(elements: List<TolkTy>): TolkTy = TolkTypedTupleTy.create(elements)
+        fun typedTuple(elements: List<TolkTy>): TolkTy = TolkTyTypedTuple.create(elements)
 
         fun uint(n: Int): TolkTy = TolkIntNTy(n, unsigned = true)
 
@@ -107,10 +156,10 @@ interface TolkTy : TypeFoldable<TolkTy> {
 // example: `int | slice | builder | bool` - `bool | slice` = `int | builder`
 // what for: `if (x != null)` / `if (x is T)`, to smart cast x inside if
 fun TolkTy?.subtract(other: TolkTy?): TolkTy {
-    val lhsUnion = this as? TolkUnionTy ?: return TolkNeverTy
+    val lhsUnion = this as? TolkTyUnion ?: return TolkTyNever
 
     val restVariants = ArrayList<TolkTy>()
-    if (other is TolkUnionTy) {
+    if (other is TolkTyUnion) {
         if (lhsUnion.containsAll(other)) {
             for (lhsVariant in lhsUnion.variants) {
                 if (!other.contains(lhsVariant)) {
@@ -126,16 +175,12 @@ fun TolkTy?.subtract(other: TolkTy?): TolkTy {
         }
     }
     if (restVariants.isEmpty()) {
-        return TolkNeverTy
+        return TolkTyNever
     }
     if (restVariants.size == 1) {
         return restVariants.first()
     }
-    return TolkUnionTy.create(restVariants)
-}
-
-fun TolkTy?.isKnown(): Boolean {
-    return !(this == null || this == TolkTy.Unknown)
+    return TolkTyUnion.create(restVariants)
 }
 
 fun TolkTy?.join(other: TolkTy?): TolkTy? {
@@ -145,6 +190,8 @@ fun TolkTy?.join(other: TolkTy?): TolkTy? {
 }
 
 interface TolkPrimitiveTy : TolkTy {
+    override val hasTypeAlias: Boolean get() = false
+
     companion object {
         fun fromReference(element: TolkReferenceElement): TolkPrimitiveTy? {
             val name = element.referenceName ?: return null
@@ -166,7 +213,7 @@ interface TolkPrimitiveTy : TolkTy {
                 "tuple" -> TolkTy.Tuple
                 "void" -> TolkTy.Void
                 "bool" -> TolkTy.Bool
-                "never" -> TolkTy.Never
+                "never" -> Never
                 "coins" -> TolkTy.Coins
                 "varint16" -> TolkTy.VarInt16
                 "varint32" -> TolkTy.VarInt32
@@ -182,36 +229,22 @@ interface TolkConstantTy<T> : TolkTy {
     val value: T
 }
 
-object TolkVoidTy : TolkPrimitiveTy {
-    override fun join(other: TolkTy): TolkTy {
-        if (other == this) return this
-        return TolkTy.union(other, this)
-    }
-
+object TolkTyVoid : TolkPrimitiveTy {
     override fun toString(): String = "void"
 }
 
-object TolkNullTy : TolkPrimitiveTy {
-    override fun join(other: TolkTy): TolkTy {
-        if (other == this) return this
-        return TolkTy.union(other, this)
-    }
-
+object TolkTyNull : TolkPrimitiveTy {
     override fun toString(): String = "null"
+
+    override fun join(other: TolkTy): TolkTy {
+        if (other == this || other == Never) return this
+        if (other == TolkTy.Unknown) return TolkTy.Unknown
+        return TolkTyUnion.create(other, this)
+    }
 }
 
 object TolkCellTy : TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
-
-    override fun join(other: TolkTy): TolkTy {
-        if (other is TolkCellTy) return this
-        return TolkTy.union(this, other)
-    }
-
-    override fun meet(other: TolkTy): TolkTy {
-        if (other is TolkCellTy) return this
-        return TolkNeverTy
-    }
 
     override fun toString(): String = "cell"
 }
@@ -219,105 +252,53 @@ object TolkCellTy : TolkPrimitiveTy {
 object TolkSliceTy : TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
 
-    override fun join(other: TolkTy): TolkTy {
-        if (other is TolkSliceTy) return this
-        return TolkTy.union(this, other)
-    }
-
-    override fun meet(other: TolkTy): TolkTy {
-        if (other is TolkSliceTy) return this
-        return TolkNeverTy
-    }
-
     override fun toString(): String = "slice"
 }
 
-object TolkBuilderTy : TolkPrimitiveTy {
+object TolkTyBuilder : TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
-
-    override fun join(other: TolkTy): TolkTy {
-        if (other is TolkBuilderTy) return this
-        return TolkUnionTy.create(this, other)
-    }
-
-    override fun meet(other: TolkTy): TolkTy {
-        if (other is TolkBuilderTy) return this
-        return TolkNeverTy
-    }
 
     override fun toString(): String = "builder"
 }
 
-object TolkContinuationTy : TolkPrimitiveTy {
+object TolkTyContinuation : TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
-
-    override fun join(other: TolkTy): TolkTy {
-        if (other is TolkContinuationTy) return this
-        return TolkTy.union(this, other)
-    }
-
-    override fun meet(other: TolkTy): TolkTy {
-        if (other is TolkContinuationTy) return this
-        return TolkNeverTy
-    }
 
     override fun toString(): String = "continuation"
 }
 
-object TolkTupleTy : TolkPrimitiveTy {
+object TolkTyTuple : TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
-
-    override fun join(other: TolkTy): TolkTy {
-        if (other is TolkTupleTy) return this
-        return TolkTy.union(this, other)
-    }
-
-    override fun meet(other: TolkTy): TolkTy {
-        if (other is TolkTupleTy) return this
-        return TolkNeverTy
-    }
 
     override fun toString(): String = "tuple"
 }
 
-object TolkUnknownTy : TolkTy {
+object TolkTyUnknown : TolkTy {
+    override val hasTypeAlias: Boolean get() = false
+
     override fun isSuperType(other: TolkTy): Boolean = true
     override fun join(other: TolkTy): TolkTy = this
-    override fun meet(other: TolkTy): TolkTy = other
 
     override fun toString(): String = "unknown"
 }
 
-object TolkNeverTy : TolkTy, TolkPrimitiveTy {
+object TolkTyNever : TolkTy, TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
     override fun join(other: TolkTy): TolkTy = other
-    override fun meet(other: TolkTy): TolkTy = this
 
-    override fun canRhsBeAssigned(other: TolkTy): Boolean = true
+    override fun canRhsBeAssigned(other: TolkTy): Boolean = other == this
 
     override fun toString(): String = "never"
 }
 
-object TolkAddressTy : TolkPrimitiveTy {
+object TolkTyAddress : TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
-
-    override fun join(other: TolkTy): TolkTy {
-        if (other is TolkAddressTy) return this
-        return TolkUnionTy.create(this, other)
-    }
-
-    override fun meet(other: TolkTy): TolkTy {
-        if (other is TolkAddressTy) return this
-        return TolkNeverTy
-    }
 
     override fun toString(): String = "address"
 }
 
-data class TolkCoinsTy(
-    override val range: TvmIntRangeSet = TvmIntRangeSet.ALL
-) : TolkIntTy {
-    override fun negate(): TolkIntTy = TolkCoinsTy(range.unaryMinus())
+object TolkTyCoins : TolkPrimitiveTy {
+    override fun actualType(): TolkTy = this
 
     override fun toString(): String = "coins"
 }
@@ -325,10 +306,7 @@ data class TolkCoinsTy(
 data class TolkIntNTy(
     val n: Int,
     val unsigned: Boolean,
-    override val range: TvmIntRangeSet = TvmIntRangeSet.ALL
-) : TolkIntTy {
-    override fun negate(): TolkIntTy = TolkIntNTy(n, unsigned, range.unaryMinus())
-
+) : TolkPrimitiveTy {
     override fun actualType(): TolkTy = this
 
     override fun toString(): String = if (unsigned) {
@@ -340,7 +318,7 @@ data class TolkIntNTy(
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
         if (other.actualType() == TolkTy.Int) return true
-        if (other is TolkTypeAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTyAlias) return canRhsBeAssigned(other.unwrapTypeAlias())
         return other == Never
     }
 
@@ -427,11 +405,6 @@ data class TolkBitsNTy(
 ) : TolkPrimitiveTy {
     override fun toString(): String = "bits$n"
 
-    override fun join(other: TolkTy): TolkTy {
-        if (this == other) return this
-        return TolkUnionTy.create(this, other)
-    }
-
     companion object {
         fun fromName(text: String): TolkBitsNTy? {
             if (!text.startsWith("bits")) return null
@@ -449,11 +422,6 @@ data class TolkBytesNTy(
 ) : TolkPrimitiveTy {
     override fun toString(): String = "bytes$n"
 
-    override fun join(other: TolkTy): TolkTy {
-        if (this == other) return this
-        return TolkUnionTy.create(this, other)
-    }
-
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         return other.unwrapTypeAlias() == this
     }
@@ -470,18 +438,10 @@ data class TolkBytesNTy(
     }
 }
 
-data class TolkVarInt32Ty(
-    override val range: TvmIntRangeSet = TvmIntRangeSet.ALL
-) : TolkIntTy {
-    override fun negate(): TolkIntTy = TolkVarInt32Ty(range.unaryMinus())
-
+ object TolkTyVarInt32 : TolkPrimitiveTy {
     override fun toString(): String = "varint32"
 }
 
-data class TolkVarInt16Ty(
-    override val range: TvmIntRangeSet = TvmIntRangeSet.ALL
-) : TolkIntTy {
-    override fun negate(): TolkIntTy = TolkVarInt16Ty(range.unaryMinus())
-
+ object TolkTyVarInt16 : TolkPrimitiveTy {
     override fun toString(): String = "varint16"
 }

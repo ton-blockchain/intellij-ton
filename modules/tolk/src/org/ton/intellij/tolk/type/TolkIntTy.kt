@@ -12,26 +12,24 @@ interface TolkIntTy : TolkPrimitiveTy {
 
     override fun isSuperType(other: TolkTy): Boolean {
         if (other == TolkTy.Never) return true
-        if (other is TolkTypeAliasTy) return isSuperType(other.underlyingType)
+        if (other is TolkTyAlias) return isSuperType(other.underlyingType)
         if (other !is TolkIntTy) return false
         return range.contains(other.range)
     }
 
     override fun join(other: TolkTy): TolkTy {
-        if (other == this) return this
+        if (other.unwrapTypeAlias() == this) return this
         if (other == TolkTy.Never) return this
-        if (other is TolkTypeAliasTy) return join(other.underlyingType)
-        if (other !is TolkIntTy) return TolkUnionTy.create(this, other)
-//        val range = this.range.join(other.range)
-//        if (range is TvmIntRangeSet.Point) return TolkConstantIntTy(range.value)
+        if (other is TolkTyAlias) return join(other.underlyingType)
+        if (other !is TolkIntTy) return TolkTyUnion.create(this, other)
         return TolkTy.Int
     }
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
         if (other is TolkIntNTy) return true
-        if (other is TolkCoinsTy) return true
-        if (other is TolkTypeAliasTy) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTyCoins) return true
+        if (other is TolkTyAlias) return canRhsBeAssigned(other.unwrapTypeAlias())
         if (other.actualType() == TolkTy.Int) return true
         return other == TolkTy.Never
     }
@@ -56,8 +54,8 @@ data class TolkConstantIntTy(
     override fun negate(): TolkIntTy = TolkConstantIntTy(value.negate())
 
     override fun isSuperType(other: TolkTy): Boolean {
-        if (other is TolkTypeAliasTy) return isSuperType(other.underlyingType)
-        return other == this || other == TolkNeverTy
+        if (other is TolkTyAlias) return isSuperType(other.underlyingType)
+        return other == this || other == TolkTyNever
     }
 
     override fun toString(): String {

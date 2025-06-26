@@ -16,8 +16,8 @@ import org.ton.intellij.tolk.doc.psi.TolkDocComment
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.TolkFunctionStub
 import org.ton.intellij.tolk.type.CyclicReferenceException
-import org.ton.intellij.tolk.type.TolkFunctionTy
 import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.TolkTyFunction
 import org.ton.intellij.tolk.type.inference
 import org.ton.intellij.util.childOfType
 import org.ton.intellij.util.greenStub
@@ -37,31 +37,30 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
         return TolkIcons.FUNCTION
     }
 
-    override val type: TolkFunctionTy
+    override val type: TolkTyFunction
         get() = CachedValuesManager.getCachedValue(this, FUNCTION_TYPE) {
             val returnTy = returnTy
             val parameterList = parameterList ?: return@getCachedValue CachedValueProvider.Result.create(
-                TolkFunctionTy(
-                    TolkTy.Void,
+                TolkTyFunction(
+                    emptyList(),
                     returnTy
                 ), this
             )
             val selfParameter = parameterList.selfParameter
             val parameters = parameterList.parameterList
-            val tensor: ArrayList<TolkTy>
+            val parametersType: ArrayList<TolkTy>
             if (selfParameter != null) {
-                tensor = ArrayList(parameters.size + 1)
-                tensor.add(selfParameter.type ?: TolkTy.Unknown)
+                parametersType = ArrayList(parameters.size + 1)
+                parametersType.add(selfParameter.type ?: TolkTy.Unknown)
             } else {
-                tensor = ArrayList(parameters.size)
+                parametersType = ArrayList(parameters.size)
             }
             parameters.forEach {
                 val type = it.typeExpression.type ?: TolkTy.Unknown
-                tensor.add(type)
+                parametersType.add(type)
             }
 
-            val parameterTy = TolkTy.tensor(tensor)
-            val type = TolkFunctionTy(parameterTy, returnTy)
+            val type = TolkTyFunction(parametersType, returnTy)
 
             createCachedResult(type)
         }
@@ -110,7 +109,7 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
     }
 }
 
-private val FUNCTION_TYPE = Key.create<CachedValue<TolkFunctionTy>>("tolk.function.function_type")
+private val FUNCTION_TYPE = Key.create<CachedValue<TolkTyFunction>>("tolk.function.function_type")
 private val RETURN_TYPE_KEY = Key.create<CachedValue<TolkTy>>("tolk.function.return_type")
 private val RECEIVER_TYPE_KEY = Key.create<CachedValue<TolkTy>>("tolk.function.receiver_type")
 
@@ -156,7 +155,7 @@ private fun TolkFunction.resolveReturnType(): TolkTy {
     return result
 }
 
-val TolkFunction.declaredType: TolkFunctionTy get() = (this as TolkFunctionMixin).type
+val TolkFunction.declaredType: TolkTyFunction get() = (this as TolkFunctionMixin).type
 
 val TolkFunction.isMutable: Boolean
     get() = greenStub?.isMutable ?: (node.findChildByType(TolkElementTypes.TILDE) != null)

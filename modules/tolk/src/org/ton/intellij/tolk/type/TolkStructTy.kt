@@ -8,14 +8,11 @@ data class TolkStructTy private constructor(
     val psi: TolkStruct,
     val typeArguments: List<TolkTy> = emptyList(),
 ) : TolkTy {
+    override val hasTypeAlias: Boolean get() = typeArguments.any { it.hasTypeAlias }
+
     private val hasGenerics = typeArguments.any { it.hasGenerics() }
 
     override fun hasGenerics(): Boolean = hasGenerics
-
-    override fun join(other: TolkTy): TolkTy {
-        if (other.unwrapTypeAlias() == this) return other
-        return TolkUnionTy.create(this, other)
-    }
 
     override fun superFoldWith(folder: TypeFolder): TolkTy {
         val newTypeArguments = typeArguments.map {
@@ -39,7 +36,7 @@ data class TolkStructTy private constructor(
         fun create(struct: TolkStruct, args: List<TolkTypeExpression>? = null): TolkStructTy {
             val typeParameters = mutableListOf<TolkTy>()
             struct.typeParameterList?.typeParameterList?.forEachIndexed { index, param ->
-                typeParameters += args?.getOrNull(index)?.type ?: TolkTypeParameterTy.create(param)
+                typeParameters += args?.getOrNull(index)?.type ?: TolkTyParam.create(param)
             }
             return TolkStructTy(CompletionUtil.getOriginalOrSelf(struct), typeParameters)
         }

@@ -30,11 +30,11 @@ object TolkMatchPatternTypesCompletionProvider : TolkCompletionProvider() {
         if (expr != null) {
             val type = expr.type ?: TolkTy.Unknown
             val unwrappedType = type.unwrapTypeAlias()
-            if (unwrappedType is TolkUnionTy) {
+            if (unwrappedType is TolkTyUnion) {
                 unwrappedType.variants.forEach { unionVariant ->
                     when(unionVariant) {
                         is TolkStructTy -> result.addElement(unionVariant.psi.toLookupElementBuilder(ctx))
-                        is TolkTypeAliasTy -> result.addElement(unionVariant.psi.toLookupElementBuilder(ctx))
+                        is TolkTyAlias -> result.addElement(unionVariant.psi.toLookupElementBuilder(ctx))
                         is TolkPrimitiveTy -> result.addElement(unionVariant.toLookupElement())
                         else -> result.addElement(
                             LookupElementBuilder.create(unionVariant.render())

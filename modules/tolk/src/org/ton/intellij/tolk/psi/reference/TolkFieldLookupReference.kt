@@ -91,7 +91,7 @@ fun collectFunctionCandidates(
         val functionReceiver = function.receiverTy
 
         val actualFunctionReceiver = functionReceiver.actualType()
-        if (functionReceiver.hasGenerics() && functionReceiver !is TolkTypeParameterTy) {
+        if (functionReceiver.hasGenerics() && functionReceiver !is TolkTyParam) {
             if (actualFunctionReceiver is TolkStructTy && actualCalledReceiver is TolkStructTy) {
                 if (!actualFunctionReceiver.psi.isEquivalentTo(actualCalledReceiver.psi)) {
                     continue
@@ -113,7 +113,7 @@ fun collectFunctionCandidates(
     // step 4: try to match `T.copy`
     for (function in namedFunctions) {
         val functionReceiver = function.receiverTy
-        if (functionReceiver is TolkTypeParameterTy) {
+        if (functionReceiver is TolkTyParam) {
             candidates.add(function to Substitution(mapOf(functionReceiver to calledReceiver)))
         }
     }

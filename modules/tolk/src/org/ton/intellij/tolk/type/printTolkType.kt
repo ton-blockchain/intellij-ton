@@ -6,10 +6,10 @@ import org.ton.intellij.util.printPsi
 
 fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
     when (type) {
-        is TolkTypeParameterTy -> {
+        is TolkTyParam -> {
             printPsi(type.parameter.psi, type.name ?: "<unknown>")
         }
-        is TolkTypeAliasTy -> {
+        is TolkTyAlias -> {
             printPsi(type.psi, type.psi.name ?: type.render())
         }
         is TolkStructTy -> {
@@ -28,25 +28,24 @@ fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
                 text(">")
             }
         }
-        is TolkFunctionTy -> {
-            val inputType = type.inputType
-            if (inputType is TolkTensorTy || inputType is TolkVoidTy) {
-                printTolkType(inputType)
-            } else {
-                text("(")
-                printTolkType(inputType)
-                text(")")
+        is TolkTyFunction -> {
+            val inputType = type.parametersType
+            text("(")
+            var separator = ""
+            inputType.forEach {
+                if (separator.isNotEmpty()) {
+                    text(separator)
+                }
+                separator = ", "
+                printTolkType(it)
             }
+            text(")")
             text(" -> ")
             val returnType = type.returnType
-            if (returnType is TolkVoidTy) {
-                text("void")
-            } else {
-                printTolkType(returnType)
-            }
+            printTolkType(returnType)
         }
 
-        is TolkTensorTy -> {
+        is TolkTyTensor -> {
             text("(")
             val iterator = type.elements.iterator()
             while (iterator.hasNext()) {
@@ -59,7 +58,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
             text(")")
         }
 
-        is TolkTypedTupleTy -> {
+        is TolkTyTypedTuple -> {
             text("[")
             val iterator = type.elements.iterator()
             while (iterator.hasNext()) {
@@ -72,7 +71,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
             text("]")
         }
 
-        is TolkUnionTy -> {
+        is TolkTyUnion -> {
             val elements = type.variants
             if (elements.size == 2) {
                 val first = elements.first()

@@ -70,7 +70,7 @@ fun TolkNamedElement.toLookupElementBuilder(
 
     return when (this) {
         is TolkFunction -> {
-            val returnType = (type as? TolkFunctionTy)?.returnType
+            val returnType = (type as? TolkTyFunction)?.returnType
             base
                 .withTypeText(returnType?.render())
                 .let { builder ->

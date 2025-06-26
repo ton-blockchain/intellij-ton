@@ -30,33 +30,81 @@ open class Substitution(
                 }
             }
 
-            paramType is TolkTyFunction && argType is TolkTyFunction -> {
-                paramType.parametersType.asSequence()
-                    .zip(argType.parametersType.asSequence())
-                    .fold(this) { sub, (a, b) ->
-                        sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
-                    } + deduce(paramType.returnType.unwrapTypeAlias(), argType.returnType.unwrapTypeAlias())
+            paramType is TolkTyFunction -> {
+                val argType = (argType.unwrapTypeAlias() as? TolkTyFunction)?.takeIf {
+                    it.parametersType.size == paramType.parametersType.size
+                } ?: return this
+                var sub = this
+                for (i in paramType.parametersType.indices) {
+                    sub = sub.deduce(paramType.parametersType[i], argType.parametersType[i])
+                }
+                sub = sub.deduce(paramType.returnType, argType.returnType)
+                return sub
             }
 
-            paramType is TolkTyTensor && argType is TolkTyTensor -> {
-                paramType.elements.asSequence().zip(argType.elements.asSequence())
-                    .fold(this) { sub, (a, b) ->
-                        sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
-                    }
+            paramType is TolkTyTensor -> {
+                // `arg: (int, T)` called as `f((5, cs))` => T is slice
+                val argTensor = (argType.unwrapTypeAlias() as? TolkTyTensor)?.takeIf {
+                    it.elements.size == paramType.elements.size
+                } ?: return this
+                var sub = this
+                for (i in argTensor.elements.indices) {
+                    val paramItem = paramType.elements[i]
+                    val argItem = argTensor.elements[i]
+                    sub = sub.deduce(paramItem, argItem)
+                }
+                return sub
             }
 
-            paramType is TolkTyTypedTuple && argType is TolkTyTypedTuple -> {
-                paramType.elements.asSequence().zip(argType.elements.asSequence())
-                    .fold(this) { sub, (a, b) ->
-                        sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
-                    }
+            paramType is TolkTyTypedTuple -> {
+                // `arg: [int, T]` called as `f([5, cs])` => T is slice
+                val argTuple = (argType.unwrapTypeAlias() as? TolkTyTypedTuple)?.takeIf {
+                    it.elements.size == paramType.elements.size
+                } ?: return this
+                var sub = this
+                for (i in argTuple.elements.indices) {
+                    val paramItem = paramType.elements[i]
+                    val argItem = argTuple.elements[i]
+                    sub = sub.deduce(paramItem, argItem)
+                }
+                return sub
             }
 
-            paramType is TolkTyUnion && argType is TolkTyUnion -> {
-                paramType.variants.asSequence().zip(argType.variants.asSequence())
-                    .fold(this) { sub, (a, b) ->
-                        sub.deduce(a.actualType(), b.actualType())
+            paramType is TolkTyUnion -> {
+                val argUnion = argType.unwrapTypeAlias() as? TolkTyUnion
+                if (argUnion == null) {
+                    // `arg: int | MyData<T>` called as `f(MyData<int>)` => T is int
+                    var sub = this
+                    for (paramVariant in paramType.variants) {
+                        sub = sub.deduce(paramVariant, argType)
                     }
+                    return sub
+                }
+                // `arg: T1 | T2` called as `f(intOrBuilder)` => T1 is int, T2 is builder
+                // `arg: int | T1` called as `f(builderOrIntOrSlice)` => T1 is builder|slice
+                val aSubP = argUnion.variants.toMutableList()
+                val paramGenerics = ArrayList<TolkTy>(aSubP.size)
+                var isSubCorrect = true
+                for (paramVariant in paramType.variants) {
+                    if (paramVariant.hasGenerics()) {
+                        paramGenerics.add(paramVariant)
+                    } else if (!aSubP.remove(paramVariant)) {
+                        isSubCorrect = false
+                    }
+                }
+                if (isSubCorrect && paramGenerics.size == 1 && aSubP.size > 1) {
+                    return deduce(paramGenerics[0], TolkTyUnion.create(aSubP))
+                } else if (isSubCorrect && paramGenerics.size == aSubP.size) {
+                    var sub = this
+                    for (i in paramGenerics.indices) {
+                        val paramItem = paramGenerics[i]
+                        val argItem = aSubP[i]
+                        sub = sub.deduce(paramItem, argItem)
+                    }
+                    return sub
+                } else {
+                    return this
+                }
             }
 
             paramType is TolkTyParam -> {

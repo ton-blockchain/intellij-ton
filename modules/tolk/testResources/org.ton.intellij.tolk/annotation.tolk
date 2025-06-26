@@ -21,11 +21,10 @@ fun analyzeTensor1<T1, T2>(a: (T1, T2)): (T1, T2) { return a; }
 fun analyzeTensor2<T1, T2>(a: (T1, T2)?): (T1, T2)? { return a; }
 
 fun test11() {
-    var (x1: (int8, int16), x2: Pair2_v1, x3: Pair2_v2) = ((1,2), (3,4), (5,6));
-    // __expect_type(analyzeTensor1(x1), "(int8, int16)");
-    __expect_type(analyzeTensor1(x2), "(int, int)");
-    // __expect_type(analyzeTensor1(x3), "(MInt, MInt)");
-    // __expect_type(analyzeTensor2(x1), "(int8, int16)?");
-    // __expect_type(analyzeTensor2(x2), "(int, int)?");
-    // __expect_type(analyzeTensor2(x3), "(MInt, MInt)?");
+    var bc = beginCell() as builder | cell;
+    // var mi1 = 5 as MInt | int8;
+    // var mi2 = 5 as int8 | MInt;
+    // var mi3 = (5 as int8) as int8 | MInt;
+    __expect_type(eqUnion2(bc), "cell | builder");
+    // __expect_type(eqUnion2(mi1), "int8 | MInt");
 }

@@ -22,10 +22,13 @@ fun analyzeTensor1<T1, T2>(a: (T1, T2)): (T1, T2) { return a; }
 fun analyzeTensor2<T1, T2>(a: (T1, T2)?): (T1, T2)? { return a; }
 fun getNullableInt(): int? { return 5; }
 
-fun test3(x: MIntN, y: MInt?) {
-    if (x != null) {
-    }
-    var (z1, z2) = (x, x!, );
-    __expect_type(z1, "MInt?");
-    __expect_type(z2, "MInt");
+struct Wrapper<T> {
+    value: T;
+}
+
+fun Wrapper<T>.equalsNotNull<U>(self, anotherW: Wrapper<U>): bool;
+
+fun test3() {
+    var eq = Wrapper<int8>.equalsNotNull<coins?>;
+    __expect_type(eq, "(Wrapper<int8>, Wrapper<coins?>) -> bool");
 }

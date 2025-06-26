@@ -594,6 +594,13 @@ class TolkInferenceWalker(
                 ctx.setType(element, type)
             }
 
+            is TolkVarParen -> {
+                val varDefinition = element.varDefinition ?: return nextFlow
+                nextFlow = inferLeftSideVarAssigment(varDefinition, nextFlow)
+                val type = ctx.getType(varDefinition)
+                ctx.setType(element, type)
+            }
+
             is TolkVar -> {
                 val typeHint = element.typeExpression?.type ?: TolkTy.Unknown
                 ctx.setType(element, typeHint)
@@ -658,6 +665,10 @@ class TolkInferenceWalker(
                 } ?: rightType
                 ctx.setType(element, declaredType ?: rightType)
                 outFlow.setSymbol(TolkSinkExpression(element), smartCastedType)
+            }
+
+            is TolkVarParen -> {
+                return processVarDefinitionAfterRight(element.varDefinition ?: return, rightType, outFlow)
             }
 
             is TolkVarTensor -> {

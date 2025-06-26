@@ -1,6 +1,20 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
-## [Unreleased]
+## [2.5.7.4]
+- Added notification if Tolk stdlib is not found
+- Added icon for annotations in Tolk
+- Added smart completion weighers for Tolk
+- Added breadcrumbs support for Tolk
+- Added sticky lines support for Tolk
+- Added navigation bar support for Tolk
+- Added Tolk file links in terminal
+- Fixed deprecation references highlighting in Tolk
+- Fixed some function resolving issues in Tolk
+- Fixed union type deduce in Tolk type inference
+- Fixed direct method reference with type arguments generics deducing in Tolk
+- Fixed inference for type params named as primitives in Tolk
+- Fixed paren variable type inference in Tolk
+- Fixed a lot of minor issues in Tolk
 
 ## [2.5.7]
 - [Tolk 0.99](https://github.com/ton-blockchain/ton/pull/1707) support

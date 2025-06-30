@@ -384,7 +384,7 @@ data class TolkIntNTy(
             when {
                 text.startsWith("uint") -> {
                     val n = text.removePrefix("uint").toIntOrNull() ?: return null
-                    if (n in 1..256) {
+                    if (n in 1..257) {
                         return TolkIntNTy(n, unsigned = true)
                     }
                     return null
@@ -392,7 +392,7 @@ data class TolkIntNTy(
 
                 text.startsWith("int") -> {
                     val n = text.removePrefix("int").toIntOrNull() ?: return null
-                    if (n in 1..257) {
+                    if (n in 1..256) {
                         return TolkIntNTy(n, unsigned = false)
                     }
                     return null

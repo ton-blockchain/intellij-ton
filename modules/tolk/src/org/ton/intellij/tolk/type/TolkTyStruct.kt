@@ -21,11 +21,18 @@ data class TolkTyStruct private constructor(
         return TolkTyStruct(psi, newTypeArguments)
     }
 
+    override fun canRhsBeAssigned(other: TolkTy): Boolean {
+        if (this == other) return true
+        if (other is TolkTyNever) return true
+        if (other is TolkTyAlias) return canRhsBeAssigned(other.underlyingType)
+        return isEquivalentTo(other)
+    }
+
     override fun isEquivalentToInner(other: TolkTy): Boolean {
-        if (this === other) return true
+        if (this == other) return true
         if (other !is TolkTyStruct) return false
-        if (!psi.manager.areElementsEquivalent(psi,other.psi)) return false
         if (typeArguments.size != other.typeArguments.size) return false
+        if (!psi.manager.areElementsEquivalent(psi, other.psi)) return false
         for (i in typeArguments.indices) {
             if (!typeArguments[i].isEquivalentTo(other.typeArguments[i])) return false
         }

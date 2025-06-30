@@ -9,25 +9,18 @@ fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
         is TolkTyParam -> {
             printPsi(type.parameter.psi, type.name ?: "<unknown>")
         }
+
         is TolkTyAlias -> {
             printPsi(type.psi, type.psi.name ?: type.render())
+            printTolkTypeArguments(type.typeArguments)
         }
+
         is TolkTyStruct -> {
             val psi = type.psi
             printPsi(psi, psi.name ?: "<unknown>")
-            if (type.typeArguments.isNotEmpty()) {
-                text("<")
-                val iterator = type.typeArguments.iterator()
-                while (iterator.hasNext()) {
-                    val argument = iterator.next()
-                    printTolkType(argument)
-                    if (iterator.hasNext()) {
-                        text(", ")
-                    }
-                }
-                text(">")
-            }
+            printTolkTypeArguments(type.typeArguments)
         }
+
         is TolkTyFunction -> {
             val inputType = type.parametersType
             text("(")
@@ -98,5 +91,20 @@ fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
         }
 
         else -> text(type.render())
+    }
+}
+
+private fun PresentationTreeBuilder.printTolkTypeArguments(typeArguments: List<TolkTy>) {
+    if (typeArguments.isNotEmpty()) {
+        text("<")
+        val iterator = typeArguments.iterator()
+        while (iterator.hasNext()) {
+            val argument = iterator.next()
+            printTolkType(argument)
+            if (iterator.hasNext()) {
+                text(", ")
+            }
+        }
+        text(">")
     }
 }

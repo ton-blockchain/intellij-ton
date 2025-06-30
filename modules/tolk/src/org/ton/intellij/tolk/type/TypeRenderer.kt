@@ -72,7 +72,7 @@ private class TypeRenderer(
             }
 
             is TolkTyParam -> ty.name ?: anonymous
-            is TolkStructTy -> buildString {
+            is TolkTyStruct -> buildString {
                 append(ty.psi.name ?: return anonymous)
                 if (includeTypeArguments && ty.typeArguments.isNotEmpty()) {
                     append(ty.typeArguments.joinToString(", ", "<", ">", transform = render))

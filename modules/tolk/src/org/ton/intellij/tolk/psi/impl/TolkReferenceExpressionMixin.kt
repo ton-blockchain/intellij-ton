@@ -6,13 +6,18 @@ import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.TolkDotExpression
 import org.ton.intellij.tolk.psi.TolkReferenceElement
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
+import org.ton.intellij.tolk.psi.TolkTypeArgumentList
 import org.ton.intellij.tolk.psi.reference.TolkSymbolReference
 import org.ton.intellij.tolk.type.TolkPrimitiveTy
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.inference
 
 
-abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceExpression, TolkReferenceElement {
+abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceExpression,
+    TolkReferenceElement {
+    override val typeArgumentList: TolkTypeArgumentList?
+        get() = findChildByClass(TolkTypeArgumentList::class.java)
+
     override val referenceNameElement: PsiElement?
         get() = identifier
 

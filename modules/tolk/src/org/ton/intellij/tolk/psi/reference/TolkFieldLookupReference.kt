@@ -23,8 +23,8 @@ fun resolveFieldLookupReferenceWithReceiver(
 ): List<Pair<TolkTypedElement, Substitution>> {
     val name = fieldLookup.referenceName ?: return emptyList()
     val unwrappedReceiverType = receiverType.unwrapTypeAlias()
-    if (unwrappedReceiverType is TolkStructTy) {
-        val sub = Substitution.instantiate(unwrappedReceiverType.psi.declaredType, receiverType)
+    if (unwrappedReceiverType is TolkTyStruct) {
+        val sub = Substitution.instantiate(unwrappedReceiverType.psi.declaredType, receiverType.unwrapTypeAlias())
         unwrappedReceiverType.psi.structFields.forEachIndexed { index, field ->
             if (index.toString() != name && field.name != name) {
                 return@forEachIndexed
@@ -124,7 +124,7 @@ fun collectFunctionCandidates(
 
         val actualFunctionReceiver = functionReceiver.actualType()
         if (functionReceiver.hasGenerics() && functionReceiver !is TolkTyParam) {
-            if (actualFunctionReceiver is TolkStructTy && actualCalledReceiver is TolkStructTy) {
+            if (actualFunctionReceiver is TolkTyStruct && actualCalledReceiver is TolkTyStruct) {
                 if (!actualFunctionReceiver.psi.isEquivalentTo(actualCalledReceiver.psi)) {
                     continue
                 }

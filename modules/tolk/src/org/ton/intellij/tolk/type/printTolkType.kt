@@ -12,7 +12,7 @@ fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
         is TolkTyAlias -> {
             printPsi(type.psi, type.psi.name ?: type.render())
         }
-        is TolkStructTy -> {
+        is TolkTyStruct -> {
             val psi = type.psi
             printPsi(psi, psi.name ?: "<unknown>")
             if (type.typeArguments.isNotEmpty()) {

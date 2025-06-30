@@ -67,7 +67,7 @@ class TolkFlowContext(
             val functionReceiver = function.receiverTy
             val actualFunctionReceiver = functionReceiver.actualType()
             if (functionReceiver.hasGenerics() && functionReceiver !is TolkTyParam) {
-                if (actualFunctionReceiver is TolkStructTy && actualCalledReceiver is TolkStructTy) {
+                if (actualFunctionReceiver is TolkTyStruct && actualCalledReceiver is TolkTyStruct) {
                     if (!actualFunctionReceiver.psi.isEquivalentTo(actualCalledReceiver.psi)) {
                         continue
                     }

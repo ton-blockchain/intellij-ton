@@ -149,7 +149,7 @@ interface TolkTy : TypeFoldable<TolkTy> {
 
         fun bytes(n: Int): TolkTy = TolkBytesNTy(n)
 
-        fun struct(struct: TolkStruct): TolkStructTy = TolkStructTy.create(struct)
+        fun struct(struct: TolkStruct): TolkTyStruct = TolkTyStruct.create(struct)
     }
 }
 

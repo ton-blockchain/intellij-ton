@@ -7,7 +7,7 @@ import com.intellij.psi.ResolveResult
 import com.intellij.psi.impl.source.resolve.ResolveCache
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.type.TolkStructTy
+import org.ton.intellij.tolk.type.TolkTyStruct
 
 class TolkStructFieldReference(val field: TolkStructExpressionField) :
     PsiReferenceBase.Poly<TolkStructExpressionField>(field, field.identifier.textRangeInParent, false) {
@@ -36,7 +36,7 @@ class TolkStructFieldReference(val field: TolkStructExpressionField) :
         val structExpression = field.parentOfType<TolkStructExpression>() ?: return ResolveResult.EMPTY_ARRAY
 
         val structType =
-            structExpression.type?.unwrapTypeAlias() as? TolkStructTy ?: return ResolveResult.EMPTY_ARRAY
+            structExpression.type?.unwrapTypeAlias() as? TolkTyStruct ?: return ResolveResult.EMPTY_ARRAY
 
         val name = field.referenceName
         val field = structType.psi.structBody?.structFieldList?.find {

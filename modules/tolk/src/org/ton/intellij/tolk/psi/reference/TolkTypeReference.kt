@@ -22,6 +22,10 @@ class TolkTypeReference(
         return TextRange(identifier.startOffsetInParent, identifier.textLength)
     }
 
+    override fun resolve(): TolkTypedElement? {
+        return super.resolve() as? TolkTypedElement?
+    }
+
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         val myElement = myElement
         return buildList<ResolveResult> {

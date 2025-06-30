@@ -9,7 +9,7 @@ import org.ton.intellij.tolk.doc.psi.TolkDocComment
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.stub.TolkStructStub
-import org.ton.intellij.tolk.type.TolkStructTy
+import org.ton.intellij.tolk.type.TolkTyStruct
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.util.childOfType
 import javax.swing.Icon
@@ -23,7 +23,7 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
         return super.getUseScope()
     }
 
-    override val type: TolkStructTy get() = declaredType
+    override val type: TolkTyStruct get() = declaredType
 
     override val doc: TolkDocComment? get() = childOfType()
 
@@ -40,7 +40,7 @@ abstract class TolkStructMixin : TolkNamedElementImpl<TolkStructStub>, TolkStruc
     }
 }
 
-val TolkStruct.declaredType: TolkStructTy get() = TolkTy.struct(this)
+val TolkStruct.declaredType: TolkTyStruct get() = TolkTy.struct(this)
 
 val TolkStruct?.structFields: List<TolkStructField>
     get() {

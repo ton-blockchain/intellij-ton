@@ -71,9 +71,9 @@ class TolkTyAlias private constructor(
                             sub = sub.deduce(param, arg)
                         }
                     }
-                    val newSubType = underlyingType.substitute(sub)
+//                    val newSubType = underlyingType.substitute(sub)
 
-                    TolkTyAlias(psi, newSubType, args.orEmpty())
+                    TolkTyAlias(psi, underlyingType, params.orEmpty()).substitute(sub)
                 }
             }
         }

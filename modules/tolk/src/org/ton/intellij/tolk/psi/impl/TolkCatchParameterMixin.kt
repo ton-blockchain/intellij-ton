@@ -9,11 +9,11 @@ import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.type.TolkTy
 
 abstract class TolkCatchParameterMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkCatchParameter {
-    override val type: TolkTy?
+    override val type: TolkTy
         get() = if ((parent as? TolkCatch)?.catchParameterList?.indexOf(this) == 0) {
             TolkTy.Int
         } else {
-            null
+            TolkTy.Unknown
         }
 
     override fun getName(): String = identifier.text

@@ -1259,10 +1259,11 @@ class TolkInferenceWalker(
         flow: TolkFlowContext,
         usedAsCondition: Boolean,
     ): TolkExpressionFlowContext {
-        val selfParam = element.reference?.resolve() as? TolkSelfParameter
+        val selfParam = currentFunction?.parameterList?.selfParameter
         if (selfParam != null) {
             val type = flow.getType(TolkSinkExpression(selfParam)) ?: flow.getType(selfParam)
             ctx.setType(element, type)
+            ctx.setResolvedRefs(element, listOf(PsiElementResolveResult(selfParam)))
         }
         return TolkExpressionFlowContext(flow, usedAsCondition)
     }
@@ -1834,7 +1835,7 @@ class TolkInferenceWalker(
                     currentDot = currentDot.expression.unwrapNotNull() as? TolkDotExpression ?: break
                 }
                 if (indexPath == 0L) return null
-                val ref = currentDot.expression.unwrapNotNull() as? TolkReferenceExpression ?: return null
+                val ref = currentDot.expression.unwrapNotNull() as? TolkReferenceElement ?: return null
                 val symbol =
                     ctx.getResolvedRefs(ref).firstOrNull()?.element as? TolkLocalSymbolElement ?: return null
                 return TolkSinkExpression(symbol, indexPath)

@@ -762,6 +762,10 @@ LiteralExpression ::= INTEGER_LITERAL | BoolExpression | NullExpression | String
 
 SelfExpression ::= 'self' {
     mixin="org.ton.intellij.tolk.psi.impl.TolkSelfExpressionMixin"
+    implements= [
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkReferenceElement"
+    ]
 }
 
 ReferenceExpression ::= IDENTIFIER TypeArgumentList? {

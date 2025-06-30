@@ -154,5 +154,5 @@ fun collectFunctionCandidates(
         return listOf(it to EmptySubstitution)
     }
 
-    return emptyList()
+    return namedFunctions.map { it to EmptySubstitution }
 }

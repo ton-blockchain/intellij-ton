@@ -519,6 +519,7 @@ VarExpression ::= ('var'|'val') VarDefinition ('=' Expression)? {
 }
 AssignBinExpression ::= Expression AssignBinOp Expression {
     pin=2
+    rightAssociative=true
 }
 TernaryExpression ::= Expression '?' TernaryExpressionBranch ':' TernaryExpressionBranch {
     methods=[

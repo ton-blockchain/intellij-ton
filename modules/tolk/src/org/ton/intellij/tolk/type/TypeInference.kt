@@ -757,7 +757,7 @@ class TolkInferenceWalker(
             is TolkTupleExpression -> inferTupleExpression(element, flow, usedAsCondition, hint)
             is TolkTensorExpression -> inferTensorExpression(element, flow, usedAsCondition, hint)
             is TolkCallExpression -> inferCallExpression(element, flow, usedAsCondition, hint)
-            is TolkDotExpression -> inferDotExpression(element, flow, usedAsCondition, hint)
+            is TolkDotExpression -> inferDotExpression(element, flow, usedAsCondition, hint).context
             is TolkParenExpression -> inferParenExpression(element, flow, usedAsCondition, hint)
             is TolkPrefixExpression -> inferPrefixExpression(element, flow, usedAsCondition, hint)
             is TolkNotNullExpression -> inferNotNullExpression(element, flow, usedAsCondition)
@@ -1125,7 +1125,7 @@ class TolkInferenceWalker(
 
             else -> {
                 val sExpr = extractSinkExpression(left) ?: return
-                val lhsDeclaredType = ctx.getType(left) ?: return
+                val lhsDeclaredType = calcDeclaredTypeBeforeSmartCast(left) ?: return
                 val smartCastedType = calcSmartcastTypeOnAssignment(lhsDeclaredType, rightType)
                 flow.setSymbol(sExpr, smartCastedType)
             }
@@ -1332,13 +1332,29 @@ class TolkInferenceWalker(
             }
 
             is TolkDotExpression -> {
-                nextFlow = inferDotExpression(callee, nextFlow, false).outFlow
+                val dotInfResult = inferDotExpression(callee, nextFlow, false, hint)
+                nextFlow = dotInfResult.context.outFlow
                 val calleeRight = callee.fieldLookup
                 if (calleeRight != null) {
                     functionSymbol = ctx.getResolvedFields(calleeRight).firstOrNull() as? TolkFunction
                     functionType = (ctx.getType(callee) as? TolkTyFunction)?.let {
-                        sub = sub.deduce(functionSymbol?.type as? TolkTyFunction ?: it, it)
+                        sub = sub.deduce(functionSymbol?.type as? TolkTyFunction ?: it, it, false)
                         it
+                    }
+                    val receiverObject = dotInfResult.receiverObject
+                    if (receiverObject != null && dotInfResult.receiverType?.unwrapTypeAlias() != functionType?.parametersType?.firstOrNull()
+                            ?.unwrapTypeAlias()
+                    ) {
+                        val firstParam = functionSymbol?.parameterList?.selfParameter
+                        if (firstParam != null && firstParam.isMutable) {
+                            val selfObj = callee.expression
+                            extractSinkExpression(selfObj)?.let { sExpr ->
+                                val declaredType = calcDeclaredTypeBeforeSmartCast(selfObj) ?: dotInfResult.receiverType
+                                ?: TolkTy.Unknown
+                                nextFlow.setSymbol(sExpr, declaredType)
+                                ctx.setType(selfObj, declaredType)
+                            }
+                        }
                     }
                 }
             }
@@ -1389,10 +1405,11 @@ class TolkInferenceWalker(
             }
             val argExpr = arg.expression
             nextFlow = inferExpression(argExpr, nextFlow, false, paramType.takeIf { it !is TolkTyParam }).outFlow
-            var argType = ctx.getType(argExpr) ?: TolkTy.Unknown
-            sub = sub.deduce(paramType, argType)
-            argType = argType.substitute(sub)
-            ctx.setType(argExpr, argType)
+            val argType = ctx.getType(argExpr) ?: TolkTy.Unknown
+            if (paramType.hasGenerics()) {
+                sub = sub.deduce(paramType, argType)
+                paramType = paramType.substitute(sub)
+            }
             if (param.isMutable && argType.unwrapTypeAlias() != paramType.unwrapTypeAlias()) {
                 val sExpr = extractSinkExpression(argExpr)
                 if (sExpr != null) {
@@ -1421,55 +1438,100 @@ class TolkInferenceWalker(
         flow: TolkFlowContext,
         usedAsCondition: Boolean,
         hint: TolkTy? = null
-    ): TolkExpressionFlowContext {
+    ): DotExpressionInferenceResult {
         var nextFlow = flow
         val receiver = element.expression
-        nextFlow = inferExpression(receiver, nextFlow, false).outFlow
-        val receiverSymbol = ctx.getResolvedRefs(receiver).singleOrNull()?.element
-        val receiverType =
-            if (receiver is TolkReferenceExpression && (receiverSymbol == null || receiverSymbol is TolkFunction)) {
-                val name = receiver.referenceName
-                if (name != null) {
-                    TolkTy.byName(name)
-                } else {
-                    null
-                }
-            } else {
-                ctx.getType(receiver)?.actualType()
-            }
 
-        val fieldLookup = element.fieldLookup ?: return TolkExpressionFlowContext(nextFlow, usedAsCondition)
-        var inferredType = inferFieldLookup(receiverType ?: TolkTy.Unknown, fieldLookup, hint)
-        extractSinkExpression(element)?.let { sExpr ->
-            nextFlow.getType(sExpr)?.let { smartCasted ->
-                inferredType = smartCasted
+        var receiverSymbol: TolkElement? = null
+        var receiverObject: TolkSymbolElement? = null
+        var receiverType: TolkTy? = null
+
+        if (receiver is TolkReferenceExpression) {
+            receiverType = resolveTypeReferenceType(receiver)
+            when (receiverType) {
+                is TolkTyParam -> {
+                    receiverSymbol = receiverType.parameter.psi
+                }
+
+                is TolkTyAlias -> {
+                    receiverSymbol = receiverType.psi
+                }
+
+                is TolkTyStruct -> {
+                    receiverSymbol = receiverType.psi
+                }
+
+                null -> {
+                    nextFlow = inferExpression(receiver, nextFlow, false).outFlow
+                    receiverType = ctx.getType(receiver)
+                    receiverObject = ctx.getResolvedRefs(receiver).singleOrNull()?.element as? TolkSymbolElement
+                }
+            }
+            if (receiverSymbol != null) {
+                ctx.setResolvedRefs(receiver, listOf(PsiElementResolveResult(receiverSymbol)))
+            }
+        } else {
+            nextFlow = inferExpression(receiver, nextFlow, false).outFlow
+            receiverType = ctx.getType(receiver)
+            receiverObject = ctx.getResolvedRefs(receiver).singleOrNull()?.element as? TolkSymbolElement
+        }
+
+        val fieldLookup = element.fieldLookup
+        var inferredType: TolkTy? = null
+        var fieldSymbol: TolkTypedElement? = null
+        if (fieldLookup != null) {
+            val (fieldType, resolvedVariants) = inferFieldLookup(receiverType ?: TolkTy.Unknown, fieldLookup, hint)
+            inferredType = fieldType
+            if (resolvedVariants.isNotEmpty()) {
+                fieldSymbol = resolvedVariants.singleOrNull()
+                ctx.setResolvedRefs(fieldLookup, resolvedVariants.map { PsiElementResolveResult(it) })
+            }
+            extractSinkExpression(element)?.let { sExpr ->
+                nextFlow.getType(sExpr)?.let { smartCasted ->
+                    inferredType = smartCasted
+                }
             }
         }
 
         ctx.setType(element, inferredType)
-        return TolkExpressionFlowContext(nextFlow, usedAsCondition)
+        return DotExpressionInferenceResult(
+            context = TolkExpressionFlowContext(nextFlow, usedAsCondition),
+            inferredType = inferredType,
+            receiverType = receiverType,
+            receiverObject = receiverObject,
+            receiverSymbol = receiverSymbol,
+            fieldSymbol = fieldSymbol
+        )
     }
+
+    private class DotExpressionInferenceResult(
+        val context: TolkExpressionFlowContext,
+        val inferredType: TolkTy? = null,
+        val receiverType: TolkTy? = null,
+        val receiverObject: TolkSymbolElement? = null,
+        val receiverSymbol: TolkElement? = null,
+        val fieldSymbol: TolkTypedElement? = null,
+    )
 
     private fun inferFieldLookup(
         receiver: TolkTy,
         fieldLookup: TolkFieldLookup,
         hint: TolkTy?
-    ): TolkTy {
+    ): Pair<TolkTy, List<TolkTypedElement>> {
         val variants = resolveFieldLookupReferenceWithReceiver(receiver, fieldLookup)
         val firstVariant = variants.firstOrNull()
         if (firstVariant == null) {
             val types = when (val receiverType = receiver.unwrapTypeAlias().actualType()) {
                 is TolkTyTypedTuple -> receiverType.elements
                 is TolkTyTensor -> receiverType.elements
-                else -> return TolkTy.Unknown
+                else -> return TolkTy.Unknown to emptyList()
             }
-            val fieldIndex = fieldLookup.integerLiteral?.text?.toIntOrNull() ?: return TolkTy.Unknown
-            return types.getOrNull(fieldIndex) ?: TolkTy.Unknown
+            val fieldIndex = fieldLookup.integerLiteral?.text?.toIntOrNull() ?: return TolkTy.Unknown to emptyList()
+            return (types.getOrNull(fieldIndex) ?: TolkTy.Unknown) to emptyList()
         } else {
-            ctx.setResolvedRefs(fieldLookup, variants.map { PsiElementResolveResult(it.first) })
             val (resolved, sub) = firstVariant
             val rawFieldType = resolved.type ?: hint ?: TolkTy.Unknown
-            return rawFieldType.substitute(sub)
+            return rawFieldType.substitute(sub) to variants.map { it.first }
         }
     }
 
@@ -1822,12 +1884,8 @@ class TolkInferenceWalker(
                     else -> null
                 }
             }
-
-            is TolkParenExpression -> {
-                return calcDeclaredTypeBeforeSmartCast(expression.unwrapParen())
-            }
         }
-        return null
+        return ctx.getType(expression)
     }
 
     private fun TolkExpression.unwrapNotNull(): TolkExpression {
@@ -1850,7 +1908,7 @@ class TolkInferenceWalker(
         reference: TolkReferenceElement,
     ): TolkTy? {
         val name = reference.referenceName ?: return null
-        localSymbols[reference] ?: return null
+        if (localSymbols.contains(reference)) return null
         val genericTy = currentFunction?.resolveGenericType(name)
         if (genericTy != null) {
             return genericTy
@@ -1859,7 +1917,7 @@ class TolkInferenceWalker(
             resolveToGlobalSymbols(reference, name).singleOrNull()
         } catch (_: CyclicReferenceException) {
             return null
-        } ?: return null
+        } ?: return TolkPrimitiveTy.fromName(name)
         return resolveTypeReferenceType(reference, symbolTy)
     }
 

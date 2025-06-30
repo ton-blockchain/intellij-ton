@@ -1468,6 +1468,9 @@ class TolkInferenceWalker(
                     receiverObject = ctx.getResolvedRefs(receiver).singleOrNull()?.element as? TolkSymbolElement
                 }
             }
+            if (receiverType != null) {
+                ctx.setType(receiver, receiverType)
+            }
             if (receiverSymbol != null) {
                 ctx.setResolvedRefs(receiver, listOf(PsiElementResolveResult(receiverSymbol)))
             }

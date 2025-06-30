@@ -238,7 +238,7 @@ object TolkTyVoid : TolkPrimitiveTy {
 }
 
 object TolkTyNull : TolkPrimitiveTy {
-    override fun toString(): String = "null"
+    override fun toString(): String = "TolkTy(null)"
 
     override fun join(other: TolkTy): TolkTy {
         if (other == this || other == Never) return this

@@ -22,7 +22,7 @@ open class Substitution(
 
     override fun hashCode(): Int = typeSubst.hashCode()
 
-    fun deduce(paramType: TolkTy, argType: TolkTy): Substitution {
+    fun deduce(paramType: TolkTy, argType: TolkTy, applyDefault: Boolean = true): Substitution {
         return when {
             paramType is TolkTyStruct -> {
                 val argType = (argType as? TolkTyStruct)?.takeIf {
@@ -30,7 +30,7 @@ open class Substitution(
                 } ?: return this
                 var sub = this
                 for (i in paramType.typeArguments.indices) {
-                    sub = sub.deduce(paramType.typeArguments[i], argType.typeArguments[i])
+                    sub = sub.deduce(paramType.typeArguments[i], argType.typeArguments[i], applyDefault)
                 }
                 return sub
             }
@@ -40,7 +40,7 @@ open class Substitution(
                 } ?: return this
                 var sub = this
                 for (i in paramType.typeArguments.indices) {
-                    sub = sub.deduce(paramType.typeArguments[i], argType.typeArguments[i])
+                    sub = sub.deduce(paramType.typeArguments[i], argType.typeArguments[i], applyDefault)
                 }
                 return sub
             }
@@ -51,9 +51,9 @@ open class Substitution(
                 } ?: return this
                 var sub = this
                 for (i in paramType.parametersType.indices) {
-                    sub = sub.deduce(paramType.parametersType[i], argType.parametersType[i])
+                    sub = sub.deduce(paramType.parametersType[i], argType.parametersType[i], applyDefault)
                 }
-                sub = sub.deduce(paramType.returnType, argType.returnType)
+                sub = sub.deduce(paramType.returnType, argType.returnType, applyDefault)
                 return sub
             }
 
@@ -66,7 +66,7 @@ open class Substitution(
                 for (i in argTensor.elements.indices) {
                     val paramItem = paramType.elements[i]
                     val argItem = argTensor.elements[i]
-                    sub = sub.deduce(paramItem, argItem)
+                    sub = sub.deduce(paramItem, argItem, applyDefault)
                 }
                 return sub
             }
@@ -80,7 +80,7 @@ open class Substitution(
                 for (i in argTuple.elements.indices) {
                     val paramItem = paramType.elements[i]
                     val argItem = argTuple.elements[i]
-                    sub = sub.deduce(paramItem, argItem)
+                    sub = sub.deduce(paramItem, argItem, applyDefault)
                 }
                 return sub
             }
@@ -91,7 +91,7 @@ open class Substitution(
                     // `arg: int | MyData<T>` called as `f(MyData<int>)` => T is int
                     var sub = this
                     for (paramVariant in paramType.variants) {
-                        sub = sub.deduce(paramVariant, argType)
+                        sub = sub.deduce(paramVariant, argType, applyDefault)
                     }
                     return sub
                 }
@@ -108,13 +108,13 @@ open class Substitution(
                     }
                 }
                 if (isSubCorrect && paramGenerics.size == 1 && aSubP.size > 1) {
-                    return deduce(paramGenerics[0], TolkTyUnion.create(aSubP))
+                    return deduce(paramGenerics[0], TolkTyUnion.create(aSubP), applyDefault)
                 } else if (isSubCorrect && paramGenerics.size == aSubP.size) {
                     var sub = this
                     for (i in paramGenerics.indices) {
                         val paramItem = paramGenerics[i]
                         val argItem = aSubP[i]
-                        sub = sub.deduce(paramItem, argItem)
+                        sub = sub.deduce(paramItem, argItem, applyDefault)
                     }
                     return sub
                 } else {
@@ -126,6 +126,9 @@ open class Substitution(
                 if (!typeSubst.containsKey(paramType)) {
                     val newType =
                         if ((argType == paramType) && paramType.parameter is TolkTyParam.NamedTypeParameter) {
+                            if (!applyDefault) {
+                                return this
+                            }
                             paramType.parameter.psi.defaultTypeParameter?.typeExpression?.type ?: return this
                         } else {
                             argType
@@ -151,8 +154,8 @@ open class Substitution(
     companion object {
         fun empty(): Substitution = EmptySubstitution
 
-        fun instantiate(paramType: TolkTy, argType: TolkTy): Substitution {
-            return EmptySubstitution.deduce(paramType, argType)
+        fun instantiate(paramType: TolkTy, argType: TolkTy, applyDefault: Boolean = true): Substitution {
+            return EmptySubstitution.deduce(paramType, argType, applyDefault)
         }
     }
 }

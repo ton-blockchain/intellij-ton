@@ -1326,7 +1326,7 @@ class TolkInferenceWalker(
                 functionSymbol = ctx.getResolvedRefs(callee).firstOrNull()?.element as? TolkFunction
                 sub = refInfResult.substitution
                 functionType = (refInfResult.inferredType as? TolkTyFunction)?.let {
-                    sub = sub.deduce(functionSymbol?.type as? TolkTyFunction ?: it, it)
+                    sub = sub.deduce(functionSymbol?.type as? TolkTyFunction ?: it, it, false)
                     it
                 }
             }
@@ -1458,8 +1458,7 @@ class TolkInferenceWalker(
         val variants = resolveFieldLookupReferenceWithReceiver(receiver, fieldLookup)
         val firstVariant = variants.firstOrNull()
         if (firstVariant == null) {
-            val receiverType = receiver.unwrapTypeAlias().actualType()
-            val types = when (receiverType) {
+            val types = when (val receiverType = receiver.unwrapTypeAlias().actualType()) {
                 is TolkTyTypedTuple -> receiverType.elements
                 is TolkTyTensor -> receiverType.elements
                 else -> return TolkTy.Unknown
@@ -1556,7 +1555,7 @@ class TolkInferenceWalker(
         } catch (e: Exception) {
             throw e
         }
-        val asType = element.typeExpression?.type
+        val asType = element.type
         val afterExpr = inferExpression(expression, flow, false, asType)
         ctx.setType(element, asType)
         if (!usedAsCondition) {
@@ -1675,8 +1674,7 @@ class TolkInferenceWalker(
             structType = structType.substitute(instantiate) as? TolkTyStruct ?: structType
         }
         if (structType == null && hint != TolkTy.Unknown) {
-            val unwrappedHint = hint.unwrapTypeAlias()
-            when (unwrappedHint) {
+            when (val unwrappedHint = hint.unwrapTypeAlias()) {
                 is TolkTyStruct -> structType = unwrappedHint
                 is TolkTyUnion -> {
                     var found = 0
@@ -1699,12 +1697,13 @@ class TolkInferenceWalker(
         val body = element.structExpressionBody
         val structPsi = structType?.psi
         if (structPsi != null) {
-            substitution = substitution.deduce(structPsi.declaredType, structType)
+            substitution = substitution.deduce(structPsi.declaredType, structType, false)
         }
+        val structFields = structPsi.structFields.associateBy { it.name ?: "" }
         body.structExpressionFieldList.forEach { fieldRef ->
             val expression = fieldRef.expression
             val name = fieldRef.identifier.text.removeSurrounding("`")
-            val structField = structPsi.structFields.firstOrNull { it.name == name }
+            val structField = structFields[name]
             var fieldType = structField?.type
             if (fieldType != null && fieldType.hasGenerics()) {
                 fieldType = fieldType.substitute(substitution)
@@ -1729,8 +1728,12 @@ class TolkInferenceWalker(
             }
         }
 
+
         val type = structType ?: return nextFlow
         val subType = if (type.hasGenerics()) {
+            if (structPsi != null) {
+                substitution = substitution.deduce(structPsi.declaredType, type, true)
+            }
             type.substitute(substitution)
         } else {
             type
@@ -1939,8 +1942,7 @@ class TolkInferenceWalker(
     // helper function, similar to the above, but for generic type aliases
     // example: `v is OkAlias`, need to deduce `OkAlias<T>` based on type of v
     private fun tryPickInstantiatedGenericFromHint(hint: TolkTy, lookupRef: TolkTypeDef): TolkTy? {
-        val type = lookupRef.typeExpression?.type
-        when (type) {
+        when (val type = lookupRef.typeExpression?.type) {
             is TolkTyStruct -> return tryPickInstantiatedGenericFromHint(hint, type.psi)
             is TolkTyAlias -> return tryPickInstantiatedGenericFromHint(hint, type.psi)
         }

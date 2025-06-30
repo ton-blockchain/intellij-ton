@@ -38,6 +38,7 @@ private class TypeRenderer(
             } else {
                 render(ty.underlyingType, level)
             }
+            is TolkTyNull -> "null"
             is TolkTyBool -> "bool"
             is TolkTyCoins -> "coins"
             is TolkTyVarInt16 -> "varint16"

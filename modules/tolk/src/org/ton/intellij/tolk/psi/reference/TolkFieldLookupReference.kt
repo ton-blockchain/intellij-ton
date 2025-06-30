@@ -130,7 +130,7 @@ fun collectFunctionCandidates(
                 }
             }
 
-            val sub = Substitution.instantiate(functionReceiver, calledReceiver)
+            val sub = Substitution.instantiate(functionReceiver, calledReceiver, false)
             candidates.add(function to sub)
         }
     }

@@ -1606,7 +1606,15 @@ class TolkInferenceWalker(
                     ctx.setResolvedRefs(matchPatternReference, listOf(PsiElementResolveResult(symbol)))
                 }
                 armType = when {
-                    symbol is TolkTypeSymbolElement -> resolveTypeReferenceType(matchPatternReference, symbol)
+                    symbol is TolkTypeSymbolElement -> {
+                        val resolvedTy = resolveTypeReferenceType(matchPatternReference, symbol)
+                        if (resolvedTy != null && resolvedTy.hasGenerics()) {
+                            tryPickInstantiatedGenericFromHint(exprTy, symbol) ?: resolvedTy
+                        } else {
+                            resolvedTy
+                        }
+                    }
+
                     symbol is TolkLocalSymbolElement -> ctx.getType(symbol)
                     symbol != null -> symbol.type
                     else -> TolkPrimitiveTy.fromName(name)
@@ -1858,12 +1866,13 @@ class TolkInferenceWalker(
     ): TolkTy? {
         val symbolTy: TolkTy
         val symbolTyParams: List<TolkTy>
-        when(symbol) {
+        when (symbol) {
             is TolkStruct -> {
-                symbolTy =  symbol.declaredType.also {
+                symbolTy = symbol.declaredType.also {
                     symbolTyParams = it.typeArguments
                 }
             }
+
             is TolkTypeDef -> {
                 symbolTy = symbol.type
                 if (symbolTy is TolkTyAlias) {
@@ -1872,6 +1881,7 @@ class TolkInferenceWalker(
                     return symbolTy
                 }
             }
+
             else -> return null
         }
         val typeArguments = reference.typeArgumentList?.typeExpressionList
@@ -1893,7 +1903,7 @@ class TolkInferenceWalker(
     }
 
     private fun tryPickInstantiatedGenericFromHint(hint: TolkTy, symbol: TolkTypeSymbolElement): TolkTy? {
-        return when( symbol) {
+        return when (symbol) {
             is TolkStruct -> tryPickInstantiatedGenericFromHint(hint, symbol)
             is TolkTypeDef -> tryPickInstantiatedGenericFromHint(hint, symbol)
             else -> null

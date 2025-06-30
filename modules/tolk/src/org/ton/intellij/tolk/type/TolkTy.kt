@@ -122,6 +122,8 @@ interface TolkTy : TypeFoldable<TolkTy> {
         val Coins = TolkTyCoins
         val VarInt32 = TolkTyVarInt32
         val VarInt16 = TolkTyVarInt16
+        val VarUInt16 = TolkTyVarUInt16
+        val VarUInt32 = TolkTyVarUInt32
         val Address = TolkTyAddress
 
         // add to TolkTypeCompletionProvider also
@@ -216,7 +218,9 @@ interface TolkPrimitiveTy : TolkTy {
                 "never" -> Never
                 "coins" -> TolkTy.Coins
                 "varint16" -> TolkTy.VarInt16
+                "varuint16" -> TolkTy.VarUInt16
                 "varint32" -> TolkTy.VarInt32
+                "varuint32" -> TolkTy.VarUInt32
                 "address" -> TolkTy.Address
                 else -> null
             }
@@ -380,7 +384,7 @@ data class TolkIntNTy(
             when {
                 text.startsWith("uint") -> {
                     val n = text.removePrefix("uint").toIntOrNull() ?: return null
-                    if (n in 1..1023) {
+                    if (n in 1..256) {
                         return TolkIntNTy(n, unsigned = true)
                     }
                     return null
@@ -388,7 +392,7 @@ data class TolkIntNTy(
 
                 text.startsWith("int") -> {
                     val n = text.removePrefix("int").toIntOrNull() ?: return null
-                    if (n in 1..1023) {
+                    if (n in 1..257) {
                         return TolkIntNTy(n, unsigned = false)
                     }
                     return null
@@ -409,7 +413,7 @@ data class TolkBitsNTy(
         fun fromName(text: String): TolkBitsNTy? {
             if (!text.startsWith("bits")) return null
             val n = text.removePrefix("bits").toIntOrNull() ?: return null
-            if (n in 1..1024) {
+            if (n in 1..1023) {
                 return TolkBitsNTy(n)
             }
             return null
@@ -430,7 +434,7 @@ data class TolkBytesNTy(
         fun fromName(text: String): TolkBytesNTy? {
             if (!text.startsWith("bytes")) return null
             val n = text.removePrefix("bytes").toIntOrNull() ?: return null
-            if (n in 1..1024) {
+            if (n in 1..1023) {
                 return TolkBytesNTy(n)
             }
             return null
@@ -442,6 +446,14 @@ data class TolkBytesNTy(
     override fun toString(): String = "varint32"
 }
 
+object TolkTyVarUInt32 : TolkPrimitiveTy {
+    override fun toString(): String = "varuint32"
+}
+
  object TolkTyVarInt16 : TolkPrimitiveTy {
     override fun toString(): String = "varint16"
+}
+
+object TolkTyVarUInt16 : TolkPrimitiveTy {
+    override fun toString(): String = "varuint16"
 }

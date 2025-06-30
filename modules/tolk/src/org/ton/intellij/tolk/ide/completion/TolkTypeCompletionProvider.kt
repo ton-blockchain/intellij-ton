@@ -59,6 +59,8 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
     private val cachedVarIntElements = listOf(
         TolkTy.VarInt16,
         TolkTy.VarInt32,
+        TolkTy.VarUInt16,
+        TolkTy.VarUInt32,
     )
 
     override fun addCompletions(

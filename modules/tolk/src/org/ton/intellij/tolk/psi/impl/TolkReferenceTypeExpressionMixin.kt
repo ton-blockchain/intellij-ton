@@ -8,7 +8,7 @@ import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.reference.TolkTypeReference
-import org.ton.intellij.tolk.type.TolkStructTy
+import org.ton.intellij.tolk.type.TolkTyStruct
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkTyAlias
 import org.ton.intellij.tolk.type.TolkTyParam
@@ -50,7 +50,7 @@ abstract class TolkReferenceTypeExpressionMixin : ASTWrapperPsiElement, TolkRefe
         val primitiveType = primitiveType
         val resolved = reference?.resolve()
         return when {
-            resolved is TolkStruct -> TolkStructTy.create(resolved, typeArgumentList?.typeExpressionList)
+            resolved is TolkStruct -> TolkTyStruct.create(resolved, typeArgumentList?.typeExpressionList)
             resolved is TolkTypeDef -> TolkTyAlias.create(resolved, typeArgumentList?.typeExpressionList)
             resolved is TolkTypedElement -> resolved.type
             parentOfType<TolkFunctionReceiver>() != null && typeArgumentList == null -> {

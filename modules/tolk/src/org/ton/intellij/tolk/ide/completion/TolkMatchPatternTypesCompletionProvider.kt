@@ -33,7 +33,7 @@ object TolkMatchPatternTypesCompletionProvider : TolkCompletionProvider() {
             if (unwrappedType is TolkTyUnion) {
                 unwrappedType.variants.forEach { unionVariant ->
                     when(unionVariant) {
-                        is TolkStructTy -> result.addElement(unionVariant.psi.toLookupElementBuilder(ctx))
+                        is TolkTyStruct -> result.addElement(unionVariant.psi.toLookupElementBuilder(ctx))
                         is TolkTyAlias -> result.addElement(unionVariant.psi.toLookupElementBuilder(ctx))
                         is TolkPrimitiveTy -> result.addElement(unionVariant.toLookupElement())
                         else -> result.addElement(

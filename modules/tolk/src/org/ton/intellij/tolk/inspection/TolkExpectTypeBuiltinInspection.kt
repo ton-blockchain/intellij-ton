@@ -22,7 +22,7 @@ class TolkExpectTypeBuiltinInspection  : TolkInspectionBase() {
             val expectTypeText = ((right.expression as? TolkLiteralExpression)?.value as? TolkSliceValue)?.value ?: return
             val actualType = left.expression.type ?: return
 
-            val actualTypeText = actualType.render()
+            val actualTypeText = actualType.render(unknown = "unknown")
             if (expectTypeText != actualTypeText) {
                 holder.registerProblem(
                     left,

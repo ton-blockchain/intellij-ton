@@ -11,7 +11,6 @@ import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.TolkElementTypes.MINUS
 import org.ton.intellij.tolk.psi.TolkElementTypes.PLUS
 import org.ton.intellij.tolk.psi.impl.*
-import org.ton.intellij.tolk.psi.reference.TolkTypeReference
 import org.ton.intellij.tolk.psi.reference.collectFunctionCandidates
 import org.ton.intellij.tolk.psi.reference.resolveFieldLookupReferenceWithReceiver
 import org.ton.intellij.util.recursionGuard
@@ -244,6 +243,16 @@ class AssignLocalSymbolsVisitor : TolkVisitor() {
     override fun visitReferenceExpression(o: TolkReferenceExpression) {
         val symbol = currentScope.lookupSymbol(o.referenceName) ?: return
         resolvedSymbols[o] = symbol
+    }
+
+    override fun visitStructExpressionField(o: TolkStructExpressionField) {
+        val expression = o.expression
+        if (expression == null) {
+            val symbol = currentScope.lookupSymbol(o.referenceName) ?: return
+            resolvedSymbols[o] = symbol
+        } else {
+            expression.accept(this)
+        }
     }
 
     override fun visitBlockStatement(o: TolkBlockStatement) {
@@ -970,7 +979,7 @@ class TolkInferenceWalker(
         val isExprType = element.typeExpression?.type
         var rhsType = isExprType?.unwrapTypeAlias()
         val exprType = ctx.getType(expression)?.unwrapTypeAlias() ?: TolkTy.Unknown
-        if (rhsType is TolkStructTy) {
+        if (rhsType is TolkTyStruct) {
             tryPickInstantiatedGenericFromHint(exprType, rhsType.psi)?.let {
                 rhsType = it
             }
@@ -1160,34 +1169,17 @@ class TolkInferenceWalker(
         val symbolCandidates = resolveToGlobalSymbols(element, name)
         if (symbolCandidates.isNotEmpty()) {
             ctx.setResolvedRefs(element, symbolCandidates.map { PsiElementResolveResult(it) })
-            var type = try {
-                symbolCandidates.first().type
-            } catch (_: CyclicReferenceException) {
-                // cyclic resolve for constants = `const a = b; const b = a`
-                return TolkExpressionInferenceResult(element, nextFlow)
+            val singleSymbol = symbolCandidates.singleOrNull()
+            val inferredType = if (singleSymbol != null) {
+                resolveTypeReferenceType(element, singleSymbol) ?: singleSymbol.type
+            } else null
+            if (inferredType != null) {
+                ctx.setType(element, inferredType)
             }
-            if (type is TolkStructTy && type.hasGenerics()) {
-                val typeArguments = element.typeArgumentList?.typeExpressionList
-                val substitution = HashMap<TolkTyParam, TolkTy>()
-                type.typeArguments.forEachIndexed { index, typeParam ->
-                    if (typeParam !is TolkTyParam) return@forEachIndexed
-                    val parameter =
-                        typeParam.parameter as? TolkTyParam.NamedTypeParameter ?: return@forEachIndexed
-                    val subType = typeArguments?.getOrNull(index)?.type
-                        ?: parameter.psi.defaultTypeParameter?.typeExpression?.type
-                    if (subType != null) {
-                        substitution[typeParam] = subType
-                    }
-                }
-
-                type = type.substitute(Substitution(substitution))
-            }
-
-            ctx.setType(element, type)
             return TolkExpressionInferenceResult(
                 element,
                 nextFlow,
-                type
+                inferredType
             )
         }
 
@@ -1582,6 +1574,7 @@ class TolkInferenceWalker(
     ): TolkExpressionFlowContext {
         val expression = element.expression ?: return TolkExpressionFlowContext(flow, usedAsCondition)
         val afterExpr = inferExpression(expression, flow, false).outFlow
+        val exprTy = ctx.getType(expression) ?: TolkTy.Unknown
         val sinkExpression = extractSinkExpression(expression)
 
         val armsEntryFlow = afterExpr.clone()
@@ -1601,31 +1594,26 @@ class TolkInferenceWalker(
             if (armFlow == null) {
                 armFlow = armsEntryFlow.clone()
             }
+            var armType: TolkTy? = matchArm.matchPattern.typeExpression?.type
             val matchPatternReference = matchPattern.matchPatternReference
             if (matchPatternReference != null) {
                 val name = matchPatternReference.identifier.text.removeSurrounding("`")
-                val symbol = localSymbols[matchPatternReference] ?: resolveToGlobalSymbols(matchPatternReference, name).firstOrNull()
-                val syncExprType = if (symbol != null) {
+                val symbol = localSymbols[matchPatternReference] ?: resolveToGlobalSymbols(
+                    matchPatternReference,
+                    name
+                ).singleOrNull()
+                if (symbol != null) {
                     ctx.setResolvedRefs(matchPatternReference, listOf(PsiElementResolveResult(symbol)))
-                    ctx.getType(symbol) ?: symbol.type
-                } else {
-                    var exactType: TolkTy? = TolkPrimitiveTy.fromName(name)
-                    if (exactType == null) {
-                        val result = TolkTypeReference(matchPatternReference)
-                            .multiResolve(false).firstOrNull()?.element as? TolkTypedElement
-                        exactType = result?.type
-                    }
-                    exactType
                 }
-                if (sinkExpression != null && syncExprType != null) {
-                    armFlow.setSymbol(sinkExpression, syncExprType)
+                armType = when {
+                    symbol is TolkTypeSymbolElement -> resolveTypeReferenceType(matchPatternReference, symbol)
+                    symbol is TolkLocalSymbolElement -> ctx.getType(symbol)
+                    symbol != null -> symbol.type
+                    else -> TolkPrimitiveTy.fromName(name)
                 }
             }
-            if (sinkExpression != null) {
-                val exactType = matchArm.matchPattern.typeExpression?.type
-                if (exactType != null) {
-                    armFlow.setSymbol(sinkExpression, exactType)
-                }
+            if (sinkExpression != null && armType != null) {
+                armFlow.setSymbol(sinkExpression, armType)
             }
             if (matchExpression != null) {
                 armFlow = inferExpression(matchExpression, armFlow, usedAsCondition).outFlow
@@ -1673,21 +1661,21 @@ class TolkInferenceWalker(
         hint: TolkTy
     ): TolkExpressionFlowContext {
         val nextFlow = TolkExpressionFlowContext(flow, false)
-        var structType = element.referenceTypeExpression?.type?.unwrapTypeAlias() as? TolkStructTy
+        var structType = element.referenceTypeExpression?.type?.unwrapTypeAlias() as? TolkTyStruct
         if (structType != null && structType.hasGenerics() && hint != TolkTy.Unknown) {
             val instantiate = Substitution.instantiate(structType, hint.unwrapTypeAlias())
-            structType = structType.substitute(instantiate) as? TolkStructTy ?: structType
+            structType = structType.substitute(instantiate) as? TolkTyStruct ?: structType
         }
         if (structType == null && hint != TolkTy.Unknown) {
             val unwrappedHint = hint.unwrapTypeAlias()
             when (unwrappedHint) {
-                is TolkStructTy -> structType = unwrappedHint
+                is TolkTyStruct -> structType = unwrappedHint
                 is TolkTyUnion -> {
                     var found = 0
-                    var lastStruct: TolkStructTy? = null
+                    var lastStruct: TolkTyStruct? = null
                     for (hintVariant in unwrappedHint.variants) {
                         val unwrappedHint = hintVariant.unwrapTypeAlias()
-                        if (unwrappedHint is TolkStructTy) {
+                        if (unwrappedHint is TolkTyStruct) {
                             lastStruct = unwrappedHint
                             found++
                         }
@@ -1705,26 +1693,30 @@ class TolkInferenceWalker(
         if (structPsi != null) {
             substitution = substitution.deduce(structPsi.declaredType, structType)
         }
-        body.structExpressionFieldList.forEach { field ->
-            val expression = field.expression
-            val name = field.identifier.text.removeSurrounding("`")
-            if (expression != null) { // field: expression
-                val field = structPsi.structFields.firstOrNull { it.name == name }
-                var fieldType = field?.type
-                if (fieldType != null && fieldType.hasGenerics()) {
-                    fieldType = fieldType.substitute(substitution)
-                }
+        body.structExpressionFieldList.forEach { fieldRef ->
+            val expression = fieldRef.expression
+            val name = fieldRef.identifier.text.removeSurrounding("`")
+            val structField = structPsi.structFields.firstOrNull { it.name == name }
+            var fieldType = structField?.type
+            if (fieldType != null && fieldType.hasGenerics()) {
+                fieldType = fieldType.substitute(substitution)
+            }
+            val expressionType = if (expression != null) { // field: expression
                 inferExpression(expression, nextFlow.outFlow, false, fieldType)
-                val expressionType = ctx.getType(expression)
-                if (fieldType != null && expressionType != null) {
-                    substitution = substitution.deduce(fieldType, expressionType.actualType())
-                    val subType = expressionType.substitute(substitution)
-                    ctx.setType(expression, subType)
-                }
+                ctx.getType(expression)
             } else { // let foo = 1; MyStruct { foo };
-                val localSymbol = flow.getSymbol(name)
+                val localSymbol = localSymbols[fieldRef]
                 if (localSymbol != null) {
-                    ctx.setResolvedRefs(field, listOf(PsiElementResolveResult(localSymbol)))
+                    ctx.setResolvedRefs(fieldRef, listOf(PsiElementResolveResult(localSymbol)))
+                }
+                ctx.getType(localSymbol) ?: localSymbol?.type
+            }
+
+            if (fieldType != null && expressionType != null) {
+                substitution = substitution.deduce(fieldType, expressionType.actualType())
+                val subType = expressionType.substitute(substitution)
+                if (expression != null) {
+                    ctx.setType(expression, subType)
                 }
             }
         }
@@ -1799,7 +1791,7 @@ class TolkInferenceWalker(
             is TolkDotExpression -> {
                 val leftType = calcDeclaredTypeBeforeSmartCast(expression.expression) ?: return null
                 return when (leftType) {
-                    is TolkStructTy -> {
+                    is TolkTyStruct -> {
                         val right = expression.fieldLookup ?: return null
                         val field =
                             ctx.getResolvedFields(right).firstOrNull() as? TolkStructField ?: return null
@@ -1843,21 +1835,86 @@ class TolkInferenceWalker(
         return current
     }
 
+    private fun resolveTypeReferenceType(
+        reference: TolkReferenceElement,
+    ): TolkTy? {
+        val name = reference.referenceName ?: return null
+        localSymbols[reference] ?: return null
+        val genericTy = currentFunction?.resolveGenericType(name)
+        if (genericTy != null) {
+            return genericTy
+        }
+        val symbolTy = try {
+            resolveToGlobalSymbols(reference, name).singleOrNull()
+        } catch (_: CyclicReferenceException) {
+            return null
+        } ?: return null
+        return resolveTypeReferenceType(reference, symbolTy)
+    }
+
+    private fun resolveTypeReferenceType(
+        reference: TolkReferenceElement,
+        symbol: TolkSymbolElement
+    ): TolkTy? {
+        val symbolTy: TolkTy
+        val symbolTyParams: List<TolkTy>
+        when(symbol) {
+            is TolkStruct -> {
+                symbolTy =  symbol.declaredType.also {
+                    symbolTyParams = it.typeArguments
+                }
+            }
+            is TolkTypeDef -> {
+                symbolTy = symbol.type
+                if (symbolTy is TolkTyAlias) {
+                    symbolTyParams = symbolTy.typeArguments
+                } else {
+                    return symbolTy
+                }
+            }
+            else -> return null
+        }
+        val typeArguments = reference.typeArgumentList?.typeExpressionList
+        if (typeArguments != null) {
+            var sub = Substitution.empty()
+            symbolTyParams.forEachIndexed { index, typeParam ->
+                if (typeParam !is TolkTyParam) return@forEachIndexed
+                val parameter =
+                    typeParam.parameter as? TolkTyParam.NamedTypeParameter ?: return@forEachIndexed
+                val subType = typeArguments.getOrNull(index)?.type
+                    ?: parameter.psi.defaultTypeParameter?.typeExpression?.type
+                if (subType != null) {
+                    sub = sub.deduce(typeParam, subType)
+                }
+            }
+            return symbolTy.substitute(sub)
+        }
+        return symbolTy
+    }
+
+    private fun tryPickInstantiatedGenericFromHint(hint: TolkTy, symbol: TolkTypeSymbolElement): TolkTy? {
+        return when( symbol) {
+            is TolkStruct -> tryPickInstantiatedGenericFromHint(hint, symbol)
+            is TolkTypeDef -> tryPickInstantiatedGenericFromHint(hint, symbol)
+            else -> null
+        }
+    }
+
     // helper function: given hint = `Ok<int> | Err<slice>` and struct `Ok`, return `Ok<int>`
     // example: `match (...) { Ok => ... }` we need to deduce `Ok<T>` based on subject
-    private fun tryPickInstantiatedGenericFromHint(hint: TolkTy, lookupRef: TolkStruct): TolkStructTy? {
+    private fun tryPickInstantiatedGenericFromHint(hint: TolkTy, lookupRef: TolkStruct): TolkTyStruct? {
         // example: `var w: Ok<int> = Ok { ... }`, hint is `Ok<int>`, lookup is `Ok`
-        (hint.unwrapTypeAlias() as? TolkStructTy)?.let { hStruct ->
+        (hint.unwrapTypeAlias() as? TolkTyStruct)?.let { hStruct ->
             if (lookupRef.isEquivalentTo(hStruct.psi)) {
                 return hStruct
             }
         }
         // example: `fun f(): Response<int, slice> { return Err { ... } }`, hint is `Ok<int> | Err<slice>`, lookup is `Err`
         (hint.unwrapTypeAlias() as? TolkTyUnion)?.let { hUnion ->
-            var onlyVariant: TolkStructTy? = null
+            var onlyVariant: TolkTyStruct? = null
             for (variant in hUnion.variants) {
                 val unwrappedVariant = variant.unwrapTypeAlias()
-                if (unwrappedVariant is TolkStructTy && lookupRef.isEquivalentTo(unwrappedVariant.psi)) {
+                if (unwrappedVariant is TolkTyStruct && lookupRef.isEquivalentTo(unwrappedVariant.psi)) {
                     if (onlyVariant != null) {
                         return null
                     }
@@ -1865,6 +1922,22 @@ class TolkInferenceWalker(
                 }
             }
             return onlyVariant
+        }
+        return null
+    }
+
+    // helper function, similar to the above, but for generic type aliases
+    // example: `v is OkAlias`, need to deduce `OkAlias<T>` based on type of v
+    private fun tryPickInstantiatedGenericFromHint(hint: TolkTy, lookupRef: TolkTypeDef): TolkTy? {
+        val type = lookupRef.typeExpression?.type
+        when (type) {
+            is TolkTyStruct -> return tryPickInstantiatedGenericFromHint(hint, type.psi)
+            is TolkTyAlias -> return tryPickInstantiatedGenericFromHint(hint, type.psi)
+        }
+        if (hint is TolkTyAlias) {
+            if (lookupRef.isEquivalentTo(hint.psi)) {
+                return hint
+            }
         }
         return null
     }

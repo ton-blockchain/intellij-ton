@@ -51,5 +51,8 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
     }
 }
 
+val TolkTypeDef.declaredType: TolkTy
+    get() = TolkTyAlias.create(this)
+
 val TolkTypeDef.annotationList
     get() = PsiTreeUtil.getChildrenOfTypeAsList(this, TolkAnnotation::class.java)

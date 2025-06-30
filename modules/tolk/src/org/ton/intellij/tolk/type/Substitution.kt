@@ -24,10 +24,25 @@ open class Substitution(
 
     fun deduce(paramType: TolkTy, argType: TolkTy): Substitution {
         return when {
-            paramType is TolkStructTy && argType is TolkStructTy -> {
-                paramType.typeArguments.asSequence().zip(argType.typeArguments.asSequence()).fold(this) { sub, (a, b) ->
-                    sub.deduce(a.unwrapTypeAlias(), b.unwrapTypeAlias())
+            paramType is TolkTyStruct -> {
+                val argType = (argType as? TolkTyStruct)?.takeIf {
+                    it.typeArguments.size == paramType.typeArguments.size
+                } ?: return this
+                var sub = this
+                for (i in paramType.typeArguments.indices) {
+                    sub = sub.deduce(paramType.typeArguments[i], argType.typeArguments[i])
                 }
+                return sub
+            }
+            paramType is TolkTyAlias -> {
+                val argType = (argType as? TolkTyAlias)?.takeIf {
+                    it.typeArguments.size == paramType.typeArguments.size
+                } ?: return this
+                var sub = this
+                for (i in paramType.typeArguments.indices) {
+                    sub = sub.deduce(paramType.typeArguments[i], argType.typeArguments[i])
+                }
+                return sub
             }
 
             paramType is TolkTyFunction -> {
@@ -110,7 +125,7 @@ open class Substitution(
             paramType is TolkTyParam -> {
                 if (!typeSubst.containsKey(paramType)) {
                     val newType =
-                        if ((argType == paramType || argType == TolkTy.Unknown) && paramType.parameter is TolkTyParam.NamedTypeParameter) {
+                        if ((argType == paramType) && paramType.parameter is TolkTyParam.NamedTypeParameter) {
                             paramType.parameter.psi.defaultTypeParameter?.typeExpression?.type ?: return this
                         } else {
                             argType

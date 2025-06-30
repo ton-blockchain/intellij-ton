@@ -70,7 +70,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
 
         if (!isStaticReceiver && !isBeforeParenthesis) {
             when (calledType) {
-                is TolkStructTy -> {
+                is TolkTyStruct -> {
                     val sub = Substitution.instantiate(calledType.psi.declaredType, calledType)
                     for (field in calledType.psi.structBody?.structFieldList.orEmpty()) {
                         if (!checkLimit()) return
@@ -127,8 +127,8 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                 if ((canBeAssigned && isStatic == isStaticReceiver) || (receiverType == primitiveStaticReceiver && isStatic)) return true
                 if (receiverType is TolkTyParam) return true
                 if (receiverType.hasGenerics() &&
-                    receiverType is TolkStructTy &&
-                    calledType is TolkStructTy &&
+                    receiverType is TolkTyStruct &&
+                    calledType is TolkTyStruct &&
                     receiverType.psi.isEquivalentTo(calledType.psi)
                 ) return true
                 return false

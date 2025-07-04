@@ -15,6 +15,10 @@ class TolkAnnotationQuery(
 
     fun hasDeprecatedAnnotation(): Boolean = hasAnnotation("deprecated")
 
+    fun deprecatedAnnotation(): TolkAnnotation? {
+        return annotationByName("deprecated").firstOrNull()
+    }
+
     fun hasAnnotation(annotationName: String): Boolean {
         val annotation = annotationByName(annotationName)
         return annotation.any()

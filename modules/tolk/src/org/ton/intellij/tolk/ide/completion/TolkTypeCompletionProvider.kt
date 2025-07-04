@@ -10,6 +10,8 @@ import com.intellij.psi.stubs.StubIndex
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
+import org.ton.intellij.tolk.type.TolkBitsNTy
+import org.ton.intellij.tolk.type.TolkIntNTy
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.psiElement
@@ -28,30 +30,29 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         TolkTy.Never,
         TolkTy.Coins,
         TolkTy.Address,
-    ).map { it.toString() } + listOf(
-        "uint8",
-        "uint16",
-        "uint32",
-        "uint64",
-        "uint128",
-        "uint256",
-        "int",
-        "int8",
-        "int16",
-        "int32",
-        "int64",
-        "int128",
-        "int256",
-        "bits8",
-        "bits16",
-        "bits32",
-        "bits64",
-        "bits128",
-        "bits256",
+        TolkTy.Int,
+        TolkIntNTy.fromName("uint8")!!,
+        TolkIntNTy.fromName("uint16")!!,
+        TolkIntNTy.fromName("uint32")!!,
+        TolkIntNTy.fromName("uint64")!!,
+        TolkIntNTy.fromName("uint128")!!,
+        TolkIntNTy.fromName("uint256")!!,
+        TolkIntNTy.fromName("int8")!!,
+        TolkIntNTy.fromName("int16")!!,
+        TolkIntNTy.fromName("int32")!!,
+        TolkIntNTy.fromName("int64")!!,
+        TolkIntNTy.fromName("int128")!!,
+        TolkIntNTy.fromName("int256")!!,
+        TolkBitsNTy.fromName("bits8")!!,
+        TolkBitsNTy.fromName("bits16")!!,
+        TolkBitsNTy.fromName("bits32")!!,
+        TolkBitsNTy.fromName("bits64")!!,
+        TolkBitsNTy.fromName("bits128")!!,
+        TolkBitsNTy.fromName("bits256")!!,
     )
 
     private val cachedPrimitiveElements = primitiveTypes.map {
-        LookupElementBuilder.create(it).withBoldness(true)
+        it to LookupElementBuilder.create(it.toString()).withBoldness(true)
     }
     private val cachedVarIntElements = listOf(
         TolkTy.VarInt16,
@@ -86,8 +87,8 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
                 LookupElementBuilder.createWithIcon(type)
             )
         }
-        cachedPrimitiveElements.forEach {
-            result.addElement(it)
+        cachedPrimitiveElements.forEach { (_, lookup) ->
+            result.addElement(lookup)
         }
 
         val typeCandidates = HashSet<TolkSymbolElement>()

@@ -207,7 +207,7 @@ VersionDefinition ::= 'tolk' VersionValue {
 }
 VersionValue ::= ('='|'>'|'>='|'<'|'<='|'^')? INTEGER_LITERAL ('.' INTEGER_LITERAL)*
 
-upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpression ';'? {
+upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' (UnionTypeExpression|('|'?TypeExpression)) ';'? {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkTypeMixin"
     implements = [
@@ -870,11 +870,12 @@ UnionTypeExpression ::= unionType1 | unionType2 {
     mixin="org.ton.intellij.tolk.psi.impl.TolkUnionTypeExpressionMixin"
 }
 
-private unionType1 ::= '|' UnionTypeElement ('|' UnionTypeElement)+ {
-    pin = 1
-}
-private unionType2 ::= UnionTypeElement &'|' ('|' UnionTypeElement)+ {
+private unionType1 ::= unionElement+
+private unionType2 ::= UnionTypeElement &'|' unionElement+ {
     pin = 2
+}
+private unionElement ::= '|' UnionTypeElement {
+    pin = 1
 }
 
 NullTypeExpression ::= 'null' {

@@ -116,7 +116,7 @@ type MsgCounter1 =
     CounterIncrement |
     CounterDecrement |
     CounterReset0 |
-    CounterResetTo |
+    CounterResetTo
 ;
 
 /*

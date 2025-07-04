@@ -121,7 +121,7 @@ struct(0x1020) Test7_1 { }
 struct(0x1030) Test7_2 { }
 struct(0x1040) Test7_3 { }
 
-type Test7_or = Test7_1 | Test7_2 | Test7_3 |;
+type Test7_or = Test7_1 | Test7_2 | Test7_3;
 
 @method_id(107)
 fun test7() {

@@ -170,8 +170,10 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
     private fun findDeclarations(): Map<String, Collection<TolkSymbolElement>> {
         val result = HashMap<String, MutableList<TolkSymbolElement>>()
 
+        val visitedFiles = mutableSetOf<TolkFile>()
         project.tolkSettings.getDefaultImport()?.let {
             if (it != this) {
+                visitedFiles.add(it)
                 it.findDeclarations().forEach { (name, declarations) ->
                     result.getOrPut(name) { mutableListOf() }.addAll(declarations)
                 }
@@ -191,7 +193,6 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             }
         }
 
-        val visitedFiles = mutableSetOf<TolkFile>()
         processDeclarations(
             processor,
             state = ResolveState.initial(),

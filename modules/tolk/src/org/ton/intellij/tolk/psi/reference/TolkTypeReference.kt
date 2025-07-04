@@ -26,7 +26,7 @@ class TolkTypeReference(
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         val myElement = myElement
         return buildList<ResolveResult> {
-            val typeParameterName = element.referenceNameElement?.text ?: return@buildList
+            val typeParameterName = element.referenceName ?: return@buildList
             val owner = myElement.parentOfType<TolkTypeParameterListOwner>()
             if (owner != null) {
                 if (typeParameterName == "self" && owner is TolkFunction) {

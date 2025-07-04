@@ -8,10 +8,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubIndex
 import com.intellij.util.ProcessingContext
-import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
-import org.ton.intellij.tolk.psi.TolkSymbolElement
-import org.ton.intellij.tolk.psi.TolkTypeParameterListOwner
-import org.ton.intellij.tolk.psi.TolkTypeSymbolElement
+import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.util.parentOfType
@@ -71,7 +68,7 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         val project = parameters.originalFile.project
         val position = parameters.position
         val parameterListOwner = position.parentOfType<TolkTypeParameterListOwner>()
-        val ctx = TolkCompletionContext(position.parent as? TolkSymbolElement)
+        val ctx = TolkCompletionContext(position.parent as? TolkElement)
 
         result.restartCompletionOnPrefixChange("cont")
         if (result.prefixMatcher.prefix == "cont") {

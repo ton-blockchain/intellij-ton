@@ -1171,7 +1171,11 @@ class TolkInferenceWalker(
             ctx.setResolvedRefs(element, symbolCandidates.map { PsiElementResolveResult(it) })
             val singleSymbol = symbolCandidates.singleOrNull()
             val inferredType = if (singleSymbol != null) {
-                resolveTypeReferenceType(element, singleSymbol) ?: singleSymbol.type
+                resolveTypeReferenceType(element, singleSymbol) ?: try {
+                    singleSymbol.type
+                } catch (_: CyclicReferenceException) {
+                    null
+                }
             } else null
             if (inferredType != null) {
                 ctx.setType(element, inferredType)

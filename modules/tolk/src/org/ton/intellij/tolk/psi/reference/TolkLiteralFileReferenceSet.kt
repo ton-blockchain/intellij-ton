@@ -35,16 +35,13 @@ class TolkLiteralFileReferenceSet(
         return contexts
     }
 
-    override fun createFileReference(range: TextRange, index: Int, text: String): FileReference? {
+    override fun createFileReference(range: TextRange, index: Int, text: String): FileReference {
         if (text == "@stdlib") {
             return FileReference(this, range, index, ".")
         }
-        // automatically add ".tolk" for the last non-directory part
-        // foo/bar -> foo/bar.tolk
-        // foo/bar/ -> foo/bar/
         if (!text.endsWith(".tolk") && range.endOffset - 1 == this.pathString.length) {
-            return TolkFileReference(this, range, index, "$text.tolk");
+            return TolkFileReference(this, range, index, "$text.tolk")
         }
-        return super.createFileReference(range, index, text)
+        return TolkFileReference(this, range, index, text)
     }
 }

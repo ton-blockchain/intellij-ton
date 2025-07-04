@@ -38,8 +38,8 @@ class TolkConstVarStub(
 
     companion object {
         val EMPTY_ARRAY = emptyArray<TolkConstVar>()
-        val ARRAY_FACTORY: ArrayFactory<TolkConstVar?> = ArrayFactory {
-            if (it == 0) EMPTY_ARRAY else arrayOfNulls(it)
+        val ARRAY_FACTORY: ArrayFactory<TolkConstVar> = ArrayFactory {
+            if (it == 0) EMPTY_ARRAY else arrayOfNulls<TolkConstVar>(it)
         }
     }
 }

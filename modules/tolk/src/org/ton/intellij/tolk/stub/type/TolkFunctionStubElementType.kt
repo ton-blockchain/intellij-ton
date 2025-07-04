@@ -87,8 +87,8 @@ class TolkFunctionStubElementType(
         private const val IS_ENTRY_POINT = 1 shl 7
 
         val EMPTY_ARRAY = emptyArray<TolkFunction>()
-        val ARRAY_FACTORY: ArrayFactory<TolkFunction?> = ArrayFactory {
-            if (it == 0) EMPTY_ARRAY else arrayOfNulls(it)
+        val ARRAY_FACTORY = ArrayFactory<TolkFunction> {
+            if (it == 0) EMPTY_ARRAY else arrayOfNulls<TolkFunction>(it)
         }
     }
 }

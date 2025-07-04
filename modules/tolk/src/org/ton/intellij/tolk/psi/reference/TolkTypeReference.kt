@@ -1,24 +1,21 @@
 package org.ton.intellij.tolk.psi.reference
 
+import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.util.parentOfType
-import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.*
-import java.util.*
 
 class TolkTypeReference(
-    element: TolkElement,
-) : PsiReferenceBase.Poly<TolkElement>(
+    element: TolkReferenceElement,
+) : PsiReferenceBase.Poly<TolkReferenceElement>(
     element
 ) {
-    val identifier get() = element.node.findChildByType(TolkElementTypes.IDENTIFIER)!!
-
     override fun calculateDefaultRangeInElement(): TextRange {
-        val identifier = identifier
+        val identifier = element.referenceNameElement ?: return TextRange.EMPTY_RANGE
         return TextRange(identifier.startOffsetInParent, identifier.textLength)
     }
 
@@ -29,7 +26,7 @@ class TolkTypeReference(
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         val myElement = myElement
         return buildList<ResolveResult> {
-            val typeParameterName = identifier.text.removeSurrounding("`")
+            val typeParameterName = element.referenceNameElement?.text ?: return@buildList
             val owner = myElement.parentOfType<TolkTypeParameterListOwner>()
             if (owner != null) {
                 if (typeParameterName == "self" && owner is TolkFunction) {
@@ -53,41 +50,27 @@ class TolkTypeReference(
         }.toTypedArray()
     }
 
-    override fun handleElementRename(newElementName: String): PsiElement? {
-        return identifier.psi.replace(TolkPsiFactory[element.project].createIdentifier(newElementName))
+    override fun handleElementRename(newElementName: String): PsiElement {
+        val identifier = element.referenceNameElement ?: return super.handleElementRename(newElementName)
+        val newId = TolkPsiFactory[identifier.project].createIdentifier(newElementName)
+        identifier.replace(newId)
+        return element
     }
 
     private fun collectTypeDefResults(file: TolkFile, target: String): List<PsiElementResolveResult> {
-        val result = LinkedList<PsiElementResolveResult>()
-        val visitedFiles = HashSet<TolkFile>()
-        if (visitedFiles.add(file)) {
-            file.declaredSymbols[target]?.forEach {
-                if (it is TolkTypeSymbolElement) {
-                    result.add(PsiElementResolveResult(it))
-                }
+        val injectedLanguageManager = InjectedLanguageManager.getInstance(file.project)
+        val isInjected = injectedLanguageManager.isInjectedFragment(file)
+        if (isInjected) {
+            val hostElement = injectedLanguageManager.getInjectionHost(file)
+            val originalFile = hostElement?.containingFile as? TolkFile
+            if (originalFile != null) {
+                return collectTypeDefResults(originalFile, target)
             }
         }
 
-        file.project.tolkSettings.getDefaultImport()?.let {
-            if (visitedFiles.add(it)) {
-                it.declaredSymbols[target]?.forEach {
-                    if (it is TolkTypeSymbolElement) {
-                        result.add(PsiElementResolveResult(it))
-                    }
-                }
-            }
-        }
-
-        file.getImportedFiles().forEach { importedFile ->
-            if (visitedFiles.add(importedFile)) {
-                importedFile.declaredSymbols[target]?.forEach {
-                    if (it is TolkTypeSymbolElement) {
-                        result.add(PsiElementResolveResult(it))
-                    }
-                }
-            }
-        }
-
-        return result
+        return file.resolveSymbols(target)
+            .filterIsInstance<TolkTypeSymbolElement>()
+            .map { PsiElementResolveResult(it) }
+            .toList()
     }
 }

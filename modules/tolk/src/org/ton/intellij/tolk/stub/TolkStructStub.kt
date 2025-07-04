@@ -41,8 +41,8 @@ class TolkStructStub(
 
     companion object {
         val EMPTY_ARRAY = emptyArray<TolkStruct>()
-        val ARRAY_FACTORY: ArrayFactory<TolkStruct?> = ArrayFactory {
-            if (it == 0) EMPTY_ARRAY else arrayOfNulls(it)
+        val ARRAY_FACTORY: ArrayFactory<TolkStruct> = ArrayFactory {
+            if (it == 0) EMPTY_ARRAY else arrayOfNulls<TolkStruct>(it)
         }
     }
 }

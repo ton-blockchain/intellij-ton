@@ -13,9 +13,19 @@ class TolkFileReference(set: FileReferenceSet, range: TextRange, index: Int, tex
         if (!file.isPhysical) return FileInfoManager.getFileLookupItem(element)
         val withoutExtensions = file.name.removeSuffix(".tolk")
         val extension = if (withoutExtensions == file.name) "" else ".tolk"
-        val root = rangeInElement.startOffset == 1
-        val finalName = if (root) "./$withoutExtensions" else withoutExtensions
+        val finalName = withoutExtensions
 
         return FileInfoManager.getFileLookupItem(file, finalName, file.getIcon(0)).withTailText(extension)
+    }
+
+    override fun rename(newName: String): PsiElement {
+        return super.rename(if (isLast) fixLastNameForRename(newName) else newName)
+    }
+
+    fun fixLastNameForRename(newName: String): String {
+        if (newName.endsWith(".tolk")) {
+            return newName.removeSuffix(".tolk")
+        }
+        return newName
     }
 }

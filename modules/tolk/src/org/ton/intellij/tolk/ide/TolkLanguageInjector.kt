@@ -1,22 +1,40 @@
 package org.ton.intellij.tolk.ide
 
-import com.intellij.lang.injection.general.Injection
-import com.intellij.lang.injection.general.LanguageInjectionContributor
-import com.intellij.lang.injection.general.SimpleInjection
+import com.intellij.lang.injection.MultiHostInjector
+import com.intellij.lang.injection.MultiHostRegistrar
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.psi.util.elementType
-import org.ton.intellij.asm.AsmLanguage
-import org.ton.intellij.tolk.psi.TolkAsmBody
-import org.ton.intellij.tolk.psi.TolkElementTypes
+import org.ton.intellij.tolk.TolkLanguage
+import org.ton.intellij.tolk.psi.TolkArgument
+import org.ton.intellij.tolk.psi.TolkCallExpression
+import org.ton.intellij.tolk.psi.TolkReferenceExpression
+import org.ton.intellij.tolk.psi.TolkStringLiteral
 
-class TolkLanguageInjector : LanguageInjectionContributor {
-    override fun getInjection(p0: PsiElement): Injection? {
-        if (p0.elementType != TolkElementTypes.RAW_STRING) return null
-        PsiTreeUtil.findFirstParent(p0) { it is TolkAsmBody } ?: return null
+class TolkLanguageInjector : MultiHostInjector {
 
-        return SimpleInjection(
-            AsmLanguage, "", "", null
-        )
+    private fun shouldInjectExpectType(element: TolkStringLiteral): Boolean {
+        val argument = element.parent?.parent as? TolkArgument ?: return false
+        val callExpr = argument.parent?.parent as? TolkCallExpression ?: return false
+        val calleeRef = callExpr.expression as? TolkReferenceExpression ?: return false
+        return calleeRef.referenceName == "__expect_type"
+    }
+
+    override fun getLanguagesToInject(
+        registrar: MultiHostRegistrar,
+        context: PsiElement
+    ) {
+        if (context !is TolkStringLiteral) return
+        val rawStr = context.rawString ?: return
+
+        if (shouldInjectExpectType(context)) {
+            val contentRange = rawStr.textRangeInParent
+            registrar.startInjecting(TolkLanguage)
+                .addPlace("type __DUMMY = ", ";", context, contentRange)
+                .doneInjecting()
+            return
+        }
+    }
+
+    override fun elementsToInjectIn(): List<Class<out PsiElement?>?> {
+        return listOf(TolkStringLiteral::class.java)
     }
 }

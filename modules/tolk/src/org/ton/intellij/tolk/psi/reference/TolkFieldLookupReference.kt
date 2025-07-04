@@ -80,7 +80,6 @@ fun collectFunctionCandidates(
     containingFile: TolkFile
 ): List<Pair<TolkFunction, Substitution>> {
     val namedFunctionsSeq = containingFile.resolveSymbols(name)
-        .asSequence()
         .filterIsInstance<TolkFunction>()
 
     val namedFunctions: List<TolkFunction>

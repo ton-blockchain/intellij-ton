@@ -23,7 +23,10 @@ class TolkStructFieldReference(val field: TolkStructExpressionField) :
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {
-        return identifier.replace(TolkPsiFactory[element.project].createIdentifier(newElementName))
+        val identifier = element.identifier
+        val newId = TolkPsiFactory[identifier.project].createIdentifier(newElementName)
+        identifier.replace(newId)
+        return element
     }
 
     private fun resolveInner(incompleteCode: Boolean): Array<ResolveResult> {

@@ -37,8 +37,8 @@ class TolkIncludeDefinitionStubElementType(
 
     companion object {
         val EMPTY_ARRAY = emptyArray<TolkIncludeDefinition>()
-        val ARRAY_FACTORY: ArrayFactory<TolkIncludeDefinition?> = ArrayFactory {
-            if (it == 0) EMPTY_ARRAY else arrayOfNulls(it)
+        val ARRAY_FACTORY: ArrayFactory<TolkIncludeDefinition> = ArrayFactory {
+            if (it == 0) EMPTY_ARRAY else arrayOfNulls<TolkIncludeDefinition>(it)
         }
     }
 }

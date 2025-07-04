@@ -42,8 +42,9 @@ class TolkTypeDefStub(
 
     companion object {
         val EMPTY_ARRAY = emptyArray<TolkTypeDef>()
-        val ARRAY_FACTORY: ArrayFactory<TolkTypeDef?> = ArrayFactory {
-            if (it == 0) EMPTY_ARRAY else arrayOfNulls(it)
+
+        val ARRAY_FACTORY: ArrayFactory<TolkTypeDef> = ArrayFactory {
+            if (it == 0) EMPTY_ARRAY else arrayOfNulls<TolkTypeDef>(it)
         }
     }
 }

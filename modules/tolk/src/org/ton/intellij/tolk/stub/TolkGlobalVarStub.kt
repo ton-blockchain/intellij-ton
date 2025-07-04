@@ -38,8 +38,8 @@ class TolkGlobalVarStub(
 
     companion object {
         val EMPTY_ARRAY = emptyArray<TolkGlobalVar>()
-        val ARRAY_FACTORY: ArrayFactory<TolkGlobalVar?> = ArrayFactory {
-            if (it == 0) EMPTY_ARRAY else arrayOfNulls(it)
+        val ARRAY_FACTORY: ArrayFactory<TolkGlobalVar> = ArrayFactory {
+            if (it == 0) EMPTY_ARRAY else arrayOfNulls<TolkGlobalVar>(it)
         }
     }
 }

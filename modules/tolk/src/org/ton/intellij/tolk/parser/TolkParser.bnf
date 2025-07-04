@@ -155,13 +155,16 @@ Item ::= Annotations (ConstVar | GlobalVar | TypeDef | Struct | Function) {
 private Annotations ::= Annotation*
 
 RawString ::= RAW_STRING_ELEMENT*
+
 StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE {
     pin=1
-    implements=["com.intellij.psi.PsiLanguageInjectionHost"]
     mixin="org.ton.intellij.tolk.psi.impl.TolkStringLiteralMixin"
+    implements=[
+        "com.intellij.psi.PsiLanguageInjectionHost"
+    ]
 }
 
-upper GlobalVar ::= 'global' IDENTIFIER GlobalVarType ';'  {
+upper GlobalVar ::= 'global' IDENTIFIER GlobalVarType ';'?  {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkGlobalVarMixin"
     implements=[
@@ -176,7 +179,7 @@ private GlobalVarType ::= ':' TypeExpression {
     pin = 1
 }
 
-upper ConstVar ::= 'const' IDENTIFIER ConstVarType? '=' Expression ';' {
+upper ConstVar ::= 'const' IDENTIFIER ConstVarType? '=' Expression ';'? {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkConstVarMixin"
     implements=[
@@ -204,7 +207,7 @@ VersionDefinition ::= 'tolk' VersionValue {
 }
 VersionValue ::= ('='|'>'|'>='|'<'|'<='|'^')? INTEGER_LITERAL ('.' INTEGER_LITERAL)*
 
-upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpression ';' {
+upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpression ';'? {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkTypeMixin"
     implements = [
@@ -217,7 +220,7 @@ upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpressio
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
 
-upper Struct ::= 'struct' StructConstructorTag? IDENTIFIER TypeParameterList? (StructBody | ';') {
+upper Struct ::= 'struct' StructConstructorTag? IDENTIFIER TypeParameterList? (StructBody | ';')? {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkStructMixin"
     implements = [
@@ -276,7 +279,7 @@ private StructFieldDefault ::= '=' Expression {
 //PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
 //Function ::= (TypeParameterList|'get')? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
-upper Function ::= ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypeParameterList? ParameterList ReturnType? FunctionBody {
+upper Function ::= ((get 'fun') | ('fun')) FunctionReceiver? IDENTIFIER TypeParameterList? ParameterList ReturnType? FunctionBody {
     pin = 1
     implements = [
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
@@ -867,10 +870,10 @@ UnionTypeExpression ::= unionType1 | unionType2 {
     mixin="org.ton.intellij.tolk.psi.impl.TolkUnionTypeExpressionMixin"
 }
 
-private unionType1 ::= '|' UnionTypeElement [('|' UnionTypeElement )+ '|'?] {
+private unionType1 ::= '|' UnionTypeElement ('|' UnionTypeElement)+ {
     pin = 1
 }
-private unionType2 ::= UnionTypeElement &'|' [('|' UnionTypeElement )+ '|'?] {
+private unionType2 ::= UnionTypeElement &'|' ('|' UnionTypeElement)+ {
     pin = 2
 }
 

@@ -48,8 +48,9 @@ class TolkDumbAnnotator : Annotator, DumbAware {
                 is TolkGlobalVar -> TolkColor.GLOBAL_VARIABLE.textAttributesKey
                 is TolkConstVar -> TolkColor.CONSTANT.textAttributesKey
                 is TolkStruct -> {
+                    val tag = element.structConstructorTag
                     val body = element.structBody
-                    if (body == null || body.childOfType<TolkStructField>() == null) {
+                    if (tag == null && (body == null || body.childOfType<TolkStructField>() == null)) {
                         TolkColor.EMPTY_STRUCT.textAttributesKey
                     } else {
                         TolkColor.STRUCT.textAttributesKey

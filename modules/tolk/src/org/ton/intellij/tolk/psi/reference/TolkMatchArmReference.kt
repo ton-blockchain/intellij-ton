@@ -25,7 +25,10 @@ class TolkMatchArmReference(
         return TextRange(identifier.startOffsetInParent, identifier.textLength)
     }
 
-    override fun handleElementRename(newElementName: String): PsiElement? {
-        return element.identifier.replace(TolkPsiFactory[element.project].createIdentifier(newElementName))
+    override fun handleElementRename(newElementName: String): PsiElement {
+        val identifier = element.identifier
+        val newId = TolkPsiFactory[identifier.project].createIdentifier(newElementName)
+        identifier.replace(newId)
+        return element
     }
 }

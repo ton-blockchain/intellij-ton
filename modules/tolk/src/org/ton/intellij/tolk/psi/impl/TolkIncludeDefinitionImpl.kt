@@ -5,6 +5,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.findFile
+import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.tree.IElementType
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
@@ -29,7 +30,12 @@ abstract class TolkIncludeDefinitionMixin : StubBasedPsiElementBase<TolkIncludeD
         }
     }
 
+    fun resolve(): PsiElement? {
+        return stringLiteral?.references?.lastOrNull()?.resolve()
+    }
+
     companion object {
+        @Deprecated("Use reference directly")
         fun resolveTolkImport(project: Project, file: TolkFile, path: String): VirtualFile? {
             var path = path
             if (!path.endsWith(".tolk")) {
@@ -50,4 +56,7 @@ abstract class TolkIncludeDefinitionMixin : StubBasedPsiElementBase<TolkIncludeD
 val TolkIncludeDefinition.path: String
     get() = greenStub?.path ?: stringLiteral?.rawString?.text ?: ""
 
+@Deprecated("Use reference directly")
 fun TolkIncludeDefinition.resolveFile(project: Project) = resolveTolkImport(project, containingFile as TolkFile, path)
+
+fun TolkIncludeDefinition.resolve() = (this as TolkIncludeDefinitionMixin).resolve()

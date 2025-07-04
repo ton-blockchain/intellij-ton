@@ -45,7 +45,7 @@ class TolkCompletionContributor : CompletionContributor() {
                 "fun",
                 "const",
                 "global",
-                "get",
+                "get fun",
                 "tolk",
                 "type",
                 "struct",

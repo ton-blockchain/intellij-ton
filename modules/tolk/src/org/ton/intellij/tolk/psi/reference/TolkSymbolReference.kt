@@ -15,7 +15,7 @@ class TolkSymbolReference(
 ) : PsiReferenceBase.Poly<TolkElement>(element) {
     val identifier: PsiElement get() = element.node.findChildByType(TolkElementTypes.IDENTIFIER)!!.psi
 
-    override fun calculateDefaultRangeInElement(): TextRange? {
+    override fun calculateDefaultRangeInElement(): TextRange {
         val identifier = identifier
         return TextRange(identifier.startOffsetInParent, identifier.textLength)
     }
@@ -37,7 +37,10 @@ class TolkSymbolReference(
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {
-        return identifier.replace(TolkPsiFactory.Companion[element.project].createIdentifier(newElementName))
+        val identifier = identifier
+        val newId = TolkPsiFactory[identifier.project].createIdentifier(newElementName)
+        identifier.replace(newId)
+        return element
     }
 
     companion object {

@@ -27,9 +27,9 @@
                                  implementationClass="org.ton.intellij.tolk.ide.TolkFindUsagesProvider"/>
         <lang.implementationTextSelectioner language="Tolk"
                                             implementationClass="org.ton.intellij.tolk.ide.TolkImplementationTextSelectioner"/>
-<!--        <platform.backend.documentation.psiTargetProvider id="TolkDocumentationTargetProvider"-->
-<!--                                                          implementation="org.ton.intellij.tolk.doc.TolkDocumentationProvider"/>-->
-<!--        <platform.backend.documentation.inlineDocumentationProvider implementation="org.ton.intellij.tolk.doc.TolkInlineDocumentationProvider"/>-->
+        <!--        <platform.backend.documentation.psiTargetProvider id="TolkDocumentationTargetProvider"-->
+        <!--                                                          implementation="org.ton.intellij.tolk.doc.TolkDocumentationProvider"/>-->
+        <!--        <platform.backend.documentation.inlineDocumentationProvider implementation="org.ton.intellij.tolk.doc.TolkInlineDocumentationProvider"/>-->
 
         <lang.formatter language="Tolk" implementationClass="org.ton.intellij.tolk.ide.formatter.TolkFormatter"/>
         <lang.refactoringSupport language="Tolk"
@@ -124,10 +124,9 @@
         <codeInsight.lineMarkerProvider language="Tolk"
                                         implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkRecursiveCallLineMarkerProvider"/>
 
-        <languageInjectionContributor language="Tolk"
-                                      implementationClass="org.ton.intellij.tolk.ide.TolkLanguageInjector"/>
-
-        <languageInjector implementation="org.ton.intellij.tolk.psi.TolkStringAsmInjector"/>
+        <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkStringLiteral"
+                                 implementationClass="org.ton.intellij.tolk.psi.reference.manipulators.TolkStringLiteralManipulator"/>
+        <multiHostInjector implementation="org.ton.intellij.tolk.ide.TolkLanguageInjector"/>
 
         <localInspection language="Tolk" displayName="Unused function inspection" groupPath="Tolk"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
@@ -145,7 +144,7 @@
         <!--                         groupName="Declaration redundancy" enabledByDefault="true" level="ERROR"-->
         <!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnsupportedElementInspection"/>-->
         <localInspection language="Tolk" displayName="__expect_type inspection" groupPath="Tolk"
-                         groupName="Declaration redundancy" enabledByDefault="false" level="ERROR"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="ERROR"
                          implementationClass="org.ton.intellij.tolk.inspection.TolkExpectTypeBuiltinInspection"/>
 
         <!-- style issues -->

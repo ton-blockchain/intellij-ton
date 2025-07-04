@@ -5,163 +5,104 @@ import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.FileViewProvider
-import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.PsiElement
+import com.intellij.psi.ResolveState
+import com.intellij.psi.scope.PsiScopeProcessor
+import com.intellij.psi.util.CachedValueProvider.Result
 import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.PsiModificationTracker
 import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
+import org.ton.intellij.tolk.psi.impl.resolve
 import org.ton.intellij.tolk.psi.impl.resolveFile
 import org.ton.intellij.tolk.stub.*
 import org.ton.intellij.tolk.stub.type.TolkFunctionStubElementType
 import org.ton.intellij.tolk.stub.type.TolkIncludeDefinitionStubElementType
-import org.ton.intellij.util.getChildrenByType
-import java.util.*
 
 class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkLanguage), TolkElement {
     override fun getFileType(): FileType = TolkFileType
 
     override fun getStub(): TolkFileStub? = super.getStub() as? TolkFileStub
 
-    val declaredSymbols: Map<String, List<TolkSymbolElement>>
-        get() = CachedValuesManager.getCachedValue(this) {
-            val map = HashMap<String, MutableList<TolkSymbolElement>>()
-
-            typeDefs.forEach { typeDef ->
-                val name = typeDef.name ?: return@forEach
-                val list = map.getOrPut(name) { LinkedList() }
-                list.add(typeDef)
-            }
-            structs.forEach { struct ->
-                val name = struct.name ?: return@forEach
-                val list = map.getOrPut(name) { LinkedList() }
-                list.add(struct)
-            }
-            functions.forEach { function ->
-                val name = function.name ?: return@forEach
-                val list = map.getOrPut(name) { LinkedList() }
-                list.add(function)
-            }
-            constVars.forEach { constVar ->
-                val name = constVar.name ?: return@forEach
-                val list = map.getOrPut(name) { LinkedList() }
-                list.add(constVar)
-            }
-            globalVars.forEach { globalVar ->
-                val name = globalVar.name ?: return@forEach
-                val list = map.getOrPut(name) { LinkedList() }
-                list.add(globalVar)
-            }
-
-            CachedValueProvider.Result.create(map, this)
+    private val cachedDeclarations = CachedValuesManager.getManager(manager.project).createCachedValue({
+        val declarations = findDeclarations()
+        if (!isPhysical) {
+            Result.create(declarations, containingFile, PsiModificationTracker.MODIFICATION_COUNT)
+        } else {
+            Result.create(declarations, PsiModificationTracker.MODIFICATION_COUNT)
         }
+    }, false)
 
-    val includeDefinitions: List<TolkIncludeDefinition>
-        get() = CachedValuesManager.getCachedValue(this) {
-            val stub = stub
-            val children = if (stub != null) getChildrenByType(
-                stub,
-                TolkElementTypes.INCLUDE_DEFINITION,
-                TolkIncludeDefinitionStubElementType.ARRAY_FACTORY
-            ) else {
-                findChildrenByClass(TolkIncludeDefinition::class.java).toList()
-            }
-            CachedValueProvider.Result.create(children, this)
-        }
-
-    val functions: List<TolkFunction>
-        get() = CachedValuesManager.getCachedValue(this) {
-            val stub = stub
-            val functions = if (stub != null) {
-                getChildrenByType(stub, TolkElementTypes.FUNCTION, TolkFunctionStubElementType.ARRAY_FACTORY)
-            } else {
-                findChildrenByClass(TolkFunction::class.java).toList()
-            }
-            CachedValueProvider.Result.create(functions, this)
-        }
-
-    val constVars: List<TolkConstVar>
-        get() = CachedValuesManager.getCachedValue(this) {
-            val stub = stub
-            val constVars = if (stub != null) {
-                getChildrenByType(stub, TolkElementTypes.CONST_VAR, TolkConstVarStub.ARRAY_FACTORY)
-            } else {
-                findChildrenByClass(TolkConstVar::class.java).toList()
-            }
-            CachedValueProvider.Result.create(constVars, this)
-        }
-
-    val globalVars: List<TolkGlobalVar>
-        get() = CachedValuesManager.getCachedValue(this) {
-            val result = withGreenStubOrAst(TolkFileStub::class.java, { stub ->
-               getChildrenByType(stub, TolkElementTypes.GLOBAL_VAR, TolkGlobalVarStub.ARRAY_FACTORY)
-            }, {
-                children.filterIsInstance<TolkGlobalVar>()
-            })
-            CachedValueProvider.Result.create(result, this)
-        }
-
-    val typeDefs: List<TolkTypeDef>
-        get() = CachedValuesManager.getCachedValue(this) {
-            val stub = stub
-            val typeDefs = if (stub != null) {
-                getChildrenByType(stub, TolkElementTypes.TYPE_DEF, TolkTypeDefStub.ARRAY_FACTORY)
-            } else {
-                findChildrenByClass(TolkTypeDef::class.java).toList()
-            }
-            CachedValueProvider.Result.create(typeDefs, this)
-        }
-
-    val structs: List<TolkStruct>
-        get() = CachedValuesManager.getCachedValue(this) {
-            val stub = stub
-            val typeDefs = if (stub != null) {
-                getChildrenByType(stub, TolkElementTypes.STRUCT, TolkStructStub.ARRAY_FACTORY)
-            } else {
-                findChildrenByClass(TolkStruct::class.java).toList()
-            }
-            CachedValueProvider.Result.create(typeDefs, this)
-        }
-
-    override fun getResolveScope(): GlobalSearchScope {
-        return CachedValuesManager.getCachedValue(this) {
-            val scope = GlobalSearchScope.union(
-                listOf(
-                    GlobalSearchScope.fileScope(originalFile),
-                    getDefaultImportsScope(),
-                    getImportsScope(),
+    val includeDefinitions
+        get() = withGreenStubOrAst(
+            { stub ->
+                stub.getChildrenByType(
+                    TolkElementTypes.INCLUDE_DEFINITION,
+                    TolkIncludeDefinitionStubElementType.ARRAY_FACTORY
                 )
-            )
-            CachedValueProvider.Result.create(scope, this)
-        }
-    }
-
-    fun getImportsScope(): GlobalSearchScope {
-        val scopes = getImportedFiles().map { GlobalSearchScope.fileScope(it) }
-        if (scopes.isNotEmpty()) {
-            return GlobalSearchScope.union(scopes)
-        }
-        return GlobalSearchScope.EMPTY_SCOPE
-    }
-
-    fun getImportedFiles(): List<TolkFile> {
-        return CachedValuesManager.getCachedValue(this) {
-            val result = includeDefinitions.mapNotNull {
-                it.stringLiteral?.references?.lastOrNull()?.resolve() as? TolkFile ?: return@mapNotNull null
+            },
+            { ast ->
+                ast.getChildrenAsPsiElements(
+                    TolkElementTypes.INCLUDE_DEFINITION,
+                    TolkIncludeDefinitionStubElementType.ARRAY_FACTORY
+                )
             }
-            CachedValueProvider.Result.create(result, this)
-        }
-    }
+        )
 
-    fun getDefaultImportsScope(): GlobalSearchScope {
-        return GlobalSearchScope.fileScope(project.tolkSettings.getDefaultImport() ?: return GlobalSearchScope.EMPTY_SCOPE)
-    }
+    val functions
+        get() = withGreenStubOrAst(
+            { stub ->
+                stub.getChildrenByType(TolkElementTypes.FUNCTION, TolkFunctionStubElementType.ARRAY_FACTORY)
+            },
+            { ast ->
+                ast.getChildrenAsPsiElements(TolkElementTypes.FUNCTION, TolkFunctionStubElementType.ARRAY_FACTORY)
+            }
+        )
 
-    fun resolveSymbols(name: String): List<TolkSymbolElement> {
-        val files = HashSet(getImportedFiles())
-        files.add(this)
-        project.tolkSettings.getDefaultImport()?.let { files.add(it) }
-        return files.flatMap { it.declaredSymbols[name].orEmpty() }
+    val constVars
+        get() = withGreenStubOrAst(
+            { stub ->
+                stub.getChildrenByType(TolkElementTypes.CONST_VAR, TolkConstVarStub.ARRAY_FACTORY)
+            },
+            { ast ->
+                ast.getChildrenAsPsiElements(TolkElementTypes.CONST_VAR, TolkConstVarStub.ARRAY_FACTORY)
+            }
+        )
+
+    val globalVars
+        get() = withGreenStubOrAst(
+            { stub ->
+                stub.getChildrenByType(TolkElementTypes.GLOBAL_VAR, TolkGlobalVarStub.ARRAY_FACTORY)
+            },
+            { ast ->
+                ast.getChildrenAsPsiElements(TolkElementTypes.GLOBAL_VAR, TolkGlobalVarStub.ARRAY_FACTORY)
+            }
+        )
+
+    val typeDefs
+        get() = withGreenStubOrAst(
+            { stub ->
+                stub.getChildrenByType(TolkElementTypes.TYPE_DEF, TolkTypeDefStub.ARRAY_FACTORY)
+            },
+            { ast ->
+                ast.getChildrenAsPsiElements(TolkElementTypes.TYPE_DEF, TolkTypeDefStub.ARRAY_FACTORY)
+            }
+        )
+
+    val structs
+        get() = withGreenStubOrAst(
+            { stub ->
+                stub.getChildrenByType(TolkElementTypes.STRUCT, TolkStructStub.ARRAY_FACTORY)
+            },
+            { ast ->
+                ast.getChildrenAsPsiElements(TolkElementTypes.STRUCT, TolkStructStub.ARRAY_FACTORY)
+            }
+        )
+
+    fun resolveSymbols(name: String): Sequence<TolkSymbolElement> {
+        val values = cachedDeclarations.value
+        return values[name]?.asSequence() ?: emptySequence()
     }
 
     fun import(file: TolkFile) {
@@ -210,6 +151,65 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
 
             else -> error("unreachable")
         }
+    }
+
+    override fun processDeclarations(
+        processor: PsiScopeProcessor,
+        state: ResolveState,
+        lastParent: PsiElement?,
+        place: PsiElement
+    ): Boolean {
+        structs.forEach { if (!processor.execute(it, state)) return false }
+        typeDefs.forEach { if (!processor.execute(it, state)) return false }
+        constVars.forEach { if (!processor.execute(it, state)) return false }
+        globalVars.forEach { if (!processor.execute(it, state)) return false }
+        functions.forEach { if (!processor.execute(it, state)) return false }
+        return true
+    }
+
+    private fun findDeclarations(): Map<String, Collection<TolkSymbolElement>> {
+        val result = HashMap<String, MutableList<TolkSymbolElement>>()
+
+        project.tolkSettings.getDefaultImport()?.let {
+            if (it != this) {
+                it.findDeclarations().forEach { (name, declarations) ->
+                    result.getOrPut(name) { mutableListOf() }.addAll(declarations)
+                }
+            }
+        }
+        val processor = object : PsiScopeProcessor {
+            override fun execute(
+                element: PsiElement,
+                state: ResolveState
+            ): Boolean {
+                if (element is TolkSymbolElement) {
+                    val name = element.name ?: return true
+                    val declarations = result.getOrPut(name) { mutableListOf() }
+                    declarations.add(element)
+                }
+                return true
+            }
+        }
+
+        val visitedFiles = mutableSetOf<TolkFile>()
+        processDeclarations(
+            processor,
+            state = ResolveState.initial(),
+            lastParent = null,
+            place = this
+        )
+        visitedFiles.add(this)
+        includeDefinitions.forEach { include ->
+            val file = include.resolve() as? TolkFile ?: return@forEach
+            if (!visitedFiles.add(file)) return@forEach
+            file.processDeclarations(
+                processor,
+                state = ResolveState.initial(),
+                lastParent = null,
+                place = this
+            )
+        }
+        return result
     }
 
     override fun toString(): String = "TolkFile($name)"

@@ -207,7 +207,7 @@ VersionDefinition ::= 'tolk' VersionValue {
 }
 VersionValue ::= ('='|'>'|'>='|'<'|'<='|'^')? INTEGER_LITERAL ('.' INTEGER_LITERAL)*
 
-upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' (UnionTypeExpression|('|'?TypeExpression)) ';'? {
+upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpression ';'? {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkTypeMixin"
     implements = [

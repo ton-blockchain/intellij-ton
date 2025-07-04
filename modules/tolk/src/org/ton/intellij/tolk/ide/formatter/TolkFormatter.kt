@@ -64,6 +64,7 @@ class TolkFormatter : FormattingModelBuilder {
             .around(BINARY_OP).spaces(1)
             .around(MAPSTO).spaces(1)
             .betweenInside(LPAREN, MAPSTO, ASM_PARAMETERS).spaces(1)
+            .aroundInside(OR, UNION_TYPE_EXPRESSION).spaces(1)
             .betweenInside(
                 TokenSet.create(
                     TENSOR_TYPE_EXPRESSION,

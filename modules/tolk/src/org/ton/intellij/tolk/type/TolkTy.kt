@@ -222,6 +222,7 @@ interface TolkPrimitiveTy : TolkTy {
                 "varint32" -> TolkTy.VarInt32
                 "varuint32" -> TolkTy.VarUInt32
                 "address" -> TolkTy.Address
+                "unknown" -> TolkTy.Unknown
                 else -> null
             }
         }
@@ -277,7 +278,7 @@ object TolkTyTuple : TolkPrimitiveTy {
     override fun toString(): String = "tuple"
 }
 
-object TolkTyUnknown : TolkTy {
+object TolkTyUnknown : TolkPrimitiveTy {
     override val hasTypeAlias: Boolean get() = false
 
     override fun isSuperType(other: TolkTy): Boolean = true

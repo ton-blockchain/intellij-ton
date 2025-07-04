@@ -896,7 +896,7 @@ private UnionTypeElement ::= FunTypeExpression | NullableTypeExpression | Simple
 
 //private TypeReference_first ::= '[' | '(' | 'var' | 'int' | 'cell' | 'slice' | 'builder' | 'cont' | 'tuple' | 'type' | IDENTIFIER
 
-TupleTypeExpression ::= '[' TypeExpression TupleTypeExpressionValue* ']' {
+TupleTypeExpression ::= '[' [TypeExpression TupleTypeExpressionValue*] ']' {
     pin = 1
     mixin="org.ton.intellij.tolk.psi.impl.TolkTupleTypeMixin"
 }

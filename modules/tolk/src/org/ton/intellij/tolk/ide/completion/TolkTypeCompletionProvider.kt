@@ -13,6 +13,7 @@ import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
 import org.ton.intellij.tolk.type.TolkBitsNTy
 import org.ton.intellij.tolk.type.TolkIntNTy
 import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.psiElement
 
@@ -52,7 +53,7 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
     )
 
     private val cachedPrimitiveElements = primitiveTypes.map {
-        it to LookupElementBuilder.create(it.toString()).withBoldness(true)
+        it to LookupElementBuilder.create(it.render()).withBoldness(true)
     }
     private val cachedVarIntElements = listOf(
         TolkTy.VarInt16,

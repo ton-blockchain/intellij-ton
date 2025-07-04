@@ -1,16 +1,16 @@
-get ascii_slice(): slice {
+get fun ascii_slice() : slice {
   return"string";
 }
 
-get raw_slice(): slice {
+get fun raw_slice() : slice {
   return stringHexToSlice("abcdef");
 }
 
-get addr_slice(): address {
+get fun addr_slice() : address {
   return address("Ef8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM0vF");
 }
 
-get string_hex(): int {
+get fun string_hex() : int {
   return stringToBase256("ABCDEFGHIJKLMNOPQRSTUVWXYZ012345");
 }
 

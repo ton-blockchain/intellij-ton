@@ -30,7 +30,9 @@ class TolkFormatter : FormattingModelBuilder {
             .around(EQ).spaces(1)
 
             .aroundInside(IDENTIFIER, ANNOTATION).none()
-            .after(TokenSet.create(ANNOTATION, GET_KEYWORD, FUN_KEYWORD, RETURN_TYPE, PARAMETER_LIST)).spaces(1)
+            .after(TokenSet.create(ANNOTATION, GET_KEYWORD, FUN_KEYWORD, RETURN_TYPE)).spaces(1)
+            .beforeInside(RETURN_TYPE, FUNCTION).none()
+            .afterInside(COLON, RETURN_TYPE).spaces(1)
             .after(FUNCTION_RECEIVER).none()
             .around(FUNCTION_BODY).spaces(1)
 
@@ -58,10 +60,8 @@ class TolkFormatter : FormattingModelBuilder {
             .after(TokenSet.create(STATEMENT, LBRACE)).lineBreakInCode()
             .before(RBRACE).lineBreakInCode()
             .after(RBRACE).spaces(1)
-//            .around(UNTIL_KEYWORD).spaces(1)
             .before(TokenSet.create(BLOCK_STATEMENT, ASM_BODY)).spaces(1)
             .around(BINARY_OP).spaces(1)
-//            .after(FORALL_KEYWORD).spaces(1)
             .around(MAPSTO).spaces(1)
             .betweenInside(LPAREN, MAPSTO, ASM_PARAMETERS).spaces(1)
             .betweenInside(
@@ -95,6 +95,5 @@ class TolkFormatter : FormattingModelBuilder {
                 ), BIN_EXPRESSION
             ).spaces(1)
             .afterInside(tokenSetOf(EXCL, TILDE, MINUS, PLUS), PREFIX_EXPRESSION).none()
-//            .around(TokenSet.create(IMPURE_KEYWORD, INLINE_KEYWORD, INLINE_REF_KEYWORD, METHOD_ID_KEYWORD)).spaces(1)
     }
 }

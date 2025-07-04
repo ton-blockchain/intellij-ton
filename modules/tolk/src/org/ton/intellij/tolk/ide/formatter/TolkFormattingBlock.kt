@@ -70,9 +70,11 @@ class TolkFormattingBlock(
         val childIndent =
             when (node.elementType) {
                 BLOCK_STATEMENT -> Indent.getNormalIndent()
+                ANNOTATION -> Indent.getNoneIndent()
                 DOC_BLOCK_COMMENT, DOC_EOL_COMMENT -> Indent.getNoneIndent()
                 FUNCTION, STRUCT, GLOBAL_VAR, CONST_VAR -> Indent.getNoneIndent()
-                TYPE_DEF -> Indent.getNormalIndent()
+                TYPE_DEF -> Indent.getNormalIndent(true)
+                UNION_TYPE_EXPRESSION -> Indent.getNoneIndent()
                 else -> Indent.getNormalIndent()
             }
         val wrap = calcWrap(node)
@@ -103,7 +105,7 @@ class TolkFormattingBlock(
             DOT_EXPRESSION, TERNARY_EXPRESSION -> if (parent.firstChildNode != child) return Indent.getNormalIndent()
             VAR_TENSOR, TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE_EXPRESSION, PAREN_TYPE_EXPRESSION, ARGUMENT_LIST -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
             VAR_TUPLE, TUPLE_TYPE_EXPRESSION, TUPLE_EXPRESSION -> if (type != LBRACK && type != RBRACK) return Indent.getNormalIndent()
-            UNION_TYPE_EXPRESSION -> Indent.getNoneIndent()
+            UNION_TYPE_EXPRESSION -> Indent.getContinuationIndent()
             FUNCTION_BODY -> if (type == BUILTIN_KEYWORD || type == ASM_DEFINITION) return Indent.getNormalIndent()
         }
         // todo: check if intent work normally

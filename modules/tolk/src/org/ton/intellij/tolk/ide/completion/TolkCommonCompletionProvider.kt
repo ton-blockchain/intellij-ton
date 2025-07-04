@@ -4,7 +4,6 @@ import com.intellij.analysis.AnalysisBundle
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
-import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
@@ -13,12 +12,11 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.psi.impl.hasDeprecatedAnnotation
-import org.ton.intellij.tolk.psi.impl.hasReceiver
-import org.ton.intellij.tolk.psi.impl.isEntryPoint
-import org.ton.intellij.tolk.psi.impl.isStatic
+import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
+import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.util.REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
+import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.psiElement
 
 object TolkCommonCompletionProvider : TolkCompletionProvider() {
@@ -45,9 +43,18 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
     ) {
         val position = parameters.position
         val element = position.parent as TolkReferenceExpression
+        val elementParent = element.parent
         if (position != element.identifier) return
 
         val project = parameters.position.project
+
+        var expectType: TolkTy? = null
+        if (elementParent is TolkMatchPattern) {
+            val matchExpr = elementParent.parentOfType<TolkMatchExpression>()
+            if (matchExpr != null) {
+                expectType = matchExpr.expression?.type
+            }
+        }
 
         val ctx = TolkCompletionContext(element)
         val completionLimit = REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
@@ -81,40 +88,47 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             return
         }
 
-        result.addElement(
-            PrioritizedLookupElement.withPriority(
-                LookupElementBuilder.create("null").bold(),
-                TolkCompletionPriorities.KEYWORD
-            )
-        )
-        result.addElement(
-            PrioritizedLookupElement.withPriority(
-                LookupElementBuilder.create("true").bold(),
-                TolkCompletionPriorities.KEYWORD
-            )
-        )
-        result.addElement(
-            PrioritizedLookupElement.withPriority(
-                LookupElementBuilder.create("false").bold(),
-                TolkCompletionPriorities.KEYWORD
-            )
-        )
+        fun TolkTy?.canAddElement(elementType: TolkTy?): Boolean {
+            if (this == null) return true
+            if (elementType == null) return true
+            return canRhsBeAssigned(elementType)
+        }
 
-        val addedNamedElements = HashSet<String>()
+        if (expectType.canAddElement(TolkTy.Null)) {
+            result.addElement(
+                PrioritizedLookupElement.withPriority(
+                    LookupElementBuilder.create("null").bold(),
+                    TolkCompletionPriorities.KEYWORD
+                )
+            )
+        }
+        if (expectType.canAddElement(TolkTy.Bool)) {
+            result.addElement(
+                PrioritizedLookupElement.withPriority(
+                    LookupElementBuilder.create("true").bold(),
+                    TolkCompletionPriorities.KEYWORD
+                )
+            )
+            result.addElement(
+                PrioritizedLookupElement.withPriority(
+                    LookupElementBuilder.create("false").bold(),
+                    TolkCompletionPriorities.KEYWORD
+                )
+            )
+        }
+
         val prefixMatcher = result.prefixMatcher
 
         fun processNamedElement(element: TolkSymbolElement): Boolean {
             val name = element.name ?: return true
             if (!prefixMatcher.prefixMatches(name)) return true
-            if (!addedNamedElements.add(element.name ?: "")) {
-                println("try add duplicate element: ${element.name} - ${element.containingFile.name}")
-            }
 
             if (element is TolkFunction && element.hasReceiver) return true
             if (!checkLimit()) return false
             when (element) {
                 is TolkFunction -> {
                     if (!checkLimit()) return false
+                    if (!expectType.canAddElement(element.declaredType.returnType)) return true
                     val lookupElement = element.toLookupElementBuilder(ctx)
                         .toTolkLookupElement(
                             TolkLookupElementData(
@@ -138,7 +152,9 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
 
                 is TolkConstVar,
                 is TolkGlobalVar,
+                is TolkTypeDef,
                 is TolkStruct -> {
+                    if (!expectType.canAddElement(element.type)) return true
                     val lookupElement = element
                         .toLookupElementBuilder(ctx)
                         .toTolkLookupElement(
@@ -151,8 +167,6 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                         )
                     result.addElement(lookupElement)
                 }
-
-                is TolkTypeDef -> result.addElement(element.toLookupElementBuilder(ctx))
             }
             return true
         }
@@ -171,15 +185,6 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         }
     }
 }
-
-fun TolkLocalSymbolElement.toLookupElement(): LookupElement {
-    return when (this) {
-        else -> {
-            LookupElementBuilder.create(this.name.toString()).withIcon(this.getIcon(0))
-        }
-    }
-}
-
 
 fun collectLocalVariables(
     startFrom: PsiElement,

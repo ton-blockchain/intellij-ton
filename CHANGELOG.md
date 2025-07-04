@@ -1,5 +1,19 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [2.5.7.5]
+
+- Added support for Tolk 1.0
+- Added deprecated annotation message support in Tolk
+- Added smart completion for match patterns in Tolk
+- Fixed file renaming in Tolk
+- Fixed unnecessary receiver reference for primitive types in Tolk
+- Fixed smart casts in some cases in Tolk
+- Fixed generics type inference in some cases in Tolk
+- Fixed sorting of fields in Tolk
+- Fixed completions for elements with the same name in Tolk
+- Fixed formatting for `:` in function return type in Tolk
+- Fixed intent for union types in type aliases in Tolk
+
 ## [2.5.7.4]
 - Added notification if Tolk stdlib is not found
 - Added icon for annotations in Tolk

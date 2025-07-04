@@ -175,13 +175,14 @@ val TolkFunction.hasDeprecatedAnnotation: Boolean
     get() = greenStub?.isDeprecated ?: annotations.hasDeprecatedAnnotation()
 
 val TolkFunction.isEntryPoint: Boolean
-    get() = greenStub?.isEntryPoint ?: run {
+    get() {
         return when (name ?: return false) {
             "main",
             "onInternalMessage",
             "onExternalMessage",
             "onRunTickTock",
             "onSplitPrepare",
+            "onBouncedMessage",
             "onSplitInstall" -> true
 
             else -> false

@@ -15,6 +15,7 @@ import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.hasDeprecatedAnnotation
 import org.ton.intellij.tolk.psi.impl.hasReceiver
+import org.ton.intellij.tolk.psi.impl.isEntryPoint
 import org.ton.intellij.tolk.psi.impl.isStatic
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
 import org.ton.intellij.util.REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
@@ -99,13 +100,15 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             )
         )
 
-        val addedNamedElements = HashSet<TolkNamedElement>()
+        val addedNamedElements = HashSet<String>()
         val prefixMatcher = result.prefixMatcher
 
         fun processNamedElement(element: TolkSymbolElement): Boolean {
             val name = element.name ?: return true
             if (!prefixMatcher.prefixMatches(name)) return true
-            if (!addedNamedElements.add(element)) return true
+            if (!addedNamedElements.add(element.name ?: "")) {
+                println("try add duplicate element: ${element.name} - ${element.containingFile.name}")
+            }
 
             if (element is TolkFunction && element.hasReceiver) return true
             if (!checkLimit()) return false
@@ -123,6 +126,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                                     else -> false
                                 },
                                 elementKind = when {
+                                    element.isEntryPoint -> TolkLookupElementData.ElementKind.ENTRY_POINT_FUNCTION
                                     element.hasDeprecatedAnnotation -> TolkLookupElementData.ElementKind.DEPRECATED
                                     element.isStatic -> TolkLookupElementData.ElementKind.STATIC_FUNCTION
                                     else -> TolkLookupElementData.ElementKind.DEFAULT

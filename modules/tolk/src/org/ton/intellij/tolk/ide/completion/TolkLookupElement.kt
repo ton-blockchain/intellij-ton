@@ -7,16 +7,14 @@ class TolkLookupElement(
     delegate: LookupElement,
     val data: TolkLookupElementData
 ) : LookupElementDecorator<LookupElement>(delegate) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-        if (!super.equals(other)) return false
+    override fun equals(o: Any?): Boolean {
+        if (this === o) return true
+        if (javaClass != o?.javaClass) return false
+        if (!super.equals(o)) return false
 
-        other as TolkLookupElement
+        o as TolkLookupElement
 
-        if (data != other.data) return false
-
-        return true
+        return data == o.data
     }
 
     override fun hashCode(): Int {
@@ -41,7 +39,7 @@ data class TolkLookupElementData(
      */
     val isSelfTypeCompatible: Boolean = true,
 
-    val isSelfTypeNullableCompatible: Boolean = false,
+    val isSelfTypeNullableCompatible: Boolean = true,
 
     /**
      * `true` if the lookup element must show only if a completion result is empty.
@@ -82,6 +80,7 @@ data class TolkLookupElementData(
         STATIC_FUNCTION,
         DEFAULT,
         DEPRECATED,
+        ENTRY_POINT_FUNCTION,
         FROM_UNRESOLVED_IMPORT
     }
 }

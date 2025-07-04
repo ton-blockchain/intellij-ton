@@ -25,7 +25,6 @@ class TolkFunctionStubElementType(
         if (stub.isDeprecated) flags = flags or IS_DEPRECATED
         if (stub.hasSelf) flags = flags or HAS_SELF
         if (stub.hasReceiver) flags = flags or HAS_RECEIVER
-        if (stub.isEntryPoint) flags = flags or IS_ENTRY_POINT
         dataStream.writeByte(flags)
     }
 
@@ -39,7 +38,6 @@ class TolkFunctionStubElementType(
         val isDeprecated = flags and IS_DEPRECATED != 0
         val hasSelf = flags and HAS_SELF != 0
         val hasReceiver = flags and HAS_RECEIVER != 0
-        val isEntryPoint = flags and IS_ENTRY_POINT != 0
 
         return TolkFunctionStub(
             parentStub,
@@ -52,7 +50,6 @@ class TolkFunctionStubElementType(
             isDeprecated,
             hasSelf,
             hasReceiver,
-            isEntryPoint
         )
     }
 
@@ -68,7 +65,6 @@ class TolkFunctionStubElementType(
             isDeprecated = psi.annotations.hasDeprecatedAnnotation(),
             hasSelf = psi.hasSelf,
             hasReceiver = psi.hasReceiver,
-            isEntryPoint = psi.isEntryPoint
         )
     }
 
@@ -84,7 +80,6 @@ class TolkFunctionStubElementType(
         private const val IS_DEPRECATED = 1 shl 4
         private const val HAS_SELF = 1 shl 5
         private const val HAS_RECEIVER = 1 shl 6
-        private const val IS_ENTRY_POINT = 1 shl 7
 
         val EMPTY_ARRAY = emptyArray<TolkFunction>()
         val ARRAY_FACTORY = ArrayFactory<TolkFunction> {

@@ -12,10 +12,7 @@ import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.perf
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.psi.impl.declaredType
-import org.ton.intellij.tolk.psi.impl.hasDeprecatedAnnotation
-import org.ton.intellij.tolk.psi.impl.isStatic
-import org.ton.intellij.tolk.psi.impl.receiverTy
+import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 import org.ton.intellij.tolk.type.*
 import org.ton.intellij.util.REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
@@ -145,6 +142,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                             isInherentUnionMember = receiverType is TolkTyUnion,
                             isGeneric = receiverType is TolkTyParam,
                             elementKind = when {
+                                function.isEntryPoint -> TolkLookupElementData.ElementKind.ENTRY_POINT_FUNCTION
                                 function.hasDeprecatedAnnotation -> TolkLookupElementData.ElementKind.DEPRECATED
                                 isStatic -> TolkLookupElementData.ElementKind.STATIC_FUNCTION
                                 else -> TolkLookupElementData.ElementKind.DEFAULT

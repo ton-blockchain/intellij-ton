@@ -55,7 +55,11 @@ fun TolkNamedElement.toLookupElementBuilder(
         val contextVirtualFile = contextFile.virtualFile
         val elementVirtualFile = file.virtualFile
         if (contextVirtualFile != null && elementVirtualFile != null) {
-            VfsUtilCore.findRelativePath(contextVirtualFile, elementVirtualFile, '/') ?: ""
+            if (elementVirtualFile.parent.name == "tolk-stdlib") {
+                "@stdlib/${elementVirtualFile.name}"
+            } else {
+                VfsUtilCore.findRelativePath(contextVirtualFile, elementVirtualFile, '/') ?: ""
+            }
         } else {
             file.name
         }
@@ -64,7 +68,7 @@ fun TolkNamedElement.toLookupElementBuilder(
         if (it.hasGenerics()) it.substitute(substitution) else it
     } else null
 
-    val base = LookupElementBuilder.create(name)
+    val base = LookupElementBuilder.createWithSmartPointer(name, this)
         .withIcon(this.getIcon(0))
         .withStrikeoutness(this is TolkAnnotationHolder && this.annotations.hasDeprecatedAnnotation())
 
@@ -87,6 +91,7 @@ fun TolkNamedElement.toLookupElementBuilder(
                 }
                 .withTailText(getTailText())
                 .appendTailText(getExtraTailText(), true)
+                .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
                 .withInsertHandler { context, item ->
                     val isMethodCall = context.getElementOfType<TolkFieldLookup>() != null
                     val document = context.document
@@ -150,6 +155,26 @@ fun TolkNamedElement.toLookupElementBuilder(
 
         is TolkVarDefinition -> base
             .withTypeText(type?.render())
+
+        is TolkStruct -> base
+            .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
+            .withInsertHandler { context, item ->
+                context.commitDocument()
+
+                val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+                val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
+                insertFile.import(includeCandidateFile)
+            }
+
+        is TolkTypeDef -> base
+            .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
+            .withInsertHandler { context, item ->
+                context.commitDocument()
+
+                val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+                val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
+                insertFile.import(includeCandidateFile)
+            }
 
         else -> base
     }

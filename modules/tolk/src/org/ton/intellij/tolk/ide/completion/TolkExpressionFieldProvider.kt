@@ -2,6 +2,7 @@ package org.ton.intellij.tolk.ide.completion
 
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
+import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
@@ -30,13 +31,17 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         val ctx = TolkCompletionContext(parent)
         val existedFields = structExpr.structExpressionBody.structExpressionFieldList.mapNotNull {
             if (it == parent) return@mapNotNull null
-            it.identifier.text.removeSurrounding("`")
+            it.referenceName
         }
 
-        structTy.psi.structFields.forEach { field ->
-            if (field.name in existedFields) return@forEach
+        structTy.psi.structFields.asReversed().forEachIndexed { index, field ->
+            if (field.name in existedFields) return@forEachIndexed
             result.addElement(
-                field.toLookupElementBuilder(ctx)
+                PrioritizedLookupElement.withPriority(
+                    field.toLookupElementBuilder(ctx)
+                        .toTolkLookupElement(TolkLookupElementData(elementKind = TolkLookupElementData.ElementKind.FIELD)),
+                    index.toDouble() * 0.001 + 1.0
+                )
             )
         }
     }

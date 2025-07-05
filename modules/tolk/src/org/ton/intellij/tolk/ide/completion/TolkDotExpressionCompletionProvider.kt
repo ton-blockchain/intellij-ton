@@ -38,6 +38,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         val project = file.project
         val dotExpression = parameters.position.parentOfType<TolkDotExpression>() ?: return
         val left = dotExpression.expression
+        val currentFile = file as? TolkFile ?: return
         val resolvedReceiver = left.reference?.resolve()
         val calledType = left.type?.actualType() ?: return
         val primitiveStaticReceiver = (left as? TolkReferenceExpression)?.let {
@@ -133,6 +134,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
 
             if (canBeAdded()) {
                 if (!checkLimit()) return false
+                val isResolved = currentFile.resolveSymbols(name).contains(function)
                 val lookupElement = function.toLookupElementBuilder(ctx)
                     .withBoldness(receiverType == calledType)
                     .toTolkLookupElement(
@@ -142,6 +144,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                             isInherentUnionMember = receiverType is TolkTyUnion,
                             isGeneric = receiverType is TolkTyParam,
                             elementKind = when {
+                                !isResolved -> TolkLookupElementData.ElementKind.FROM_UNRESOLVED_IMPORT
                                 function.isEntryPoint -> TolkLookupElementData.ElementKind.ENTRY_POINT_FUNCTION
                                 function.hasDeprecatedAnnotation -> TolkLookupElementData.ElementKind.DEPRECATED
                                 isStatic -> TolkLookupElementData.ElementKind.STATIC_FUNCTION

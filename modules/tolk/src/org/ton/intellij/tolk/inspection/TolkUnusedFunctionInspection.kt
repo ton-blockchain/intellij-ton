@@ -9,6 +9,8 @@ import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkVisitor
 import org.ton.intellij.tolk.psi.impl.isEntryPoint
 import org.ton.intellij.tolk.psi.impl.isGetMethod
+import org.ton.intellij.tolk.psi.impl.isMethod
+import org.ton.intellij.tolk.psi.impl.isStatic
 
 class TolkUnusedFunctionInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(
@@ -17,6 +19,8 @@ class TolkUnusedFunctionInspection : TolkInspectionBase() {
     ): TolkVisitor = object : TolkVisitor() {
         override fun visitFunction(o: TolkFunction) {
             if (o.isGetMethod || o.isEntryPoint) return
+            if (o.isStatic && o.name == "unpackFromSlice") return
+            if (o.isMethod && o.name == "packToBuilder") return
             val containingDirectory = o.containingFile.containingDirectory ?: return
             if (containingDirectory.name.startsWith("tolk-stdlib")) return
             if (ReferencesSearch.search(o, o.useScope).findFirst() == null) {

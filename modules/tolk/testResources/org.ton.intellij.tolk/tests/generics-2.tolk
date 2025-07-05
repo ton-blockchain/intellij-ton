@@ -61,6 +61,7 @@ fun test2(c: Wrapper<int>) {
 }
 
 @pure
+@noinline
 fun getWrappervalue1<T>(c: Wrapper<T>) {
     return c.value;
 }
@@ -71,6 +72,7 @@ fun Wrapper<T>.getWrappervalue1(self) {
 }
 
 @pure
+@noinline
 fun getWrappervalue2<T>(c: T) {
     return c.value;
 }
@@ -105,8 +107,8 @@ fun test4() {
     __expect_type(c4, "Wrapper<Wrapper<slice>>");
     var sumOf1 = 0;
     sumOf1 += getWrappervalue1(getWrappervalue1(c4)).loadInt(32);     // a function returns a copy
-    // sumOf1 += getWrappervalue2(c4.value).loadInt(32);                   // so original slice isn't mutated
-    // return (c1.value += c4.value.value.loadInt(32), c1.getWrappervalue1(), c1.value += c4.value.value.loadInt(32), c1.getWrappervalue2(), c1, sumOf1);
+    sumOf1 += getWrappervalue2(c4.value).loadInt(32);                   // so original slice isn't mutated
+    return (c1.value += c4.value.value.loadInt(32), c1.getWrappervalue1(), c1.value += c4.value.value.loadInt(32), c1.getWrappervalue2(), c1, sumOf1);
 }
 
 @method_id(105)
@@ -473,12 +475,12 @@ fun main(c: Wrapper<slice>, d: WrappedInt) {
 
 @fif_codegen
 """
-  test1 PROC:<{
+test1() PROC:<{
     23 PUSHINT   // c1=23
     DUP          // c1=23 c2=23
   }>
 """
 
-@fif_codegen DECLPROC getWrappervalue1<Wrapper<(int,int)>>
-@fif_codegen DECLPROC getWrappervalue2<Wrapper<Wrapper<(int,int)>>>
+@fif_codegen DECLPROC getWrappervalue1<Wrapper<(int,int)>>()
+@fif_codegen DECLPROC getWrappervalue2<Wrapper<Wrapper<(int,int)>>>()
  */

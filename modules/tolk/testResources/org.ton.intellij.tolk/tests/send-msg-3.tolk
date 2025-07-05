@@ -16,6 +16,7 @@ struct(0x12345678) MyBody {
     queryId: uint64;
 }
 
+@noinline
 fun test1_manual(topic: int) {
     return beginCell()
         .storeUint(0b1100, 4)       // ext_out_msg_info$11 src:MsgAddressInt ()
@@ -32,7 +33,7 @@ fun test1_manual(topic: int) {
 @method_id(101)
 fun test1(topic: int) {
     val body: MyBody = { queryId: 800 };
-    var b = createExternalMessage({
+    var b = createExternalLogMessage({
         body: body,
         dest: ExtOutLogBucket { topic },
     });
@@ -42,6 +43,7 @@ fun test1(topic: int) {
 
 type Body750Bits = (uint250, uint250, uint250);      // this body is auto-ref
 
+@noinline
 fun test2_manual(bd: Body750Bits) {
     val bodyRef = beginCell().storeUint(bd.0,250).storeUint(bd.1,250).storeUint(bd.2,250).endCell();
     return beginCell()
@@ -56,7 +58,7 @@ fun test2_manual(bd: Body750Bits) {
 
 @method_id(102)
 fun test2(bd: Body750Bits) {
-    var b = createExternalMessage({
+    var b = createExternalLogMessage({
         body: bd,
         dest: { topic: 1 << 102 },
     });
@@ -74,13 +76,14 @@ struct Body3 {
 fun test3(eventId: int) {
     val bodyAddress = address("Ef9nzj6RBc4mQ6p3ng7mGJ7tp7MbzERhe7obkM9A0wnCCEcf");
     val someRef = MyBody { queryId: 800 }.toCell();
-    var b = createExternalMessage({
+    var b = createExternalLogMessage({
         body: Body3 { bodyAddress, someRef, amount: ton("0.05") },
         dest: { topic: eventId },
     });
     return b.hash();
 }
 
+@noinline
 fun test4_manual(dest: address, body: cell) {
     return beginCell()
         .storeUint(0b1100, 4)       // ext_out_msg_info$11 src:MsgAddressInt ()
@@ -95,7 +98,7 @@ fun test4() {
     val body: cell = Body3 { bodyAddress: createAddressNone(), amount: 0, someRef: createEmptyCell() }.toCell();
     val dest = beginCell().storeUint(0b01, 2).storeUint(12, 9).storeUint(88, 12).endCell()
         .beginParse() as address;
-    var b = createExternalMessage({
+    var b = createExternalLogMessage({
         body,
         dest,
     });
@@ -105,7 +108,7 @@ fun test4() {
 
 @method_id(105)
 fun test5(topic: int) {
-    var b = createExternalMessage({
+    var b = createExternalLogMessage({
         dest: { topic },
     });
     return b.hash();
@@ -115,12 +118,13 @@ fun test5(topic: int) {
 fun test6() {
     val dest = beginCell().storeUint(0b01, 2).storeUint(12, 9).storeUint(88, 12).endCell()
         .beginParse() as address;
-    var b = createExternalMessage({
+    var b = createExternalLogMessage({
         dest,
     });
     return b.hash();
 }
 
+@noinline
 fun test7_manual(dest: builder, queryId: uint64) {
     return beginCell()
         .storeUint(0b1100, 4)       // ext_out_msg_info$11 src:MsgAddressInt ()
@@ -136,7 +140,7 @@ fun test7_manual(dest: builder, queryId: uint64) {
 fun test7(queryId: uint64) {
     val body: MyBody = { queryId };
     val dest = beginCell().storeUint(0b01, 2).storeUint(12, 9).storeUint(88, 12);
-    var b = createExternalMessage({
+    var b = createExternalLogMessage({
         body,
         dest,
     });
@@ -147,7 +151,7 @@ fun test7(queryId: uint64) {
 @method_id(108)
 fun test8(topic: int) {
     var bodyB = beginCell().storeUint(0x12345678, 32).storeUint(800, 64);
-    var b = createExternalMessage({
+    var b = createExternalLogMessage({
         body: bodyB,
         dest: { topic },
     });
@@ -165,15 +169,16 @@ fun test9(topic: int) {
         any1: null,
         any2: beginCell().storeUint(80, 80).storeMaybeRef(null).storeRef(createEmptyCell()),
     };
-    var b = createExternalMessage({
+    var b = createExternalLogMessage({
         body: UnsafeBodyNoRef {
-            bodyForceNoRef: bd,
+            forceInline: bd,
         },
         dest: ExtOutLogBucket { topic: topic },
     });
     return b.hash();
 }
 
+@noinline
 fun test10_manual(topic: slice, queryIdRef: uint64) {
     return beginCell()
         .storeUint(0b1100, 4)       // ext_out_msg_info$11 src:MsgAddressInt ()
@@ -194,7 +199,7 @@ struct Body10 {
 fun test10() {
     val queryIdRef = 123;
     val topic = stringHexToSlice("012345678901234567890123456789012345678901234567890123456789FF");
-    var b = createExternalMessage({
+    var b = createExternalLogMessage({
         body: Body10 { queryIdRef: (queryIdRef as uint64).toCell() },
         dest: ExtOutLogBucket { topic: topic as bits248 },
     });
@@ -205,7 +210,7 @@ fun test10() {
 @method_id(111)
 fun test11() {
     try {
-        createExternalMessage({
+        createExternalLogMessage({
             dest: ExtOutLogBucket { topic: "asdf" as bits248 }  // wrong bits count
         });
         return 0;

@@ -41,11 +41,12 @@ fun assert_slice_is_44_and_ref45(s: slice) {
     s.assertEnd();
 }
 
-@inline
+@inline_ref
 fun slice.appendRef(self, refSlice: slice): slice {
     return beginCell().storeSlice(self).storeRef(beginCell().storeSlice(refSlice).endCell()).endCell().beginParse();
 }
 
+@noinline
 fun run<TInputStruct>(input: TInputStruct, ans: slice) {
     repeat (2) {
         var s = input.toCell().beginParse();
@@ -334,6 +335,30 @@ struct DifferentMix3 {
 }
 
 /*
+    ui16: VarUInteger 16
+    i16: VarInteger 16
+    ui32: VarUInteger 32
+    i32: VarInteger 32
+ */
+
+struct WithVariadicInts {
+    ui16: varuint16;
+    i16: varint16;
+    ui32: varuint32;
+    i32: varint32;
+}
+
+/*
+    Test MIN_INT and MAX_INT
+ */
+
+struct EdgeCaseInts {
+    maxUint: uint256 = +115792089237316195423570985008687907853269984665640564039457584007913129639935;
+    maxInt: int257 = +115792089237316195423570985008687907853269984665640564039457584007913129639935;
+    minInt: int257 = -115792089237316195423570985008687907853269984665640564039457584007913129639935 - 1;
+}
+
+/*
     Test: write with builder, read with other struct
     (type `builder` is available for writing, but not for reading)
  */
@@ -373,6 +398,12 @@ struct ReadWriteMid<T> {
     f1: int32;
     mid: T;
     f3: coins;
+}
+
+struct WithTwoRestFields {
+    i32: int32;
+    rest1: RemainingBitsAndRefs;
+    rest2: RemainingBitsAndRefs;
 }
 
 
@@ -490,15 +521,15 @@ fun test_IntAndMaybeMaybe8() {
     val t1 = IntAndMaybeMaybe8.fromSlice(stringHexToSlice("D60000001EE_"));  // (88) 123
     val v1 = t1.value;
     __expect_type(v1, "Maybe<Maybe<int8>>");
-    // assert(v1 is MaybeJust && v1.value is MaybeJust && v1.value.value == 88 && t1.op == 123, 400);
-    // __expect_type(v1, "MaybeJust<Maybe<int8>>");
-    // __expect_type(v1.value, "MaybeJust<int8>");
-    // __expect_type(v1.value.value, "int8");
-    // val t2 = IntAndMaybeMaybe8.fromSlice(stringHexToSlice("8000001EE_"));  // (()) 123
-    // val v2 = t2.value;
-    // assert(v2 is MaybeJust && v2.value is MaybeNothing && t2.op == 123, 400);
-    // __expect_type(v2, "MaybeJust<Maybe<int8>>");
-    // __expect_type(v2.value, "MaybeNothing");
+    assert(v1 is MaybeJust && v1.value is MaybeJust && v1.value.value == 88 && t1.op == 123, 400);
+    __expect_type(v1, "MaybeJust<Maybe<int8>>");
+    __expect_type(v1.value, "MaybeJust<int8>");
+    __expect_type(v1.value.value, "int8");
+    val t2 = IntAndMaybeMaybe8.fromSlice(stringHexToSlice("8000001EE_"));  // (()) 123
+    val v2 = t2.value;
+    assert(v2 is MaybeJust && v2.value is MaybeNothing && t2.op == 123, 400);
+    __expect_type(v2, "MaybeJust<Maybe<int8>>");
+    __expect_type(v2.value, "MaybeNothing");
 
     return true;
 }
@@ -649,6 +680,44 @@ fun test_MidIsBuilderOrBitsN() {
     return (r.f1, mid.remainingBitsCount(), mid.loadAny<int32>(), mid.remainingBitsCount(), r.f3);
 }
 
+@method_id(226)
+fun test_MultipleRemainers() {
+    val m = WithTwoRestFields.fromSlice(stringHexToSlice("00000001FFFF"));
+    return (m.i32, m.rest1.remainingBitsCount(), m.rest2.remainingBitsCount());
+}
+
+@method_id(227)
+fun test_mutatingRemainder() {
+    var cs = stringHexToSlice("00000001FFFF");
+    val obj = cs.loadAny<IntAndRestInlineCell>();
+    cs.assertEnd();
+    return obj.rest.remainingBitsCount();
+}
+
+@method_id(228)
+fun test_VariadicIntegers() {
+    var t: WithVariadicInts = {
+        ui16: (1 << 120) - 1,
+        i16: -(1 << 119),
+        ui32: (1 << 248) - 1,
+        i32: -(1 << 247),
+    };
+    run<WithVariadicInts>(t, stringHexToSlice("ffffffffffffffffffffffffffffffff800000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe000000000000000000000000000000000000000000000000000000000000020_"));
+    run<WithVariadicInts>({
+        ui16: 0, i16: 0, ui32: 0, i32: 0
+    }, stringHexToSlice("000020_"));
+
+    var c = t.toCell().load();
+    return (c.ui16 == t.ui16) & (c.i16 == t.i16) & (c.ui32 == t.ui32) & (c.i32 == t.i32)
+}
+
+@method_id(229)
+fun test_EdgeCaseIntegers() {
+    var edge: EdgeCaseInts = {
+    };
+    var manual = beginCell().storeUint(edge.maxUint, 256).storeInt(edge.maxInt, 257).storeInt(edge.minInt, 257);
+    return edge.toCell().hash() == manual.endCell().hash()
+}
 
 fun main() {
     var t: JustInt32 = { value: 10 };
@@ -686,4 +755,8 @@ fun main() {
 @testcase | 223 | | 10 55 (null)
 @testcase | 224 | | 60 50000000 5 9 123 -1
 @testcase | 225 | | 5 40 65535 8 50000000
+@testcase | 226 | | 1 16 0
+@testcase | 227 | | 16
+@testcase | 228 | | -1
+@testcase | 229 | | -1
  */

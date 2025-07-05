@@ -7,7 +7,7 @@ struct BigBodyMessage {
 }
 
 fun testFail(body: BigBodyMessage) {
-    createExternalMessage({
+    createExternalLogMessage({
         dest: createAddressNone(),
         body,
     });

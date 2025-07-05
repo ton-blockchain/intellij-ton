@@ -1738,14 +1738,18 @@ class TolkInferenceWalker(
         hint: TolkTy
     ): TolkExpressionFlowContext {
         val nextFlow = TolkExpressionFlowContext(flow, false)
-        var structType = element.referenceTypeExpression?.type?.unwrapTypeAlias() as? TolkTyStruct
-        if (structType != null && structType.hasGenerics() && hint != TolkTy.Unknown) {
-            val instantiate = Substitution.instantiate(structType, hint.unwrapTypeAlias())
-            structType = structType.substitute(instantiate) as? TolkTyStruct ?: structType
+        var structTy = element.referenceTypeExpression?.type?.unwrapTypeAlias() as? TolkTyStruct
+
+        // example: `var v: Ok<int> = Ok { ... }`, now struct_ref is "Ok<T>", take "Ok<int>" from hint
+        if (structTy != null && structTy.hasGenerics() && hint != TolkTy.Unknown) {
+            val instExplicitStructTy = tryPickInstantiatedGenericFromHint(hint, structTy.psi)
+            if (instExplicitStructTy != null) {
+                structTy = instExplicitStructTy
+            }
         }
-        if (structType == null && hint != TolkTy.Unknown) {
+        if (structTy == null && hint != TolkTy.Unknown) {
             when (val unwrappedHint = hint.unwrapTypeAlias()) {
-                is TolkTyStruct -> structType = unwrappedHint
+                is TolkTyStruct -> structTy = unwrappedHint
                 is TolkTyUnion -> {
                     var found = 0
                     var lastStruct: TolkTyStruct? = null
@@ -1757,7 +1761,7 @@ class TolkInferenceWalker(
                         }
                     }
                     if (found == 1) {
-                        structType = lastStruct
+                        structTy = lastStruct
                     }
                 }
             }
@@ -1765,9 +1769,9 @@ class TolkInferenceWalker(
 
         var substitution: Substitution = EmptySubstitution
         val body = element.structExpressionBody
-        val structPsi = structType?.psi
+        val structPsi = structTy?.psi
         if (structPsi != null) {
-            substitution = substitution.deduce(structPsi.declaredType, structType, false)
+            substitution = substitution.deduce(structPsi.declaredType, structTy, false)
         }
         val structFields = structPsi.structFields.associateBy { it.name ?: "" }
         body.structExpressionFieldList.forEach { fieldRef ->
@@ -1799,7 +1803,7 @@ class TolkInferenceWalker(
         }
 
 
-        val type = structType ?: return nextFlow
+        val type = structTy ?: return nextFlow
         val subType = if (type.hasGenerics()) {
             if (structPsi != null) {
                 substitution = substitution.deduce(structPsi.declaredType, type, true)

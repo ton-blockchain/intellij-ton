@@ -970,7 +970,7 @@ fun algo116() {
     __expect_lazy("[o] load f1 f2 ab f4 f5");
     o.f1 + o.f2;
     match (o.ab) {
-        A => return o.f4
+        A => return o.f4,
         B => throw o.f5
     }
 }

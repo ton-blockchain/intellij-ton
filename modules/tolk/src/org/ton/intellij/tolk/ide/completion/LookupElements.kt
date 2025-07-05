@@ -50,8 +50,7 @@ fun TolkNamedElement.toLookupElementBuilder(
     val name = this.name ?: ""
     val file = this.containingFile.originalFile
     val contextFile = context.context?.containingFile?.originalFile
-    val includePath = if (file == contextFile || contextFile == null) ""
-    else {
+    val includePath = if (file == contextFile || contextFile == null) "" else {
         val contextVirtualFile = contextFile.virtualFile
         val elementVirtualFile = file.virtualFile
         if (contextVirtualFile != null && elementVirtualFile != null) {
@@ -63,7 +62,7 @@ fun TolkNamedElement.toLookupElementBuilder(
         } else {
             file.name
         }
-    }
+    }.removeSuffix(".tolk")
     val type = if (this is TolkTypedElement) type?.let {
         if (it.hasGenerics()) it.substitute(substitution) else it
     } else null

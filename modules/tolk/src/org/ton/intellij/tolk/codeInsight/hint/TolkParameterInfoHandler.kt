@@ -4,10 +4,7 @@ import com.intellij.lang.parameterInfo.*
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 import com.intellij.refactoring.suggested.startOffset
-import org.ton.intellij.tolk.psi.TolkArgumentList
-import org.ton.intellij.tolk.psi.TolkCallExpression
-import org.ton.intellij.tolk.psi.TolkElementTypes
-import org.ton.intellij.tolk.psi.TolkParameter
+import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.parentOfType
@@ -24,6 +21,22 @@ class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<Str
                 if (parameter is TolkParameter) {
                     append(": ")
                     append((parameter.typeExpression.type ?: TolkTy.Unknown).render())
+                    val parameterDefault = parameter.parameterDefault
+                    val defExpr = parameterDefault?.expression?.unwrapParentheses()
+                    if (defExpr != null) {
+                        append(" = ")
+                        when (defExpr) {
+                            is TolkStructExpression -> {
+                                if (defExpr.structExpressionBody.structExpressionFieldList.isEmpty()) {
+                                    append("{}")
+                                } else {
+                                    append("{...}")
+                                }
+                            }
+
+                            else -> append(defExpr.text)
+                        }
+                    }
                 }
             }
             parameterInfos.add(parameterInfo)

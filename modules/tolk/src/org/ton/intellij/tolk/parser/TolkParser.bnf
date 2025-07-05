@@ -244,7 +244,7 @@ StructBody ::= '{' StructBodyElements? '}' {
 private StructBodyElements ::= (StructBody_MultipleElement | StructBody_SingleElement) (','|';')?
 
 private StructBody_SingleElement ::= StructField
-private StructBody_MultipleElement ::= StructField ((','|';') StructField)+
+private StructBody_MultipleElement ::= StructField ((','|';')? StructField)+
 
 StructField ::= IDENTIFIER ':' TypeExpression StructFieldDefault? {
     pin = 1
@@ -259,7 +259,7 @@ StructField ::= IDENTIFIER ':' TypeExpression StructFieldDefault? {
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
-private StructField_recover ::= !(';'|','|'}')
+private StructField_recover ::= !(';'|','|'}'|IDENTIFIER)
 private StructFieldDefault ::= '=' Expression {
     pin=1
     recoverWhile = StructField_recover
@@ -322,7 +322,7 @@ AnnotationArgument ::= Expression {
     elementType = Argument
 }
 
-FunctionBody ::= ';' | AsmDefinition | BlockStatement | ('builtin' ';')
+FunctionBody ::= ';' | AsmDefinition | BlockStatement | ('builtin' ';'?)
 private FunctionBody_first ::= ';' | 'asm' | '{' | 'builtin'
 
 TypeParameterList ::= '<' << comma_separated_list TypeParameter >> '>' {
@@ -341,7 +341,7 @@ DefaultTypeParameter ::= '=' TypeExpression {
     pin=1
 }
 
-AsmDefinition ::= 'asm' AsmParameters? AsmBody ';' {pin=1}
+AsmDefinition ::= 'asm' AsmParameters? AsmBody ';'? {pin=1}
 AsmParameters ::= '(' AsmArgumentList? AsmIndexList? ')' {pin=1}
 private AsmArgumentList ::= AsmArgument+
 AsmArgument ::= 'self'|IDENTIFIER {

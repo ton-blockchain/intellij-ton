@@ -24,12 +24,10 @@ class TolkTyUnion private constructor(
             return null
         }
 
-    override fun toString(): String {
-        val orNull = orNull
-        if (orNull != null) {
-            return "$orNull?"
-        }
-        return variants.joinToString(" | ")
+    override fun toString(): String = buildString {
+        append("TolkTyUnion(variants=")
+        variants.joinTo(this, separator = ", ") { it.toString() }
+        append(")")
     }
 
     override fun hashCode(): Int {

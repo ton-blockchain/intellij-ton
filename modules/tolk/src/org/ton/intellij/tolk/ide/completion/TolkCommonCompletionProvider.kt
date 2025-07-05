@@ -47,6 +47,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         if (position != element.identifier) return
 
         val project = parameters.position.project
+        val currentFile = element.containingFile as? TolkFile ?: return
 
         var expectType: TolkTy? = null
         if (elementParent is TolkMatchPattern) {
@@ -125,9 +126,11 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
 
             if (element is TolkFunction && element.hasReceiver) return true
             if (!checkLimit()) return false
+            val isResolved = currentFile.resolveSymbols(name).contains(element)
             when (element) {
                 is TolkFunction -> {
                     if (!checkLimit()) return false
+                    if (element.isEntryPoint) return true
                     if (!expectType.canAddElement(element.declaredType.returnType)) return true
                     val lookupElement = element.toLookupElementBuilder(ctx)
                         .toTolkLookupElement(
@@ -136,10 +139,10 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                                     "getDeclaredPackPrefix",
                                     "getDeclaredPackPrefixLen",
                                     "stackMoveToTop" -> true
-
                                     else -> false
                                 },
                                 elementKind = when {
+                                    !isResolved -> TolkLookupElementData.ElementKind.FROM_UNRESOLVED_IMPORT
                                     element.isEntryPoint -> TolkLookupElementData.ElementKind.ENTRY_POINT_FUNCTION
                                     element.hasDeprecatedAnnotation -> TolkLookupElementData.ElementKind.DEPRECATED
                                     element.isStatic -> TolkLookupElementData.ElementKind.STATIC_FUNCTION
@@ -160,6 +163,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                         .toTolkLookupElement(
                             TolkLookupElementData(
                                 elementKind = when {
+                                    !isResolved -> TolkLookupElementData.ElementKind.FROM_UNRESOLVED_IMPORT
                                     element.annotations.hasDeprecatedAnnotation() -> TolkLookupElementData.ElementKind.DEPRECATED
                                     else -> TolkLookupElementData.ElementKind.DEFAULT
                                 }

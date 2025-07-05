@@ -15,7 +15,6 @@ import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.impl.resolve
-import org.ton.intellij.tolk.psi.impl.resolveFile
 import org.ton.intellij.tolk.stub.*
 import org.ton.intellij.tolk.stub.type.TolkFunctionStubElementType
 import org.ton.intellij.tolk.stub.type.TolkIncludeDefinitionStubElementType
@@ -109,7 +108,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         if (file == this) return
         if (!file.isPhysical) return
         var path = VfsUtil.findRelativePath(virtualFile ?: return, file.virtualFile ?: return, '/') ?: return
-        val needImport = includeDefinitions.none { it.resolveFile(it.project) == file.virtualFile }
+        val needImport = includeDefinitions.none { (it.resolve() as? TolkFile)?.virtualFile == file.virtualFile }
         if (!needImport) return
 
         val factory = TolkPsiFactory[project]
@@ -121,7 +120,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
                 return
             }
         }
-        val newInclude = factory.createIncludeDefinition(path)
+        val newInclude = factory.createIncludeDefinition(path.removeSuffix(".tolk"))
 
         tryIncludeAtCorrectLocation(newInclude)
     }

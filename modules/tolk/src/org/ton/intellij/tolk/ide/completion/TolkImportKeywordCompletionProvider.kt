@@ -8,15 +8,14 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
-import com.intellij.psi.TokenType
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.TolkFile
 
-object TolkMacroCompletionProvider : TolkCompletionProvider(), DumbAware {
+object TolkImportKeywordCompletionProvider : TolkCompletionProvider(), DumbAware {
     override val elementPattern: ElementPattern<out PsiElement> =
-        psiElement().withParent(
-            psiElement().withElementType(TokenType.ERROR_ELEMENT).withParent(TolkFile::class.java)
-        )
+        psiElement()
+            .afterLeafSkipping(psiElement().withText(""), psiElement().whitespaceCommentEmptyOrError())
+            .withSuperParent(2, psiElement(TolkFile::class.java))
 
     override fun addCompletions(
         parameters: CompletionParameters,

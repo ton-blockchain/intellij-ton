@@ -9,12 +9,11 @@ import com.intellij.patterns.PlatformPatterns.or
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
-import com.intellij.psi.TokenType
 import org.ton.intellij.tolk.psi.*
 
 class TolkCompletionContributor : CompletionContributor() {
     init {
-        extend(TolkMacroCompletionProvider)
+        extend(TolkImportKeywordCompletionProvider)
         extend(TolkTypeCompletionProvider)
         extend(
             CompletionType.BASIC,
@@ -37,9 +36,9 @@ class TolkCompletionContributor : CompletionContributor() {
         extend(TolkParameterCompletionProvider)
         extend(
             CompletionType.BASIC,
-            psiElement().withParent(
-                psiElement().withElementType(TokenType.ERROR_ELEMENT).withParent(TolkFile::class.java)
-            ),
+            psiElement()
+                .afterLeafSkipping(psiElement().withText(""), psiElement().whitespaceCommentEmptyOrError())
+                .withSuperParent(2, psiElement(TolkFile::class.java)),
             TolkKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
                 "fun",

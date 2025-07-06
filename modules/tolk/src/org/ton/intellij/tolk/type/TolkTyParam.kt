@@ -7,7 +7,7 @@ import org.ton.intellij.tolk.psi.TolkTypeParameter
 
 class TolkTyParam private constructor(
     val parameter: TypeParameter,
-) : TolkTy {
+) : TolkTy, TolkTyPsiHolder {
     val name: String? get() = parameter.name
 
     override val hasTypeAlias: Boolean get() = false
@@ -19,6 +19,9 @@ class TolkTyParam private constructor(
     override fun equals(other: Any?): Boolean = other is TolkTyParam && other.parameter == this.parameter
 
     override fun hashCode(): Int = parameter.hashCode()
+
+    override val psi: TolkElement
+        get() = parameter.psi
 
     sealed class TypeParameter {
         abstract val psi: TolkElement

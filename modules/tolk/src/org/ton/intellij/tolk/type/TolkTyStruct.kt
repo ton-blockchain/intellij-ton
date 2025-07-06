@@ -5,9 +5,9 @@ import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkTypeExpression
 
 data class TolkTyStruct private constructor(
-    val psi: TolkStruct,
+    override val psi: TolkStruct,
     val typeArguments: List<TolkTy> = emptyList(),
-) : TolkTy {
+) : TolkTy, TolkTyPsiHolder {
     override val hasTypeAlias: Boolean get() = typeArguments.any { it.hasTypeAlias }
 
     private val hasGenerics = typeArguments.any { it.hasGenerics() }

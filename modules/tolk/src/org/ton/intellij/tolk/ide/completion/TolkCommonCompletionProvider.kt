@@ -4,6 +4,7 @@ import com.intellij.analysis.AnalysisBundle
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
+import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
@@ -15,6 +16,8 @@ import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
 import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.TolkTyPsiHolder
+import org.ton.intellij.tolk.type.TolkTyUnion
 import org.ton.intellij.util.REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
 import org.ton.intellij.util.parentOfType
 import org.ton.intellij.util.psiElement
@@ -49,15 +52,26 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         val project = parameters.position.project
         val currentFile = element.containingFile as? TolkFile ?: return
 
+        val ctx = TolkCompletionContext(element)
         var expectType: TolkTy? = null
-        if (elementParent is TolkMatchPattern) {
+        val inMatchPattern = elementParent is TolkMatchPattern
+        var declaredMatchArms: List<String> = emptyList()
+        if (inMatchPattern) {
             val matchExpr = elementParent.parentOfType<TolkMatchExpression>()
             if (matchExpr != null) {
-                expectType = matchExpr.expression?.type
+                declaredMatchArms = matchExpr.matchArmList.mapNotNull { it.matchPattern.matchPatternReference?.text }
+                expectType = matchExpr.expression?.type?.unwrapTypeAlias()
             }
         }
+        fun TolkTy?.canAddElement(elementType: TolkTy?): Boolean {
+            if (this == null) return true
+            if (elementType == null) return false
+            if (elementType == TolkTy.Never) return false
+            if (!canRhsBeAssigned(elementType)) return false
+            if (inMatchPattern && elementType.unwrapTypeAlias() is TolkTyUnion && this is TolkTyUnion) return false
+            return true
+        }
 
-        val ctx = TolkCompletionContext(element)
         val completionLimit = REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
         var addedElements = 0
 
@@ -74,6 +88,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
 
         if (!collectLocalVariables(element) { localSymbol ->
                 if (!checkLimit()) return@collectLocalVariables false
+                if (!expectType.canAddElement(localSymbol.type)) return@collectLocalVariables true
                 result.addElement(
                     localSymbol.toLookupElementBuilder(ctx)
                         .toTolkLookupElement(
@@ -87,12 +102,6 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             }
         ) {
             return
-        }
-
-        fun TolkTy?.canAddElement(elementType: TolkTy?): Boolean {
-            if (this == null) return true
-            if (elementType == null) return true
-            return canRhsBeAssigned(elementType)
         }
 
         if (expectType.canAddElement(TolkTy.Null)) {
@@ -117,66 +126,54 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 )
             )
         }
-
         val prefixMatcher = result.prefixMatcher
-
-        fun processNamedElement(element: TolkSymbolElement): Boolean {
+        fun processNamedElement(element: TolkNamedElement): Boolean {
             val name = element.name ?: return true
             if (!prefixMatcher.prefixMatches(name)) return true
-
             if (element is TolkFunction && element.hasReceiver) return true
-            if (!checkLimit()) return false
-            val isResolved = currentFile.resolveSymbols(name).contains(element)
             when (element) {
                 is TolkFunction -> {
-                    if (!checkLimit()) return false
                     if (element.isEntryPoint) return true
                     if (!expectType.canAddElement(element.declaredType.returnType)) return true
-                    val lookupElement = element.toLookupElementBuilder(ctx)
-                        .toTolkLookupElement(
-                            TolkLookupElementData(
-                                isDeferredLookup = when (name) {
-                                    "getDeclaredPackPrefix",
-                                    "getDeclaredPackPrefixLen",
-                                    "stackMoveToTop" -> true
-                                    else -> false
-                                },
-                                elementKind = when {
-                                    !isResolved -> TolkLookupElementData.ElementKind.FROM_UNRESOLVED_IMPORT
-                                    element.isEntryPoint -> TolkLookupElementData.ElementKind.ENTRY_POINT_FUNCTION
-                                    element.hasDeprecatedAnnotation -> TolkLookupElementData.ElementKind.DEPRECATED
-                                    element.isStatic -> TolkLookupElementData.ElementKind.STATIC_FUNCTION
-                                    else -> TolkLookupElementData.ElementKind.DEFAULT
-                                },
-                            )
-                        )
-                    result.addElement(lookupElement)
+                    if (!checkLimit()) return false
+                    result.addElement(element.toLookupElement(currentFile, ctx))
                 }
 
                 is TolkConstVar,
                 is TolkGlobalVar,
                 is TolkTypeDef,
                 is TolkStruct -> {
-                    if (!expectType.canAddElement(element.type)) return true
-                    val lookupElement = element
-                        .toLookupElementBuilder(ctx)
-                        .toTolkLookupElement(
-                            TolkLookupElementData(
-                                elementKind = when {
-                                    !isResolved -> TolkLookupElementData.ElementKind.FROM_UNRESOLVED_IMPORT
-                                    element.annotations.hasDeprecatedAnnotation() -> TolkLookupElementData.ElementKind.DEPRECATED
-                                    else -> TolkLookupElementData.ElementKind.DEFAULT
-                                }
-                            )
-                        )
-                    result.addElement(lookupElement)
+                    if (name == "Buki") {
+                        print("")
+                    }
+                    fun canAddAsUnionMatchVariant(): Boolean {
+                        if (!inMatchPattern) return false
+                        if (declaredMatchArms.contains(name)) return false
+                        if (expectType !is TolkTyUnion) return false
+                        val type = element.type ?: return false
+                        return expectType.variants.any { it.canRhsBeAssigned(type) }
+                    }
+                    if (!expectType.canAddElement(element.type) || !canAddAsUnionMatchVariant()) return true
+                    if (!checkLimit()) return false
+                    result.addElement(element.toLookupElement(currentFile, ctx))
                 }
             }
             return true
         }
 
+        if (inMatchPattern && expectType is TolkTyUnion) {
+            expectType.variants.forEach { variant ->
+                if (variant is TolkTyPsiHolder) {
+                    val psi = variant.psi as? TolkNamedElement ?: return@forEach
+                    if (!declaredMatchArms.contains(psi.name)) {
+                        processNamedElement(psi)
+                    }
+                }
+            }
+        }
+
         if (!TolkNamedElementIndex.processAllElements(project) {
-                if (it is TolkSymbolElement) {
+                if (it is TolkNamedElement) {
                     processNamedElement(it)
                 } else {
                     // Skip non-symbol elements
@@ -186,6 +183,53 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
 
         if (result is DeferredCompletionResultSet) {
             result.flushDeferredElements()
+        }
+    }
+
+    private fun TolkNamedElement.toLookupElement(
+        currentFile: TolkFile,
+        ctx: TolkCompletionContext
+    ): LookupElement {
+        val isResolved = currentFile.resolveSymbols(name ?: "").contains(this)
+        val builder = toLookupElementBuilder(ctx)
+        return when (this) {
+            is TolkFunction -> {
+                builder.toTolkLookupElement(
+                    TolkLookupElementData(
+                        isDeferredLookup = when (name) {
+                            "getDeclaredPackPrefix",
+                            "getDeclaredPackPrefixLen",
+                            "stackMoveToTop" -> true
+
+                            else -> false
+                        },
+                        elementKind = when {
+                            !isResolved -> TolkLookupElementData.ElementKind.FROM_UNRESOLVED_IMPORT
+                            isEntryPoint -> TolkLookupElementData.ElementKind.ENTRY_POINT_FUNCTION
+                            hasDeprecatedAnnotation -> TolkLookupElementData.ElementKind.DEPRECATED
+                            isStatic -> TolkLookupElementData.ElementKind.STATIC_FUNCTION
+                            else -> TolkLookupElementData.ElementKind.DEFAULT
+                        },
+                    )
+                )
+            }
+
+            is TolkConstVar,
+            is TolkGlobalVar,
+            is TolkTypeDef,
+            is TolkStruct -> {
+                builder.toTolkLookupElement(
+                    TolkLookupElementData(
+                        elementKind = when {
+                            !isResolved -> TolkLookupElementData.ElementKind.FROM_UNRESOLVED_IMPORT
+                            annotations.hasDeprecatedAnnotation() -> TolkLookupElementData.ElementKind.DEPRECATED
+                            else -> TolkLookupElementData.ElementKind.DEFAULT
+                        }
+                    )
+                )
+            }
+
+            else -> builder
         }
     }
 }

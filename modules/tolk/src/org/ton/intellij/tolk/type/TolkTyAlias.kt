@@ -5,10 +5,10 @@ import org.ton.intellij.tolk.psi.TolkTypeExpression
 import org.ton.intellij.util.recursionGuard
 
 class TolkTyAlias private constructor(
-    val psi: TolkTypeDef,
+    override val psi: TolkTypeDef,
     val underlyingType: TolkTy,
     val typeArguments: List<TolkTy> = emptyList(),
-) : TolkTy {
+) : TolkTy, TolkTyPsiHolder {
     override val hasTypeAlias: Boolean = true
 
     private var hashCode: Int = 0

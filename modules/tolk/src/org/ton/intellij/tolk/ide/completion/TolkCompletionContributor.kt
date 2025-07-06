@@ -37,8 +37,13 @@ class TolkCompletionContributor : CompletionContributor() {
         extend(
             CompletionType.BASIC,
             psiElement()
-                .afterLeafSkipping(psiElement().withText(""), psiElement().whitespaceCommentEmptyOrError())
-                .withSuperParent(2, psiElement(TolkFile::class.java)),
+                .withSuperParent(2, TolkFile::class.java)
+                .andNot(
+                    psiElement().afterLeafSkipping(
+                        psiElement().withText(""),
+                        psiElement().inside(TolkTopLevelElement::class.java)
+                    )
+                ),
             TolkKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
                 "fun",

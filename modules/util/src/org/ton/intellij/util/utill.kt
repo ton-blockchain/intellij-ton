@@ -37,6 +37,9 @@ inline fun <reified T : PsiElement> PsiElement.parentOfType(strict: Boolean = tr
 inline fun <reified T : PsiElement> PsiElement.collectElements() =
     PsiTreeUtil.collectElementsOfType(this, T::class.java)
 
+inline val PsiElement.prevLeaf get() = PsiTreeUtil.prevLeaf(this)
+inline val PsiElement.nextLeaf get() = PsiTreeUtil.nextLeaf(this)
+
 inline fun TokenSet(vararg elements: IElementType) = TokenSet.create(*elements)
 
 fun PsiElement.processElements(processor: (PsiElement) -> Boolean) = PsiTreeUtil.processElements(this, processor)

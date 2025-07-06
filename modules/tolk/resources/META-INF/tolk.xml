@@ -128,6 +128,11 @@
                                  implementationClass="org.ton.intellij.tolk.psi.reference.manipulators.TolkStringLiteralManipulator"/>
         <multiHostInjector implementation="org.ton.intellij.tolk.ide.TolkLanguageInjector"/>
 
+        <localInspection language="Tolk" groupKey="tolk"
+                         enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkFunKeywordExpectedInspection"
+                         bundle="messages.TolkBundle"
+                         key="inspection.name.fun_keyword_expected"/>
         <localInspection language="Tolk" displayName="Unused function inspection" groupPath="Tolk"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedFunctionInspection"/>

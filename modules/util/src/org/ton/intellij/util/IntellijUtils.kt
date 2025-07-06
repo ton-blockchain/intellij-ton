@@ -12,6 +12,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.RecursionManager
+import com.intellij.openapi.util.TextRange
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.patterns.PsiElementPattern
 import com.intellij.psi.*
@@ -34,6 +35,9 @@ val PsiFile.document: Document?
 
 val PsiElement.stubParent: PsiElement?
     get() = (this as? StubBasedPsiElement<*>)?.greenStub?.parentStub?.psi ?: parent
+
+val ASTNode.textRangeInParent: TextRange
+    get() = TextRange.from(startOffsetInParent, textLength)
 
 inline fun <reified T : PsiElement> PsiElement.ancestorStrict(): T? =
     PsiTreeUtil.getParentOfType(this, T::class.java, /* strict */ true)

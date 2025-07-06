@@ -24,7 +24,7 @@ class TolkKeywordCompletionProvider(
         context: ProcessingContext,
         result: CompletionResultSet,
     ) {
-        keywords.asReversed().forEach{ s ->
+        keywords.asReversed().forEach { s ->
             result.addElement(createKeywordLookupElement(s, parameters))
         }
     }
@@ -49,6 +49,7 @@ class TolkKeywordCompletionProvider(
                 val returnTy = fn.returnTy
                 if (returnTy == TolkTy.Void) ";" else " "
             }
+
             else -> " "
         }
         return builder.withInsertHandler { ctx, _ ->

@@ -139,8 +139,8 @@
 
 private root ::= TopLevelDefinition_with_recover*
 
-private TopLevelDefinition ::= (IncludeDefinition | VersionDefinition | Item | ';')
-private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelDefinition {
+private TopLevelElement ::= (IncludeDefinition | VersionDefinition | Item | ';')
+private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelElement {
     pin = 1
     recoverWhile = TopLevelDefinition_recover
 }
@@ -197,6 +197,9 @@ private ConstVarType ::= ':' TypeExpression {
 
 IncludeDefinition ::= 'import' StringLiteral {
     pin=1
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkTopLevelElement"
+    ]
     mixin="org.ton.intellij.tolk.psi.impl.TolkIncludeDefinitionMixin"
     stubClass="org.ton.intellij.tolk.stub.TolkIncludeDefinitionStub"
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
@@ -204,8 +207,16 @@ IncludeDefinition ::= 'import' StringLiteral {
 
 VersionDefinition ::= 'tolk' VersionValue {
     pin=1
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkTopLevelElement"
+    ]
 }
-VersionValue ::= ('='|'>'|'>='|'<'|'<='|'^')? INTEGER_LITERAL ('.' INTEGER_LITERAL)*
+VersionValue ::= (('='|'>'|'>='|'<'|'<='|'^')? INTEGER_LITERAL) VersionValueElement* {
+    pin=1
+}
+private VersionValueElement ::= '.' INTEGER_LITERAL {
+    pin=1
+}
 
 upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpression ';'? {
     pin = 1

@@ -10,12 +10,18 @@ import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.TolkFile
+import org.ton.intellij.tolk.psi.TolkTopLevelElement
 
 object TolkImportKeywordCompletionProvider : TolkCompletionProvider(), DumbAware {
     override val elementPattern: ElementPattern<out PsiElement> =
         psiElement()
-            .afterLeafSkipping(psiElement().withText(""), psiElement().whitespaceCommentEmptyOrError())
-            .withSuperParent(2, psiElement(TolkFile::class.java))
+            .withSuperParent(2, TolkFile::class.java)
+            .andNot(
+                psiElement().afterLeafSkipping(
+                    psiElement().withText(""),
+                    psiElement().inside(TolkTopLevelElement::class.java)
+                )
+            )
 
     override fun addCompletions(
         parameters: CompletionParameters,

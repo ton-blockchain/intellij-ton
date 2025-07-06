@@ -1,0 +1,26 @@
+<html>
+<body>
+Reports get-functions missing the required 'fun' keyword in Tolk 1.0.
+<p>
+    In Tolk 1.0, the syntax for declaring get-functions has changed. The 'fun' keyword is now mandatory for all
+    get-functions.
+</p>
+<p>
+    Incorrect:
+</p>
+<pre><code>
+get foo() {
+    return 42
+}
+</code></pre>
+<p>
+    Correct:
+</p>
+<pre><code>
+get fun foo() {
+    return 42
+}
+</code></pre>
+<!-- tooltip end -->
+</body>
+</html>

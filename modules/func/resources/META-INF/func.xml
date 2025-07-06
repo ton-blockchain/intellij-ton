@@ -1,4 +1,4 @@
-<idea-plugin>
+<idea-plugin package="org.ton.intellij.func">
     <resource-bundle>messages.FuncBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">

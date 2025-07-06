@@ -279,7 +279,7 @@ private StructFieldDefault ::= '=' Expression {
 //PragmaSemiVersion ::= INTEGER_LITERAL ('.' INTEGER_LITERAL ('.' INTEGER_LITERAL)?)?
 
 //Function ::= (TypeParameterList|'get')? TypeReference FunctionIdentifier FunctionParameterList FunctionAttributes FunctionBody {
-upper Function ::= ((get 'fun') | ('fun')) FunctionReceiver? IDENTIFIER TypeParameterList? ParameterList ReturnType? FunctionBody {
+upper Function ::= ((get 'fun'?) | ('fun')) FunctionReceiver? IDENTIFIER TypeParameterList? ParameterList ReturnType? FunctionBody {
     pin = 1
     implements = [
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"

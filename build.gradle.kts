@@ -117,11 +117,13 @@ val mergePluginJarsTask = tasks.register<Jar>("mergePluginJars") {
     exclude("META-INF/MANIFEST.MF")
     exclude("**/classpath.index")
 
-    val sandboxTask = tasks.prepareSandbox.get()
-    val pluginLibDir = sandboxTask.destinationDir.resolve("${sandboxTask.pluginName.get()}/lib")
-    val pluginJars = pluginLibDir.listFiles().orEmpty().filter { it.isPluginJar() }
-    for (file in pluginJars) {
-        from(zipTree(file))
+    doFirst {
+        val sandboxTask = tasks.prepareSandbox.get()
+        val pluginLibDir = sandboxTask.destinationDir.resolve("${sandboxTask.pluginName.get()}/lib")
+        val pluginJars = pluginLibDir.listFiles().orEmpty().filter { it.isPluginJar() }
+        for (file in pluginJars) {
+            from(zipTree(file))
+        }
     }
 }
 

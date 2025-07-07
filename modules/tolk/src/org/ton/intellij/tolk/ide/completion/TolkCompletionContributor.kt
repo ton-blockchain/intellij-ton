@@ -29,7 +29,8 @@ class TolkCompletionContributor : CompletionContributor() {
                 "while",
                 "try",
                 "assert",
-                "throw"
+                "throw",
+                "match"
             )
         )
         extend(TolkFunCompletionProvider)

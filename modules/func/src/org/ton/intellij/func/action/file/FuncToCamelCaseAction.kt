@@ -10,6 +10,7 @@ import org.ton.intellij.func.psi.FuncFile
 import org.ton.intellij.func.psi.FuncFunction
 import org.ton.intellij.func.psi.FuncPsiFactory
 import org.ton.intellij.func.psi.FuncReferenceExpression
+import java.util.Locale.getDefault
 
 class FuncToCamelCaseAction : AnAction() {
     override fun getActionUpdateThread(): ActionUpdateThread {
@@ -245,12 +246,12 @@ fun isCamelCase(inputStr: String): Boolean {
 
 private fun snakeToCamel(inputStr: String): String {
     val words = inputStr.split("_")
-    val camelCaseWords = listOf(words[0].toLowerCase()) + words.drop(1).map { it.capitalize() }
+    val camelCaseWords = listOf(words[0].lowercase(getDefault())) + words.drop(1).map { it.capitalize() }
     return camelCaseWords.joinToString("")
 }
 
 private fun camelToSnake(inputStr: String): String {
-    return inputStr.replace(Regex("([a-z0-9])([A-Z])"), "$1_$2").toLowerCase()
+    return inputStr.replace(Regex("([a-z0-9])([A-Z])"), "$1_$2").lowercase(getDefault())
 }
 
 private fun transformQuestionMark(inputStr: String): String {

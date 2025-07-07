@@ -39,9 +39,9 @@ class TolkFormatter : FormattingModelBuilder {
             .beforeInside(TokenSet.create(IDENTIFIER, STRUCT_CONSTRUCTOR_TAG), STRUCT).spaces(1)
             .around(STRUCT_BODY).spaces(1)
 
-            .afterInside(IDENTIFIER, STRUCT_FIELD).none()
-            .afterInside(COLON, STRUCT_FIELD).spaces(1)
-
+            .afterInside(IDENTIFIER, TokenSet.create(STRUCT_FIELD, STRUCT_EXPRESSION_FIELD)).none()
+            .afterInside(COLON, TokenSet.create(STRUCT_FIELD, STRUCT_EXPRESSION_FIELD)).spaces(1)
+            .before(STRUCT_FIELD).lineBreakInCode()
             .after(
                 TokenSet.create(
                     RETURN_KEYWORD,
@@ -53,6 +53,7 @@ class TolkFormatter : FormattingModelBuilder {
                     CATCH_KEYWORD,
                     IF_KEYWORD,
                     ELSE_KEYWORD,
+                    MATCH_KEYWORD
                 )
             ).spaces(1)
             .before(TokenSet.create(COMMA, SEMICOLON)).none()
@@ -62,7 +63,7 @@ class TolkFormatter : FormattingModelBuilder {
             .after(RBRACE).spaces(1)
             .before(TokenSet.create(BLOCK_STATEMENT, ASM_BODY)).spaces(1)
             .around(BINARY_OP).spaces(1)
-            .around(MAPSTO).spaces(1)
+            .around(TokenSet.create(MAPSTO, ARROW)).spaces(1)
             .betweenInside(LPAREN, MAPSTO, ASM_PARAMETERS).spaces(1)
             .aroundInside(OR, UNION_TYPE_EXPRESSION).spaces(1)
             .betweenInside(
@@ -76,6 +77,8 @@ class TolkFormatter : FormattingModelBuilder {
             .afterInside(TokenSet.create(TILDE), FUNCTION).none()
             .afterInside(IDENTIFIER, FUNCTION).none()
             .between(FUNCTION, FUNCTION).blankLines(1)
+            .after(ASSERT_KEYWORD).spaces(1)
+            .beforeInside(THROW_STATEMENT, ASSERT_STATEMENT).spaces(1)
             .beforeInside(TENSOR_EXPRESSION, CALL_EXPRESSION).none()
             .beforeInside(UNIT_EXPRESSION, CALL_EXPRESSION).none()
             .beforeInside(TENSOR_EXPRESSION, DOT_EXPRESSION).none()

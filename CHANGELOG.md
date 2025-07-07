@@ -1,5 +1,21 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [2.5.7.6]
+
+- Added support for Tolk 1.0 semicolon syntax
+- Added sorting completions by resolved import in Tolk
+- Added default values and `mutate` rendering in parameter info in Tolk
+- Added inspection for "Expected `fun` keyword" with quick-fix in Tolk
+- Added variants completions for union types inside match patterns in Tolk
+- Removed `unpackFromSlice` and `packToBuilder` from "unused function" inspection
+- Removed `.tolk` from completions
+- Fixed `match` keyword completion in Tolk
+- Fixed formatting for struct fields, match, assert statements in Tolk
+- Fixed int257 type resolving
+- Fixed completions for top level in case of empty file or beginning of file in Tolk
+- Fixed type inference for union typed fields in a struct expressions
+- Fixed auto import without `.tolk`
+
 ## [2.5.7.5]
 
 - Added support for Tolk 1.0

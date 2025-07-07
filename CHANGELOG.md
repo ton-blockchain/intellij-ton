@@ -1,6 +1,6 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
-## [2.5.7.6]
+## [2.57.6]
 
 - Added support for Tolk 1.0 semicolon syntax
 - Added sorting completions by resolved import in Tolk

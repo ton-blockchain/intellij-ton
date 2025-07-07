@@ -17,6 +17,9 @@ class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<Str
         val parameterInfos: ArrayList<String> = ArrayList()
         iterateOverParameters(callExpression) { parameter, _ ->
             val parameterInfo = buildString {
+                if (parameter.isMutable) {
+                    append("mutate ")
+                }
                 append(parameter.name)
                 if (parameter is TolkParameter) {
                     append(": ")

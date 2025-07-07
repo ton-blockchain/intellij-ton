@@ -1,3 +1,4 @@
+
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
@@ -19,7 +20,7 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
-val generateTlbParser = task<GenerateParserTask>("generateTlbParser") {
+val generateTlbParser = tasks.register<GenerateParserTask>("generateTlbParser") {
     sourceFile.set(file("src/org/ton/intellij/tlb/parser/TlbParser.bnf"))
     targetRootOutputDir.set(file("gen"))
     pathToParser.set("/org/ton/intellij/tlb/parser/TlbParser.java")
@@ -29,7 +30,7 @@ val generateTlbParser = task<GenerateParserTask>("generateTlbParser") {
     dependsOn(":util:composedJar")
 }
 
-val generateTlbLexer = task<GenerateLexerTask>("generateTlbLexer") {
+val generateTlbLexer = tasks.register<GenerateLexerTask>("generateTlbLexer") {
     val input = "src/org/ton/intellij/tlb/lexer/TlbLexer.flex"
     val output = "gen/org/ton/intellij/tlb/lexer"
     sourceFile.set(file(input))

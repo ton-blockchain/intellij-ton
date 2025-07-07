@@ -1,3 +1,4 @@
+
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -15,7 +16,7 @@ dependencies {
     compileOnly(project(":util"))
 }
 
-val generateAsmParser = task<GenerateParserTask>("generateAsmParser") {
+val generateAsmParser = tasks.register<GenerateParserTask>("generateAsmParser") {
     sourceFile.set(file("src/org/ton/intellij/asm/parser/AsmParser.bnf"))
     targetRootOutputDir.set(file("gen"))
     pathToParser.set("/org/ton/intellij/asm/parser/AsmParser.java")
@@ -24,7 +25,7 @@ val generateAsmParser = task<GenerateParserTask>("generateAsmParser") {
     dependsOn(":util:composedJar")
 }
 
-val generateAsmLexer = task<GenerateLexerTask>("generateAsmLexer") {
+val generateAsmLexer = tasks.register<GenerateLexerTask>("generateAsmLexer") {
     sourceFile.set(file("src/org/ton/intellij/asm/lexer/AsmLexer.flex"))
     targetOutputDir.set(file("gen/org/ton/intellij/asm/lexer"))
     purgeOldFiles.set(true)

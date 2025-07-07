@@ -143,9 +143,6 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 is TolkGlobalVar,
                 is TolkTypeDef,
                 is TolkStruct -> {
-                    if (name == "Buki") {
-                        print("")
-                    }
                     fun canAddAsUnionMatchVariant(): Boolean {
                         if (!inMatchPattern) return false
                         if (declaredMatchArms.contains(name)) return false
@@ -153,7 +150,9 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                         val type = element.type ?: return false
                         return expectType.variants.any { it.canRhsBeAssigned(type) }
                     }
-                    if (!expectType.canAddElement(element.type) || !canAddAsUnionMatchVariant()) return true
+                    val canAddByExpectType = expectType.canAddElement(element.type)
+                    val canAddAsUnionMatchVariant = canAddAsUnionMatchVariant()
+                    if (!canAddByExpectType && !canAddAsUnionMatchVariant) return true
                     if (!checkLimit()) return false
                     result.addElement(element.toLookupElement(currentFile, ctx))
                 }
@@ -172,14 +171,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             }
         }
 
-        if (!TolkNamedElementIndex.processAllElements(project) {
-                if (it is TolkNamedElement) {
-                    processNamedElement(it)
-                } else {
-                    // Skip non-symbol elements
-                    true
-                }
-            }) return
+        if (!TolkNamedElementIndex.processAllElements(project, processor = ::processNamedElement)) return
 
         if (result is DeferredCompletionResultSet) {
             result.flushDeferredElements()

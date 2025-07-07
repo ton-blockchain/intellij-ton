@@ -1,3 +1,4 @@
+
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -16,7 +17,7 @@ dependencies {
     compileOnly(project(":util"))
 }
 
-val generateFuncParser = task<GenerateParserTask>("generateFuncParser") {
+val generateFuncParser = tasks.register<GenerateParserTask>("generateFuncParser") {
     sourceFile.set(file("src/org/ton/intellij/func/parser/FuncParser.bnf"))
     targetRootOutputDir.set(file("gen"))
     pathToParser.set("/org/ton/intellij/func/parser/FuncParser.java")
@@ -26,7 +27,7 @@ val generateFuncParser = task<GenerateParserTask>("generateFuncParser") {
     dependsOn(":util:composedJar")
 }
 
-val generateFuncLexer = task<GenerateLexerTask>("generateFuncLexer") {
+val generateFuncLexer = tasks.register<GenerateLexerTask>("generateFuncLexer") {
     val input = "src/org/ton/intellij/func/lexer/FuncLexer.flex"
     val output = "gen/org/ton/intellij/func/lexer"
     sourceFile.set(file(input))

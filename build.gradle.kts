@@ -1,3 +1,4 @@
+
 import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -56,15 +57,6 @@ allprojects {
     }
 }
 
-task("resolveDependencies") {
-    doLast {
-        rootProject.allprojects
-            .map { it.configurations }
-            .flatMap { it.filter { c -> c.isCanBeResolved } }
-            .forEach { it.resolve() }
-    }
-}
-
 dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
@@ -118,28 +110,18 @@ intellijPlatform {
     }
 }
 
-val mergePluginJarsTask = task<Jar>("mergePluginJars") {
+val mergePluginJarsTask = tasks.register<Jar>("mergePluginJars") {
     duplicatesStrategy = DuplicatesStrategy.FAIL
     archiveBaseName.set("intellij-ton")
 
     exclude("META-INF/MANIFEST.MF")
     exclude("**/classpath.index")
 
-    val pluginLibDir by lazy {
-        val sandboxTask = tasks.prepareSandbox.get()
-        sandboxTask.destinationDir.resolve("${sandboxTask.pluginName.get()}/lib")
-    }
-
-    val pluginJars = {
-        val files = pluginLibDir.listFiles().orEmpty().filter { it.isPluginJar() }
-        files
-    }
-
-    doFirst {
-        val pluginJars = pluginJars()
-        for (file in pluginJars) {
-            from(zipTree(file))
-        }
+    val sandboxTask = tasks.prepareSandbox.get()
+    val pluginLibDir = sandboxTask.destinationDir.resolve("${sandboxTask.pluginName.get()}/lib")
+    val pluginJars = pluginLibDir.listFiles().orEmpty().filter { it.isPluginJar() }
+    for (file in pluginJars) {
+        from(zipTree(file))
     }
 }
 

@@ -1,3 +1,4 @@
+
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
 import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -15,7 +16,7 @@ dependencies {
     compileOnly(project(":util"))
 }
 
-val generateFiftParser = task<GenerateParserTask>("generateFiftParser") {
+val generateFiftParser = tasks.register<GenerateParserTask>("generateFiftParser") {
     sourceFile.set(file("src/org/ton/intellij/fift/parser/FiftParser.bnf"))
     targetRootOutputDir.set(file("gen"))
     pathToParser.set("/org/ton/intellij/fift/parser/FiftParser.java")
@@ -25,7 +26,7 @@ val generateFiftParser = task<GenerateParserTask>("generateFiftParser") {
     dependsOn(":util:composedJar")
 }
 
-val generateFiftLexer = task<GenerateLexerTask>("generateFiftLexer") {
+val generateFiftLexer = tasks.register<GenerateLexerTask>("generateFiftLexer") {
     val input = "src/org/ton/intellij/fift/lexer/FiftLexer.flex"
     val output = "gen/org/ton/intellij/fift/lexer"
     sourceFile.set(file(input))

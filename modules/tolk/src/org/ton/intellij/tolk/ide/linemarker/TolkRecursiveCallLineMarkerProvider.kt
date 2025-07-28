@@ -1,32 +1,65 @@
 package org.ton.intellij.tolk.ide.linemarker
 
 import com.intellij.codeInsight.daemon.LineMarkerInfo
-import com.intellij.codeInsight.daemon.LineMarkerProviderDescriptor
+import com.intellij.codeInsight.daemon.LineMarkerProvider
+import com.intellij.icons.AllIcons
+import com.intellij.openapi.editor.markup.GutterIconRenderer
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
-import org.ton.intellij.tolk.TolkIcons
+import com.intellij.psi.util.parentOfType
+import com.intellij.util.FunctionUtil
+import org.ton.intellij.tolk.psi.TolkCallExpression
+import org.ton.intellij.tolk.psi.TolkDotExpression
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
-import org.ton.intellij.util.ancestorStrict
-import javax.swing.Icon
 
-class TolkRecursiveCallLineMarkerProvider : LineMarkerProviderDescriptor() {
-    override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? = null
+class TolkRecursiveCallLineMarkerProvider : LineMarkerProvider {
+    override fun getLineMarkerInfo(element: PsiElement) = null
 
-    override fun getIcon(): Icon = TolkIcons.RECURSIVE_CALL
+    override fun collectSlowLineMarkers(elements: List<PsiElement>, result: MutableCollection<in LineMarkerInfo<*>?>) {
+        val lines = mutableSetOf<Int>()
+        for (element in elements) {
+            if (element !is TolkCallExpression) continue
 
-    override fun getName(): String = "Recursive call"
+            val function = resolveCalledFunction(element) ?: continue
 
-    override fun collectSlowLineMarkers(
-        elements: MutableList<out PsiElement>,
-        result: MutableCollection<in LineMarkerInfo<*>>,
-    ) {
-        return // TODO: fix
+            if (isRecursiveCall(element, function)) {
+                val document = PsiDocumentManager.getInstance(element.project).getDocument(element.containingFile) ?: continue
+                val lineNumber = document.getLineNumber(element.textOffset)
+                if (!lines.contains(lineNumber)) {
+                    result.add(RecursiveMethodCallMarkerInfo(element.argumentList.lparen))
+                }
+
+                lines.add(lineNumber)
+            }
+        }
     }
 
-    private val TolkReferenceExpression?.isRecursive: Boolean
-        get() {
-            val reference = this?.reference ?: return false
-            val def = reference.resolve()
-            return def != null && reference.element.ancestorStrict<TolkFunction>() == def
+    fun resolveCalledFunction(call: TolkCallExpression): TolkFunction? {
+        val expr = call.expression
+        if (expr is TolkReferenceExpression) {
+            // foo()
+            return expr.reference?.resolve() as? TolkFunction
         }
+        if (expr is TolkDotExpression) {
+            // int.foo()
+            // 10.foo()
+            return expr.fieldLookup?.reference?.resolve() as? TolkFunction
+        }
+        return null
+    }
+
+    private class RecursiveMethodCallMarkerInfo(methodCall: PsiElement) : LineMarkerInfo<PsiElement?>(
+        methodCall,
+        methodCall.textRange,
+        AllIcons.Gutter.RecursiveMethod,
+        FunctionUtil.constant("Recursive call"),
+        null,
+        GutterIconRenderer.Alignment.RIGHT,
+        { "Recursive call" }
+    )
+
+    private fun isRecursiveCall(element: PsiElement, function: TolkFunction): Boolean {
+        return element.parentOfType<TolkFunction>() == function
+    }
 }

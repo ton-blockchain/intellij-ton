@@ -30,7 +30,8 @@ class TolkCompletionContributor : CompletionContributor() {
                 "try",
                 "assert",
                 "throw",
-                "match"
+                "match",
+                "lazy"
             )
         )
         extend(TolkFunCompletionProvider)

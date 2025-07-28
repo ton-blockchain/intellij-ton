@@ -122,7 +122,7 @@
         <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkDocAnnotator"/>
 
         <codeInsight.lineMarkerProvider language="Tolk"
-                                        implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkRecursiveCallMarkerProvider"/>
+                                        implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkRecursiveCallLineMarkerProvider"/>
 
         <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkStringLiteral"
                                  implementationClass="org.ton.intellij.tolk.psi.reference.manipulators.TolkStringLiteralManipulator"/>

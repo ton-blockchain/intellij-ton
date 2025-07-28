@@ -20,6 +20,7 @@ import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkTyFunction
 import org.ton.intellij.tolk.type.inference
 import org.ton.intellij.util.childOfType
+import org.ton.intellij.util.crc16
 import org.ton.intellij.util.greenStub
 import javax.swing.Icon
 
@@ -210,3 +211,15 @@ val TolkFunction.isStatic: Boolean
 val TolkFunction.returnTy get() = (this as TolkFunctionMixin).returnTy
 
 val TolkFunction.receiverTy get() = (this as TolkFunctionMixin).receiverTy
+
+fun TolkFunction.computeMethodId(): Pair<String, Boolean> {
+    val methodId = annotations.annotationByName("method_id").firstOrNull()
+    if (methodId != null) {
+        val argument = methodId.argumentList?.argumentList?.firstOrNull()
+        if (argument != null) {
+            return argument.text to true
+        }
+    }
+
+    return "0x" + ((crc16(this.name ?: "") and 0xFF_FF) or 0x1_00_00).toString(16) to false
+}

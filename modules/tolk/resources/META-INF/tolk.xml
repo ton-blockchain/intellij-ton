@@ -99,11 +99,11 @@
 
         <codeInsight.declarativeInlayProvider language="Tolk"
                                               bundle="messages.TolkBundle"
-                                              nameKey="codeInsight.hint.other.method.ids"
+                                              nameKey="codeInsight.hint.other.method.id"
                                               group="OTHER_GROUP"
                                               implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkMethodIdHintsProvider"
                                               isEnabledByDefault="true"
-                                              descriptionKey="codeInsight.hint.description.values.method.ids"
+                                              descriptionKey="codeInsight.hint.description.values.method.id"
                                               providerId="tolk.other.hints.method.ids"/>
 
         <codeInsight.declarativeInlayProvider group="PARAMETERS_GROUP"

@@ -27,7 +27,7 @@ class TolkRecursiveCallMarkerProvider : LineMarkerProvider {
                 val document = PsiDocumentManager.getInstance(element.project).getDocument(element.containingFile) ?: continue
                 val lineNumber = document.getLineNumber(element.textOffset)
                 if (!lines.contains(lineNumber)) {
-                    result.add(RecursiveMethodCallMarkerInfo(element.expression))
+                    result.add(RecursiveMethodCallMarkerInfo(element.argumentList.lparen))
                 }
 
                 lines.add(lineNumber)

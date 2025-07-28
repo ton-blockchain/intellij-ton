@@ -75,6 +75,12 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """)
 
+    fun `test lazy keyword`() = doSingleCompletion("""
+        fun main() { laz/*caret*/ }
+    """, """
+        fun main() { lazy /*caret*/ }
+    """)
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

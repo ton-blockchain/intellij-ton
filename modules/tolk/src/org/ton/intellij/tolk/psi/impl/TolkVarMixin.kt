@@ -6,8 +6,10 @@ import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.psi.TolkVar
+import org.ton.intellij.tolk.psi.TolkVarExpression
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.inference
+import org.ton.intellij.util.parentOfType
 import javax.swing.Icon
 
 abstract class TolkVarMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkVar {
@@ -29,3 +31,7 @@ abstract class TolkVarMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkVar
 
     override fun toString(): String = "TolkVar($text)"
 }
+
+val TolkVar.isMutable: Boolean
+    get() = parentOfType<TolkVarExpression>()?.varKeyword != null
+

@@ -13,6 +13,7 @@ enum class TolkColor(
     default: TextAttributesKey,
 ) {
     VARIABLE(TolkBundle.messagePointer("settings.tolk.color.variable"), Default.LOCAL_VARIABLE),
+    MUTABLE_VARIABLE(TolkBundle.messagePointer("settings.tolk.color.variable.mutable"), Default.REASSIGNED_LOCAL_VARIABLE),
     FIELD(TolkBundle.messagePointer("settings.tolk.color.field"), Default.INSTANCE_FIELD),
     CONSTANT(TolkBundle.messagePointer("settings.tolk.color.constant"), Default.CONSTANT),
     GLOBAL_VARIABLE(TolkBundle.messagePointer("settings.tolk.color.global"), Default.GLOBAL_VARIABLE),

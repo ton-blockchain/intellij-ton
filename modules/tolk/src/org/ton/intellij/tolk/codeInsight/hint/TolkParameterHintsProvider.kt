@@ -18,6 +18,10 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
             element
         ) { parameter, argument ->
             val parameterName = parameter.name ?: return@iterateOverParameters
+
+            // There is no need to show a hint for single letter parameters as it does not add any information to the reader
+            if (parameterName.length == 1) return@iterateOverParameters
+
             val expression = argument?.expression?.unwrapParentheses() ?: return@iterateOverParameters
             if (expression !is TolkReferenceElement || expression.referenceName != parameterName) {
                 sink.addPresentation(

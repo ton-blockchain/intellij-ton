@@ -5,6 +5,7 @@ import com.intellij.codeInsight.hints.declarative.InlineInlayPosition
 import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.TolkCallExpression
 import org.ton.intellij.tolk.psi.TolkReferenceElement
+import org.ton.intellij.tolk.psi.impl.functionSymbol
 import org.ton.intellij.tolk.psi.unwrapParentheses
 import org.ton.intellij.util.printPsi
 
@@ -14,6 +15,13 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
         sink: InlayTreeSink
     ) {
         if (element !is TolkCallExpression) return
+
+        val function = element.functionSymbol
+        if (function?.name == "ton") {
+            // Obvious and `floatString:` is too long for a parameter hint here
+            return
+        }
+
         iterateOverParameters(
             element
         ) { parameter, argument ->

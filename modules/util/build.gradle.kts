@@ -9,3 +9,7 @@ dependencies {
         bundledPlugin("org.intellij.plugins.markdown")
     }
 }
+
+intellijPlatform {
+    instrumentCode.set(false)
+}

@@ -20,7 +20,6 @@ enum class FuncColor(
     PARENTHESES("Braces and Operators//Parentheses", Default.PARENTHESES),
     SEMICOLON("Braces and Operators//Semicolon", Default.SEMICOLON),
     COMMA("Braces and Operators//Comma", Default.COMMA),
-    DOT("Braces and Operators//Dot", Default.DOT),
     OPERATION_SIGN("Braces and Operators//Operation signs", Default.OPERATION_SIGN),
 
     NUMBER("Literals//Number", Default.NUMBER),
@@ -41,8 +40,6 @@ enum class FuncColor(
 
     PARAMETER("Parameters//Parameter", Default.PARAMETER),
     TYPE_PARAMETER("Parameters//Type parameter", TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")),
-
-    IDENTIFIER("Identifier", Default.IDENTIFIER),
     ;
 
     val textAttributesKey =

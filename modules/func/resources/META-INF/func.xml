@@ -42,6 +42,8 @@
         <lang.elementManipulator forClass="org.ton.intellij.func.psi.FuncIncludeDefinition"
                                  implementationClass="org.ton.intellij.func.psi.impl.FuncIncludePathElementManipulator"/>
 
+        <colorSettingsPage implementation="org.ton.intellij.func.ide.colors.FuncColorSettingsPage"/>
+
         <typedHandler implementation="org.ton.intellij.func.editor.FuncTypedHandler" id="FuncTypedHandler"/>
 
         <liveTemplateContext

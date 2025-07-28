@@ -88,6 +88,7 @@ class TolkCompletionContributor : CompletionContributor() {
         extend(TolkExpressionFieldProvider)
         extend(TolkMatchPatternTypesCompletionProvider)
         extend(TolkAnnotationCompletionProvider)
+        extend(TolkBuiltinCompletionProvider)
     }
 
     fun extend(provider: TolkCompletionProvider) {

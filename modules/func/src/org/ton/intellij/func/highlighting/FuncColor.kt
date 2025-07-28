@@ -9,34 +9,37 @@ enum class FuncColor(
     displayName: String,
     default: TextAttributesKey,
 ) {
-    LINE_COMMENT("Line comment", Default.LINE_COMMENT),
-    BLOCK_COMMENT("Block comment", Default.BLOCK_COMMENT),
-    DOC_COMMENT("Documentation", Default.DOC_COMMENT),
-    DOC_CODE("Documentation Code", Default.DOC_COMMENT_MARKUP),
-    DOC_LINK("Documentation Link", Default.DOC_COMMENT_TAG_VALUE),
+    LINE_COMMENT("Comments//Line comment", Default.LINE_COMMENT),
+    BLOCK_COMMENT("Comments//Block comment", Default.BLOCK_COMMENT),
+    DOC_COMMENT("Documentation//Comment", Default.DOC_COMMENT),
+    DOC_CODE("Documentation//Code", Default.DOC_COMMENT_MARKUP),
+    DOC_LINK("Documentation//Link", Default.DOC_COMMENT_TAG_VALUE),
 
-    BRACES("Braces", Default.BRACES),
-    BRACKETS("Brackets", Default.BRACKETS),
-    PARENTHESES("Parentheses", Default.PARENTHESES),
-    SEMICOLON("Semicolon", Default.SEMICOLON),
-    COMMA("Comma", Default.COMMA),
-    DOT("Dot", Default.DOT),
-    OPERATION_SIGN("Operation signs", Default.OPERATION_SIGN),
+    BRACES("Braces and Operators//Braces", Default.BRACES),
+    BRACKETS("Braces and Operators//Brackets", Default.BRACKETS),
+    PARENTHESES("Braces and Operators//Parentheses", Default.PARENTHESES),
+    SEMICOLON("Braces and Operators//Semicolon", Default.SEMICOLON),
+    COMMA("Braces and Operators//Comma", Default.COMMA),
+    OPERATION_SIGN("Braces and Operators//Operation signs", Default.OPERATION_SIGN),
 
-    NUMBER("Number", Default.NUMBER),
-    STRING("String", Default.STRING),
+    NUMBER("Literals//Number", Default.NUMBER),
+    STRING("Literals//String", Default.STRING),
+
     KEYWORD("Keyword", Default.KEYWORD),
-    PRIMITIVE_TYPES("Primitive types", Default.KEYWORD),
-    FUNCTION_DECLARATION("Function declaration", Default.FUNCTION_DECLARATION),
-    FUNCTION_CALL("Function call", Default.FUNCTION_CALL),
-    FUNCTION_STATIC("Function static", Default.STATIC_METHOD),
-    CONSTANT("Constant", Default.CONSTANT),
-    GLOBAL_VARIABLE("Global variable", Default.GLOBAL_VARIABLE),
-    LOCAL_VARIABLE("Local variable", Default.LOCAL_VARIABLE),
+
+    PRIMITIVE_TYPES("Types//Primitive types", Default.KEYWORD),
+
+    FUNCTION_DECLARATION("Functions//Function declaration", Default.FUNCTION_DECLARATION),
+    FUNCTION_CALL("Functions//Function call", Default.FUNCTION_CALL),
+
+    CONSTANT("Variables//Constant", Default.CONSTANT),
+    GLOBAL_VARIABLE("Variables//Global variable", Default.GLOBAL_VARIABLE),
+    LOCAL_VARIABLE("Variables//Local variable", Default.LOCAL_VARIABLE),
+
     MACRO("Macro", Default.METADATA),
-    PARAMETER("Parameter", Default.PARAMETER),
-    IDENTIFIER("Identifier", Default.IDENTIFIER),
-    TYPE_PARAMETER("Type parameter", TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")),
+
+    PARAMETER("Parameters//Parameter", Default.PARAMETER),
+    TYPE_PARAMETER("Parameters//Type parameter", TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")),
     ;
 
     val textAttributesKey =

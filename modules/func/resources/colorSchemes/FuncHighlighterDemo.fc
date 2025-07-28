@@ -1,0 +1,34 @@
+{- This is a block comment -}
+;; This is a line comment
+
+<MACRO>#pragma</MACRO> version >=0.4.3;
+
+<MACRO>#include</MACRO> "stdlib.fc";
+
+;;; This is a documentation comment
+const int <CONSTANT>SHARD_DEPTH</CONSTANT> = 8;
+
+global int <GLOBAL_VARIABLE>stored_seqno</GLOBAL_VARIABLE>;
+
+forall <TYPE_PARAMETER>X</TYPE_PARAMETER> -> tuple <FUNCTION_DECLARATION>cons</FUNCTION_DECLARATION>(<TYPE_PARAMETER>X</TYPE_PARAMETER> <PARAMETER>head</PARAMETER>, tuple <PARAMETER>tail</PARAMETER>) asm "CONS";
+
+cell <FUNCTION_DECLARATION>pack_jetton_wallet_data</FUNCTION_DECLARATION>(int <PARAMETER>balance</PARAMETER>, slice <PARAMETER>owner_address</PARAMETER>, slice <PARAMETER>jetton_master_address</PARAMETER>) inline {
+    return <FUNCTION_CALL>begin_cell</FUNCTION_CALL>()
+        .<FUNCTION_CALL>store_coins</FUNCTION_CALL>(<PARAMETER>balance</PARAMETER>)
+        .<FUNCTION_CALL>store_slice</FUNCTION_CALL>(<PARAMETER>owner_address</PARAMETER>)
+        .<FUNCTION_CALL>store_slice</FUNCTION_CALL>(<PARAMETER>jetton_master_address</PARAMETER>)
+        .<FUNCTION_CALL>end_cell</FUNCTION_CALL>();
+}
+
+() <FUNCTION_DECLARATION>recv_internal</FUNCTION_DECLARATION>(int <PARAMETER>my_balance</PARAMETER>, int <PARAMETER>msg_value</PARAMETER>, cell <PARAMETER>in_msg_full</PARAMETER>, slice <PARAMETER>in_msg_body</PARAMETER>) {
+    if (<PARAMETER>in_msg_body</PARAMETER>.<FUNCTION_CALL>slice_empty?</FUNCTION_CALL>()) { ;; ignore empty messages
+        return ();
+    }
+
+    slice <LOCAL_VARIABLE>cs</LOCAL_VARIABLE> = <PARAMETER>in_msg_full</PARAMETER>.<FUNCTION_CALL>begin_parse</FUNCTION_CALL>();
+    int <LOCAL_VARIABLE>flags</LOCAL_VARIABLE> = <LOCAL_VARIABLE>cs</LOCAL_VARIABLE><FUNCTION_CALL>~load_uint</FUNCTION_CALL>(4);
+    if (<LOCAL_VARIABLE>flags</LOCAL_VARIABLE> & 1) {
+        return ();
+    }
+    slice <LOCAL_VARIABLE>sender_address</LOCAL_VARIABLE> = <LOCAL_VARIABLE>cs</LOCAL_VARIABLE><FUNCTION_CALL>~load_msg_addr</FUNCTION_CALL>();
+}

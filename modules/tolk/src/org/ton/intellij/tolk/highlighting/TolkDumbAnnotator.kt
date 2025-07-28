@@ -11,6 +11,7 @@ import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.ide.colors.TolkColor
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.isMethod
+import org.ton.intellij.tolk.psi.impl.isMutable
 import org.ton.intellij.tolk.psi.impl.isStatic
 import org.ton.intellij.util.childOfType
 
@@ -59,7 +60,11 @@ class TolkDumbAnnotator : Annotator, DumbAware {
                 is TolkTypeDef -> TolkColor.TYPE_ALIAS.textAttributesKey
                 is TolkStructField -> TolkColor.FIELD.textAttributesKey
                 is TolkStructExpressionField -> TolkColor.FIELD.textAttributesKey
-                is TolkVar -> TolkColor.VARIABLE.textAttributesKey
+                is TolkVar -> if (element.isMutable) {
+                    TolkColor.MUTABLE_VARIABLE.textAttributesKey
+                } else {
+                    TolkColor.VARIABLE.textAttributesKey
+                }
                 is TolkCatchParameter -> TolkColor.VARIABLE.textAttributesKey
                 is TolkSelfParameter -> TolkColor.SELF_PARAMETER.textAttributesKey
                 is TolkParameter -> if (element.isMutable) {

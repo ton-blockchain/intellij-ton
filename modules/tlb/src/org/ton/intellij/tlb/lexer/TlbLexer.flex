@@ -82,7 +82,7 @@ LINE_DOCUMENTATION = "/""/""/"[^\n]*
 LINE_COMMENT = "/""/"[^\n]*
 
 NUMBER=[0-9]+
-IDENTIFIER=[a-zA-Z_][0-9a-zA-Z0-9_]*
+IDENTIFIER=[0-9a-zA-Z_]*
 //PREDIFINED_TYPE=u?int[0-9]+|Cell
 
 %xstate BLOCK_COMMENT_STATE, DOC_COMMENT_STATE

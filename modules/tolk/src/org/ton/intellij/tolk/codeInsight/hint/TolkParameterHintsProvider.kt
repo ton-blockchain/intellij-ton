@@ -25,7 +25,7 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
                     hasBackground = true,
                 ) {
                     printPsi(parameter, parameterName)
-                    text(" = ")
+                    text(":")
                 }
             }
         }

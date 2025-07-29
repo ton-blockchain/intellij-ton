@@ -142,7 +142,8 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 is TolkConstVar,
                 is TolkGlobalVar,
                 is TolkTypeDef,
-                is TolkStruct -> {
+                is TolkStruct,
+                    -> {
                     fun canAddAsUnionMatchVariant(): Boolean {
                         if (!inMatchPattern) return false
                         if (declaredMatchArms.contains(name)) return false
@@ -150,8 +151,14 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                         val type = element.type ?: return false
                         return expectType.variants.any { it.canRhsBeAssigned(type) }
                     }
-                    val canAddByExpectType = expectType.canAddElement(element.type)
+
                     val canAddAsUnionMatchVariant = canAddAsUnionMatchVariant()
+                    if (inMatchPattern && !canAddAsUnionMatchVariant) {
+                        // already processed
+                        return true
+                    }
+
+                    val canAddByExpectType = expectType.canAddElement(element.type)
                     if (!canAddByExpectType && !canAddAsUnionMatchVariant) return true
                     if (!checkLimit()) return false
                     result.addElement(element.toLookupElement(currentFile, ctx))

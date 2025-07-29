@@ -55,6 +55,8 @@
                 implementation="org.ton.intellij.func.template.FuncEverywhereContextType"/>
         <defaultLiveTemplates file="/liveTemplates/funcHidden.xml" hidden="true"/>
 
+        <gotoSymbolContributor implementation="org.ton.intellij.func.ide.navigation.FuncGotoSymbolContributor"/>
+
         <!-- Hints -->
         <codeInsight.parameterInfo language="FunC"
                                    implementationClass="org.ton.intellij.func.ide.FuncParameterInfoHandler"/>

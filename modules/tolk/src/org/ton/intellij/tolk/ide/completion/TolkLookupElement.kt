@@ -69,6 +69,7 @@ data class TolkLookupElementData(
     enum class KeywordKind {
         // Top Priority
         ELSE_BRANCH,
+        CONTEXT_RETURN_KEYWORD,
         KEYWORD,
         NOT_A_KEYWORD,
         // Least priority

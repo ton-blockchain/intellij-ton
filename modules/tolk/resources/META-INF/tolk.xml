@@ -209,6 +209,12 @@
         <completion.contributor language="Tolk"
                                 implementationClass="org.ton.intellij.tolk.ide.completion.TolkCompletionContributor"/>
 
+        <!-- region Postfix Templates -->
+        <codeInsight.template.postfixTemplateProvider
+                language="Tolk"
+                implementationClass="org.ton.intellij.tolk.ide.completion.postfix.TolkPostfixTemplateProvider"/>
+        <!-- endregion Postfix Templates -->
+
         <!-- Code Style -->
         <langCodeStyleSettingsProvider
                 implementation="org.ton.intellij.tolk.ide.formatter.TolkLanguageCodeStyleSettingsProvider"/>

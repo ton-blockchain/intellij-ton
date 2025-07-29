@@ -10,6 +10,8 @@ import org.ton.intellij.util.descendantOfTypeStrict
 
 @Service(Service.Level.PROJECT)
 class TolkPsiFactory private constructor(val project: Project) {
+    private val keywords = TOLK_KEYWORDS.types.filterIsInstance<TolkTokenType>().map { it.name }.toSet()
+
     fun createFile(text: CharSequence) =
         createFile(null, text)
 
@@ -38,8 +40,14 @@ class TolkPsiFactory private constructor(val project: Project) {
         return (createStatement("$text;") as TolkExpressionStatement).expression
     }
 
+    fun isValidIdentifier(name: String): Boolean {
+        if (keywords.contains(name)) return false
+        return Regex("^[A-Z_a-z]\\w*$").matches(name)
+    }
+
     fun createIdentifier(text: String): PsiElement {
-        val funcFile = createFile("fun $text() {}")
+        val actualText = if (!isValidIdentifier(text)) "`$text`" else text
+        val funcFile = createFile("fun $actualText() {}")
         val function = funcFile.functions.first()
         return function.identifier!!
     }

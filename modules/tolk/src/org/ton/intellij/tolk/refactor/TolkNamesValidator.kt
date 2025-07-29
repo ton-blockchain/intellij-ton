@@ -23,15 +23,8 @@ class TolkNamesValidator : NamesValidator {
         }
         if (name.startsWith("{-")) return false
         if (name.startsWith("\"\"\"") && name.endsWith("\"\"\"")) return false
-        for ((index, currentChar) in name.withIndex()) {
-            if (currentChar.isWhitespace()) return false
-            if (index == 0 && currentChar == '~') continue
-            if (currentChar in BAN_CHARS) return false
-        }
-        return true
-    }
 
-    companion object {
-        private const val BAN_CHARS = ";.().~"
+        // any identifiers with spaces/non-identifier characters will be wrapped to ``
+        return true
     }
 }

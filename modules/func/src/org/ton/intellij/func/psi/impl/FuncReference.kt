@@ -30,38 +30,60 @@ class FuncReference(
         if (file != null) {
             val contextFunction = element.parentOfType<FuncFunction>()
             val includes = file.collectIncludedFiles(true)
-
             includes.forEach { includedFile ->
-                includedFile.constVars.forEach { constVar ->
-                    if (constVar.name == name) {
-                        return@PolyVariantResolver arrayOf(PsiElementResolveResult(constVar))
-                    }
+                val result = processFile(includedFile, name, contextFunction)
+                if (result != null) {
+                    return@PolyVariantResolver result
                 }
-                includedFile.globalVars.forEach { globalVar ->
-                    if (globalVar.name == name) {
-                        return@PolyVariantResolver arrayOf(PsiElementResolveResult(globalVar))
-                    }
-                }
-                includedFile.functions.forEach { function ->
-                    val functionName = function.name
-                    if (functionName == name) {
-                        return@PolyVariantResolver arrayOf(PsiElementResolveResult(function))
-                    }
-                    if (name.startsWith("~") && functionName != null && !functionName.startsWith("~")) {
-                        val tensorList = (function.typeReference as? FuncTensorType)?.typeReferenceList
-                        if (tensorList?.size == 2 && functionName == name.substring(1)) {
-                            return@PolyVariantResolver arrayOf(PsiElementResolveResult(function))
-                        }
-                    }
+            }
 
-                    if (function == contextFunction) {
-                        return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
+            val currentDirFiles = file.parent?.files
+            currentDirFiles?.mapNotNull { currentDirFile ->
+                if (currentDirFile is FuncFile) {
+                    val result = processFile(currentDirFile, name, contextFunction)
+                    if (result != null) {
+                        return@PolyVariantResolver result
                     }
                 }
             }
         }
 
         ResolveResult.EMPTY_ARRAY
+    }
+
+    private fun processFile(
+        includedFile: FuncFile,
+        name: String,
+        contextFunction: FuncFunction?,
+    ): Array<out ResolveResult?>? {
+        includedFile.constVars.forEach { constVar ->
+            if (constVar.name == name) {
+                return arrayOf(PsiElementResolveResult(constVar))
+            }
+        }
+        includedFile.globalVars.forEach { globalVar ->
+            if (globalVar.name == name) {
+                return arrayOf(PsiElementResolveResult(globalVar))
+            }
+        }
+        includedFile.functions.forEach { function ->
+            val functionName = function.name
+            if (functionName == name) {
+                return arrayOf(PsiElementResolveResult(function))
+            }
+            if (name.startsWith("~") && functionName != null && !functionName.startsWith("~")) {
+                val tensorList = (function.typeReference as? FuncTensorType)?.typeReferenceList
+                if (tensorList?.size == 2 && functionName == name.substring(1)) {
+                    return arrayOf(PsiElementResolveResult(function))
+                }
+            }
+
+            if (function == contextFunction) {
+                return null
+            }
+        }
+
+        return null
     }
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {

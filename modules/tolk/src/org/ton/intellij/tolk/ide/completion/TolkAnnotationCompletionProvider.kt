@@ -6,6 +6,7 @@ import com.intellij.codeInsight.completion.InsertHandler
 import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.codeInsight.template.impl.ConstantNode
 import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
@@ -23,21 +24,21 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
         LookupElementBuilder.create("inline"),
         LookupElementBuilder.create("inline_ref"),
         LookupElementBuilder.create("method_id").withInsertHandler(ParInsertHandler),
-        LookupElementBuilder.create("deprecated"),
+        LookupElementBuilder.create("deprecated").withTailText("(\"reason\")").withInsertHandler(StringArgumentInsertHandler("")),
         LookupElementBuilder.create("custom").withInsertHandler(ParInsertHandler),
         LookupElementBuilder.create("overflow1023_policy")
             .withTailText("(\"suppress\")")
             .withInsertHandler { ctx, item ->
-            ParInsertHandler.handleInsert(ctx, item)
-            // Проверяем, находится ли курсор внутри пустых скобок
-            val offset = ctx.editor.caretModel.offset
-            val chars = ctx.document.charsSequence
+                ParInsertHandler.handleInsert(ctx, item)
+                // Проверяем, находится ли курсор внутри пустых скобок
+                val offset = ctx.editor.caretModel.offset
+                val chars = ctx.document.charsSequence
 
-            if (offset < chars.length && chars[offset] == ')' && offset > 0 && chars[offset - 1] == '(') {
-                ctx.document.insertString(offset, "\"suppress\"")
-                ctx.editor.caretModel.moveToOffset(offset + "\"suppress\")".length)
+                if (offset < chars.length && chars[offset] == ')' && offset > 0 && chars[offset - 1] == '(') {
+                    ctx.document.insertString(offset, "\"suppress\"")
+                    ctx.editor.caretModel.moveToOffset(offset + "\"suppress\")".length)
+                }
             }
-        }
     ).map {
         it.withIcon(TolkIcons.ANNOTATION)
     }
@@ -45,7 +46,7 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         result.addAllElements(lookupElements)
     }
@@ -53,7 +54,7 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
     private object ParInsertHandler : InsertHandler<LookupElement> {
         override fun handleInsert(
             context: InsertionContext,
-            item: LookupElement
+            item: LookupElement,
         ) {
             val offset = context.editor.caretModel.offset
             val chars = context.document.charsSequence
@@ -69,4 +70,12 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
         }
     }
 
+    private class StringArgumentInsertHandler(private val value: String) : InsertHandler<LookupElement> {
+        override fun handleInsert(
+            context: InsertionContext,
+            item: LookupElement,
+        ) {
+            TemplateStringInsertHandler("(\"\$value$\")", true, "value" to ConstantNode(value)).handleInsert(context, item)
+        }
+    }
 }

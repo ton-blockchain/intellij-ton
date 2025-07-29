@@ -321,6 +321,14 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """.trimIndent())
 
+    fun `test deprecated annotation`() = doFirstCompletion("""
+        @de/*caret*/
+        fun foo() {}
+    """, """
+        @deprecated("")/*caret*/
+        fun foo() {}
+    """.trimIndent())
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

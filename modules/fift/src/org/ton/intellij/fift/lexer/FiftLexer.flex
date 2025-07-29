@@ -93,7 +93,7 @@ LINE_COMMENT = "/""/"[^\n]*
 %xstate ASM_STATE
 
 %%
-<YYINITIAL> "PROGRAM{"            { yybegin(ASM_STATE); return PROGRAM_START; }
+<YYINITIAL> "PROGRAM{"          { yybegin(ASM_STATE); return PROGRAM_START; }
 
 <ASM_STATE> "}END>c"            { yybegin(YYINITIAL); return END_C; }
 
@@ -104,6 +104,7 @@ LINE_COMMENT = "/""/"[^\n]*
 <ASM_STATE> "}>s"               { return ANGLE_RBRACE_S; }
 <ASM_STATE> "}>"                { return ANGLE_RBRACE; }
 <ASM_STATE> "<{"                { return ANGLE_LBRACE; }
+<ASM_STATE> "CONT:<{"           { return CONT_START; }
 
 <ASM_STATE> "PROCINLINE:<{"     { return PROCINLINE_START; }
 <ASM_STATE> "PROCREF:<{"        { return PROCREF_START; }

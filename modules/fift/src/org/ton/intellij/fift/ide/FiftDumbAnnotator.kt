@@ -32,7 +32,7 @@ fun identifierColor(element: PsiElement): FiftColor? {
     return when (element) {
         is FiftTvmInstruction -> {
             val firstChar = element.text[0]
-            if (firstChar !in 'A'..'Z' && firstChar !in '0'..'9') {
+            if (firstChar !in 'A'..'Z' && firstChar !in '0'..'9' && firstChar != '-') {
                 // foo CALLDICT
                 // ^^^
                 return FiftColor.ASSEMBLY_CALL

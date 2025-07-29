@@ -80,6 +80,7 @@
         REPEAT_START       = 'REPEAT:<{'
         UNTIL_START        = 'UNTIL:<{'
         DO_SEP             = '}>DO<{'
+        CONT_START         = 'CONT:<{'
         ANGLE_LBRACE       = '<{'
         ANGLE_RBRACE       = '}>'
         ANGLE_RBRACE_C     = '}>c'
@@ -155,7 +156,7 @@ AsmPrimitive ::= InstructionBlock
                | number_literal
                | ARG_IDENTIFIER
 
-InstructionBlock ::= '<{' Instruction* ( '}>' | '}>c' | '}>s' | '}>CONT' )
+InstructionBlock ::= ('<{' | 'CONT:<{') Instruction* ( '}>' | '}>c' | '}>s' | '}>CONT' )
 
 IfStatement    ::= ('IF:<{' | 'IFNOT:<{') Instruction* ('}>ELSE<{' Instruction*)? '}>' ?
 IfjmpStatement ::= ('IFJMP:<{' | 'IFNOTJMP:<{') Instruction* '}>'

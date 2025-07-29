@@ -53,6 +53,7 @@ class FiftParserDefinition : ParserDefinition {
             FiftTypes.REPEAT_START,
             FiftTypes.UNTIL_START,
             FiftTypes.DO_SEP,
+            FiftTypes.CONT_START,
             FiftTypes.ANGLE_LBRACE,
             FiftTypes.ANGLE_RBRACE,
             FiftTypes.ANGLE_RBRACE_C,

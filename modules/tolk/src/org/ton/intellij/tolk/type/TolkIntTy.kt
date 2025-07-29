@@ -68,7 +68,7 @@ data class TolkConstantIntTy(
 
 data class TolkIntRangeTy(
     override val range: TvmIntRangeSet
-) : TolkIntTy {
+) : TolkIntTy, TolkIntTyFamily {
 
     override fun negate(): TolkIntTy = TolkIntRangeTy(range.unaryMinus())
 

@@ -281,6 +281,46 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """.trimIndent())
 
+    fun `test return, void type`() = doFirstCompletion("""
+        fun foo() {
+            return/*caret*/
+        }
+    """, """
+        fun foo() {
+            return;/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test return, int type`() = doFirstCompletion("""
+        fun foo(): int {
+            return/*caret*/
+        }
+    """, """
+        fun foo(): int {
+            return ;/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test return, bool type`() = doFirstCompletion("""
+        fun foo(): bool {
+            return/*caret*/
+        }
+    """, """
+        fun foo(): bool {
+            return ;/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test return, nullable type`() = doFirstCompletion("""
+        fun foo(): slice? {
+            return/*caret*/
+        }
+    """, """
+        fun foo(): slice? {
+            return ;/*caret*/
+        }
+    """.trimIndent())
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

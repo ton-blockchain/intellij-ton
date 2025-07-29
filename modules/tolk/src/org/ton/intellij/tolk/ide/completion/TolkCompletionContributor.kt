@@ -20,7 +20,6 @@ class TolkCompletionContributor : CompletionContributor() {
             TolkCompletionPatterns.inBlock(),
             TolkKeywordCompletionProvider(
                 KEYWORD_PRIORITY,
-                "return",
                 "lazy"
             )
         )
@@ -80,6 +79,7 @@ class TolkCompletionContributor : CompletionContributor() {
         extend(TolkAnnotationCompletionProvider)
         extend(TolkBuiltinCompletionProvider)
         extend(TolkSnippetsCompletionProvider)
+        extend(TolkReturnCompletionProvider)
     }
 
     fun extend(provider: TolkCompletionProvider) {

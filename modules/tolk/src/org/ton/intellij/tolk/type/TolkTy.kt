@@ -302,6 +302,8 @@ object TolkTyAddress : TolkPrimitiveTy {
     override fun toString(): String = "address"
 }
 
+interface TolkIntTyFamily : TolkPrimitiveTy
+
 object TolkTyCoins : TolkPrimitiveTy {
     override fun actualType(): TolkTy = this
 

@@ -5,6 +5,7 @@ import com.intellij.lang.folding.FoldingBuilder
 import com.intellij.lang.folding.FoldingDescriptor
 import com.intellij.openapi.editor.Document
 import org.ton.intellij.func.psi.FuncElementTypes
+import org.ton.intellij.func.parser.FuncParserDefinition
 
 class FuncFoldingBuilder : FoldingBuilder {
     override fun buildFoldRegions(node: ASTNode, document: Document): Array<FoldingDescriptor> {
@@ -17,6 +18,10 @@ class FuncFoldingBuilder : FoldingBuilder {
         when (node.elementType) {
             FuncElementTypes.BLOCK_STATEMENT,
                 -> descriptors.add(FoldingDescriptor(node, node.textRange))
+
+            FuncParserDefinition.BLOCK_DOC_COMMENT,
+            FuncParserDefinition.BLOCK_COMMENT,
+                -> descriptors.add(FoldingDescriptor(node, node.textRange))
         }
 
         node.getChildren(null).forEach { childNode ->
@@ -26,7 +31,11 @@ class FuncFoldingBuilder : FoldingBuilder {
 
     override fun getPlaceholderText(node: ASTNode): String = when (node.elementType) {
         FuncElementTypes.BLOCK_STATEMENT,
-            -> "{...}"
+             -> "{...}"
+
+        FuncParserDefinition.BLOCK_DOC_COMMENT,
+        FuncParserDefinition.BLOCK_COMMENT,
+             -> "{-...-}"
 
         else -> "..."
     }

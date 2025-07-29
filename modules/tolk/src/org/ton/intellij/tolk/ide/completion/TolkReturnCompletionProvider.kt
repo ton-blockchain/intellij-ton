@@ -12,7 +12,7 @@ import org.ton.intellij.tolk.ide.completion.TolkLookupElementData.KeywordKind.KE
 import org.ton.intellij.tolk.ide.completion.TolkLookupElementData.KeywordKind.CONTEXT_RETURN_KEYWORD
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.impl.returnTy
-import org.ton.intellij.tolk.type.TolkInyTyFamily
+import org.ton.intellij.tolk.type.TolkIntTyFamily
 import org.ton.intellij.tolk.type.TolkTyBool
 import org.ton.intellij.tolk.type.TolkTyUnion
 import org.ton.intellij.tolk.type.TolkTyVoid
@@ -55,7 +55,7 @@ object TolkReturnCompletionProvider : TolkCompletionProvider(), DumbAware {
             result.addElement(createReturnExprElement2("false"))
         }
 
-        if (returnTy is TolkInyTyFamily) {
+        if (returnTy is TolkIntTyFamily) {
             result.addElement(createReturnExprElement2("0"))
         }
 

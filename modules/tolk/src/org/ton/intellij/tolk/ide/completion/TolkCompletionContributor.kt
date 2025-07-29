@@ -17,20 +17,10 @@ class TolkCompletionContributor : CompletionContributor() {
         extend(TolkTypeCompletionProvider)
         extend(
             CompletionType.BASIC,
-            inBlock(),
+            TolkCompletionPatterns.inBlock(),
             TolkKeywordCompletionProvider(
                 KEYWORD_PRIORITY,
-                "var",
-                "val",
-                "if",
                 "return",
-                "repeat",
-                "do",
-                "while",
-                "try",
-                "assert",
-                "throw",
-                "match",
                 "lazy"
             )
         )
@@ -80,7 +70,7 @@ class TolkCompletionContributor : CompletionContributor() {
             ),
             TolkKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
-                "else",
+                "while",
             )
         )
         extend(TolkCommonCompletionProvider)
@@ -89,6 +79,7 @@ class TolkCompletionContributor : CompletionContributor() {
         extend(TolkMatchPatternTypesCompletionProvider)
         extend(TolkAnnotationCompletionProvider)
         extend(TolkBuiltinCompletionProvider)
+        extend(TolkSnippetsCompletionProvider)
     }
 
     fun extend(provider: TolkCompletionProvider) {
@@ -98,19 +89,6 @@ class TolkCompletionContributor : CompletionContributor() {
     override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {
         super.fillCompletionVariants(parameters, withTolkSorter(parameters, result))
     }
-
-    private fun inBlock() =
-        psiElement().withParent(
-            psiElement(TolkReferenceExpression::class.java).withParent(
-                psiElement(
-                    TolkExpressionStatement::class.java
-                ).inside(TolkBlockStatement::class.java)
-            )
-        ).andNot(
-            psiElement().afterLeaf(
-                psiElement().withText(StandardPatterns.string().matches("\\d+"))
-            )
-        )
 
     private fun baseFunctionAttributePattern(
         vararg afterLeafs: ElementPattern<out PsiElement>,

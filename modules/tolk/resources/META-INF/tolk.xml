@@ -50,6 +50,9 @@
         <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkFunctionIndex"/>
         <stubElementTypeHolder class="org.ton.intellij.tolk.psi.TolkElementTypes" externalIdPrefix="tolk."/>
 
+        <gotoClassContributor implementation="org.ton.intellij.tolk.ide.navigation.TolkGotoClassLikeContributor"/>
+        <gotoSymbolContributor implementation="org.ton.intellij.tolk.ide.navigation.TolkGotoSymbolContributor"/>
+
         <editorNotificationProvider
                 implementation="org.ton.intellij.tolk.ide.configurable.TolkSetupToolchainNotificationProvider"/>
 

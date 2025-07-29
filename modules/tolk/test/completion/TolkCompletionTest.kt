@@ -403,6 +403,83 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """.trimIndent())
 
+    fun `test type match arm completion, no completion items`() = checkNoCompletion("""
+        struct (0x7e8764ef) IncreaseCounter {
+            queryId: uint64
+            increaseBy: uint32
+        }
+        
+        struct (0x3a752f06) ResetCounter {
+            queryId: uint64
+        }
+
+        type AllowedMessage = IncreaseCounter | ResetCounter
+        
+        fun foo(msg: AllowedMessage) {
+            match (msg) {
+                IncreaseCounter => {}
+                ResetCounter => {}
+                /*caret*/
+            }
+        }
+    """)
+
+    fun `test type match arm completion, single item`() = doSingleCompletion("""
+        struct (0x7e8764ef) IncreaseCounter {
+            queryId: uint64
+            increaseBy: uint32
+        }
+        
+        struct (0x3a752f06) ResetCounter {
+            queryId: uint64
+        }
+
+        type AllowedMessage = IncreaseCounter | ResetCounter
+        
+        fun foo(msg: AllowedMessage) {
+            match (msg) {
+                IncreaseCounter => {}
+                /*caret*/
+            }
+        }
+    """, """
+        struct (0x7e8764ef) IncreaseCounter {
+            queryId: uint64
+            increaseBy: uint32
+        }
+        
+        struct (0x3a752f06) ResetCounter {
+            queryId: uint64
+        }
+
+        type AllowedMessage = IncreaseCounter | ResetCounter
+        
+        fun foo(msg: AllowedMessage) {
+            match (msg) {
+                IncreaseCounter => {}
+                ResetCounter/*caret*/
+            }
+        }
+    """)
+
+    fun `test value match arm completion, single item`() = doSingleCompletion("""
+        const FOO = 100
+
+        fun foo() {
+            match (0) {
+                FO/*caret*/
+            }
+        }
+    """, """
+        const FOO = 100
+
+        fun foo() {
+            match (0) {
+                FOO/*caret*/
+            }
+        }
+    """)
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

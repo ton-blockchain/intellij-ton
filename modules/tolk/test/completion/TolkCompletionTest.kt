@@ -97,6 +97,190 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         get fun foo() buil/*caret*/
     """)
 
+    fun `test do-while loop, while keyword`() = doFirstCompletion("""
+        fun foo() {
+            do {
+                
+            } whi/*caret*/
+        }
+    """, """
+        fun foo() {
+            do {
+                
+            } while /*caret*/
+        }
+    """.trimIndent())
+
+    fun `test val snippet`() = doFirstCompletion("""
+        fun foo() {
+            val/*caret*/
+        }
+    """, """
+        fun foo() {
+            val name = 0;/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test valt snippet`() = doFirstCompletion("""
+        fun foo() {
+            valt/*caret*/
+        }
+    """, """
+        fun foo() {
+            val name: int = 0;/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test var snippet`() = doFirstCompletion("""
+        fun foo() {
+            var/*caret*/
+        }
+    """, """
+        fun foo() {
+            var name = 0;/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test vart snippet`() = doFirstCompletion("""
+        fun foo() {
+            vart/*caret*/
+        }
+    """, """
+        fun foo() {
+            var name: int = 0;/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test if snippet`() = doFirstCompletion("""
+        fun foo() {
+            if/*caret*/
+        }
+    """, """
+        fun foo() {
+            if (true) {
+                /*caret*/
+            }
+        }
+    """.trimIndent())
+
+    fun `test ife snippet`() = doFirstCompletion("""
+        fun foo() {
+            ife/*caret*/
+        }
+    """, """
+        fun foo() {
+            if (true) {
+                
+            } else {
+                /*caret*/
+            }
+        }
+    """.trimIndent())
+
+    fun `test while snippet`() = doFirstCompletion("""
+        fun foo() {
+            while/*caret*/
+        }
+    """, """
+        fun foo() {
+            while (true) {
+                /*caret*/
+            }
+        }
+    """.trimIndent())
+
+    fun `test do snippet`() = doFirstCompletion("""
+        fun foo() {
+            do/*caret*/
+        }
+    """, """
+        fun foo() {
+            do {
+                /*caret*/
+            } while (true);
+        }
+    """.trimIndent())
+
+    fun `test repeat snippet`() = doFirstCompletion("""
+        fun foo() {
+            repeat/*caret*/
+        }
+    """, """
+        fun foo() {
+            repeat (10) {
+                /*caret*/
+            }
+        }
+    """.trimIndent())
+
+    fun `test try snippet`() = doFirstCompletion("""
+        fun foo() {
+            try/*caret*/
+        }
+    """, """
+        fun foo() {
+            try {
+                /*caret*/
+            }
+        }
+    """.trimIndent())
+
+    fun `test tryc snippet`() = doFirstCompletion("""
+        fun foo() {
+            tryc/*caret*/
+        }
+    """, """
+        fun foo() {
+            try {
+                
+            } catch (e) {
+                /*caret*/
+            }
+        }
+    """.trimIndent())
+
+    fun `test match snippet`() = doFirstCompletion("""
+        fun foo() {
+            match/*caret*/
+        }
+    """, """
+        fun foo() {
+            match (true) {
+                /*caret*/
+            }
+        }
+    """.trimIndent())
+
+    fun `test assert snippet`() = doFirstCompletion("""
+        fun foo() {
+            assert/*caret*/
+        }
+    """, """
+        fun foo() {
+            assert (false) throw 5;/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test throw snippet`() = doFirstCompletion("""
+        fun foo() {
+            throw/*caret*/
+        }
+    """, """
+        fun foo() {
+            throw 5;/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test throw snippet after assert`() = doFirstCompletion("""
+        fun foo() {
+            assert (false) throw/*caret*/
+        }
+    """, """
+        fun foo() {
+            assert (false) throw 5;/*caret*/
+        }
+    """.trimIndent())
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

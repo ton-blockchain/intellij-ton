@@ -36,7 +36,7 @@ abstract class TolkCompletionTestFixtureBase<IN>(
         checkByText(code, after.trimIndent()) {
             val variants = myFixture.completeBasic()
             if (variants != null) {
-                myFixture.type('\n')
+                myFixture.type('\t')
             }
         }
     }

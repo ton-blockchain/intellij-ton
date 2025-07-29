@@ -329,6 +329,80 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         fun foo() {}
     """.trimIndent())
 
+    fun `test postfix completion, arg`() = doFirstCompletion("""
+        fun foo() {
+            true.arg/*caret*/
+        }
+    """, """
+        fun foo() {
+            /*caret*/(true)
+        }
+    """.trimIndent())
+
+    fun `test postfix completion, if`() = doFirstCompletion("""
+        fun foo() {
+            true.if/*caret*/
+        }
+    """, """
+        fun foo() {
+            if (true) {
+                /*caret*/
+            }
+        }
+    """.trimIndent())
+
+    fun `test postfix completion, match`() = doFirstCompletion("""
+        fun foo() {
+            true.match/*caret*/
+        }
+    """, """
+        fun foo() {
+            match (true) {
+                /*caret*/
+            }
+        }
+    """.trimIndent())
+
+    fun `test postfix completion, not`() = doFirstCompletion("""
+        fun foo() {
+            true.not/*caret*/
+        }
+    """, """
+        fun foo() {
+            !true/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test postfix completion, par`() = doFirstCompletion("""
+        fun foo() {
+            true.par/*caret*/
+        }
+    """, """
+        fun foo() {
+            (true)/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test postfix completion, val`() = doFirstCompletion("""
+        fun foo() {
+            true.val/*caret*/
+        }
+    """, """
+        fun foo() {
+            val name/*caret*/ = true;
+        }
+    """.trimIndent())
+
+    fun `test postfix completion, var`() = doFirstCompletion("""
+        fun foo() {
+            true.var/*caret*/
+        }
+    """, """
+        fun foo() {
+            var name/*caret*/ = true;
+        }
+    """.trimIndent())
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

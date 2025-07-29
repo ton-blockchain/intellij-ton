@@ -36,6 +36,7 @@ object FuncReturnCompletionProvider : FuncCompletionProvider(), DumbAware {
 
         result.addElement(
             LookupElementBuilder.create("return")
+                .bold()
                 .withTailText(" expr;", true)
                 .withInsertHandler(
                     TemplateStringInsertHandler(

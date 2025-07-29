@@ -41,6 +41,7 @@ object TolkReturnCompletionProvider : TolkCompletionProvider(), DumbAware {
 
         result.addElement(
             LookupElementBuilder.create("return")
+                .bold()
                 .withTailText(" expr;", true)
                 .withInsertHandler(
                     TemplateStringInsertHandler(

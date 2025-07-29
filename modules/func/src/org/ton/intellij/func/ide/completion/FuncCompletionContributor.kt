@@ -13,13 +13,12 @@ class FuncCompletionContributor : CompletionContributor() {
         extend(FuncMacroCompletionProvider)
         extend(
             CompletionType.BASIC,
-            inBlock(),
+            FuncCompletionPatterns.inBlock(),
             FuncKeywordCompletionProvider(
                 KEYWORD_PRIORITY,
                 "var",
                 "if",
                 "ifnot",
-                "return",
                 "repeat",
                 "do",
                 "while",
@@ -97,20 +96,12 @@ class FuncCompletionContributor : CompletionContributor() {
             )
         )
         extend(FuncCommonCompletionProvider)
+        extend(FuncReturnCompletionProvider)
     }
 
     fun extend(provider: FuncCompletionProvider) {
         extend(CompletionType.BASIC, provider.elementPattern, provider)
     }
-
-    private fun inBlock() =
-        psiElement().withParent(
-            psiElement(FuncReferenceExpression::class.java).withParent(
-                psiElement(
-                    FuncExpressionStatement::class.java
-                ).inside(FuncBlockStatement::class.java)
-            )
-        )
 
     private fun baseFunctionAttributePattern(
         vararg afterLeafs: ElementPattern<out PsiElement>,

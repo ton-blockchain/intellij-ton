@@ -10,6 +10,7 @@
         <lang.syntaxHighlighterFactory language="Fift"
                                        implementationClass="org.ton.intellij.fift.ide.FiftSyntaxHighlighterFactory"/>
         <annotator language="Fift" implementationClass="org.ton.intellij.fift.ide.FiftAnnotator"/>
+        <annotator language="Fift" implementationClass="org.ton.intellij.fift.ide.FiftDumbAnnotator"/>
         <lang.commenter language="Fift"
                         implementationClass="org.ton.intellij.fift.ide.FiftCommenter"/>
         <lang.braceMatcher language="Fift"
@@ -19,5 +20,6 @@
         <lang.findUsagesProvider language="Fift"
                                  implementationClass="org.ton.intellij.fift.ide.FiftFindUsagesProvider"/>
         <colorSettingsPage implementation="org.ton.intellij.fift.ide.FiftColorSettingsPage"/>
+        <lang.foldingBuilder language="Fift" implementationClass="org.ton.intellij.fift.ide.FiftFoldingBuilder"/>
     </extensions>
 </idea-plugin>

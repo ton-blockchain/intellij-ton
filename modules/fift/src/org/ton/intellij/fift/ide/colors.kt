@@ -1,5 +1,6 @@
 package org.ton.intellij.fift.ide
 
+import com.intellij.openapi.editor.XmlHighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.fileTypes.SyntaxHighlighter
 import com.intellij.openapi.options.colors.AttributesDescriptor
@@ -29,7 +30,11 @@ enum class FiftColor(
 
     OPERATION_SIGN("Operation signs", Defaults.OPERATION_SIGN),
     WORD_DECLARATION("Word declaration", Defaults.FUNCTION_DECLARATION),
-    STRING_WORD("String parameter word", Defaults.INSTANCE_FIELD)
+    STRING_WORD("String parameter word", Defaults.INSTANCE_FIELD),
+
+    ASSEMBLY_DEFINITION("Assembly definition", Defaults.FUNCTION_DECLARATION),
+    ASSEMBLY_CALL("Assembly call", Defaults.FUNCTION_DECLARATION),
+    ASSEMBLY_INSTRUCTION("Assembly instruction", XmlHighlighterColors.HTML_TAG)
     ;
 
     val textAttributesKey =

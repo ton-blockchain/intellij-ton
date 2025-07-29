@@ -20,6 +20,7 @@ object FiftSyntaxHighlighter : SyntaxHighlighterBase() {
         in FiftParserDefinition.BRACES -> FiftColor.BRACES
         in FiftParserDefinition.PARENTHESES -> FiftColor.PARENTHESES
         in FiftParserDefinition.BRACKETS -> FiftColor.BRACKETS
+        in FiftParserDefinition.ASSEMBLY_KEYWORDS -> FiftColor.KEYWORD
 
         NUMBER_DIGIT_LITERAL, NUMBER_HEX_LITERAL, NUMBER_BINARY_LITERAL -> FiftColor.NUMBER
         SLICE_BINARY_LITERAL, SLICE_HEX_LITERAL, BYTE_HEX_LITERAL -> FiftColor.NUMBER

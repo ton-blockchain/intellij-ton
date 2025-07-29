@@ -133,6 +133,7 @@
         <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkDumbAnnotator"/>
         <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkAnnotator"/>
         <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkDocAnnotator"/>
+        <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkCheckAnnotator"/>
 
         <codeInsight.lineMarkerProvider language="Tolk"
                                         implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkRecursiveCallLineMarkerProvider"/>

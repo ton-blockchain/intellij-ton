@@ -7,6 +7,7 @@ import com.intellij.refactoring.util.RefactoringDescriptionLocation
 import com.intellij.ui.breadcrumbs.BreadcrumbsProvider
 import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.impl.hasSelf
 
 class TolkBreadcrumbsProvider : BreadcrumbsProvider {
     private interface TolkElementHandler<T : TolkElement> {
@@ -15,21 +16,22 @@ class TolkBreadcrumbsProvider : BreadcrumbsProvider {
     }
 
     private val handlers: List<TolkElementHandler<out TolkElement>> = listOf(
-        handler(
-            {
-                when (it) {
-                    is TolkLocalSymbolElement -> null
-                    is TolkSymbolElement -> it
-                    else -> null
-                }
-            }
-        ) { append(it.name) },
         handler({ it as? TolkFunction }) {
+            val receiver = it.functionReceiver
+            if (receiver != null) {
+                append(receiver.text)
+                append(".")
+            }
             append(it.name)
-            append("()")
+
+            if (it.hasSelf) {
+                append("(self)")
+            } else {
+                append("()")
+            }
         },
         handler({ it as? TolkIfStatement }) {
-            append("if")
+            append("if ")
             val condition = it.condition
             if (condition != null) {
                 append("(")
@@ -40,7 +42,7 @@ class TolkBreadcrumbsProvider : BreadcrumbsProvider {
         handler({ it as? TolkElseBranch }) { append("else") },
         handler({ it as? TolkRepeatStatement }) { append("repeat") },
         handler({ it as? TolkDoStatement }) {
-            append("do")
+            append("do ")
             val condition = it.condition
             if (condition != null) {
                 append("(")
@@ -49,7 +51,7 @@ class TolkBreadcrumbsProvider : BreadcrumbsProvider {
             }
         },
         handler({ it as? TolkWhileStatement }) {
-            append("while")
+            append("while ")
             val condition = it.condition
             if (condition != null) {
                 append("(")
@@ -58,21 +60,21 @@ class TolkBreadcrumbsProvider : BreadcrumbsProvider {
             }
         },
         handler({
-            (it as? TolkBlockStatement)?.takeIf { it.parent is TolkTryStatement }
+            (it as? TolkBlockStatement)?.takeIf { stmt -> stmt.parent is TolkTryStatement }
         }) {
             append("try")
         },
         handler({ it as? TolkCatch }) {
-            append("catch")
+            append("catch ")
             val parameters = it.catchParameterList
             if (parameters.isNotEmpty()) {
                 append("(")
-                append(parameters.joinToString(", ") { it.text.truncate(TextKind.INFO) })
+                append(parameters.joinToString(", ") { param -> param.text.truncate(TextKind.INFO) })
                 append(")")
             }
         },
         handler({ it as? TolkMatchExpression }) {
-            append("match")
+            append("match ")
             val expression = it.expression
             if (expression != null) {
                 append("(")
@@ -82,8 +84,17 @@ class TolkBreadcrumbsProvider : BreadcrumbsProvider {
         },
         handler({ it as? TolkMatchArm }) {
             append(it.matchPattern.text.truncate(TextKind.INFO))
-            append(" ->")
+            append(" =>")
         },
+        handler(
+            {
+                when (it) {
+                    is TolkLocalSymbolElement -> null
+                    is TolkSymbolElement      -> it
+                    else                      -> null
+                }
+            }
+        ) { append(it.name) },
     )
 
     private fun <T : TolkElement> handler(filter: (PsiElement) -> T?, string: StringBuilder.(T) -> Unit) =

@@ -44,6 +44,7 @@
 
         <lang.psiStructureViewFactory language="FunC"
                                       implementationClass="org.ton.intellij.func.structure.FuncStructureViewFactory"/>
+        <breadcrumbsInfoProvider implementation="org.ton.intellij.func.structure.FuncBreadcrumbsInfoProvider"/>
 
         <colorSettingsPage implementation="org.ton.intellij.func.ide.colors.FuncColorSettingsPage"/>
 

@@ -85,7 +85,7 @@
                     nameKey="codeInsight.hint.name.types.var"
                     descriptionKey="codeInsight.hint.description.types.var"/>
             <option optionId="hint.type.const"
-                    enabledByDefault="false"
+                    enabledByDefault="true"
                     bundle="messages.TolkBundle"
                     nameKey="codeInsight.hint.name.types.const"
                     descriptionKey="codeInsight.hint.description.types.const"/>

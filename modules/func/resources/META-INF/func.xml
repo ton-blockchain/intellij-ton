@@ -66,10 +66,18 @@
                                               implementationClass="org.ton.intellij.func.ide.hints.FuncConstantHintsProvider"
                                               isEnabledByDefault="true"
                                               language="FunC"
-                                              nameKey="numeric.constant.values"
+                                              nameKey="codeInsight.hint.value.numeric.constant.values"
                                               providerId="func.constant.hints">
         </codeInsight.declarativeInlayProvider>
 
+        <codeInsight.declarativeInlayProvider bundle="messages.FuncBundle"
+                                              group="OTHER_GROUP"
+                                              implementationClass="org.ton.intellij.func.ide.hints.FuncMethodIdHintsProvider"
+                                              isEnabledByDefault="true"
+                                              language="FunC"
+                                              nameKey="codeInsight.hint.other.method.id"
+                                              descriptionKey="codeInsight.hint.description.values.method.id"
+                                              providerId="func.other.hints.method.id"/>
 
         <annotator language="FunC" implementationClass="org.ton.intellij.func.highlighting.FuncAnnotator"/>
         <annotator language="FunC" implementationClass="org.ton.intellij.func.highlighting.FuncDocAnnotator"/>

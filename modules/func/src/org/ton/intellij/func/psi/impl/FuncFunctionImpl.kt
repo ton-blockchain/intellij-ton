@@ -10,7 +10,9 @@ import org.ton.intellij.func.type.ty.FuncTy
 import org.ton.intellij.func.type.ty.FuncTyMap
 import org.ton.intellij.func.type.ty.FuncTyUnknown
 import org.ton.intellij.func.type.ty.rawType
+import org.ton.intellij.util.crc16
 import javax.swing.Icon
+import kotlin.text.toString
 
 abstract class FuncFunctionMixin : FuncNamedElementImpl<FuncFunctionStub>, FuncFunction {
     constructor(node: ASTNode) : super(node)
@@ -49,3 +51,16 @@ val FuncFunction.rawType: FuncTyMap
         rawParamType,
         rawReturnType
     )
+
+
+fun FuncFunction.computeMethodId(): Pair<String, Boolean> {
+    val methodId = methodIdDefinition
+    if (methodId != null) {
+        val argument = methodId.integerLiteral ?: methodId.stringLiteral
+        if (argument != null) {
+            return argument.text to true
+        }
+    }
+
+    return "0x" + ((crc16(this.name ?: "") and 0xFF_FF) or 0x1_00_00).toString(16) to false
+}

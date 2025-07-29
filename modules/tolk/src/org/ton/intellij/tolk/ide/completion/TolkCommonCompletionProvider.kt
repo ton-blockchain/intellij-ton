@@ -153,8 +153,8 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                     }
 
                     val canAddAsUnionMatchVariant = canAddAsUnionMatchVariant()
-                    if (inMatchPattern && !canAddAsUnionMatchVariant) {
-                        // already processed
+                    if (inMatchPattern && expectType is TolkTyUnion && !canAddAsUnionMatchVariant) {
+                        // union variant has already been processed
                         return true
                     }
 

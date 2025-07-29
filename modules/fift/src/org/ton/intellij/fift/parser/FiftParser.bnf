@@ -62,15 +62,38 @@
         DOUBLE_COLON='::'
         DOUBLE_COLON_UNDERSCORE='::_'
 
-        WHITE_SPACE='regexp:\s+'
-        IDENTIFIER='regexp:\S+'
+        PROGRAM_START      = 'PROGRAM{'
+        END_C              = '}END>c'
+        DECLPROC           = 'DECLPROC'
+        DECLMETHOD         = 'DECLMETHOD'
+        DECLGLOBVAR        = 'DECLGLOBVAR'
+        PROC_START         = 'PROC:<{'
+        PROCINLINE_START   = 'PROCINLINE:<{'
+        PROCREF_START      = 'PROCREF:<{'
+        METHOD_START       = 'METHOD:<{'
+        IF_START           = 'IF:<{'
+        IFNOT_START        = 'IFNOT:<{'
+        ELSE_START         = '}>ELSE<{'
+        IFJMP_START        = 'IFJMP:<{'
+        IFNOTJMP_START     = 'IFNOTJMP:<{'
+        WHILE_START        = 'WHILE:<{'
+        REPEAT_START       = 'REPEAT:<{'
+        UNTIL_START        = 'UNTIL:<{'
+        DO_SEP             = '}>DO<{'
+        CONT_START         = 'CONT:<{'
+        ANGLE_LBRACE       = '<{'
+        ANGLE_RBRACE       = '}>'
+        ANGLE_RBRACE_C     = '}>c'
+        ANGLE_RBRACE_S     = '}>s'
+        ANGLE_RBRACE_CONT  = '}>CONT'
+        TO_BOC_FIFT        = 'B>boc'
     ]
 
     implements(".*") = "org.ton.intellij.fift.psi.FiftElement"
 }
 
 private root ::= statement*
-private statement ::= (word_def_statement | block | list | literal | word)
+private statement ::= (word_def_statement | block | list | literal | word | Assembly)
 word ::= stack_word | loop_word | cond_word | INCLUDE | CHAR | ABORT | PRINT | STRING_CONCAT | ordinary_word
 ordinary_word ::= IDENTIFIER {
     mixin = "org.ton.intellij.fift.psi.FiftOrdinaryWordMixin"
@@ -90,3 +113,64 @@ word_def_statement ::= (block | ordinary_word) WORD_DEF {
 
 //noinspection BnfUnusedRule
 private unused_in_bnf ::= LINE_COMMENT | BLOCK_COMMENT | LINE_DOCUMENTATION | BLOCK_DOCUMENTATION
+
+// ────────────────────────────────────────────────────────────────────────────
+//  Fift Asssembly
+// ────────────────────────────────────────────────────────────────────────────
+
+Assembly ::= 'PROGRAM{' AsmProgram '}END>c' { pin=1 }
+
+AsmProgram ::= (Declaration | Definition)*
+
+// declarations
+Declaration ::= ProcDeclaration | MethodDeclaration | GlobalVar
+
+ProcDeclaration   ::= 'DECLPROC' IDENTIFIER {pin=1}
+MethodDeclaration ::= number_literal 'DECLMETHOD' IDENTIFIER {pin=2}
+GlobalVar         ::= 'DECLGLOBVAR' IDENTIFIER {pin=1}
+
+// definitions
+Definition ::= ProcDefinition | ProcInlineDefinition | ProcRefDefinition | MethodDefinition
+
+ProcDefinition       ::= DefinitionName 'PROC:<{'        Instruction* '}>' {pin=2}
+ProcInlineDefinition ::= DefinitionName 'PROCINLINE:<{'  Instruction* '}>' {pin=2}
+ProcRefDefinition    ::= DefinitionName 'PROCREF:<{'     Instruction* '}>' {pin=2}
+MethodDefinition     ::= DefinitionName 'METHOD:<{'      Instruction* '}>' {pin=2}
+
+DefinitionName ::= ordinary_word
+
+// instructions
+Instruction ::= IfStatement | IfjmpStatement | WhileStatement | RepeatStatement | UntilStatement | AsmExpression
+
+AsmExpression ::= AsmArgumentList? TvmInstruction
+
+AsmArgumentList ::= AsmPrimitive+ { pin=1 }
+
+AsmPrimitive ::= InstructionBlock
+               | STRING_LITERAL
+               | SLICE_HEX_LITERAL
+               | SLICE_BINARY_LITERAL
+               | AsmBocHex
+               | StackRegister
+               | ControlRegister
+               | number_literal
+               | ARG_IDENTIFIER
+
+InstructionBlock ::= ('<{' | 'CONT:<{') Instruction* ( '}>' | '}>c' | '}>s' | '}>CONT' )
+
+IfStatement    ::= ('IF:<{' | 'IFNOT:<{') Instruction* ('}>ELSE<{' Instruction*)? '}>' ?
+IfjmpStatement ::= ('IFJMP:<{' | 'IFNOTJMP:<{') Instruction* '}>'
+WhileStatement ::= 'WHILE:<{' Instruction* '}>DO<{' Instruction* '}>'
+RepeatStatement ::= 'REPEAT:<{' Instruction* '}>'
+UntilStatement  ::= 'UNTIL:<{' Instruction* '}>'
+
+// helpers
+AsmBocHex      ::= BYTE_HEX_LITERAL 'B>boc'?
+
+StackRegister  ::= 's0' | 's1' | 's2' | 's3' | 's4' | 's5' | 's6' | 's7'
+                 | 's8' | 's9' | 's10' | 's11' | 's12' | 's13' | 's14' | 's15'
+                 | 's()' | 's(-1)' | 's(-2)' | 's(-3)' | 's(-4)'
+
+ControlRegister ::= 'c0' | 'c1' | 'c2' | 'c3' | 'c4' | 'c5' | 'c6' | 'c7'
+
+TvmInstruction ::= '-'? IDENTIFIER

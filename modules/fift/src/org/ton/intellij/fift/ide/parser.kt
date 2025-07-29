@@ -33,5 +33,33 @@ class FiftParserDefinition : ParserDefinition {
         val BRACES = TokenSet.create(FiftTypes.LBRACE, FiftTypes.RBRACE)
         val PARENTHESES = TokenSet.create(FiftTypes.LPAREN, FiftTypes.RPAREN)
         val BRACKETS = TokenSet.create(FiftTypes.LBRACKET, FiftTypes.RBRACKET)
+
+        val ASSEMBLY_KEYWORDS = TokenSet.create(
+            FiftTypes.PROGRAM_START,
+            FiftTypes.END_C,
+            FiftTypes.DECLPROC,
+            FiftTypes.DECLMETHOD,
+            FiftTypes.DECLGLOBVAR,
+            FiftTypes.PROC_START,
+            FiftTypes.PROCINLINE_START,
+            FiftTypes.PROCREF_START,
+            FiftTypes.METHOD_START,
+            FiftTypes.IF_START,
+            FiftTypes.IFNOT_START,
+            FiftTypes.ELSE_START,
+            FiftTypes.IFJMP_START,
+            FiftTypes.IFNOTJMP_START,
+            FiftTypes.WHILE_START,
+            FiftTypes.REPEAT_START,
+            FiftTypes.UNTIL_START,
+            FiftTypes.DO_SEP,
+            FiftTypes.CONT_START,
+            FiftTypes.ANGLE_LBRACE,
+            FiftTypes.ANGLE_RBRACE,
+            FiftTypes.ANGLE_RBRACE_C,
+            FiftTypes.ANGLE_RBRACE_S,
+            FiftTypes.ANGLE_RBRACE_CONT,
+            FiftTypes.TO_BOC_FIFT,
+        )
     }
 }

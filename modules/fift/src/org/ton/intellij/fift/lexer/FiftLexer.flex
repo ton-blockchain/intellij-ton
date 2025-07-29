@@ -90,91 +90,96 @@ IDENTIFIER=[^ \t\n\x0B\f\r]+
 LINE_COMMENT = "/""/"[^\n]*
 
 %xstate BLOCK_COMMENT_STATE
+%xstate ASM_STATE
 
 %%
+<YYINITIAL> "PROGRAM{"          { yybegin(ASM_STATE); return PROGRAM_START; }
 
-"[" { return LBRACKET; }
-"]" { return RBRACKET; }
-"{" { return LBRACE; }
-"}" { return RBRACE; }
-"(" { return LPAREN; }
-")" { return RPAREN; }
-"_(" { return UNDERSCORE_LPAREN; }
-"dup" { return DUP; }
-"drop" { return DROP; }
-"swap" { return SWAP; }
-"rot" { return ROT; }
-"-rot" { return REV_ROT; }
-"over" { return OVER; }
-"tuck" { return TUCK; }
-"nip" { return NIP; }
-"2dup" { return DUP_DUP; }
-"2drop" { return DROP_DROP; }
-"2swap" { return SWAP_SWAP; }
-"pick" { return PICK; }
-"roll" { return ROLL; }
-"-roll" { return REV_ROLL; }
-"exch" { return EXCH; }
-"exch2" { return EXCH2; }
-"?dup" { return COND_DUP; }
-"if" { return IF; }
-"ifnot" { return IFNOT; }
-"cond" { return COND; }
-"until" { return UNTIL; }
-"while" { return WHILE; }
-"times" { return TIMES; }
-"include" { return INCLUDE; }
-"true" { return TRUE; }
-"false" { return FALSE; }
+<ASM_STATE> "}END>c"            { yybegin(YYINITIAL); return END_C; }
 
-{CHAR} { return CHAR; }
-{ABORT} { return ABORT; }
-{PRINT} { return PRINT; }
-{WORD_DEF} { return WORD_DEF; }
-{STRING_CONCAT} { return STRING_CONCAT; }
-{STRING_LITERAL} { return STRING_LITERAL; }
-{NUMBER_DIGIT_LITERAL} { return NUMBER_DIGIT_LITERAL; }
-{NUMBER_HEX_LITERAL} { return NUMBER_HEX_LITERAL; }
-{NUMBER_BINARY_LITERAL} { return NUMBER_BINARY_LITERAL; }
-{SLICE_BINARY_LITERAL} { return SLICE_BINARY_LITERAL; }
-{SLICE_HEX_LITERAL} { return SLICE_HEX_LITERAL; }
-{BYTE_HEX_LITERAL} { return BYTE_HEX_LITERAL; }
+<ASM_STATE> ">DO<"              { return DO_SEP; }
+<ASM_STATE> "}>DO<{"            { return DO_SEP; }
+<ASM_STATE> "}>CONT"            { return ANGLE_RBRACE_CONT; }
+<ASM_STATE> "}>c"               { return ANGLE_RBRACE_C; }
+<ASM_STATE> "}>s"               { return ANGLE_RBRACE_S; }
+<ASM_STATE> "}>"                { return ANGLE_RBRACE; }
+<ASM_STATE> "<{"                { return ANGLE_LBRACE; }
+<ASM_STATE> "CONT:<{"           { return CONT_START; }
 
-"/**/" { return BLOCK_COMMENT; }
+<ASM_STATE> "PROCINLINE:<{"     { return PROCINLINE_START; }
+<ASM_STATE> "PROCREF:<{"        { return PROCREF_START; }
+<ASM_STATE> "PROC:<{"           { return PROC_START; }
+<ASM_STATE> "METHOD:<{"         { return METHOD_START; }
 
-"/*" {
-          pushState(BLOCK_COMMENT_STATE);
-          commentDepth = 0;
-          commentStart = getTokenStart();
-}
+<ASM_STATE> "IFJMP:<{"          { return IFJMP_START; }
+<ASM_STATE> "IFNOTJMP:<{"       { return IFNOTJMP_START; }
+<ASM_STATE> "IF:<{"             { return IF_START; }
+<ASM_STATE> "IFNOT:<{"          { return IFNOT_START; }
+<ASM_STATE> "}>ELSE<{"          { return ELSE_START; }
+<ASM_STATE> "WHILE:<{"          { return WHILE_START; }
+<ASM_STATE> "REPEAT:<{"         { return REPEAT_START; }
+<ASM_STATE> "UNTIL:<{"          { return UNTIL_START; }
 
-<BLOCK_COMMENT_STATE> {
-    "/*" {
-          commentDepth++;
-      }
+<ASM_STATE> "DECLPROC"          { return DECLPROC; }
+<ASM_STATE> "DECLMETHOD"        { return DECLMETHOD; }
+<ASM_STATE> "DECLGLOBVAR"       { return DECLGLOBVAR; }
 
-    <<EOF>> {
-          int state = yystate();
-          popState();
-          zzStartRead = commentStart;
-          return commentStateToTokenType(state);
-      }
+<YYINITIAL,ASM_STATE> "["         { return LBRACKET; }
+<YYINITIAL,ASM_STATE> "]"         { return RBRACKET; }
+<YYINITIAL,ASM_STATE> "{"         { return LBRACE; }
+<YYINITIAL,ASM_STATE> "}"         { return RBRACE; }
+<YYINITIAL,ASM_STATE> "("         { return LPAREN; }
+<YYINITIAL,ASM_STATE> ")"         { return RPAREN; }
+<YYINITIAL,ASM_STATE> "_("        { return UNDERSCORE_LPAREN; }
+<YYINITIAL,ASM_STATE> "dup"       { return DUP; }
+<YYINITIAL,ASM_STATE> "drop"      { return DROP; }
+<YYINITIAL,ASM_STATE> "swap"      { return SWAP; }
+<YYINITIAL,ASM_STATE> "rot"       { return ROT; }
+<YYINITIAL,ASM_STATE> "-rot"      { return REV_ROT; }
+<YYINITIAL,ASM_STATE> "over"      { return OVER; }
+<YYINITIAL,ASM_STATE> "tuck"      { return TUCK; }
+<YYINITIAL,ASM_STATE> "nip"       { return NIP; }
+<YYINITIAL,ASM_STATE> "2dup"      { return DUP_DUP; }
+<YYINITIAL,ASM_STATE> "2drop"     { return DROP_DROP; }
+<YYINITIAL,ASM_STATE> "2swap"     { return SWAP_SWAP; }
+<YYINITIAL,ASM_STATE> "pick"      { return PICK; }
+<YYINITIAL,ASM_STATE> "roll"      { return ROLL; }
+<YYINITIAL,ASM_STATE> "-roll"     { return REV_ROLL; }
+<YYINITIAL,ASM_STATE> "exch"      { return EXCH; }
+<YYINITIAL,ASM_STATE> "exch2"     { return EXCH2; }
+<YYINITIAL,ASM_STATE> "?dup"      { return COND_DUP; }
+<YYINITIAL,ASM_STATE> "if"        { return IF; }
+<YYINITIAL,ASM_STATE> "ifnot"     { return IFNOT; }
+<YYINITIAL,ASM_STATE> "cond"      { return COND; }
+<YYINITIAL,ASM_STATE> "until"     { return UNTIL; }
+<YYINITIAL,ASM_STATE> "while"     { return WHILE; }
+<YYINITIAL,ASM_STATE> "times"     { return TIMES; }
+<YYINITIAL,ASM_STATE> "include"   { return INCLUDE; }
+<YYINITIAL,ASM_STATE> "true"      { return TRUE; }
+<YYINITIAL,ASM_STATE> "false"     { return FALSE; }
 
-    "*/" {
-          if (commentDepth > 0) {
-              commentDepth--;
-          } else {
-              int state = yystate();
-              popState();
-              zzStartRead = commentStart;
-              return commentStateToTokenType(state);
-          }
-    }
+<YYINITIAL,ASM_STATE> {CHAR}                   { return CHAR; }
+<YYINITIAL,ASM_STATE> {ABORT}                  { return ABORT; }
+<YYINITIAL,ASM_STATE> {PRINT}                  { return PRINT; }
+<YYINITIAL,ASM_STATE> {WORD_DEF}               { return WORD_DEF; }
+<YYINITIAL,ASM_STATE> {STRING_CONCAT}          { return STRING_CONCAT; }
+<YYINITIAL,ASM_STATE> {STRING_LITERAL}         { return STRING_LITERAL; }
+<YYINITIAL,ASM_STATE> {NUMBER_DIGIT_LITERAL}   { return NUMBER_DIGIT_LITERAL; }
+<YYINITIAL,ASM_STATE> {NUMBER_HEX_LITERAL}     { return NUMBER_HEX_LITERAL; }
+<YYINITIAL,ASM_STATE> {NUMBER_BINARY_LITERAL}  { return NUMBER_BINARY_LITERAL; }
+<YYINITIAL,ASM_STATE> {SLICE_BINARY_LITERAL}   { return SLICE_BINARY_LITERAL; }
+<YYINITIAL,ASM_STATE> {SLICE_HEX_LITERAL}      { return SLICE_HEX_LITERAL; }
+<YYINITIAL,ASM_STATE> {BYTE_HEX_LITERAL}       { return BYTE_HEX_LITERAL; }
 
-    [\s\S] {}
-}
+<YYINITIAL,ASM_STATE> "/**/"                   { return BLOCK_COMMENT; }
+<YYINITIAL,ASM_STATE> "/*"                     { pushState(BLOCK_COMMENT_STATE); commentDepth = 0; commentStart = getTokenStart(); }
 
-{WHITE_SPACE} { return WHITE_SPACE; }
-{LINE_COMMENT} { return LINE_COMMENT; }
-{IDENTIFIER} { return IDENTIFIER; }
-({WHITE_SPACE_CHAR})+ { return WHITE_SPACE; }
+<BLOCK_COMMENT_STATE> "/*"                     { commentDepth++; }
+<BLOCK_COMMENT_STATE> "*/"                     { if (commentDepth-- == 0) { int s = yystate(); popState(); zzStartRead = commentStart; return commentStateToTokenType(s); } }
+<BLOCK_COMMENT_STATE> <<EOF>>                  { int s = yystate(); popState(); zzStartRead = commentStart; return commentStateToTokenType(s); }
+<BLOCK_COMMENT_STATE> [\s\S]                   { /* eat */ }
+
+<YYINITIAL,ASM_STATE> {LINE_COMMENT}            { return LINE_COMMENT; }
+
+<YYINITIAL,ASM_STATE> {WHITE_SPACE}             { return WHITE_SPACE; }
+<YYINITIAL,ASM_STATE> {IDENTIFIER}              { return IDENTIFIER; }

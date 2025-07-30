@@ -116,6 +116,24 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
             append(NBSP)
             appendStyledSpan(FuncColor.KEYWORD.attributes, "impure")
         }
+
+        val asm = function.asmDefinition
+        if (asm != null) {
+            renderAssemblyBody(asm)
+        }
+    }
+
+    private fun StringBuilder.renderAssemblyBody(asm: FuncAsmDefinition) {
+        val literals = asm.asmBody?.stringLiteralList
+        if (literals?.size != 1) return
+
+        append("\n    ")
+        appendStyledSpan(FuncColor.KEYWORD.attributes, "asm")
+        if (asm.asmParameters != null) {
+            append(asm.asmParameters?.text)
+        }
+        append(" ")
+        appendStyledSpan(FuncColor.STRING.attributes, literals.firstOrNull()?.text)
     }
 
     private fun StringBuilder.renderFunctionParameter(

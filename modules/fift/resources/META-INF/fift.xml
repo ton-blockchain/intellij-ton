@@ -22,6 +22,9 @@
         <colorSettingsPage implementation="org.ton.intellij.fift.ide.FiftColorSettingsPage"/>
         <lang.foldingBuilder language="Fift" implementationClass="org.ton.intellij.fift.ide.FiftFoldingBuilder"/>
 
+        <lang.psiStructureViewFactory language="Fift"
+                                      implementationClass="org.ton.intellij.fift.ide.structure.FiftStructureViewFactory"/>
+
         <!-- region Completion -->
         <completion.contributor
                 language="Fift"

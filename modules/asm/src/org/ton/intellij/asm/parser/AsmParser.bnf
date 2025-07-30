@@ -41,4 +41,7 @@ Verb ::= INTEGER | SLICE_BINARY | SLICE_HEX
  | CODE_END
  | CODE_END_CELL
  | CODE_END_SLICE
- | WORD
+ | Instruction
+
+Instruction ::= WORD
+

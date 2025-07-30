@@ -43,6 +43,8 @@
         <lookup.charFilter implementation="org.ton.intellij.tolk.ide.completion.TolkCharFilter"/>
         <typedHandler implementation="org.ton.intellij.tolk.codeInsight.editorActions.TolkTypedHandler"/>
 
+        <readWriteAccessDetector implementation="org.ton.intellij.tolk.ide.usages.TolkReadWriteAccessDetector"/>
+
         <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkNamedElementIndex"/>
         <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkTypeDefIndex"/>
         <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkStructIndex"/>

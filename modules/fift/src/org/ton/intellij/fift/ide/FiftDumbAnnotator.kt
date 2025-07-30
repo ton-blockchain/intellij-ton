@@ -10,6 +10,7 @@ import org.ton.intellij.fift.psi.FiftDeclaration
 import org.ton.intellij.fift.psi.FiftDefinitionName
 import org.ton.intellij.fift.psi.FiftTvmInstruction
 import org.ton.intellij.fift.psi.FiftTypes
+import org.ton.intellij.fift.psi.isNotInstruction
 
 class FiftDumbAnnotator : Annotator, DumbAware {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
@@ -31,8 +32,7 @@ class FiftDumbAnnotator : Annotator, DumbAware {
 fun identifierColor(element: PsiElement): FiftColor? {
     return when (element) {
         is FiftTvmInstruction -> {
-            val firstChar = element.text[0]
-            if (firstChar !in 'A'..'Z' && firstChar !in '0'..'9' && firstChar != '-') {
+            if (element.isNotInstruction()) {
                 // foo CALLDICT
                 // ^^^
                 return FiftColor.ASSEMBLY_CALL

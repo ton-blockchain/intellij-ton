@@ -22,6 +22,11 @@
         <colorSettingsPage implementation="org.ton.intellij.fift.ide.FiftColorSettingsPage"/>
         <lang.foldingBuilder language="Fift" implementationClass="org.ton.intellij.fift.ide.FiftFoldingBuilder"/>
 
+        <!-- region Documentation -->
+        <lang.documentationProvider language="Fift"
+                                    implementationClass="org.ton.intellij.fift.ide.documentation.FiftDocumentationProvider"/>
+        <!-- endregion Documentation -->
+
         <codeInsight.declarativeInlayProvider bundle="messages.FiftBundle"
                                               group="VALUES_GROUP"
                                               implementationClass="org.ton.intellij.fift.ide.hints.FiftAssemblyInfoHintsProvider"

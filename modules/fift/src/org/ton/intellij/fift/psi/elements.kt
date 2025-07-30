@@ -57,3 +57,37 @@ abstract class FiftWordDefStatementMixin(node: ASTNode) : FiftNamedElementImpl(n
 abstract class FiftOrdinaryWordMixin(node: ASTNode) : FiftNamedElementImpl(node), FiftOrdinaryWord {
     override fun getReference() = FiftOrdinaryWordReference(this)
 }
+
+fun FiftTvmInstruction.isNotInstruction(): Boolean {
+    if (text.length < 3) return true
+
+    val firstChar = text[0]
+    if (firstChar in '0'..'9') {
+        // only instruction can start with a digit
+        return false
+    }
+
+    if (firstChar == '-') {
+        // -ROT, -ROLL
+        return false
+    }
+
+    if (firstChar == '~') {
+        // ~load_bool
+        return true
+    }
+
+    if (firstChar !in 'A'..'Z') {
+        // load_bool
+        return true
+    }
+
+    val secondChar = text[1]
+    if (secondChar !in 'A'..'Z') {
+        // Foo.bar()
+        return true
+    }
+
+    // INT
+    return false
+}

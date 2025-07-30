@@ -5,6 +5,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import org.ton.intellij.fift.psi.FiftAsmExpression
+import org.ton.intellij.fift.psi.isNotInstruction
 import org.ton.intellij.util.asm.findInstruction
 import org.ton.intellij.util.asm.instructionPresentation
 
@@ -16,9 +17,13 @@ class FiftAssemblyInfoHintsProvider : InlayHintsProvider {
             if (element !is FiftAsmExpression) return
 
             val instr = element.tvmInstruction
+            if (instr.isNotInstruction()) return
+            val name = instr.text
+            if (name == "INLINECALLDICT") return
+
             val arguments = element.asmArgumentList?.asmPrimitiveList ?: emptyList()
 
-            val info = findInstruction(instr.text, arguments)
+            val info = findInstruction(name, arguments)
 
             val presentation = instructionPresentation(info?.doc?.gas, info?.doc?.stack, "{gas}")
 

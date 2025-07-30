@@ -331,11 +331,32 @@ class TolkCompletionTest : TolkCompletionTestBase() {
 
     fun `test on_bounced_policy annotation`() = doFirstCompletion("""
         @on_bounced_polic/*caret*/
-        fun foo() {}
+        fun main() {}
     """, """
         @on_bounced_policy("manual")/*caret*/
-        fun foo() {}
+        fun main() {}
     """.trimIndent())
+
+    fun `test no inline annotation for struct`() = checkNoCompletion("""
+        @inl/*caret*/
+        struct Foo {}
+    """)
+
+    fun `test no overflow1023_policy annotation for functions`() = checkNoCompletion("""
+        @overflow1023_po/*caret*/
+        fun foo() {}
+    """)
+
+    fun `test no on_bounced_policy annotation for non entry functions`() = checkNoCompletion("""
+        @on_bounced_poli/*caret*/
+        fun foo() {}
+    """)
+
+    fun `test no inline annotation for function with inline annotation`() = checkNoCompletion("""
+        @inline
+        @inl/*caret*/
+        struct Foo {}
+    """)
 
     fun `test postfix completion, arg`() = doFirstCompletion("""
         fun foo() {

@@ -13,21 +13,33 @@ import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.TolkIcons
+import org.ton.intellij.tolk.psi.TolkAnnotationHolder
+import org.ton.intellij.tolk.psi.TolkFunction
+import org.ton.intellij.tolk.psi.TolkStruct
+import org.ton.intellij.tolk.psi.impl.isEntryPoint
+
+typealias Applicability = (PsiElement) -> Boolean
 
 object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
     override val elementPattern: ElementPattern<out PsiElement>
         get() = psiElement().afterLeaf("@")
 
+    val forAny: Applicability = { true }
+    val forFunctions: Applicability = { it is TolkFunction }
+    val forStructs: Applicability = { it is TolkStruct }
+    val forEntryPoints: Applicability = { it is TolkFunction && it.isEntryPoint }
+
     private val lookupElements = listOf(
-        LookupElementBuilder.create("pure"),
-        LookupElementBuilder.create("noinline"),
-        LookupElementBuilder.create("inline"),
-        LookupElementBuilder.create("inline_ref"),
-        LookupElementBuilder.create("method_id").withInsertHandler(ParInsertHandler),
-        LookupElementBuilder.create("deprecated").withTailText("(\"reason\")").withInsertHandler(StringArgumentInsertHandler("")),
-        LookupElementBuilder.create("custom").withInsertHandler(ParInsertHandler),
+        LookupElementBuilder.create("pure") to forFunctions,
+        LookupElementBuilder.create("noinline") to forFunctions,
+        LookupElementBuilder.create("inline") to forFunctions,
+        LookupElementBuilder.create("inline_ref") to forFunctions,
+        LookupElementBuilder.create("method_id").withInsertHandler(ParInsertHandler) to forFunctions,
+        LookupElementBuilder.create("deprecated").withTailText("(\"reason\")")
+            .withInsertHandler(StringArgumentInsertHandler("")) to forAny,
+        LookupElementBuilder.create("custom").withInsertHandler(ParInsertHandler) to forAny,
         LookupElementBuilder.create("on_bounced_policy").withTailText("(\"manual\")")
-            .withInsertHandler(StringArgumentInsertHandler("manual")),
+            .withInsertHandler(StringArgumentInsertHandler("manual")) to forEntryPoints,
         LookupElementBuilder.create("overflow1023_policy")
             .withTailText("(\"suppress\")")
             .withInsertHandler { ctx, item ->
@@ -40,9 +52,9 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
                     ctx.document.insertString(offset, "\"suppress\"")
                     ctx.editor.caretModel.moveToOffset(offset + "\"suppress\")".length)
                 }
-            }
+            } to forStructs
     ).map {
-        it.withIcon(TolkIcons.ANNOTATION)
+        it.first.withIcon(TolkIcons.ANNOTATION) to it.second
     }
 
     override fun addCompletions(
@@ -50,7 +62,16 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
         context: ProcessingContext,
         result: CompletionResultSet,
     ) {
-        result.addAllElements(lookupElements)
+        val owner = parameters.position.parent.parent
+        if (owner is TolkAnnotationHolder) {
+            val currentAnnotations = owner.annotations.names().toSet()
+            result.addAllElements(lookupElements.filter { (element, isApplicable) ->
+                !currentAnnotations.contains(element.lookupString) && isApplicable(owner)
+            }.map { it.first })
+            return
+        }
+
+        result.addAllElements(lookupElements.map { it.first })
     }
 
     private object ParInsertHandler : InsertHandler<LookupElement> {

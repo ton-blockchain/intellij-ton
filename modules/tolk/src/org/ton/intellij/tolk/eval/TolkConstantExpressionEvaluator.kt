@@ -117,6 +117,17 @@ class TolkConstantExpressionVisitor(
         result = o.value
     }
 
+    override fun visitPrefixExpression(o: TolkPrefixExpression) {
+        val expr = o.expression ?: return
+        val exprValue = get(expr)
+
+        if (o.minus != null) {
+            if (exprValue is TolkIntValue) {
+                result = TolkIntValue(exprValue.value.multiply(BigInteger.valueOf(-1)))
+            }
+        }
+    }
+
     override fun visitBinExpression(o: TolkBinExpression) {
         val left = get(o.left)
         if (left == null) {

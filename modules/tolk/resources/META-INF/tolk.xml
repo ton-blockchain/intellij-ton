@@ -109,6 +109,15 @@
                                               descriptionKey="codeInsight.hint.description.values.method.id"
                                               providerId="tolk.other.hints.method.ids"/>
 
+        <codeInsight.declarativeInlayProvider language="Tolk"
+                                              bundle="messages.TolkBundle"
+                                              nameKey="codeInsight.hint.values.exit.code"
+                                              group="VALUES_GROUP"
+                                              implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkExitCodeHintsProvider"
+                                              isEnabledByDefault="true"
+                                              descriptionKey="codeInsight.hint.description.values.exit.code"
+                                              providerId="tolk.values.hints.exit.code"/>
+
         <codeInsight.declarativeInlayProvider group="PARAMETERS_GROUP"
                                               implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkParameterHintsProvider"
                                               isEnabledByDefault="true"

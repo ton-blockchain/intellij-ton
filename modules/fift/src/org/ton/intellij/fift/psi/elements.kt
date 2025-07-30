@@ -58,6 +58,22 @@ abstract class FiftOrdinaryWordMixin(node: ASTNode) : FiftNamedElementImpl(node)
     override fun getReference() = FiftOrdinaryWordReference(this)
 }
 
+fun FiftDefinition.name(): String? {
+    if (methodDefinition != null) {
+        return methodDefinition?.definitionName?.text
+    }
+    if (procDefinition != null) {
+        return procDefinition?.definitionName?.text
+    }
+    if (procInlineDefinition != null) {
+        return procInlineDefinition?.definitionName?.text
+    }
+    if (procRefDefinition != null) {
+        return procRefDefinition?.definitionName?.text
+    }
+    return null
+}
+
 fun FiftTvmInstruction.isNotInstruction(): Boolean {
     if (text.length < 3) return true
 

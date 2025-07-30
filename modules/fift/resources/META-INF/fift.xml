@@ -24,6 +24,7 @@
 
         <lang.psiStructureViewFactory language="Fift"
                                       implementationClass="org.ton.intellij.fift.ide.structure.FiftStructureViewFactory"/>
+        <breadcrumbsInfoProvider implementation="org.ton.intellij.fift.ide.structure.FiftBreadcrumbsInfoProvider"/>
 
         <!-- region Completion -->
         <completion.contributor

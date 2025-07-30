@@ -11,5 +11,10 @@
                                        implementationClass="org.ton.intellij.asm.AsmSyntaxHighlighterFactory"/>
         <completion.contributor language="TVM assembly"
                                 implementationClass="org.ton.intellij.asm.AsmCompletionContributor"/>
+
+        <!-- region Documentation -->
+        <lang.documentationProvider language="TVM assembly"
+                                    implementationClass="org.ton.intellij.asm.ide.documentation.AsmDocumentationProvider"/>
+        <!-- endregion Documentation -->
     </extensions>
 </idea-plugin>

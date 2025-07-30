@@ -12,6 +12,7 @@ import org.ton.intellij.fift.FiftIcons
 import org.ton.intellij.fift.psi.FiftDefinition
 import org.ton.intellij.fift.psi.FiftFile
 import org.ton.intellij.fift.psi.FiftNamedElement
+import org.ton.intellij.fift.psi.name
 import javax.swing.Icon
 
 class FiftStructureViewFactory : PsiStructureViewFactory {
@@ -52,18 +53,7 @@ class FiftStructureViewFactory : PsiStructureViewFactory {
             }
 
             if (element is FiftDefinition) {
-                if (element.methodDefinition != null) {
-                    return element.methodDefinition?.definitionName?.text
-                }
-                if (element.procDefinition != null) {
-                    return element.procDefinition?.definitionName?.text
-                }
-                if (element.procInlineDefinition != null) {
-                    return element.procInlineDefinition?.definitionName?.text
-                }
-                if (element.procRefDefinition != null) {
-                    return element.procRefDefinition?.definitionName?.text
-                }
+                return element.name()
             }
 
             return null

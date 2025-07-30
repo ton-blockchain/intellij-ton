@@ -12,6 +12,7 @@ import com.intellij.psi.NavigatablePsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.util.containers.map2Array
 import org.ton.intellij.tolk.psi.*
+import javax.swing.Icon
 
 class TolkPsiStructureViewFactory : PsiStructureViewFactory {
     override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder? {
@@ -70,9 +71,17 @@ class TolkStructureViewElement(
 
     override fun getValue(): TolkElement? = psi
 
-    override fun getPresentation(): ItemPresentation = psi?.let {
-        if (it is NavigatablePsiElement) it.presentation else null
-    } ?: PresentationData("", null, null, null)
+    override fun getPresentation(): ItemPresentation {
+        val psi = psi ?: return PresentationData("", null, null, null)
+        if (psi !is NavigatablePsiElement) return PresentationData("", null, null, null)
+        val initialPresentation = psi.presentation ?: return PresentationData("", null, null, null)
+
+        // override initialPresentation to avoid locationString and therefore the filename for each tree node
+        return object : ItemPresentation {
+            override fun getPresentableText() = initialPresentation.presentableText
+            override fun getIcon(unused: Boolean) = initialPresentation.getIcon(unused)
+        }
+    }
 
     override fun getChildren(): Array<out TreeElement?> = childElements.map2Array { TolkStructureViewElement(it) }
 

@@ -2,8 +2,13 @@ package org.ton.intellij.tlb.psi
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
+import com.intellij.navigation.ItemPresentation
+import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.util.Iconable
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
+import org.ton.intellij.tlb.TlbIcons
+import javax.swing.Icon
 
 interface TlbElement : PsiElement
 abstract class TlbElementImpl(node: ASTNode) : ASTWrapperPsiElement(node)
@@ -23,7 +28,58 @@ abstract class TlbNamedElementImpl(node: ASTNode) : TlbElementImpl(node), TlbNam
     }
 
     override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
+
+    override fun getIcon(flags: Int): Icon? {
+        return when (this) {
+            is TlbResultType -> TlbIcons.TYPE
+            else             -> return super.getIcon(flags)
+        }
+    }
+
+    override fun getPresentation(): ItemPresentation? {
+        return object : TlbItemPresentation<TlbNamedElement>(this) {
+            override fun getPresentableText(): String? {
+                if (element is TlbResultType) {
+                    val declarationLines = element.parent.text.split("\n")
+                    if (declarationLines.isEmpty()) {
+                        return element.name
+                    }
+
+                    if (declarationLines.size == 1) {
+                        // action_delete_ext#03 addr:MsgAddressInt = ExtendedAction;
+                        return declarationLines.first()
+                    }
+
+                    // action_add_ext#02... = ExtendedAction;
+                    val declarationText = declarationLines.first()
+                    return declarationText + "... = " + element.name
+                }
+
+                return runReadAction {
+                    element.name
+                }
+            }
+        }
+    }
 }
+
+abstract class TlbItemPresentation<T : TlbNamedElement>(protected val element: T) : ItemPresentation {
+    private var locationString: String? = null
+
+    override fun getLocationString(): String {
+        return if (locationString != null) locationString!! else getLocationStringInner().also { locationString = it }
+    }
+
+    private fun getLocationStringInner(): String {
+        val file = element.containingFile
+        val fileName = file.name
+        return "in $fileName"
+    }
+
+    override fun getIcon(b: Boolean): Icon =
+        element.getIcon(Iconable.ICON_FLAG_VISIBILITY)
+}
+
 
 interface TlbFieldListOwner : TlbElement {
     val fieldList: TlbFieldList?

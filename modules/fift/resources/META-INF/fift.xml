@@ -22,6 +22,12 @@
         <colorSettingsPage implementation="org.ton.intellij.fift.ide.FiftColorSettingsPage"/>
         <lang.foldingBuilder language="Fift" implementationClass="org.ton.intellij.fift.ide.FiftFoldingBuilder"/>
 
+        <!-- region Completion -->
+        <completion.contributor
+                language="Fift"
+                implementationClass="org.ton.intellij.fift.completion.contributors.FiftCompletionContributor"/>
+        <!-- endregion Completion -->
+
         <!-- region Documentation -->
         <lang.documentationProvider language="Fift"
                                     implementationClass="org.ton.intellij.fift.ide.documentation.FiftDocumentationProvider"/>

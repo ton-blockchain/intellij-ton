@@ -329,6 +329,14 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         fun foo() {}
     """.trimIndent())
 
+    fun `test on_bounced_policy annotation`() = doFirstCompletion("""
+        @on_bounced_polic/*caret*/
+        fun foo() {}
+    """, """
+        @on_bounced_policy("manual")/*caret*/
+        fun foo() {}
+    """.trimIndent())
+
     fun `test postfix completion, arg`() = doFirstCompletion("""
         fun foo() {
             true.arg/*caret*/

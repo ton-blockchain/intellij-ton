@@ -10,43 +10,67 @@ import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkMatchExpression
-import org.ton.intellij.tolk.psi.TolkMatchPatternReference
+import org.ton.intellij.tolk.psi.TolkMatchPattern
+import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.type.*
 
 object TolkMatchPatternTypesCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
         psiElement()
-            .withParent(TolkMatchPatternReference::class.java)
+            .withParent(TolkReferenceExpression::class.java)
+            .withSuperParent(2, TolkMatchPattern::class.java)
 
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         val position = parameters.position
         val matchExpr = position.parentOfType<TolkMatchExpression>() ?: return
-        val expr = matchExpr.expression
+        val expr = matchExpr.expression ?: return
         val ctx = TolkCompletionContext(position.parent as? TolkElement)
-        if (expr != null) {
-            val type = expr.type ?: TolkTy.Unknown
-            val unwrappedType = type.unwrapTypeAlias()
-            if (unwrappedType is TolkTyUnion) {
-                unwrappedType.variants.forEach { unionVariant ->
-                    when(unionVariant) {
-                        is TolkTyStruct -> result.addElement(unionVariant.psi.toLookupElementBuilder(ctx))
-                        is TolkTyAlias -> result.addElement(unionVariant.psi.toLookupElementBuilder(ctx))
-                        is TolkPrimitiveTy -> result.addElement(unionVariant.toLookupElement())
-                        else -> result.addElement(
-                            LookupElementBuilder.create(unionVariant.render())
-                        )
-                    }
+
+        val declaredMatchArms = hashSetOf<String>()
+        for (arm in matchExpr.matchArmList) {
+            declaredMatchArms.add(arm.matchPattern.text)
+        }
+
+        val type = expr.type ?: TolkTy.Unknown
+        val unwrappedType = type.unwrapTypeAlias()
+        if (unwrappedType is TolkTyUnion) {
+            for (unionVariant in unwrappedType.variants) {
+                val variantText = unionVariant.render()
+                if (declaredMatchArms.contains(variantText)) {
+                    continue
                 }
-            } else {
-                collectLocalVariables(matchExpr) {
-                    result.addElement(it.toLookupElementBuilder(ctx))
-                    true
+
+                val element = when (unionVariant) {
+                    is TolkTyStruct    -> unionVariant.psi.toLookupElementBuilder(ctx).forMatchArm()
+                    is TolkTyAlias     -> unionVariant.psi.toLookupElementBuilder(ctx).forMatchArm()
+                    is TolkPrimitiveTy -> unionVariant.toLookupElement().forMatchArm()
+                    else               -> LookupElementBuilder.create(unionVariant.render()).forMatchArm()
                 }
+
+                result.addElement(element)
+            }
+        } else {
+            collectLocalVariables(matchExpr) {
+                result.addElement(it.toLookupElementBuilder(ctx))
+                true
             }
         }
+
+        if (!declaredMatchArms.contains("else")) {
+            result.addElement(
+                LookupElementBuilder.create("else")
+                    .withTailText(" => {}", true)
+                    .withInsertHandler(TemplateStringInsertHandler(" => {\n\$END$\n}"))
+            )
+        }
+    }
+
+    fun LookupElementBuilder.forMatchArm(): LookupElementBuilder {
+        return this.withTailText(" => {}", true)
+            .withInsertHandler(TemplateStringInsertHandler(" => {\n\$END$\n}"))
     }
 }

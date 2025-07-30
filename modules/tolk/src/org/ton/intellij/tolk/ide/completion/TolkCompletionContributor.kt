@@ -7,7 +7,6 @@ import com.intellij.codeInsight.lookup.LookupElementWeigher
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.or
 import com.intellij.patterns.PlatformPatterns.psiElement
-import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.*
 
@@ -76,6 +75,7 @@ class TolkCompletionContributor : CompletionContributor() {
         extend(TolkDotExpressionCompletionProvider)
         extend(TolkExpressionFieldProvider)
         extend(TolkMatchPatternTypesCompletionProvider)
+        extend(TolkAllMatchTypesCompletionProvider)
         extend(TolkAnnotationCompletionProvider)
         extend(TolkBuiltinCompletionProvider)
         extend(TolkSnippetsCompletionProvider)

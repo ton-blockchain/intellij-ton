@@ -58,12 +58,5 @@ class TlbStructureViewFactory : PsiStructureViewFactory {
 
             return null
         }
-
-        override fun getIcon(open: Boolean): Icon? {
-            if (element is TlbConstructor) {
-                return TlbIcons.TYPE
-            }
-            return super.getIcon(open)
-        }
     }
 }

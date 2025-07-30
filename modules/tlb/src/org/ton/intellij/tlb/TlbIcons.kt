@@ -8,5 +8,5 @@ object TlbIcons {
 
     val TYPE = AllIcons.Nodes.Type
     val FIELD = AllIcons.Nodes.Field
-    val CONSTRUCTOR = AllIcons.Nodes.Constructor
+    val CONSTRUCTOR = AllIcons.Nodes.Type
 }

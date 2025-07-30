@@ -20,6 +20,9 @@
         <lang.findUsagesProvider language="TL-B"
                                  implementationClass="org.ton.intellij.tlb.ide.TlbFindUsagesProvider"/>
 
+        <lang.psiStructureViewFactory language="TL-B"
+                                      implementationClass="org.ton.intellij.tlb.structure.TlbStructureViewFactory"/>
+
         <localInspection
                 language="TL-B" displayName="Wrong name case for result type"
                 groupPath="TL-B"

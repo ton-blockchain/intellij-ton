@@ -432,7 +432,7 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """.trimIndent())
 
-    fun `test type match arm completion, no completion items`() = checkNoCompletion("""
+    fun `test type match arm completion, else`() = doFirstCompletion("""
         struct (0x7e8764ef) IncreaseCounter {
             queryId: uint64
             increaseBy: uint32
@@ -451,9 +451,52 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 /*caret*/
             }
         }
+    """, """
+        struct (0x7e8764ef) IncreaseCounter {
+            queryId: uint64
+            increaseBy: uint32
+        }
+        
+        struct (0x3a752f06) ResetCounter {
+            queryId: uint64
+        }
+
+        type AllowedMessage = IncreaseCounter | ResetCounter
+        
+        fun foo(msg: AllowedMessage) {
+            match (msg) {
+                IncreaseCounter => {}
+                ResetCounter => {}
+                else => {
+                    /*caret*/
+                }
+            }
+        }
     """)
 
-    fun `test type match arm completion, single item`() = doSingleCompletion("""
+    fun `test type match arm completion, no completion items`() = checkNoCompletion("""
+        struct (0x7e8764ef) IncreaseCounter {
+            queryId: uint64
+            increaseBy: uint32
+        }
+        
+        struct (0x3a752f06) ResetCounter {
+            queryId: uint64
+        }
+
+        type AllowedMessage = IncreaseCounter | ResetCounter
+        
+        fun foo(msg: AllowedMessage) {
+            match (msg) {
+                IncreaseCounter => {}
+                ResetCounter => {}
+                else => {}
+                /*caret*/
+            }
+        }
+    """)
+
+    fun `test type match arm completion, single item`() = doFirstCompletion("""
         struct (0x7e8764ef) IncreaseCounter {
             queryId: uint64
             increaseBy: uint32
@@ -486,7 +529,9 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         fun foo(msg: AllowedMessage) {
             match (msg) {
                 IncreaseCounter => {}
-                ResetCounter/*caret*/
+                ResetCounter => {
+                    /*caret*/
+                }
             }
         }
     """)

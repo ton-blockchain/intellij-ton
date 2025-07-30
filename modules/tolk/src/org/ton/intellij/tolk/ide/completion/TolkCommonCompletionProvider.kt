@@ -149,7 +149,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                         if (declaredMatchArms.contains(name)) return false
                         if (expectType !is TolkTyUnion) return false
                         val type = element.type ?: return false
-                        return expectType.variants.any { it.canRhsBeAssigned(type) }
+                        return expectType.variants.any { it != type && it.canRhsBeAssigned(type) }
                     }
 
                     val canAddAsUnionMatchVariant = canAddAsUnionMatchVariant()

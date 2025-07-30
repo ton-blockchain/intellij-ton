@@ -21,5 +21,15 @@
                                  implementationClass="org.ton.intellij.fift.ide.FiftFindUsagesProvider"/>
         <colorSettingsPage implementation="org.ton.intellij.fift.ide.FiftColorSettingsPage"/>
         <lang.foldingBuilder language="Fift" implementationClass="org.ton.intellij.fift.ide.FiftFoldingBuilder"/>
+
+        <codeInsight.declarativeInlayProvider bundle="messages.FiftBundle"
+                                              group="VALUES_GROUP"
+                                              implementationClass="org.ton.intellij.fift.ide.hints.FiftAssemblyInfoHintsProvider"
+                                              isEnabledByDefault="true"
+                                              language="Fift"
+                                              nameKey="codeInsight.hint.values.instruction.info"
+                                              descriptionKey="codeInsight.hint.description.values.instruction.info"
+                                              providerId="fift.values.hints.instruction.info"/>
+
     </extensions>
 </idea-plugin>

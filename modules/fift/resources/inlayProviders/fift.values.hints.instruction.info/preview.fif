@@ -1,0 +1,6 @@
+"Asm.fif" include
+PROGRAM{
+  recv_internal PROC:<{
+    DROP/*<# 18 #>*/
+  }>
+}END>c

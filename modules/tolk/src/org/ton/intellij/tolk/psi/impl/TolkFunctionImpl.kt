@@ -164,7 +164,7 @@ private fun TolkFunction.resolveReturnType(): TolkTy {
 val TolkFunction.declaredType: TolkTyFunction get() = (this as TolkFunctionMixin).type
 
 val TolkFunction.isMutable: Boolean
-    get() = greenStub?.isMutable ?: (node.findChildByType(TolkElementTypes.TILDE) != null)
+    get() = greenStub?.isMutable ?: (parameterList?.selfParameter?.isMutable) ?: false
 
 val TolkFunction.getKeyword get() = node.findChildByType(TolkElementTypes.GET_KEYWORD)
 

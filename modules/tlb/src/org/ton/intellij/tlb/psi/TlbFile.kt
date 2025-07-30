@@ -19,4 +19,8 @@ class TlbFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TlbLan
             }
         }
     }
+
+    fun constructors(): List<TlbConstructor> {
+        return findChildrenByClass(TlbConstructor::class.java).toList()
+    }
 }

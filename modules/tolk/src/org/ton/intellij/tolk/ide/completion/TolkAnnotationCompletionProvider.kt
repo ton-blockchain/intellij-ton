@@ -26,6 +26,8 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
         LookupElementBuilder.create("method_id").withInsertHandler(ParInsertHandler),
         LookupElementBuilder.create("deprecated").withTailText("(\"reason\")").withInsertHandler(StringArgumentInsertHandler("")),
         LookupElementBuilder.create("custom").withInsertHandler(ParInsertHandler),
+        LookupElementBuilder.create("on_bounced_policy").withTailText("(\"manual\")")
+            .withInsertHandler(StringArgumentInsertHandler("manual")),
         LookupElementBuilder.create("overflow1023_policy")
             .withTailText("(\"suppress\")")
             .withInsertHandler { ctx, item ->

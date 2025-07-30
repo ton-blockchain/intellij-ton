@@ -9,4 +9,9 @@ import org.ton.intellij.fift.FiftLanguage
 class FiftFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FiftLanguage), FiftElement {
     override fun getFileType(): FileType = FiftFileType
     override fun toString(): String = "Fift"
+
+    fun assemblyDefinitions(): List<FiftDefinition> {
+        val roots = this.children.filterIsInstance<FiftAssembly>().mapNotNull { it.asmProgram }
+        return roots.flatMap { it.children.filterIsInstance<FiftDefinition>() }
+    }
 }

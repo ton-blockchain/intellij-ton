@@ -150,6 +150,7 @@
         <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkStringLiteral"
                                  implementationClass="org.ton.intellij.tolk.psi.reference.manipulators.TolkStringLiteralManipulator"/>
         <multiHostInjector implementation="org.ton.intellij.tolk.ide.TolkLanguageInjector"/>
+        <languageInjector implementation="org.ton.intellij.tolk.ide.TolkStringAsmInjector"/>
 
         <localInspection language="Tolk" groupKey="tolk"
                          enabledByDefault="true" level="ERROR"

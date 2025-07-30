@@ -100,16 +100,31 @@ fun adjustName(name: String, args: List<PsiElement>): String {
             }
         }
 
-        "PUSH"    -> {
+        "PUSH"           -> {
             if (args.size == 1 && args[0].text.startsWith("s")) return "PUSH"
             if (args.size == 2) return "PUSH2"
             if (args.size == 3) return "PUSH3"
             name
         }
 
-        "XCHG0"   -> "XCHG_0I"
-        "XCHG"    -> "XCHG_IJ"
-        else      -> name
+        "XCHG0"          -> "XCHG_0I"
+        "XCHG"           -> "XCHG_IJ"
+        "SKIPOPTREF"     -> "SKIPDICT"
+        "STOPTREF"       -> "STDICT"
+        "LDOPTREF"       -> "LDDICT"
+        "PLDOPTREF"      -> "PLDDICT"
+        "PUSHNULL"       -> "NULL"
+        "FALSE"          -> "PUSHINT_4"
+        "-ROT"           -> "ROTREV"
+        "-ROLL"          -> "BLKSWAP"
+        "2DROP"          -> "DROP2"
+        "2SWAP"          -> "SWAP2"
+        "2DUP"           -> "DUP2"
+        "2OVER"          -> "OVER2"
+        "LDVARUINT16"    -> "LDGRAMS"
+        "STVARUINT16"    -> "STGRAMS"
+        "INLINECALLDICT" -> "CALLDICT"
+        else             -> name
     }
 }
 

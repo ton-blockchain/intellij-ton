@@ -25,4 +25,5 @@ class TolkAnnotationQuery(
     }
 
     fun annotationByName(name: String) = rawAnnotations.filter { it.identifier?.text == name }
+    fun names() = rawAnnotations.mapNotNull { it.identifier?.text }
 }

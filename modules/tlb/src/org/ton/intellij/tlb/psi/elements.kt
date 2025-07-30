@@ -31,8 +31,10 @@ abstract class TlbNamedElementImpl(node: ASTNode) : TlbElementImpl(node), TlbNam
 
     override fun getIcon(flags: Int): Icon? {
         return when (this) {
-            is TlbResultType -> TlbIcons.TYPE
-            else             -> return super.getIcon(flags)
+            is TlbResultType  -> TlbIcons.TYPE
+            is TlbField       -> TlbIcons.FIELD
+            is TlbConstructor -> TlbIcons.CONSTRUCTOR
+            else              -> return super.getIcon(flags)
         }
     }
 

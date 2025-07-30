@@ -7,4 +7,6 @@ object TlbIcons {
     val FILE = IconLoader.getIcon("/icons/tlb.svg", TlbIcons::class.java)
 
     val TYPE = AllIcons.Nodes.Type
+    val FIELD = AllIcons.Nodes.Field
+    val CONSTRUCTOR = AllIcons.Nodes.Constructor
 }

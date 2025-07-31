@@ -81,9 +81,13 @@ intellijPlatform {
         name = "TON"
         version = project.version.toString()
         description = """
-        TON Blockchain Development Plugin for IntelliJ: Adds support for TON blockchain programming languages,
-        including Tolk, Func, Fift and TL-B schemas.
-        Ideal for Web3 developers working within the TON ecosystem.
+        TON Blockchain Development Plugin — a JetBrains plugin that brings first-class TON blockchain support to IntelliJ-based IDEs.
+
+        - Syntax highlighting, code completion, navigation and inspections for Tolk, FunC, Fift (including assembly) and TL-B schemas
+        - Integration with Blueprint
+        - Works in IntelliJ IDEA, WebStorm, PyCharm, GoLand and other JetBrains IDEs
+
+        Everything you need to develop, test and ship TON smart contracts—right from your editor.
         """.trimIndent()
         changeNotes.set(
             provider {

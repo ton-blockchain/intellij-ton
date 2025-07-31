@@ -45,6 +45,8 @@
         <breadcrumbsInfoProvider implementation="org.ton.intellij.func.structure.FuncBreadcrumbsInfoProvider"/>
 
         <colorSettingsPage implementation="org.ton.intellij.func.ide.colors.FuncColorSettingsPage"/>
+        <additionalTextAttributes scheme="Default" file="colorSchemes/FuncDefault.xml"/>
+        <additionalTextAttributes scheme="Dark" file="colorSchemes/FuncDark.xml"/>
 
         <typedHandler implementation="org.ton.intellij.func.editor.FuncTypedHandler" id="FuncTypedHandler"/>
 

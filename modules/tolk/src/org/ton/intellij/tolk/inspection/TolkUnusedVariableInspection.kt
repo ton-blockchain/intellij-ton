@@ -24,7 +24,7 @@ class TolkUnusedVariableInspection : TolkInspectionBase() {
             val fixes = LinkedList<LocalQuickFix>()
             fixes.add(RenameUnderscoreFix(element))
 
-            val parent = element.parent
+//            val parent = element.parent
 //            if (parent is TolkVarStatement) {
 //                fixes.add(RemoveElementFix(parent))
 //            }

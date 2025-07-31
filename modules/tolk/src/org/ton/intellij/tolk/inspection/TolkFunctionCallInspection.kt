@@ -11,12 +11,6 @@ class TolkFunctionCallInspection : TolkInspectionBase() {
         holder: ProblemsHolder,
         session: LocalInspectionToolSession,
     ) = object : TolkVisitor() {
-        override fun visitDotExpression(o: TolkDotExpression) {
-            super.visitDotExpression(o)
-            //            super.visitSpecialApplyExpression(o)
-//            val function = o.left.reference?.resolve() as? TolkFunction ?: return
-//            holder.check(function, o.right ?: return, true)
-        }
 //        override fun visitApplyExpression(o: TolkApplyExpression) {
 //            super.visitApplyExpression(o)
 //            if (o.parent is TolkSpecialApplyExpression) return

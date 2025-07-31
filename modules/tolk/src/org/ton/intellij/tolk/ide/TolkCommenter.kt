@@ -18,10 +18,10 @@ data class CommentHolder(val file: PsiFile) : CommenterDataHolder() {
 
 class TolkCommenter : Commenter, CodeDocumentationAwareCommenter {
     override fun isDocumentationComment(element: PsiComment?) = element?.tokenType == DOC_BLOCK_COMMENT
-    override fun getDocumentationCommentTokenType(): IElementType? = DOC_BLOCK_COMMENT
-    override fun getDocumentationCommentLinePrefix(): String? = "*"
-    override fun getDocumentationCommentPrefix(): String? = "/**"
-    override fun getDocumentationCommentSuffix(): String? = "*/"
+    override fun getDocumentationCommentTokenType(): IElementType = DOC_BLOCK_COMMENT
+    override fun getDocumentationCommentLinePrefix(): String = "*"
+    override fun getDocumentationCommentPrefix(): String = "/**"
+    override fun getDocumentationCommentSuffix(): String = "*/"
     // act like there are no doc comments, these are handled in `TolkEnterInLineCommentHandler`
 //    override fun isDocumentationComment(element: PsiComment?): Boolean = false
 //    override fun getDocumentationCommentTokenType(): IElementType? = null

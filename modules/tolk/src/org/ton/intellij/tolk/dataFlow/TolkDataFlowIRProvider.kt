@@ -9,7 +9,7 @@ class TolkDataFlowIRProvider : DataFlowIRProvider {
     override fun createControlFlow(
         factory: DfaValueFactory,
         psiBlock: PsiElement
-    ): ControlFlow? {
+    ): ControlFlow {
         TODO("Not yet implemented")
     }
 }

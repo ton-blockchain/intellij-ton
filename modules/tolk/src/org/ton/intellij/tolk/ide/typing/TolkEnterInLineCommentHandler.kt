@@ -25,7 +25,7 @@ class TolkEnterInLineCommentHandler : EnterHandlerDelegateAdapter() {
         caretAdvanceRef: Ref<Int>,
         dataContext: DataContext,
         originalHandler: EditorActionHandler?
-    ): Result? {
+    ): Result {
         if (file !is TolkFile) return Result.Continue
 
         // get current document and commit any changes, so we'll get latest PSI

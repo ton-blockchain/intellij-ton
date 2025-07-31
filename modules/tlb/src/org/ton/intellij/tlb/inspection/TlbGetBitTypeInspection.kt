@@ -13,8 +13,7 @@ class TlbGetBitTypeInspection : TlbInspectionBase() {
         override fun visitGetBitTypeExpression(o: TlbGetBitTypeExpression) {
             val typeExpressionList = o.typeExpressionList
             val left = typeExpressionList.firstOrNull()?.unwrap() ?: return
-            val resolvedParam = left.reference?.resolve()
-            when (resolvedParam) {
+            when (val resolvedParam = left.reference?.resolve()) {
                 is TlbImplicitField -> {
                     if (resolvedParam.typeKeyword != null) {
                         reportProblem(holder, left)

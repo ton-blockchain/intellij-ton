@@ -13,7 +13,4 @@ class TolkNodeModulesToolchainFlavor : TolkToolchainFlavor() {
             .filter { isValidToolchainPath(it) }
     }
 
-    override fun isValidToolchainPath(path: Path): Boolean {
-        return super.isValidToolchainPath(path)
-    }
 }

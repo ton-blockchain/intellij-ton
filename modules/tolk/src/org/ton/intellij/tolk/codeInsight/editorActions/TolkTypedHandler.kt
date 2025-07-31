@@ -18,7 +18,7 @@ class TolkTypedHandler : TypedHandlerDelegate() {
         if (file !is TolkFile) return Result.CONTINUE
         if (charTyped == '@') {
             // Trigger auto-popup for annotations
-            AutoPopupController.getInstance(project).autoPopupMemberLookup(editor, null);
+            AutoPopupController.getInstance(project).autoPopupMemberLookup(editor, null)
             return Result.STOP
         }
         return Result.CONTINUE

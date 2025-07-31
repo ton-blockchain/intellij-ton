@@ -35,7 +35,7 @@ class FiftDocumentationProvider : AbstractDocumentationProvider() {
 
 private class FiftDocMarkdownFlavourDescriptor(
     private val gfm: MarkdownFlavourDescriptor = GFMFlavourDescriptor(useSafeLinks = false, absolutizeAnchorLinks = true),
-) : MarkdownFlavourDescriptor by gfm {}
+) : MarkdownFlavourDescriptor by gfm
 
 fun documentationAsHtml(documentationText: String): String {
     val flavour = FiftDocMarkdownFlavourDescriptor()

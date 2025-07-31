@@ -1,6 +1,5 @@
 package org.ton.intellij.func.stub.type
 
-import com.intellij.lang.ASTNode
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.stubs.IndexSink
 import com.intellij.psi.stubs.StubBase
@@ -15,7 +14,4 @@ abstract class FuncStubElementType<S : StubBase<T>, T : FuncElement>(
     override fun indexStub(stub: S, sink: IndexSink) {
     }
 
-    override fun shouldCreateStub(node: ASTNode?): Boolean {
-        return super.shouldCreateStub(node)
-    }
 }

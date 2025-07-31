@@ -102,7 +102,7 @@ class FuncDocumentationTarget(val element: PsiElement, val originalElement: PsiE
     fun renderElement(
         element: PsiElement,
         originalElement: PsiElement?,
-    ): Pair<PsiElement, String>? = element to buildString {
+    ): Pair<PsiElement, String> = element to buildString {
         when (element) {
             is FuncReferenceExpression -> {
 //                val resolved = element.reference?.resolve()

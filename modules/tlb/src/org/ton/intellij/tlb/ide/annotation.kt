@@ -31,8 +31,7 @@ class TlbAnnotator : Annotator {
                 holder.annotateInfo(element.identifier, TlbColor.CONSTRUCTOR_TYPE_NAME)
             }
             is TlbParamTypeExpression -> {
-                val resolved = element.reference?.resolve()
-                when(resolved) {
+                when(val resolved = element.reference?.resolve()) {
                     is TlbImplicitField -> {
                         if (resolved.typeKeyword != null) {
                             holder.annotateInfo(element, TlbColor.TYPE_PARAMETER)

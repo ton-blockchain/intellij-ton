@@ -43,6 +43,10 @@ The plugin supports the following languages:
 - [`@tondev_eng` on Telegram](https://t.me/tondev_eng) — Main TON community chat and discussion group.
 - [`@tondev` on Telegram](https://t.me/tondev) — Main Russian TON community chat and discussion group.
 
+## License
+
+GPL-3.0
+
 Based on [The Open Network](https://ton.org)
 
 <!-- Badges -->

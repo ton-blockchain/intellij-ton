@@ -8,11 +8,9 @@ import com.intellij.lang.PsiStructureViewFactory
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import org.ton.intellij.tlb.TlbIcons
 import org.ton.intellij.tlb.psi.TlbConstructor
 import org.ton.intellij.tlb.psi.TlbFile
 import org.ton.intellij.tlb.psi.TlbNamedElement
-import javax.swing.Icon
 
 class TlbStructureViewFactory : PsiStructureViewFactory {
     override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder {

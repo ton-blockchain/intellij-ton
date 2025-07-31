@@ -1,7 +1,6 @@
 package org.ton.intellij.tolk.presentation
 
 import org.ton.intellij.tolk.psi.*
-import org.ton.intellij.tolk.psi.impl.isMutable
 
 fun TolkPsiRenderer.renderParameterList(element: TolkParameterList) = buildString {
     appendParameterList(this, element)

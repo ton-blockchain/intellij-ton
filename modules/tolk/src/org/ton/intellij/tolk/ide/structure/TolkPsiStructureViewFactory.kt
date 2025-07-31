@@ -12,7 +12,6 @@ import com.intellij.psi.NavigatablePsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.util.containers.map2Array
 import org.ton.intellij.tolk.psi.*
-import javax.swing.Icon
 
 class TolkPsiStructureViewFactory : PsiStructureViewFactory {
     override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder? {

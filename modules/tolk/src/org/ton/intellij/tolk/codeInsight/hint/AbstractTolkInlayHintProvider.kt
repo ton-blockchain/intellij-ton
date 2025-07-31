@@ -4,15 +4,12 @@ import com.intellij.codeInsight.hints.declarative.InlayHintsCollector
 import com.intellij.codeInsight.hints.declarative.InlayHintsProvider
 import com.intellij.codeInsight.hints.declarative.InlayTreeSink
 import com.intellij.codeInsight.hints.declarative.SharedBypassCollector
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import org.ton.intellij.tolk.psi.TolkFile
 
 abstract class AbstractTolkInlayHintProvider : InlayHintsProvider {
-    private val log = Logger.getInstance(this::class.java)
-
     final override fun createCollector(
         file: PsiFile,
         editor: Editor

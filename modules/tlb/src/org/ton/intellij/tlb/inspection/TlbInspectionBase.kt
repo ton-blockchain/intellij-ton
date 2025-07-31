@@ -15,10 +15,6 @@ abstract class TlbInspectionBase : LocalInspectionTool() {
         }
     }
 
-    override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
-        return super.buildVisitor(holder, isOnTheFly)
-    }
-
     override fun buildVisitor(
         holder: ProblemsHolder,
         isOnTheFly: Boolean,

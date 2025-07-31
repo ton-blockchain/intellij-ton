@@ -4,10 +4,7 @@ import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.completion.impl.CompletionSorterImpl
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementWeigher
-import com.intellij.patterns.ElementPattern
-import com.intellij.patterns.PlatformPatterns.or
 import com.intellij.patterns.PlatformPatterns.psiElement
-import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.*
 
 class TolkCompletionContributor : CompletionContributor() {
@@ -89,18 +86,6 @@ class TolkCompletionContributor : CompletionContributor() {
     override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {
         super.fillCompletionVariants(parameters, withTolkSorter(parameters, result))
     }
-
-    private fun baseFunctionAttributePattern(
-        vararg afterLeafs: ElementPattern<out PsiElement>,
-    ) = psiElement()
-        .withAncestor(2, psiElement(TolkFunction::class.java))
-        .afterLeaf(
-            or(
-                *afterLeafs
-            )
-        ).andNot(
-            psiElement().beforeLeaf(psiElement(TolkElementTypes.IDENTIFIER))
-        )
 
     companion object {
         const val KEYWORD_PRIORITY = 20.0

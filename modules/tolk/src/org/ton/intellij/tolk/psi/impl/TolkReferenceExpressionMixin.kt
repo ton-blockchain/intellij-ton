@@ -47,19 +47,3 @@ abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
         private val EMPTY_ARRAY = emptyArray<TolkSymbolReference>()
     }
 }
-
-//fun TolkReferenceExpression.isVariableDefinition(): Boolean = CachedValuesManager.getCachedValue(this) {
-//    val result = !PsiTreeUtil.treeWalkUp(this, null) { scope, lastParent ->
-//        if (scope is TolkApplyExpression && scope.right == lastParent) { // `var |foo|` <-- last parent
-//            val left = scope.left // type definition -> `|var| foo`
-//            if (left.isTypeExpression()) {
-//                return@treeWalkUp false
-//            }
-//        }
-//        if (scope is TolkCatch && lastParent in scope.referenceExpressionList) {
-//            return@treeWalkUp false
-//        }
-//        true
-//    }
-//    Result(result, this)
-//}

@@ -51,9 +51,6 @@ class TolkInlineDocumentation(
     override fun getDocumentationOwnerRange(): TextRange? = owner.textRange
 
     override fun renderText(): @Nls String? {
-
-
-
         return null
     }
 

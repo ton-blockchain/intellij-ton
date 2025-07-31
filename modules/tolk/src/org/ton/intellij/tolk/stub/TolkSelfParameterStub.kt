@@ -4,7 +4,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.*
 import org.ton.intellij.tolk.psi.TolkSelfParameter
 import org.ton.intellij.tolk.psi.impl.TolkSelfParameterImpl
-import org.ton.intellij.tolk.psi.impl.isMutable
 import org.ton.intellij.tolk.stub.type.TolkStubElementType
 
 class TolkSelfParameterStub(

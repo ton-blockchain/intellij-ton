@@ -114,7 +114,7 @@ class TolkBreadcrumbsProvider : BreadcrumbsProvider {
             getHandler(element)?.elementInfo(element)
         } ?: ""
 
-    override fun getElementTooltip(element: PsiElement): @NlsSafe String? {
+    override fun getElementTooltip(element: PsiElement): @NlsSafe String {
         return ElementDescriptionUtil.getElementDescription(element, RefactoringDescriptionLocation.WITH_PARENT)
     }
 

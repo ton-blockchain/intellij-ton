@@ -34,7 +34,6 @@ import javax.swing.Icon
 class TonBlueprintProjectGenerator() : NpmPackageProjectGenerator() {
     override fun getId(): String = "create-ton"
 
-    @Suppress("DialogTitleCapitalization")
     override fun getName(): String = "TON"
 
     override fun getDescription(): String =

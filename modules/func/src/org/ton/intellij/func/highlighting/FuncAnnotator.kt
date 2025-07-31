@@ -99,8 +99,7 @@ class FuncAnnotator : Annotator {
                 }
             }
         }
-        val parent = element.parent
-        when (parent) {
+        when (val parent = element.parent) {
             is FuncFunction -> {
                 if (element == parent.nameIdentifier) {
                     highlight(element, holder, FuncColor.FUNCTION_DECLARATION.textAttributesKey)

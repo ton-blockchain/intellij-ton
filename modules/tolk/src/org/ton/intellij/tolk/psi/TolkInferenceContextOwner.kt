@@ -18,9 +18,9 @@ private val TOLK_INFERENCE_KEY: Key<CachedValue<TolkInferenceResult>> = Key.crea
 @OptIn(ExperimentalTime::class)
 val TolkInferenceContextOwner.selfInferenceResult: TolkInferenceResult
     get() {
-        val (cachedValue, time) = measureTimedValue {
+        val (cachedValue, _) = measureTimedValue {
             CachedValuesManager.getCachedValue(this, TOLK_INFERENCE_KEY) {
-                val (inferred, time) = measureTimedValue {
+                val (inferred, _) = measureTimedValue {
                     try {
                         inferTypesIn(this)
                     } catch (e: ProcessCanceledException) {

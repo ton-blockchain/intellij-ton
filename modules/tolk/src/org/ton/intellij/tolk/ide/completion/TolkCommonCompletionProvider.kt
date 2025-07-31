@@ -25,13 +25,7 @@ import org.ton.intellij.util.psiElement
 object TolkCommonCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
         psiElement<PsiElement>()
-            .withParent(
-                psiElement<TolkReferenceExpression>()
-//                    .andNot(
-//                        psiElement<TolkReferenceExpression>()
-//                            .withParent(TolkDotExpression::class.java)
-//                    )
-            )
+            .withParent(psiElement<TolkReferenceExpression>())
             .andNot(
                 PlatformPatterns.psiElement().afterLeaf(
                     PlatformPatterns.psiElement().withText(StandardPatterns.string().matches("\\d+"))

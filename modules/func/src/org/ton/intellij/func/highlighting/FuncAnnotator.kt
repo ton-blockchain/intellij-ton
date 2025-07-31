@@ -6,6 +6,8 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.endOffset
+import com.intellij.psi.util.startOffset
 import org.ton.intellij.func.FuncBundle
 import org.ton.intellij.func.eval.FuncIntValue
 import org.ton.intellij.func.eval.value
@@ -46,7 +48,7 @@ class FuncAnnotator : Annotator {
 
             is FuncConstVar -> {
                 highlight(
-                    element.identifier ?: return,
+                    element.identifier,
                     holder,
                     FuncColor.CONSTANT.textAttributesKey
                 )
@@ -72,8 +74,20 @@ class FuncAnnotator : Annotator {
                     )
                 } else {
                     val resolved = reference.resolve() ?: return
+                    if (resolved is FuncFunction) {
+                        // for `some.callMethod()`
+                        //           ^^^^^^^^^^ highlight only this part without the dot
+                        val shift = if (element.text.startsWith(".")) 1 else 0
+                        val range = TextRange(element.identifier.startOffset + shift, element.identifier.endOffset)
+                        highlight(
+                            range,
+                            holder,
+                            FuncColor.FUNCTION_CALL.textAttributesKey
+                        )
+                        return
+                    }
+
                     val color = when (resolved) {
-                        is FuncFunction -> FuncColor.FUNCTION_CALL
                         is FuncGlobalVar -> FuncColor.GLOBAL_VARIABLE
                         is FuncConstVar -> FuncColor.CONSTANT
                         is FuncFunctionParameter -> FuncColor.PARAMETER
@@ -91,7 +105,7 @@ class FuncAnnotator : Annotator {
 
             is FuncLiteralExpression -> {
                 val value = element.value
-                if (value is FuncIntValue && (value.value < TVM_INT_MIN_VALUE || value.value > TVM_INT_MAX_VALUE)) {
+                if (value is FuncIntValue && (value.value !in TVM_INT_MIN_VALUE..TVM_INT_MAX_VALUE)) {
                     holder.newAnnotation(
                         HighlightSeverity.ERROR,
                         FuncBundle.message("inspection.int_literal_out_of_range")

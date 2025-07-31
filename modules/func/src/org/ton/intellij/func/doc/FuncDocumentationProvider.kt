@@ -78,6 +78,9 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
             is FuncFunction -> buildString {
                 renderFunction(element)
             }
+            is FuncFunctionParameter -> buildString {
+                renderFunctionParameter(element)
+            }
 
             else -> null
         }

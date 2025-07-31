@@ -78,5 +78,9 @@
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
             <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
         </group>
+        <action id="NewTlbFile" class="org.ton.intellij.tlb.ide.actions.TlbCreateFileAction"
+                text="TL-B File" description="Create new TL-B file">
+            <add-to-group group-id="NewGroup"/>
+        </action>
     </actions>
 </idea-plugin>

@@ -59,46 +59,4 @@ abstract class TolkReferenceTypeExpressionMixin : ASTWrapperPsiElement, TolkRefe
             else -> primitiveType
         }
     }
-
-
-//    inner class CacheResolver : CachedValueProvider<TolkTy> {
-//        override fun compute(): CachedValueProvider.Result<TolkTy?>? {
-//            resolve().firstOrNull()?.let { return CachedValueProvider.Result.create(it, this) }
-//            return CachedValueProvider.Result.create(null, this)
-//        }
-//
-//        fun resolve(): List<TolkTy> = buildList {
-//            val typeName = text
-//            when(typeName) {
-//                "int" -> return listOf(TolkTyInt)
-//                "cell" -> return listOf(TolkTyCell)
-//                "slice" -> return listOf(TolkTySlice)
-//                "builder" -> return listOf(TolkTyBuilder)
-//                "continuation" -> return listOf(TolkTyCont)
-//                "tuple" -> return listOf(TolkTyAtomicTuple)
-//            }
-//            val owner = parentOfType<TolkTypeParameterListOwner>()
-//            if (owner != null) {
-//                val typeParameterList = owner.typeParameterList
-//                typeParameterList?.typeParameterList?.forEach { typeParameter ->
-//                    if (typeParameter.name == typeName) {
-//                        add(TolkTyParameter(typeParameter))
-//                    }
-//                }
-//            }
-//            TolkTypeDeclarationIndex.findElementsByName(
-//                project,
-//                typeName,
-//                GlobalSearchScope.filesScope(project) {
-//                    val file = containingFile as? TolkFile ?: return@filesScope emptyList()
-//                    file.collectIncludedFiles(true).map { it.virtualFile }
-//                }
-//            ).forEach { typeDeclaration ->
-//                add(TolkTyTypeDeclaration(typeDeclaration))
-//            }
-//        }
-//    }
 }
-
-val TolkReferenceTypeExpression.isPrimitive: Boolean
-    get() = (this as TolkReferenceTypeExpressionMixin).isPrimitive

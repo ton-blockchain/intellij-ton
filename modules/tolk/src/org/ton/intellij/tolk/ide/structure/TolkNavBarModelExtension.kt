@@ -10,33 +10,6 @@ import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkSymbolElement
 
-//class TolkNavBarModelExtension : StructureAwareNavBarModelExtension() {
-//    override val language: Language get() = TolkLanguage
-//
-////    override fun createModel(file: PsiFile, editor: Editor?): StructureViewModel? {
-////        if (file !is TolkFile) return null
-////        return TolkStructureViewModel(file, editor)
-////    }
-//
-//    override fun getPresentableText(item: Any?): String? {
-//        println("nav=$item")
-
-//    }
-//
-////    override fun getLeafElement(dataContext: DataContext): PsiElement? {
-////        val leafElement = super.getLeafElement(dataContext) as? TolkElement ?: return null
-////        if (TolkBreadcrumbsProvider().getElementInfo(leafElement).isEmpty()) return null
-////        return leafElement
-////    }
-//
-//    override fun getIcon(item: Any?): Icon? {
-//        if (item is TolkElement) {
-//            return item.getIcon(0)
-//        }
-//        return super.getIcon(item)
-//    }
-//}
-
 class TolkNavBarModelExtension : StructureAwareNavBarModelExtension() {
     override val language: Language get() = TolkLanguage
 
@@ -59,14 +32,4 @@ class TolkNavBarModelExtension : StructureAwareNavBarModelExtension() {
     override fun processChildren(`object`: Any, rootElement: Any?, processor: Processor<Any>): Boolean {
         return super.processChildren(`object`, rootElement, processor)
     }
-
-//    override fun adjustElement(psiElement: PsiElement): PsiElement? {
-//        println("adjust=$psiElement")
-//        if (psiElement is TolkFile || psiElement is PsiDirectory) return psiElement
-//        if (psiElement is TolkFunction) return psiElement
-//        if (psiElement is TolkSymbolElement && psiElement !is TolkLocalSymbolElement) {
-//            return psiElement
-//        }
-//        return null
-//    }
 }

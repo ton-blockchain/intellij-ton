@@ -22,7 +22,6 @@ class FuncSyntaxHighlighter : SyntaxHighlighterBase() {
             FuncElementTypes.INTEGER_LITERAL -> FuncColor.NUMBER
             FuncElementTypes.SEMICOLON -> FuncColor.SEMICOLON
             FuncElementTypes.COMMA -> FuncColor.COMMA
-//            FuncElementTypes.DOT -> FuncColor.DOT
             FuncParserDefinition.EOL_COMMENT -> FuncColor.LINE_COMMENT
             FuncParserDefinition.BLOCK_COMMENT -> FuncColor.BLOCK_COMMENT
             in FUNC_DOC_COMMENTS -> FuncColor.DOC_COMMENT

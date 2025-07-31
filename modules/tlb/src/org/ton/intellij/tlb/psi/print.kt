@@ -207,7 +207,7 @@ fun TlbTypeExpression.print(
                 less != null -> {
                     appendable.append("<")
                 }
-                else -> "??"
+                else -> appendable.append("??")
             }
             arguments.forEachIndexed { index, argument ->
                 appendable.append(" ")

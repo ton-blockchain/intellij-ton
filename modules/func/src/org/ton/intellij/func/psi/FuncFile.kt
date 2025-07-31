@@ -16,14 +16,6 @@ import org.ton.intellij.func.stub.type.FuncIncludeDefinitionStubElementType
 import org.ton.intellij.util.getChildrenByType
 import org.ton.intellij.util.recursionGuard
 
-//private fun processFile(context: FuncElement, file: FuncFile) {
-//    recursionGuard(file, {
-//        for (includeDefinition in file.includeDefinitions) {
-//            val nextFile = includeDefinition.reference?.resolve()
-//            if (nextFile !is FuncFile) continue
-//            processFile(context, nextFile)
-//        }
-
 class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncLanguage), FuncElement {
     override fun getFileType(): FileType = FuncFileType
 

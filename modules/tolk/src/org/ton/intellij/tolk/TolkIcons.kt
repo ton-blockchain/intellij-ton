@@ -15,5 +15,4 @@ object TolkIcons {
     val STRUCTURE = IconLoader.getIcon("/icons/struct.svg", TolkIcons::class.java)
     val TYPE_ALIAS = IconLoader.getIcon("/icons/typeAlias.svg", TolkIcons::class.java)
     val GLOBAL_VARIABLE = IconLoader.getIcon("/icons/globalVariable.svg", TolkIcons::class.java)
-    val RECURSIVE_CALL = AllIcons.Gutter.RecursiveMethod
 }

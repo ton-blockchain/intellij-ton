@@ -192,16 +192,6 @@
                          implementationClass="org.ton.intellij.tolk.inspection.numeric.TolkIntOverflowInspection"/>
 
         <!-- control flow issues -->
-        <localInspection language="Tolk" displayName="Missing return at end of function" groupPath="Tolk"
-                         groupName="Control flow issues" enabledByDefault="true" level="ERROR"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkMissingReturnInspection"/>
-        <localInspection language="Tolk" displayName="Calling function" groupPath="Tolk"
-                         groupName="Control flow issues" enabledByDefault="true" level="ERROR"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkFunctionCallInspection"/>
-        <localInspection language="Tolk" groupPath="Tolk" groupName="Control flow issues" enabledByDefault="true"
-                         level="INFORMATION"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkReplaceGuardClauseWithFunctionCallInspection"
-                         displayName="Replace guard clause with function call"/>
         <!--        <localInspection language="Tolk" displayName="`if` condition is not an integer" groupPath="Tolk"-->
         <!--                         groupName="Control flow issues" enabledByDefault="true" level="ERROR"-->
         <!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkIfConditionIsNotAnIntegerInspection"/>-->

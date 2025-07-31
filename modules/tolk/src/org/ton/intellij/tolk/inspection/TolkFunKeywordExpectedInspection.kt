@@ -39,15 +39,6 @@ class TolkFunKeywordExpectedInspection : TolkInspectionBase() {
         ) {
             val function = descriptor.psiElement as? TolkFunction ?: return
             val getKeyword = function.getKeyword ?: return
-//            val anchorBefore = (function.functionReceiver ?: function.identifier)?.node?.let {
-//                val prev = it.treePrev
-//                if (prev != null && prev.elementType == TokenType.WHITE_SPACE) {
-//                    prev
-//                } else {
-//                    it
-//                }
-//            } ?: return
-//            val functionNode = function.node
             val document = function.containingFile.document ?: return
             document.insertString(getKeyword.startOffset + getKeyword.textLength, " fun")
         }

@@ -199,9 +199,10 @@
         <!-- control flow issues -->
 
         <!-- general -->
-        <!--        <localInspection language="Tolk" displayName="Unresolved reference inspection" groupPath="Tolk"-->
-        <!--                         groupName="General" enabledByDefault="true" level="ERROR"-->
-        <!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnresolvedReferenceInspection"/>-->
+        <localInspection language="Tolk" groupPath="Tolk"
+                         groupName="General" enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnresolvedReferenceInspection"
+                         key="inspection.tolk.unresolved.reference.display.name" bundle="messages.TolkBundle"/>
         <!--        <localInspection language="Tolk" displayName="Unresolved type identifier" groupPath="Tolk"-->
         <!--                         groupName="General" enabledByDefault="true" level="ERROR"-->
         <!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnresolvedTypeIdentifierInspection"/>-->

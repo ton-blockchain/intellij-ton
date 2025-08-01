@@ -45,5 +45,13 @@ class TolkNamedElementIndex : StringStubIndexExtension<TolkNamedElement>() {
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
             processor: Processor<String>
         ): Boolean = StubIndex.getInstance().processAllKeys(KEY, processor, scope)
+
+        fun find(
+            fqn: String,
+            project: Project,
+            scope: GlobalSearchScope?,
+        ): Collection<TolkNamedElement> {
+            return StubIndex.getElements(KEY, fqn, project, scope, TolkNamedElement::class.java)
+        }
     }
 }

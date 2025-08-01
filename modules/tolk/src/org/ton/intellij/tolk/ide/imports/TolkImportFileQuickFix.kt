@@ -272,8 +272,5 @@ fun SmartPsiElementPointer<TolkFile>.relativePath(file: PsiFile): String {
         return path.replace(sdkPath, "@stdlib").removeSuffix(".tolk")
     }
 
-    return Path(path).relativeTo(Path(containingFile)).pathString.let {
-        if (it.startsWith("..") || it.startsWith(".") || it.startsWith("/") || it.startsWith("\\")) it
-        else "./$it"
-    }.removeSuffix(".tolk")
+    return Path(path).relativeTo(Path(containingFile)).pathString.removeSuffix(".tolk")
 }

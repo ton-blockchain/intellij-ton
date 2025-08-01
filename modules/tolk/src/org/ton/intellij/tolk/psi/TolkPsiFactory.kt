@@ -19,6 +19,7 @@ class TolkPsiFactory private constructor(val project: Project) {
         PsiFileFactory.getInstance(project).createFileFromText(name ?: "dummy.tolk", TolkLanguage, text) as TolkFile
 
     fun createNewline(): PsiElement = createWhitespace("\n")
+    fun createNewlines(): PsiElement = createWhitespace("\n\n")
 
     fun createWhitespace(ws: String): PsiElement =
         PsiParserFacade.getInstance(project).createWhiteSpaceFromText(ws)

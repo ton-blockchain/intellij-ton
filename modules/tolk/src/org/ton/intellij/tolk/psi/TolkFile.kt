@@ -6,6 +6,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.ResolveState
 import com.intellij.psi.scope.PsiScopeProcessor
 import com.intellij.psi.util.CachedValueProvider.Result
@@ -129,8 +130,18 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         val newline = TolkPsiFactory[project].createNewline()
         val includes = includeDefinitions
         if (includes.isEmpty()) {
+            val needTwoNewlines = firstChild !is PsiWhiteSpace
             addBefore(includeDefinition, firstChild)
-            addAfter(newline, firstChild)
+
+            if (needTwoNewlines) {
+                // fun foo() {}
+                val newlines = TolkPsiFactory[project].createNewlines()
+                addAfter(newlines, firstChild)
+            } else {
+                //
+                // fun foo() {}
+                addAfter(newline, firstChild)
+            }
             return
         }
 

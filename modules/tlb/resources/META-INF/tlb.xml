@@ -24,6 +24,15 @@
                                       implementationClass="org.ton.intellij.tlb.structure.TlbStructureViewFactory"/>
         <breadcrumbsInfoProvider implementation="org.ton.intellij.tlb.structure.TlbBreadcrumbsInfoProvider"/>
 
+        <codeInsight.declarativeInlayProvider language="TL-B"
+                                              bundle="messages.TlbBundle"
+                                              nameKey="codeInsight.hint.other.implicit.constructor.tag"
+                                              group="OTHER_GROUP"
+                                              implementationClass="org.ton.intellij.tlb.ide.hints.TlbImplicitConstructorTagHintsProvider"
+                                              isEnabledByDefault="true"
+                                              descriptionKey="codeInsight.hint.description.implicit.constructor.tag"
+                                              providerId="tlb.other.hints.implicit.constructor.tag"/>
+
         <localInspection
                 language="TL-B" displayName="Wrong name case for result type"
                 groupPath="TL-B"

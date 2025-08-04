@@ -598,6 +598,37 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """)
 
+    fun `test fill all fields completion`() = doFirstCompletion("""
+        struct Foo {
+            a: int
+            b: uint32
+            c: bool
+            d: slice
+        }
+
+        fun foo() {
+            Foo{
+                /*caret*/
+            }
+        }
+    """, """
+        struct Foo {
+            a: int
+            b: uint32
+            c: bool
+            d: slice
+        }
+        
+        fun foo() {
+            Foo{
+                a: 0,
+                b: 0,
+                c: false,
+                d: createEmptySlice(),/*caret*/
+            }
+        }
+    """)
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

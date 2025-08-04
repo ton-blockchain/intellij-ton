@@ -1,5 +1,6 @@
 package org.ton.intellij.tolk.ide.completion
 
+import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementDecorator
 
@@ -25,6 +26,7 @@ class TolkLookupElement(
 }
 
 fun LookupElement.toTolkLookupElement(data: TolkLookupElementData) = TolkLookupElement(this, data)
+fun LookupElement.withPriority(priority: Double) = PrioritizedLookupElement.withPriority(this, priority)
 
 data class TolkLookupElementData(
     /**

@@ -304,7 +304,7 @@ object TolkTyAddress : TolkPrimitiveTy {
 
 interface TolkIntTyFamily : TolkPrimitiveTy
 
-object TolkTyCoins : TolkPrimitiveTy {
+object TolkTyCoins : TolkIntTyFamily {
     override fun actualType(): TolkTy = this
 
     override fun toString(): String = "coins"
@@ -313,7 +313,7 @@ object TolkTyCoins : TolkPrimitiveTy {
 data class TolkIntNTy(
     val n: Int,
     val unsigned: Boolean,
-) : TolkPrimitiveTy {
+) : TolkIntTyFamily {
     override fun actualType(): TolkTy = this
 
     override fun toString(): String = if (unsigned) {

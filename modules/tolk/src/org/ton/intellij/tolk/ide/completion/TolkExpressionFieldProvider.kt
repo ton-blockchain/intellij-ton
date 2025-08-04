@@ -2,8 +2,13 @@ package org.ton.intellij.tolk.ide.completion
 
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
+import com.intellij.codeInsight.completion.InsertHandler
+import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
+import com.intellij.codeInsight.lookup.LookupElement
+import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.codeInsight.template.impl.ConstantNode
+import com.intellij.icons.AllIcons
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
@@ -13,6 +18,7 @@ import com.intellij.psi.util.startOffset
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.TolkStructExpression
 import org.ton.intellij.tolk.psi.TolkStructExpressionField
+import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.psi.impl.structFields
 import org.ton.intellij.tolk.type.TolkBitsNTy
 import org.ton.intellij.tolk.type.TolkBytesNTy
@@ -79,6 +85,28 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
                 )
             )
         }
+
+        val allFields = structTy.psi.structFields
+        val requiredFields = allFields.filter { isFieldRequired(it) }
+
+        result.addElement(
+            LookupElementBuilder.create("0")
+                .withPresentableText("Fill all fields…")
+                .withIcon(AllIcons.Actions.RealIntentionBulb)
+                .withInsertHandler(FillFieldsInsertHandler(allFields))
+                .withPriority(TolkCompletionPriorities.KEYWORD)
+        )
+
+        // no need to show this variant if it works like `Fill all fields` and there are some required fields to fill
+        if (allFields.size != requiredFields.size && requiredFields.isNotEmpty()) {
+            result.addElement(
+                LookupElementBuilder.create("1")
+                    .withPresentableText("Fill required fields…")
+                    .withIcon(AllIcons.Actions.RealIntentionBulb)
+                    .withInsertHandler(FillFieldsInsertHandler(requiredFields))
+                    .withPriority(TolkCompletionPriorities.KEYWORD)
+            )
+        }
     }
 
     fun typeDefaultValue(type: TolkTy?): String {
@@ -119,7 +147,7 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         }
 
         if (type is TolkSliceTy) {
-            return "createEmptyCell()"
+            return "createEmptySlice()"
         }
 
         if (type is TolkTyBuilder) {
@@ -144,4 +172,21 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
 
         return "null"
     }
+
+    class FillFieldsInsertHandler(private val fields: List<TolkStructField>) : InsertHandler<LookupElement> {
+        override fun handleInsert(context: InsertionContext, item: LookupElement) {
+            val document = context.document
+            val start = context.startOffset
+            document.deleteString(start, start + 1)
+
+            val lines = fields.mapIndexed { index, it -> "${it.name}: \$field$index$," }
+            val defaultValues = fields.mapIndexed { index, it -> "field$index" to ConstantNode(typeDefaultValue(it.type)) }
+
+            val snippet = lines.joinToString("\n")
+
+            TemplateStringInsertHandler(snippet, true, *defaultValues.toTypedArray()).handleInsert(context, item)
+        }
+    }
+
+    private fun isFieldRequired(field: TolkStructField): Boolean = field.expression == null
 }

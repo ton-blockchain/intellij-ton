@@ -17,9 +17,13 @@ fun <STRUCT>Point</STRUCT>.<STATIC_FUNCTION>generatePoint</STATIC_FUNCTION>(<PAR
     return { <FIELD>x</FIELD>, <FIELD>y</FIELD> };
 }
 
-fun <STRUCT>Point</STRUCT>.<METHOD>assignCoords</METHOD>(mutate <SELF_PARAMETER>self</SELF_PARAMETER>) {
-    self.<FIELD>x</FIELD> = 10;
-    self.<FIELD>y</FIELD> = <FUNCTION_CALL>returnConstValue</FUNCTION_CALL>();
+fun <STRUCT>Point</STRUCT>.<METHOD>assignCoords</METHOD>(mutate <MUT_SELF_PARAMETER>self</MUT_SELF_PARAMETER>) {
+    <MUT_SELF_PARAMETER>self</MUT_SELF_PARAMETER>.<FIELD>x</FIELD> = 10;
+    <MUT_SELF_PARAMETER>self</MUT_SELF_PARAMETER>.<FIELD>y</FIELD> = <FUNCTION_CALL>returnConstValue</FUNCTION_CALL>();
+}
+
+fun <STRUCT>Point</STRUCT>.<METHOD>change</METHOD>(mutate <MUT_PARAMETER>value</MUT_PARAMETER>: <PRIMITIVE>int</PRIMITIVE>) {
+    <MUT_PARAMETER>value</MUT_PARAMETER> = 10;
 }
 
 fun <FUNCTION>returnConstValue</FUNCTION>(): <PRIMITIVE>int</PRIMITIVE> {

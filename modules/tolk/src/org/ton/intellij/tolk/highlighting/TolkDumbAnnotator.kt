@@ -26,6 +26,27 @@ class TolkDumbAnnotator : Annotator, DumbAware {
             }
             TolkElementTypes.GET_KEYWORD,
             TolkElementTypes.LAZY_KEYWORD -> TolkColor.KEYWORD.textAttributesKey
+            TolkElementTypes.SELF_KEYWORD -> {
+                when (val parent = element.parent) {
+                    is TolkSelfExpression -> {
+                        val resolved = parent.reference?.resolve() as? TolkSelfParameter
+                        if (resolved != null && resolved.isMutable) {
+                            TolkColor.MUT_SELF_PARAMETER.textAttributesKey
+                        } else {
+                            TolkColor.SELF_PARAMETER.textAttributesKey
+                        }
+                    }
+                    is TolkSelfTypeExpression -> {
+                        val grand = parent.parent as? TolkSelfParameter
+                        if (grand != null && grand.isMutable) {
+                            TolkColor.MUT_SELF_PARAMETER.textAttributesKey
+                        } else {
+                            TolkColor.SELF_PARAMETER.textAttributesKey
+                        }
+                    }
+                    else                  -> TolkColor.KEYWORD.textAttributesKey
+                }
+            }
             else -> return
         }
         holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
@@ -66,7 +87,11 @@ class TolkDumbAnnotator : Annotator, DumbAware {
                     TolkColor.VARIABLE.textAttributesKey
                 }
                 is TolkCatchParameter -> TolkColor.VARIABLE.textAttributesKey
-                is TolkSelfParameter -> TolkColor.SELF_PARAMETER.textAttributesKey
+                is TolkSelfParameter -> if (element.isMutable) {
+                    TolkColor.MUT_SELF_PARAMETER.textAttributesKey
+                } else {
+                    TolkColor.SELF_PARAMETER.textAttributesKey
+                }
                 is TolkParameter -> if (element.isMutable) {
                     TolkColor.MUT_PARAMETER.textAttributesKey
                 } else {

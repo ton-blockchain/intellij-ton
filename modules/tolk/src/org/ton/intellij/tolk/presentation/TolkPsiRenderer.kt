@@ -85,7 +85,6 @@ open class TolkPsiRenderer {
                 appendable.append("?")
             }
             is TolkAutoTypeExpression -> appendable.append("auto")
-            is TolkVoidTypeExpression -> appendable.append("void")
             is TolkNullTypeExpression -> appendable.append("null")
             is TolkParenTypeExpression -> {
                 appendable.append("(")

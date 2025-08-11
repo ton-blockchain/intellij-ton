@@ -103,7 +103,6 @@
             REDEF_KEYWORD               = 'redef'
             FUN_KEYWORD                 = 'fun'
             AUTO_KEYWORD                = 'auto'
-            VOID_KEYWORD                = 'void'
             VAL_KEYWORD                 = 'val'
             ENUM_KEYWORD                = 'enum'
             STRUCT_KEYWORD              = 'struct'
@@ -218,7 +217,7 @@ private VersionValueElement ::= '.' INTEGER_LITERAL {
     pin=1
 }
 
-upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' TypeExpression ';'? {
+upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' (TypeExpression | 'builtin') ';'? {
     pin = 1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkTypeMixin"
     implements = [
@@ -867,7 +866,6 @@ private SimpleTypeExpression ::=
     NullTypeExpression
     | SelfTypeExpression
     | AutoTypeExpression
-    | VoidTypeExpression
     | TensorOrParenTypeExpression
     | TupleTypeExpression
     | ReferenceTypeExpression
@@ -928,9 +926,6 @@ private MapTypeArrow ::= (NullableTypeExpression|SimpleTypeExpression) '->' {
 }
 
 AutoTypeExpression ::= 'auto'
-VoidTypeExpression ::= 'void' {
-    mixin="org.ton.intellij.tolk.psi.impl.TolkVoidTypeExpressionMixin"
-}
 
 ReferenceTypeExpression ::= IDENTIFIER TypeArgumentList_pinned? {
     mixin="org.ton.intellij.tolk.psi.impl.TolkReferenceTypeExpressionMixin"

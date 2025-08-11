@@ -267,7 +267,6 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "mutate"                 { return MUTATE_KEYWORD; }
       "assert"                 { return ASSERT_KEYWORD; }
       "throw"                  { return THROW_KEYWORD; }
-      "void"                   { return VOID_KEYWORD; }
       "tolk"                   { return TOLK_KEYWORD; }
       "type"                   { return TYPE_KEYWORD; }
       "val"                    { return VAL_KEYWORD; }

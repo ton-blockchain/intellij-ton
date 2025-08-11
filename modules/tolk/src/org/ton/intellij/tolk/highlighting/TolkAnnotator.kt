@@ -56,7 +56,12 @@ class TolkAnnotator : Annotator {
                 }
                 holder.info(color)
             }
-
+            is TolkTypeDef -> {
+                if (resolved.builtinKeyword != null) {
+                    // type void = builtin
+                    return holder.info(TolkColor.PRIMITIVE.textAttributesKey)
+                }
+            }
             null -> {
                 val parent = element.parent
                 val isPrimitiveType = TolkPrimitiveTy.fromReference(element) != null

@@ -41,7 +41,6 @@ val TOLK_KEYWORDS = tokenSetOf(
     TolkElementTypes.FUN_KEYWORD,
     TolkElementTypes.REDEF_KEYWORD,
     TolkElementTypes.AUTO_KEYWORD,
-    TolkElementTypes.VOID_KEYWORD,
     TolkElementTypes.MUTATE_KEYWORD,
     TolkElementTypes.THROW_KEYWORD,
     TolkElementTypes.ASSERT_KEYWORD,

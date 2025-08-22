@@ -30,10 +30,8 @@ class TolkAttachTestConsoleFiltersAtStartup : ProjectActivity {
                 handler.addProcessListener(object : ProcessAdapter() {
                     override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
                         val descriptor = RunContentManager.getInstance(project).allDescriptors.lastOrNull() ?: return
-                        val console = (descriptor.executionConsole as? ConsoleView)
-                        if (console != null) {
-                            addFilters(project, console)
-                        }
+                        val console = descriptor.executionConsole as? ConsoleView ?: return
+                        addFilters(project, console)
                     }
                 })
             }

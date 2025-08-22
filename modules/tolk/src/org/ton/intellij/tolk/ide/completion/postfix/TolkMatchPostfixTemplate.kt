@@ -12,7 +12,8 @@ class TolkMatchPostfixTemplate : PostfixTemplate(
     "tolk.postfix.match", "match",
     "match (expr) {}", null
 ) {
-    override fun isApplicable(context: PsiElement, copyDocument: Document, newOffset: Int) = true
+    override fun isApplicable(context: PsiElement, copyDocument: Document, newOffset: Int) =
+        TolkPostfixUtil.isExpression(context)
 
     override fun expand(context: PsiElement, editor: Editor) {
         val element = context.parentOfType<TolkExpressionStatement>() ?: return

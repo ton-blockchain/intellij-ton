@@ -10,6 +10,8 @@
         <breadcrumbsInfoProvider implementation="org.ton.intellij.tolk.ide.structure.TolkBreadcrumbsProvider"/>
         <navbar implementation="org.ton.intellij.tolk.ide.structure.TolkNavBarModelExtension" order="first"/>
 
+        <postStartupActivity implementation="org.ton.intellij.tolk.ide.TolkAttachTestConsoleFiltersAtStartup"/>
+
         <lang.parserDefinition language="Tolk"
                                implementationClass="org.ton.intellij.tolk.parser.TolkParserDefinition"/>
         <lang.syntaxHighlighterFactory language="Tolk"

@@ -41,6 +41,11 @@ class TolkPsiFactory private constructor(val project: Project) {
         return (createStatement("$text;") as TolkExpressionStatement).expression
     }
 
+    fun createVariableDeclaration(name: String, expr: String): TolkExpressionStatement {
+        return (createStatement("val $name = $expr;") as? TolkExpressionStatement)
+            ?: error("Failed to create variable from name: `$name` and expr: `$expr`")
+    }
+
     fun isValidIdentifier(name: String): Boolean {
         if (keywords.contains(name)) return false
         return Regex("^[A-Z_a-z]\\w*$").matches(name)

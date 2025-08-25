@@ -7,4 +7,6 @@ import org.ton.intellij.tolk.psi.TolkNamedElement
 class TolkRefactoringSupportProvider : RefactoringSupportProvider() {
     override fun isMemberInplaceRenameAvailable(element: PsiElement, context: PsiElement?): Boolean =
         element is TolkNamedElement
+
+    override fun getIntroduceVariableHandler() = TolkIntroduceVariableHandler()
 }

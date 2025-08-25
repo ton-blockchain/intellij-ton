@@ -30,7 +30,7 @@ class TolkReadWriteAccessDetector : ReadWriteAccessDetector() {
     }
 
     override fun isDeclarationWriteAccess(element: PsiElement): Boolean {
-        return element is TolkVar || element is TolkConstVar
+        return element is TolkVar || element is TolkConstVar || element is TolkStructField
     }
 
     override fun getReferenceAccess(referencedElement: PsiElement, reference: PsiReference): Access {
@@ -38,15 +38,20 @@ class TolkReadWriteAccessDetector : ReadWriteAccessDetector() {
     }
 
     override fun getExpressionAccess(expression: PsiElement): Access {
+        val parent = expression.parent
         if (expression is TolkStructField) {
-            val parent = expression.parent
             return if (parent is TolkStructExpressionField && parent.expression != null) Access.Write else Access.Read
         }
+        if (parent is TolkDotExpression && parent.parent !is TolkCallExpression) {
+            // foo.bar.baz()
+            return parent.getReadWriteAccess()
+        }
+        // foo, foo() or foo.bar()
         val referenceExpression = expression as? TolkReferenceExpression ?: expression.parentOfType()
         return referenceExpression?.getReadWriteAccess() ?: Access.Read
     }
 
-    fun TolkReferenceExpression.getReadWriteAccess(): Access {
+    fun TolkExpression.getReadWriteAccess(): Access {
         val expression = getConsiderableExpression(this)
         val parent = expression.parent
         if (parent is TolkBinExpression && (parent.binaryOp.eq != null || parent.isSetAssignment)) {

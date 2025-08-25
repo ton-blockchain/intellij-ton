@@ -665,6 +665,10 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """)
 
+    fun `test no storage snippet completion after fun`() = checkNotContainsCompletion("storage", """"
+        fun storage/*caret*/
+    """)
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

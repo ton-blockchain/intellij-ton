@@ -6,6 +6,7 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.codeInsight.template.impl.ConstantNode
 import com.intellij.icons.AllIcons
 import com.intellij.patterns.ElementPattern
+import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
@@ -15,6 +16,15 @@ object TolkStorageSnippetCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
         PlatformPatterns.psiElement()
             .withSuperParent(2, TolkFile::class.java)
+            .with(object : PatternCondition<PsiElement>("notAfterLiteral") {
+                override fun accepts(t: PsiElement, context: ProcessingContext?): Boolean {
+                    // accept
+                    // <caret>
+                    // but not
+                    // fun <caret>
+                    return t.prevSibling == null
+                }
+            })
 
     override fun addCompletions(
         parameters: CompletionParameters,

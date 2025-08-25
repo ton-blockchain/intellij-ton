@@ -20,6 +20,14 @@ class TlbFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TlbLan
         }
     }
 
+    fun resultTypes(): Sequence<TlbResultType> = sequence {
+        val constructors = findChildrenByClass(TlbConstructor::class.java)
+        for (constructor in constructors) {
+            val resultType = constructor.resultType ?: continue
+            yield(resultType)
+        }
+    }
+
     fun constructors(): List<TlbConstructor> {
         return findChildrenByClass(TlbConstructor::class.java).toList()
     }

@@ -2,13 +2,19 @@ package org.ton.intellij.tolk.inspection
 
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.LocalQuickFix
+import com.intellij.codeInspection.LocalQuickFixAndIntentionActionOnPsiElement
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiReference
+import org.ton.intellij.tolk.ide.fixes.TolkCreateConstantQuickfix
+import org.ton.intellij.tolk.ide.fixes.TolkCreateFunctionQuickfix
+import org.ton.intellij.tolk.ide.fixes.TolkCreateGlobalVariableQuickfix
+import org.ton.intellij.tolk.ide.fixes.TolkCreateLocalVariableQuickfix
 import org.ton.intellij.tolk.ide.imports.TolkImportFileQuickFix
+import org.ton.intellij.tolk.psi.TolkCallExpression
 import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
@@ -39,7 +45,19 @@ class TolkUnresolvedReferenceInspection : TolkInspectionBase() {
 
             val range = TextRange.from(identifier.startOffsetInParent, identifier.textLength)
             val fixes = createImportFileFixes(expr, reference, holder.isOnTheFly)
-            registerProblem(expr, range, fixes)
+            registerProblem(expr, range, arrayOf(*getCreateQuickfixes(expr, identifier), *fixes))
+        }
+
+        fun getCreateQuickfixes(expr: TolkElement, identifier: PsiElement): Array<LocalQuickFixAndIntentionActionOnPsiElement> {
+            if (expr.parent is TolkCallExpression) {
+                return arrayOf(TolkCreateFunctionQuickfix(identifier))
+            }
+
+            return arrayOf(
+                TolkCreateLocalVariableQuickfix(identifier),
+                TolkCreateConstantQuickfix(identifier),
+                TolkCreateGlobalVariableQuickfix(identifier)
+            )
         }
 
         fun registerProblem(o: PsiElement, range: TextRange, fixes: Array<LocalQuickFix>) {

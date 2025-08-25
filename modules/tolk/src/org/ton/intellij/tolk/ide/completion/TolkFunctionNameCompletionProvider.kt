@@ -9,10 +9,14 @@ import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
 import com.intellij.util.ProcessingContext
+import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.impl.hasReceiver
+import org.ton.intellij.tolk.psi.impl.receiverTy
+import org.ton.intellij.tolk.type.TolkTyAlias
+import org.ton.intellij.tolk.type.TolkTyUnknown
 import org.ton.intellij.util.parentOfType
 
 object TolkFunctionNameCompletionProvider : TolkCompletionProvider() {
@@ -53,28 +57,34 @@ object TolkFunctionNameCompletionProvider : TolkCompletionProvider() {
         val hasBodyAndParams = func.parameterList != null && func.functionBody != null
 
         val isMethod = func.hasReceiver
-
         if (isMethod) {
-            if (hasBodyAndParams) {
-                result.addElement(
-                    LookupElementBuilder.create("unpackFromSlice")
-                        .withTailText("(mutate s: slice)")
-                )
-                result.addElement(
-                    LookupElementBuilder.create("packToBuilder")
-                        .withTailText("(self, mutate b: builder)")
-                )
-            } else {
-                result.addElement(
-                    LookupElementBuilder.create("unpackFromSlice")
-                        .withTailText("(mutate s: slice)")
-                        .withInsertHandler(TemplateStringInsertHandler("(mutate s: slice) {\n\$END$\n}"))
-                )
-                result.addElement(
-                    LookupElementBuilder.create("packToBuilder")
-                        .withTailText("(self, mutate b: builder)")
-                        .withInsertHandler(TemplateStringInsertHandler("(self, mutate b: builder) {\n\$END$\n}"))
-                )
+            val receiverTy = func.receiverTy
+            if (receiverTy is TolkTyAlias && receiverTy.underlyingType !is TolkTyUnknown) {
+                if (hasBodyAndParams) {
+                    result.addElement(
+                        LookupElementBuilder.create("unpackFromSlice")
+                            .withIcon(TolkIcons.FUNCTION)
+                            .withTailText("(mutate s: slice)")
+                    )
+                    result.addElement(
+                        LookupElementBuilder.create("packToBuilder")
+                            .withIcon(TolkIcons.FUNCTION)
+                            .withTailText("(self, mutate b: builder)")
+                    )
+                } else {
+                    result.addElement(
+                        LookupElementBuilder.create("unpackFromSlice")
+                            .withIcon(TolkIcons.FUNCTION)
+                            .withTailText("(mutate s: slice)")
+                            .withInsertHandler(TemplateStringInsertHandler("(mutate s: slice) {\n\$END$\n}"))
+                    )
+                    result.addElement(
+                        LookupElementBuilder.create("packToBuilder")
+                            .withIcon(TolkIcons.FUNCTION)
+                            .withTailText("(self, mutate b: builder)")
+                            .withInsertHandler(TemplateStringInsertHandler("(self, mutate b: builder) {\n\$END$\n}"))
+                    )
+                }
             }
         } else {
             for ((name, signature) in functions) {
@@ -83,11 +93,13 @@ object TolkFunctionNameCompletionProvider : TolkCompletionProvider() {
                 if (hasBodyAndParams) {
                     result.addElement(
                         LookupElementBuilder.create(name)
+                            .withIcon(TolkIcons.FUNCTION)
                             .withTailText("(${signature})")
                     )
                 } else {
                     result.addElement(
                         LookupElementBuilder.create(name)
+                            .withIcon(TolkIcons.FUNCTION)
                             .withTailText("(${signature})")
                             .withInsertHandler(TemplateStringInsertHandler("(${signature}) {\n\$END$\n}"))
                     )

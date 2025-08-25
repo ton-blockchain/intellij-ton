@@ -700,26 +700,48 @@ class TolkCompletionTest : TolkCompletionTestBase() {
     """)
 
     fun `test packToBuilder completion`() = doFirstCompletion("""
-        fun int.packT/*caret*/
+        type SnakeString = slice
+        
+        fun SnakeString.packT/*caret*/
     """, """
-        fun int.packToBuilder(self, mutate b: builder) {
+        type SnakeString = slice
+
+        fun SnakeString.packToBuilder(self, mutate b: builder) {
             /*caret*/
         }
     """.trimIndent())
 
     fun `test unpackFromSlice completion`() = doFirstCompletion("""
-        fun int.unpack/*caret*/
+        type SnakeString = slice
+
+        fun SnakeString.unpack/*caret*/
     """, """
-        fun int.unpackFromSlice(mutate s: slice) {
+        type SnakeString = slice
+
+        fun SnakeString.unpackFromSlice(mutate s: slice) {
             /*caret*/
         }
     """.trimIndent())
 
     fun `test unpackFromSlice completion with full declaration`() = doFirstCompletion("""
-        fun int.pack/*caret*/(self, mutate b: builder) {}
+        type SnakeString = slice
+
+        fun SnakeString.pack/*caret*/(self, mutate b: builder) {}
     """, """
-        fun int.packToBuilder/*caret*/(self, mutate b: builder) {}
+        type SnakeString = slice
+
+        fun SnakeString.packToBuilder/*caret*/(self, mutate b: builder) {}
     """.trimIndent())
+
+    fun `test no unpackFromSlice completion for non alias type`() = checkNotContainsCompletion("unpackFromSlice", """
+        struct Foo {}
+
+        fun Foo.pack/*caret*/(self, mutate b: builder) {}
+    """)
+
+    fun `test no unpackFromSlice completion for builtin alias type`() = checkNotContainsCompletion("unpackFromSlice", """
+        fun int.pack/*caret*/(self, mutate b: builder) {}
+    """)
 
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;

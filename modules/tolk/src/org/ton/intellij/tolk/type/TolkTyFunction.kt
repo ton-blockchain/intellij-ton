@@ -75,12 +75,18 @@ class TolkTyFunction(
         for (i in parametersType.indices) {
             val param = parametersType[i]
             val otherParam = other.parametersType[i]
+            if (param is TolkTyParam || otherParam is TolkTyParam) {
+                continue
+            }
             if (!param.canRhsBeAssigned(otherParam)) {
                 return false
             }
             if (!otherParam.canRhsBeAssigned(param)) {
                 return false
             }
+        }
+        if (returnType is TolkTyParam || other.returnType is TolkTyParam) {
+            return true
         }
         return returnType.canRhsBeAssigned(other.returnType) && other.returnType.canRhsBeAssigned(returnType)
     }

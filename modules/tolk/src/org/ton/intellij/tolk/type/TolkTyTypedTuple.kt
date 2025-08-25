@@ -28,6 +28,7 @@ class TolkTyTypedTuple private constructor(
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (this == other) return true
         if (other is TolkTyAlias) return canRhsBeAssigned(other.underlyingType)
+        if (other is TolkTyParam) return true
         if (other !is TolkTyTypedTuple) return other == TolkTy.Never
         if (elements.size != other.elements.size) return false
         for (i in elements.indices) {

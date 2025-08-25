@@ -2,6 +2,7 @@ package org.ton.intellij.tolk.psi
 
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.FileViewProvider
@@ -26,7 +27,16 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
     override fun getStub(): TolkFileStub? = super.getStub() as? TolkFileStub
 
     private val cachedDeclarations = CachedValuesManager.getManager(manager.project).createCachedValue({
-        val declarations = findDeclarations()
+        val declarations = findDeclarations(skipTypes = false)
+        if (!isPhysical) {
+            Result.create(declarations, containingFile, PsiModificationTracker.MODIFICATION_COUNT)
+        } else {
+            Result.create(declarations, PsiModificationTracker.MODIFICATION_COUNT)
+        }
+    }, false)
+
+    private val cachedDeclarationsWithoutTypes = CachedValuesManager.getManager(manager.project).createCachedValue({
+        val declarations = findDeclarations(skipTypes = true)
         if (!isPhysical) {
             Result.create(declarations, containingFile, PsiModificationTracker.MODIFICATION_COUNT)
         } else {
@@ -100,8 +110,8 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             }
         )
 
-    fun resolveSymbols(name: String): Sequence<TolkSymbolElement> {
-        val values = cachedDeclarations.value
+    fun resolveSymbols(name: String, skipTypes: Boolean = false): Sequence<TolkSymbolElement> {
+        val values = if (skipTypes) cachedDeclarationsWithoutTypes.value else cachedDeclarations.value
         return values[name]?.asSequence() ?: emptySequence()
     }
 
@@ -167,24 +177,28 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         processor: PsiScopeProcessor,
         state: ResolveState,
         lastParent: PsiElement?,
-        place: PsiElement
+        place: PsiElement,
     ): Boolean {
+        val skipTypes = !state.get(NEED_PROCESS_TYPES)
+
         structs.forEach { if (!processor.execute(it, state)) return false }
-        typeDefs.forEach { if (!processor.execute(it, state)) return false }
+        if (!skipTypes) {
+            typeDefs.forEach { if (!processor.execute(it, state)) return false }
+        }
         constVars.forEach { if (!processor.execute(it, state)) return false }
         globalVars.forEach { if (!processor.execute(it, state)) return false }
         functions.forEach { if (!processor.execute(it, state)) return false }
         return true
     }
 
-    private fun findDeclarations(): Map<String, Collection<TolkSymbolElement>> {
+    private fun findDeclarations(skipTypes: Boolean): Map<String, Collection<TolkSymbolElement>> {
         val result = HashMap<String, MutableList<TolkSymbolElement>>()
 
         val visitedFiles = mutableSetOf<TolkFile>()
         project.tolkSettings.getDefaultImport()?.let {
             if (it != this) {
                 visitedFiles.add(it)
-                it.findDeclarations().forEach { (name, declarations) ->
+                it.findDeclarations(skipTypes).forEach { (name, declarations) ->
                     result.getOrPut(name) { mutableListOf() }.addAll(declarations)
                 }
             }
@@ -192,7 +206,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         val processor = object : PsiScopeProcessor {
             override fun execute(
                 element: PsiElement,
-                state: ResolveState
+                state: ResolveState,
             ): Boolean {
                 if (element is TolkSymbolElement) {
                     val name = element.name ?: return true
@@ -203,9 +217,10 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             }
         }
 
+        val state = ResolveState.initial().put(NEED_PROCESS_TYPES, !skipTypes)
         processDeclarations(
             processor,
-            state = ResolveState.initial(),
+            state = state,
             lastParent = null,
             place = this
         )
@@ -215,7 +230,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             if (!visitedFiles.add(file)) return@forEach
             file.processDeclarations(
                 processor,
-                state = ResolveState.initial(),
+                state = state,
                 lastParent = null,
                 place = this
             )
@@ -224,6 +239,10 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
     }
 
     override fun toString(): String = "TolkFile($name)"
+
+    companion object {
+        val NEED_PROCESS_TYPES = Key.create<Boolean>("PROCESS_FOR_TYPES")
+    }
 }
 
 private val INCLUDE_COMPARE: Comparator<TolkIncludeDefinition> =

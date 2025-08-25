@@ -16,7 +16,7 @@ object TolkStorageSnippetCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
         PlatformPatterns.psiElement()
             .withSuperParent(2, TolkFile::class.java)
-            .with(object : PatternCondition<PsiElement>("notAfterLiteral") {
+            .with(object : PatternCondition<PsiElement>("atLineStart") {
                 override fun accepts(t: PsiElement, context: ProcessingContext?): Boolean {
                     // accept
                     // <caret>

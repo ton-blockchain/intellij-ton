@@ -669,6 +669,58 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         fun storage/*caret*/
     """)
 
+    fun `test onInternalMessage completion after fun keyword`() = doFirstCompletion("""
+        fun onInternal/*caret*/
+    """, """
+        fun onInternalMessage(in: InMessage) {
+            /*caret*/
+        }
+    """.trimIndent())
+
+    fun `test onExternalMessage completion after fun keyword`() = doFirstCompletion("""
+        fun onExternal/*caret*/
+    """, """
+        fun onExternalMessage(inMsg: slice) {
+            /*caret*/
+        }
+    """.trimIndent())
+
+    fun `test onInternalMessage completion after fun keyword with full declaration`() = doFirstCompletion("""
+        fun onInternal/*caret*/(in: InMessage) {
+        }
+    """, """
+        fun onInternalMessage/*caret*/(in: InMessage) {
+        }
+    """.trimIndent())
+
+    fun `test no onInternalMessage completion in file with onInternalMessage`() = checkNotContainsCompletion("onInternalMessage", """"
+        fun onInternalMessage(in: InMessage) {}        
+
+        fun /*caret*/
+    """)
+
+    fun `test packToBuilder completion`() = doFirstCompletion("""
+        fun int.packT/*caret*/
+    """, """
+        fun int.packToBuilder(self, mutate b: builder) {
+            /*caret*/
+        }
+    """.trimIndent())
+
+    fun `test unpackFromSlice completion`() = doFirstCompletion("""
+        fun int.unpack/*caret*/
+    """, """
+        fun int.unpackFromSlice(mutate s: slice) {
+            /*caret*/
+        }
+    """.trimIndent())
+
+    fun `test unpackFromSlice completion with full declaration`() = doFirstCompletion("""
+        fun int.pack/*caret*/(self, mutate b: builder) {}
+    """, """
+        fun int.packToBuilder/*caret*/(self, mutate b: builder) {}
+    """.trimIndent())
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

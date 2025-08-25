@@ -52,6 +52,7 @@ open class TolkIntroduceVariableBase {
         }
 
         if (extractableExpressions.size == 1 || hasSelection || ApplicationManager.getApplication().isUnitTestMode) {
+            operation.replaceAll = ApplicationManager.getApplication().isUnitTestMode
             operation.expression = extractableExpressions.first()
             performOnElement(operation)
             return

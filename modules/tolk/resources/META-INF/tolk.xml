@@ -211,6 +211,9 @@
         <localInspection language="Tolk" groupPath="Tolk" displayName="Deprecation function" groupName="General"
                          enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.tolk.inspection.TolkDeprecationInspection"/>
+        <localInspection language="Tolk" groupPath="Tolk" displayName="Struct initialization" groupName="General"
+                         enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkStructInitializationInspection"/>
         <!-- Completion -->
         <completion.contributor language="Tolk"
                                 implementationClass="org.ton.intellij.tolk.ide.completion.TolkCompletionContributor"/>

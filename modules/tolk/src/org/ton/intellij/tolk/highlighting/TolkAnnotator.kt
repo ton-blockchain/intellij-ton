@@ -61,6 +61,8 @@ class TolkAnnotator : Annotator {
                     // type void = builtin
                     return holder.info(TolkColor.PRIMITIVE.textAttributesKey)
                 }
+
+                return holder.info(TolkColor.TYPE_ALIAS.textAttributesKey)
             }
             null -> {
                 val parent = element.parent

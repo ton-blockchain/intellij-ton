@@ -214,6 +214,9 @@
         <localInspection language="Tolk" groupPath="Tolk" displayName="Struct initialization" groupName="General"
                          enabledByDefault="true" level="ERROR"
                          implementationClass="org.ton.intellij.tolk.inspection.TolkStructInitializationInspection"/>
+        <localInspection language="Tolk" groupPath="Tolk" displayName="Call arguments count mismatch" groupName="General"
+                         enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkCallArgumentsCountMismatchInspection"/>
         <!-- Completion -->
         <completion.contributor language="Tolk"
                                 implementationClass="org.ton.intellij.tolk.ide.completion.TolkCompletionContributor"/>

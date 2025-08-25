@@ -4,9 +4,16 @@ import com.intellij.codeInspection.InspectionProfileEntry
 import com.intellij.codeInspection.LocalInspectionTool
 import org.intellij.lang.annotations.Language
 import org.ton.intellij.tolk.TolkTestBase
+import org.ton.intellij.tolk.ide.configurable.tolkSettings
 
 abstract class TolkInspectionTestBase : TolkTestBase() {
     override fun getTestDataPath(): String = "testResources/org.ton.intellij.tolk"
+
+    override fun setUp() {
+        super.setUp()
+        val file = myFixture.copyDirectoryToProject("tolk-stdlib", "tolk-stdlib")
+        project.tolkSettings.explicitPathToStdlib = file.url
+    }
 
     protected fun doInspectionTest(
         @Language("Tolk") code: String,

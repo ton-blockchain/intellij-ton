@@ -643,6 +643,28 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         import "foo/*caret*/"
     """)
 
+    fun `test storage snippet completion`() = doFirstCompletion("""
+        storage/*caret*/
+    """, """
+        struct Storage {
+            /*caret*/
+        }
+
+        fun Storage.load() {
+            return Storage.fromCell(contract.getData());
+        }
+
+        fun Storage.save(self) {
+            contract.setData(self.toCell());
+        }
+    """.trimIndent())
+
+    fun `test no storage snippet completion in block`() = checkNotContainsCompletion("storage", """"
+        fun foo() {
+            storage/*caret*/
+        }
+    """)
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

@@ -76,6 +76,8 @@ class TolkTyUnion private constructor(
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
         if (calculateExactVariantToFitRhs(other) != null) return true
+        if (other is TolkTyParam) return true
+        if (other is TolkTyUnknown) return true
         if (other is TolkTyUnion) return containsAll(other)
         if (other is TolkTyAlias) return canRhsBeAssigned(other.unwrapTypeAlias())
         return other == TolkTy.Never

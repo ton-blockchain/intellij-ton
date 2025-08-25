@@ -25,6 +25,17 @@ data class TolkTyStruct private constructor(
         if (this == other) return true
         if (other is TolkTyNever) return true
         if (other is TolkTyAlias) return canRhsBeAssigned(other.underlyingType)
+        if (other is TolkTyStruct) {
+            if (typeArguments.size != other.typeArguments.size) return false
+            if (!psi.manager.areElementsEquivalent(psi, other.psi)) return false
+
+            // allow assigning `Foo<int>` to `Foo<T>`
+            for (i in typeArguments.indices) {
+                val typeArgument = typeArguments[i]
+                if (!typeArgument.isEquivalentTo(other.typeArguments[i]) && typeArgument !is TolkTyParam) return false
+            }
+            return true
+        }
         return isEquivalentTo(other)
     }
 

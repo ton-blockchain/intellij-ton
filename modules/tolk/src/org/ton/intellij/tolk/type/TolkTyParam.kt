@@ -18,6 +18,8 @@ class TolkTyParam private constructor(
 
     override fun equals(other: Any?): Boolean = other is TolkTyParam && other.parameter == this.parameter
 
+    override fun canRhsBeAssigned(other: TolkTy): Boolean = true
+
     override fun hashCode(): Int = parameter.hashCode()
 
     override val psi: TolkElement

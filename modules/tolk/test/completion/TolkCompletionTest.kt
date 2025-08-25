@@ -629,6 +629,20 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """)
 
+    fun `test @stdlib completion in empty import`() = doFirstCompletion("""
+        import "/*caret*/"
+    """, """
+        import "@stdlib//*caret*/"
+    """.trimIndent())
+
+    fun `test @stdlib completion in non-empty import`() = checkNotContainsCompletion("@stdlib", """
+        import "@stdlib//*caret*/"
+    """)
+
+    fun `test @stdlib completion in non-empty import2`() = checkNotContainsCompletion("@stdlib", """
+        import "foo/*caret*/"
+    """)
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

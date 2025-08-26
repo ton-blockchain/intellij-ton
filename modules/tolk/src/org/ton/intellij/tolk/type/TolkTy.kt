@@ -252,6 +252,14 @@ object TolkCellTy : TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
 
     override fun toString(): String = "cell"
+
+    override fun canRhsBeAssigned(other: TolkTy): Boolean {
+        if (other is TolkTyStruct && other.psi.name == "Cell") {
+            // allow assignment of Cell<T> to cell
+            return true
+        }
+        return super.canRhsBeAssigned(other)
+    }
 }
 
 object TolkSliceTy : TolkPrimitiveTy {
@@ -302,7 +310,12 @@ object TolkTyAddress : TolkPrimitiveTy {
     override fun toString(): String = "address"
 }
 
-interface TolkIntTyFamily : TolkPrimitiveTy
+interface TolkIntTyFamily : TolkPrimitiveTy {
+    override fun canRhsBeAssigned(other: TolkTy): Boolean {
+        if (other is TolkIntTyFamily) return true
+        return super.canRhsBeAssigned(other)
+    }
+}
 
 object TolkTyCoins : TolkIntTyFamily {
     override fun actualType(): TolkTy = this
@@ -445,18 +458,18 @@ data class TolkBytesNTy(
     }
 }
 
- object TolkTyVarInt32 : TolkPrimitiveTy {
+ object TolkTyVarInt32 : TolkIntTyFamily {
     override fun toString(): String = "varint32"
 }
 
-object TolkTyVarUInt32 : TolkPrimitiveTy {
+object TolkTyVarUInt32 : TolkIntTyFamily {
     override fun toString(): String = "varuint32"
 }
 
- object TolkTyVarInt16 : TolkPrimitiveTy {
+ object TolkTyVarInt16 : TolkIntTyFamily {
     override fun toString(): String = "varint16"
 }
 
-object TolkTyVarUInt16 : TolkPrimitiveTy {
+object TolkTyVarUInt16 : TolkIntTyFamily {
     override fun toString(): String = "varuint16"
 }

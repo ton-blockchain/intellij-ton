@@ -47,6 +47,7 @@ private val EMPTY_RESOLVED_SET = emptySet<PsiElementResolveResult>()
 data class TolkInferenceResult(
     private val resolvedRefs: Map<TolkElement, Collection<PsiElementResolveResult>>,
     private val expressionTypes: Map<TolkTypedElement, TolkTy>,
+    private val structExpressionTypes: Map<TolkStructExpressionField, TolkTy>,
     private val varTypes: Map<TolkVarDefinition, TolkTy>,
     private val constTypes: Map<TolkConstVar, TolkTy>,
     private val resolvedFunctions: Map<TolkCallExpression, TolkFunction>,
@@ -68,6 +69,10 @@ data class TolkInferenceResult(
         return expressionTypes[element ?: return null]
     }
 
+    fun getType(element: TolkStructExpressionField?): TolkTy? {
+        return structExpressionTypes[element ?: return null]
+    }
+
     fun getResolvedFunction(expression: TolkCallExpression): TolkFunction? {
         return resolvedFunctions[expression]
     }
@@ -86,6 +91,7 @@ class TolkInferenceContext(
     private val resolvedFields: MutableMap<TolkFieldLookup, List<TolkElement>> = hashMapOf()
     private val resolvedFunctions: MutableMap<TolkCallExpression, TolkFunction> = hashMapOf()
     internal val expressionTypes = HashMap<TolkTypedElement, TolkTy>()
+    internal val structExpressionTypes = HashMap<TolkStructExpressionField, TolkTy>()
     override val returnStatements = LinkedList<TolkReturnStatement>()
     var declaredReturnType: TolkTy? = null
 
@@ -127,6 +133,13 @@ class TolkInferenceContext(
     fun <T : TolkTy> setType(element: TolkExpression, type: T?): T? {
         if (type != null) {
             expressionTypes[element] = type
+        }
+        return type
+    }
+
+    fun <T : TolkTy> setType(element: TolkStructExpressionField, type: T?): T? {
+        if (type != null) {
+            structExpressionTypes[element] = type
         }
         return type
     }
@@ -173,6 +186,7 @@ class TolkInferenceContext(
         return TolkInferenceResult(
             resolvedRefs,
             expressionTypes,
+            structExpressionTypes,
             varTypes,
             constTypes,
             resolvedFunctions,
@@ -1073,19 +1087,16 @@ class TolkInferenceWalker(
         usedAsCondition: Boolean
     ): TolkExpressionFlowContext {
         val lhs = element.left
-        val afterLhs = inferExpression(lhs, flow, false)
-        val rhs = element.right ?: return afterLhs
-        val rhsFlow = afterLhs.outFlow
-        val lhsType = ctx.getType(lhs)
-        val afterRhs = inferExpression(rhs, rhsFlow, false, lhsType)
-
-//        val builtinFuncName = "_${element.binaryOp.text}_"
-//        val builtinFunc = TolkBuiltins[project].getFunction(builtinFuncName)
-//        builtinFunc?.type
-        val resultType = lhsType?.actualType() ?: ctx.getType(rhs)
-        ctx.setType(element, resultType)
-
-        return TolkExpressionFlowContext(afterRhs.outFlow, usedAsCondition)
+        var nextFlow = inferExpression(lhs, flow, false).outFlow
+        val rhs = element.right
+        if (rhs != null) {
+            val leftType = ctx.getType(lhs)
+            nextFlow = inferExpression(rhs, nextFlow, false, leftType).outFlow
+            val rightType = ctx.getType(rhs) ?: TolkTy.Unknown
+            val resultType = leftType?.actualType() ?:rightType
+            ctx.setType(element, resultType)
+        }
+        return TolkExpressionFlowContext(nextFlow, usedAsCondition)
     }
 
     private fun processAssigmentAfterRight(
@@ -1242,9 +1253,10 @@ class TolkInferenceWalker(
 
     private fun resolveToGlobalSymbols(
         element: TolkReferenceElement,
-        name: String
+        name: String,
     ): List<TolkSymbolElement> {
-        val declarations = (element.containingFile as TolkFile).resolveSymbols(name)
+        val isCallExpression = element.parent is TolkCallExpression
+        val declarations = (element.containingFile as TolkFile).resolveSymbols(name, skipTypes = isCallExpression)
         val result = SmartList<TolkSymbolElement>()
         declarations.forEach {
             when (it) {
@@ -1799,6 +1811,7 @@ class TolkInferenceWalker(
                 if (expression != null) {
                     ctx.setType(expression, subType)
                 }
+                ctx.setType(fieldRef, fieldType.substitute(substitution))
             }
         }
 
@@ -1874,7 +1887,7 @@ class TolkInferenceWalker(
             }
 
             is TolkDotExpression -> {
-                val leftType = calcDeclaredTypeBeforeSmartCast(expression.expression) ?: return null
+                val leftType = calcDeclaredTypeBeforeSmartCast(expression.expression)?.unwrapTypeAlias() ?: return null
                 return when (leftType) {
                     is TolkTyStruct -> {
                         val right = expression.fieldLookup ?: return null

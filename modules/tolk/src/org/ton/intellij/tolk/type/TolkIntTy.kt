@@ -46,7 +46,7 @@ interface TolkIntTy : TolkPrimitiveTy {
 
 data class TolkConstantIntTy(
     override val value: BigInteger
-) : TolkIntTy, TolkConstantTy<BigInteger> {
+) : TolkIntTy, TolkConstantTy<BigInteger>, TolkIntTyFamily {
     constructor(value: Long) : this(value.toBigInteger())
 
     override val range: TvmIntRangeSet get() = TvmIntRangeSet.point(value)
@@ -56,6 +56,10 @@ data class TolkConstantIntTy(
     override fun isSuperType(other: TolkTy): Boolean {
         if (other is TolkTyAlias) return isSuperType(other.underlyingType)
         return other == this || other == TolkTyNever
+    }
+
+    override fun canRhsBeAssigned(other: TolkTy): Boolean {
+        return super<TolkIntTy>.canRhsBeAssigned(other)
     }
 
     override fun toString(): String {
@@ -73,4 +77,8 @@ data class TolkIntRangeTy(
     override fun negate(): TolkIntTy = TolkIntRangeTy(range.unaryMinus())
 
     override fun toString(): String = range.toString()
+
+    override fun canRhsBeAssigned(other: TolkTy): Boolean {
+        return super<TolkIntTy>.canRhsBeAssigned(other)
+    }
 }

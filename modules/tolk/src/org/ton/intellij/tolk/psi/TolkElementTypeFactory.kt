@@ -14,6 +14,7 @@ object TolkElementTypeFactory {
     fun stubFactory(name: String): IStubElementType<*, *> = when (name) {
         "INCLUDE_DEFINITION"        -> TolkIncludeDefinitionStubElementType(name)
         "FUNCTION"                  -> TolkFunctionStubElementType(name)
+        "PARAMETER_LIST"            -> TolkParameterListStub.Type(name)
         "PARAMETER"                 -> TolkParameterStubElementType(name)
         "SELF_PARAMETER"            -> TolkSelfParameterStub.Type
         "GLOBAL_VAR"                -> TolkGlobalVarStub.Type
@@ -38,6 +39,7 @@ object TolkElementTypeFactory {
         "REFERENCE_TYPE_EXPRESSION" -> TolkTypeStub.Type(name, ::TolkReferenceTypeExpressionImpl)
         "TYPE_ARGUMENT_LIST"        -> TolkTypeArgumentListStub.Type(name)
         "TYPE_PARAMETER_LIST"       -> TolkTypeParameterListStub.Type(name)
+        "STRING_LITERAL"            -> TolkStringLiteralStub.Type(name)
         else                        -> throw RuntimeException("Unknown element type: $name")
     }
 }

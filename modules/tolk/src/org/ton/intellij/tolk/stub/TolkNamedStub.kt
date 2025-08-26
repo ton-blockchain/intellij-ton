@@ -10,12 +10,14 @@ abstract class TolkNamedStub<T : TolkNamedElement>(
     parent: StubElement<*>,
     elementType: IStubElementType<*, *>,
     name: StringRef?,
+    val isDeprecated: Boolean,
 ) : NamedStubBase<T>(
     parent, elementType, name
 ) {
-    constructor(parent: StubElement<*>, elementType: IStubElementType<*, *>, name: String?) : this(
+    constructor(parent: StubElement<*>, elementType: IStubElementType<*, *>, name: String?, isDeprecated: Boolean) : this(
         parent,
         elementType,
-        StringRef.fromString(name)
+        StringRef.fromString(name),
+        isDeprecated,
     )
 }

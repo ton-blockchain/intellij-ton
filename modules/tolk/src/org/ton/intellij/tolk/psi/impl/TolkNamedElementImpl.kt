@@ -26,6 +26,15 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
 
     override val rawName: String? = greenStub?.name ?: identifier?.text
 
+    override val isDeprecated: Boolean
+        get() {
+            val stub = stub
+            if (stub != null) {
+                return stub.isDeprecated
+            }
+            return (this as? TolkAnnotationHolder)?.annotations?.hasDeprecatedAnnotation() ?: false
+        }
+
     override fun getNameIdentifier(): PsiElement? = identifier
 
     override fun getIcon(flags: Int): Icon? {

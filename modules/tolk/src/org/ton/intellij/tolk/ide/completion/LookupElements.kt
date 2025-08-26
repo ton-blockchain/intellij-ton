@@ -69,7 +69,7 @@ fun TolkNamedElement.toLookupElementBuilder(
 
     val base = LookupElementBuilder.createWithSmartPointer(name, this)
         .withIcon(this.getIcon(0))
-        .withStrikeoutness(this is TolkAnnotationHolder && this.annotations.hasDeprecatedAnnotation())
+        .withStrikeoutness(isDeprecated)
 
     return when (this) {
         is TolkFunction -> {

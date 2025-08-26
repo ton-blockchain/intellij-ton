@@ -10,7 +10,7 @@ import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.stub.TolkFileStub
 
-private const val STUB_VERSION = 41
+private const val STUB_VERSION = 43
 
 object TolkFileElementType : IStubFileElementType<TolkFileStub>("TOLK_FILE", TolkLanguage) {
     override fun getStubVersion(): Int = STUB_VERSION

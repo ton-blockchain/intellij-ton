@@ -31,6 +31,8 @@ abstract class TolkVarMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkVar
     override val type: TolkTy?
         get() = typeExpression?.type ?: inference?.getType(this)
 
+    override val isDeprecated: Boolean = false
+
     override fun toString(): String = "TolkVar($text)"
 }
 

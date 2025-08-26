@@ -162,7 +162,11 @@ StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE {
     mixin="org.ton.intellij.tolk.psi.impl.TolkStringLiteralMixin"
     implements=[
         "com.intellij.psi.PsiLanguageInjectionHost"
+        "org.ton.intellij.tolk.psi.TolkElement"
     ]
+    extends = "org.ton.intellij.tolk.psi.impl.TolkStubbedElementImpl<?>"
+    stubClass = "org.ton.intellij.tolk.stub.TolkStringLiteralStub"
+    elementTypeFactory = "org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
 
 upper GlobalVar ::= 'global' IDENTIFIER GlobalVarType ';'?  {
@@ -824,7 +828,10 @@ TypeArgumentList_pinned ::= '<' <<list_with_recover TypeExpression>> '>' {
 //private TypeArgument_recovery ::= !(','|'>'|'('|';'|StatementFirst)
 
 ParameterList ::= '(' !',' SelfParameter_with_comma? Parameter_with_recover* ')' {
-    pin = 1
+    pin=1
+    extends = "org.ton.intellij.tolk.psi.impl.TolkStubbedElementImpl<?>"
+    stubClass = "org.ton.intellij.tolk.stub.TolkParameterListStub"
+    elementTypeFactory = "org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
 
 Parameter ::= 'mutate'? IDENTIFIER ':' TypeExpression ParameterDefault? {

@@ -28,4 +28,6 @@ abstract class TolkCatchParameterMixin(node: ASTNode) : ASTWrapperPsiElement(nod
     override fun getNameIdentifier(): PsiElement = identifier
 
     override fun getTextOffset(): Int = identifier.textOffset
+
+    override val isDeprecated: Boolean = false
 }

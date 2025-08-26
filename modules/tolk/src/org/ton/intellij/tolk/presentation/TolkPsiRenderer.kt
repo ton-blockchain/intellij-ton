@@ -112,7 +112,7 @@ open class TolkPsiRenderer {
                 appendable.append(")")
             }
             is TolkReferenceTypeExpression -> {
-                appendable.append(element.identifier.text.removeSurrounding("`"))
+                appendable.append(element.referenceName?.removeSurrounding("`"))
                 element.typeArgumentList?.typeExpressionList?.let {
                     appendable.append("<")
                     var separator = ""

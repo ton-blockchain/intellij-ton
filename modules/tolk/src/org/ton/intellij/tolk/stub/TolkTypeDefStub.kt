@@ -17,8 +17,8 @@ class TolkTypeDefStub(
     parent: StubElement<*>,
     elementType: IStubElementType<*, *>,
     name: StringRef?,
-    val isDeprecated: Boolean
-) : TolkNamedStub<TolkTypeDef>(parent, elementType, name) {
+    isDeprecated: Boolean
+) : TolkNamedStub<TolkTypeDef>(parent, elementType, name, isDeprecated) {
     object Type : TolkNamedStubElementType<TolkTypeDefStub, TolkTypeDef>("TYPE_DEF") {
         override val extraIndexKeys = listOf(TolkTypeDefIndex.KEY, TolkTypeSymbolIndex.KEY)
 

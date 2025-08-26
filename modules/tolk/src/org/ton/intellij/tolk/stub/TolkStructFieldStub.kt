@@ -9,7 +9,7 @@ class TolkStructFieldStub(
     parent: StubElement<*>,
     elementType: IStubElementType<*, *>,
     name: StringRef?,
-) : TolkNamedStub<TolkStructField>(parent, elementType, name) {
+) : TolkNamedStub<TolkStructField>(parent, elementType, name, false) {
     constructor(
         parent: StubElement<*>, elementType: IStubElementType<*, *>,
         name: String?,

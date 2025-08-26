@@ -1,16 +1,21 @@
 package org.ton.intellij.tolk.psi.impl
 
-import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.LiteralTextEscaper
 import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.PsiReference
+import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.reference.TolkLiteralFileReferenceSet
+import org.ton.intellij.tolk.stub.TolkStringLiteralStub
 
-abstract class TolkStringLiteralMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkStringLiteral,
+abstract class TolkStringLiteralMixin : TolkStubbedElementImpl<TolkStringLiteralStub>, TolkStringLiteral,
     PsiLanguageInjectionHost {
+
+    constructor(stub: TolkStringLiteralStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+    constructor(node: ASTNode) : super(node)
+
     override fun getReferences(): Array<out PsiReference?> {
         if (parent is TolkIncludeDefinition) {
             val rawString = rawString ?: return PsiReference.EMPTY_ARRAY

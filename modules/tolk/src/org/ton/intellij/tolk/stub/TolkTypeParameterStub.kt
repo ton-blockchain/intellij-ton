@@ -9,7 +9,7 @@ class TolkTypeParameterStub(
     parent: StubElement<*>,
     elementType: IStubElementType<*, *>,
     name: StringRef?,
-) : TolkNamedStub<TolkTypeParameter>(parent, elementType, name) {
+) : TolkNamedStub<TolkTypeParameter>(parent, elementType, name, false) {
     constructor(
         parent: StubElement<*>, elementType: IStubElementType<*, *>,
         name: String?,

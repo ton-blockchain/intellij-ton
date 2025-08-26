@@ -71,37 +71,41 @@ class TolkCallArgumentsCountMismatchInspection : TolkInspectionBase() {
                 )
             }
         }
-
-        private fun isInstanceMethodCall(call: TolkCallExpression): Boolean {
-            val qualifier = getQualifier(call.expression) ?: return false
-            if (qualifier is TolkReferenceExpression) {
-                if ((qualifier.typeArgumentList?.typeExpressionList?.size ?: 0) > 0) {
-                    // Foo<int>.bar()
-                    return false
-                }
-
-                val resolved = qualifier.reference?.resolve()
-                if (resolved is TolkStruct || resolved is TolkTypeDef || resolved is TolkTypeParameter) {
-                    // likely Foo.bar() static call
-                    return false
-                }
-
-                // instance method call like foo.bar()
-                return true
-            }
-
-            // instance method call like foo.bar()
-            return true
-        }
-
-        private fun getQualifier(expression: TolkExpression): TolkElement? {
-            if (expression is TolkReferenceExpression) {
-                return null
-            }
-            if (expression is TolkDotExpression) {
-                return expression.expression
-            }
-            return null
-        }
     }
+}
+
+fun isInstanceMethodCall(call: TolkCallExpression): Boolean {
+    val qualifier = getQualifier(call.expression) ?: return false
+    if (qualifier is TolkReferenceExpression) {
+        if ((qualifier.typeArgumentList?.typeExpressionList?.size ?: 0) > 0) {
+            // Foo<int>.bar()
+            return false
+        }
+
+        val resolved = qualifier.reference?.resolve()
+        if (resolved is TolkStruct || resolved is TolkTypeDef || resolved is TolkTypeParameter) {
+            // likely Foo.bar() static call
+            return false
+        }
+        if (resolved == null) {
+            // likely int8.bar() with old Tolk stdlib
+            return false
+        }
+
+        // instance method call like foo.bar()
+        return true
+    }
+
+    // instance method call like foo.bar()
+    return true
+}
+
+private fun getQualifier(expression: TolkExpression): TolkElement? {
+    if (expression is TolkReferenceExpression) {
+        return null
+    }
+    if (expression is TolkDotExpression) {
+        return expression.expression
+    }
+    return null
 }

@@ -15,6 +15,11 @@ abstract class TolkTyBool : TolkPrimitiveTy {
 
         override fun toString(): String = "bool"
     }
+
+    override fun canRhsBeAssigned(other: TolkTy): Boolean {
+        if (other is TolkTyBool) return true
+        return super.canRhsBeAssigned(other)
+    }
 }
 
 data class TolkConstantBoolTy(

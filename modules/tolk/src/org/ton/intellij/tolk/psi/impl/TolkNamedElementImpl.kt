@@ -24,6 +24,8 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
 
     override fun getName(): String? = greenStub?.name ?: identifier?.text?.removeSurrounding("`")
 
+    override val rawName: String? = greenStub?.name ?: identifier?.text
+
     override fun getNameIdentifier(): PsiElement? = identifier
 
     override fun getIcon(flags: Int): Icon? {

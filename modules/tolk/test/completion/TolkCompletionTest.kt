@@ -743,6 +743,74 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         fun int.pack/*caret*/(self, mutate b: builder) {}
     """)
 
+    fun `test backticked constant`() = doFirstCompletion("""
+        const `aaaaaa` = 10
+
+        fun main() {
+            aaaaaa/*caret*/
+        }
+    """, """
+        const `aaaaaa` = 10
+
+        fun main() {
+            `aaaaaa`/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test backticked global variable`() = doFirstCompletion("""
+        global `aaaaaa`: int
+
+        fun main() {
+            aaaaaa/*caret*/
+        }
+    """, """
+        global `aaaaaa`: int
+
+        fun main() {
+            `aaaaaa`/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test backticked type alias`() = doFirstCompletion("""
+        type `aaaaaa` = int
+
+        fun main() {
+            val a: aaaaaa/*caret*/
+        }
+    """, """
+        type `aaaaaa` = int
+
+        fun main() {
+            val a: `aaaaaa`/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test backticked function`() = doFirstCompletion("""
+        fun `aaaaaa`() {}
+
+        fun main() {
+            aaaaaa/*caret*/
+        }
+    """, """
+        fun `aaaaaa`() {}
+
+        fun main() {
+            `aaaaaa`()/*caret*/
+        }
+    """.trimIndent())
+
+    fun `test backticked variable`() = doFirstCompletion("""
+        fun main() {
+            val `aaaaaa` = 10;
+            aaaaaa/*caret*/
+        }
+    """, """
+        fun main() {
+            val `aaaaaa` = 10;
+            `aaaaaa`/*caret*/
+        }
+    """.trimIndent())
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

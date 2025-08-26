@@ -11,6 +11,7 @@ import org.ton.intellij.tolk.doc.DocumentationUtils.asAnnotation
 import org.ton.intellij.tolk.doc.DocumentationUtils.asComma
 import org.ton.intellij.tolk.doc.DocumentationUtils.asConstant
 import org.ton.intellij.tolk.doc.DocumentationUtils.asDot
+import org.ton.intellij.tolk.doc.DocumentationUtils.asField
 import org.ton.intellij.tolk.doc.DocumentationUtils.asFunction
 import org.ton.intellij.tolk.doc.DocumentationUtils.asGlobalVariable
 import org.ton.intellij.tolk.doc.DocumentationUtils.asIdentifier
@@ -335,7 +336,7 @@ fun TolkStructField.generateDoc(): String {
             append("\n")
         }
 
-        colorize(name ?: "", asParameter)
+        colorize(name ?: "", asField)
         append(": ")
 
         val type = type
@@ -513,7 +514,7 @@ private fun StringBuilder.generateStructFields(fields: List<TolkStructField>) {
         fields.joinToString("\n") { field ->
             buildString {
                 append("   ")
-                colorize(field.name ?: "", asParameter)
+                colorize(field.name ?: "", asField)
                 append(": ")
 
                 val type = field.type

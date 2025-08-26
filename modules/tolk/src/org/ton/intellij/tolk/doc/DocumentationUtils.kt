@@ -15,8 +15,6 @@ object DocumentationUtils {
 
     val asKeyword = loadKey(TolkColor.KEYWORD.textAttributesKey)
     val asIdentifier = loadKey(DefaultLanguageHighlighterColors.IDENTIFIER)
-    val asBuiltin = loadKey(TolkColor.PRIMITIVE.textAttributesKey)
-    val asType = loadKey(TolkColor.PRIMITIVE.textAttributesKey)
     val asParameter = loadKey(TolkColor.PARAMETER.textAttributesKey)
     val asTypeParameter = loadKey(TolkColor.TYPE_PARAMETER.textAttributesKey)
     val asConstant = loadKey(TolkColor.CONSTANT.textAttributesKey)
@@ -24,10 +22,7 @@ object DocumentationUtils {
     val asString = loadKey(TolkColor.STRING.textAttributesKey)
     val asNumber = loadKey(TolkColor.NUMBER.textAttributesKey)
     val asField = loadKey(TolkColor.FIELD.textAttributesKey)
-    val asComment = loadKey(TolkColor.LINE_COMMENT.textAttributesKey)
     val asParen = loadKey(TolkColor.PARENTHESES.textAttributesKey)
-    val asBraces = loadKey(TolkColor.BRACES.textAttributesKey)
-    val asBrackets = loadKey(TolkColor.BRACKETS.textAttributesKey)
     val asComma = loadKey(TolkColor.COMMA.textAttributesKey)
     val asDot = loadKey(TolkColor.DOT.textAttributesKey)
 

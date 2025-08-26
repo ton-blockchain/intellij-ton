@@ -14,7 +14,6 @@ abstract class TolkFunTypeExpressionMixin(node: ASTNode) : TolkTypeExpressionImp
             val right = typeExpressions.getOrNull(1)?.type ?: return null
 
             val paramTypes = if (left is TolkTyTensor) left.elements else listOf(left)
-
             return TolkTyFunction(paramTypes, right)
         }
 }

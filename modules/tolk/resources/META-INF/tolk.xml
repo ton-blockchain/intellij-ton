@@ -29,9 +29,11 @@
                                  implementationClass="org.ton.intellij.tolk.ide.TolkFindUsagesProvider"/>
         <lang.implementationTextSelectioner language="Tolk"
                                             implementationClass="org.ton.intellij.tolk.ide.TolkImplementationTextSelectioner"/>
-        <!--        <platform.backend.documentation.psiTargetProvider id="TolkDocumentationTargetProvider"-->
-        <!--                                                          implementation="org.ton.intellij.tolk.doc.TolkDocumentationProvider"/>-->
-        <!--        <platform.backend.documentation.inlineDocumentationProvider implementation="org.ton.intellij.tolk.doc.TolkInlineDocumentationProvider"/>-->
+
+        <!-- region Documentation -->
+        <lang.documentationProvider language="Tolk"
+                                    implementationClass="org.ton.intellij.tolk.doc.TolkDocumentationProvider"/>
+        <!-- endregion Documentation -->
 
         <lang.formatter language="Tolk" implementationClass="org.ton.intellij.tolk.ide.formatter.TolkFormatter"/>
         <lang.refactoringSupport language="Tolk"

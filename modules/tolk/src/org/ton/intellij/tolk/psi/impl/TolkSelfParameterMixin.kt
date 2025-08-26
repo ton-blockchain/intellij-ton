@@ -26,6 +26,8 @@ abstract class TolkSelfParameterMixin : StubBasedPsiElementBase<TolkSelfParamete
 
     override fun getName(): String = "self"
 
+    override val rawName: String? = "self"
+
     override fun setName(name: String): PsiElement? {
         // can't rename self
         throw UnsupportedOperationException()

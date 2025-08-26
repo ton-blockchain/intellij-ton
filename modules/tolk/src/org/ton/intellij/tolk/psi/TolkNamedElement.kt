@@ -6,4 +6,5 @@ import com.intellij.psi.PsiNameIdentifierOwner
 
 interface TolkNamedElement : PsiNameIdentifierOwner, TolkElement, NavigationItem {
     val identifier: PsiElement?
+    val rawName: String?
 }

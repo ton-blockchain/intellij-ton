@@ -47,7 +47,7 @@ fun TolkNamedElement.toLookupElementBuilder(
     context: TolkCompletionContext,
     substitution: Substitution = Substitution.empty()
 ): LookupElementBuilder {
-    val name = this.name ?: ""
+    val name = this.rawName ?: this.name ?: ""
     val file = this.containingFile.originalFile
     val contextFile = context.context?.containingFile?.originalFile
     val includePath = if (file == contextFile || contextFile == null) "" else {

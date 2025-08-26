@@ -18,6 +18,8 @@ abstract class TolkCatchParameterMixin(node: ASTNode) : ASTWrapperPsiElement(nod
 
     override fun getName(): String = identifier.text
 
+    override val rawName: String? = identifier.text
+
     override fun setName(name: String): PsiElement {
         identifier.replace(TolkPsiFactory[project].createIdentifier(name))
         return this

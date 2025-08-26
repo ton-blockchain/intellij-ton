@@ -1,4 +1,4 @@
-package documentation
+package org.ton.intellij.tolk.documentation
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiRecursiveElementVisitor

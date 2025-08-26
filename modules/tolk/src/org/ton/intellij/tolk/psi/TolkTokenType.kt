@@ -56,3 +56,13 @@ val TOLK_KEYWORDS = tokenSetOf(
     TolkElementTypes.NOT_IS_KEYWORD,
     TolkElementTypes.SELF_KEYWORD,
 )
+
+val TOLK_NUMBERS = tokenSetOf(
+    TolkElementTypes.INTEGER_LITERAL,
+)
+
+val TOLK_STRING_LITERALS = tokenSetOf(
+    TolkElementTypes.OPEN_QUOTE,
+    TolkElementTypes.CLOSING_QUOTE,
+    TolkElementTypes.RAW_STRING_ELEMENT,
+)

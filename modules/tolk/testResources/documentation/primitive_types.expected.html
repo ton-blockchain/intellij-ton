@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tolk Documentation Test Results</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #fafafa; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        .element { margin-bottom: 25px; border: 1px solid #ddd; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .element-title { font-weight: bold; color: #2c3e50; margin-bottom: 15px; font-size: 14px; background: #ecf0f1; padding: 8px; border-radius: 4px; }
+        .documentation { background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #3498db; font-family: 'JetBrains Mono', 'Fira Code', monospace; line-height: 1.6; }
+        
+        /* Tolk syntax highlighting */
+        .keyword { color: #d73a49; font-weight: bold; }
+        .primitive { color: #005cc5; font-weight: 500; }
+        .struct { color: #22863a; font-weight: 500; }
+        .function { color: #6f42c1; font-weight: 500; }
+        .parameter { color: #e36209; }
+        .type-alias { color: #d73a49; }
+        .type-parameter { color: #6f42c1; font-style: italic; }
+        .annotation { color: #6a737d; }
+        .string { color: #032f62; }
+        .number { color: #005cc5; }
+        .comment { color: #6a737d; font-style: italic; }
+        .constant { color: #005cc5; font-weight: 500; }
+        .global-variable { color: #e36209; font-weight: 500; }
+        .identifier { color: #24292e; }
+        
+        /* Documentation markup */
+        .definition-start { border-top: 2px solid #e1e4e8; margin-top: 10px; padding-top: 10px; }
+        .definition-end { border-bottom: 1px solid #e1e4e8; margin-bottom: 10px; padding-bottom: 10px; }
+        .content-start { margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Tolk Documentation Test Results</h1>
+    <div class="element">
+        <div class="element-title">Type expression: int</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: basic_int</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">basic_int</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: int257</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int257</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: fixed_int</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">fixed_int</span>: <span style="color:#000080;font-weight:bold;">int257</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: uint64</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">uint64</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: unsigned</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">unsigned</span>: <span style="color:#000080;font-weight:bold;">uint64</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: bits256</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">bits256</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: bits_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">bits_type</span>: <span style="color:#000080;font-weight:bold;">bits256</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: bytes32</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">bytes32</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: bytes_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">bytes_type</span>: <span style="color:#000080;font-weight:bold;">bytes32</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: cell</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">cell</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: cell_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">cell_type</span>: <span style="color:#000080;font-weight:bold;">cell</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: slice</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">slice</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: slice_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">slice_type</span>: <span style="color:#000080;font-weight:bold;">slice</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: builder</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">builder</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: builder_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">builder_type</span>: <span style="color:#000080;font-weight:bold;">builder</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: bool</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">bool</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: bool_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">bool_type</span>: <span style="color:#000080;font-weight:bold;">bool</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: coins</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">coins</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: coins_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">coins_type</span>: <span style="color:#000080;font-weight:bold;">coins</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: address</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">address</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: address_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">address_type</span>: <span style="color:#000080;font-weight:bold;">address</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: varint16</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">varint16</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: varint16_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">varint16_type</span>: <span style="color:#000080;font-weight:bold;">varint16</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: varuint16</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">varuint16</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: varuint16_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">varuint16_type</span>: <span style="color:#000080;font-weight:bold;">varuint16</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: varint32</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">varint32</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: varint32_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">varint32_type</span>: <span style="color:#000080;font-weight:bold;">varint32</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: varuint32</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">varuint32</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: varuint32_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">varuint32_type</span>: <span style="color:#000080;font-weight:bold;">varuint32</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: continuation</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">continuation</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: continuation_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">continuation_type</span>: <span style="color:#000080;font-weight:bold;">continuation</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: tuple</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">tuple</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: tuple_type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">tuple_type</span>: <span style="color:#000080;font-weight:bold;">tuple</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: void</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">void</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Function: primitiveTypes</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">fun</span> <span style="color:#000000;">primitiveTypes</span><span style="">(</span>
+   <span style="color:#000000;">basic_int</span>:         <span style="color:#000080;font-weight:bold;">int</span>,
+   <span style="color:#000000;">fixed_int</span>:         <span style="color:#000080;font-weight:bold;">int257</span>,
+   <span style="color:#000000;">unsigned</span>:          <span style="color:#000080;font-weight:bold;">uint64</span>,
+   <span style="color:#000000;">bits_type</span>:         <span style="color:#000080;font-weight:bold;">bits256</span>,
+   <span style="color:#000000;">bytes_type</span>:        <span style="color:#000080;font-weight:bold;">bytes32</span>,
+   <span style="color:#000000;">cell_type</span>:         <span style="color:#000080;font-weight:bold;">cell</span>,
+   <span style="color:#000000;">slice_type</span>:        <span style="color:#000080;font-weight:bold;">slice</span>,
+   <span style="color:#000000;">builder_type</span>:      <span style="color:#000080;font-weight:bold;">builder</span>,
+   <span style="color:#000000;">bool_type</span>:         <span style="color:#000080;font-weight:bold;">bool</span>,
+   <span style="color:#000000;">coins_type</span>:        <span style="color:#000080;font-weight:bold;">coins</span>,
+   <span style="color:#000000;">address_type</span>:      <span style="color:#000080;font-weight:bold;">address</span>,
+   <span style="color:#000000;">varint16_type</span>:     <span style="color:#000080;font-weight:bold;">varint16</span>,
+   <span style="color:#000000;">varuint16_type</span>:    <span style="color:#000080;font-weight:bold;">varuint16</span>,
+   <span style="color:#000000;">varint32_type</span>:     <span style="color:#000080;font-weight:bold;">varint32</span>,
+   <span style="color:#000000;">varuint32_type</span>:    <span style="color:#000080;font-weight:bold;">varuint32</span>,
+   <span style="color:#000000;">continuation_type</span>: <span style="color:#000080;font-weight:bold;">continuation</span>,
+   <span style="color:#000000;">tuple_type</span>:        <span style="color:#000080;font-weight:bold;">tuple</span>,
+<span style="">)</span>: <span style="color:#000080;font-weight:bold;">void</span></pre></div><div class='content'><p>Test all primitive types</p>
+</div>
+        </div>
+    </div>
+</body>
+</html>

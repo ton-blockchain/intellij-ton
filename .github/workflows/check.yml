@@ -63,7 +63,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.artifact.outputs.filename }}
-          path: ./build/distributions/content/*/*
+          path: |
+            ${{ github.workspace }}/build/reports/tests
+            ${{ github.workspace }}/modules/**/build/reports/tests
 
   test:
     name: Test

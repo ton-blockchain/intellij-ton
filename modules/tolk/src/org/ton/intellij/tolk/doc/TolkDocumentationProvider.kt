@@ -32,6 +32,7 @@ import org.ton.intellij.tolk.psi.TOLK_KEYWORDS
 import org.ton.intellij.tolk.psi.TOLK_NUMBERS
 import org.ton.intellij.tolk.psi.TOLK_STRING_LITERALS
 import org.ton.intellij.tolk.psi.TolkAnnotation
+import org.ton.intellij.tolk.psi.TolkCatchParameter
 import org.ton.intellij.tolk.psi.TolkConstVar
 import org.ton.intellij.tolk.psi.TolkDocOwner
 import org.ton.intellij.tolk.psi.TolkExpression
@@ -40,12 +41,14 @@ import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkGlobalVar
 import org.ton.intellij.tolk.psi.TolkParameter
 import org.ton.intellij.tolk.psi.TolkSelfParameter
+import org.ton.intellij.tolk.psi.TolkSelfTypeExpression
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.psi.TolkTypeDef
-import org.ton.intellij.tolk.psi.TolkTypeExpression
 import org.ton.intellij.tolk.psi.TolkTypeParameter
 import org.ton.intellij.tolk.psi.TolkTypeParameterList
+import org.ton.intellij.tolk.psi.TolkVar
+import org.ton.intellij.tolk.psi.TolkVarExpression
 import org.ton.intellij.tolk.psi.impl.hasReceiver
 import org.ton.intellij.tolk.psi.impl.receiverTy
 import org.ton.intellij.tolk.psi.impl.returnTy
@@ -62,13 +65,19 @@ import kotlin.math.max
 
 class TolkDocumentationProvider : AbstractDocumentationProvider() {
     override fun generateDoc(element: PsiElement?, originalElement: PsiElement?) = when (element) {
-        is TolkFunction    -> element.generateDoc()
-        is TolkConstVar    -> element.generateDoc()
-        is TolkGlobalVar   -> element.generateDoc()
-        is TolkTypeDef     -> element.generateDoc()
-        is TolkStruct      -> element.generateDoc()
-        is TolkStructField -> element.generateDoc()
-        else               -> null
+        is TolkFunction           -> element.generateDoc()
+        is TolkConstVar           -> element.generateDoc()
+        is TolkGlobalVar          -> element.generateDoc()
+        is TolkTypeDef            -> element.generateDoc()
+        is TolkStruct             -> element.generateDoc()
+        is TolkStructField        -> element.generateDoc()
+        is TolkParameter          -> element.generateDoc()
+        is TolkSelfParameter      -> element.generateDoc()
+        is TolkSelfTypeExpression -> element.generateDoc()
+        is TolkVar                -> element.generateDoc()
+        is TolkTypeParameter      -> element.generateDoc()
+        is TolkCatchParameter     -> element.generateDoc()
+        else                      -> null
     }
 
     override fun collectDocComments(file: PsiFile, sink: Consumer<in PsiDocCommentBase>) {
@@ -139,13 +148,15 @@ fun TolkGlobalVar.generateDoc(): String {
 }
 
 fun TolkTypeDef.generateDoc(): String {
+    val primitiveType = TolkPrimitiveTy.fromName(name ?: "")
+
     return buildString {
         append(DocumentationMarkup.DEFINITION_START)
 
         line(annotations.annotations().generateDoc())
 
         part("type", asKeyword)
-        colorize(name ?: "", asTypeAlias)
+        colorize(name ?: "", if (primitiveType != null) asPrimitive else asTypeAlias)
 
         val typeParams = typeParameterList
         if (typeParams != null) {
@@ -154,7 +165,6 @@ fun TolkTypeDef.generateDoc(): String {
 
         append(" = ")
 
-        val primitiveType = TolkPrimitiveTy.fromName(name ?: "")
         if (primitiveType != null || typeExpression?.text == "builtin") {
             part("builtin", asKeyword)
         } else {
@@ -424,6 +434,111 @@ fun TolkTypeParameterList.generateDoc(): String {
             }
         }
         colorize(">", asParen)
+    }
+}
+
+fun TolkParameter.generateDoc(): String {
+    return buildString {
+        append(DocumentationMarkup.DEFINITION_START)
+
+        if (isMutable) {
+            part("mutate ", asKeyword)
+        }
+        colorize(name ?: "", asParameter)
+        append(": ")
+
+        val type = type
+        if (type != null) {
+            append(type.generateDoc())
+        }
+
+        val defaultValue = parameterDefault?.expression
+        if (defaultValue != null) {
+            append(" = ")
+            append(defaultValue.generateDoc())
+        }
+
+        append(DocumentationMarkup.DEFINITION_END)
+    }
+}
+
+fun TolkSelfParameter.generateDoc(): String {
+    return buildString {
+        append(DocumentationMarkup.DEFINITION_START)
+
+        if (isMutable) {
+            part("mutate", asKeyword)
+        }
+        colorize("self", asKeyword)
+
+        val type = type
+        if (type != null) {
+            append(": ")
+            append(type.generateDoc())
+        }
+
+        append(DocumentationMarkup.DEFINITION_END)
+    }
+}
+
+fun TolkSelfTypeExpression.generateDoc(): String {
+    val owner = parentOfType<TolkSelfParameter>() ?: return ""
+    return owner.generateDoc()
+}
+
+fun TolkVar.generateDoc(): String {
+    val varExpression = parentOfType<TolkVarExpression>()
+
+    return buildString {
+        append(DocumentationMarkup.DEFINITION_START)
+
+        val kind = if (varExpression?.valKeyword != null) "val" else "var"
+
+        part(kind, asKeyword)
+        colorize(name ?: "", asIdentifier)
+
+        val type = type
+        if (type != null) {
+            append(": ")
+            append(type.generateDoc())
+        }
+
+        append(DocumentationMarkup.DEFINITION_END)
+    }
+}
+
+fun TolkTypeParameter.generateDoc(): String {
+    return buildString {
+        append(DocumentationMarkup.DEFINITION_START)
+
+        part("type parameter", asKeyword)
+        colorize(name ?: "", asTypeParameter)
+
+        val defaultType = defaultTypeParameter?.typeExpression?.type
+        if (defaultType != null) {
+            append(" = ")
+            append(defaultType.generateDoc())
+        }
+
+        append(DocumentationMarkup.DEFINITION_END)
+        generateCommentsPart(null) // Type parameters don't have doc comments directly
+    }
+}
+
+fun TolkCatchParameter.generateDoc(): String {
+    return buildString {
+        append(DocumentationMarkup.DEFINITION_START)
+
+        part("catch parameter", asKeyword)
+        colorize(name ?: "", asParameter)
+
+        val type = type
+        if (type != null) {
+            append(": ")
+            append(type.generateDoc())
+        }
+
+        append(DocumentationMarkup.DEFINITION_END)
     }
 }
 

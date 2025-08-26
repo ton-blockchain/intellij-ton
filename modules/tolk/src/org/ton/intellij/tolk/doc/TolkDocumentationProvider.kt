@@ -45,6 +45,7 @@ import org.ton.intellij.tolk.psi.TolkSelfTypeExpression
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.psi.TolkTypeDef
+import org.ton.intellij.tolk.psi.TolkTypeExpression
 import org.ton.intellij.tolk.psi.TolkTypeParameter
 import org.ton.intellij.tolk.psi.TolkTypeParameterList
 import org.ton.intellij.tolk.psi.TolkVar
@@ -52,13 +53,7 @@ import org.ton.intellij.tolk.psi.TolkVarExpression
 import org.ton.intellij.tolk.psi.impl.hasReceiver
 import org.ton.intellij.tolk.psi.impl.receiverTy
 import org.ton.intellij.tolk.psi.impl.returnTy
-import org.ton.intellij.tolk.type.TolkIntTyFamily
-import org.ton.intellij.tolk.type.TolkPrimitiveTy
-import org.ton.intellij.tolk.type.TolkTy
-import org.ton.intellij.tolk.type.TolkTyAlias
-import org.ton.intellij.tolk.type.TolkTyStruct
-import org.ton.intellij.tolk.type.TolkTyUnknown
-import org.ton.intellij.tolk.type.render
+import org.ton.intellij.tolk.type.*
 import org.ton.intellij.util.parentOfType
 import java.util.function.Consumer
 import kotlin.math.max
@@ -74,6 +69,7 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
         is TolkParameter          -> element.generateDoc()
         is TolkSelfParameter      -> element.generateDoc()
         is TolkSelfTypeExpression -> element.generateDoc()
+        is TolkTypeExpression     -> element.generateDoc()
         is TolkVar                -> element.generateDoc()
         is TolkTypeParameter      -> element.generateDoc()
         is TolkCatchParameter     -> element.generateDoc()
@@ -94,14 +90,127 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
     }
 }
 
-fun TolkTy.generateDoc(): String {
-    when (this) {
-        is TolkIntTyFamily -> return buildString { colorize(render(), asPrimitive) }
-        is TolkPrimitiveTy -> return buildString { colorize(render(), asPrimitive) }
-        is TolkTyStruct    -> return buildString { colorize(render(), asStruct) }
-        is TolkTypeDef     -> return buildString { colorize(render(), asTypeAlias) }
+fun TolkTy.generateDoc(): String = buildString {
+    when (this@generateDoc) {
+        is TolkIntNTy         -> colorize(render(), asPrimitive)
+        is TolkBitsNTy        -> colorize(render(), asPrimitive)
+        is TolkBytesNTy       -> colorize(render(), asPrimitive)
+
+        is TolkConstantBoolTy -> colorize(value.toString(), asKeyword)
+        is TolkTyBool         -> colorize("bool", asPrimitive)
+
+        TolkTy.Int            -> colorize("int", asPrimitive)
+        TolkCellTy            -> colorize("cell", asPrimitive)
+        TolkSliceTy           -> colorize("slice", asPrimitive)
+        TolkTy.Builder        -> colorize("builder", asPrimitive)
+        TolkTy.Continuation   -> colorize("continuation", asPrimitive)
+        TolkTy.Tuple          -> colorize("tuple", asPrimitive)
+        TolkTy.Void           -> colorize("void", asPrimitive)
+        TolkTy.Null           -> colorize("null", asKeyword)
+        TolkTy.Coins          -> colorize("coins", asPrimitive)
+        TolkTy.Address        -> colorize("address", asPrimitive)
+        TolkTy.VarInt16       -> colorize("varint16", asPrimitive)
+        TolkTy.VarUInt16      -> colorize("varuint16", asPrimitive)
+        TolkTy.VarInt32       -> colorize("varint32", asPrimitive)
+        TolkTy.VarUInt32      -> colorize("varuint32", asPrimitive)
+
+        is TolkIntTyFamily    -> colorize(render(), asPrimitive)
+
+        TolkTy.Unknown        -> colorize("unknown", asIdentifier)
+        TolkTy.Never          -> colorize("never", asKeyword)
+
+        is TolkTyStruct       -> {
+            colorize(psi.name ?: "Anonymous", asStruct)
+            renderTypeParameters(typeArguments, this@buildString)
+        }
+
+        is TolkTyAlias        -> {
+            val typeName = psi.name ?: "Anonymous"
+            val primitiveType = TolkPrimitiveTy.fromName(typeName)
+            if (primitiveType != null) {
+                colorize(typeName, asPrimitive)
+            } else {
+                colorize(typeName, asTypeAlias)
+            }
+            renderTypeParameters(typeArguments, this@buildString)
+        }
+
+        is TolkTyFunction     -> {
+            colorize("fun", asKeyword)
+            colorize("(", asParen)
+            parametersType.forEachIndexed { index, paramType ->
+                if (index > 0) colorize(", ", asComma)
+                append(paramType.generateDoc())
+            }
+            colorize(")", asParen)
+            append(" ")
+            colorize("->", asKeyword)
+            append(" ")
+            append(returnType.generateDoc())
+        }
+
+        is TolkTyTensor       -> {
+            colorize("(", asParen)
+            elements.forEachIndexed { index, element ->
+                if (index > 0) colorize(", ", asComma)
+                append(element.generateDoc())
+            }
+            colorize(")", asParen)
+        }
+
+        is TolkTyTypedTuple   -> {
+            colorize("[", asParen)
+            elements.forEachIndexed { index, element ->
+                if (index > 0) colorize(", ", asComma)
+                append(element.generateDoc())
+            }
+            colorize("]", asParen)
+        }
+
+        is TolkTyUnion        -> {
+            val nullableType = orNull
+            if (nullableType != null) {
+                // nullable types like `int?`
+                append(nullableType.generateDoc())
+                colorize("?", asComma)
+            } else {
+                if (variants.size > 2) {
+                    variants.forEach { variant ->
+                        append("\n    ")
+                        colorize("|", asComma)
+                        append(" ")
+                        append(variant.generateDoc())
+                    }
+                    return@buildString
+                }
+                variants.forEachIndexed { index, variant ->
+                    if (index > 0) {
+                        append(" ")
+                        colorize("|", asComma)
+                        append(" ")
+                    }
+                    append(variant.generateDoc())
+                }
+            }
+        }
+
+        is TolkTyParam        -> {
+            colorize(name ?: "T", asTypeParameter)
+        }
+
+        else                  -> colorize(render(), asIdentifier)
     }
-    return render()
+}
+
+private fun renderTypeParameters(typeArguments: List<TolkTy>, builder: StringBuilder) {
+    if (typeArguments.isNotEmpty()) {
+        builder.colorize("<", asParen)
+        typeArguments.forEachIndexed { index, typeArg ->
+            if (index > 0) builder.colorize(", ", asComma)
+            builder.append(typeArg.generateDoc())
+        }
+        builder.colorize(">", asParen)
+    }
 }
 
 fun TolkConstVar.generateDoc(): String {
@@ -148,7 +257,7 @@ fun TolkGlobalVar.generateDoc(): String {
 }
 
 fun TolkTypeDef.generateDoc(): String {
-    val primitiveType = TolkPrimitiveTy.fromName(name ?: "")
+    val isPrimitiveType = TolkPrimitiveTy.fromName(name ?: "") != null || name == "map"
 
     return buildString {
         append(DocumentationMarkup.DEFINITION_START)
@@ -156,7 +265,7 @@ fun TolkTypeDef.generateDoc(): String {
         line(annotations.annotations().generateDoc())
 
         part("type", asKeyword)
-        colorize(name ?: "", if (primitiveType != null) asPrimitive else asTypeAlias)
+        colorize(name ?: "", if (isPrimitiveType) asPrimitive else asTypeAlias)
 
         val typeParams = typeParameterList
         if (typeParams != null) {
@@ -165,7 +274,7 @@ fun TolkTypeDef.generateDoc(): String {
 
         append(" = ")
 
-        if (primitiveType != null || typeExpression?.text == "builtin") {
+        if (isPrimitiveType || typeExpression?.text == "builtin") {
             part("builtin", asKeyword)
         } else {
             val type = type as? TolkTyAlias
@@ -263,6 +372,11 @@ fun TolkFunction.generateDoc(): String {
         }
 
         colorize(name ?: "", asFunction)
+
+        val typeParams = typeParameterList
+        if (typeParams != null) {
+            append(typeParams.generateDoc())
+        }
 
         append(parameters.generateDoc(parameterList?.selfParameter))
         append(": ")
@@ -484,6 +598,17 @@ fun TolkSelfParameter.generateDoc(): String {
 fun TolkSelfTypeExpression.generateDoc(): String {
     val owner = parentOfType<TolkSelfParameter>() ?: return ""
     return owner.generateDoc()
+}
+
+fun TolkTypeExpression.generateDoc(): String {
+    val type = type
+    return if (type != null) {
+        type.generateDoc()
+    } else {
+        buildString {
+            colorize(text, asIdentifier)
+        }
+    }
 }
 
 fun TolkVar.generateDoc(): String {

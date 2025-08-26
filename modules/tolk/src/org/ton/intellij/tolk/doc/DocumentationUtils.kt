@@ -36,7 +36,6 @@ object DocumentationUtils {
     val asStruct = loadKey(TolkColor.STRUCT.textAttributesKey)
     val asTypeAlias = loadKey(TolkColor.TYPE_ALIAS.textAttributesKey)
     val asPrimitive = loadKey(TolkColor.PRIMITIVE.textAttributesKey)
-    val asConst = loadKey(TolkColor.CONSTANT.textAttributesKey)
 
     @Suppress("UnstableApiUsage")
     fun StringBuilder.colorize(text: String, attrs: TextAttributes, noHtml: Boolean = false) {

@@ -66,16 +66,10 @@ jobs:
           path: ./build/distributions/content/*/*
 
   test:
-    name: Test (${{ matrix.os }})
+    name: Test
+    if: ${{ inputs.branch != 'main' }}
     needs: [ build ]
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - windows-latest
-          - ubuntu-latest
-          - macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Fetch Sources
         uses: actions/checkout@v4
@@ -96,7 +90,7 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: tests-result-${{ matrix.os }}
+          name: tests-result
           path: ${{ github.workspace }}/build/reports/tests
 
   verify:

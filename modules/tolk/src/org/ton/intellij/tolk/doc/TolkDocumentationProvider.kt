@@ -2,6 +2,7 @@ package org.ton.intellij.tolk.doc
 
 import com.intellij.lang.documentation.AbstractDocumentationProvider
 import com.intellij.lang.documentation.DocumentationMarkup
+import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiDocCommentBase
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -76,6 +77,15 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
         is TolkCatchParameter     -> element.generateDoc()
         is TolkAnnotation         -> element.generateDoc()
         else                      -> null
+    }
+
+    override fun getCustomDocumentationElement(editor: Editor, file: PsiFile, contextElement: PsiElement?, targetOffset: Int): PsiElement? {
+        val parent = contextElement?.parent
+        if (parent is TolkAnnotation) {
+            return parent
+        }
+
+        return super.getCustomDocumentationElement(editor, file, contextElement, targetOffset)
     }
 
     override fun collectDocComments(file: PsiFile, sink: Consumer<in PsiDocCommentBase>) {
@@ -391,13 +401,31 @@ fun TolkFunction.generateDoc(): String {
 
 fun Sequence<TolkAnnotation>.generateDoc(): String {
     return joinToString("\n") { attr ->
-        attr.generateDoc()
+        attr.generateShortDoc()
     }
 }
 
 fun TolkAnnotation.generateDoc(): String {
     val name = identifier?.text ?: ""
+
+    return buildString {
+        append(DocumentationMarkup.DEFINITION_START)
+        append(generateShortDoc())
+        append(DocumentationMarkup.DEFINITION_END)
+        
+        val annotationInfo = TolkAnnotationInfo.getAnnotationInfo(name)
+        if (annotationInfo != null) {
+            append(DocumentationMarkup.CONTENT_START)
+            append(annotationInfo.description)
+            append(DocumentationMarkup.CONTENT_END)
+        }
+    }
+}
+
+fun TolkAnnotation.generateShortDoc(): String {
+    val name = identifier?.text ?: ""
     val arguments = argumentList?.argumentList ?: emptyList()
+
     return buildString {
         colorize("@", asAnnotation)
         colorize(name, asAnnotation)

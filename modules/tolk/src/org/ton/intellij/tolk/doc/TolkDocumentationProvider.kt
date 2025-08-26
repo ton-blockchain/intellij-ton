@@ -71,7 +71,6 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
         is TolkParameter          -> element.generateDoc()
         is TolkSelfParameter      -> element.generateDoc()
         is TolkSelfTypeExpression -> element.generateDoc()
-        is TolkTypeExpression     -> element.generateDoc()
         is TolkVar                -> element.generateDoc()
         is TolkTypeParameter      -> element.generateDoc()
         is TolkCatchParameter     -> element.generateDoc()
@@ -631,17 +630,6 @@ fun TolkSelfParameter.generateDoc(): String {
 fun TolkSelfTypeExpression.generateDoc(): String {
     val owner = parentOfType<TolkSelfParameter>() ?: return ""
     return owner.generateDoc()
-}
-
-fun TolkTypeExpression.generateDoc(): String {
-    val type = type
-    return if (type != null) {
-        type.generateDoc()
-    } else {
-        buildString {
-            colorize(text, asIdentifier)
-        }
-    }
 }
 
 fun TolkVar.generateDoc(): String {

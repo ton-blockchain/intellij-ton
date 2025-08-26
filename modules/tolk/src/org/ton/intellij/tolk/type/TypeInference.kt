@@ -345,7 +345,7 @@ class TolkInferenceWalker(
             var nextFlow = flow
             val selfType = element.receiverTy
             ctx.declaredReturnType = element.returnType?.let {
-                if (it.selfKeyword != null) {
+                if (it.selfReturnType != null) {
                     selfType
                 } else {
                     it.typeExpression?.type

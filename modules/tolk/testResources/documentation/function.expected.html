@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tolk Documentation Test Results</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #fafafa; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        .element { margin-bottom: 25px; border: 1px solid #ddd; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .element-title { font-weight: bold; color: #2c3e50; margin-bottom: 15px; font-size: 14px; background: #ecf0f1; padding: 8px; border-radius: 4px; }
+        .documentation { background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #3498db; font-family: 'JetBrains Mono', 'Fira Code', monospace; line-height: 1.6; }
+        
+        /* Tolk syntax highlighting */
+        .keyword { color: #d73a49; font-weight: bold; }
+        .primitive { color: #005cc5; font-weight: 500; }
+        .struct { color: #22863a; font-weight: 500; }
+        .function { color: #6f42c1; font-weight: 500; }
+        .parameter { color: #e36209; }
+        .type-alias { color: #d73a49; }
+        .type-parameter { color: #6f42c1; font-style: italic; }
+        .annotation { color: #6a737d; }
+        .string { color: #032f62; }
+        .number { color: #005cc5; }
+        .comment { color: #6a737d; font-style: italic; }
+        .constant { color: #005cc5; font-weight: 500; }
+        .global-variable { color: #e36209; font-weight: 500; }
+        .identifier { color: #24292e; }
+        
+        /* Documentation markup */
+        .definition-start { border-top: 2px solid #e1e4e8; margin-top: 10px; padding-top: 10px; }
+        .definition-end { border-bottom: 1px solid #e1e4e8; margin-bottom: 10px; padding-bottom: 10px; }
+        .content-start { margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Tolk Documentation Test Results</h1>
+    <div class="element">
+        <div class="element-title">TolkReferenceTypeExpressionImpl</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">void</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Function: simpleFunction</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">fun</span> <span style="color:#000000;">simpleFunction</span><span style="">()</span>: <span style="color:#000080;font-weight:bold;">void</span></pre></div><div class='content'><p>Simple function without parameters</p>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkReferenceTypeExpressionImpl</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: x</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">x</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkReferenceTypeExpressionImpl</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: y</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">y</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkReferenceTypeExpressionImpl</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Function: addNumbers</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">fun</span> <span style="color:#000000;">addNumbers</span><span style="">(</span>
+   <span style="color:#000000;">x</span>: <span style="color:#000080;font-weight:bold;">int</span>,
+   <span style="color:#000000;">y</span>: <span style="color:#000080;font-weight:bold;">int</span>,
+<span style="">)</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div><div class='content'><p>Function with parameters @param x The first parameter @param y The second parameter</p>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkReferenceTypeExpressionImpl</div>
+        <div class="documentation">
+            <span style="color:#20999d;">Point</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkSelfTypeExpressionImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">self</span>: <span style="color:#20999d;">Point</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkSelfParameterImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">self</span>: <span style="color:#20999d;">Point</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkReferenceTypeExpressionImpl</div>
+        <div class="documentation">
+            <span style="color:#20999d;">Point</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: other</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">other</span>: <span style="color:#20999d;">Point</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkReferenceTypeExpressionImpl</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Function: distance</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">fun</span> <span style="color:#20999d;">Point</span><span style="">.</span><span style="color:#000000;">distance</span><span style="">(</span><span style="color:#000080;font-weight:bold;">self</span><span style="">, </span><span style="color:#000000;">other</span>: <span style="color:#20999d;">Point</span><span style="">)</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div><div class='content'><p>Function with receiver</p>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkReferenceTypeExpressionImpl</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: value</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">mutate</span> <span style="color:#000000;">value</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkReferenceTypeExpressionImpl</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">void</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Function: modifyValue</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">fun</span> <span style="color:#000000;">modifyValue</span><span style="">(</span><span style="color:#000080;font-weight:bold;">mutate </span><span style="color:#000000;">value</span>: <span style="color:#000080;font-weight:bold;">int</span><span style="">)</span>: <span style="color:#000080;font-weight:bold;">void</span></pre></div><div class='content'><p>Function with mutate parameter</p>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TypeParam: T</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">type parameter</span> <span style="color:#20999d;">T</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkReferenceTypeExpressionImpl</div>
+        <div class="documentation">
+            <span style="color:#20999d;">T</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: value</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">value</span>: <span style="color:#20999d;">T</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkReferenceTypeExpressionImpl</div>
+        <div class="documentation">
+            <span style="color:#20999d;">T</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Function: identity</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">fun</span> <span style="color:#000000;">identity</span><span style="">&lt;</span><span style="color:#20999d;">T</span><span style="">&gt;</span><span style="">(</span><span style="color:#000000;">value</span>: <span style="color:#20999d;">T</span><span style="">)</span>: <span style="color:#20999d;">T</span></pre></div><div class='content'><p>Generic function</p>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkReferenceTypeExpressionImpl</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">void</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Function: annotatedFunction</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#808000;">@</span><span style="color:#808000;">method_id</span><span style="">(</span><span style="color:#0000ff;">123</span><span style="">)</span>
+<span style="color:#000080;font-weight:bold;">fun</span> <span style="color:#000000;">annotatedFunction</span><span style="">()</span>: <span style="color:#000080;font-weight:bold;">void</span></pre></div><div class='content'><p>Function with annotation</p>
+</div>
+        </div>
+    </div>
+</body>
+</html>

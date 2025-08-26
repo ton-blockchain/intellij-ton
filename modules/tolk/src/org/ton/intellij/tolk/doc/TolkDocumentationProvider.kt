@@ -136,7 +136,7 @@ fun TolkTy.generateDoc(): String = buildString {
         }
 
         is TolkTyFunction     -> {
-            colorize("fun", asKeyword)
+            colorize("fun ", asKeyword)
             colorize("(", asParen)
             parametersType.forEachIndexed { index, paramType ->
                 if (index > 0) colorize(", ", asComma)
@@ -476,6 +476,9 @@ private fun TolkParameter.generateDocForMethod(): String {
     return buildString {
         val name = name
         if (name != null) {
+            if (isMutable) {
+                colorize("mutate ", asKeyword)
+            }
             colorize(name, asParameter)
             append(": ")
         }
@@ -556,7 +559,7 @@ fun TolkParameter.generateDoc(): String {
         append(DocumentationMarkup.DEFINITION_START)
 
         if (isMutable) {
-            part("mutate ", asKeyword)
+            part("mutate", asKeyword)
         }
         colorize(name ?: "", asParameter)
         append(": ")

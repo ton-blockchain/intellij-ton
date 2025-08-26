@@ -67,7 +67,7 @@ jobs:
 
   test:
     name: Test
-    if: ${{ inputs.branch != 'main' }}
+    if: ${{ github.ref_name != 'main' }}
     needs: [ build ]
     runs-on: ubuntu-latest
     steps:

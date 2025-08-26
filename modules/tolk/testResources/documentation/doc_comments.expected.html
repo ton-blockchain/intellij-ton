@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tolk Documentation Test Results</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #fafafa; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        .element { margin-bottom: 25px; border: 1px solid #ddd; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .element-title { font-weight: bold; color: #2c3e50; margin-bottom: 15px; font-size: 14px; background: #ecf0f1; padding: 8px; border-radius: 4px; }
+        .documentation { background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #3498db; font-family: 'JetBrains Mono', 'Fira Code', monospace; line-height: 1.6; }
+        
+        /* Tolk syntax highlighting */
+        .keyword { color: #d73a49; font-weight: bold; }
+        .primitive { color: #005cc5; font-weight: 500; }
+        .struct { color: #22863a; font-weight: 500; }
+        .function { color: #6f42c1; font-weight: 500; }
+        .parameter { color: #e36209; }
+        .type-alias { color: #d73a49; }
+        .type-parameter { color: #6f42c1; font-style: italic; }
+        .annotation { color: #6a737d; }
+        .string { color: #032f62; }
+        .number { color: #005cc5; }
+        .comment { color: #6a737d; font-style: italic; }
+        .constant { color: #005cc5; font-weight: 500; }
+        .global-variable { color: #e36209; font-weight: 500; }
+        .identifier { color: #24292e; }
+        
+        /* Documentation markup */
+        .definition-start { border-top: 2px solid #e1e4e8; margin-top: 10px; padding-top: 10px; }
+        .definition-end { border-bottom: 1px solid #e1e4e8; margin-bottom: 10px; padding-bottom: 10px; }
+        .content-start { margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Tolk Documentation Test Results</h1>
+    <div class="element">
+        <div class="element-title">Type expression: int</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: param1</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">param1</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: int</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: param2</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">param2</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: int</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Function: documentedFunction</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">fun</span> <span style="color:#000000;">documentedFunction</span><span style="">(</span>
+   <span style="color:#000000;">param1</span>: <span style="color:#000080;font-weight:bold;">int</span>,
+   <span style="color:#000000;">param2</span>: <span style="color:#000080;font-weight:bold;">int</span>,
+<span style="">)</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div><div class='content'><p>This is a simple doc comment</p>
+  <p>It can have multiple lines and <strong>markdown</strong> formatting.</p>
+  <h1> Examples</h1>  <pre><code><span style="">someFunction(</span><span style="color:#0000ff;">42</span><span style="">);</span></code></pre>  <h1> Parameters</h1>  <ul><li><p><code style='font-size:96%;'><span style=""><span style="">param1</span></span></code> - The first parameter</p>
+</li> <li><p><code style='font-size:96%;'><span style=""><span style="">param2</span></span></code> - The second parameter</p>
+</li></ul>
+  <h1> Returns</h1>  <p>Returns the sum of the parameters.</p>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: int</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Field: x</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">struct</span> <span style="color:#a04908;">Point</span>
+<span style="color:#660e7a;font-weight:bold;">x</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div><div class='content'><p>X coordinate in pixels</p>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: int</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Field: y</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">struct</span> <span style="color:#a04908;">Point</span>
+<span style="color:#660e7a;font-weight:bold;">y</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div><div class='content'><p>Y coordinate in pixels  </p>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Struct: Point</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">struct</span> <span style="color:#a04908;">Point</span><span style=""> {</span>
+   <span style="color:#660e7a;font-weight:bold;">x</span>: <span style="color:#000080;font-weight:bold;">int</span>
+   <span style="color:#660e7a;font-weight:bold;">y</span>: <span style="color:#000080;font-weight:bold;">int</span>
+<span style="">}</span></pre></div><div class='content'><p>Struct with rich documentation</p>
+  <p>This struct represents a 2D point in space.</p>
+  <h2> Usage</h2>  <pre><code><span style="color:#000080;font-weight:bold;">var&#32;</span><span style="">p&#32;=&#32;Point&#32;{&#32;x:&#32;</span><span style="color:#0000ff;">10</span><span style="">,&#32;y:&#32;</span><span style="color:#0000ff;">20&#32;</span><span style="">};</span></code></pre>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Const: MAX_VALUE</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">const</span> <span style="color:#660e7a;">MAX_VALUE</span>: <span style="color:#000080;font-weight:bold;">int</span> = <span style="color:#0000ff;">1000</span></pre></div><div class='content'><p>Constant with documentation</p>
+  <p>This constant defines the maximum allowed value.</p>
+  <p><strong>Warning</strong>: Don't exceed this value!</p>
+</div>
+        </div>
+    </div>
+</body>
+</html>

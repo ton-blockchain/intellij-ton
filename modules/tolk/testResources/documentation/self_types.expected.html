@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tolk Documentation Test Results</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #fafafa; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        .element { margin-bottom: 25px; border: 1px solid #ddd; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .element-title { font-weight: bold; color: #2c3e50; margin-bottom: 15px; font-size: 14px; background: #ecf0f1; padding: 8px; border-radius: 4px; }
+        .documentation { background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #3498db; font-family: 'JetBrains Mono', 'Fira Code', monospace; line-height: 1.6; }
+        
+        /* Tolk syntax highlighting */
+        .keyword { color: #d73a49; font-weight: bold; }
+        .primitive { color: #005cc5; font-weight: 500; }
+        .struct { color: #22863a; font-weight: 500; }
+        .function { color: #6f42c1; font-weight: 500; }
+        .parameter { color: #e36209; }
+        .type-alias { color: #d73a49; }
+        .type-parameter { color: #6f42c1; font-style: italic; }
+        .annotation { color: #6a737d; }
+        .string { color: #032f62; }
+        .number { color: #005cc5; }
+        .comment { color: #6a737d; font-style: italic; }
+        .constant { color: #005cc5; font-weight: 500; }
+        .global-variable { color: #e36209; font-weight: 500; }
+        .identifier { color: #24292e; }
+        
+        /* Documentation markup */
+        .definition-start { border-top: 2px solid #e1e4e8; margin-top: 10px; padding-top: 10px; }
+        .definition-end { border-bottom: 1px solid #e1e4e8; margin-bottom: 10px; padding-bottom: 10px; }
+        .content-start { margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Tolk Documentation Test Results</h1>
+    <div class="element">
+        <div class="element-title">Type expression: int</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Field: value</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">struct</span> <span style="color:#a04908;">Calculator</span>
+<span style="color:#660e7a;font-weight:bold;">value</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Struct: Calculator</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">struct</span> <span style="color:#a04908;">Calculator</span><span style=""> {</span>
+   <span style="color:#660e7a;font-weight:bold;">value</span>: <span style="color:#000080;font-weight:bold;">int</span>
+<span style="">}</span></pre></div><div class='content'><p>Struct for testing self types</p>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: Calculator</div>
+        <div class="documentation">
+            <span style="color:#a04908;">Calculator</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Self type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">self</span>: <span style="color:#a04908;">Calculator</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Self param: self</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">self</span>: <span style="color:#a04908;">Calculator</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: int</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: other</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">other</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Self type</div>
+        <div class="documentation">
+            
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: Calculator</div>
+        <div class="documentation">
+            <span style="color:#a04908;">Calculator</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Function: add</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">fun</span> <span style="color:#a04908;">Calculator</span><span style="">.</span><span style="color:#000000;">add</span><span style="">(</span><span style="color:#000080;font-weight:bold;">self</span><span style="">, </span><span style="color:#000000;">other</span>: <span style="color:#000080;font-weight:bold;">int</span><span style="">)</span>: <span style="color:#a04908;">Calculator</span></pre></div><div class='content'><p>Method with self parameter</p>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: Calculator</div>
+        <div class="documentation">
+            <span style="color:#a04908;">Calculator</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Self type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">mutate</span> <span style="color:#000080;font-weight:bold;">self</span>: <span style="color:#a04908;">Calculator</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Self param: mutate self</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">mutate</span> <span style="color:#000080;font-weight:bold;">self</span>: <span style="color:#a04908;">Calculator</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: void</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">void</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Function: increment</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">fun</span> <span style="color:#a04908;">Calculator</span><span style="">.</span><span style="color:#000000;">increment</span><span style="">()</span>: <span style="color:#000080;font-weight:bold;">void</span></pre></div><div class='content'><p>Mutating method</p>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: Calculator</div>
+        <div class="documentation">
+            <span style="color:#a04908;">Calculator</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Self type</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">self</span>: <span style="color:#a04908;">Calculator</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Self param: self</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">self</span>: <span style="color:#a04908;">Calculator</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Self type</div>
+        <div class="documentation">
+            
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: Calculator</div>
+        <div class="documentation">
+            <span style="color:#a04908;">Calculator</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Function: reset</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">fun</span> <span style="color:#a04908;">Calculator</span><span style="">.</span><span style="color:#000000;">reset</span><span style="">()</span>: <span style="color:#a04908;">Calculator</span></pre></div><div class='content'><p>Method returning self type</p>
+</div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: Calculator</div>
+        <div class="documentation">
+            <span style="color:#a04908;">Calculator</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: int</div>
+        <div class="documentation">
+            <span style="color:#000080;font-weight:bold;">int</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Parameter: initial</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000000;">initial</span>: <span style="color:#000080;font-weight:bold;">int</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: Calculator</div>
+        <div class="documentation">
+            <span style="color:#a04908;">Calculator</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Type expression: Calculator</div>
+        <div class="documentation">
+            <span style="color:#a04908;">Calculator</span>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">Function: create</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">fun</span> <span style="color:#a04908;">Calculator</span><span style="">.</span><span style="color:#000000;">create</span><span style="">(</span><span style="color:#000000;">initial</span>: <span style="color:#000080;font-weight:bold;">int</span><span style="">)</span>: <span style="color:#a04908;">Calculator</span></pre></div><div class='content'><p>Static method (no self)</p>
+</div>
+        </div>
+    </div>
+</body>
+</html>

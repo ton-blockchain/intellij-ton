@@ -27,6 +27,12 @@ class TolkDocumentationProviderTest : TolkTestBase() {
     fun testComplexTypesDocumentation() = doTest("complex_types")
     fun testUnionTypesDocumentation() = doTest("union_types")
     fun testGenericTypesDocumentation() = doTest("generic_types")
+    fun testAnnotationsDocumentation() = doTest("annotations")
+    fun testAsmFunctionsDocumentation() = doTest("asm_functions")
+    fun testAdvancedTypesDocumentation() = doTest("advanced_types")
+    fun testSelfTypesDocumentation() = doTest("self_types")
+    fun testPrimitiveTypesDocumentation() = doTest("primitive_types")
+    fun testDocCommentsDocumentation() = doTest("doc_comments")
 
     private fun doTest(testName: String) {
         val tolkFile = myFixture.configureByFile("$testName.tolk")
@@ -64,17 +70,21 @@ class TolkDocumentationProviderTest : TolkTestBase() {
 
     private fun getElementDescription(element: PsiElement): String {
         return when (element) {
-            is TolkFunction       -> "Function: ${element.name}"
-            is TolkConstVar       -> "Const: ${element.name}"
-            is TolkGlobalVar      -> "Global: ${element.name}"
-            is TolkStruct         -> "Struct: ${element.name}"
-            is TolkStructField    -> "Field: ${element.name}"
-            is TolkTypeDef        -> "Type: ${element.name}"
-            is TolkParameter      -> "Parameter: ${element.name}"
-            is TolkVar            -> "Variable: ${element.name}"
-            is TolkTypeParameter  -> "TypeParam: ${element.name}"
-            is TolkCatchParameter -> "CatchParam: ${element.name}"
-            else                  -> element.javaClass.simpleName
+            is TolkFunction           -> "Function: ${element.name}"
+            is TolkConstVar           -> "Const: ${element.name}"
+            is TolkGlobalVar          -> "Global: ${element.name}"
+            is TolkStruct             -> "Struct: ${element.name}"
+            is TolkStructField        -> "Field: ${element.name}"
+            is TolkTypeDef            -> "Type: ${element.name}"
+            is TolkParameter          -> "Parameter: ${element.name}"
+            is TolkVar                -> "Variable: ${element.name}"
+            is TolkTypeParameter      -> "Type param: ${element.name}"
+            is TolkCatchParameter     -> "Catch param: ${element.name}"
+            is TolkAnnotation         -> "Annotation: ${element.identifier?.text ?: "unknown"}"
+            is TolkSelfParameter      -> "Self param: ${if (element.isMutable) "mutate " else ""}self"
+            is TolkSelfTypeExpression -> "Self type"
+            is TolkTypeExpression     -> "Type expression: ${element.text}"
+            else                      -> element.javaClass.simpleName
         }
     }
 

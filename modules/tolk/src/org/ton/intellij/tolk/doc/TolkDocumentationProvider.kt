@@ -74,6 +74,7 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
         is TolkVar                -> element.generateDoc()
         is TolkTypeParameter      -> element.generateDoc()
         is TolkCatchParameter     -> element.generateDoc()
+        is TolkAnnotation         -> element.generateDoc()
         else                      -> null
     }
 

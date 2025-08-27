@@ -44,7 +44,11 @@ class TlbAnnotator : Annotator {
                     }
                     null -> {
                         val text = element.text
-                        if (TLB_BUILTIN_TYPES.containsKey(text)) {
+                        if (text.startsWith("uint") ||
+                            text.startsWith("int") ||
+                            text.startsWith("bits") ||
+                            TLB_BUILTIN_TYPES.containsKey(text)
+                        ) {
                             holder.annotateInfo(element, TlbColor.BUILTIN_TYPE)
                         }
                     }

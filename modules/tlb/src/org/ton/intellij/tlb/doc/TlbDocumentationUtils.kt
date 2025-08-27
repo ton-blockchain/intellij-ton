@@ -11,4 +11,5 @@ object TlbDocumentationUtils : DocumentationUtils() {
     val asNumber get() = loadKey(TlbColor.NUMBER.textAttributesKey)
     val asBinaryTag get() = loadKey(TlbColor.BINARY_TAG.textAttributesKey)
     val asBuiltinType get() = loadKey(TlbColor.BUILTIN_TYPE.textAttributesKey)
+    val asKeyword get() = loadKey(DefaultLanguageHighlighterColors.KEYWORD)
 }

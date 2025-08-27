@@ -21,7 +21,7 @@ object TolkBuiltinTypesCompletionProvider : TlbCompletionProvider() {
         context: ProcessingContext,
         result: CompletionResultSet,
     ) {
-        BUILTIN_TYPES.forEach { (type, description) ->
+        TLB_BUILTIN_TYPES.forEach { (type, description) ->
             result.addElement(
                 LookupElementBuilder.create(type)
                     .withTailText(" $description", true)

@@ -33,7 +33,7 @@ class TolkTyParam private constructor(
     data class ReceiverTypeParameter(
         override val psi: TolkReferenceTypeExpression
     ) : TypeParameter() {
-        override val name: String get() = psi.identifier.text.removeSurrounding("`")
+        override val name: String get() = psi.referenceName ?: psi.identifier.text.removeSurrounding("`")
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true

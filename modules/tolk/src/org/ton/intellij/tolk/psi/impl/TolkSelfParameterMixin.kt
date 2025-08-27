@@ -24,6 +24,8 @@ abstract class TolkSelfParameterMixin : StubBasedPsiElementBase<TolkSelfParamete
 
     override val isMutable: Boolean get() = greenStub?.isMutable ?: (mutateKeyword != null)
 
+    override val isDeprecated: Boolean = false
+
     override fun getName(): String = "self"
 
     override val rawName: String? = "self"

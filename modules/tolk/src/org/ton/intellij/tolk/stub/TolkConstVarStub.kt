@@ -15,8 +15,8 @@ class TolkConstVarStub(
     parent: StubElement<*>,
     elementType: IStubElementType<*, *>,
     name: StringRef?,
-    val isDeprecated: Boolean
-) : TolkNamedStub<TolkConstVar>(parent, elementType, name) {
+    isDeprecated: Boolean
+) : TolkNamedStub<TolkConstVar>(parent, elementType, name, isDeprecated) {
     object Type : TolkNamedStubElementType<TolkConstVarStub, TolkConstVar>("CONST_VAR") {
         override fun serialize(stub: TolkConstVarStub, dataStream: StubOutputStream) {
             dataStream.writeName(stub.name)

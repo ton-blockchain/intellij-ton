@@ -117,7 +117,7 @@ private val RECEIVER_TYPE_KEY = Key.create<CachedValue<TolkTy>>("tolk.function.r
 private fun TolkFunction.resolveReturnType(): TolkTy {
     val returnTypePsi = returnType
     if (returnTypePsi != null) {
-        return if (returnTypePsi.selfKeyword != null) {
+        return if (returnTypePsi.selfReturnType != null) {
             receiverTy
         } else {
             val typeExExpression = returnTypePsi.typeExpression

@@ -10,7 +10,7 @@ class TolkParameterStub(
     elementType: IStubElementType<*, *>,
     name: StringRef?,
     val isMutable: Boolean,
-) : TolkNamedStub<TolkParameter>(parent, elementType, name) {
+) : TolkNamedStub<TolkParameter>(parent, elementType, name, false) {
     constructor(
         parent: StubElement<*>,
         elementType: IStubElementType<*, *>,

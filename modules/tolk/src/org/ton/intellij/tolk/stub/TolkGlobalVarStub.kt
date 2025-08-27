@@ -15,8 +15,8 @@ class TolkGlobalVarStub(
     parent: StubElement<*>,
     elementType: IStubElementType<*, *>,
     name: StringRef?,
-    val isDeprecated: Boolean,
-) : TolkNamedStub<TolkGlobalVar>(parent, elementType, name) {
+    isDeprecated: Boolean,
+) : TolkNamedStub<TolkGlobalVar>(parent, elementType, name, isDeprecated) {
     object Type : TolkNamedStubElementType<TolkGlobalVarStub, TolkGlobalVar>("GLOBAL_VAR") {
         override fun serialize(stub: TolkGlobalVarStub, dataStream: StubOutputStream) {
             dataStream.writeName(stub.name)

@@ -2,19 +2,23 @@ package org.ton.intellij.tlb.psi
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementResolveResult
+import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiReferenceBase
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.impl.source.resolve.ResolveCache
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.parentOfType
+import org.ton.intellij.tlb.settings.TlbSettingsState
 
 class TlbReference(
     val project: Project,
     element: TlbParamTypeExpression,
     rangeInElement: TextRange,
 ) : PsiReferenceBase.Poly<TlbParamTypeExpression>(element, rangeInElement, false) {
+
     private val resolver = ResolveCache.PolyVariantResolver<TlbReference> { t, incompleteCode ->
         if (!myElement.isValid) return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
         val name = t.element.identifier?.text ?: return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
@@ -63,6 +67,17 @@ class TlbReference(
             }
         }
 
+        // Search in a global block.tlb file if no results found in the current file
+        if (results.isEmpty()) {
+            val globalBlockTlbFile = getGlobalBlockTlbFile(project)
+            globalBlockTlbFile?.findResultTypes(name)?.forEach { resultType ->
+                val parameterList = resultType.paramList.typeExpressionList
+                if (incompleteCode || matchArgumentAndParams(argumentList, parameterList)) {
+                    results.add(PsiElementResolveResult(resultType))
+                }
+            }
+        }
+
         results.toTypedArray()
     }
 
@@ -83,7 +98,15 @@ class TlbReference(
     }
 
     override fun multiResolve(incompleteCode: Boolean): Array<out ResolveResult> {
-       return ResolveCache.getInstance(project)
+        return ResolveCache.getInstance(project)
             .resolveWithCaching(this, resolver, true, incompleteCode)
+    }
+
+    private fun getGlobalBlockTlbFile(project: Project): TlbFile? {
+        val settings = TlbSettingsState.getInstance(project)
+        val globalPath = settings.globalBlockTlbPath.takeIf { it.isNotBlank() } ?: return null
+
+        val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$globalPath") ?: return null
+        return PsiManager.getInstance(project).findFile(virtualFile) as? TlbFile
     }
 }

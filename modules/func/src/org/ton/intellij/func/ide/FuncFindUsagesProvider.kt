@@ -31,8 +31,10 @@ class FuncFindUsagesProvider : FindUsagesProvider {
         return when (element) {
             is FuncFunction -> "function"
             is FuncConstVar -> "constant"
-            is FuncGlobalVar -> "global var"
+            is FuncGlobalVar -> "global variable"
+            is FuncFunctionParameter -> "parameter"
             is FuncTypeParameter -> "type parameter"
+            is FuncReferenceExpression -> "local variable"
             else -> return "<TYPE $element>"
         }
     }

@@ -144,6 +144,7 @@
                                 implementationClass="org.ton.intellij.func.ide.completion.FuncCompletionContributor"/>
 
         <!-- Code Style -->
+        <codeStyleSettingsProvider implementation="org.ton.intellij.func.ide.formatter.FuncCodeStyleSettingsProvider"/>
         <langCodeStyleSettingsProvider
                 implementation="org.ton.intellij.func.ide.formatter.FuncLanguageCodeStyleSettingsProvider"/>
 

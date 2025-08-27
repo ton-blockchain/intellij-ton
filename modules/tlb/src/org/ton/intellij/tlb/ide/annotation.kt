@@ -25,6 +25,10 @@ class TlbAnnotator : Annotator {
                 } else {
                     holder.annotateInfo(element.identifier, TlbColor.IMPLICIT_FIELD_NAME)
                 }
+                val type = element.typeKeyword ?: element.tag
+                if (type != null) {
+                    holder.annotateInfo(type, TlbColor.IMPLICIT_FIELD_NAME)
+                }
             }
             is TlbResultType -> {
                 holder.annotateInfo(element.identifier, TlbColor.RESULT_TYPE_NAME)

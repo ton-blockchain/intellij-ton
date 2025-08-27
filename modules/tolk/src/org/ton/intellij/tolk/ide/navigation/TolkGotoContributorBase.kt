@@ -10,7 +10,11 @@ import com.intellij.psi.stubs.StubIndexKey
 import com.intellij.util.Processor
 import com.intellij.util.indexing.FindSymbolParameters
 import com.intellij.util.indexing.IdFilter
+import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkNamedElement
+import org.ton.intellij.tolk.psi.impl.hasReceiver
+import org.ton.intellij.tolk.psi.impl.receiverTy
+import org.ton.intellij.tolk.type.render
 
 open class TolkGotoContributorBase<T : TolkNamedElement>(
     private val clazz: Class<T>,
@@ -35,7 +39,11 @@ open class TolkGotoContributorBase<T : TolkNamedElement>(
     }
 
     override fun getQualifiedName(item: NavigationItem): String? {
-        return if (item is TolkNamedElement) item.name else null
+        if (item !is TolkNamedElement) return null
+        if (item is TolkFunction && item.hasReceiver) {
+            return item.receiverTy.render() + "." + item.name
+        }
+        return item.name
     }
 
     override fun getQualifiedNameSeparator() = "."

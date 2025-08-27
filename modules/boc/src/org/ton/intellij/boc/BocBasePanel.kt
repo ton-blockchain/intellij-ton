@@ -4,7 +4,8 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
-import com.intellij.openapi.editor.EditorKind
+import com.intellij.openapi.fileTypes.LanguageFileType
+import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.ui.JBUI
@@ -14,11 +15,12 @@ import javax.swing.JPanel
 abstract class BocBasePanel(
     protected val project: Project,
     protected val file: VirtualFile,
+    fileType: LanguageFileType = PlainTextFileType.INSTANCE,
     private val onInstalled: (() -> Unit)? = null,
 ) : JPanel(BorderLayout()) {
 
     protected val document: Document = EditorFactory.getInstance().createDocument("")
-    protected val editor: Editor = EditorFactory.getInstance().createViewer(document, project, EditorKind.MAIN_EDITOR).also {
+    protected val editor: Editor = EditorFactory.getInstance().createEditor(document, project, fileType, true).also {
         it.settings.isUseSoftWraps = true
     }
 

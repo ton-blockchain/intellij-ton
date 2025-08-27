@@ -93,7 +93,7 @@ LINE_COMMENT = "/""/"[^\n]*
 %xstate ASM_STATE
 
 %%
-<YYINITIAL> "PROGRAM{"          { yybegin(ASM_STATE); return PROGRAM_START; }
+<YYINITIAL> "PROGRAM{""\n"          { yybegin(ASM_STATE); return PROGRAM_START; }
 
 <ASM_STATE> "}END>c"            { yybegin(YYINITIAL); return END_C; }
 

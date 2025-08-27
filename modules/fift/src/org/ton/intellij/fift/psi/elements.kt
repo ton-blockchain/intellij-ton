@@ -74,6 +74,19 @@ fun FiftDefinition.name(): String? {
     return null
 }
 
+fun FiftDeclaration.name(): String? {
+    if (globalVar != null) {
+        return globalVar?.definitionName?.text
+    }
+    if (methodDeclaration != null) {
+        return methodDeclaration?.definitionName?.text
+    }
+    if (procDeclaration != null) {
+        return procDeclaration?.definitionName?.text
+    }
+    return null
+}
+
 fun FiftTvmInstruction.isNotInstruction(): Boolean {
     if (text.length < 3) return true
 

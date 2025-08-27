@@ -23,6 +23,8 @@ class BocFileEditor(
 
     private val disassemblyPanel = BocDisassemblyPanel(project, file) { onInstalled() }
     private val cellTreePanel = BocCellTreePanel(project, file) { onInstalled() }
+    private val hexPanel = BocHexPanel(project, file) { onInstalled() }
+    private val base64Panel = BocBase64Panel(project, file) { onInstalled() }
 
     private val tabs: JBTabs = JBTabsFactory.createEditorTabs(project, this).apply {
         presentation.setInnerInsets(JBInsets.emptyInsets())
@@ -31,16 +33,22 @@ class BocFileEditor(
 
     private val tasmTab = TabInfo(disassemblyPanel).setText("TASM")
     private val cellTab = TabInfo(cellTreePanel).setText("Cell Tree")
+    private val hexTab = TabInfo(hexPanel).setText("Hex")
+    private val base64Tab = TabInfo(base64Panel).setText("Base64")
 
     init {
         tabs.addTab(tasmTab)
         tabs.addTab(cellTab)
+        tabs.addTab(hexTab)
+        tabs.addTab(base64Tab)
         tabs.select(tasmTab, true)
     }
 
     private fun onInstalled() {
         disassemblyPanel.onTasmInstalled()
         cellTreePanel.onTasmInstalled()
+        hexPanel.onTasmInstalled()
+        base64Panel.onTasmInstalled()
     }
 
     override fun getComponent(): JComponent = tabs.component

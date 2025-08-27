@@ -9,6 +9,10 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.TimeUnit
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.Base64
+import java.util.HexFormat
 
 object TasmService {
     private val LOG = logger<TasmService>()
@@ -24,6 +28,24 @@ object TasmService {
 
     fun disassemble(bocFilePath: String) = executeCommand("tdisasm", bocFilePath)
     fun showCellTree(bocFilePath: String) = executeCommand("tdisasm", "--cell-tree", bocFilePath)
+
+    fun readFileAsHex(path: String): Result<String> = try {
+        val bytes = Files.readAllBytes(Paths.get(path))
+        val hex = HexFormat.of().formatHex(bytes) // lowercase by default
+        Result.success(hex)
+    } catch (e: Exception) {
+        LOG.warn("Failed to read file as hex: $path", e)
+        Result.failure(e)
+    }
+
+    fun readFileAsBase64(path: String): Result<String> = try {
+        val bytes = Files.readAllBytes(Paths.get(path))
+        val b64 = Base64.getEncoder().encodeToString(bytes)
+        Result.success(b64)
+    } catch (e: Exception) {
+        LOG.warn("Failed to read file as base64: $path", e)
+        Result.failure(e)
+    }
 
     private fun executeCommand(vararg parameters: String): Result<String> {
         val cmd = GeneralCommandLine()

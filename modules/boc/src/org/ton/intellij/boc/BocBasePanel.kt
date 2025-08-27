@@ -18,7 +18,9 @@ abstract class BocBasePanel(
 ) : JPanel(BorderLayout()) {
 
     protected val document: Document = EditorFactory.getInstance().createDocument("")
-    protected val editor: Editor = EditorFactory.getInstance().createViewer(document, project, EditorKind.MAIN_EDITOR)
+    protected val editor: Editor = EditorFactory.getInstance().createViewer(document, project, EditorKind.MAIN_EDITOR).also {
+        it.settings.isUseSoftWraps = true
+    }
 
     init {
         setupUI()

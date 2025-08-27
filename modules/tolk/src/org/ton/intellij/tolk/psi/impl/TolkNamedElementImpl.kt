@@ -24,7 +24,7 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
 
     override fun getName(): String? = greenStub?.name ?: identifier?.text?.removeSurrounding("`")
 
-    override val rawName: String? = greenStub?.name ?: identifier?.text
+    override val rawName: String? get() = greenStub?.name ?: identifier?.text
 
     override val isDeprecated: Boolean
         get() {

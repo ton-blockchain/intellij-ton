@@ -882,7 +882,7 @@ TypeExpression ::=
     elementTypeFactory='org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory'
     stubClass="org.ton.intellij.tolk.stub.TolkTypeStub<?>"
     implements = "org.ton.intellij.tolk.psi.TolkTypedElement"
-//    name = "type"
+    name = "type"
 }
 
 NullableTypeExpression ::= SimpleTypeExpression '?' {
@@ -898,6 +898,7 @@ private SimpleTypeExpression ::=
     | ReferenceTypeExpression
 
 SelfTypeExpression ::= 'self' {
+    extends=TypeExpression
     mixin="org.ton.intellij.tolk.psi.impl.TolkSelfTypeExpressionMixin"
 }
 
@@ -924,7 +925,7 @@ private TupleTypeExpressionValue ::= ',' TypeExpression {
 private TupleTypeValueRecovery ::= !(']'|IDENTIFIER|',')
 
 FunTypeExpression ::= (FunTypeKw | MapTypeArrow) TypeExpression {
-    pin = 1
+    pin=1
     mixin="org.ton.intellij.tolk.psi.impl.TolkFunTypeExpressionMixin"
 }
 private FunTypeKw ::= 'fun' SimpleTypeExpression '->' {pin=1}

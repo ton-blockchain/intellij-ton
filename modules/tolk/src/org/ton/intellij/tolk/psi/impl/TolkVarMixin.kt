@@ -15,7 +15,7 @@ import javax.swing.Icon
 abstract class TolkVarMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkVar {
     override fun getName(): String = identifier.text.removeSurrounding("`")
 
-    override val rawName: String? = identifier.text
+    override val rawName: String? get() = identifier.text
 
     override fun setName(name: String): PsiElement {
         identifier.replace(TolkPsiFactory[project].createIdentifier(name))

@@ -10,14 +10,15 @@ import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.stub.TolkFileStub
 
-private const val STUB_VERSION = 43
+private const val STUB_VERSION = 44
 
 object TolkFileElementType : IStubFileElementType<TolkFileStub>("TOLK_FILE", TolkLanguage) {
     override fun getStubVersion(): Int = STUB_VERSION
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
-        override fun createStubForFile(file: PsiFile): StubElement<*> = if (file is TolkFile) TolkFileStub(file)
-        else super.createStubForFile(file)
+        override fun createStubForFile(file: PsiFile): StubElement<*> =
+            if (file is TolkFile) TolkFileStub(file)
+            else super.createStubForFile(file)
 
         override fun skipChildProcessingWhenBuildingStubs(parent: ASTNode, node: ASTNode): Boolean {
             return node.elementType == TolkElementTypes.BLOCK_STATEMENT || node.elementType in TOLK_COMMENTS

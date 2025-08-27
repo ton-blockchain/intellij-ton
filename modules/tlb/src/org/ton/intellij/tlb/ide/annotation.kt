@@ -4,7 +4,7 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.psi.PsiElement
-import org.ton.intellij.tlb.ide.completion.providers.BUILTIN_TYPES
+import org.ton.intellij.tlb.ide.completion.providers.TLB_BUILTIN_TYPES
 import org.ton.intellij.tlb.psi.*
 
 class TlbAnnotator : Annotator {
@@ -40,7 +40,7 @@ class TlbAnnotator : Annotator {
                     }
                     null -> {
                         val text = element.text
-                        if (BUILTIN_TYPES.containsKey(text)) {
+                        if (TLB_BUILTIN_TYPES.containsKey(text)) {
                             holder.annotateInfo(element, TlbColor.BUILTIN_TYPE)
                         }
                     }

@@ -1,6 +1,6 @@
 package org.ton.intellij.tlb.ide.completion.providers
 
-val BUILTIN_TYPES: Map<String, String> = mapOf(
+val TLB_BUILTIN_TYPES: Map<String, String> = mapOf(
     "#" to "Nat, 32-bit unsigned integer",
     "##" to "Nat: unsigned integer with `x` bits",
     "#<" to "Nat: unsigned integer less than `x` stored with the minimum number `⌈log2 x⌉` of bits (up to 31) to represent the number `x`",

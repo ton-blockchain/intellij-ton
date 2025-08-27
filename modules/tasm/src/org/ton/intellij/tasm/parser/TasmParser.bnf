@@ -1,0 +1,77 @@
+{
+  parserClass="org.ton.intellij.tasm.parser.TasmParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="Tasm"
+  psiImplClassSuffix="Impl"
+  psiPackage="org.ton.intellij.tasm.psi"
+  psiImplPackage="org.ton.intellij.tasm.psi.impl"
+
+  elementTypeHolderClass="org.ton.intellij.tasm.psi.TasmTypes"
+  elementTypeClass="org.ton.intellij.tasm.psi.TasmElementType"
+  tokenTypeClass="org.ton.intellij.tasm.psi.TasmTokenType"
+
+  psiImplUtilClass="org.ton.intellij.tasm.psi.impl.TasmPsiImplUtil"
+
+  tokens=[
+    REF='ref'
+    EMBED='embed'
+    EXOTIC='exotic'
+    LIBRARY='library'
+    
+    LBRACE='{'
+    RBRACE='}'
+    LBRACKET='['
+    RBRACKET=']'
+    ARROW='=>'
+  ]
+}
+
+File ::= Statement*
+
+Statement ::=
+    InstructionStatement
+  | RefStatement
+  | EmbedStatement
+  | ExoticLibStatement
+  | ExoticStatement
+
+InstructionStatement ::= identifier Argument*
+
+RefStatement ::= ref CodeBlock
+
+EmbedStatement ::= embed DataLiteral
+
+ExoticLibStatement ::= exotic library DataLiteral
+
+ExoticStatement ::= exotic DataLiteral
+
+Argument ::=
+    IntegerLiteral
+  | DataLiteral
+  | CodeBlock
+  | Dictionary
+  | StackElement
+  | ControlElement
+
+CodeBlock ::= '{' Statement* '}'
+
+Dictionary ::= '[' dictEntry* ']'
+
+dictEntry ::= IntegerLiteral '=>' CodeBlock
+
+StackElement ::= stack
+
+ControlElement ::= ctrl
+
+DataLiteral ::=
+    hex
+  | bin
+  | boc
+  | string
+
+IntegerLiteral ::= integer
+
+// noinspection BnfUnusedRule
+private unused ::= COMMENT

@@ -1,0 +1,17 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="TASM"
+                  implementationClass="org.ton.intellij.tasm.TasmFileType"
+                  fieldName="INSTANCE"
+                  language="TASM"
+                  extensions="tasm"/>
+
+        <lang.parserDefinition language="TASM"
+                               implementationClass="org.ton.intellij.tasm.parser.TasmParserDefinition"/>
+
+        <lang.syntaxHighlighterFactory language="TASM"
+                                       implementationClass="org.ton.intellij.tasm.ide.TasmSyntaxHighlighterFactory"/>
+
+        <colorSettingsPage implementation="org.ton.intellij.tasm.ide.TasmColorSettingsPage"/>
+    </extensions>
+</idea-plugin>

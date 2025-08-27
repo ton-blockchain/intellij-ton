@@ -72,8 +72,9 @@ class FuncReference(
                 return arrayOf(PsiElementResolveResult(function))
             }
             if (name.startsWith("~") && functionName != null && !functionName.startsWith("~")) {
-                val tensorList = (function.typeReference as? FuncTensorType)?.typeReferenceList
-                if (tensorList?.size == 2 && functionName == name.substring(1)) {
+                val returnType = function.typeReference
+                val tensorList = (returnType as? FuncTensorType)?.typeReferenceList
+                if ((tensorList?.size == 2 || returnType is FuncHoleType) && functionName == name.substring(1)) {
                     return arrayOf(PsiElementResolveResult(function))
                 }
             }

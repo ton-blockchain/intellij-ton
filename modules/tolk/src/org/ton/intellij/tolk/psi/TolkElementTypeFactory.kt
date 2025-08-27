@@ -5,7 +5,7 @@ import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.stub.*
 import org.ton.intellij.tolk.stub.type.*
 
-class TolkTypeExpressionImpl2 : TolkTypeExpressionImpl {
+class TolkNonAbstractTypeExpressionImpl : TolkTypeExpressionImpl {
     constructor(stub: TolkTypeStub<*>, stubType: IStubElementType<*, *>) : super(stub, stubType)
 }
 
@@ -26,7 +26,7 @@ object TolkElementTypeFactory {
         "RETURN_TYPE"               -> TolkPlaceholderStub.Type(name, ::TolkReturnTypeImpl)
         "SELF_RETURN_TYPE"          -> TolkSelfReturnTypeStub.Type(name)
         "FUNCTION_RECEIVER"         -> TolkFunctionReceiverStub.Type(name)
-        "TYPE_EXPRESSION"           -> TolkTypeStub.Type(name, ::TolkTypeExpressionImpl2)
+        "TYPE_EXPRESSION"           -> TolkTypeStub.Type(name, ::TolkNonAbstractTypeExpressionImpl)
         "FUN_TYPE_EXPRESSION"       -> TolkTypeStub.Type(name, ::TolkFunTypeExpressionImpl)
         "UNION_TYPE_EXPRESSION"     -> TolkTypeStub.Type(name, ::TolkUnionTypeExpressionImpl)
         "NULLABLE_TYPE_EXPRESSION"  -> TolkTypeStub.Type(name, ::TolkNullableTypeExpressionImpl)

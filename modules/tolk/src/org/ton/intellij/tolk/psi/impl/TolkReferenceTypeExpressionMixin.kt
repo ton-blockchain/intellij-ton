@@ -65,7 +65,6 @@ abstract class TolkReferenceTypeExpressionMixin : TolkTypeExpressionImpl, TolkRe
     private fun resolveType(): TolkTy? {
         val primitiveType = primitiveType
         val resolved = reference?.resolve()
-        println("reference = $reference primitive type = $primitiveType, resolved = $resolved")
         return when {
             resolved is TolkStruct -> TolkTyStruct.create(resolved, typeArgumentList?.typeExpressionList)
             resolved is TolkTypeDef && primitiveType == null -> TolkTyAlias.create(resolved, typeArgumentList?.typeExpressionList)

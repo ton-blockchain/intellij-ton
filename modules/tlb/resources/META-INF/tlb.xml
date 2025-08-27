@@ -41,6 +41,12 @@
                                     implementationClass="org.ton.intellij.tlb.doc.TlbDocumentationProvider"/>
         <!-- endregion Documentation -->
 
+        <!-- Settings -->
+        <projectConfigurable groupId="language" instance="org.ton.intellij.tlb.settings.TlbSettingsConfigurable"
+                             id="TlbSettings"
+                             dynamic="true" displayName="TL-B"/>
+        <projectService serviceImplementation="org.ton.intellij.tlb.settings.TlbSettingsState"/>
+
         <localInspection
                 language="TL-B" displayName="Wrong name case for result type"
                 groupPath="TL-B"

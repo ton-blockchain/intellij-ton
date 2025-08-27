@@ -31,7 +31,7 @@ enum class TlbColor(
     BINARY_TAG("Binary Tag", Defaults.STATIC_FIELD),
     FIELD_NAME("Field name", Defaults.INSTANCE_FIELD),
     TYPE_PARAMETER("Type parameter", TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")),
-    CONSTRUCTOR_TYPE_NAME("Constructor type name", Defaults.KEYWORD),
+    RESULT_TYPE_NAME("Result type name", Defaults.KEYWORD),
     IMPLICIT_FIELD_NAME("Implicit field name", XmlHighlighterColors.HTML_ATTRIBUTE_VALUE),
     BUILTIN_TYPE("Builtin type", XmlHighlighterColors.HTML_ATTRIBUTE_VALUE),
     IDENTIFIER("Identifier",  XmlHighlighterColors.HTML_ATTRIBUTE_NAME),

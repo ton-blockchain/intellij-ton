@@ -36,6 +36,11 @@
         <completion.contributor language="TL-B"
                                 implementationClass="org.ton.intellij.tlb.ide.completion.TlbCompletionContributor"/>
 
+        <!-- region Documentation -->
+        <lang.documentationProvider language="TL-B"
+                                    implementationClass="org.ton.intellij.tlb.doc.TlbDocumentationProvider"/>
+        <!-- endregion Documentation -->
+
         <localInspection
                 language="TL-B" displayName="Wrong name case for result type"
                 groupPath="TL-B"

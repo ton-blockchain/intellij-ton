@@ -9,7 +9,7 @@ dependencies {
         webstorm(version)
     }
     implementation(project(":util"))
-    implementation(project(":asm"))
+    implementation(project(":tasm"))
 //    implementation("com.github.espritoxyz.ton-disassembler:tvm-opcodes:07ccc49") {
 //        isTransitive = false
 //    }

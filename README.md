@@ -1,7 +1,7 @@
 # TON Plugin for the IntelliJ IDEs
 
 IntelliJ TON provides comprehensive support for developing for the TON Blockchain.
-Includes support for Tolk, FunC, Fift assembly, TL-B, BoC and Blueprint.
+Includes support for Tolk, FunC, Fift assembly, TL-B, TASM, BoC and Blueprint.
 
 **[Features] • [Installation] • [Community]**
 
@@ -24,6 +24,7 @@ The plugin supports the following languages:
 - FunC
 - Fift (including Fift assembly)
 - TL-B Schemas
+- TASM (TON Assembly)
 
 ## Installation
 

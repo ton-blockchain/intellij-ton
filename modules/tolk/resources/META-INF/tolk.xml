@@ -36,6 +36,10 @@
         <!-- endregion Documentation -->
 
         <lang.formatter language="Tolk" implementationClass="org.ton.intellij.tolk.ide.formatter.TolkFormatter"/>
+
+        <renamePsiElementProcessor id="VlangRenameProcessor"
+                                   implementation="org.ton.intellij.tolk.refactor.rename.TolkRenameProcessor"/>
+        <vetoRenameCondition implementation="org.ton.intellij.tolk.refactor.rename.TolkRenameVeto"/>
         <lang.refactoringSupport language="Tolk"
                                  implementationClass="org.ton.intellij.tolk.refactor.TolkRefactoringSupportProvider"/>
         <lang.namesValidator language="Tolk"
@@ -64,6 +68,9 @@
 
         <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkIncludeDefinition"
                                  implementationClass="org.ton.intellij.tolk.psi.impl.TolkIncludePathElementManipulator"/>
+
+        <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkSelfExpression"
+                                 implementationClass="org.ton.intellij.tolk.psi.impl.TolkSelfExpressionElementManipulator"/>
 
         <colorSettingsPage implementation="org.ton.intellij.tolk.ide.colors.TolkColorSettingsPage"/>
         <additionalTextAttributes scheme="Default" file="colorSchemes/TolkDefault.xml"/>

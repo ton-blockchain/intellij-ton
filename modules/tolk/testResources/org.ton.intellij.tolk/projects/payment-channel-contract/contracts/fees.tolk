@@ -1,0 +1,9 @@
+const FEE_JETTON_ACCEPT  = ton("0.035") // 0.035
+const FEE_JETTON_PAYOUT  = ton("0.08") // 0.08
+const FEE_JETTON_FORWARD = ton("0.03") // 0.03
+const FEE_EC_ACCEPT      = ton("0.025") // 0.025
+const FEE_EC_PAYOUT      = ton("0.03") // 0.03
+const FEE_TON_ACCEPT     = ton("0.03") // 0.03
+const FEE_MIN_BALANCE    = ton("0.01") // 0.01
+const FEE_COMMIT         = ton("0.03") // 0.03
+const FEE_JETTON_WALLET_PROVIDE = ton("0.03") // 0.03

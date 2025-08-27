@@ -70,6 +70,7 @@ dependencies {
     implementation(project(":fift"))
     implementation(project(":func"))
     implementation(project(":tlb"))
+    implementation(project(":tasm"))
 }
 
 intellijPlatform {

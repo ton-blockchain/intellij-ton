@@ -28,6 +28,7 @@ module("boc")
 module("tlb")
 module("fift")
 module("blueprint")
+module("tasm")
 
 fun module(name: String) {
     include("$name")

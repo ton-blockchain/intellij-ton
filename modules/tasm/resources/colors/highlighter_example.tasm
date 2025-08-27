@@ -1,0 +1,37 @@
+SETCP 0
+DICTPUSHCONST 19 [
+    0 => {
+        POP s2
+        CTOS
+        LDU 4
+        SWAP
+        ref {
+            PUSHINT_4 1
+            AND
+        }
+    }
+    106029 => {
+        PUSHCTR c4
+        CTOS
+        LDGRAMS
+        LDMSGADDR
+        LDMSGADDR
+        LDREF
+        LDREF
+        ENDS
+        PUSHINT_4 -1
+        POP s3
+        CTOS
+        PUSHNULL
+        PUSHSLICE x{39}
+        CALLDICT 20
+        PUSHINT_4 0
+        NEWC
+        STU 8
+        STDICT
+        ENDC
+        XCHG3 s3 s0 s0
+    }
+]
+DICTIGETJMPZ
+THROWARG 11

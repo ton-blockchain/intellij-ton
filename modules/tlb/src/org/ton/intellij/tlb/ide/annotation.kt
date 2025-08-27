@@ -4,6 +4,7 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.psi.PsiElement
+import org.ton.intellij.tlb.ide.completion.providers.BUILTIN_TYPES
 import org.ton.intellij.tlb.psi.*
 
 class TlbAnnotator : Annotator {
@@ -26,7 +27,7 @@ class TlbAnnotator : Annotator {
                 }
             }
             is TlbResultType -> {
-                holder.annotateInfo(element.identifier, TlbColor.CONSTRUCTOR_TYPE_NAME)
+                holder.annotateInfo(element.identifier, TlbColor.RESULT_TYPE_NAME)
             }
             is TlbParamTypeExpression -> {
                 when(val resolved = element.reference?.resolve()) {
@@ -39,7 +40,7 @@ class TlbAnnotator : Annotator {
                     }
                     null -> {
                         val text = element.text
-                        if (text.startsWith("uint") || text.startsWith("int") || text.startsWith("bits")) {
+                        if (BUILTIN_TYPES.containsKey(text)) {
                             holder.annotateInfo(element, TlbColor.BUILTIN_TYPE)
                         }
                     }

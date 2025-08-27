@@ -9,9 +9,9 @@ import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
 import org.intellij.markdown.html.HtmlGenerator
 import org.intellij.markdown.parser.MarkdownParser
-import org.ton.intellij.asm.ide.documentation.DocumentationUtils.asAsmInstruction
-import org.ton.intellij.asm.ide.documentation.DocumentationUtils.asComment
-import org.ton.intellij.asm.ide.documentation.DocumentationUtils.colorize
+import org.ton.intellij.asm.ide.documentation.AsmDocumentationUtils.asAsmInstruction
+import org.ton.intellij.asm.ide.documentation.AsmDocumentationUtils.asComment
+import org.ton.intellij.asm.ide.documentation.AsmDocumentationUtils.colorize
 import org.ton.intellij.asm.psi.AsmInstruction
 import org.ton.intellij.util.asm.findInstruction
 import org.ton.intellij.util.asm.getStackPresentation

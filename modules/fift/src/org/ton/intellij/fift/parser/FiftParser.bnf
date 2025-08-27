@@ -106,10 +106,12 @@ literal ::= number_literal | boolean_literal | STRING_LITERAL | SLICE_BINARY_LIT
 stack_word ::= DUP | DROP | SWAP | ROT | REV_ROT | OVER | TUCK | NIP | DUP_DUP | DROP_DROP | SWAP_SWAP | PICK | ROLL | REV_ROLL | EXCH | EXCH2 | COND_DUP
 loop_word ::= UNTIL | WHILE | TIMES
 cond_word ::= IF | IFNOT | COND
-word_def_statement ::= (block | ordinary_word) WORD_DEF {
+word_def_statement ::= ((block word*) | ordinary_word) WORD_DEF word_def_tail {
     implements = "org.ton.intellij.fift.psi.FiftNamedElement"
     mixin = "org.ton.intellij.fift.psi.FiftWordDefStatementMixin"
 }
+
+word_def_tail ::= WORD_DEF*
 
 //noinspection BnfUnusedRule
 private unused_in_bnf ::= LINE_COMMENT | BLOCK_COMMENT | LINE_DOCUMENTATION | BLOCK_DOCUMENTATION

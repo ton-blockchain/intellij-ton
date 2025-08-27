@@ -21,8 +21,8 @@ class BocFileEditor(
     private val file: VirtualFile,
 ) : FileEditorBase() {
 
-    private val disassemblyPanel = BocDisassemblyPanel(project, file)
-    private val cellTreePanel = BocCellTreePanel(project, file)
+    private val disassemblyPanel = BocDisassemblyPanel(project, file) { onInstalled() }
+    private val cellTreePanel = BocCellTreePanel(project, file) { onInstalled() }
 
     private val tabs: JBTabs = JBTabsFactory.createEditorTabs(project, this).apply {
         presentation.setInnerInsets(JBInsets.emptyInsets())
@@ -36,6 +36,11 @@ class BocFileEditor(
         tabs.addTab(tasmTab)
         tabs.addTab(cellTab)
         tabs.select(tasmTab, true)
+    }
+
+    private fun onInstalled() {
+        disassemblyPanel.onTasmInstalled()
+        cellTreePanel.onTasmInstalled()
     }
 
     override fun getComponent(): JComponent = tabs.component

@@ -93,7 +93,7 @@
 }
 
 private root ::= statement*
-private statement ::= (word_def_statement | block | list | literal | word | Assembly)
+private statement ::= (word_def_statement | block | session | list | literal | word | Assembly)
 word ::= stack_word | loop_word | cond_word | INCLUDE | CHAR | ABORT | PRINT | STRING_CONCAT | ordinary_word
 ordinary_word ::= IDENTIFIER {
     mixin = "org.ton.intellij.fift.psi.FiftOrdinaryWordMixin"
@@ -101,6 +101,7 @@ ordinary_word ::= IDENTIFIER {
 number_literal ::= NUMBER_DIGIT_LITERAL | NUMBER_HEX_LITERAL | NUMBER_BINARY_LITERAL
 boolean_literal ::= TRUE | FALSE
 block ::= '{' statement* '}'
+session ::= '[' statement* ']'
 list ::= ('(' | '_(') statement* ')'
 literal ::= number_literal | boolean_literal | STRING_LITERAL | SLICE_BINARY_LITERAL | SLICE_HEX_LITERAL | BYTE_HEX_LITERAL
 stack_word ::= DUP | DROP | SWAP | ROT | REV_ROT | OVER | TUCK | NIP | DUP_DUP | DROP_DROP | SWAP_SWAP | PICK | ROLL | REV_ROLL | EXCH | EXCH2 | COND_DUP

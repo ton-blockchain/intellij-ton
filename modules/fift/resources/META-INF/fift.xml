@@ -26,6 +26,9 @@
                                       implementationClass="org.ton.intellij.fift.ide.structure.FiftStructureViewFactory"/>
         <breadcrumbsInfoProvider implementation="org.ton.intellij.fift.ide.structure.FiftBreadcrumbsInfoProvider"/>
 
+        <lang.findUsagesProvider language="Fift"
+                                 implementationClass="org.ton.intellij.fift.ide.FiftAssemblyFindUsagesProvider"/>
+
         <!-- region Completion -->
         <completion.contributor
                 language="Fift"

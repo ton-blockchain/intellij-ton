@@ -14,4 +14,9 @@ class FiftFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FiftL
         val roots = this.children.filterIsInstance<FiftAssembly>().mapNotNull { it.asmProgram }
         return roots.flatMap { it.children.filterIsInstance<FiftDefinition>() }
     }
+
+    fun assemblyDeclarations(): List<FiftDeclaration> {
+        val roots = this.children.filterIsInstance<FiftAssembly>().mapNotNull { it.asmProgram }
+        return roots.flatMap { it.children.filterIsInstance<FiftDeclaration>() }
+    }
 }

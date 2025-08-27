@@ -125,9 +125,9 @@ AsmProgram ::= (Declaration | Definition)*
 // declarations
 Declaration ::= ProcDeclaration | MethodDeclaration | GlobalVar
 
-ProcDeclaration   ::= 'DECLPROC' IDENTIFIER {pin=1}
-MethodDeclaration ::= number_literal 'DECLMETHOD' IDENTIFIER {pin=2}
-GlobalVar         ::= 'DECLGLOBVAR' IDENTIFIER {pin=1}
+ProcDeclaration   ::= 'DECLPROC' DefinitionName {pin=1}
+MethodDeclaration ::= number_literal 'DECLMETHOD' DefinitionName {pin=2}
+GlobalVar         ::= 'DECLGLOBVAR' DefinitionName {pin=1}
 
 // definitions
 Definition ::= ProcDefinition | ProcInlineDefinition | ProcRefDefinition | MethodDefinition
@@ -173,4 +173,6 @@ StackRegister  ::= 's0' | 's1' | 's2' | 's3' | 's4' | 's5' | 's6' | 's7'
 
 ControlRegister ::= 'c0' | 'c1' | 'c2' | 'c3' | 'c4' | 'c5' | 'c6' | 'c7'
 
-TvmInstruction ::= '-'? IDENTIFIER
+TvmInstruction ::= '-'? IDENTIFIER {
+    mixin = "org.ton.intellij.fift.psi.FiftAssemblyInstructionMixin"
+}

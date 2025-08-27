@@ -5,7 +5,7 @@
     <vendor url="https://github.com/ton-blockchain/intellij-ton">TON Core</vendor>
     <description>TON Blockchain Development Plugin — a JetBrains plugin that brings first-class TON blockchain support to IntelliJ-based IDEs.
 
-        - Syntax highlighting, code completion, navigation and inspections for Tolk, FunC, Fift (including assembly) and TL-B schemas
+        - Syntax highlighting, code completion, navigation and inspections for Tolk, FunC, Fift (including assembly), TL-B schemas and TASM (TON Assembly)
         - Integration with Blueprint
         - Works in IntelliJ IDEA, WebStorm, PyCharm, GoLand and other JetBrains IDEs
 

@@ -8,14 +8,12 @@ import org.ton.intellij.func.psi.FuncExpression
 import org.ton.intellij.func.psi.FuncFunction
 import org.ton.intellij.func.psi.FuncInferenceContextOwner
 import org.ton.intellij.func.psi.FuncReferenceExpression
-import org.ton.intellij.func.resolve.FuncLookup
 import org.ton.intellij.func.type.ty.FuncTy
 import org.ton.intellij.func.type.ty.FuncTyUnknown
 import org.ton.intellij.util.recursionGuard
 
 fun inferTypesIn(element: FuncInferenceContextOwner): FuncInferenceResult {
-    val lookup = FuncLookup(element.project, element)
-    return recursionGuard(element, memoize = false) { lookup.ctx.infer(element) }
+    return recursionGuard(element, memoize = false) { FuncInferenceContext(element.project).infer(element) }
         ?: error("Can not run nested type inference")
 }
 
@@ -31,8 +29,6 @@ data class FuncInferenceResult(
     val exprTypes: Map<FuncExpression, FuncTy>,
     val resolvedRefs: Map<FuncReferenceExpression, OrderedSet<PsiElementResolveResult>>
 ) : FuncInferenceData {
-    val timestamp = System.nanoTime()
-
     override fun getExprTy(expr: FuncExpression): FuncTy =
         exprTypes[expr] ?: FuncTyUnknown
 
@@ -45,7 +41,6 @@ data class FuncInferenceResult(
 
 class FuncInferenceContext(
     val project: Project,
-    val lookup: FuncLookup
 ) : FuncInferenceData {
     private val exprTypes = HashMap<FuncExpression, FuncTy>()
     private val resolvedRefs = HashMap<FuncReferenceExpression, OrderedSet<PsiElementResolveResult>>()
@@ -84,14 +79,10 @@ class FuncInferenceContext(
         when (element) {
             is FuncFunction -> {
                 val walker = FuncTypeInferenceWalker(this, FuncTyUnknown)
-                element.blockStatement?.let {
-                    walker.inferFunctionBody(it)
-                }
+                walker.inferFunction(element)
             }
         }
 
-        return FuncInferenceResult(exprTypes, resolvedRefs).also {
-//            println("Inferred types: $it")
-        }
+        return FuncInferenceResult(exprTypes, resolvedRefs)
     }
 }

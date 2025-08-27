@@ -3,30 +3,41 @@ package org.ton.intellij.func.type.infer
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.psi.PsiElementResolveResult
 import org.ton.intellij.func.psi.*
+import org.ton.intellij.func.resolve.FuncGlobalLookup
 import org.ton.intellij.func.type.ty.*
 import org.ton.intellij.util.infiniteWith
+import java.util.ArrayDeque
+import java.util.HashMap
+import kotlin.collections.last
 
 class FuncTypeInferenceWalker(
     val ctx: FuncInferenceContext,
     private val returnTy: FuncTy
 ) {
-    private val definitions = HashMap<String, FuncElement>()
-    private var variableDeclarationState = false
+    private val globalLookup = FuncGlobalLookup(ctx.project)
+    private val currentScope = LocalSymbolsScopes()
+    private var nextReferenceExpressionIsVariable = false
 
-    fun inferFunctionBody(
-        block: FuncBlockStatement
-    ): FuncTy = block.inferTypeCoercibleTo(returnTy)
+    fun inferFunction(func: FuncFunction): FuncTy = currentScope.useScope {
+        for (parameter in func.functionParameterList) {
+            currentScope.addLocalSymbol(parameter)
+        }
 
-    private fun FuncBlockStatement.inferTypeCoercibleTo(
-        expected: FuncTy
-    ): FuncTy = inferType(Expectation.ExpectHasTy(expected), coerce = true)
+        val body = func.blockStatement ?: return FuncTyUnknown
+        return inferFunctionBody(body)
+    }
+
+    fun inferFunctionBody(block: FuncBlockStatement): FuncTy {
+        return block.inferType(Expectation.ExpectHasTy(returnTy))
+    }
 
     private fun FuncBlockStatement.inferType(
         expected: Expectation = Expectation.NoExpectation,
-        coerce: Boolean = false
     ): FuncTy {
-        for (statement in statementList) {
-            statement.inferType()
+        currentScope.useScope {
+            for (statement in statementList) {
+                statement.inferType()
+            }
         }
 
         return if (expected is Expectation.ExpectHasTy) {
@@ -46,8 +57,7 @@ class FuncTypeInferenceWalker(
             is FuncWhileStatement -> inferType()
             is FuncTryStatement -> inferType()
             is FuncExpressionStatement -> expression.inferType()
-            else -> {
-            }
+            else -> {}
         }
     }
 
@@ -117,8 +127,15 @@ class FuncTypeInferenceWalker(
     }
 
     private fun FuncDoStatement.inferType(): FuncTy {
-        blockStatement?.inferType()
-        condition?.inferType(FuncTyInt)
+        val blockStatement = blockStatement ?: return FuncTyUnit
+        currentScope.useScope {
+            for (statement in blockStatement.statementList) {
+                statement.inferType()
+            }
+
+            // condition can use variables defined in the body
+            condition?.inferType(FuncTyInt)
+        }
         return FuncTyUnit
     }
 
@@ -134,7 +151,7 @@ class FuncTypeInferenceWalker(
         (catch?.expression as? FuncTensorExpression)?.let { tensor ->
             tensor.expressionList.forEach { tensorElement ->
                 if (tensorElement is FuncReferenceExpression) {
-                    ctx.lookup.define(tensorElement)
+                    currentScope.addLocalSymbol(tensorElement)
                 }
             }
         }
@@ -198,11 +215,11 @@ class FuncTypeInferenceWalker(
         }
 
         if (lhs.isTypeExpression()) {
-            variableDeclarationState = true
+            nextReferenceExpressionIsVariable = true
         }
         lhs?.inferType()
         rhs?.inferType()
-        variableDeclarationState = false
+        nextReferenceExpressionIsVariable = false
 
         return FuncTyUnit
     }
@@ -221,14 +238,26 @@ class FuncTypeInferenceWalker(
     private fun FuncReferenceExpression.inferType(
         expected: Expectation
     ): FuncTy {
-        if (variableDeclarationState) {
-            ctx.lookup.define(this)
+        if (nextReferenceExpressionIsVariable) {
+            currentScope.addLocalSymbol(this)
         } else {
-            ctx.lookup.resolve(this)?.let { resolved ->
-                ctx.setResolvedRefs(this, resolved.map { PsiElementResolveResult(it) })
-            }
+            resolve()
         }
         return FuncTyUnknown
+    }
+
+    private fun FuncReferenceExpression.resolve() {
+        val localSymbol = currentScope.lookupSymbol(this.text)
+        if (localSymbol != null) {
+            ctx.setResolvedRefs(this, listOf(PsiElementResolveResult(localSymbol)))
+            return
+        }
+
+        val globalSymbols = globalLookup.resolve(this)
+        if (globalSymbols != null) {
+            ctx.setResolvedRefs(this, globalSymbols.map { PsiElementResolveResult(it) })
+            return
+        }
     }
 
     private fun FuncInvExpression.inferType(
@@ -263,5 +292,60 @@ class FuncTypeInferenceWalker(
         return asSequence().zip(extended).map { (expr, ty) ->
             expr.inferTypeCoercibleTo(ty)
         }.toList()
+    }
+}
+
+private typealias LocalSymbolsScope = MutableMap<String, FuncNamedElement>
+private typealias LocalSymbolsScopes = ArrayDeque<LocalSymbolsScope>
+
+private fun LocalSymbolsScopes.openScope() = add(HashMap())
+
+private fun LocalSymbolsScopes.closeScope() = removeLast()
+
+private fun LocalSymbolsScopes.lookupSymbol(name: String?): FuncNamedElement? {
+    if (name == null) return null
+    val iterator = descendingIterator()
+    while (iterator.hasNext()) {
+        val scope = iterator.next()
+        val symbol = scope.resolve(name)
+        if (symbol != null) {
+            return symbol
+        }
+    }
+    return null
+}
+
+fun LocalSymbolsScope.resolve(name: String): FuncNamedElement? = this[name]
+
+fun LocalSymbolsScope.resolve(element: FuncNamedElement): FuncNamedElement? {
+    val name = element.identifier?.text ?: return null
+    val parent = element.parent
+    if (parent is FuncApplyExpression && parent.left == element) {
+        val grandParent = parent.parent
+        if (grandParent is FuncSpecialApplyExpression && grandParent.right == parent) {
+            if (name.startsWith('.')) {
+                return resolve(name.substring(1))
+            }
+            if (name.startsWith('~')) {
+                return resolve(name) ?: resolve(name.substring(1))
+            }
+        }
+    }
+    return resolve(name)
+}
+
+private fun LocalSymbolsScopes.addLocalSymbol(symbol: FuncNamedElement): Boolean {
+    val currentScope = last()
+    val name = symbol.name ?: return false
+    val result = currentScope.put(name, symbol) != null
+    return result
+}
+
+private inline fun <T> LocalSymbolsScopes.useScope(block: LocalSymbolsScopes.() -> T): T {
+    openScope()
+    try {
+        return block()
+    } finally {
+        closeScope()
     }
 }

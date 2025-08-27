@@ -20,13 +20,6 @@ abstract class TolkReferenceTypeExpressionMixin : TolkTypeExpressionImpl, TolkRe
 
     private val primitiveType: TolkTy?
         get() {
-            val stub = stub
-            if (stub != null) {
-                val text = stub.getText()
-                if (text != null) {
-                    return TolkTy.byName(text)
-                }
-            }
             return TolkTy.byName(referenceName ?: return null)
         }
 
@@ -36,6 +29,10 @@ abstract class TolkReferenceTypeExpressionMixin : TolkTypeExpressionImpl, TolkRe
             if (stub != null) {
                 val text = stub.getText()
                 if (text != null) {
+                    if (text.contains("<")) {
+                        // Foo<T> -> Foo
+                        return text.substringBefore("<")
+                    }
                     return text
                 }
             }
@@ -68,6 +65,7 @@ abstract class TolkReferenceTypeExpressionMixin : TolkTypeExpressionImpl, TolkRe
     private fun resolveType(): TolkTy? {
         val primitiveType = primitiveType
         val resolved = reference?.resolve()
+        println("reference = $reference primitive type = $primitiveType, resolved = $resolved")
         return when {
             resolved is TolkStruct -> TolkTyStruct.create(resolved, typeArgumentList?.typeExpressionList)
             resolved is TolkTypeDef && primitiveType == null -> TolkTyAlias.create(resolved, typeArgumentList?.typeExpressionList)

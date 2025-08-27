@@ -18,7 +18,8 @@ class TolkFunctionReceiverStub : StubWithText<TolkFunctionReceiver> {
 
     constructor(
         parent: StubElement<*>?,
-        elementType: IStubElementType<*, *>?, text: String?,
+        elementType: IStubElementType<*, *>?,
+        text: String?,
     ) : this(parent, elementType, StringRef.fromString(text))
 
     class Type(name: String) : TolkStubElementType<TolkFunctionReceiverStub, TolkFunctionReceiver>(name) {

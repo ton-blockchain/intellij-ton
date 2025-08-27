@@ -49,6 +49,10 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
 
             override fun getPresentableText(): String? = when (this@TolkNamedElementImpl) {
                 is TolkFunction -> buildString {
+                    if (hasReceiver) {
+                        append(receiverTy.render())
+                        append(".")
+                    }
                     append(name)
                     append("(")
                     var separator = ""

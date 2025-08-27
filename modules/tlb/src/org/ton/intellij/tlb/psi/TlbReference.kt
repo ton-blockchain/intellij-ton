@@ -67,7 +67,12 @@ class TlbReference(
             }
         }
 
-        // Search in a global block.tlb file if no results found in the current file
+        // Search in dependency files from dependson declarations
+        if (results.isEmpty() && tlbFile != null) {
+            searchInDependencies(tlbFile, name, argumentList, results, mutableSetOf(), incompleteCode)
+        }
+
+        // Search in a global block.tlb file if no results found in the current file and dependencies
         if (results.isEmpty()) {
             val globalBlockTlbFile = getGlobalBlockTlbFile(project)
             globalBlockTlbFile?.findResultTypes(name)?.forEach { resultType ->
@@ -100,6 +105,33 @@ class TlbReference(
     override fun multiResolve(incompleteCode: Boolean): Array<out ResolveResult> {
         return ResolveCache.getInstance(project)
             .resolveWithCaching(this, resolver, true, incompleteCode)
+    }
+
+    private fun searchInDependencies(
+        tlbFile: TlbFile,
+        name: String,
+        argumentList: List<TlbTypeExpression>,
+        results: MutableList<ResolveResult>,
+        visitedFiles: MutableSet<TlbFile>,
+        incompleteCode: Boolean,
+    ) {
+        if (!visitedFiles.add(tlbFile)) {
+            return
+        }
+
+        val dependencyFiles = tlbFile.getDependencyFiles()
+        for (dependencyFile in dependencyFiles) {
+            if (dependencyFile in visitedFiles) {
+                continue
+            }
+
+            dependencyFile.findResultTypes(name).forEach { resultType ->
+                val parameterList = resultType.paramList.typeExpressionList
+                if (incompleteCode || matchArgumentAndParams(argumentList, parameterList)) {
+                    results.add(PsiElementResolveResult(resultType))
+                }
+            }
+        }
     }
 
     private fun getGlobalBlockTlbFile(project: Project): TlbFile? {

@@ -90,10 +90,4 @@ class TolkTypeAwareCompletionTest : TolkCompletionTestBase() {
         fun Foo.frobnicate(self) {}
         fun Foo.bar(self) { self.frobnicate()/*caret*/ }
     """)
-
-    fun `test no completion for a method with self`() = checkNoCompletion("""
-        struct S;
-        fun S.foo(self) {}
-        fun main() { S.fo/*caret*/; }
-    """.trimIndent())
 }

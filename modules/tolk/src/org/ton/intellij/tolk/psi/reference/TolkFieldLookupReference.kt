@@ -154,11 +154,24 @@ fun collectFunctionCandidates(
 
     // Since we call with receiver, filter simple functions
     val namedMethods = namedFunctionsSeq.filter { it.hasReceiver }.toList()
+    if (namedMethods.isEmpty()) {
+        TolkBuiltins[project].getFunction(name)?.let {
+            return listOf(it to EmptySubstitution)
+        }
+    }
 
+    return collectMethodCandidates(calledReceiver, namedMethods)
+}
+
+fun collectMethodCandidates(
+    calledReceiver: TolkTy,
+    methods: List<TolkFunction>,
+    forCompletion: Boolean = false,
+): List<Pair<TolkFunction, Substitution>> {
     // find all methods theoretically applicable; we'll filter them by priority;
     // for instance, if there is `T.method`, it will be instantiated with T=provided_receiver
     var viable = mutableListOf<MethodCallCandidate>()
-    for (method in namedMethods) {
+    for (method in methods) {
         val receiver = method.receiverTy
         if (receiver.hasGenerics()) {
             // check whether exist some T to make it a valid call (probably with type coercion)
@@ -173,10 +186,6 @@ fun collectFunctionCandidates(
     }
 
     if (viable.isEmpty()) {
-        TolkBuiltins[project].getFunction(name)?.let {
-            return listOf(it to EmptySubstitution)
-        }
-
         // We cannot always infer a type of generic functions like
         // ```
         // fun getWrapperValue2<T>(c: T) {
@@ -184,7 +193,7 @@ fun collectFunctionCandidates(
         // }
         // ```
         // so fallback to initial methods list to resolve somehow
-        return namedMethods.map { it to EmptySubstitution }
+        return methods.map { it to EmptySubstitution }
     }
 
     // if nothing found, return nothing;
@@ -203,11 +212,15 @@ fun collectFunctionCandidates(
             exact.add(candidate)
         }
     }
-    if (exact.size == 1) {
+    if (exact.size == 1 && !forCompletion) {
         return exact.map { it.method to it.substitutedTs }
     }
     if (exact.isNotEmpty()) {
         viable = exact
+    }
+
+    if (forCompletion) {
+        return viable.map { it.method to EmptySubstitution }
     }
 
     // 2) if there are both generic and non-generic functions, filter out generic
@@ -243,7 +256,7 @@ fun collectFunctionCandidates(
             bestByShape.add(candidate)
         }
     }
-    if (bestByShape.size == 1) {
+    if (bestByShape.size == 1 && !forCompletion) {
         return bestByShape.map { it.method to it.substitutedTs }
     }
     if (bestByShape.isNotEmpty()) {
@@ -265,7 +278,7 @@ fun collectFunctionCandidates(
         }
     }
 
-    if (dominator != null) {
+    if (dominator != null && !forCompletion) {
         return listOf(dominator.method to dominator.substitutedTs)
     }
 

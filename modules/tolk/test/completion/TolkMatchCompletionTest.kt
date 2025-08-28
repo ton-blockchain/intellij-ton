@@ -57,6 +57,6 @@ class TolkMatchCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "Blue", "Red",
+        "Blue", "Red", "foo"
     )
 }

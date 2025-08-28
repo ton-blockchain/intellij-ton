@@ -89,5 +89,11 @@ abstract class TolkCompletionTestBase : TolkTestBase() {
         vararg variants: String,
     ) = completionFixture.doTestVariants(txt, CompletionType.BASIC, count, TolkCompletionTestFixtureBase.CheckType.EQUALS, *variants)
 
+    fun checkOrderedEquals(
+        @Language("Tolk") txt: String,
+        count: Int,
+        vararg variants: String,
+    ) = completionFixture.doTestVariants(txt, CompletionType.BASIC, count, TolkCompletionTestFixtureBase.CheckType.ORDERED_EQUALS, *variants)
+
     protected fun executeSoloCompletion() = completionFixture.executeSoloCompletion()
 }

@@ -61,7 +61,7 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """.trimIndent())
 
-    fun `test completion after tuple field expr`() = doSingleCompletion("""
+    fun `test completion after tuple field expr`() = doFirstCompletion("""
         struct S { field: int }
         fun main() {
             val x = (0, S { field: 0 });

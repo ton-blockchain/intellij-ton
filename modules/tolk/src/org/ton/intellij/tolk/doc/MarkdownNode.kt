@@ -2,6 +2,7 @@
 
 package org.ton.intellij.tolk.doc
 
+import com.intellij.codeInsight.documentation.DocumentationManagerUtil
 import com.intellij.lang.Language
 import com.intellij.lang.documentation.DocumentationSettings
 import com.intellij.openapi.application.ApplicationManager
@@ -140,11 +141,25 @@ class MarkdownNode(
                     val linkLabelContent = linkLabelNode?.children
                         ?.dropWhile { it.type == MarkdownTokenTypes.LBRACKET }
                         ?.dropLastWhile { it.type == MarkdownTokenTypes.RBRACKET }
+
                     if (linkLabelContent != null) {
-                        // val label = linkLabelContent.joinToString(separator = "") { it.text }
-                        // val linkText = node.child(MarkdownElementTypes.LINK_TEXT)?.toHtml() ?: label
-                        // TODO: resolve `[foo]` to symbol.
-                        sb.append(node.text)
+                        val label = linkLabelContent.joinToString(separator = "") { it.text }
+                        val linkText = node.child(MarkdownElementTypes.LINK_TEXT)?.toHtml() ?: label
+
+                        val resolved = resolveDocumentationReference(linkText, owner.parent)
+                        if (resolved != null) {
+                            val hyperlink = buildString {
+                                DocumentationManagerUtil.createHyperlink(
+                                    this,
+                                    label,
+                                    linkText,
+                                    false,
+                                )
+                            }
+                            sb.append(hyperlink)
+                        } else {
+                            sb.append(node.text)
+                        }
                     } else {
                         sb.append(node.text)
                     }

@@ -1,8 +1,8 @@
-fun recursive1() : int {
+fun recursive1(): int {
     return recursive2();
 }
 
-fun recursive2() : int {
+fun recursive2(): int {
     __expect_inline(true);
     return recursive1();
 }
@@ -10,4 +10,4 @@ fun recursive2() : int {
 /**
 @compilation_should_fail
 @stderr __expect_inline failed
-*/
+ */

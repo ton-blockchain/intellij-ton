@@ -80,8 +80,7 @@ fun test3(op: int32, qid: uint64) {
     if (op == qid) {}
     if ((op as int32?)! == qid) {}
     if (op == (qid as uint64)) {}
-    if ((op as int257?)! != (qid as uint256?)!) {
-    }
+    if ((op as int257?)! != (qid as uint256?)!) {}
     __expect_type(op << qid, "int");
 
     takeAnyInt(op);
@@ -202,6 +201,7 @@ fun test11() {
     ];
 }
 
+@method_id(112)
 fun test12() {
     var a = ton("1") + ton("2");    // check absence in fif codegen
     return ton("0.1");
@@ -248,7 +248,7 @@ fun main() {
 @testcase | 110 |      | 50000000 50000100 1234000000 51000000
 @testcase | 111 |      | [ 1000000000 1000000000 1000000000 -321123456789 321123456789 1100000000 ]
 @testcase | 114 | 5    | (null) (null) 0
-@testcase | 114 | 15   | 15 2 typeid-2
+@testcase | 114 | 15   | 15 2 typeid-1
 
 @fif_codegen DECLPROC assign0<int8>()
 @fif_codegen DECLPROC assign0<uint16>()
@@ -256,7 +256,7 @@ fun main() {
 
 @fif_codegen
 """
-test12() PROC:<{
+  test12() PROC:<{
     100000000 PUSHINT	//  '4=100000000
   }>
 """

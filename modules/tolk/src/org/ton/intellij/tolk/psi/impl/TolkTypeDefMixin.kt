@@ -11,13 +11,14 @@ import org.ton.intellij.tolk.psi.TolkAnnotation
 import org.ton.intellij.tolk.psi.TolkTypeDef
 import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.stub.TolkTypeDefStub
+import org.ton.intellij.tolk.type.TolkPrimitiveTy
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkTyAlias
 import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.childOfType
 import javax.swing.Icon
 
-abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDef, TolkTypedElement {
+abstract class TolkTypeDefMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDef, TolkTypedElement {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TolkTypeDefStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
@@ -26,7 +27,16 @@ abstract class TolkTypeMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDe
         return super.getUseScope()
     }
 
-    override val type: TolkTy get() = TolkTyAlias.create(this)
+    override val type: TolkTy get() {
+        val referenceName = stub?.name ?: identifier?.text
+        if (referenceName != null) {
+            val asPrimitive = TolkPrimitiveTy.fromName(referenceName)
+            if (asPrimitive != null) {
+                return asPrimitive
+            }
+        }
+        return TolkTyAlias.create(this)
+    }
 
     override val doc: TolkDocComment? get() = childOfType()
 

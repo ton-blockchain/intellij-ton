@@ -11,4 +11,4 @@ fun f() {
 /**
 @compilation_should_fail
 @stderr `lazy` union should contain only structures, but it contains `int32`
-*/
+ */

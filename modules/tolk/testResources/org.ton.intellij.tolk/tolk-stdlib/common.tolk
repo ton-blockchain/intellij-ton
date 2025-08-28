@@ -1,13 +1,111 @@
 // Standard library for Tolk (LGPL licence).
 // It contains common functions that are available out of the box, the user doesn't have to import anything.
-// More specific functions are required to be imported explicitly, like "@stdlib/tvm-dicts".
-tolk 0.99
+// More specific functions are required to be imported explicitly, like "@stdlib/gas-payments".
+tolk 1.0
 
-/// In Tolk v1.x there would be a type `map<K,V>`.
-/// Currently, working with dictionaries is still low-level, with raw cells.
-/// But just for clarity, we use "dict" instead of a "cell?" where a cell-dictionary is assumed.
-/// Every dictionary object can be null. TVM NULL is essentially "empty dictionary".
+/**
+    Built-in types.
+ */
+
+/// `int` is the primitive 257-bit signed integer type.
+type int = builtin
+
+/// `bool` is a classic boolean type, which can hold only two values: `true` and `false`.
+/// At the TVM (TON virtual machine) level, it's an integer -1 or 0.
+/// Note: `boolVar as int` is possible, but remember, that true is -1, not 1!
+type bool = builtin
+
+/// `cell` is a data structure, which can hold of up to 1023 bits (not bytes!)
+/// and up to 4 references (refs) to other cells.
+/// Both contract code and contract state are represented by a tree of cells.
+/// See docs: https://docs.ton.org/v3/documentation/data-formats/tlb/cell-boc
+type cell = builtin
+
+/// `slice` is a "cell opened for reading".
+/// When you call [cell.beginParse], you get a `slice`, from which you can load binary data
+/// or high-level structures with [T.fromSlice].
+type slice = builtin
+
+/// `builder` is a "cell at the stage of creation".
+/// When you call [beginCell], you get a `builder`, populate it with binary data or structures,
+/// and after [builder.endCell], you get a `cell`.
+type builder = builtin
+
+/// `continuation` are "executable cells" representing executable TVM bytecode.
+/// They are used to manage execution flow in TVM programs and serve as
+/// the basis for function calls, exception handling, and control flow operations. 
+type continuation = builtin
+
+/// `tuple` is a collection from 0 to 255 elements of any type.
+/// You can push, pop, access individual elements as `someTuple.0`.
+/// A tuple occupies one stack slot regardless of its size.
+type tuple = builtin
+
+/// `address` represents an internal/external/none address.
+/// Most likely, you'll use it for internal addresses — "an address of a smart contract".
+/// It's `slice` under the hood. `someAddress as slice` is also possible.
+/// See docs: https://docs.ton.org/learn/overviews/addresses#address-of-smart-contract
+type address = builtin
+
+/// `never` is a special type that represents computations that never complete normally.
+/// A functions that always throw an exception returns `never`, and the compiler knows
+/// that any code after it is unreachable.
+type never = builtin
+
+/// `int8`, `int32`, `int222`, etc. is "a fixed-width signed integer with N bits", N <= 257.
+/// Note: it's still `int` at runtime, you can assign "100500" to "int8":
+/// overflow will happen at serialization to a cell/builder, NOT at assignment. 
+type intN = builtin
+
+/// `uint32`, `uint64`, `uint111`, etc. is "a fixed-width unsigned integer with N bits", N <= 256.
+/// Note: it's still `int` at runtime, you can assign "100500" to "uint8":
+/// overflow will happen at serialization to a cell/builder, NOT at assignment. 
+type uintN = builtin
+
+/// `coins` is a special primitive representing "nanotoncoins". One TON = 10^9 nanotoncoins.
+/// You can create coins with `ton()` function: `ton("0.05")` (actually, `int` 50000000 at runtime).
+/// Arithmetic operations on `coins` degrade to 257-bit `int` type.
+type coins = builtin
+
+/// `varint16` is `int` at runtime, but serialized as "variadic signed int", -2^119 <= X < 2^119. 
+type varint16 = builtin
+
+/// `varuint16` is `int` at runtime, but serialized as "variadic unsigned int", 0 <= X < 2^120. 
+type varuint16 = builtin
+
+/// `varint32` is `int` at runtime, but serialized as "variadic signed int", -2^247 <= X < 2^247. 
+type varint32 = builtin
+
+/// `varuint32` is `int` at runtime, but serialized as "variadic unsigned int", 0 <= X < 2^248. 
+type varuint32 = builtin
+
+/// `bits256`, `bits111`, etc. is "a fixed-width slice with N bits and 0 refs", N <= 1023.
+/// Note: use `as` operator to convert `slice` to `bitsN`: `someSlice as bits256` 
+/// (manually writing `as` enforces you to think that this conversion is correct).
+/// Note: similar to `intN`, you can assign an invalid slice to `bitsN`,
+/// an error will be fired at serialization with [T.toCell] and similar, NOT at assignment.
+type bitsN = builtin
+
+/// `bytes8`, `bytes99`, etc. is a convenient alias for `bits(N*8)`
+type bytesN = builtin
+
+/// `map<K, V>` is "a map from a key K to a value V".
+/// Internally, it's an "optional cell": an empty map is `null`, a non-empty points to a root cell.
+/// Restrictions for K and V types:
+/// - a key must be fixed-with; valid: int32, uint64, address, bits256, Point; invalid: int, coins
+/// - a value must be serializable; valid: int32, coins, AnyStruct, Cell<AnyStruct>; invalid: int, builder
+struct map<K, V> {}
+
+/// `dict` is a low-level TVM dictionary.
+/// Think of it as "a map with unknown keys and unknown values".
+/// Prefer using `map<K, V>`, not `dict`.
 type dict = cell?
+
+/// `void` is the unit type representing the absence of a meaningful value.
+/// It's similar to both `void` and `unit` in other languages.
+/// Note: a function without return type means "auto infer", NOT "void".
+type void = builtin
+
 
 /**
     Tuple manipulation primitives.
@@ -36,14 +134,14 @@ fun tuple.first<T>(self): T
 /// `t.i` is actually the same as `t.get(i)`
 @pure
 fun tuple.get<T>(self, index: int): T
-builtin
+    builtin
 
 /// Sets the [`index`]-th element of a tuple to a specified value
 /// (element with this index must already exist, a new element isn't created).
 /// `t.i = value` is actually the same as `t.set(value, i)`
 @pure
 fun tuple.set<T>(mutate self, value: T, index: int): void
-builtin
+    builtin
 
 /// Returns the size of a tuple (elements count in it).
 @pure
@@ -70,7 +168,7 @@ fun tuple.pop<T>(mutate self): T
 /// Note, that `ton()` requires a constant string; `ton(some_var)` is an error
 @pure
 fun ton(floatString: slice): coins
-builtin
+    builtin
 
 /// Computes the minimum of two integers.
 @pure
@@ -112,22 +210,22 @@ fun modDiv(x: int, y: int): (int, int)
 /// The intermediate result is stored in a 513-bit integer to prevent precision loss.
 @pure
 fun mulDivFloor(x: int, y: int, z: int): int
-builtin
+    builtin
 
 /// Similar to `mulDivFloor`, but rounds the result: round([x] * [y] / [z]).
 @pure
 fun mulDivRound(x: int, y: int, z: int): int
-builtin
+    builtin
 
 /// Similar to `mulDivFloor`, but ceils the result: ceil([x] * [y] / [z]).
 @pure
 fun mulDivCeil(x: int, y: int, z: int): int
-builtin
+    builtin
 
 /// Computes the quotient and remainder of ([x] * [y] / [z]). Example: mulDivMod(112,3,10) = (33,6)
 @pure
 fun mulDivMod(x: int, y: int, z: int): (int, int)
-builtin
+    builtin
 
 
 /**
@@ -150,11 +248,9 @@ fun contract.getAddress(): address
 fun contract.getOriginalBalance(): coins
     asm "BALANCE" "FIRST"
 
-/// Same as [contract.getOriginalBalance], but returns a tuple:
-/// `int` — balance in nanotoncoins;
-/// `dict` — a dictionary with 32-bit keys representing the balance of "extra currencies".
+/// Same as [contract.getOriginalBalance], but returns a tuple: balance in nanotoncoins and extra currencies
 @pure
-fun contract.getOriginalBalanceWithExtraCurrencies(): [coins, dict]
+fun contract.getOriginalBalanceWithExtraCurrencies(): [coins, ExtraCurrenciesMap]
     asm "BALANCE"
 
 /// Returns the persistent contract storage cell. It can be parsed or modified with slice and builder primitives later.
@@ -257,7 +353,7 @@ struct UnpackOptions {
 /// (beginCell() + serialize fields + endCell()).
 @pure
 fun T.toCell(self, options: PackOptions = {}): Cell<T>
-builtin
+    builtin
 
 /// Parse anything from a cell (most likely, you'll call it for structures).
 /// Example:
@@ -268,7 +364,7 @@ builtin
 /// (packedCell.beginParse() + read from slice).
 @pure
 fun T.fromCell(packedCell: cell, options: UnpackOptions = {}): T
-builtin
+    builtin
 
 /// Parse anything from a slice (most likely, you'll call it for structures).
 /// Example:
@@ -281,7 +377,7 @@ builtin
 /// If you need to mutate it, like `cs.loadInt()`, consider calling `cs.loadAny<CounterIncrement>()`.
 @pure
 fun T.fromSlice(rawSlice: slice, options: UnpackOptions = {}): T
-builtin
+    builtin
 
 /// Parse anything from a slice, shifting its internal pointer.
 /// Similar to `slice.loadUint()` and others, but allows loading structures.
@@ -294,7 +390,7 @@ builtin
 /// to read data from the middle.
 @pure
 fun slice.loadAny<T>(mutate self, options: UnpackOptions = {}): T
-builtin
+    builtin
 
 /// Skip anything in a slice, shifting its internal pointer.
 /// Similar to `slice.skipBits()` and others, but allows skipping structures.
@@ -305,7 +401,7 @@ builtin
 /// ```
 @pure
 fun slice.skipAny<T>(mutate self, options: UnpackOptions = {}): self
-builtin
+    builtin
 
 /// Store anything to a builder.
 /// Similar to `builder.storeUint()` and others, but allows storing structures.
@@ -315,19 +411,19 @@ builtin
 /// ```
 @pure
 fun builder.storeAny<T>(mutate self, v: T, options: PackOptions = {}): self
-builtin
+    builtin
 
 /// Returns serialization prefix of a struct. Works at compile-time.
 /// Example: for `struct (0xF0) AssetRegular { ... }` will return `240`.
 @pure
 fun T.getDeclaredPackPrefix(): int
-builtin
+    builtin
 
 /// Returns serialization prefix length of a struct. Works at compile-time.
 /// Example: for `struct (0xF0) AssetRegular { ... }` will return `16`.
 @pure
 fun T.getDeclaredPackPrefixLen(): int
-builtin
+    builtin
 
 /// Forces an object created by `lazy` to load fully. Returns the remaining slice (having read all fields).
 /// Since `options.assertEndAfterReading` is ignored by `lazy` (fields are loaded on demand),
@@ -346,8 +442,8 @@ builtin
 /// Note: while [slice.assertEnd] may seem reasonable, these checks are avoided in practice,
 /// because the purpose of `lazy` is to auto-detect and load only necessary fields, not up to the end.
 @pure
-fun T.forceLoadLazyObject(self) : slice
-builtin
+fun T.forceLoadLazyObject(self): slice
+    builtin
 
 /// Cell<T> represents a typed cell reference (as opposed to untyped `cell`).
 /// Example:
@@ -379,7 +475,7 @@ struct Cell<T> {
 /// ```
 @pure
 fun Cell<T>.load(self, options: UnpackOptions = {}): T
-builtin
+    builtin
 
 /// Converts a typed cell into a slice.
 @pure
@@ -388,7 +484,7 @@ fun Cell<T>.beginParse(self): slice
 
 /// Returns hash of a typed cell, same as [cell.hash].
 @pure
-fun Cell<T>.hash(self) : uint256
+fun Cell<T>.hash(self): uint256
     asm "HASHCU"
 
 /// RemainingBitsAndRefs is a special built-in type to get "all the rest" slice tail on reading.
@@ -424,14 +520,14 @@ fun createEmptySlice(): slice
 /// Note: stringCrc32(slice_var) does not work! It accepts a constant string and works at compile-time.
 @pure
 fun stringCrc32(constString: slice): int
-builtin
+    builtin
 
 /// Compile-time function that calculates crc16 (XMODEM) of a constant string.
 /// Example: `const op = stringCrc16("some_str")` = 53407 = 0xD09F
 /// Note: stringCrc16(slice_var) does not work! It accepts a constant string and works at compile-time.
 @pure
 fun stringCrc16(constString: slice): int
-builtin
+    builtin
 
 /// Compile-time function that calculates sha256 of a constant string and returns 256-bit integer.
 /// Example: `const hash = stringSha256("some_crypto_key")`
@@ -439,39 +535,39 @@ builtin
 /// Use `sliceBitsHash` or `sliceHash` (declared below) to hash a slice without/with its refs at runtime.
 @pure
 fun stringSha256(constString: slice): int
-builtin
+    builtin
 
 /// Compile-time function that calculates sha256 of a constant string and takes the first 32 bits.
 /// Example: `const minihash = stringSha256_32("some_crypto_key")`
 /// Note: stringSha256_32(slice_var) does not work! It accepts a constant string and works at compile-time.
 @pure
 fun stringSha256_32(constString: slice): int
-builtin
+    builtin
 
 /// Compile-time function that takes N-chars ascii string and interprets it as a number in base 256.
 /// Example: `const value = stringToBase256("AB")` = 16706 (65*256 + 66)
 /// Note: stringToBase256(slice_var) does not work! It accepts a constant string and works at compile-time.
 @pure
 fun stringToBase256(constString: slice): int
-builtin
+    builtin
 
 /// Computes the representation hash of a `cell` and returns it as a 256-bit unsigned integer `x`.
 /// Useful for signing and checking signatures of arbitrary entities represented by a tree of cells.
 @pure
-fun cell.hash(self) : uint256
+fun cell.hash(self): uint256
     asm "HASHCU"
 
 /// Computes the hash of a `slice` and returns it as a 256-bit unsigned integer `x`.
 /// The result is the same as if an ordinary cell containing only data and references from `s` had been created
 /// and its hash computed by [cell.hash].
 @pure
-fun slice.hash(self) : uint256
+fun slice.hash(self): uint256
     asm "HASHSU"
 
 /// Computes sha256 of the data bits of a `slice`. If the bit length of `s` is not divisible by eight,
 /// throws a cell underflow exception. The hash value is returned as a 256-bit unsigned integer `x`.
 @pure
-fun slice.bitsHash(self) : uint256
+fun slice.bitsHash(self): uint256
     asm "SHA256U"
 
 /// Checks the Ed25519-`signature` of a `hash` (a 256-bit unsigned integer, usually computed as the hash of some data)
@@ -589,7 +685,7 @@ fun builder.depth(self): int
 /// Useful for debugging or when preparing stack contents for RUNVM.
 @pure
 fun sizeof<T>(anyVariable: T): int
-builtin
+    builtin
 
 
 /**
@@ -603,15 +699,284 @@ struct debug
 
 /// Dump a variable [x] to the debug log.
 fun debug.print<T>(x: T): void
-builtin
+    builtin
 
 /// Dump a string [x] to the debug log.
 fun debug.printString<T>(x: T): void
-builtin
+    builtin
 
 /// Dumps the stack (at most the top 255 values) and shows the total stack depth.
 fun debug.dumpStack(): void
-builtin
+    builtin
+
+
+/*
+    Implementation of `map<K, V>` and methods over it.
+
+    Note: maps in TVM are called "dictionaries". They are stored as nested cells 
+  (each value in a separate cell, probably with intermediate cells-nodes).
+  Constructing even small dicts is gas-expensive, because cell creation costs a lot.
+
+    `map<K, V>` is a "human-readable interface" over low-level dictionaries. The compiler,
+  knowing types of K and V, effectively generates asm instructions for storing/loading values.
+  But still, of course, it's a tree of cells, it's just a TVM dictionary.
+ */
+
+/// Returns an empty types map. It's essentially "PUSHNULL", since null represents an empty map.
+/// Example:
+/// ```
+/// var m: map<int8, int32> = createEmptyMap();
+/// ```
+@pure
+fun createEmptyMap<K, V>(): map<K, V>
+    builtin
+
+/// Converts a low-level TVM dictionary to a typed map.
+/// Actually, does nothing: accepts an "optional cell" and returns the same "optional cell",
+/// so if you specify key/value types incorrectly, it will fail later, at [map.get] and similar.
+@pure
+fun createMapFromLowLevelDict<K, V>(d: dict): map<K, V>
+    builtin
+
+/// Converts a high-level map to a low-level TVM dictionary.
+/// Actually, does nothing: returns the same "optional cell".
+@pure
+fun map<K, V>.toLowLevelDict(self): dict
+    asm "NOP"
+
+/// Checks whether a map is empty (whether a cell is null).
+/// Note: a check `m == null` will not work, use `m.isEmpty()`.
+@pure
+fun map<K, V>.isEmpty(self): bool
+    asm "DICTEMPTY"
+
+/// Checks whether a key exists in a map.
+@pure
+fun map<K, V>.exists(self, key: K): bool
+    builtin
+
+/// Gets an element by key. If not found, does NOT throw, just returns isFound = false.
+/// Example:
+/// ```
+/// val r = m.get(123);
+/// if (r.isFound) {
+///     r.loadValue()
+/// }
+/// ```
+@pure
+fun map<K, V>.get(self, key: K): MapLookupResult<V>
+    builtin
+
+/// Gets an element by key and throws if it doesn't exist.
+@pure
+fun map<K, V>.mustGet(self, key: K, throwIfNotFound: int = 9): V
+    builtin
+
+/// Sets an element by key.
+/// Example:
+/// ```
+/// m.set(k, 3);
+/// ```
+/// Since it returns `self`, calls may be chained.
+@pure
+fun map<K, V>.set(mutate self, key: K, value: V): self
+    builtin
+
+/// Sets an element and returns previous element at that key. If previous doesn't exist, isFound = false.
+/// Example:
+/// ```
+/// val prev = m.setAndGetPrevious(k, 3);
+/// if (prev.isFound) {
+///     prev.loadValue()
+/// }
+/// ```
+@pure
+fun map<K, V>.setAndGetPrevious(mutate self, key: K, value: V): MapLookupResult<V>
+    builtin
+
+/// Sets an element only if the key already exists. Returns whether an element was replaced.
+@pure
+fun map<K, V>.replaceIfExists(mutate self, key: K, value: V): bool
+    builtin
+
+/// Sets an element only if the key already exists and returns previous element at that key.
+@pure
+fun map<K, V>.replaceAndGetPrevious(mutate self, key: K, value: V): MapLookupResult<V>
+    builtin
+
+/// Sets an element only if the key does not exist. Returns whether an element was added.
+@pure
+fun map<K, V>.addIfNotExists(mutate self, key: K, value: V): bool
+    builtin
+
+/// Sets an element only if the key does not exist. If exists, returns an old value.
+@pure
+fun map<K, V>.addOrGetExisting(mutate self, key: K, value: V): MapLookupResult<V>
+    builtin
+
+/// Delete an element at the key. Returns whether an element was deleted. 
+@pure
+fun map<K, V>.delete(mutate self, key: K): bool
+    builtin
+
+/// Delete an element at the key and returns the deleted element. If not exists, isFound = false.
+/// Example:
+/// ```
+/// val prev = m.deleteAndGetDeleted(k);
+/// if (prev.isFound) {
+///     prev.loadValue()
+/// }
+/// ```
+@pure
+fun map<K, V>.deleteAndGetDeleted(mutate self, key: K): MapLookupResult<V>
+    builtin
+
+/// Finds the first (minimal) element in a map. If key are integers, it's the minimal integer.
+/// It keys are addresses or complex structures (represented as slices), it's lexicographically smallest.
+/// For an empty map, just returns isFound = false.
+/// Useful for iterating over a map:
+/// ```
+/// var r = m.findFirst();
+/// while (r.isFound) {
+///     ... use r.getKey() and r.loadValue()
+///     r = m.iterateNext(r)
+/// }
+/// ```
+@pure
+fun map<K, V>.findFirst(self): MapEntry<K, V>
+    builtin
+
+/// Finds the last (minimal) element in a map. If key are integers, it's the maximal integer.
+/// It keys are addresses or complex structures (represented as slices), it's lexicographically largest.
+/// For an empty map, just returns isFound = false.
+/// Useful for iterating over a map:
+/// ```
+/// var r = m.findLast();
+/// while (r.isFound) {
+///     ... use r.getKey() and r.loadValue()
+///     r = m.iteratePrev(r)
+/// }
+/// ```
+@pure
+fun map<K, V>.findLast(self): MapEntry<K, V>
+    builtin
+
+/// Finds an element with key > pivotKey.
+/// Don't forget to check `isFound` before using `getKey()` and `loadValue()` of the result.
+@pure
+fun map<K, V>.findKeyGreater(self, pivotKey: K): MapEntry<K, V>
+    builtin
+
+/// Finds an element with key >= pivotKey.
+/// Don't forget to check `isFound` before using `getKey()` and `loadValue()` of the result.
+@pure
+fun map<K, V>.findKeyGreaterOrEqual(self, pivotKey: K): MapEntry<K, V>
+    builtin
+
+/// Finds an element with key < pivotKey.
+/// Don't forget to check `isFound` before using `getKey()` and `loadValue()` of the result.
+@pure
+fun map<K, V>.findKeyLess(self, pivotKey: K): MapEntry<K, V>
+    builtin
+
+/// Finds an element with key <= pivotKey.
+/// Don't forget to check `isFound` before using `getKey()` and `loadValue()` of the result.
+@pure
+fun map<K, V>.findKeyLessOrEqual(self, pivotKey: K): MapEntry<K, V>
+    builtin
+
+/// Iterate over a map in ascending order.
+/// Example:
+/// ```
+/// // iterate for all keys >= 10 up to the end
+/// var r = m.findKeyGreaterOrEqual(10);
+/// while (r.isFound) {
+///     ... use r.getKey() and r.loadValue()
+///     r = m.iterateNext(r)
+/// }
+/// ```
+@pure
+fun map<K, V>.iterateNext(self, current: MapEntry<K, V>): MapEntry<K, V>
+    builtin
+
+/// Iterate over a map in reverse order.
+/// Example:
+/// ```
+/// // iterate for all keys < 10 down lo lowest
+/// var r = m.findKeyLess(10);
+/// while (r.isFound) {
+///     ... use r.getKey() and r.loadValue()
+///     r = m.iteratePrev(r)
+/// }
+/// ```@pure
+fun map<K, V>.iteratePrev(self, current: MapEntry<K, V>): MapEntry<K, V>
+    builtin
+
+/// MapLookupResult is a return value of [map.get], [map.setAndGetPrevious], and similar.
+/// Instead of returning a nullable value (that you'd check on null before usage),
+/// this struct is returned (and you check on `isFound` before usage).
+/// Example:
+/// ```
+/// val r = m.get(key);
+/// if (r.isFound) {
+///     r.loadValue()    // unpacks a returned slice
+/// }
+/// ```
+struct MapLookupResult<TValue> {
+    rawSlice: slice?        // holds encoded value, present if isFound
+    isFound: bool
+}
+
+@pure
+fun MapLookupResult<TValue>.loadValue(self): TValue {
+    // it's assumed that you check for `isFound` before calling `loadValue()`;
+    // note that `assertEnd` is called to ensure no remaining data left besides TValue
+    return TValue.fromSlice(self.rawSlice!, {
+        assertEndAfterReading: true
+    })
+}
+
+@pure
+fun MapLookupResult<slice>.loadValue(self): slice {
+    return self.rawSlice!
+}
+
+/// MapEntry is a return value of [map.findFirst], [map.iterateNext], and similar.
+/// You should check for `isFound` before calling `getKey()` and `loadValue()`.
+/// Example:
+/// ```
+/// var r = m.findFirst();
+/// while (r.isFound) {
+///     ... use r.getKey() and r.loadValue()
+///     r = m.iterateNext(r)
+/// }
+/// ```
+struct MapEntry<K, V> {
+    rawValue: slice?        // holds encoded value, present if isFound
+    key: K
+    isFound: bool
+}
+
+@pure
+fun MapEntry<K, V>.getKey(self): K {
+    // it's assumed that you check for `isFound` before calling `getKey()`;
+    // (otherwise, it will contain an incorrect stack slot with `null` value, not K)
+    return self.key
+}
+
+@pure
+fun MapEntry<K, V>.loadValue(self): V {
+    // it's assumed that you check for `isFound` before calling `loadValue()`;
+    // note that `assertEnd` is inserted to ensure no remaining data left besides TValue
+    return V.fromSlice(self.rawValue!, {
+        assertEndAfterReading: true
+    })
+}
+
+@pure
+fun MapEntry<K, slice>.loadValue(self): slice {
+    return self.rawValue!
+}
 
 
 /**
@@ -625,7 +990,7 @@ builtin
 /// Note: stringHexToSlice(slice_var) does not work! It accepts a constant string and works at compile-time.
 @pure
 fun stringHexToSlice(constStringBytesHex: slice): slice
-builtin
+    builtin
 
 /// Converts a `cell` into a `slice`. Notice that [c] must be either an ordinary cell,
 /// or an exotic cell (see [TVM.pdf](https://ton-blockchain.github.io/docs/tvm.pdf), 3.1.2)
@@ -641,7 +1006,7 @@ fun slice.assertEnd(self): void
 /// Loads the next reference from the slice.
 @pure
 fun slice.loadRef(mutate self): cell
-    asm(-> 1 0) "LDREF"
+    asm( -> 1 0) "LDREF"
 
 /// Preloads the next reference from the slice.
 @pure
@@ -651,47 +1016,47 @@ fun slice.preloadRef(self): cell
 /// Loads a signed [len]-bit integer from a slice.
 @pure
 fun slice.loadInt(mutate self, len: int): int
-builtin
+    builtin
 
 /// Loads an unsigned [len]-bit integer from a slice.
 @pure
 fun slice.loadUint(mutate self, len: int): int
-builtin
+    builtin
 
 /// Loads the first `0 ≤ len ≤ 1023` bits from slice [s] into a separate slice `s''`.
 @pure
 fun slice.loadBits(mutate self, len: int): slice
-builtin
+    builtin
 
 /// Preloads a signed [len]-bit integer from a slice.
 @pure
 fun slice.preloadInt(self, len: int): int
-builtin
+    builtin
 
 /// Preloads an unsigned [len]-bit integer from a slice.
 @pure
 fun slice.preloadUint(self, len: int): int
-builtin
+    builtin
 
 /// Preloads the first `0 ≤ len ≤ 1023` bits from slice [s] into a separate slice.
 @pure
 fun slice.preloadBits(self, len: int): slice
-builtin
+    builtin
 
 /// Loads serialized amount of Toncoins (any unsigned integer up to `2^120 - 1`).
 @pure
 fun slice.loadCoins(mutate self): coins
-    asm(-> 1 0) "LDGRAMS"
+    asm( -> 1 0) "LDGRAMS"
 
 /// Loads bool (-1 or 0) from a slice
 @pure
 fun slice.loadBool(mutate self): bool
-    asm(-> 1 0) "1 LDI"
+    asm( -> 1 0) "1 LDI"
 
 /// Shifts a slice pointer to [len] bits forward, mutating the slice.
 @pure
 fun slice.skipBits(mutate self, len: int): self
-builtin
+    builtin
 
 /// Returns the first `0 ≤ len ≤ 1023` bits of a slice.
 @pure
@@ -715,10 +1080,9 @@ fun slice.getMiddleBits(self, offset: int, len: int): slice
     asm "SDSUBSTR"
 
 /// Loads a dictionary (TL HashMapE structure, represented as TVM cell) from a slice.
-/// Returns `null` if `nothing` constructor is used.
 @pure
 fun slice.loadDict(mutate self): dict
-    asm(-> 1 0) "LDDICT"
+    asm( -> 1 0) "LDDICT"
 
 /// Preloads a dictionary (cell) from a slice.
 @pure
@@ -734,7 +1098,7 @@ fun slice.skipDict(mutate self): self
 /// In other words, loads 1 bit: if it's true, loads the first ref, otherwise returns `null`.
 @pure
 fun slice.loadMaybeRef(mutate self): cell?
-    asm(-> 1 0) "LDOPTREF"
+    asm( -> 1 0) "LDOPTREF"
 
 /// Preloads (Maybe ^Cell) from a slice.
 @pure
@@ -771,12 +1135,12 @@ fun builder.storeRef(mutate self, c: cell): self
 /// Stores a signed [len]-bit integer into a builder (`0 ≤ len ≤ 257`).
 @pure
 fun builder.storeInt(mutate self, x: int, len: int): self
-builtin
+    builtin
 
 /// Stores an unsigned [len]-bit integer into a builder (`0 ≤ len ≤ 256`).
 @pure
 fun builder.storeUint(mutate self, x: int, len: int): self
-builtin
+    builtin
 
 /// Stores a slice into a builder.
 @pure
@@ -791,13 +1155,13 @@ fun builder.storeAddress(mutate self, addr: address): self
 /// Stores amount of Toncoins into a builder.
 @pure
 fun builder.storeCoins(mutate self, x: coins): self
-builtin
+    builtin
 
 /// Stores bool (-1 or 0) into a builder.
 /// Attention: true value is `-1`, not 1! If you pass `1` here, TVM will throw an exception.
 @pure
 fun builder.storeBool(mutate self, x: bool): self
-builtin
+    builtin
 
 /// Stores dictionary (represented by TVM `cell` or `null`) into a builder.
 /// In other words, stores a `1`-bit and a reference to [c] if [c] is not `null` and `0`-bit otherwise.
@@ -843,7 +1207,7 @@ fun slice.remainingBitsAndRefsCount(self): (int, int)
 
 /// Checks whether a slice is empty (i.e., contains no bits of data and no cell references).
 @pure
-fun slice.isEmpty(self) : bool
+fun slice.isEmpty(self): bool
     asm "SEMPTY"
 
 /// Checks whether a slice has no bits of data.
@@ -882,7 +1246,7 @@ fun builder.bitsCount(self): int
 /// Returns `address`, which can be stored in a builder, compared with `==`, etc.
 @pure
 fun address(stdAddress: slice): address
-builtin
+    builtin
 
 /// Creates a slice representing "none address" (TL addr_none$00 — two zero bits).
 @pure
@@ -933,7 +1297,7 @@ fun address.bitsEqual(self, b: address): bool
 /// Loads from slice [s] a valid `MsgAddress` (none/internal/external).
 @pure
 fun slice.loadAddress(mutate self): address
-    asm(-> 1 0) "LDMSGADDR"
+    asm( -> 1 0) "LDMSGADDR"
 
 
 /**
@@ -993,7 +1357,7 @@ const SEND_MODE_ESTIMATE_FEE_ONLY = 1024
 /// +64 substitutes the entire balance of the incoming message as an outcoming value (slightly inaccurate, gas expenses that cannot be estimated before the computation is completed are not taken into account).
 /// +128 substitutes the value of the entire balance of the contract before the start of the computation phase (slightly inaccurate, since gas expenses that cannot be estimated before the completion of the computation phase are not taken into account).
 
-type ExtraCurrenciesDict = dict
+type ExtraCurrenciesMap = map<int32, varuint32>     // todo or uint32? 
 
 /// ContractState is "code + data" of a contract.
 /// Used in outgoing messages (StateInit) to initialize a destination contract.
@@ -1042,8 +1406,8 @@ struct AutoDeployAddress {
 /// Note: returns `builder`, not `address`! It's cheap.
 /// If you really need `address`, use `address.fromValidBuilder(res)`.
 @pure
-fun AutoDeployAddress.buildAddress(self) : builder
-builtin
+fun AutoDeployAddress.buildAddress(self): builder
+    builtin
 
 /// Checks that an address matches a deployed contract.
 /// For example, from a jetton minter, you're checking whether a message is from a jetton wallet:
@@ -1053,8 +1417,8 @@ builtin
 /// ```
 /// Just instead of `dest` for [createMessage], you use it is to check whether a sender is a jetton/nft.
 @pure
-fun AutoDeployAddress.addressMatches(self, addr: address) : bool
-builtin
+fun AutoDeployAddress.addressMatches(self, addr: address): bool
+    builtin
 
 /// Options for creating an outgoing message.
 /// Consider [createMessage] for examples.
@@ -1062,12 +1426,12 @@ struct CreateMessageOptions<TBody = never> {
     /// whether a message will bounce back on error
     bounce: bool
     /// message value: attached tons (or tons + extra currencies)
-    value: coins| (coins, ExtraCurrenciesDict)
+    value: coins | (coins, ExtraCurrenciesMap)
     /// destination is either a provided address, or is auto-calculated by stateInit
-    dest: address// either just send a message to some address
-    | builder// ... or a manually constructed builder with a valid address
-    | (int8, uint256)       // ... or to workchain + hash (also known as accountID)
-    | AutoDeployAddress// ... or "send to stateInit" aka deploy (address auto-calculated)
+    dest: address               // either just send a message to some address
+        | builder               // ... or a manually constructed builder with a valid address
+        | (int8, uint256)       // ... or to workchain + hash (also known as accountID)
+        | AutoDeployAddress     // ... or "send to stateInit" aka deploy (address auto-calculated)
     /// body is any serializable object (or just miss this field for empty body)
     body: TBody
 }
@@ -1090,7 +1454,7 @@ struct CreateMessageOptions<TBody = never> {
 /// If you need an empty body, just miss the field `body`, fill other 3 fields.
 @pure
 fun createMessage<TBody>(options: CreateMessageOptions<TBody>): OutMessage
-builtin
+    builtin
 
 
 /// ExtOutLogBucket is a variant of a custom external address for emitting logs "to the outer world".
@@ -1111,8 +1475,8 @@ struct (0x00) ExtOutLogBucket {
 struct CreateExternalLogMessageOptions<TBody = never> {
     /// destination is either an external address or a pattern to calculate it
     dest: address           // either some valid external/none address (not internal!)
-    | builder           // ... or a manually constructed builder with a valid external address
-    | ExtOutLogBucket   // ... or encode topic/eventID in destination
+        | builder           // ... or a manually constructed builder with a valid external address
+        | ExtOutLogBucket   // ... or encode topic/eventID in destination
     /// body is any serializable object (or just miss this field for empty body)
     body: TBody
 }
@@ -1132,8 +1496,8 @@ struct CreateExternalLogMessageOptions<TBody = never> {
 ///       (if body is small, it will be inlined without an expensive cell creation)
 ///       (if body is large, the compiler will automatically wrap it into a cell)
 @pure
-fun createExternalLogMessage<TBody>(options: CreateExternalLogMessageOptions<TBody>) : OutMessage
-builtin
+fun createExternalLogMessage<TBody>(options: CreateExternalLogMessageOptions<TBody>): OutMessage
+    builtin
 
 /// UnsafeBodyNoRef is used to prevent default behavior: when message body is potentially large,
 /// it's packed into a separate ref. Wrapping body with this struct tells the compiler:
@@ -1266,7 +1630,7 @@ fun StateInit.calcHashPrefixCodeData(fixedPrefixLength: uint5, code: cell, data:
 /// If you really need `address`, use `address.fromValidBuilder(resBuilder)`.
 @pure
 fun address.buildSameAddressInAnotherShard(self, options: AddressShardingOptions): builder
-builtin
+    builtin
 
 /// Converts a builder containing a valid address (internal/external/none) to `address` (slice under the hood).
 /// Gas-expensive! Because or a cell creation: essentially, it's `b.endCell().beginParse()`.
@@ -1312,10 +1676,10 @@ fun sendRawMessage(msg: cell, mode: int): void
 struct InMessage {
     senderAddress: address          // an internal address from which the message arrived
     valueCoins: coins               // ton amount attached to an incoming message
-    valueExtra: dict                // extra currencies attached to an incoming message
+    valueExtra: ExtraCurrenciesMap  // extra currencies attached to an incoming message
     originalForwardFee: coins       // fee that was paid by the sender
-    createdLt: uint64// logical time when a message was created
-    createdAt: uint32// unixtime when a message was created
+    createdLt: uint64               // logical time when a message was created
+    createdAt: uint32               // unixtime when a message was created
     body: slice                     // message body, parse it with `lazy AllowedMsg.fromSlice(in.body)`
 }
 
@@ -1332,10 +1696,10 @@ struct InMessage {
 struct InMessageBounced {
     senderAddress: address          // an internal address from which the message was bounced
     valueCoins: coins               // ton amount attached to a message
-    valueExtra: dict                // extra currencies attached to a message
+    valueExtra: ExtraCurrenciesMap  // extra currencies attached to a message
     originalForwardFee: coins       // comission that the sender has payed to send this message
-    createdLt: uint64// logical time when a message was created (and bounced)
-    createdAt: uint32// unixtime when a message was created (and bounced)
+    createdLt: uint64               // logical time when a message was created (and bounced)
+    createdAt: uint32               // unixtime when a message was created (and bounced)
     bouncedBody: slice              // currently 256 bits: 0xFFFFFFFF + 224 bits sent originally
 }
 
@@ -1347,32 +1711,34 @@ fun slice.skipBouncedPrefix(mutate self): self
 /// Load msgFlags from incoming message body (4 bits).
 @pure
 @deprecated("use `onBouncedMessage` handler instead of parsing msgCell flags manually")
-fun slice.loadMessageFlags(mutate self) : int
-    asm(-> 1 0) "4 LDU"
+fun slice.loadMessageFlags(mutate self): int
+    asm( -> 1 0) "4 LDU"
 
 /// Loads a message opcode (32-bit integer) when parsing message body manually.
 @pure
 fun slice.loadMessageOp(mutate self): int
-    asm(-> 1 0) "32 LDU"
+    asm( -> 1 0) "32 LDU"
 
 /// Stores a message opcode (32-bit integer) when composing an output message manually.
 @pure
 @deprecated("use `createMessage` instead of composing messages manually")
-fun builder.storeMessageOp(mutate self, op: int) : self
+fun builder.storeMessageOp(mutate self, op: int): self
     asm(op self) "32 STU"
 
 /// Loads a message queryId (64-bit integer, immediately following the opcode) when parsing message body manually.
 @pure
 @deprecated("use structures and lazy match instead of parsing messages manually")
 fun slice.loadMessageQueryId(mutate self): int
-    asm(-> 1 0) "64 LDU"
+    asm( -> 1 0) "64 LDU"
 
 @pure
 @deprecated("use structures and lazy loading instead of parsing messages manually")
-fun slice.skipMessageQueryId(mutate self) : self
+fun slice.skipMessageQueryId(mutate self): self
     asm "64 LDU" "NIP"
 
 @pure
 @deprecated("use `createMessage` instead of composing messages manually")
-fun builder.storeMessageQueryId(mutate self, queryId: int) : self
+fun builder.storeMessageQueryId(mutate self, queryId: int): self
     asm(queryId self) "64 STU"
+
+

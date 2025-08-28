@@ -25,22 +25,51 @@ open class Substitution(
     fun deduce(paramType: TolkTy, argType: TolkTy, applyDefault: Boolean = true): Substitution {
         return when {
             paramType is TolkTyStruct -> {
-                val argType = (argType as? TolkTyStruct)?.takeIf {
-                    it.typeArguments.size == paramType.typeArguments.size
-                } ?: return this
                 var sub = this
-                for (i in paramType.typeArguments.indices) {
-                    sub = sub.deduce(paramType.typeArguments[i], argType.typeArguments[i], applyDefault)
+                // `arg: Wrapper<T>` called as `f(wrappedInt)` => T is int
+                val unwrappedArgType = argType.unwrapTypeAlias() as? TolkTyStruct
+                if (unwrappedArgType != null && unwrappedArgType.typeArguments.size == paramType.typeArguments.size) {
+                    for (i in paramType.typeArguments.indices) {
+                        sub = sub.deduce(paramType.typeArguments[i], unwrappedArgType.typeArguments[i], applyDefault)
+                    }
+                }
+
+                // `arg: Wrapper<T>` called as `f(Wrapper<Wrapper<T>>)` => T is Wrapper<T>
+                val argType = argType as? TolkTyStruct
+                if (argType != null && argType.typeArguments.size == paramType.typeArguments.size) {
+                    for (i in paramType.typeArguments.indices) {
+                        sub = sub.deduce(paramType.typeArguments[i], argType.typeArguments[i], applyDefault)
+                    }
                 }
                 return sub
             }
             paramType is TolkTyAlias -> {
-                val argType = (argType as? TolkTyAlias)?.takeIf {
-                    it.typeArguments.size == paramType.typeArguments.size
-                } ?: return this
+                // Since map<K, V> is just a type alias in stdlib, we handle
+                // ```
+                // if (const auto* p_map = param_type->try_as<TypeDataMapKV>()) {
+                //    // `arg: map<K, V>` called as `f(someMapInt32Slice)` => K = int32, V = slice
+                //    if (const auto* a_map = arg_type->unwrap_alias()->try_as<TypeDataMapKV>()) {
+                //      consider_next_condition(p_map->TKey, a_map->TKey);
+                //      consider_next_condition(p_map->TValue, a_map->TValue);
+                //    }
+                //  }
+                // ```
+                // here as well:
                 var sub = this
-                for (i in paramType.typeArguments.indices) {
-                    sub = sub.deduce(paramType.typeArguments[i], argType.typeArguments[i], applyDefault)
+                // `arg: Wrapper<T>` called as `f(wrappedInt)` => T is int
+                val unwrappedArgType = argType.unwrapTypeAlias() as? TolkTyAlias
+                if (unwrappedArgType != null && unwrappedArgType.typeArguments.size == paramType.typeArguments.size) {
+                    for (i in paramType.typeArguments.indices) {
+                        sub = sub.deduce(paramType.typeArguments[i], unwrappedArgType.typeArguments[i], applyDefault)
+                    }
+                }
+
+                // `arg: Wrapper<T>` called as `f(Wrapper<Wrapper<T>>)` => T is Wrapper<T>
+                val argType = argType as? TolkTyAlias
+                if (argType != null && argType.typeArguments.size == paramType.typeArguments.size) {
+                    for (i in paramType.typeArguments.indices) {
+                        sub = sub.deduce(paramType.typeArguments[i], argType.typeArguments[i], applyDefault)
+                    }
                 }
                 return sub
             }

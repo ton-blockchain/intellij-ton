@@ -26,6 +26,7 @@ data class TolkTyEnum private constructor(
 
     override fun isEquivalentToInner(other: TolkTy): Boolean {
         if (this == other) return true
+        if (other is TolkTyAlias) return isEquivalentToInner(other.underlyingType)
         if (other !is TolkTyEnum) return false
         return psi.manager.areElementsEquivalent(psi, other.psi)
     }

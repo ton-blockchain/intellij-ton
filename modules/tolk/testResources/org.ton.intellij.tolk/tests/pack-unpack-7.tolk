@@ -37,15 +37,9 @@ struct PointWithCustomInt {
 type MyBorderedInt = int;
 
 fun MyBorderedInt.packToBuilder(self, mutate b: builder) {
-    if (self > 10) {
-        b.storeUint(1, 4)
-    }
-    else if (self > 0) {
-        b.storeUint(2, 4)
-    }
-    else {
-        b.storeUint(3, 4)
-    }
+    if (self > 10) { b.storeUint(1, 4) }
+    else if (self > 0) { b.storeUint(2, 4) }
+    else { b.storeUint(3, 4) }
 }
 
 fun MyBorderedInt.unpackFromSlice(mutate s: slice) {
@@ -96,7 +90,7 @@ struct WithGlobalModifier {
 
 type Tensor3Skipping1 = (int, int, int);
 
-fun Tensor3Skipping1.unpackFromSlice(mutate s: slice) : Tensor3Skipping1 {
+fun Tensor3Skipping1.unpackFromSlice(mutate s: slice): Tensor3Skipping1 {
     val e0 = s.loadUint(8);
     val e2 = s.loadUint(8);
     return (e0, 0, e2);
@@ -106,12 +100,26 @@ fun Tensor3Skipping1.packToBuilder(self, mutate b: builder) {
     b.storeUint(self.0, 8).storeUint(self.2, 8);
 }
 
+enum Color {
+    Red,
+    Green,
+    Blue,
+}
+
+type UnsafeColor = Color
+
+fun UnsafeColor.unpackFromSlice(mutate s: slice) {
+    return s.loadUint(2) as Color
+}
+
+fun UnsafeColor.packToBuilder(self, mutate b: builder) {
+    b.storeUint(self as int, 2)
+}
+
 
 @method_id(101)
 fun test1() {
-    var t: StorWithStr = {
-        a: 10, str: "abc", b: 20
-    };
+    var t: StorWithStr = { a: 10, str: "abc", b: 20 };
     var c = t.toCell();
     var back = c.load();
     return ((t.b == back.b) & (t.str.bitsEqual(back.str)), back.str.remainingBitsCount(), c.hash() & 0xFFFF);
@@ -130,17 +138,13 @@ fun test3() {
 
 @method_id(104)
 fun test4(initialInt: int) {
-    var c = WithMyBorder {
-        a: 0, b: initialInt
-    }.toCell();
+    var c = WithMyBorder { a: 0, b: initialInt }.toCell();
     return c.load().b;
 }
 
 @method_id(105)
 fun test5() {
-    var f: WithFakeWriter = {
-        a: 10, b: 20
-    };
+    var f: WithFakeWriter = { a: 10, b: 20 };
     var s = beginCell().storeAny(f).endCell().beginParse();
     val size = s.remainingBitsAndRefsCount();
     return (s.skipBits(8).loadUint(32), size.1);
@@ -149,9 +153,7 @@ fun test5() {
 @method_id(106)
 fun test6() {
     gModByCustom = 6;
-    val m1: WithGlobalModifier = {
-        a: 8, n: 16
-    };
+    val m1: WithGlobalModifier = { a: 8, n: 16 };
     val c1 = m1.toCell();
     val r2 = WithGlobalModifier.fromSlice(stringHexToSlice("01FF02"));
     val gAfter2 = gModByCustom;
@@ -169,6 +171,15 @@ fun test7() {
     return t.toCell().load();
 }
 
+@method_id(108)
+fun test8(c: UnsafeColor) {
+    var way1 = beginCell().storeAny(c).endCell();
+    var way2 = c.toCell();
+    __expect_type(way2, "Cell<UnsafeColor>");
+    assert (way1.hash() == way2.hash()) throw 123;
+    return way2.load();
+}
+
 fun main() {
     __expect_type("" as TelegramString, "TelegramString");
 }
@@ -183,13 +194,15 @@ fun main() {
 @testcase | 105 |     | 123 1
 @testcase | 106 |     | 6 2 255 0 8 9
 @testcase | 107 |     | 1 0 3
+@testcase | 108 | 0   | 0
+@testcase | 108 | 3   | 3
 
 @fif_codegen
 """
-test3() PROC:<{
-x{0102} PUSHSLICE
-8 LDU
-8 PLDI
-}>
+  test3() PROC:<{
+    x{0102} PUSHSLICE
+    8 LDU
+    8 PLDI
+  }>
 """
-*/
+ */

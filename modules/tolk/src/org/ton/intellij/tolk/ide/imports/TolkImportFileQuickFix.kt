@@ -29,6 +29,7 @@ import org.ton.intellij.tolk.psi.TolkDotExpression
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
+import org.ton.intellij.tolk.psi.TolkTypeParameter
 import org.ton.intellij.tolk.psi.reference.TolkSymbolReference
 import org.ton.intellij.tolk.psi.reference.TolkTypeReference
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
@@ -252,7 +253,7 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
         }
 
         fun findImportVariants(symbolToImport: String, context: PsiElement): List<TolkFile> {
-            val candidates = TolkNamedElementIndex.find(symbolToImport, context.project, null)
+            val candidates = TolkNamedElementIndex.find(symbolToImport, context.project, null).filter { it !is TolkTypeParameter }
             val files = candidates.mapNotNull { it.containingFile }
             return files
                 .filterIsInstance<TolkFile>()

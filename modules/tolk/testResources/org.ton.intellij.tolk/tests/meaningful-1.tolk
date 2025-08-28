@@ -43,7 +43,7 @@ fun onInternalMessage(curCounter: int, mode: int) {
 
 @fif_codegen
 """
-onInternalMessage() PROC:<{ 	//  curCounter mode
-fakeParseMessage() CALLDICT	//  curCounter m.USlot1 m.UTag
+  onInternalMessage() PROC:<{ 	//  curCounter mode
+    fakeParseMessage() CALLDICT	//  curCounter m.USlot1 m.UTag
 """
  */

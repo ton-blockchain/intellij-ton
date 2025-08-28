@@ -19,4 +19,4 @@ fun main() {
 @stderr because type `CustomInt` defines a custom pack function, but does not define unpack
 @stderr hint: declare unpacker like this:
 @stderr fun CustomInt.unpackFromSlice(mutate s: slice): CustomInt
-*/
+ */

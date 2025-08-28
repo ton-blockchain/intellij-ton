@@ -1,3 +1,4 @@
+
 @method_id(101)
 fun test1() {
     return 0;
@@ -17,14 +18,14 @@ fun onInternalMessage(in: InMessage) {
 
 @fif_codegen
 """
-onInternalMessage() PROC:<{
-INMSG_BOUNCED
-IFJMP:<{
-32 LDU
-NIP
-32 PLDU
-THROWANY
-}>                      	//  in.body
-}>
+  onInternalMessage() PROC:<{
+    INMSG_BOUNCED
+    IFJMP:<{
+       32 LDU
+       NIP
+       32 PLDU
+       THROWANY
+    }>                      	//  in.body
+  }>
 """
 */

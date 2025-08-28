@@ -7,6 +7,11 @@ struct Point {
     y: int32;
 }
 
+struct TwoU {
+    a: uint8
+    b: uint8
+}
+
 @method_id(101)
 fun test1(value: int) {
     var t: JustInt32 = { value };
@@ -84,6 +89,15 @@ fun test7(s: slice) {
     return (6, s.remainingBitsCount());
 }
 
+@method_id(108)
+fun test8(): cell | int {
+    try {
+        return TwoU{a:1<<10, b:0}.toCell()
+    } catch (ex) {
+        return ex
+    }
+}
+
 fun main(c: cell) {
     c as Cell<Point>;
     (c as Cell<Point>) as cell;
@@ -103,16 +117,17 @@ fun main(c: cell) {
 @testcase | 107 | x{09332}      | 4 12
 @testcase | 107 | x{2}          | 5 1
 @testcase | 107 | x{0234}       | 6 16
+@testcase | 108 |               | 5 1
 
 @fif_codegen
 """
-test3() PROC:<{
+  test3() PROC:<{
     NEWC
-x{0000000a00000014} STSLICECONST  //  b
+    x{0000000a00000014} STSLICECONST  //  b
     ENDC                        //  c
     CTOS                        //  s
-64 LDU
-NIP                         //  s
+    64 LDU
+    NIP                         //  s
     SBITS                       //  '17
   }>
 """

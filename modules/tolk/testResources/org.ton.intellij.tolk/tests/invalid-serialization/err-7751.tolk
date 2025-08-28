@@ -17,4 +17,4 @@ fun main() {
 @stderr because `CustomInt.packToBuilder()` is declared incorrectly
 @stderr hint: it must accept 2 parameters and return nothing:
 @stderr fun CustomInt.packToBuilder(self, mutate b: builder)
-*/
+ */

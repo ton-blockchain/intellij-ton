@@ -1,5 +1,5 @@
 // A part of standard library for Tolk
-tolk 0.99
+tolk 1.0
 
 /**
   Gas and payment related primitives.
@@ -46,16 +46,16 @@ fun calculateStorageFee(workchain: int8, seconds: int, bits: int, cells: int): c
     asm(cells bits seconds workchain) "GETSTORAGEFEE"
 
 /// Calculates amount of nanotoncoins you should pay to send a message of a specified size.
-fun calculateForwardFee(workchain: int8, bits: int, cells: int) : coins
+fun calculateForwardFee(workchain: int8, bits: int, cells: int): coins
     asm(cells bits workchain) "GETFORWARDFEE"
 
 /// Same as [calculateForwardFee], but without lump price (you have supposed to read https://docs.ton.org/develop/howto/fees-low-level)
-fun calculateForwardFeeWithoutLumpPrice(workchain: int8, bits: int, cells: int) : coins
+fun calculateForwardFeeWithoutLumpPrice(workchain: int8, bits: int, cells: int): coins
     asm(cells bits workchain) "GETFORWARDFEESIMPLE"
 
 /// Calculates fee that was paid by the sender of an incoming internal message.
 @deprecated("use modern `onInternalMessage` and access `in.originalForwardFee` directly")
-fun calculateOriginalForwardFee(workchain: int8, incomingFwdFee: coins) : coins
+fun calculateOriginalForwardFee(workchain: int8, incomingFwdFee: coins): coins
     asm(incomingFwdFee workchain) "GETORIGINALFWDFEE"
 
 /// Returns the amount of nanotoncoins current contract debts for storage. ("due" and "debt" are synonyms)

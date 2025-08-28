@@ -1,9 +1,5 @@
-struct A {
-    a1: int7; a2: int8; a3: int8;
-}
-struct B {
-    b1: int7; b2: int8; b3: int8;
-}
+struct A { a1: int7; a2: int8; a3: int8; }
+struct B { b1: int7; b2: int8; b3: int8; }
 type AOrB = A | B;
 
 fun f() {
@@ -16,4 +12,4 @@ fun f() {
 @compilation_should_fail
 @stderr `lazy` will not work here, because variable `o` it's used in a non-lazy manner
 @stderr hint: lazy union may be used only in `match` statement
-*/
+ */

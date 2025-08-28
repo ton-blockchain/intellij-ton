@@ -17,6 +17,7 @@ import org.ton.intellij.tolk.psi.TolkTypeDef
 import org.ton.intellij.tolk.psi.TolkTypeParameter
 import org.ton.intellij.tolk.psi.TolkVisitor
 import org.ton.intellij.tolk.psi.impl.functionSymbol
+import org.ton.intellij.tolk.psi.impl.hasSelf
 
 class TolkCallArgumentsCountMismatchInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(
@@ -29,7 +30,7 @@ class TolkCallArgumentsCountMismatchInspection : TolkInspectionBase() {
         }
 
         private fun checkCall(call: TolkCallExpression, called: TolkFunction) {
-            val deltaSelf = if (isInstanceMethodCall(call)) 1 else 0
+            val deltaSelf = if (isInstanceMethodCall(call) && called.hasSelf) 1 else 0
             val args = call.argumentList.argumentList
             val argsCount = args.size + deltaSelf
             val selfParam = called.parameterList?.selfParameter

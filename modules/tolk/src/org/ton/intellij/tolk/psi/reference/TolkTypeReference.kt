@@ -40,6 +40,8 @@ class TolkTypeReference(
                     val genericType = owner.resolveGenericType(typeParameterName)
                     if (genericType != null && genericType.parameter.psi != element) {
                         add(PsiElementResolveResult(genericType.parameter.psi))
+                        // already resolved as type parameter, no need to resolve it further
+                        return@buildList
                     }
                 }
             }

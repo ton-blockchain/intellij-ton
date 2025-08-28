@@ -56,7 +56,7 @@ class TolkTyUnion private constructor(
     override fun isEquivalentToInner(other: TolkTy): Boolean {
         if (this === other) return true
         if (other !is TolkTyUnion) return false
-        return containsAll(other)
+        return variants.size == other.variants.size && containsAll(other)
     }
 
     fun containsAll(rhsType: TolkTyUnion): Boolean {
@@ -69,15 +69,14 @@ class TolkTyUnion private constructor(
     }
 
     operator fun contains(type: TolkTy): Boolean {
-        val actualType = type.unwrapTypeAlias().actualType()
-        return variants.any { it.isEquivalentTo(actualType) }
+        return variants.any { it.isEquivalentTo(type) }
     }
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
         if (calculateExactVariantToFitRhs(other) != null) return true
         if (other is TolkTyUnion) return containsAll(other)
-        if (other is TolkTyAlias) return canRhsBeAssigned(other.unwrapTypeAlias())
+        if (other is TolkTyAlias) return canRhsBeAssigned(other.underlyingType)
         return other == TolkTy.Never
     }
 
@@ -85,7 +84,7 @@ class TolkTyUnion private constructor(
         rhsType: TolkTy
     ): TolkTy? {
         val rhsUnion = rhsType.unwrapTypeAlias() as? TolkTyUnion
-        //   // primitive 1-slot nullable don't store type_id, they can be assigned less strict, like `int?` to `int16?`
+        // primitive 1-slot nullable don't store type_id, they can be assigned less strict, like `int?` to `int16?`
         if (rhsUnion != null) {
             val orNull = orNull
             val rhsOrNull = rhsUnion.orNull
@@ -94,12 +93,14 @@ class TolkTyUnion private constructor(
             }
             return null
         }
+
         // `int` to `int | int8` is okay: exact type matching
         for (variant in variants) {
-            if (variant.actualType() == rhsType.actualType()) {
+            if (variant.isEquivalentTo(rhsType)) {
                 return variant
             }
         }
+
         // find the only T_i; it would also be used for transition at IR generation, like `(int,null)` to `(int, User?) | int`
         var firstCovering: TolkTy? = null
         for (variant in variants) {
@@ -126,7 +127,7 @@ class TolkTyUnion private constructor(
             check(variants.isNotEmpty()) { "Cannot create union from an empty set of types" }
             val flatVariants = ArrayList<TolkTy>(variants.size)
             for (variant in variants) {
-                val nestedUnion = (variant.unwrapTypeAlias() as? TolkTyUnion)
+                val nestedUnion = variant.unwrapTypeAlias() as? TolkTyUnion
                 if (nestedUnion != null) {
                     nestedUnion.variants.forEach {
                         flatVariants.addUniqueType(it)
@@ -144,7 +145,7 @@ class TolkTyUnion private constructor(
         private fun MutableCollection<TolkTy>.addUniqueType(variant: TolkTy) {
             val actualType = variant.unwrapTypeAlias().actualType()
             for (existing in this) {
-                if (existing.unwrapTypeAlias().actualType() == actualType) {
+                if (existing.isEquivalentTo(actualType)) {
                     return
                 }
             }

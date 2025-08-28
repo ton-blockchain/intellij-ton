@@ -1,6 +1,6 @@
 const SHARD_DEPTH = 8;
 
-fun getMyAddressDev() : address
+fun getMyAddressDev(): address
     asm "x{80194DC6438F99D3D9DBE151944925D90B2492954BF6B9C070FBFF2DDED5F30547D_} PUSHSLICE";
 
 struct WalletStorage {
@@ -39,12 +39,8 @@ fun buildAddrInShard_manual(a: address, options: AddressShardingOptions) {
 fun test1() {
     val a = address("0:00000000000000000000000000000000000000000000000000000000000000FF");
     val b = address("1:1100000000000000000000000000000000000000000000000000000000000000");
-    val dd1 = buildAddrInShard_manual(a, {
-        fixedPrefixLength: 8, closeTo: b
-    });
-    val dd2 = a.buildSameAddressInAnotherShard({
-        fixedPrefixLength: 8, closeTo: b
-    });
+    val dd1 = buildAddrInShard_manual(a, {fixedPrefixLength: 8, closeTo: b});
+    val dd2 = a.buildSameAddressInAnotherShard({fixedPrefixLength: 8, closeTo: b});
     assert(dd1.endCell().hash() == dd2.endCell().hash(), 400);
     return dd1.endCell().beginParse() as address
     == address("1:11000000000000000000000000000000000000000000000000000000000000FF");
@@ -54,12 +50,8 @@ fun test1() {
 fun test2() {
     val a = address("0:1234aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
     val b = address("0:FFFFbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
-    val dd1 = buildAddrInShard_manual(a, {
-        closeTo: b, fixedPrefixLength: 16
-    });
-    val dd2 = a.buildSameAddressInAnotherShard({
-        fixedPrefixLength: 16, closeTo: b
-    });
+    val dd1 = buildAddrInShard_manual(a, {closeTo: b, fixedPrefixLength: 16});
+    val dd2 = a.buildSameAddressInAnotherShard({fixedPrefixLength: 16, closeTo: b});
     assert((a as slice).remainingBitsCount() == 267, 267);
     assert((b as slice).remainingBitsCount() == 267, 267);
     assert(dd1.endCell().hash() == dd2.endCell().hash(), 400);
@@ -76,24 +68,12 @@ fun test3() {
     var t3_a = address("EQAUTbQiM522Y_XJ_T98QPhPhTmb4nV--VSPiha8kC6kRfPO");
     var t3_b = address("EQBlqsm144Dq6SjbPI4jjZvA1hqTIP3CvHovbIfW_t-SCALE");
     return (
-        t1_a.buildSameAddressInAnotherShard({
-            fixedPrefixLength: 8, closeTo: t1_b
-        }).endCell().hash() & 0xFFFF,
-        t1_a.buildSameAddressInAnotherShard({
-            fixedPrefixLength: 4, closeTo: t1_b
-        }).endCell().hash() & 0xFFFF,
-        t2_a.buildSameAddressInAnotherShard({
-            fixedPrefixLength: 2, closeTo: t2_b
-        }).endCell().hash() & 0xFFFF,
-        t3_a.buildSameAddressInAnotherShard({
-            fixedPrefixLength: 30, closeTo: t2_b
-        }).endCell().hash() & 0xFFFF,
-        t2_a.buildSameAddressInAnotherShard({
-            fixedPrefixLength: 1, closeTo: t3_b
-        }).endCell().hash() & 0xFFFF,
-        t2_a.buildSameAddressInAnotherShard({
-            fixedPrefixLength: 0, closeTo: t3_b
-        }).endCell().hash() & 0xFFFF,
+        t1_a.buildSameAddressInAnotherShard({fixedPrefixLength: 8, closeTo: t1_b}).endCell().hash() & 0xFFFF,
+        t1_a.buildSameAddressInAnotherShard({fixedPrefixLength: 4, closeTo: t1_b}).endCell().hash() & 0xFFFF,
+        t2_a.buildSameAddressInAnotherShard({fixedPrefixLength: 2, closeTo: t2_b}).endCell().hash() & 0xFFFF,
+        t3_a.buildSameAddressInAnotherShard({fixedPrefixLength: 30, closeTo: t2_b}).endCell().hash() & 0xFFFF,
+        t2_a.buildSameAddressInAnotherShard({fixedPrefixLength: 1, closeTo: t3_b}).endCell().hash() & 0xFFFF,
+        t2_a.buildSameAddressInAnotherShard({fixedPrefixLength: 0, closeTo: t3_b}).endCell().hash() & 0xFFFF,
     )
 }
 
@@ -101,9 +81,7 @@ fun test3() {
 fun test4(shardDepth: int) {
     var a = address("EQCRDM9h4k3UJdOePPuyX40mCgA4vxge5Dc5vjBR8djbEKC5");
     var b = address("9:527964d55cfa6eb731f4bfc07e9d025098097ef8505519e853986279bd8400d8");
-    return a.buildSameAddressInAnotherShard({
-        fixedPrefixLength: shardDepth, closeTo: b
-    }).endCell().hash() & 0xFFFF;
+    return a.buildSameAddressInAnotherShard({fixedPrefixLength: shardDepth, closeTo: b}).endCell().hash() & 0xFFFF;
 }
 
 @method_id(105)
@@ -120,14 +98,12 @@ fun test5() {
 fun test6() {
     val a = address("0:00000000000000000000000000000000000000000000000000000000000000FF");
     val b = address("1:1100000000000000000000000000000000000000000000000000000000000000");
-    return address.fromValidBuilder(a.buildSameAddressInAnotherShard({
-        fixedPrefixLength: 8, closeTo: b
-    })) ==
+    return  address.fromValidBuilder(a.buildSameAddressInAnotherShard({fixedPrefixLength: 8, closeTo: b})) ==
     address("1:11000000000000000000000000000000000000000000000000000000000000FF");
 }
 
 
-fun manual_buildAddressOfJettonWallet_plain(ownerAddress: address, minterAddress: address, jettonWalletCode: cell) : builder {
+fun manual_buildAddressOfJettonWallet_plain(ownerAddress: address, minterAddress: address, jettonWalletCode: cell): builder {
     val stateInitHash = StateInit.calcHashCodeData(
         jettonWalletCode,
         WalletStorage.generateEmptyData(ownerAddress, minterAddress)
@@ -138,7 +114,7 @@ fun manual_buildAddressOfJettonWallet_plain(ownerAddress: address, minterAddress
         .storeUint(stateInitHash, 256)
 }
 
-fun manual_buildAddressOfJettonWallet_sharded(ownerAddress: address, minterAddress: address, jettonWalletCode: cell) : builder {
+fun manual_buildAddressOfJettonWallet_sharded(ownerAddress: address, minterAddress: address, jettonWalletCode: cell): builder {
     val stateInitHash = StateInit.calcHashPrefixCodeData(
         SHARD_DEPTH,
         jettonWalletCode,
@@ -150,7 +126,7 @@ fun manual_buildAddressOfJettonWallet_sharded(ownerAddress: address, minterAddre
         .storeUint(0b100, 3)
         .storeUint(BASECHAIN, 8)
         .storeSlice(shard_prefix)
-        .storeUint(mask, 256 - SHARD_DEPTH);
+        .storeUint( mask, 256 - SHARD_DEPTH);
 }
 
 fun address.manual_isAddressOfJettonWallet_plain(self, ownerAddress: address, minterAddress: address, jettonWalletCode: cell) {
@@ -183,9 +159,7 @@ fun test10() {
 
     val b1 = manual_buildAddressOfJettonWallet_plain(ownerAddress, minterAddress, jwCode);
     val si2: AutoDeployAddress = {
-        stateInit: {
-            code: jwCode, data: WalletStorage.generateEmptyData(ownerAddress, minterAddress)
-        }
+        stateInit: { code: jwCode, data: WalletStorage.generateEmptyData(ownerAddress, minterAddress) }
     };
     val b2 = si2.buildAddress();
     assert (b1.endCell().hash() == b2.endCell().hash()) throw 123;
@@ -198,9 +172,7 @@ fun test10() {
         si2.addressMatches(ownerAddress),
         AutoDeployAddress {
             workchain: -1,
-            stateInit: {
-                code: jwCode, data: WalletStorage.generateEmptyData(ownerAddress, minterAddress)
-            }
+            stateInit: { code: jwCode, data: WalletStorage.generateEmptyData(ownerAddress, minterAddress) }
         }.addressMatches(checkedAddr)
     )
 }
@@ -213,12 +185,8 @@ fun test11() {
 
     val b1 = manual_buildAddressOfJettonWallet_sharded(ownerAddress, minterAddress, jwCode);
     val si2: AutoDeployAddress = {
-        stateInit: {
-            code: jwCode, data: WalletStorage.generateEmptyData(ownerAddress, minterAddress)
-        },
-        toShard: {
-            fixedPrefixLength: SHARD_DEPTH, closeTo: ownerAddress
-        }
+        stateInit: { code: jwCode, data: WalletStorage.generateEmptyData(ownerAddress, minterAddress) },
+        toShard: { fixedPrefixLength: SHARD_DEPTH, closeTo: ownerAddress }
     };
     val b2 = si2.buildAddress();
     assert (b1.endCell().hash() == b2.endCell().hash()) throw 123;
@@ -229,19 +197,13 @@ fun test11() {
 
     return (
         AutoDeployAddress {
-            stateInit: {
-                code: jwCode, data: WalletStorage.generateEmptyData(ownerAddress, minterAddress)
-            },
+            stateInit: { code: jwCode, data: WalletStorage.generateEmptyData(ownerAddress, minterAddress) },
         }.addressMatches(checkedAddr),
         si2.addressMatches(ownerAddress),
         AutoDeployAddress {
             workchain: -1,
-            stateInit: {
-                code: jwCode, data: WalletStorage.generateEmptyData(ownerAddress, minterAddress)
-            },
-            toShard: {
-                fixedPrefixLength: SHARD_DEPTH, closeTo: ownerAddress
-            }
+            stateInit: { code: jwCode, data: WalletStorage.generateEmptyData(ownerAddress, minterAddress) },
+            toShard: { fixedPrefixLength: SHARD_DEPTH, closeTo: ownerAddress }
         }.addressMatches(checkedAddr)
     )
 }
@@ -254,12 +216,8 @@ fun test12() {
     while (i < 10) {
         var params: AutoDeployAddress = {
             workchain: -1,
-            stateInit: {
-                code: jwCode, data: createEmptyCell()
-            },
-            toShard: {
-                fixedPrefixLength: i, closeTo: ownerAddress
-            }
+            stateInit: { code: jwCode, data: createEmptyCell() },
+            toShard: { fixedPrefixLength: i, closeTo: ownerAddress }
         };
         val addrBuilt = params.buildAddress();
         val addr = address.fromValidBuilder(addrBuilt);
@@ -285,7 +243,7 @@ fun test13() {
     }.toCell();
 
     val manualBuilt = beginCell().storeUint(0b100, 3).storeUint(0, 8)
-        .storeUint(stateInitCell.hash(), 256);
+                             .storeUint(stateInitCell.hash(), 256);
     val si: AutoDeployAddress = {
         stateInit: stateInitCell
     };
@@ -295,9 +253,7 @@ fun test13() {
     val addr = addrBuilt.endCell().beginParse() as address;
     return (
         si.addressMatches(addr),
-        AutoDeployAddress {
-            workchain: 99, stateInit: stateInitCell
-        }.addressMatches(addr),
+        AutoDeployAddress {workchain: 99, stateInit: stateInitCell}.addressMatches(addr),
     )
 }
 
@@ -313,14 +269,12 @@ fun test14() {
     }.toCell();
 
     val manualBuilt = beginCell().storeUint(0b100, 3).storeUint(9, 8)
-        .storeSlice((ownerAddress as slice).getMiddleBits(3 + 8, 10))
-        .storeUint(stateInitCell.hash() & ((1 << 246) - 1), 246);
+                             .storeSlice((ownerAddress as slice).getMiddleBits(3+8, 10))
+                             .storeUint(stateInitCell.hash() & ((1 << 246) - 1), 246);
     val si: AutoDeployAddress = {
         workchain: 9,
         stateInit: stateInitCell,
-        toShard: {
-            fixedPrefixLength: 10, closeTo: ownerAddress
-        }
+        toShard: { fixedPrefixLength: 10, closeTo: ownerAddress }
     };
     val addrBuilt = si.buildAddress();
     val addr = addrBuilt.endCell().beginParse() as address;
@@ -337,8 +291,8 @@ fun test14() {
 }
 
 
-fun main() {
-}
+
+fun main() {}
 
 /**
 @testcase | 101 |   | -1
@@ -353,4 +307,4 @@ fun main() {
 @testcase | 112 |   | 10
 @testcase | 113 |   | -1 0
 @testcase | 114 |   | -1 -1 -1
-*/
+ */

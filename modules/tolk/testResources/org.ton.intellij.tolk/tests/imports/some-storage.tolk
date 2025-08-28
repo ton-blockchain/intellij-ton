@@ -1,2 +1,1 @@
-struct SomeStorage {
-}
+struct SomeStorage {}

@@ -19,4 +19,4 @@ fun main() {
 @compilation_should_fail
 @stderr auto-serialization via loadAny() is not available for type `CustomInt`
 @stderr because `CustomInt.unpackFromSlice()` can't be inlined; probably, it contains `return` in the middle
-*/
+ */

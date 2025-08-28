@@ -1,13 +1,8 @@
 const TWO = 2;
 global gTup: tuple;
 
-fun get1() {
-    gTup.push(1); return 1;
-}
-
-fun get2() {
-    gTup.push(2); return 2;
-}
+fun get1() { gTup.push(1); return 1; }
+fun get2() { gTup.push(2); return 2; }
 
 struct Point {
     x: int;
@@ -15,16 +10,12 @@ struct Point {
 }
 
 @noinline
-fun Point.create0NoInline() : Point {
-    return {
-        x: 0, y: 0
-    }
+fun Point.create0NoInline(): Point {
+    return { x: 0, y: 0 }
 }
 
-fun Point.create0() : Point {
-    return {
-        x: 0, y: 0
-    }
+fun Point.create0(): Point {
+    return { x: 0, y: 0 }
 }
 
 @method_id(101)
@@ -52,9 +43,7 @@ fun test104(x: (int, int)) {
 
 @method_id(105)
 fun test105(getX: bool) {
-    var p: Point = {
-        x: 10, y: 20
-    };
+    var p: Point = { x: 10, y: 20 };
     return getX ? p.x : p!.y;
 }
 
@@ -77,11 +66,7 @@ fun helper107(t: (int, Point)) {
 
 @method_id(107)
 fun test107() {
-    return (helper107((1, {
-        x: 10, y:20
-    })), helper107((0, {
-        x: 10, y: 20
-    })));
+    return (helper107((1, {x: 10, y:20})), helper107((0, {x: 10, y: 20})));
 }
 
 @method_id(108)
@@ -143,7 +128,7 @@ fun test220(p: Point?, getNull: bool) {
 }
 
 @method_id(221)
-fun test221(c: (int, (int, int)?)) {
+fun test221(c: (int, (int,int)?)) {
     if (c.1 != null) {
         return c.0 > 5 ? c.1.0 : c.1.1;
     }
@@ -152,7 +137,7 @@ fun test221(c: (int, (int, int)?)) {
 
 
 @method_id(300)
-fun test300(x: int) : tuple | int {
+fun test300(x: int): tuple | int {
     // no condsel, because more that 1 slot
     return x > 0 ? x : gTup;
 }
@@ -189,8 +174,7 @@ fun test305(y: bool) {
 }
 
 
-fun main() {
-}
+fun main() {}
 
 /**
 @testcase | 101 | 0       | 1 1
@@ -235,149 +219,149 @@ fun main() {
 
 @fif_codegen
 """
-test101() PROC:<{
-DUP
-2 PUSHINT
-1 PUSHINT
-CONDSEL
-SWAP
-5 EQINT
-2 PUSHINT
-1 PUSHINT
-CONDSEL
-}>
+  test101() PROC:<{
+    DUP
+    2 PUSHINT
+    1 PUSHINT
+    CONDSEL
+    SWAP
+    5 EQINT
+    2 PUSHINT
+    1 PUSHINT
+    CONDSEL
+  }>
 """
 
 @fif_codegen
 """
-test102() PROC:<{             //  x
-DUP                         //  x x
-ISNULL                      //  x '1
-0 PUSHINT
-ROT                         //  '1 '3=0 x
-CONDSEL                     //  '2
-}>
+  test102() PROC:<{             //  x
+    DUP                         //  x x
+    ISNULL                      //  x '1
+    0 PUSHINT
+    ROT                         //  '1 '3=0 x
+    CONDSEL                     //  '2
+  }>
 """
 
 @fif_codegen
 """
-test103() PROC:<{
--2 PUSHINT
-2 PUSHINT
-CONDSEL
-}>
+  test103() PROC:<{
+    -2 PUSHINT
+    2 PUSHINT
+    CONDSEL
+  }>
 """
 
 @fif_codegen
 """
-test105() PROC:<{             //  getX
-10 PUSHINT                  //  getX '3=10
-20 PUSHINT                  //  getX p.x=10 p.y=20
-CONDSEL                     //  '5
-}>
+  test105() PROC:<{             //  getX
+    10 PUSHINT                  //  getX '3=10
+    20 PUSHINT                  //  getX p.x=10 p.y=20
+    CONDSEL                     //  '5
+  }>
 """
 
 @fif_codegen
 """
-helper106() PROC:<{
-$gTup GETGLOB
-SWAP
-CONDSEL
-}>
+  helper106() PROC:<{
+    $gTup GETGLOB
+    SWAP
+    CONDSEL
+  }>
 """
 
 @fif_codegen
 """
-helper107() PROC:<{
-NIP
-s1 s(-1) PUXC
-CONDSEL
-}>
+  helper107() PROC:<{
+    NIP
+    s1 s(-1) PUXC
+    CONDSEL
+  }>
 """
 
 @fif_codegen
 """
-test108() PROC:<{
-CONT:<{
-MIN
-}>
-CONT:<{
-MAX
-}>
-CONDSEL
-10 PUSHINT
-20 PUSHINT
-ROT
-2 1 CALLXARGS
-}>
+  test108() PROC:<{
+    CONT:<{
+      MIN
+    }>
+    CONT:<{
+      MAX
+    }>
+    CONDSEL
+    10 PUSHINT
+    20 PUSHINT
+    ROT
+    2 1 CALLXARGS
+  }>
 """
 
 @fif_codegen
 """
-test109() PROC:<{
-50000000 PUSHINT
-1000000 PUSHINT
-CONDSEL
-}>
+  test109() PROC:<{
+    50000000 PUSHINT
+    1000000 PUSHINT
+    CONDSEL
+  }>
 """
 
 @fif_codegen
 """
-test200() PROC:<{
-DROP
-200 PUSHINT
-}>
+  test200() PROC:<{
+   DROP
+   200 PUSHINT
+  }>
 """
 
 @fif_codegen
 """
-test201() PROC:<{
-// '2
-}>
+  test201() PROC:<{
+    // '2
+  }>
 """
 
 @fif_codegen
 """
-test202() PROC:<{
-}>
+  test202() PROC:<{
+  }>
 """
 
 @fif_codegen
 """
-test203() PROC:<{
-200 PUSHINT
-}>
+  test203() PROC:<{
+    200 PUSHINT
+  }>
 """
 
 @fif_codegen
 """
-test220() PROC:<{
-s3 POP
-0 EQINT
-IFJMP:<{
-20 PUSHINT
-CONDSEL
-}>
-NIP
-}>
+  test220() PROC:<{
+    s3 POP
+    0 EQINT
+    IFJMP:<{
+      20 PUSHINT
+      CONDSEL
+    }>
+    NIP
+  }>
 """
 
 @fif_codegen
 """
-test304() PROC:<{
-IF:<{
-Point.create0NoInline() CALLDICT
+  test304() PROC:<{
+    IF:<{
+      Point.create0NoInline() CALLDICT
 """
 
 @fif_codegen
 """
-test305() PROC:<{
-IF:<{
-0 PUSHINT
-}>ELSE<{
-5 PUSHINT
-}>
-}>
+  test305() PROC:<{
+    IF:<{
+      0 PUSHINT
+    }>ELSE<{
+      5 PUSHINT
+    }>
+  }>
 """
 
 */

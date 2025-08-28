@@ -226,7 +226,7 @@ private VersionValueElement ::= '.' INTEGER_LITERAL {
 
 upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' (TypeExpression | 'builtin') ';'? {
     pin = 1
-    mixin = "org.ton.intellij.tolk.psi.impl.TolkTypeMixin"
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkTypeDefMixin"
     implements = [
         "org.ton.intellij.tolk.psi.TolkTypeParameterListOwner"
         "org.ton.intellij.tolk.psi.TolkTypeSymbolElement"

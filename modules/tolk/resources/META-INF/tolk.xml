@@ -151,6 +151,8 @@
         <!--                                              providerId="tolk.constant.hints">-->
         <!--        </codeInsight.declarativeInlayProvider>-->
 
+        <lang.importOptimizer language="Tolk"
+                              implementationClass="org.ton.intellij.tolk.codeInsight.imports.TolkImportOptimizer"/>
 
         <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkDumbAnnotator"/>
         <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkAnnotator"/>
@@ -179,6 +181,9 @@
         <localInspection language="Tolk" displayName="Unused parameter inspection" groupPath="Tolk"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedFunctionParameterInspection"/>
+        <localInspection language="Tolk" displayName="Unused import" groupPath="Tolk"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedImportInspection"/>
         <!--        <localInspection language="Tolk" displayName="Unsupported element inspection" groupPath="Tolk"-->
         <!--                         groupName="Declaration redundancy" enabledByDefault="true" level="ERROR"-->
         <!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnsupportedElementInspection"/>-->

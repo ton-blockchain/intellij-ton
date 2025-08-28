@@ -129,6 +129,7 @@ private fun TolkFunction.resolveReturnType(): TolkTy {
         }
     }
 
+    var seenThrows = false
     val statements = SmartList<TolkReturnStatement>()
     val visitor = object : TolkRecursiveElementWalkingVisitor() {
         override fun visitExpressionStatement(o: TolkExpressionStatement) {
@@ -137,10 +138,14 @@ private fun TolkFunction.resolveReturnType(): TolkTy {
         override fun visitReturnStatement(o: TolkReturnStatement) {
             statements.add(o)
         }
+
+        override fun visitThrowStatement(o: TolkThrowStatement) {
+            seenThrows = true
+        }
     }
     functionBody?.blockStatement?.accept(visitor)
 
-    if (statements.isEmpty() || statements.all { it.expression == null }) {
+    if (!seenThrows && (statements.isEmpty() || statements.all { it.expression == null })) {
         return TolkTy.Void
     }
 
@@ -155,6 +160,8 @@ private fun TolkFunction.resolveReturnType(): TolkTy {
         }.filterNotNull().fold<TolkTy, TolkTy?>(null) { a, b ->
             a?.join(b) ?: b
         } ?: TolkTy.Void
+    } else if (inference.unreachable != null) {
+        TolkTy.Never
     } else {
         TolkTy.Void
     }

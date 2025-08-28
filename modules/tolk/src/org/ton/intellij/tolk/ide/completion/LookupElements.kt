@@ -13,6 +13,7 @@ import org.ton.intellij.tolk.presentation.renderParameterList
 import org.ton.intellij.tolk.presentation.renderTypeExpression
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.hasSelf
+import org.ton.intellij.tolk.psi.impl.parentEnum
 import org.ton.intellij.tolk.type.*
 
 inline fun <reified T : PsiElement> InsertionContext.getElementOfType(strict: Boolean = false): T? =
@@ -164,6 +165,32 @@ fun TolkNamedElement.toLookupElementBuilder(
                 val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
                 insertFile.import(includeCandidateFile)
             }
+
+        is TolkEnum -> base
+            .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
+            .withInsertHandler { context, item ->
+                context.commitDocument()
+
+                val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+                val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
+                insertFile.import(includeCandidateFile)
+            }
+
+        is TolkEnumMember -> {
+            if (context.context?.parent is TolkMatchPattern) {
+                // Inside the match arm expression we need `Enum.Member` form.
+                val fqn = "${parentEnum.name}.$name"
+                return base
+                    .withBaseLookupString(fqn)
+                    .withPresentableText(fqn)
+                    .bold()
+                    .withTypeText(type?.render())
+                    .bold()
+            }
+            base.bold()
+                .withTypeText(type?.render())
+                .bold()
+        }
 
         is TolkTypeDef -> base
             .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)

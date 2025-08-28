@@ -27,5 +27,5 @@ abstract class TolkEnumMemberMixin : TolkNamedElementImpl<TolkEnumMemberStub>, T
     override fun getIcon(flags: Int): Icon = TolkIcons.FIELD
 }
 
-val TolkEnumMember.parentStruct: TolkStruct
-    get() = parentOfType<TolkStruct>()!!
+val TolkEnumMember.parentEnum: TolkEnum
+    get() = parentOfType<TolkEnum>()!!

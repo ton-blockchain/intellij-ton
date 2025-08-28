@@ -12,6 +12,7 @@ import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkMatchExpression
 import org.ton.intellij.tolk.psi.TolkMatchPattern
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
+import org.ton.intellij.tolk.psi.impl.members
 import org.ton.intellij.tolk.type.*
 
 object TolkMatchPatternTypesCompletionProvider : TolkCompletionProvider() {
@@ -53,6 +54,15 @@ object TolkMatchPatternTypesCompletionProvider : TolkCompletionProvider() {
                 }
 
                 result.addElement(element)
+            }
+        } else if (unwrappedType is TolkTyEnum) {
+            for (member in unwrappedType.psi.members) {
+                val memberName = member.name ?: continue
+                if (declaredMatchArms.contains(memberName)) {
+                    continue
+                }
+
+                result.addElement(member.toLookupElementBuilder(ctx).forMatchArm())
             }
         } else {
             collectLocalVariables(matchExpr) {

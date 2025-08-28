@@ -15,6 +15,22 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
         "Red", "Blue",
     )
 
+    fun `test enum completion with static method`() = checkEquals(
+        """
+            enum Color {
+                Red, Blue
+            }
+            
+            fun Color.max(): Color {}
+            
+            fun foo() {
+                Color./*caret*/
+            }
+        """,
+        1,
+        "Red", "Blue", "max",
+    )
+
     fun `test enum completion via alias`() = checkEquals(
         """
             enum Foo {
@@ -29,5 +45,49 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
         """,
         1,
         "Red", "Blue",
+    )
+
+    fun `test enum completion via instance without methods`() = checkEquals(
+        """
+            enum Color {
+                Red, Blue
+            }
+
+            fun foo(color: Color) {
+                color./*caret*/
+            }
+        """,
+        1,
+    )
+
+    fun `test enum completion via instance with instance method`() = checkEquals(
+        """
+            enum Color {
+                Red, Blue
+            }
+            
+            fun Color.isRed(self): bool {}
+
+            fun foo(color: Color) {
+                color./*caret*/
+            }
+        """,
+        1,
+        "isRed",
+    )
+
+    fun `test enum completion via instance with static method`() = checkEquals(
+        """
+            enum Color {
+                Red, Blue
+            }
+            
+            fun Color.max(): Color {}
+
+            fun foo(color: Color) {
+                color./*caret*/
+            }
+        """,
+        1,
     )
 }

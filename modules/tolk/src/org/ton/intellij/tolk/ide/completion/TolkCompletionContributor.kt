@@ -41,6 +41,7 @@ class TolkCompletionContributor : CompletionContributor() {
                 "tolk",
                 "type",
                 "struct",
+                "enum",
             )
         )
         extend(

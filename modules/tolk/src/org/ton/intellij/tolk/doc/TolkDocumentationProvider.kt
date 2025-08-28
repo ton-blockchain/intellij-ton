@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiDocCommentBase
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
 import com.intellij.psi.SyntaxTraverser
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.appendNotNull
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asAnnotation
@@ -97,6 +98,10 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
 
     override fun generateRenderedDoc(comment: PsiDocCommentBase): String? {
         return (comment as? TolkDocComment)?.renderHtml()
+    }
+
+    override fun getDocumentationElementForLink(psiManager: PsiManager?, link: String, context: PsiElement): PsiElement? {
+        return resolveDocumentationReference(link, context)
     }
 }
 

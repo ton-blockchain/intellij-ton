@@ -7,6 +7,7 @@ import com.intellij.openapi.util.TextRange
 import org.ton.intellij.tolk.psi.TolkCallExpression
 import org.ton.intellij.tolk.psi.TolkDotExpression
 import org.ton.intellij.tolk.psi.TolkElement
+import org.ton.intellij.tolk.psi.TolkEnum
 import org.ton.intellij.tolk.psi.TolkExpression
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkParameter
@@ -44,14 +45,15 @@ class TolkCallArgumentsCountMismatchInspection : TolkInspectionBase() {
             if (argsCount > maxParams) {
                 // foo(1, 2, 3)
                 //        ^^^^ here
-                val extraArgs = args.subList(maxParams - deltaSelf, args.size)
+                val startIndex = (maxParams - deltaSelf).coerceAtLeast(0)
+                val extraArgs = args.subList(startIndex, args.size)
                 val startPosition = (extraArgs.getOrNull(0) ?: call).startOffsetInParent
                 val lastExtraArg = extraArgs.getOrNull(extraArgs.size - 1) ?: call
                 val endPosition = lastExtraArg.startOffsetInParent + lastExtraArg.textLength
 
                 val descriptor = holder.manager.createProblemDescriptor(
                     call.argumentList,
-                    TextRange(startPosition, endPosition),
+                    if (startIndex == 0 && args.isEmpty()) null else TextRange(startPosition, endPosition),
                     "Too many arguments in call to <code>${called.name}</code>, expected ${maxParams - deltaSelf}, have ${argsCount - deltaSelf}",
                     ProblemHighlightType.GENERIC_ERROR,
                     false
@@ -83,7 +85,7 @@ fun isInstanceMethodCall(call: TolkCallExpression): Boolean {
         }
 
         val resolved = qualifier.reference?.resolve()
-        if (resolved is TolkStruct || resolved is TolkTypeDef || resolved is TolkTypeParameter) {
+        if (resolved is TolkStruct || resolved is TolkTypeDef || resolved is TolkTypeParameter || resolved is TolkEnum) {
             // likely Foo.bar() static call
             return false
         }

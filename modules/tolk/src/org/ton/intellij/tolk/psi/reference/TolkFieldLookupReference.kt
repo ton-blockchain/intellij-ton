@@ -13,7 +13,7 @@ class TolkFieldLookupReference(
         element.inference?.getResolvedRefs(element)?.mapNotNull { it.element as? TolkElement } ?: emptyList()
 
     override fun isReferenceTo(element: PsiElement): Boolean {
-        return (element is TolkStructField || element is TolkFunction) && super.isReferenceTo(element)
+        return (element is TolkStructField || element is TolkEnumMember || element is TolkFunction) && super.isReferenceTo(element)
     }
 }
 
@@ -30,6 +30,14 @@ fun resolveFieldLookupReferenceWithReceiver(
                 return@forEachIndexed
             }
             return listOf(field to sub)
+        }
+    }
+    if (unwrappedReceiverType is TolkTyEnum) {
+        unwrappedReceiverType.psi.members.forEachIndexed { index, member ->
+            if (index.toString() != name && member.name != name) {
+                return@forEachIndexed
+            }
+            return listOf(member to Substitution.empty())
         }
     }
 
@@ -124,6 +132,11 @@ fun collectFunctionCandidates(
         val actualFunctionReceiver = functionReceiver.actualType()
         if (functionReceiver.hasGenerics() && functionReceiver !is TolkTyParam) {
             if (actualFunctionReceiver is TolkTyStruct && actualCalledReceiver is TolkTyStruct) {
+                if (!actualFunctionReceiver.psi.isEquivalentTo(actualCalledReceiver.psi)) {
+                    continue
+                }
+            }
+            if (actualFunctionReceiver is TolkTyEnum && actualCalledReceiver is TolkTyEnum) {
                 if (!actualFunctionReceiver.psi.isEquivalentTo(actualCalledReceiver.psi)) {
                     continue
                 }

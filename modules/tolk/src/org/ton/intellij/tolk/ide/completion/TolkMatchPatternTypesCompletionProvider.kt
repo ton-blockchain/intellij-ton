@@ -46,6 +46,7 @@ object TolkMatchPatternTypesCompletionProvider : TolkCompletionProvider() {
 
                 val element = when (unionVariant) {
                     is TolkTyStruct    -> unionVariant.psi.toLookupElementBuilder(ctx).forMatchArm()
+                    is TolkTyEnum      -> unionVariant.psi.toLookupElementBuilder(ctx).forMatchArm()
                     is TolkTyAlias     -> unionVariant.psi.toLookupElementBuilder(ctx).forMatchArm()
                     is TolkPrimitiveTy -> unionVariant.toLookupElement().forMatchArm()
                     else               -> LookupElementBuilder.create(unionVariant.render()).forMatchArm()

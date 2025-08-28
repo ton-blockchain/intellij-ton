@@ -137,6 +137,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 is TolkGlobalVar,
                 is TolkTypeDef,
                 is TolkStruct,
+                is TolkEnum,
                     -> {
                     fun canAddAsUnionMatchVariant(): Boolean {
                         if (!inMatchPattern) return false
@@ -210,6 +211,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             is TolkConstVar,
             is TolkGlobalVar,
             is TolkTypeDef,
+            is TolkEnum,
             is TolkStruct -> {
                 builder.toTolkLookupElement(
                     TolkLookupElementData(

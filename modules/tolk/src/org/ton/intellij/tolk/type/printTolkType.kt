@@ -21,6 +21,11 @@ fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
             printTolkTypeArguments(type.typeArguments)
         }
 
+        is TolkTyEnum -> {
+            val psi = type.psi
+            printPsi(psi, psi.name ?: "<unknown>")
+        }
+
         is TolkTyFunction -> {
             val inputType = type.parametersType
             text("(")

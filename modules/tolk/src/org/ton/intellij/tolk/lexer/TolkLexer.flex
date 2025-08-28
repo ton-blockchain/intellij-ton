@@ -272,6 +272,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "val"                    { return VAL_KEYWORD; }
       "enum"                   { return ENUM_KEYWORD; }
       "struct"                 { return STRUCT_KEYWORD; }
+      "enum"                   { return ENUM_KEYWORD; }
       "export"                 { return EXPORT_KEYWORD; }
       "break"                  { return BREAK_KEYWORD; }
       "continue"               { return CONTINUE_KEYWORD; }

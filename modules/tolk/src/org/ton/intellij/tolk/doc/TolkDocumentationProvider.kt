@@ -13,6 +13,8 @@ import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asAnnotation
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asComma
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asConstant
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asDot
+import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asEnum
+import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asEnumMember
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asField
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asFunction
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asGlobalVariable
@@ -38,6 +40,8 @@ import org.ton.intellij.tolk.psi.TolkAnnotation
 import org.ton.intellij.tolk.psi.TolkCatchParameter
 import org.ton.intellij.tolk.psi.TolkConstVar
 import org.ton.intellij.tolk.psi.TolkDocOwner
+import org.ton.intellij.tolk.psi.TolkEnum
+import org.ton.intellij.tolk.psi.TolkEnumMember
 import org.ton.intellij.tolk.psi.TolkExpression
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkFunction
@@ -68,6 +72,8 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
         is TolkTypeDef            -> element.generateDoc()
         is TolkStruct             -> element.generateDoc()
         is TolkStructField        -> element.generateDoc()
+        is TolkEnum               -> element.generateDoc()
+        is TolkEnumMember         -> element.generateDoc()
         is TolkParameter          -> element.generateDoc()
         is TolkSelfParameter      -> element.generateDoc()
         is TolkSelfTypeExpression -> element.generateDoc()
@@ -137,6 +143,10 @@ fun TolkTy.generateDoc(): String = buildString {
         is TolkTyStruct       -> {
             colorize(psi.name ?: "Anonymous", asStruct)
             renderTypeParameters(typeArguments, this@buildString)
+        }
+
+        is TolkTyEnum         -> {
+            colorize(psi.name ?: "Anonymous", asEnum)
         }
 
         is TolkTyAlias        -> {
@@ -369,6 +379,48 @@ fun TolkStructField.generateDoc(): String {
     }
 }
 
+fun TolkEnum.generateDoc(): String {
+    return buildString {
+        append(DocumentationMarkup.DEFINITION_START)
+
+        line(annotations.annotations().generateDoc())
+
+        part("enum", asKeyword)
+
+        colorize(name ?: "", asEnum)
+
+        generateEnumMembers(enumBody?.enumMemberList ?: emptyList())
+
+        append(DocumentationMarkup.DEFINITION_END)
+        generateCommentsPart(this@generateDoc)
+    }
+}
+
+fun TolkEnumMember.generateDoc(): String {
+    return buildString {
+        append(DocumentationMarkup.DEFINITION_START)
+
+        val owner = parentOfType<TolkEnum>()
+        if (owner != null && owner.name != null) {
+            colorize("enum", asKeyword)
+            append(" ")
+            colorize(owner.name ?: "", asEnum)
+            append("\n")
+        }
+
+        colorize(name ?: "", asEnumMember)
+
+        val defaultValue = expression
+        if (defaultValue != null) {
+            append(" = ")
+            append(defaultValue.generateDoc())
+        }
+
+        append(DocumentationMarkup.DEFINITION_END)
+        generateCommentsPart(this@generateDoc)
+    }
+}
+
 fun TolkFunction.generateDoc(): String {
     val parameters = parameterList?.parameterList ?: emptyList()
     val returnType = returnTy
@@ -415,7 +467,7 @@ fun TolkAnnotation.generateDoc(): String {
         append(DocumentationMarkup.DEFINITION_START)
         append(generateShortDoc())
         append(DocumentationMarkup.DEFINITION_END)
-        
+
         val annotationInfo = TolkAnnotationInfo.getAnnotationInfo(name)
         if (annotationInfo != null) {
             append(DocumentationMarkup.CONTENT_START)
@@ -553,6 +605,32 @@ private fun StringBuilder.generateStructFields(fields: List<TolkStructField>) {
                 if (type != null) {
                     append(type.generateDoc())
                 }
+
+                val defaultValue = field.expression
+                if (defaultValue != null) {
+                    append(" = ")
+                    append(defaultValue.generateDoc())
+                }
+            }
+        }
+    )
+    append("\n")
+    colorize("}", asParen)
+}
+
+private fun StringBuilder.generateEnumMembers(fields: List<TolkEnumMember>) {
+    if (fields.isEmpty()) {
+        colorize(" {}", asParen)
+        return
+    }
+
+    colorize(" {", asParen)
+    appendLine()
+    append(
+        fields.joinToString("\n") { field ->
+            buildString {
+                append("   ")
+                colorize(field.name ?: "", asEnumMember)
 
                 val defaultValue = field.expression
                 if (defaultValue != null) {

@@ -23,6 +23,8 @@ object TolkElementTypeFactory {
         "TYPE_DEF"                  -> TolkTypeDefStub.Type
         "STRUCT"                    -> TolkStructStub.Type
         "STRUCT_FIELD"              -> TolkStructFieldStubElementType(name)
+        "ENUM"                      -> TolkEnumStub.Type
+        "ENUM_MEMBER"               -> TolkEnumMemberStub.Type(name)
         "RETURN_TYPE"               -> TolkPlaceholderStub.Type(name, ::TolkReturnTypeImpl)
         "SELF_RETURN_TYPE"          -> TolkSelfReturnTypeStub.Type(name)
         "FUNCTION_RECEIVER"         -> TolkFunctionReceiverStub.Type(name)

@@ -108,6 +108,7 @@
             VAL_KEYWORD                 = 'val'
             ENUM_KEYWORD                = 'enum'
             STRUCT_KEYWORD              = 'struct'
+            ENUM_KEYWORD                = 'enum'
             EXPORT_KEYWORD              = 'export'
             BREAK_KEYWORD               = 'break'
             CONTINUE_KEYWORD            = 'continue'
@@ -148,7 +149,7 @@ private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelElement {
 private TopLevelDefinition_recover ::= !(TopLevelDefinition_first)
 private TopLevelDefinition_first ::= 'tolk' | 'fun' | 'import' | 'global' | 'const' | ';' | '@' | 'enum' | 'struct' | 'type' | "get"
 
-Item ::= Annotations (ConstVar | GlobalVar | TypeDef | Struct | Function) {
+Item ::= Annotations (ConstVar | GlobalVar | TypeDef | Struct | Enum | Function) {
     name = "item"
     elementType = ToBeUpped
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
@@ -280,6 +281,36 @@ private StructFieldDefault ::= '=' Expression {
     pin=1
     recoverWhile = StructField_recover
 }
+
+upper Enum ::= 'enum' IDENTIFIER EnumBody {
+    pin=1
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkEnumMixin"
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkTypeSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkAnnotationHolder"
+        "org.ton.intellij.tolk.psi.TolkDocOwner"
+    ]
+    stubClass="org.ton.intellij.tolk.stub.TolkEnumStub"
+    elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+}
+
+EnumBody ::= '{' EnumMember* '}' {pin=1}
+
+EnumMember ::= IDENTIFIER ('=' Expression)? ','? {
+    pin=1
+    recoverWhile = EnumMember_recover
+    mixin="org.ton.intellij.tolk.psi.impl.TolkEnumMemberMixin"
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
+        "org.ton.intellij.tolk.psi.TolkDocOwner"
+    ]
+    stubClass="org.ton.intellij.tolk.stub.TolkEnumMemberStub"
+    elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+    hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
+}
+private EnumMember_recover ::= !(';'|','|'}'|IDENTIFIER)
+
 //PragmaDefinition ::= PragmaDefinitionPart
 //PragmaKey ::= IDENTIFIER
 //PragmaValue ::= StringLiteral | IntegerExpression

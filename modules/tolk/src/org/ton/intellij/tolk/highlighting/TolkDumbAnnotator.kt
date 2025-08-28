@@ -78,8 +78,10 @@ class TolkDumbAnnotator : Annotator, DumbAware {
                         TolkColor.STRUCT.textAttributesKey
                     }
                 }
+                is TolkEnum -> TolkColor.ENUM.textAttributesKey
                 is TolkTypeDef -> TolkColor.TYPE_ALIAS.textAttributesKey
                 is TolkStructField -> TolkColor.FIELD.textAttributesKey
+                is TolkEnumMember -> TolkColor.ENUM_MEMBER.textAttributesKey
                 is TolkStructExpressionField -> TolkColor.FIELD.textAttributesKey
                 is TolkVar -> if (element.isMutable) {
                     TolkColor.MUTABLE_VARIABLE.textAttributesKey

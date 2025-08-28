@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tolk Documentation Test Results</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #fafafa; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        .element { margin-bottom: 25px; border: 1px solid #ddd; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .element-title { font-weight: bold; color: #2c3e50; margin-bottom: 15px; font-size: 14px; background: #ecf0f1; padding: 8px; border-radius: 4px; }
+        .documentation { background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #3498db; font-family: 'JetBrains Mono', 'Fira Code', monospace; line-height: 1.6; }
+        
+        /* Tolk syntax highlighting */
+        .keyword { color: #d73a49; font-weight: bold; }
+        .primitive { color: #005cc5; font-weight: 500; }
+        .struct { color: #22863a; font-weight: 500; }
+        .function { color: #6f42c1; font-weight: 500; }
+        .parameter { color: #e36209; }
+        .type-alias { color: #d73a49; }
+        .type-parameter { color: #6f42c1; font-style: italic; }
+        .annotation { color: #6a737d; }
+        .string { color: #032f62; }
+        .number { color: #005cc5; }
+        .comment { color: #6a737d; font-style: italic; }
+        .constant { color: #005cc5; font-weight: 500; }
+        .global-variable { color: #e36209; font-weight: 500; }
+        .identifier { color: #24292e; }
+        
+        /* Documentation markup */
+        .definition-start { border-top: 2px solid #e1e4e8; margin-top: 10px; padding-top: 10px; }
+        .definition-end { border-bottom: 1px solid #e1e4e8; margin-bottom: 10px; padding-bottom: 10px; }
+        .content-start { margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Tolk Documentation Test Results</h1>
+    <div class="element">
+        <div class="element-title">TolkEnumImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">EEmpty</span><span style=""> {}</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumMemberImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">Color</span>
+<span style="color:#660e7a;font-style:italic;">Red</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumMemberImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">Color</span>
+<span style="color:#660e7a;font-style:italic;">Green</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumMemberImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">Color</span>
+<span style="color:#660e7a;font-style:italic;">Blue</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">Color</span><span style=""> {</span>
+   <span style="color:#660e7a;font-style:italic;">Red</span>
+   <span style="color:#660e7a;font-style:italic;">Green</span>
+   <span style="color:#660e7a;font-style:italic;">Blue</span>
+<span style="">}</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumMemberImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">EPartialAssigned</span>
+<span style="color:#660e7a;font-style:italic;">M100</span> = -<span style="color:#0000ff;">100</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumMemberImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">EPartialAssigned</span>
+<span style="color:#660e7a;font-style:italic;">M99</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumMemberImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">EPartialAssigned</span>
+<span style="color:#660e7a;font-style:italic;">P1</span> = (<span style="color:#0000ff;">1</span> + <span style="color:#0000ff;">0</span>) << <span style="color:#0000ff;">0</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumMemberImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">EPartialAssigned</span>
+<span style="color:#660e7a;font-style:italic;">P2</span> = ((+<span style="color:#0000ff;">1</span> + <span style="color:#0000ff;">1</span>) << <span style="color:#0000ff;">1</span>) / <span style="color:#0000ff;">2</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumMemberImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">EPartialAssigned</span>
+<span style="color:#660e7a;font-style:italic;">P3</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumMemberImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">EPartialAssigned</span>
+<span style="color:#660e7a;font-style:italic;">P4</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumMemberImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">EPartialAssigned</span>
+<span style="color:#660e7a;font-style:italic;">P5</span> = <span style="color:#0000ff;">0b101</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumMemberImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">EPartialAssigned</span>
+<span style="color:#660e7a;font-style:italic;">P6</span> = SIX</pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumMemberImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre><span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">EPartialAssigned</span>
+<span style="color:#660e7a;font-style:italic;">Max</span> = <span style="color:#0000ff;">0x7FFFFFFF</span></pre></div>
+        </div>
+    </div>
+    <div class="element">
+        <div class="element-title">TolkEnumImpl</div>
+        <div class="documentation">
+            <div class='definition'><pre>
+<span style="color:#000080;font-weight:bold;">enum</span> <span style="color:#000000;">EPartialAssigned</span><span style=""> {</span>
+   <span style="color:#660e7a;font-style:italic;">M100</span> = -<span style="color:#0000ff;">100</span>
+   <span style="color:#660e7a;font-style:italic;">M99</span>
+   <span style="color:#660e7a;font-style:italic;">P1</span> = (<span style="color:#0000ff;">1</span> + <span style="color:#0000ff;">0</span>) << <span style="color:#0000ff;">0</span>
+   <span style="color:#660e7a;font-style:italic;">P2</span> = ((+<span style="color:#0000ff;">1</span> + <span style="color:#0000ff;">1</span>) << <span style="color:#0000ff;">1</span>) / <span style="color:#0000ff;">2</span>
+   <span style="color:#660e7a;font-style:italic;">P3</span>
+   <span style="color:#660e7a;font-style:italic;">P4</span>
+   <span style="color:#660e7a;font-style:italic;">P5</span> = <span style="color:#0000ff;">0b101</span>
+   <span style="color:#660e7a;font-style:italic;">P6</span> = SIX
+   <span style="color:#660e7a;font-style:italic;">Max</span> = <span style="color:#0000ff;">0x7FFFFFFF</span>
+<span style="">}</span></pre></div>
+        </div>
+    </div>
+</body>
+</html>

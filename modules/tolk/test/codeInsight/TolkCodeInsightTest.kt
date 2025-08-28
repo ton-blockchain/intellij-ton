@@ -89,4 +89,6 @@ class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
     fun `test unreachable-5`() = doTest()
     fun `test use-before-declare`() = doTest()
     fun `test var-apply-tests`() = doTest()
+
+    fun `test enums-tests`() = doTest()
 }

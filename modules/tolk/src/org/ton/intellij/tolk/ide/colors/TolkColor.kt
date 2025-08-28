@@ -15,6 +15,7 @@ enum class TolkColor(
     VARIABLE(TolkBundle.messagePointer("settings.tolk.color.variable"), Default.LOCAL_VARIABLE),
     MUTABLE_VARIABLE(TolkBundle.messagePointer("settings.tolk.color.variable.mutable"), Default.REASSIGNED_LOCAL_VARIABLE),
     FIELD(TolkBundle.messagePointer("settings.tolk.color.field"), Default.INSTANCE_FIELD),
+    ENUM_MEMBER(TolkBundle.messagePointer("settings.tolk.color.enum.member"), Default.STATIC_FIELD),
     CONSTANT(TolkBundle.messagePointer("settings.tolk.color.constant"), Default.CONSTANT),
     GLOBAL_VARIABLE(TolkBundle.messagePointer("settings.tolk.color.global"), Default.GLOBAL_VARIABLE),
 
@@ -37,6 +38,7 @@ enum class TolkColor(
     PRIMITIVE(TolkBundle.messagePointer("settings.tolk.color.primitive"), Default.KEYWORD),
     STRUCT(TolkBundle.messagePointer("settings.tolk.color.struct"), Default.CLASS_NAME),
     EMPTY_STRUCT(TolkBundle.messagePointer("settings.tolk.color.empty_struct"), Default.CLASS_NAME),
+    ENUM(TolkBundle.messagePointer("settings.tolk.color.enum"), Default.CLASS_NAME),
     TYPE_ALIAS(TolkBundle.messagePointer("settings.tolk.color.type_alias"), Default.INTERFACE_NAME),
 
     KEYWORD(TolkBundle.messagePointer("settings.tolk.color.keyword"), Default.KEYWORD),

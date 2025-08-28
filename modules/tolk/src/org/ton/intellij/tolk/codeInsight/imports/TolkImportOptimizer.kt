@@ -74,6 +74,7 @@ class TolkImportOptimizer : ImportOptimizer {
                 importedFile.globalVars.forEach { names.add(it.name ?: return@forEach) }
                 importedFile.typeDefs.forEach { names.add(it.name ?: return@forEach) }
                 importedFile.structs.forEach { names.add(it.name ?: return@forEach) }
+                importedFile.enums.forEach { names.add(it.name ?: return@forEach) }
 
                 if (!usedInFile(file, names)) {
                     importsToDelete.add(import)

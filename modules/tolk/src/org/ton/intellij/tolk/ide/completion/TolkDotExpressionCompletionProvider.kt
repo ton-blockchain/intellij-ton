@@ -103,6 +103,21 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
             }
         }
 
+        val unwrappedCalledType = calledType.unwrapTypeAlias()
+        if (isStaticReceiver && unwrappedCalledType is TolkTyEnum) {
+            for (field in unwrappedCalledType.psi.members) {
+                if (!checkLimit()) return
+                val lookupElement = field.toLookupElementBuilder(ctx)
+                if (prefixMatcher.prefixMatches(lookupElement)) {
+                    result.addElement(lookupElement.toTolkLookupElement(
+                        TolkLookupElementData(
+                            elementKind = TolkLookupElementData.ElementKind.FIELD
+                        )
+                    ))
+                }
+            }
+        }
+
         val functions = HashSet<TolkFunction>()
         val calledTypeWithoutNull = calledType.actualType().removeNullable()
 

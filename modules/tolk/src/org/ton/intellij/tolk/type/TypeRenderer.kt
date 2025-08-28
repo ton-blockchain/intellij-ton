@@ -79,6 +79,9 @@ private class TypeRenderer(
                     append(ty.typeArguments.joinToString(", ", "<", ">", transform = render))
                 }
             }
+            is TolkTyEnum -> buildString {
+                append(ty.psi.name ?: return anonymous)
+            }
 
             else -> ty.toString()
         }

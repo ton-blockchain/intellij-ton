@@ -1,9 +1,15 @@
 package org.ton.intellij.tolk.completion
 
 import com.intellij.codeInsight.CodeInsightSettings
+import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.codeInsight.lookup.LookupElement
+import com.intellij.testFramework.UsefulTestCase.assertOrderedEquals
+import com.intellij.testFramework.UsefulTestCase.assertSameElements
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import com.intellij.testFramework.fixtures.impl.BaseFixture
+import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertTrue
 import org.intellij.lang.annotations.Language
 import org.ton.intellij.tolk.hasCaretMarker
 import org.ton.intellij.tolk.replaceCaretMarker
@@ -164,6 +170,64 @@ abstract class TolkCompletionTestFixtureBase<IN>(
         prepare(code)
         action()
         myFixture.checkResult(replaceCaretMarker(after))
+    }
+
+    enum class CheckType {
+        EQUALS, INCLUDES, EXCLUDES, ORDERED_EQUALS, EMPTY, NOT_EMPTY, FIRST,
+    }
+
+    open fun doTestVariants(
+        @Language("vlang") txt: String,
+        type: CompletionType,
+        count: Int,
+        checkType: CheckType,
+        vararg variants: String,
+    ) {
+        val newText = replaceCaretMarker(txt)
+        myFixture.configureByText("test.tolk", newText)
+        doTestVariantsInner(type, count, checkType, *variants)
+    }
+
+    open fun doTestVariantsInner(type: CompletionType, count: Int, checkType: CheckType, vararg variants: String) {
+        myFixture.complete(type, count)
+        val stringList = myFixture.lookupElementStrings ?: emptyList()
+        assertNotNull(
+            """
+            
+            Possibly the single variant has been completed.
+            File after:
+            ${myFixture.file.text}
+            """.trimIndent(), stringList
+        )
+        val varList = mutableListOf<String>()
+        varList.addAll(variants)
+
+        when (checkType) {
+            CheckType.ORDERED_EQUALS -> {
+                assertOrderedEquals(stringList, *variants)
+            }
+            CheckType.EQUALS         -> {
+                assertSameElements(stringList, *variants)
+            }
+            CheckType.INCLUDES       -> {
+                varList.removeAll(stringList.toSet())
+                assertTrue("Missing variants: $varList, variants: $stringList", varList.isEmpty())
+            }
+            CheckType.EXCLUDES       -> {
+                varList.retainAll(stringList.toSet())
+                assertTrue("Unexpected variants: $varList", varList.isEmpty())
+            }
+            CheckType.EMPTY          -> {
+                assertTrue("Expected empty completion, but got: $stringList", stringList.isEmpty())
+            }
+            CheckType.NOT_EMPTY      -> {
+                assertTrue("Expected non-empty completion, but got: $stringList", stringList.isNotEmpty())
+            }
+
+            CheckType.FIRST          -> {
+                assertEquals("Expected first variant to be ${variants[0]}, but got: $stringList", variants[0], stringList[0])
+            }
+        }
     }
 
     protected abstract fun prepare(code: IN)

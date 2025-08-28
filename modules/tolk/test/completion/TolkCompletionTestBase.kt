@@ -1,5 +1,6 @@
 package org.ton.intellij.tolk.completion
 
+import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.codeInsight.lookup.LookupElement
 import org.intellij.lang.annotations.Language
 import org.ton.intellij.tolk.TolkTestBase
@@ -81,6 +82,12 @@ abstract class TolkCompletionTestBase : TolkTestBase() {
     }
 
     protected open fun checkNoCompletion(@Language("Tolk") code: String) = completionFixture.checkNoCompletion(code)
+
+    fun checkEquals(
+        @Language("Tolk") txt: String,
+        count: Int,
+        vararg variants: String,
+    ) = completionFixture.doTestVariants(txt, CompletionType.BASIC, count, TolkCompletionTestFixtureBase.CheckType.EQUALS, *variants)
 
     protected fun executeSoloCompletion() = completionFixture.executeSoloCompletion()
 }

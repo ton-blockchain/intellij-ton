@@ -13,6 +13,8 @@ import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asAnnotation
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asComma
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asConstant
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asDot
+import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asEnum
+import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asEnumMember
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asField
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asFunction
 import org.ton.intellij.tolk.doc.TolkDocumentationUtils.asGlobalVariable
@@ -141,6 +143,10 @@ fun TolkTy.generateDoc(): String = buildString {
         is TolkTyStruct       -> {
             colorize(psi.name ?: "Anonymous", asStruct)
             renderTypeParameters(typeArguments, this@buildString)
+        }
+
+        is TolkTyEnum         -> {
+            colorize(psi.name ?: "Anonymous", asEnum)
         }
 
         is TolkTyAlias        -> {
@@ -381,7 +387,7 @@ fun TolkEnum.generateDoc(): String {
 
         part("enum", asKeyword)
 
-        colorize(name ?: "", asStruct)
+        colorize(name ?: "", asEnum)
 
         generateEnumMembers(enumBody?.enumMemberList ?: emptyList())
 
@@ -398,11 +404,11 @@ fun TolkEnumMember.generateDoc(): String {
         if (owner != null && owner.name != null) {
             colorize("enum", asKeyword)
             append(" ")
-            colorize(owner.name ?: "", asStruct)
+            colorize(owner.name ?: "", asEnum)
             append("\n")
         }
 
-        colorize(name ?: "", asField)
+        colorize(name ?: "", asEnumMember)
 
         val defaultValue = expression
         if (defaultValue != null) {
@@ -624,7 +630,7 @@ private fun StringBuilder.generateEnumMembers(fields: List<TolkEnumMember>) {
         fields.joinToString("\n") { field ->
             buildString {
                 append("   ")
-                colorize(field.name ?: "", asField)
+                colorize(field.name ?: "", asEnumMember)
 
                 val defaultValue = field.expression
                 if (defaultValue != null) {

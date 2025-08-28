@@ -19,6 +19,7 @@ import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.TolkStructExpression
 import org.ton.intellij.tolk.psi.TolkStructExpressionField
 import org.ton.intellij.tolk.psi.TolkStructField
+import org.ton.intellij.tolk.psi.impl.members
 import org.ton.intellij.tolk.psi.impl.structFields
 import org.ton.intellij.tolk.type.TolkBitsNTy
 import org.ton.intellij.tolk.type.TolkBytesNTy
@@ -30,6 +31,7 @@ import org.ton.intellij.tolk.type.TolkTyAddress
 import org.ton.intellij.tolk.type.TolkTyBool
 import org.ton.intellij.tolk.type.TolkTyBuilder
 import org.ton.intellij.tolk.type.TolkTyCoins
+import org.ton.intellij.tolk.type.TolkTyEnum
 import org.ton.intellij.tolk.type.TolkTyNull
 import org.ton.intellij.tolk.type.TolkTyStruct
 import org.ton.intellij.tolk.type.TolkTyTensor
@@ -156,6 +158,11 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
 
         if (type is TolkTyStruct) {
             return "${type.render()} {}"
+        }
+
+        if (type is TolkTyEnum) {
+            val member = type.psi.members.firstOrNull() ?: return type.render()
+            return "${type.render()}.${member.name}"
         }
 
         if (type is TolkTyTypedTuple) {

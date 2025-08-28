@@ -36,6 +36,8 @@ class TolkFindUsagesProvider : FindUsagesProvider {
             is TolkTypeDef -> "Type alias"
             is TolkStruct -> "Structure"
             is TolkStructField -> "Structure field"
+            is TolkEnum -> "Enum"
+            is TolkEnumMember -> "Enum member"
             is TolkVar -> "Variable"
             is TolkParameterElement -> "Parameter"
             is TolkCatchParameter -> "Catch parameter"

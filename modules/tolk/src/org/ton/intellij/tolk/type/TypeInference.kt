@@ -177,6 +177,11 @@ class TolkInferenceContext(
                 walker.inferField(element, TolkFlowContext())
             }
 
+            is TolkEnumMember -> {
+                val walker = TolkInferenceWalker(this)
+                walker.inferEnumMember(element, TolkFlowContext())
+            }
+
             is TolkParameterDefault -> {
                 val walker = TolkInferenceWalker(this)
                 walker.inferParameterDefault(element, TolkFlowContext())
@@ -394,6 +399,12 @@ class TolkInferenceWalker(
         val expression = element.expression ?: return flow
         val typeHint = element.typeExpression?.type
         inferExpression(expression, flow, false, typeHint).outFlow
+        return flow
+    }
+
+    fun inferEnumMember(element: TolkEnumMember, flow: TolkFlowContext): TolkFlowContext {
+        val expression = element.expression ?: return flow
+        inferExpression(expression, flow, false).outFlow
         return flow
     }
 
@@ -1475,6 +1486,10 @@ class TolkInferenceWalker(
                 }
 
                 is TolkTyStruct -> {
+                    receiverSymbol = receiverType.psi
+                }
+
+                is TolkTyEnum -> {
                     receiverSymbol = receiverType.psi
                 }
 

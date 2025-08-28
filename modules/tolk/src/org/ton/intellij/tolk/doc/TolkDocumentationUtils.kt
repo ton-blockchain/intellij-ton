@@ -26,6 +26,8 @@ object TolkDocumentationUtils : DocumentationUtils() {
     val asString get() = loadKey(TolkColor.STRING.textAttributesKey)
     val asNumber get() = loadKey(TolkColor.NUMBER.textAttributesKey)
     val asField get() = loadKey(TolkColor.FIELD.textAttributesKey)
+    val asEnum get() = loadKey(TolkColor.ENUM.textAttributesKey)
+    val asEnumMember get() = loadKey(TolkColor.ENUM_MEMBER.textAttributesKey)
     val asParen get() = loadKey(TolkColor.PARENTHESES.textAttributesKey)
     val asComma get() = loadKey(TolkColor.COMMA.textAttributesKey)
     val asDot get() = loadKey(TolkColor.DOT.textAttributesKey)
@@ -155,6 +157,11 @@ private fun resolveDocumentationTypeReference(containingFile: TolkFile, name: St
     for (struct in containingFile.structs) {
         if (struct.name == name) {
             return struct
+        }
+    }
+    for (enum in containingFile.enums) {
+        if (enum.name == name) {
+            return enum
         }
     }
     return null

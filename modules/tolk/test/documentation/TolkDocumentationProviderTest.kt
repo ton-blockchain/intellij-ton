@@ -21,6 +21,7 @@ class TolkDocumentationProviderTest : TolkTestBase() {
     fun testGlobalVariableDocumentation() = doTest("global_var")
     fun testFunctionDocumentation() = doTest("function")
     fun testStructDocumentation() = doTest("struct")
+    fun testEnumDocumentation() = doTest("enums")
     fun testTypeDefDocumentation() = doTest("type_def")
     fun testParameterDocumentation() = doTest("parameter")
     fun testTypeParameterDocumentation() = doTest("type_parameter")

@@ -110,6 +110,16 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             }
         )
 
+    val enums
+        get() = withGreenStubOrAst(
+            { stub ->
+                stub.getChildrenByType(TolkElementTypes.ENUM, TolkEnumStub.ARRAY_FACTORY)
+            },
+            { ast ->
+                ast.getChildrenAsPsiElements(TolkElementTypes.ENUM, TolkEnumStub.ARRAY_FACTORY)
+            }
+        )
+
     fun resolveSymbols(name: String, skipTypes: Boolean = false): Sequence<TolkSymbolElement> {
         val values = if (skipTypes) cachedDeclarationsWithoutTypes.value else cachedDeclarations.value
         return values[name]?.asSequence() ?: emptySequence()
@@ -182,6 +192,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         val skipTypes = !state.get(NEED_PROCESS_TYPES)
 
         structs.forEach { if (!processor.execute(it, state)) return false }
+        enums.forEach { if (!processor.execute(it, state)) return false }
         if (!skipTypes) {
             typeDefs.forEach { if (!processor.execute(it, state)) return false }
         }

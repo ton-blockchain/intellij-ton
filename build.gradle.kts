@@ -60,7 +60,7 @@ allprojects {
 dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
-        create(IntelliJPlatformType.WebStorm, version)
+        webstorm(version)
     }
     implementation(project(":util"))
     implementation(project(":blueprint"))

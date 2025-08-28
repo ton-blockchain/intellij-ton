@@ -1,6 +1,4 @@
-package org.ton.intellij.tolk.completion.completion
-
-import org.ton.intellij.tolk.completion.TolkCompletionTestBase
+package org.ton.intellij.tolk.completion
 
 class TolkStructInitCompletionTest : TolkCompletionTestBase() {
     fun `test field completion with enum type`() = doFirstCompletion(

@@ -63,10 +63,6 @@ fun Color.mapToNumber(self) {
         Color.Green => 200,
         Color.Blue => 300,      // this works like `else` and handles invalid values at runtime also
     }
-
-    return match (self) {
-        Color.Blue => 100
-    }
 }
 
 
@@ -113,8 +109,7 @@ fun test4(chooseGreen: bool) {
 
 @method_id(105)
 fun test5() {
-    // TODO: uncomment once new method resolving is ready
-    return (int.Red(), /*int8.Max(),*/ 456.Max(), EPartialAssigned.Max, Color.Max());
+    return (int.Red(), int8.Max(), 456.Max(), EPartialAssigned.Max, Color.Max());
 }
 
 @method_id(106)
@@ -139,7 +134,7 @@ fun test8() {
     var (u1, u2) = (Color.Red as Color | int, 0 as Color | int);
     var (b1, b2, b3) = (Color.Red as Color | EPartialAssigned | builder, EPartialAssigned.Max as ColorAlias | builder | EPartialAssigned, beginCell() as builder | Color | EPartialAssigned);
     return (
-        checkIsColor(u1), checkIsColor(u2),
+        checkIsColor(u1), checkIsColor(u2), 
         checkIsColor(b1), checkIsColor(b2), checkIsColor(b3),
         b2 is EPartialAssigned, 
         u1,

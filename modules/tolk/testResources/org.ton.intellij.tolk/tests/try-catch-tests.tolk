@@ -226,11 +226,11 @@ fun test111(b: bool) {
   }
 }
 
-fun mySetCodeAsm(newCode: slice) : void
+fun mySetCodeAsm(newCode: slice): void
     asm "SETCODE";
 
 fun mySetCode(newCode: slice) {
-    mySetCodeAsm(newCode);
+  mySetCodeAsm(newCode);
 }
 
 fun testCodegen3(numberId: int, paramVal: cell) {
@@ -244,15 +244,13 @@ fun testCodegen3(numberId: int, paramVal: cell) {
 
 @method_id(112)
 fun testCatchUsesVars(x1: int) {
-    var x2 = x1 * 2;
-    try {
-        alwaysThrow123();
-    }
-    catch (excno) {
-        var result = x1 + x2 + excno;
-        return result;
-    }
-    return -1;
+  var x2 = x1 * 2;
+  try { alwaysThrow123(); }
+  catch (excno) {
+    var result = x1 + x2 + excno;
+    return result;
+  }
+  return -1;
 }
 
 @method_id(113)
@@ -266,6 +264,8 @@ fun testBigExcno() {
 }
 
 fun main() {
+  // mark used to codegen them
+  testCodegen3;
 }
 
 /**
@@ -300,7 +300,7 @@ fun main() {
 
 @fif_codegen
 """
-testCodegen1() PROC:<{  // x
+  testCodegen1() PROC:<{  // x
     DUP	//  x x
     10 GTINT	//  x '2
     IFJMP:<{	//  x
@@ -318,17 +318,17 @@ testCodegen1() PROC:<{  // x
 
 @fif_codegen
 """
-testCodegen2() PROC:<{  // x
+  testCodegen2() PROC:<{  // x
     DUP	//  x x
     10 GTINT	//  x '2
     IFJMP:<{	//  x
       DROP	//
-alwaysThrow123() CALLDICT
+      alwaysThrow123() CALLDICT
     }>	//  x
     10 LESSINT	//  '5
     IFJMP:<{	//
       FALSE	//  '6
-anotherNever() CALLDICT
+      anotherNever() CALLDICT
     }>	//
     0 PUSHINT	//  '8=0
   }>
@@ -336,7 +336,7 @@ anotherNever() CALLDICT
 
 @fif_codegen
 """
-testCodegen3() PROC:<{  //  numberId paramVal
+  testCodegen3() PROC:<{  //  numberId paramVal
     SWAP
     -1000 PUSHINT	//  paramVal numberId '2=-1000
     EQUAL	    //  paramVal '3

@@ -92,4 +92,9 @@ class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
 
     fun `test enums-tests`() = doTest()
     fun `test never-return-functions`() = doTest()
+    fun `test maps-tests`() = doTest()
+    fun `test overloads-tests`() = doTest() // TODO: uncomment some tests
+    fun `test pack-unpack-8`() = doTest()
+    fun `test send-msg-4`() = doTest()
+    fun `test some-tests-4`() = doTest()
 }

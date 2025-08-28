@@ -7,19 +7,11 @@ fun onSplitInstall() { return -4; }
 // 'execute' and many other names are reserved words in Fift,
 // but since they are codegenerated like `execute()` (it's a valid Fift name!), no collisions
 @noinline
-fun execute() {
-    return 123
-}
-
+fun execute() { return 123 }
 @noinline
-fun `PUSHINT`() {
-    return 456
-}
-
+fun `PUSHINT`() { return 456 }
 @noinline
-fun `@havebits`() {
-    return 789
-}
+fun `@havebits`() { return 789 }
 
 global swap: int;
 
@@ -30,8 +22,6 @@ fun test101() {
 }
 
 /**
-@experimental_options remove-unused-functions
-
 @testcase | 0  | | 0
 @testcase | -1 | | -1
 @testcase | -2 | | -2
@@ -41,11 +31,11 @@ fun test101() {
 
 @fif_codegen
 """
-0 DECLMETHOD onInternalMessage()
--1 DECLMETHOD onExternalMessage()
--2 DECLMETHOD onRunTickTock()
--3 DECLMETHOD onSplitPrepare()
--4 DECLMETHOD onSplitInstall()
+  0 DECLMETHOD onInternalMessage()
+  -1 DECLMETHOD onExternalMessage()
+  -2 DECLMETHOD onRunTickTock()
+  -3 DECLMETHOD onSplitPrepare()
+  -4 DECLMETHOD onSplitInstall()
 """
 
 @fif_codegen DECLPROC execute()

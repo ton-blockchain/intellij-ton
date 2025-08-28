@@ -1,3 +1,4 @@
+
 @method_id(101)
 fun test1() {
     return 0;
@@ -13,9 +14,9 @@ fun onInternalMessage(in: InMessage) {
 
 @fif_codegen
 """
-onInternalMessage() PROC:<{
-DROP
-INMSG_VALUEEXTRA
-}>
+  onInternalMessage() PROC:<{
+    DROP
+    INMSG_VALUEEXTRA
+  }>
 """
 */

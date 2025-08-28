@@ -49,6 +49,21 @@ class TolkTyTypedTuple private constructor(
         return elements == other.elements
     }
 
+    override fun isEquivalentToInner(other: TolkTy): Boolean {
+        if (this == other) return true
+        if (other is TolkTyAlias) return this.isEquivalentTo(other.underlyingType)
+        if (other !is TolkTyTensor) return false
+        if (elements.size != other.elements.size) return false
+        for (i in elements.indices) {
+            val element = elements[i]
+            val otherElement = other.elements[i]
+            if (!element.isEquivalentToInner(otherElement)) {
+                return false
+            }
+        }
+        return true
+    }
+
     override fun hashCode(): Int {
         var result = hashCode
         if (result == 0) {

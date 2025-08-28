@@ -17,4 +17,4 @@ fun main() {
 @stderr because `CustomInt.unpackFromSlice()` is declared incorrectly
 @stderr hint: it must accept 1 parameter and return an object:
 @stderr fun CustomInt.unpackFromSlice(mutate s: slice)
-*/
+ */

@@ -1,4 +1,5 @@
-fun setTvmRegisterC7(c7: [tuple]) : void
+
+fun setTvmRegisterC7(c7: [tuple]): void
     asm "c7 POP";
 
 @noinline
@@ -24,7 +25,7 @@ fun emulateC7PresentForTests(bounced: bool, senderAddress: address, fwdFee: coin
     setTvmRegisterC7([c7_inner]);
 }
 
-fun invokeTest(body: slice, method_id: int) : void
+fun invokeTest(body: slice, method_id: int): void
     asm "c3 PUSH" "EXECUTE";        // stack: body
 
 @method_id(101)
@@ -81,53 +82,53 @@ fun onInternalMessage(in: InMessage) {
 
 @fif_codegen
 """
-handle1() PROC:<{             //  in.body
-DROP                        //
-INMSG_SRC                   //  '1
-REWRITESTDADDR
-DROP                        //  '3
-}>
+  handle1() PROC:<{             //  in.body
+    DROP                        //
+    INMSG_SRC                   //  '1
+    REWRITESTDADDR
+    DROP                        //  '3
+  }>
 """
 
 @fif_codegen
 """
-handle2() PROC:<{             //  in.body
-DROP                        //
-INMSG_VALUE                 //  '1
-INMSG_SRC                   //  '1 '3
-b{10} SDBEGINSQ
-NIP                         //  '1 '5
-}>
+  handle2() PROC:<{             //  in.body
+    DROP                        //
+    INMSG_VALUE                 //  '1
+    INMSG_SRC                   //  '1 '3
+    b{10} SDBEGINSQ
+    NIP                         //  '1 '5
+  }>
 """
 
 @fif_codegen
 """
-handle3() PROC:<{
-INMSG_SRC
-REWRITESTDADDR
-INMSG_VALUE
-INMSG_VALUEEXTRA
-INMSG_LT
-INMSG_UTIME
-s0 s6 XCHG
-SEMPTY
-s5 s6 XCHG
-s4 s5 XCHG
-s3 s4 XCHG
-s1 s3 s0 XCHG3
-}>
+  handle3() PROC:<{
+    INMSG_SRC
+    REWRITESTDADDR
+    INMSG_VALUE
+    INMSG_VALUEEXTRA
+    INMSG_LT
+    INMSG_UTIME
+    s0 s6 XCHG
+    SEMPTY
+    s5 s6 XCHG
+    s4 s5 XCHG
+    s3 s4 XCHG
+    s1 s3 s0 XCHG3
+  }>
 """
 
 @fif_codegen
 """
-onInternalMessage() PROC:<{   //  in.body
-DROP
-INMSG_BOUNCED
-0 THROWIF
-INMSG_FWDFEE
-0 PUSHINT
-GETORIGINALFWDFEE
-}>
+  onInternalMessage() PROC:<{   //  in.body
+    DROP
+    INMSG_BOUNCED
+    0 THROWIF
+    INMSG_FWDFEE
+    0 PUSHINT
+    GETORIGINALFWDFEE
+  }>
 """
 
-*/
+ */

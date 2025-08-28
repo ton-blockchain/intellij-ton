@@ -5,7 +5,6 @@ fun unsafe_tuple<X>(x: X): tuple
 fun inc(x: int, y: int): (int, int) {
     return (x + y, y * 10);
 }
-
 @noinline
 fun int.`~inc`(mutate self, y: int): int {
     val (newX, newY) = inc(self, y);
@@ -15,13 +14,10 @@ fun int.`~inc`(mutate self, y: int): int {
 
 @noinline
 fun eq<X>(v: X): X { return v; }
-
 @noinline
 fun eq2(v: (int, int)) { return v; }
-
 @noinline
 fun mul2(mutate dest: int, v: int): int { dest = v*2; return dest; }
-
 @noinline
 fun (int, int).multens(mutate self, v: (int, int)): (int, int) { var (f, s) = self; var (m1, m2) = v; self = (f*m1, s*m2); return self; }
 
@@ -158,14 +154,14 @@ fun main() {
 
 @fif_codegen
 """
-int.~inc() PROC:<{      //  self y
-inc() CALLDICT    //  self newY
+  int.~inc() PROC:<{      //  self y
+    inc() CALLDICT    //  self newY
   }>
 """
 
 @fif_codegen
 """
-test_assign_tensor_global() PROC:<{   // x.0 x.1
+  test_assign_tensor_global() PROC:<{   // x.0 x.1
 """
 
 @code_hash 77620375659834063567341916666636335765114427483375544778177892407598637223147

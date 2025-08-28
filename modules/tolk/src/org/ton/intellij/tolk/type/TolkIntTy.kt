@@ -20,7 +20,6 @@ interface TolkIntTy : TolkPrimitiveTy {
     override fun join(other: TolkTy): TolkTy {
         if (other.unwrapTypeAlias() == this) return this
         if (other == TolkTy.Never) return this
-        if (other is TolkTyAlias) return join(other.underlyingType)
         if (other !is TolkIntTy) return TolkTyUnion.create(this, other)
         return TolkTy.Int
     }
@@ -36,6 +35,7 @@ interface TolkIntTy : TolkPrimitiveTy {
 
     override fun isEquivalentToInner(other: TolkTy): Boolean {
         if (this === other) return true
+        if (other is TolkTyAlias) return isEquivalentToInner(other.unwrapTypeAlias())
         return actualType() == other.actualType()
     }
 

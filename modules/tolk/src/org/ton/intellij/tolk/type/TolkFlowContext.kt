@@ -28,6 +28,18 @@ class TolkFlowContext(
         return sinkExpressions[sinkExpression]
     }
 
+    // get the resulting type of variable or struct field
+    fun smartcastOrOriginal(sinkExpression: TolkSinkExpression, originalType: TolkTy): TolkTy {
+        val smartcast = sinkExpressions[sinkExpression] ?: return originalType
+
+        if (smartcast.isEquivalentTo(originalType.unwrapTypeAlias())) {
+            // given `var a: dict`, after merging control flow branches, restore `a: dict` instead of `a: cell?`
+            // (same for struct fields and other sink expressions)
+            return originalType
+        }
+        return smartcast
+    }
+
     fun getSymbol(
         name: String?,
     ): TolkSymbolElement? {

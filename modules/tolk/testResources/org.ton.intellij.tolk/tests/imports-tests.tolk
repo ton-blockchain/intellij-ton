@@ -11,8 +11,8 @@ fun main() {
 
 @fif_codegen
 """
-main() PROC:<{
-3 PUSHINT
-}>
+  main() PROC:<{
+    3 PUSHINT
+  }>
 """
-*/
+ */

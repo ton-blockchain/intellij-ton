@@ -1,9 +1,5 @@
-struct Counter7Increment {
-    byValue: int7
-}
-struct Counter7Decrement {
-    byValue: int7
-}
+struct Counter7Increment { byValue: int7 }
+struct Counter7Decrement { byValue: int7 }
 type MsgEitherCounter = Counter7Increment | Counter7Decrement;
 
 fun f() {
@@ -18,4 +14,4 @@ fun f() {
 /**
 @compilation_should_fail
 @stderr `lazy` will not work here, because variable `msg` it's used in a non-lazy manner
-*/
+ */

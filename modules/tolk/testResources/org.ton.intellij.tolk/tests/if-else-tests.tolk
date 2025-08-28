@@ -191,35 +191,25 @@ fun test11(x: int) {
 
 fun demo12_1(x: int) {
     __expect_inline(true);
-    if (x > 0) {
-        t.push(123);
-    }
-    else {
-        t.push(456)
-    }
+    if (x > 0) { t.push(123); }
+    else { t.push(456) }
 }
 
 fun demo12_2(x: int) {
     __expect_inline(true);
-    if (x > 0) {
-        t.push(123);
-    }
+    if (x > 0) { t.push(123); }
 }
 
 fun demo12_3(x: int) {
     __expect_inline(true);
-    if (x > 0) {
-        t.push(123);
-    }
+    if (x > 0) { t.push(123); }
     return;
 }
 
 fun demo12_4(x: int) {
     __expect_inline(false);
     if (x != -100) {
-        if (x > 0) {
-            t.push(123);
-        }
+        if (x > 0) { t.push(123); }
         return;
     }
 }
@@ -266,7 +256,7 @@ fun main() {
 
 @fif_codegen
 """
-test3() PROC:<{ //  x
+  test3() PROC:<{ //  x
     DUP	        //  x x
     20 NEQINT	//  x '2
     IFNOTJMP:<{	//  x
@@ -280,7 +270,7 @@ test3() PROC:<{ //  x
 
 @fif_codegen
 """
-withNoElse() PROC:<{
+  withNoElse() PROC:<{
     DUP
     123 EQINT
     IFJMP:<{
@@ -305,7 +295,7 @@ withNoElse() PROC:<{
 
 @fif_codegen
 """
-withElse() PROC:<{
+  withElse() PROC:<{
     DUP
     123 EQINT
     IFJMP:<{
@@ -330,7 +320,7 @@ withElse() PROC:<{
 
 @fif_codegen
 """
-withMatch() PROC:<{
+  withMatch() PROC:<{
     DUP
     123 EQINT
     IFJMP:<{
@@ -355,59 +345,59 @@ withMatch() PROC:<{
 
 @fif_codegen
 """
-demo9_1() PROC:<{
+  demo9_1() PROC:<{
     0 GTINT
     IFJMP:<{
-$t GETGLOB
+      $t GETGLOB
       123 PUSHINT
       TPUSH
-$t SETGLOB
+      $t SETGLOB
     }>
-$t GETGLOB
+    $t GETGLOB
     456 PUSHINT
     TPUSH
-$t SETGLOB
+    $t SETGLOB
   }>
 """
 
 @fif_codegen
 """
-demo9_2() PROC:<{
+  demo9_2() PROC:<{
     0 GTINT
     IFJMP:<{
-$t GETGLOB
+      $t GETGLOB
       123 PUSHINT
       TPUSH
-$t SETGLOB
+      $t SETGLOB
     }>
   }>
 """
 
 @fif_codegen
 """
-demo9_3() PROC:<{
+  demo9_3() PROC:<{
     0 GTINT
     IFJMP:<{
-$t GETGLOB
+      $t GETGLOB
       123 PUSHINT
       TPUSH
-$t SETGLOB
+      $t SETGLOB
     }>
   }>
 """
 
 @fif_codegen
 """
-demo9_4() PROC:<{
+  demo9_4() PROC:<{
     DUP
     -100 NEQINT
     IFJMP:<{
       0 GTINT
       IFJMP:<{
-$t GETGLOB
+        $t GETGLOB
         123 PUSHINT
         TPUSH
-$t SETGLOB
+        $t SETGLOB
       }>
     }>
     DROP
@@ -416,22 +406,22 @@ $t SETGLOB
 
 @fif_codegen
 """
-demo10_1() PROC:<{
+  demo10_1() PROC:<{
     DUP
     0 EQINT
     IFJMP:<{
       DROP
-$t GETGLOB
+      $t GETGLOB
       123 PUSHINT
       TPUSH
-$t SETGLOB
+      $t SETGLOB
     }>
     1 EQINT
     IFJMP:<{
-$t GETGLOB
+      $t GETGLOB
       456 PUSHINT
       TPUSH
-$t SETGLOB
+      $t SETGLOB
     }>
   }>
 """

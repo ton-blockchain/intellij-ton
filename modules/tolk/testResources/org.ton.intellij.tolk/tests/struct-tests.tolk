@@ -155,8 +155,7 @@ fun test8() {
     __expect_type(o3, "Empty?");
     __expect_type(o6, "OuterEmpty");
     __expect_type(o8, "OuterEmpty?");
-    __expect_type(EmptyGeneric2<slice>{
-    }, "EmptyGeneric2<slice>");
+    __expect_type(EmptyGeneric2<slice>{}, "EmptyGeneric2<slice>");
     return (e1, Empty{}, EmptyAlias{}, o2, o1, 777, o3, 777, o4, 777, o5, 777, o6, 777, o7, 777, o8, 777, o3!, 777);
 }
 
@@ -494,21 +493,11 @@ fun test34() {
     return o1;
 }
 
-@pure @noinline fun getXPure() {
-    return 1;
-}
-
-@pure @noinline fun getYPure() {
-    return 2;
-}
+@pure @noinline fun getXPure() { return 1; }
+@pure @noinline fun getYPure() { return 2; }
 global t_impure: tuple;
-@noinline fun getXImpure() {
-    t_impure.push(1); return 1;
-}
-
-@noinline fun getYImpure() {
-    t_impure.push(2); return 2;
-}
+@noinline fun getXImpure() { t_impure.push(1); return 1; }
+@noinline fun getYImpure() { t_impure.push(2); return 2; }
 
 @method_id(135)
 fun test35() {
@@ -597,37 +586,37 @@ type PointAlias = Point;
 @testcase | 105 |      | 35 30 45
 @testcase | 106 |      | 10 20
 @testcase | 107 |      | 5 5 10 20 15
-@testcase | 108 |      | 777 typeid-3 777 0 777 777 777 typeid-3 777 typeid-4 777 777
+@testcase | 108 |      | 777 typeid-2 777 0 777 777 777 typeid-2 777 typeid-3 777 777
 @testcase | 109 |      | 70 30 20 20 -80
 @testcase | 110 | 0    | (null) (null) 0
-@testcase | 110 | -1   | 10 20 typeid-5
+@testcase | 110 | -1   | 10 20 typeid-1
 @testcase | 111 | 0    | 0 2 10 20 30
 @testcase | 111 | -1   | 0 0 3 4 7
 @testcase | 112 | 0    | (null) (null) 0
-@testcase | 112 | -1   | 1 2 typeid-5
+@testcase | 112 | -1   | 1 2 typeid-1
 @testcase | 113 |      | (null) (null) 0
 @testcase | 114 |      | 1 2
 @testcase | 115 |      | (null) (null) (null) (null) 0
-@testcase | 116 |      | -1 -4 [ 8 4 ] 7 (null) 0 [ 10 11 ] typeid-7
+@testcase | 116 |      | -1 -4 [ 8 4 ] 7 (null) 0 [ 10 11 ] typeid-5
 @testcase | 117 | 5    | 5 5 5 5 5
 @testcase | 117 | null | (null) (null) (null) -1 (null)
 @testcase | 118 |      | 17
-@testcase | 119 |      | 10 20 9 10 typeid-5 9
-@testcase | 120 | 0    | 80 9 8 80 typeid-5
+@testcase | 119 |      | 10 20 9 10 typeid-1 9
+@testcase | 120 | 0    | 80 9 8 80 typeid-1
 @testcase | 120 | -1   | 8 14 (null) (null) 0
 @testcase | 121 | 0    | 17 17 8 136
 @testcase | 121 | -1   | 8 (null) 8 8
 @testcase | 122 | 100  | 101 50 106 212 100 101 101
 @testcase | 124 | 66   | 66
-@testcase | 125 |      | (null) (null) 40 60 typeid-5
+@testcase | 125 |      | (null) (null) 40 60 typeid-1
 @testcase | 126 |      | 118
-@testcase | 127 |      | 0 0 typeid-3 typeid-3 777 -1 -1 0 0 777 0 0 typeid-10 777 0 0 777 (null) (null) 0
-@testcase | 128 | -1   | (null) (null) typeid-3 -1 0 0 777 (null) (null) typeid-3 -1 0 0
-@testcase | 128 | 0    | 1 2 typeid-2 0 -1 0 777 0 typeid-3 typeid-10 0 -1 0
+@testcase | 127 |      | 0 0 typeid-2 typeid-2 777 -1 -1 0 0 777 0 0 typeid-7 777 0 0 777 (null) (null) 0
+@testcase | 128 | -1   | (null) (null) typeid-2 -1 0 0 777 (null) (null) typeid-2 -1 0 0
+@testcase | 128 | 0    | 1 2 typeid-8 0 -1 0 777 0 typeid-2 typeid-7 0 -1 0
 @testcase | 129 |      | (null)
-@testcase | 130 | -1   | typeid-12 777 (null) typeid-12 777 0 777 0 0
-@testcase | 130 | 0    | typeid-11 777 4 1 777 typeid-11 777 0 0
-@testcase | 131 |      | 5 typeid-13 (null) typeid-13 (null) 0 777 0 0 -1 777 0 -1
+@testcase | 130 | -1   | typeid-9 777 (null) typeid-9 777 0 777 0 0
+@testcase | 130 | 0    | typeid-10 777 4 1 777 typeid-10 777 0 0
+@testcase | 131 |      | 5 typeid-11 (null) typeid-11 (null) 0 777 0 0 -1 777 0 -1
 @testcase | 132 |      | 10 20 10 0 0 20 0 0 0 0
 @testcase | 133 |      | -1 0 5 (null) (null) (null) 0 0 46
 @testcase | 134 |      | 10 20
@@ -642,7 +631,7 @@ type PointAlias = Point;
 
 @fif_codegen
 """
-test6() PROC:<{
+  test6() PROC:<{
     10 PUSHINT   // p.x
     20 PUSHINT   // p.x p.y
   }>
@@ -650,7 +639,7 @@ test6() PROC:<{
 
 @fif_codegen
 """
-sumXY<Point>() PROC:<{  // point.x point.y
+  sumXY<Point>() PROC:<{  // point.x point.y
     ADD   // '2
   }>
 """
@@ -658,7 +647,7 @@ sumXY<Point>() PROC:<{  // point.x point.y
 
 @fif_codegen
 """
-test23() PROC:<{ // p.x p.y
+  test23() PROC:<{ // p.x p.y
     2DROP
     20 PUSHINT   // '10=20
   }>
@@ -666,27 +655,27 @@ test23() PROC:<{ // p.x p.y
 
 @fif_codegen
 """
-test29() PROC:<{
+  test29() PROC:<{
     PUSHNULL   // '5
   }>
 """
 
 @fif_codegen
 """
-test35() PROC:<{              //
-getXPure() CALLDICT         //  '2
-getYPure() CALLDICT         //  p.x p.y
+  test35() PROC:<{              //
+    getXPure() CALLDICT         //  '2
+    getYPure() CALLDICT         //  p.x p.y
   }>
 """
 
 @fif_codegen
 """
-test36() PROC:<{              //
+  test36() PROC:<{              //
     NIL                         //  '0
-$t_impure SETGLOB           //
-getYImpure() CALLDICT       //  '4
-getXImpure() CALLDICT       //  p.y p.x
-$t_impure GETGLOB           //  p.y p.x g_t_impure
+    $t_impure SETGLOB           //
+    getYImpure() CALLDICT       //  '4
+    getXImpure() CALLDICT       //  p.y p.x
+    $t_impure GETGLOB           //  p.y p.x g_t_impure
     s1 s2 XCHG                  //  p.x p.y g_t_impure
   }>
 """

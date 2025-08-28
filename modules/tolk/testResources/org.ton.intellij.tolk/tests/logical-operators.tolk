@@ -1,9 +1,11 @@
 import "imports/use-dicts.ext.tolk"
 
+@method_id(90)
 fun simpleAllConst() {
     return (!0, !!0 & !false, !!!0, !1, !!1, !-1, !!-1, (!5 as int == 0) == !0, !0 == true);
 }
 
+@method_id(91)
 fun compileTimeEval1(x: int) {
     // todo now compiler doesn't understand that bool can't be equal to number other than 0/-1
     // (but understands that it can't be positive)
@@ -217,7 +219,7 @@ fun main() {
 
 @fif_codegen
 """
-simpleAllConst() PROC:<{
+  simpleAllConst() PROC:<{
     TRUE
     0 PUSHINT
     TRUE
@@ -232,7 +234,7 @@ simpleAllConst() PROC:<{
 
 @fif_codegen
 """
-compileTimeEval1() PROC:<{  //  x
+  compileTimeEval1() PROC:<{  //  x
     DUP	//  x x
     0 EQINT	//  x '1
     FALSE	//  x '1 '4
@@ -248,7 +250,7 @@ compileTimeEval1() PROC:<{  //  x
 
 @fif_codegen
 """
-withIfNot() PROC:<{  //  x y
+  withIfNot() PROC:<{  //  x y
     c2 SAVE
     SAMEALTSAVE
     OVER	//  x y x
@@ -268,7 +270,7 @@ withIfNot() PROC:<{  //  x y
 
 @fif_codegen
 """
-testAndConstCodegen() PROC:<{
+  testAndConstCodegen() PROC:<{
     FALSE
     0 PUSHINT
     DUP
@@ -290,7 +292,7 @@ testAndConstCodegen() PROC:<{
 
 @fif_codegen
 """
-testOrConstCodegen() PROC:<{
+  testOrConstCodegen() PROC:<{
     -1 PUSHINT
     TRUE
     FALSE
@@ -315,7 +317,7 @@ For example, `a && b` can be expressed without IFs.
 These are moments of future optimizations. For now, it's more than enough.
 @fif_codegen
 """
-testAndSimpleCodegen() PROC:<{  //  a b
+  testAndSimpleCodegen() PROC:<{  //  a b
     SWAP	//  b a
     IF:<{	//  b
       0 NEQINT	//  '2
@@ -328,7 +330,7 @@ testAndSimpleCodegen() PROC:<{  //  a b
 
 @fif_codegen
 """
-testOrSimpleCodegen() PROC:<{   //  a b
+  testOrSimpleCodegen() PROC:<{   //  a b
     SWAP	//  b a
     0 GTINT	//  b '3
     IF:<{	//  b
@@ -343,7 +345,7 @@ testOrSimpleCodegen() PROC:<{   //  a b
 
 @fif_codegen
 """
-testConvertIfToIfnot() PROC:<{  //  x
+  testConvertIfToIfnot() PROC:<{  //  x
     DUP	//  x x
     100 THROWIF
     DUP	//  x x
@@ -351,15 +353,15 @@ testConvertIfToIfnot() PROC:<{  //  x
     DUP	//  x x
     IFNOTJMP:<{	//  x
       DROP	//
-1 PUSHINT	//  '7=1
+      1 PUSHINT	//  '7=1
     }>	//  x
     DUP	//  x x
     IFNOTJMP:<{	//  x
       DROP	//
-1 PUSHINT	//  '8=1
+      1 PUSHINT	//  '8=1
     }>	//  x
     100 THROWIFNOT
--4 PUSHINT	//  '11=-4
+    -4 PUSHINT	//  '11=-4
   }>
 """
 

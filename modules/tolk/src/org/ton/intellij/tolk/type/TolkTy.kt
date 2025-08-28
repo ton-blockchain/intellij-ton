@@ -66,9 +66,6 @@ interface TolkTy : TypeFoldable<TolkTy> {
             return TolkTyTypedTuple.create(types)
         }
 
-        if (this is TolkTyAlias) return this.underlyingType.join(other)
-        if (other is TolkTyAlias) return this.join(other.underlyingType)
-
         return TolkTyUnion.create(this, other)
     }
 
@@ -88,9 +85,8 @@ interface TolkTy : TypeFoldable<TolkTy> {
         val actualType = this.actualType()
         val otherActualType = other.actualType()
 
-        val unwrapped = actualType.unwrapTypeAliasDeeply()
-        val otherUnwrapped = otherActualType.unwrapTypeAliasDeeply()
-        return unwrapped == otherUnwrapped
+        val otherUnwrapped = otherActualType.unwrapTypeAlias()
+        return actualType == otherUnwrapped
     }
 
     fun unwrapTypeAlias(): TolkTy {
@@ -158,20 +154,21 @@ interface TolkTy : TypeFoldable<TolkTy> {
 // example: `int | slice | builder | bool` - `bool | slice` = `int | builder`
 // what for: `if (x != null)` / `if (x is T)`, to smart cast x inside if
 fun TolkTy?.subtract(other: TolkTy?): TolkTy {
-    val lhsUnion = this as? TolkTyUnion ?: return TolkTyNever
+    val lhsUnion = this?.unwrapTypeAlias() as? TolkTyUnion ?: return TolkTyNever
 
+    val otherUnwrapped = other?.unwrapTypeAlias()
     val restVariants = ArrayList<TolkTy>()
-    if (other is TolkTyUnion) {
-        if (lhsUnion.containsAll(other)) {
+    if (otherUnwrapped is TolkTyUnion) {
+        if (hasAllVariantsOf(lhsUnion, otherUnwrapped)) {
             for (lhsVariant in lhsUnion.variants) {
-                if (!other.contains(lhsVariant)) {
+                if (!hasVariantEquivalentTo(otherUnwrapped, lhsVariant)) {
                     restVariants.add(lhsVariant)
                 }
             }
         }
-    } else if (other != null && lhsUnion.contains(other)) {
+    } else if (other != null && hasVariantEquivalentTo(lhsUnion, other)) {
         for (lhsVariant in lhsUnion.variants) {
-            if (lhsVariant.actualType() != other.actualType()) {
+            if (!lhsVariant.isEquivalentTo(other)) {
                 restVariants.add(lhsVariant)
             }
         }
@@ -183,6 +180,14 @@ fun TolkTy?.subtract(other: TolkTy?): TolkTy {
         return restVariants.first()
     }
     return TolkTyUnion.create(restVariants)
+}
+
+private fun hasAllVariantsOf(union: TolkTyUnion, other: TolkTyUnion): Boolean {
+    return other.variants.all { hasVariantEquivalentTo(union, it) }
+}
+
+private fun hasVariantEquivalentTo(otherUnwrapped: TolkTyUnion, lhsVariant: TolkTy): Boolean {
+    return otherUnwrapped.variants.any { it.isEquivalentTo(lhsVariant) }
 }
 
 fun TolkTy?.join(other: TolkTy?): TolkTy? {
@@ -342,6 +347,13 @@ data class TolkIntNTy(
         return other == Never
     }
 
+    override fun isEquivalentToInner(other: TolkTy): Boolean {
+        if (other == this) return true
+        if (other is TolkIntNTy && other.unsigned == unsigned && other.n == n) return true
+        if (other is TolkTyAlias) return isEquivalentToInner(other.unwrapTypeAlias())
+        return false
+    }
+
     companion object {
         val UINT8 = TolkIntNTy(8, unsigned = true)
         val UINT16 = TolkIntNTy(16, unsigned = true)
@@ -425,6 +437,13 @@ data class TolkBitsNTy(
 ) : TolkPrimitiveTy {
     override fun toString(): String = "bits$n"
 
+    override fun isEquivalentToInner(other: TolkTy): Boolean {
+        if (other == this) return true
+        if (other is TolkIntNTy && other.n == n) return true
+        if (other is TolkTyAlias) return isEquivalentToInner(other.unwrapTypeAlias())
+        return false
+    }
+
     companion object {
         fun fromName(text: String): TolkBitsNTy? {
             if (!text.startsWith("bits")) return null
@@ -458,18 +477,46 @@ data class TolkBytesNTy(
     }
 }
 
- object TolkTyVarInt32 : TolkIntTyFamily {
+object TolkTyVarInt32 : TolkIntTyFamily {
     override fun toString(): String = "varint32"
+
+    override fun isEquivalentToInner(other: TolkTy): Boolean {
+        if (other == this) return true
+        if (other is TolkTyVarInt32) return true
+        if (other is TolkTyAlias) return isEquivalentToInner(other.unwrapTypeAlias())
+        return false
+    }
 }
 
 object TolkTyVarUInt32 : TolkIntTyFamily {
     override fun toString(): String = "varuint32"
+
+    override fun isEquivalentToInner(other: TolkTy): Boolean {
+        if (other == this) return true
+        if (other is TolkTyVarUInt32) return true
+        if (other is TolkTyAlias) return isEquivalentToInner(other.unwrapTypeAlias())
+        return false
+    }
 }
 
- object TolkTyVarInt16 : TolkIntTyFamily {
+object TolkTyVarInt16 : TolkIntTyFamily {
     override fun toString(): String = "varint16"
+
+    override fun isEquivalentToInner(other: TolkTy): Boolean {
+        if (other == this) return true
+        if (other is TolkTyVarInt16) return true
+        if (other is TolkTyAlias) return isEquivalentToInner(other.unwrapTypeAlias())
+        return false
+    }
 }
 
 object TolkTyVarUInt16 : TolkIntTyFamily {
     override fun toString(): String = "varuint16"
+
+    override fun isEquivalentToInner(other: TolkTy): Boolean {
+        if (other == this) return true
+        if (other is TolkTyVarUInt16) return true
+        if (other is TolkTyAlias) return isEquivalentToInner(other.unwrapTypeAlias())
+        return false
+    }
 }

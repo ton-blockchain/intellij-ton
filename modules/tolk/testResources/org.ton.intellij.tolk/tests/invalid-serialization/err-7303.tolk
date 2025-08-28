@@ -8,4 +8,4 @@ fun f() {
 /**
 @compilation_should_fail
 @stderr `lazy` is applicable to structs, not to `PairInt8`
-*/
+ */

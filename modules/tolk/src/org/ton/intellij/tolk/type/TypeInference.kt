@@ -1003,7 +1003,7 @@ class TolkInferenceWalker(
 
         val isExprType = element.typeExpression?.type
         var rhsType = isExprType?.unwrapTypeAlias()
-        val exprType = ctx.getType(expression)?.unwrapTypeAlias() ?: TolkTy.Unknown
+        val exprType = ctx.getType(expression) ?: TolkTy.Unknown
         if (rhsType is TolkTyStruct) {
             tryPickInstantiatedGenericFromHint(exprType, rhsType.psi)?.let {
                 rhsType = it
@@ -1167,12 +1167,12 @@ class TolkInferenceWalker(
 
         val variableCandidate = localSymbols[element]
         if (variableCandidate != null) {
-            val variableType = flow.getType(TolkSinkExpression(variableCandidate)) ?: try {
-                variableCandidate.type
+            val variableType = flow.smartcastOrOriginal(TolkSinkExpression(variableCandidate), try {
+                variableCandidate.type ?: this.ctx.getType(variableCandidate) ?: TolkTyUnknown
             } catch (_: CyclicReferenceException) {
-                // cyclic resolve for variables = `var a = a` // TODO; fix resolving to self?
-                return TolkExpressionInferenceResult(element, nextFlow)
-            }
+                this.ctx.getType(variableCandidate) ?: TolkTyUnknown
+            })
+
             ctx.setType(element, variableType)
             return TolkExpressionInferenceResult(element, nextFlow, variableType)
         }
@@ -1370,9 +1370,7 @@ class TolkInferenceWalker(
                         it
                     }
                     val receiverObject = dotInfResult.receiverObject
-                    if (receiverObject != null && dotInfResult.receiverType?.unwrapTypeAlias() != functionType?.parametersType?.firstOrNull()
-                            ?.unwrapTypeAlias()
-                    ) {
+                    if (receiverObject != null && dotInfResult.receiverType != functionType?.parametersType?.firstOrNull()) {
                         val firstParam = functionSymbol?.parameterList?.selfParameter
                         if (firstParam != null && firstParam.isMutable) {
                             val selfObj = callee.expression
@@ -1438,7 +1436,7 @@ class TolkInferenceWalker(
                 sub = sub.deduce(paramType, argType)
                 paramType = paramType.substitute(sub)
             }
-            if (param.isMutable && argType.unwrapTypeAlias() != paramType.unwrapTypeAlias()) {
+            if (param.isMutable && argType != paramType) {
                 val sExpr = extractSinkExpression(argExpr)
                 if (sExpr != null) {
                     ctx.setType(argExpr, calcDeclaredTypeBeforeSmartCast(argExpr))
@@ -1522,9 +1520,7 @@ class TolkInferenceWalker(
                 ctx.setResolvedRefs(fieldLookup, resolvedVariants.map { PsiElementResolveResult(it) })
             }
             extractSinkExpression(element)?.let { sExpr ->
-                nextFlow.getType(sExpr)?.let { smartCasted ->
-                    inferredType = smartCasted
-                }
+                inferredType = nextFlow.smartcastOrOriginal(sExpr, inferredType)
             }
         }
 
@@ -1632,7 +1628,7 @@ class TolkInferenceWalker(
         val expression = element.expression
         val afterExpr = inferExpression(expression, flow, false)
         val exprType = ctx.getType(expression)
-        val withoutNull = exprType?.unwrapTypeAlias()?.subtract(TolkTy.Null)
+        val withoutNull = exprType?.subtract(TolkTy.Null)
         val actualType = if (withoutNull != TolkTy.Never) withoutNull else exprType
         ctx.setType(element, actualType)
         if (!usedAsCondition) {

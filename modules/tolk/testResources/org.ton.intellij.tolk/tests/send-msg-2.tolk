@@ -294,9 +294,7 @@ fun test5() {
                 closeTo: pivot,
             }
         },
-        body: UnsafeBodyNoRef {
-            forceInline: body
-        },
+        body: UnsafeBodyNoRef { forceInline: body },
         value: ton("0.1"),
     });
     return b.hash()

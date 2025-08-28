@@ -2,10 +2,8 @@ fun justTrue(): bool { return true; }
 
 @noinline
 fun unary_minus_1(a: int, b: int, c: int): int{return -(a+b) *c;}
-
 @noinline
 fun unary_minus_2(a: int, b: int, c: int): int{return(-(a+b))*c;}
-
 @noinline
 fun unary_minus_3(a: int, b: int, c: int): int{return-((a+b) *c);}
 
@@ -97,20 +95,20 @@ fun main() {
 
 @fif_codegen
 """
-unary_minus_1() PROC:<{ //  a b c
-s0 s2 XCHG
+  unary_minus_1() PROC:<{ //  a b c
+    s0 s2 XCHG
     ADD	    //  c '3
     NEGATE	//  c '4
     MUL	    //  '5
   }>
-unary_minus_2() PROC:<{  //  a b c
-s0 s2 XCHG
+  unary_minus_2() PROC:<{  //  a b c
+    s0 s2 XCHG
     ADD	    //  c '3
     NEGATE	//  c '4
     MUL	    //  '5
   }>
-unary_minus_3() PROC:<{ //  a b c
-s0 s2 XCHG
+  unary_minus_3() PROC:<{ //  a b c
+    s0 s2 XCHG
     ADD	    //  c '3
     MUL	    //  '4
     NEGATE	//  '5

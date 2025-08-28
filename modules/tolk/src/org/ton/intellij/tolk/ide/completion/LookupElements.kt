@@ -187,8 +187,11 @@ fun TolkNamedElement.toLookupElementBuilder(
                     .withTypeText(type?.render())
                     .bold()
             }
+
+            val defaultValue = expression?.text?.let { " = $it" }
             base.bold()
                 .withTypeText(type?.render())
+                .withTailText(defaultValue)
                 .bold()
         }
 

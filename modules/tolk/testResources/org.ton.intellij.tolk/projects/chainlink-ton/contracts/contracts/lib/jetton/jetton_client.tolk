@@ -16,6 +16,9 @@ fun JettonClient.walletAddress(self): address {
     );
 }
 
+// removed in Tolk 1.1
+type ExtraCurrenciesDict = dict;
+
 struct JettonMessageOptions {
     /// whether a message will bounce back on error
     bounce: bool

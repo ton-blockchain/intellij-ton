@@ -136,6 +136,11 @@ fun collectFunctionCandidates(
                     continue
                 }
             }
+            if (actualFunctionReceiver is TolkTyEnum && actualCalledReceiver is TolkTyEnum) {
+                if (!actualFunctionReceiver.psi.isEquivalentTo(actualCalledReceiver.psi)) {
+                    continue
+                }
+            }
 
             val sub = Substitution.instantiate(functionReceiver, calledReceiver, false)
             candidates.add(function to sub)

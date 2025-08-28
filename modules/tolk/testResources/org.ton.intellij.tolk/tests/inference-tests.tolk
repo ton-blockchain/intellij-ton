@@ -111,7 +111,7 @@ fun alwaysThrowsNotAnnotated2() { alwaysThrows(); }
 fun test9() {
     __expect_type(alwaysThrows(), "never");
     __expect_type(alwaysThrows, "() -> never");
-    __expect_type(alwaysThrowsNotAnnotated(), "void");
+    __expect_type(alwaysThrowsNotAnnotated(), "never");
     __expect_type(alwaysThrowsNotAnnotated2(), "void");
 }
 

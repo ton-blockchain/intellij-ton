@@ -72,7 +72,7 @@ class TolkTypeMismatchInspection : TolkInspectionBase() {
 
             args.forEachIndexed { i, arg ->
                 val argType = arg.expression.type ?: return@forEachIndexed
-                val param = params[i]
+                val param = params.getOrNull(i) ?: return@forEachIndexed
                 val paramType = param.type ?: return@forEachIndexed
 
                 if (!paramType.canRhsBeAssigned(argType)) {

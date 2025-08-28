@@ -91,4 +91,5 @@ class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
     fun `test var-apply-tests`() = doTest()
 
     fun `test enums-tests`() = doTest()
+    fun `test never-return-functions`() = doTest()
 }

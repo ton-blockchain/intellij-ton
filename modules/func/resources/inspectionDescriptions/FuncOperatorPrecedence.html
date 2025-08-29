@@ -1,0 +1,31 @@
+<html>
+<body>
+Reports expressions with potentially confusing operator precedence that may lead to unexpected behavior.
+
+<p>
+    This inspection detects cases where mixing comparison operators (<code>&lt;</code>, <code>&gt;</code>,
+    <code>==</code>, etc.)
+    with logical operators (<code>|</code>, <code>&amp;</code>, <code>^</code>) without explicit parentheses
+    can create confusion about the intended evaluation order.
+</p>
+
+<p>
+    In FunC, logical operators have higher precedence than comparison operators, which can lead to unexpected results.
+</p>
+
+<br>
+<b>Problematic:</b>
+<pre><code>
+cpu > max_cpu | cpu < min_cpu
+// Parsed as: cpu > (max_cpu | cpu) < min_cpu
+</code></pre>
+<b>Better:</b>
+<pre><code>
+(cpu > max_cpu) | (cpu < min_cpu)
+// Clear intended meaning
+</code></pre>
+<br>
+
+The inspection helps prevent logical errors by encouraging explicit parentheses in mixed operator expressions.
+</body>
+</html>

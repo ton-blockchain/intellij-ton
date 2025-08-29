@@ -149,6 +149,12 @@
         <localInspection language="FunC" displayName="Unresolved type identifier" groupPath="FunC"
                          groupName="General" enabledByDefault="true" level="ERROR"
                          implementationClass="org.ton.intellij.func.inspection.FuncUnresolvedTypeIdentifierInspection"/>
+        <localInspection language="FunC" groupPath="FunC"
+                         bundle="messages.FuncBundle"
+                         key="inspection.func.operator.precedence.name"
+                         groupKey="group.general.name"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.func.inspection.style.FuncOperatorPrecedenceInspection"/>
 
         <!-- Completion -->
         <completion.contributor language="FunC"

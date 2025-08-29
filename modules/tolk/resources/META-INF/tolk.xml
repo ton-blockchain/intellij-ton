@@ -1,25 +1,18 @@
-<idea-plugin package="org.ton.intellij.tolk">
+<idea-plugin package="org.ton.intellij.tolk" xmlns:xi="http://www.w3.org/2001/XInclude">
+    <xi:include href="/META-INF/inspections.xml" xpointer="xpointer(/idea-plugin/*)"/>
+
     <extensions defaultExtensionNs="com.intellij">
+        <!-- Tolk language-->
         <fileType name="Tolk"
                   implementationClass="org.ton.intellij.tolk.TolkFileType"
                   fieldName="INSTANCE"
                   language="Tolk"
                   extensions="tolk"
         />
-        <consoleFilterProvider implementation="org.ton.intellij.tolk.ide.TolkConsoleFilterProvider"/>
-        <breadcrumbsInfoProvider implementation="org.ton.intellij.tolk.ide.structure.TolkBreadcrumbsProvider"/>
-        <navbar implementation="org.ton.intellij.tolk.ide.structure.TolkNavBarModelExtension" order="first"/>
 
-        <postStartupActivity implementation="org.ton.intellij.tolk.ide.TolkAttachTestConsoleFiltersAtStartup"/>
-
-        <lang.parserDefinition language="Tolk"
-                               implementationClass="org.ton.intellij.tolk.parser.TolkParserDefinition"/>
-        <lang.syntaxHighlighterFactory language="Tolk"
-                                       implementationClass="org.ton.intellij.tolk.highlighting.TolkSyntaxHighlighterFactory"/>
+        <!-- region Language general -->
+        <lang.parserDefinition language="Tolk" implementationClass="org.ton.intellij.tolk.parser.TolkParserDefinition"/>
         <lang.commenter language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkCommenter"/>
-        <enterHandlerDelegate implementation="org.ton.intellij.tolk.ide.typing.TolkEnterInLineCommentHandler"
-                              id="TolkEnterInLineCommentHandler"/>
-
         <lang.braceMatcher language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkPairedBraceMatcher"/>
         <lang.quoteHandler language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkQuoteHandler"/>
         <lang.foldingBuilder language="Tolk" implementationClass="org.ton.intellij.tolk.ide.TolkFoldingBuilder"/>
@@ -29,63 +22,44 @@
                                  implementationClass="org.ton.intellij.tolk.ide.TolkFindUsagesProvider"/>
         <lang.implementationTextSelectioner language="Tolk"
                                             implementationClass="org.ton.intellij.tolk.ide.TolkImplementationTextSelectioner"/>
+        <enterHandlerDelegate implementation="org.ton.intellij.tolk.ide.typing.TolkEnterInLineCommentHandler"
+                              id="TolkEnterInLineCommentHandler"/>
+        <!-- endregion Language general -->
 
-        <!-- region Documentation -->
-        <lang.documentationProvider language="Tolk"
-                                    implementationClass="org.ton.intellij.tolk.doc.TolkDocumentationProvider"/>
-        <!-- endregion Documentation -->
-
-        <lang.formatter language="Tolk" implementationClass="org.ton.intellij.tolk.ide.formatter.TolkFormatter"/>
-
-        <renamePsiElementProcessor id="VlangRenameProcessor"
-                                   implementation="org.ton.intellij.tolk.refactor.rename.TolkRenameProcessor"/>
-        <vetoRenameCondition implementation="org.ton.intellij.tolk.refactor.rename.TolkRenameVeto"/>
-        <lang.refactoringSupport language="Tolk"
-                                 implementationClass="org.ton.intellij.tolk.refactor.TolkRefactoringSupportProvider"/>
-        <lang.namesValidator language="Tolk"
-                             implementationClass="org.ton.intellij.tolk.refactor.TolkNamesValidator"/>
-        <completion.contributor language="Tolk"
-                                implementationClass="org.ton.intellij.tolk.ide.completion.TolkCompletionContributor"/>
-        <completion.confidence language="Tolk" order="last"
-                               implementationClass="org.ton.intellij.tolk.ide.completion.TolkCompletionConfidence"/>
-        <lookup.charFilter implementation="org.ton.intellij.tolk.ide.completion.TolkCharFilter"/>
-        <typedHandler implementation="org.ton.intellij.tolk.codeInsight.editorActions.TolkTypedHandler"/>
-
-        <readWriteAccessDetector implementation="org.ton.intellij.tolk.ide.usages.TolkReadWriteAccessDetector"/>
-
-        <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkNamedElementIndex"/>
-        <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkTypeDefIndex"/>
-        <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkStructIndex"/>
-        <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex"/>
-        <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkFunctionIndex"/>
-        <stubElementTypeHolder class="org.ton.intellij.tolk.psi.TolkElementTypes" externalIdPrefix="tolk."/>
-
-        <gotoClassContributor implementation="org.ton.intellij.tolk.ide.navigation.TolkGotoClassLikeContributor"/>
-        <gotoSymbolContributor implementation="org.ton.intellij.tolk.ide.navigation.TolkGotoSymbolContributor"/>
-
-        <editorNotificationProvider
-                implementation="org.ton.intellij.tolk.ide.configurable.TolkSetupToolchainNotificationProvider"/>
-
-        <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkIncludeDefinition"
-                                 implementationClass="org.ton.intellij.tolk.psi.impl.TolkIncludePathElementManipulator"/>
-
-        <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkSelfExpression"
-                                 implementationClass="org.ton.intellij.tolk.psi.impl.TolkSelfExpressionElementManipulator"/>
+        <!-- region Annotator & Highlighting -->
+        <lang.syntaxHighlighterFactory language="Tolk"
+                                       implementationClass="org.ton.intellij.tolk.highlighting.TolkSyntaxHighlighterFactory"/>
+        <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkDumbAnnotator"/>
+        <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkAnnotator"/>
+        <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkDocAnnotator"/>
+        <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkCheckAnnotator"/>
 
         <colorSettingsPage implementation="org.ton.intellij.tolk.ide.colors.TolkColorSettingsPage"/>
         <additionalTextAttributes scheme="Default" file="colorSchemes/TolkDefault.xml"/>
         <additionalTextAttributes scheme="Dark" file="colorSchemes/TolkDark.xml"/>
+        <!-- endregion Annotator & Highlighting -->
 
-        <liveTemplateContext
-                contextId="tolk"
-                implementation="org.ton.intellij.tolk.template.TolkEverywhereContextType"/>
+        <!-- region Formatter -->
+        <lang.formatter language="Tolk" implementationClass="org.ton.intellij.tolk.ide.formatter.TolkFormatter"/>
+        <langCodeStyleSettingsProvider
+                implementation="org.ton.intellij.tolk.ide.formatter.TolkLanguageCodeStyleSettingsProvider"/>
+        <!-- endregion Formatter -->
 
-        <vcs.codeVisionLanguageContext language="Tolk"
-                                       implementationClass="org.ton.intellij.tolk.codeInsight.hint.codeVision.TolkVcsCodeVisionContext"/>
-        <codeInsight.daemonBoundCodeVisionProvider
-                implementation="org.ton.intellij.tolk.codeInsight.hint.codeVision.TolkReferencesCodeVisionProvider"/>
-        <codeInsight.typeInfo language="Tolk"
-                              implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkTypeProvider"/>
+        <!-- region Navigation -->
+        <gotoClassContributor implementation="org.ton.intellij.tolk.ide.navigation.TolkGotoClassLikeContributor"/>
+        <gotoSymbolContributor implementation="org.ton.intellij.tolk.ide.navigation.TolkGotoSymbolContributor"/>
+
+        <breadcrumbsInfoProvider implementation="org.ton.intellij.tolk.ide.structure.TolkBreadcrumbsProvider"/>
+        <navbar implementation="org.ton.intellij.tolk.ide.structure.TolkNavBarModelExtension" order="first"/>
+        <!-- endregion Navigation -->
+
+        <!-- region Imports -->
+        <lang.importOptimizer language="Tolk"
+                              implementationClass="org.ton.intellij.tolk.codeInsight.imports.TolkImportOptimizer"/>
+        <!-- endregion Imports -->
+
+        <!-- region CodeVision & Hints -->
+        <!-- Hints -->
         <codeInsight.declarativeInlayProvider
                 language="Tolk"
                 implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkTypeHintsProvider"
@@ -141,102 +115,56 @@
                                               descriptionKey="codeInsight.hint.description.parameters"/>
         <codeInsight.parameterInfo language="Tolk"
                                    implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkParameterInfoHandler"/>
+        <!-- Code vision -->
+        <!--suppress PluginXmlValidity -->
+        <vcs.codeVisionLanguageContext language="Tolk"
+                                       implementationClass="org.ton.intellij.tolk.codeInsight.hint.codeVision.TolkVcsCodeVisionContext"/>
+        <codeInsight.daemonBoundCodeVisionProvider
+                implementation="org.ton.intellij.tolk.codeInsight.hint.codeVision.TolkReferencesCodeVisionProvider"/>
+        <!-- endregion CodeVision & Hints -->
 
-        <!--        <codeInsight.declarativeInlayProvider bundle="messages.TolkBundle"-->
-        <!--                                              group="VALUES_GROUP"-->
-        <!--                                              implementationClass="org.ton.intellij.tolk.ide.hints.TolkConstantHintsProvider"-->
-        <!--                                              isEnabledByDefault="true"-->
-        <!--                                              language="Tolk"-->
-        <!--                                              nameKey="numeric.constant.values"-->
-        <!--                                              providerId="tolk.constant.hints">-->
-        <!--        </codeInsight.declarativeInlayProvider>-->
+        <!-- region Indexes -->
+        <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkNamedElementIndex"/>
+        <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkTypeDefIndex"/>
+        <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkStructIndex"/>
+        <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex"/>
+        <stubIndex implementation="org.ton.intellij.tolk.stub.index.TolkFunctionIndex"/>
+        <stubElementTypeHolder class="org.ton.intellij.tolk.psi.TolkElementTypes" externalIdPrefix="tolk."/>
+        <!-- endregion Indexes -->
 
-        <lang.importOptimizer language="Tolk"
-                              implementationClass="org.ton.intellij.tolk.codeInsight.imports.TolkImportOptimizer"/>
-
-        <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkDumbAnnotator"/>
-        <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkAnnotator"/>
-        <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkDocAnnotator"/>
-        <annotator language="Tolk" implementationClass="org.ton.intellij.tolk.highlighting.TolkCheckAnnotator"/>
-
-        <codeInsight.lineMarkerProvider language="Tolk"
-                                        implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkRecursiveCallLineMarkerProvider"/>
-
-        <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkStringLiteral"
-                                 implementationClass="org.ton.intellij.tolk.psi.reference.manipulators.TolkStringLiteralManipulator"/>
+        <!-- region Injection -->
         <multiHostInjector implementation="org.ton.intellij.tolk.ide.TolkLanguageInjector"/>
         <languageInjector implementation="org.ton.intellij.tolk.ide.TolkStringAsmInjector"/>
+        <!-- endregion Injection -->
 
-        <localInspection language="Tolk" groupKey="tolk"
-                         enabledByDefault="true" level="ERROR"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkFunKeywordExpectedInspection"
-                         bundle="messages.TolkBundle"
-                         key="inspection.name.fun_keyword_expected"/>
-        <localInspection language="Tolk" displayName="Unused function inspection" groupPath="Tolk"
-                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedFunctionInspection"/>
-        <localInspection language="Tolk" displayName="Unused variable inspection" groupPath="Tolk"
-                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedVariableInspection"/>
-        <localInspection language="Tolk" displayName="Unused parameter inspection" groupPath="Tolk"
-                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedFunctionParameterInspection"/>
-        <localInspection language="Tolk" displayName="Unused import" groupPath="Tolk"
-                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedImportInspection"/>
-        <!--        <localInspection language="Tolk" displayName="Unsupported element inspection" groupPath="Tolk"-->
-        <!--                         groupName="Declaration redundancy" enabledByDefault="true" level="ERROR"-->
-        <!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnsupportedElementInspection"/>-->
-        <localInspection language="Tolk" displayName="__expect_type inspection" groupPath="Tolk"
-                         groupName="Declaration redundancy" enabledByDefault="true" level="ERROR"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkExpectTypeBuiltinInspection"/>
+        <!-- region Searches -->
+        <!--  endregion Searches -->
 
-        <!-- style issues -->
-        <localInspection language="Tolk" groupPath="Tolk"
-                         bundle="messages.InspectionBundle"
-                         key="inspection.constant.expression.name"
-                         groupKey="group.style.name"
-                         enabledByDefault="true" level="INFORMATION"
-                         implementationClass="org.ton.intellij.tolk.inspection.style.TolkConstantExpressionInspection"/>
+        <!-- region Code Insight -->
+        <codeInsight.lineMarkerProvider language="Tolk"
+                                        implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkRecursiveCallLineMarkerProvider"/>
+        <codeInsight.typeInfo language="Tolk"
+                              implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkTypeProvider"/>
+        <!-- endregion Code Insight -->
 
-        <!-- numeric issues -->
-        <localInspection language="Tolk" groupPath="Tolk"
-                         enabledByDefault="true" level="WARNING"
-                         implementationClass="org.ton.intellij.tolk.inspection.numeric.TolkDivideByZeroInspection"/>
-        <localInspection language="Tolk" groupPath="Tolk"
-                         enabledByDefault="true" level="WARNING"
-                         implementationClass="org.ton.intellij.tolk.inspection.numeric.TolkIntOverflowInspection"/>
+        <!-- region Documentation -->
+        <lang.documentationProvider language="Tolk"
+                                    implementationClass="org.ton.intellij.tolk.doc.TolkDocumentationProvider"/>
+        <!-- endregion Documentation -->
 
-        <!-- control flow issues -->
-        <!--        <localInspection language="Tolk" displayName="`if` condition is not an integer" groupPath="Tolk"-->
-        <!--                         groupName="Control flow issues" enabledByDefault="true" level="ERROR"-->
-        <!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkIfConditionIsNotAnIntegerInspection"/>-->
+        <!-- region Completion -->
+        <lookup.charFilter implementation="org.ton.intellij.tolk.ide.completion.TolkCharFilter"/>
+        <typedHandler implementation="org.ton.intellij.tolk.codeInsight.editorActions.TolkTypedHandler"/>
 
-        <!-- control flow issues -->
+        <liveTemplateContext
+                contextId="tolk"
+                implementation="org.ton.intellij.tolk.template.TolkEverywhereContextType"/>
 
-        <!-- general -->
-        <localInspection language="Tolk" groupPath="Tolk"
-                         groupName="General" enabledByDefault="true" level="ERROR"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnresolvedReferenceInspection"
-                         key="inspection.tolk.unresolved.reference.display.name" bundle="messages.TolkBundle"/>
-        <!--        <localInspection language="Tolk" displayName="Unresolved type identifier" groupPath="Tolk"-->
-        <!--                         groupName="General" enabledByDefault="true" level="ERROR"-->
-        <!--                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnresolvedTypeIdentifierInspection"/>-->
-        <localInspection language="Tolk" groupPath="Tolk" displayName="Deprecation function" groupName="General"
-                         enabledByDefault="true" level="WARNING"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkDeprecationInspection"/>
-        <localInspection language="Tolk" groupPath="Tolk" displayName="Struct initialization" groupName="General"
-                         enabledByDefault="true" level="ERROR"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkStructInitializationInspection"/>
-        <localInspection language="Tolk" groupPath="Tolk" displayName="Call arguments count mismatch" groupName="General"
-                         enabledByDefault="true" level="ERROR"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkCallArgumentsCountMismatchInspection"/>
-        <localInspection language="Tolk" groupPath="Tolk" displayName="Type mismatch" groupName="General"
-                         enabledByDefault="false" level="ERROR"
-                         implementationClass="org.ton.intellij.tolk.inspection.TolkTypeMismatchInspection"/>
-        <!-- Completion -->
         <completion.contributor language="Tolk"
                                 implementationClass="org.ton.intellij.tolk.ide.completion.TolkCompletionContributor"/>
+        <completion.confidence language="Tolk" order="last"
+                               implementationClass="org.ton.intellij.tolk.ide.completion.TolkCompletionConfidence"/>
+        <!-- endregion Completion -->
 
         <!-- region Postfix Templates -->
         <codeInsight.template.postfixTemplateProvider
@@ -244,9 +172,38 @@
                 implementationClass="org.ton.intellij.tolk.ide.completion.postfix.TolkPostfixTemplateProvider"/>
         <!-- endregion Postfix Templates -->
 
-        <!-- Code Style -->
-        <langCodeStyleSettingsProvider
-                implementation="org.ton.intellij.tolk.ide.formatter.TolkLanguageCodeStyleSettingsProvider"/>
+        <!-- region Editor -->
+        <editorNotificationProvider
+                implementation="org.ton.intellij.tolk.ide.configurable.TolkSetupToolchainNotificationProvider"/>
+
+        <postStartupActivity implementation="org.ton.intellij.tolk.ide.TolkAttachTestConsoleFiltersAtStartup"/>
+        <postStartupActivity implementation="org.ton.intellij.tolk.psi.impl.TolkBuiltins$RegisterActivity"/>
+        <postStartupActivity implementation="org.ton.intellij.tolk.toolchain.TolkToolchainDetectActivity"/>
+        <!-- endregion Editor -->
+
+        <!-- region Refactorings -->
+        <lang.refactoringSupport language="Tolk"
+                                 implementationClass="org.ton.intellij.tolk.refactor.TolkRefactoringSupportProvider"/>
+
+        <renamePsiElementProcessor id="VlangRenameProcessor"
+                                   implementation="org.ton.intellij.tolk.refactor.rename.TolkRenameProcessor"/>
+        <vetoRenameCondition implementation="org.ton.intellij.tolk.refactor.rename.TolkRenameVeto"/>
+
+        <lang.namesValidator language="Tolk"
+                             implementationClass="org.ton.intellij.tolk.refactor.TolkNamesValidator"/>
+
+        <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkIncludeDefinition"
+                                 implementationClass="org.ton.intellij.tolk.psi.impl.TolkIncludePathElementManipulator"/>
+
+        <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkSelfExpression"
+                                 implementationClass="org.ton.intellij.tolk.psi.impl.TolkSelfExpressionElementManipulator"/>
+
+        <lang.elementManipulator forClass="org.ton.intellij.tolk.psi.TolkStringLiteral"
+                                 implementationClass="org.ton.intellij.tolk.psi.reference.manipulators.TolkStringLiteralManipulator"/>
+        <!-- endregion Refactorings -->
+
+        <consoleFilterProvider implementation="org.ton.intellij.tolk.ide.TolkConsoleFilterProvider"/>
+        <readWriteAccessDetector implementation="org.ton.intellij.tolk.ide.usages.TolkReadWriteAccessDetector"/>
 
         <projectConfigurable instance="org.ton.intellij.tolk.ide.configurable.TolkProjectConfigurable"
                              groupId="language"
@@ -255,9 +212,6 @@
 
         <additionalLibraryRootsProvider
                 implementation="org.ton.intellij.tolk.toolchain.TolkSdkSyntheticLibraryProvider"/>
-
-        <postStartupActivity implementation="org.ton.intellij.tolk.psi.impl.TolkBuiltins$RegisterActivity"/>
-        <postStartupActivity implementation="org.ton.intellij.tolk.toolchain.TolkToolchainDetectActivity"/>
     </extensions>
 
     <extensions defaultExtensionNs="org.ton">
@@ -280,7 +234,7 @@
     </applicationListeners>
 
     <actions>
-        <action id="NewTolk" class="org.ton.intellij.tolk.action.file.TolkCreateFileAction"
+        <action id="NewTolkFile" class="org.ton.intellij.tolk.action.file.TolkCreateFileAction"
                 text="Tolk File" description="Create new Tolk file">
             <add-to-group group-id="NewGroup"/>
         </action>

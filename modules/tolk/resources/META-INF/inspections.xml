@@ -1,0 +1,58 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <localInspection language="Tolk" groupKey="tolk"
+                         enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkFunKeywordExpectedInspection"
+                         bundle="messages.TolkBundle"
+                         key="inspection.name.fun_keyword_expected"/>
+        <localInspection language="Tolk" displayName="Unused function inspection" groupPath="Tolk"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedFunctionInspection"/>
+        <localInspection language="Tolk" displayName="Unused variable inspection" groupPath="Tolk"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedVariableInspection"/>
+        <localInspection language="Tolk" displayName="Unused parameter inspection" groupPath="Tolk"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedFunctionParameterInspection"/>
+        <localInspection language="Tolk" displayName="Unused import" groupPath="Tolk"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnusedImportInspection"/>
+        <localInspection language="Tolk" displayName="__expect_type inspection" groupPath="Tolk"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkExpectTypeBuiltinInspection"/>
+
+        <!-- style issues -->
+        <localInspection language="Tolk" groupPath="Tolk"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.constant.expression.name"
+                         groupKey="group.style.name"
+                         enabledByDefault="true" level="INFORMATION"
+                         implementationClass="org.ton.intellij.tolk.inspection.style.TolkConstantExpressionInspection"/>
+
+        <!-- numeric issues -->
+        <localInspection language="Tolk" groupPath="Tolk"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.tolk.inspection.numeric.TolkDivideByZeroInspection"/>
+        <localInspection language="Tolk" groupPath="Tolk"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.tolk.inspection.numeric.TolkIntOverflowInspection"/>
+
+        <!-- general -->
+        <localInspection language="Tolk" groupPath="Tolk"
+                         groupName="General" enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkUnresolvedReferenceInspection"
+                         key="inspection.tolk.unresolved.reference.display.name" bundle="messages.TolkBundle"/>
+        <localInspection language="Tolk" groupPath="Tolk" displayName="Deprecation function" groupName="General"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkDeprecationInspection"/>
+        <localInspection language="Tolk" groupPath="Tolk" displayName="Struct initialization" groupName="General"
+                         enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkStructInitializationInspection"/>
+        <localInspection language="Tolk" groupPath="Tolk" displayName="Call arguments count mismatch" groupName="General"
+                         enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkCallArgumentsCountMismatchInspection"/>
+        <localInspection language="Tolk" groupPath="Tolk" displayName="Type mismatch" groupName="General"
+                         enabledByDefault="false" level="ERROR"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkTypeMismatchInspection"/>
+    </extensions>
+</idea-plugin>

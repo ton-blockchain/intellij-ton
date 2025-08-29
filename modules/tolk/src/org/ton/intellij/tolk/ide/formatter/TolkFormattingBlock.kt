@@ -50,6 +50,28 @@ class TolkFormattingBlock(
     indent: Indent? = null,
     childIndent: Indent? = null,
 ) : AbstractTolkBlock(node, spacingBuilder, wrap, alignment, indent, childIndent) {
+    
+    override fun getSpacing(child1: Block?, child2: Block): Spacing? {
+        if (child1 != null) {
+            val node1 = (child1 as? AbstractTolkBlock)?.node
+
+            if (node1?.elementType == ASSERT_KEYWORD && myNode.elementType == ASSERT_STATEMENT) {
+                val assertStatement = myNode
+                val hasThrowStatement = assertStatement.getChildren(TokenSet.create(THROW_STATEMENT)).isNotEmpty()
+                val hasComma = assertStatement.getChildren(TokenSet.create(COMMA)).isNotEmpty()
+                
+                return if (hasThrowStatement && !hasComma) {
+                    // assert (...) throw ...
+                    Spacing.createSpacing(1, 1, 0, false, 0)
+                } else {
+                    // assert(..., ...)
+                    Spacing.createSpacing(0, 0, 0, false, 0)
+                }
+            }
+        }
+        
+        return spacingBuilder.getSpacing(this, child1, child2)
+    }
     override fun buildChildren(): MutableList<Block> {
         val childrenBlocks = LinkedList<Block>()
         var child = myNode.firstChildNode

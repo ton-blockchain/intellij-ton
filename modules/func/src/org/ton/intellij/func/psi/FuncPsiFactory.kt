@@ -6,6 +6,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiParserFacade
 import org.ton.intellij.func.FuncLanguage
+import org.ton.intellij.util.childrenWithLeaves
 import org.ton.intellij.util.descendantOfTypeStrict
 
 @Service(Service.Level.PROJECT)
@@ -187,6 +188,13 @@ class FuncPsiFactory private constructor(val project: Project) {
         val funcFile = createFile("() $text() {}")
         val function = funcFile.functions.first()
         return function.identifier
+    }
+
+    fun createModifier(text: String): PsiElement {
+        val funcFile = createFile("() foo() $text {}")
+        val function = funcFile.functions.first()
+        return function.childrenWithLeaves.find { it.text == text }
+            ?: error("Failed to create modifier: `$text`")
     }
 
     fun createIncludeDefinition(text: String): FuncIncludeDefinition =

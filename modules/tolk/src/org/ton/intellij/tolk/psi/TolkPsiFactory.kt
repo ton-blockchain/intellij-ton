@@ -63,7 +63,7 @@ class TolkPsiFactory private constructor(val project: Project) {
             ?: error("Failed to create include definition from text: `$text`")
 
     fun createConstant(name: String, value: String): TolkConstVar =
-        createFromText("const $name = $value;")
+        createFromText("const $name = $value")
             ?: error("Failed to create constant from name: `$name` and value: `$value`")
 
     private inline fun <reified T : TolkElement> createFromText(

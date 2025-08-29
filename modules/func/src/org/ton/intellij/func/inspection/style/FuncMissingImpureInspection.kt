@@ -86,7 +86,6 @@ class FuncAddImpureFix(
         val impureKeyword = factory.createModifier("impure")
         val space = factory.createWhitespace(" ")
 
-
         if (functionBody != null) {
             function.addBefore(space, functionBody)
             function.addBefore(impureKeyword, functionBody)

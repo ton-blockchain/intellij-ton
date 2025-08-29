@@ -14,11 +14,13 @@ import org.ton.intellij.tolk.ide.fixes.TolkCreateFunctionQuickfix
 import org.ton.intellij.tolk.ide.fixes.TolkCreateGlobalVariableQuickfix
 import org.ton.intellij.tolk.ide.fixes.TolkCreateLocalVariableQuickfix
 import org.ton.intellij.tolk.ide.imports.TolkImportFileQuickFix
+import org.ton.intellij.tolk.psi.TolkBlockStatement
 import org.ton.intellij.tolk.psi.TolkCallExpression
 import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
 import org.ton.intellij.tolk.psi.TolkVisitor
+import org.ton.intellij.util.parentOfType
 
 class TolkUnresolvedReferenceInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(
@@ -53,11 +55,17 @@ class TolkUnresolvedReferenceInspection : TolkInspectionBase() {
                 return arrayOf(TolkCreateFunctionQuickfix(identifier))
             }
 
-            return arrayOf(
-                TolkCreateLocalVariableQuickfix(identifier),
+            val fixes = mutableListOf<LocalQuickFixAndIntentionActionOnPsiElement>(
                 TolkCreateConstantQuickfix(identifier),
                 TolkCreateGlobalVariableQuickfix(identifier)
             )
+
+            if (expr.parentOfType<TolkBlockStatement>() != null) {
+                // don't add a quickfix outside function
+                fixes.add(TolkCreateLocalVariableQuickfix(identifier))
+            }
+
+            return fixes.toTypedArray()
         }
 
         fun registerProblem(o: PsiElement, range: TextRange, fixes: Array<LocalQuickFix>) {

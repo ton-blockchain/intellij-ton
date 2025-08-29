@@ -155,6 +155,12 @@
                          groupKey="group.general.name"
                          enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.func.inspection.style.FuncOperatorPrecedenceInspection"/>
+        <localInspection language="FunC" groupPath="FunC"
+                         bundle="messages.FuncBundle"
+                         key="inspection.func.missing.impure.name"
+                         groupKey="group.general.name"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.func.inspection.style.FuncMissingImpureInspection"/>
 
         <!-- Completion -->
         <completion.contributor language="FunC"

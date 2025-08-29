@@ -1,0 +1,32 @@
+<html>
+<body>
+Reports functions returning unit type <code>()</code> that may need the <code>impure</code> specifier to prevent
+compiler optimization.
+
+<p>
+    In FunC, functions that return nothing (unit type <code>()</code>) typically have side effects and should be marked
+    with the <code>impure</code> specifier.
+    <strong>Without the <code>impure</code> specifier, the compiler may optimize away such functions completely</strong>,
+    leading to unexpected behavior and debugging difficulties.
+</p>
+
+<br>
+<b>Problematic (may be optimized away):</b>
+<pre><code>
+() send_message(cell msg) {
+    send_raw_message(msg, 0);
+}
+</code></pre>
+<b>Correct (protected from optimization):</b>
+<pre><code>
+() send_message(cell msg) impure {
+    send_raw_message(msg, 0);
+}
+</code></pre>
+<br>
+
+<p>
+    The inspection provides a quick fix to add the <code>impure</code> specifier automatically.
+</p>
+</body>
+</html>

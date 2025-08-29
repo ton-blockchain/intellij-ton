@@ -186,18 +186,17 @@ fun collectMethodCandidates(
     }
 
     if (viable.isEmpty()) {
-        if (forCompletion) {
-            return emptyList()
+        if (calledReceiver is TolkTyUnknown) {
+            // We cannot always infer a type of generic functions like
+            // ```
+            // fun getWrapperValue2<T>(c: T) {
+            //    return c.value;
+            // }
+            // ```
+            // so fallback to an initial methods list to resolve somehow
+            return methods.map { it to EmptySubstitution }
         }
-
-        // We cannot always infer a type of generic functions like
-        // ```
-        // fun getWrapperValue2<T>(c: T) {
-        //    return c.value;
-        // }
-        // ```
-        // so fallback to initial methods list to resolve somehow
-        return methods.map { it to EmptySubstitution }
+        return emptyList()
     }
 
     // if nothing found, return nothing;

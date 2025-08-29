@@ -51,7 +51,7 @@ class TolkTyFunction(
         )
     }
 
-    override fun join(other: TolkTy): TolkTy {
+    override fun join(other: TolkTy, hint: TolkTy?): TolkTy {
         if (this == other.unwrapTypeAlias()) return other
         if (other is TolkTyFunction) {
             var hasGenerics = false

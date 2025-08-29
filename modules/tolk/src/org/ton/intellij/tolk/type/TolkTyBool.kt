@@ -8,9 +8,9 @@ abstract class TolkTyBool : TolkPrimitiveTy {
 
     companion object : TolkTyBool() {
         override fun isSuperType(other: TolkTy): Boolean = other == TolkTy.Never || other is TolkTyBool
-        override fun join(other: TolkTy): TolkTy {
+        override fun join(other: TolkTy, hint: TolkTy?): TolkTy {
             if (other.unwrapTypeAlias() is TolkTyBool) return this
-            return super.join(other)
+            return super.join(other, hint)
         }
 
         override fun toString(): String = "bool"
@@ -32,8 +32,8 @@ data class TolkConstantBoolTy(
         return if (value) TolkTy.FALSE else TolkTy.TRUE
     }
 
-    override fun join(other: TolkTy): TolkTy {
+    override fun join(other: TolkTy, hint: TolkTy?): TolkTy {
         if (other.unwrapTypeAlias() is TolkTyBool) return TolkTy.Bool
-        return super<TolkTyBool>.join(other)
+        return super<TolkTyBool>.join(other, hint)
     }
 }

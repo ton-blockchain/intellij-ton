@@ -36,8 +36,19 @@ interface TolkTy : TypeFoldable<TolkTy> {
         return other == this || other == Never
     }
 
-    fun join(other: TolkTy): TolkTy {
+    fun join(other: TolkTy, hint: TolkTy? = null): TolkTy {
         if (this.isEquivalentTo(other)) return this
+
+        var other = other
+
+        // example: `var r = ... ? int8 : int16`, will be inferred as `int8 | int16` (via unification)
+        // but `var r: int = ... ? int8 : int16`, will be inferred as `int` (it's dest_hint)
+        if (hint != null && hint !is TolkTyUnknown && hint.unwrapTypeAlias() !is TolkTyUnion) {
+            if (hint.canRhsBeAssigned(other)) {
+                other = hint
+            }
+        }
+
         if (other == Unknown) return Unknown
         if (other == Never) return this
         if (other == Null) return TolkTyUnion.create(this, other)
@@ -190,10 +201,19 @@ private fun hasVariantEquivalentTo(otherUnwrapped: TolkTyUnion, lhsVariant: Tolk
     return otherUnwrapped.variants.any { it.isEquivalentTo(lhsVariant) }
 }
 
-fun TolkTy?.join(other: TolkTy?): TolkTy? {
+fun TolkTy?.join(other: TolkTy?, hint: TolkTy? = null): TolkTy? {
     if (this == null || this == TolkTy.Unknown) return other
     if (other == null || other == TolkTy.Unknown) return this
-    return this.join(other)
+
+    // example: `var r = ... ? int8 : int16`, will be inferred as `int8 | int16` (via unification)
+    // but `var r: int = ... ? int8 : int16`, will be inferred as `int` (it's dest_hint)
+    if (hint != null && hint !is TolkTyUnknown && hint.unwrapTypeAlias() !is TolkTyUnion) {
+        if (hint.canRhsBeAssigned(this)) {
+            return hint.join(other, hint)
+        }
+    }
+
+    return this.join(other, hint)
 }
 
 interface TolkPrimitiveTy : TolkTy {
@@ -246,7 +266,7 @@ object TolkTyVoid : TolkPrimitiveTy {
 object TolkTyNull : TolkPrimitiveTy {
     override fun toString(): String = "TolkTy(null)"
 
-    override fun join(other: TolkTy): TolkTy {
+    override fun join(other: TolkTy, hint: TolkTy?): TolkTy {
         if (other == this || other == Never) return this
         if (other == TolkTy.Unknown) return TolkTy.Unknown
         return TolkTyUnion.create(other, this)
@@ -295,14 +315,14 @@ object TolkTyUnknown : TolkPrimitiveTy {
     override val hasTypeAlias: Boolean get() = false
 
     override fun isSuperType(other: TolkTy): Boolean = true
-    override fun join(other: TolkTy): TolkTy = this
+    override fun join(other: TolkTy, hint: TolkTy?): TolkTy = this
 
     override fun toString(): String = "unknown"
 }
 
 object TolkTyNever : TolkTy, TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
-    override fun join(other: TolkTy): TolkTy = other
+    override fun join(other: TolkTy, hint: TolkTy?): TolkTy = other
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean = other == this
 
@@ -342,6 +362,10 @@ data class TolkIntNTy(
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
+        if (other is TolkIntNTy) {
+            // `int8` is NOT assignable to `int32` without `as`
+            return other.n == n && other.unsigned == unsigned
+        }
         if (other.actualType() == TolkTy.Int) return true
         if (other is TolkTyAlias) return canRhsBeAssigned(other.unwrapTypeAlias())
         return other == Never

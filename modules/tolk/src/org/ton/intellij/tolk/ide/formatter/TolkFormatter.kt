@@ -77,7 +77,6 @@ class TolkFormatter : FormattingModelBuilder {
             .afterInside(TokenSet.create(TILDE), FUNCTION).none()
             .afterInside(IDENTIFIER, FUNCTION).none()
             .between(FUNCTION, FUNCTION).blankLines(1)
-            .after(ASSERT_KEYWORD).spaces(1)
             .beforeInside(THROW_STATEMENT, ASSERT_STATEMENT).spaces(1)
             .beforeInside(TENSOR_EXPRESSION, CALL_EXPRESSION).none()
             .beforeInside(UNIT_EXPRESSION, CALL_EXPRESSION).none()

@@ -29,6 +29,21 @@ object TolkReturnCompletionProvider : TolkCompletionProvider(), DumbAware {
     ) {
         val outerFunction = parameters.position.parentOfType<TolkFunction>() ?: return
 
+        if (outerFunction.returnType == null) {
+            // no explicit return type
+            result.addElement(
+                LookupElementBuilder.create("return")
+                    .bold()
+                    .withTailText(" expr;", true)
+                    .withInsertHandler(
+                        TemplateStringInsertHandler(
+                            " \$expr$;", true, "expr" to ConstantNode("")
+                        )
+                    )
+                    .toTolkLookupElement(TolkLookupElementData(keywordKind = KEYWORD))
+            )
+        }
+
         val returnTy = outerFunction.returnTy
         if (returnTy is TolkTyVoid) {
             result.addElement(

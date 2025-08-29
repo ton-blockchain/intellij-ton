@@ -12,7 +12,9 @@ import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkReturnStatement
 import org.ton.intellij.tolk.psi.TolkStructExpressionField
 import org.ton.intellij.tolk.psi.TolkStructField
+import org.ton.intellij.tolk.psi.TolkVar
 import org.ton.intellij.tolk.psi.TolkVarDefinition
+import org.ton.intellij.tolk.psi.TolkVarExpression
 import org.ton.intellij.tolk.psi.TolkVisitor
 import org.ton.intellij.tolk.psi.impl.functionSymbol
 import org.ton.intellij.tolk.psi.impl.isSetAssignment
@@ -27,6 +29,24 @@ class TolkTypeMismatchInspection : TolkInspectionBase() {
         holder: ProblemsHolder,
         session: LocalInspectionToolSession,
     ): TolkVisitor = object : TolkVisitor() {
+        override fun visitVarExpression(decl: TolkVarExpression) {
+            val def = decl.varDefinition
+            if (def !is TolkVar) return
+            if (def.typeExpression == null) return // no explicit type hint
+
+            val defType = def.type ?: return
+            val expression = decl.expression ?: return
+            val exprType = expression.type ?: return
+
+            if (!defType.canRhsBeAssigned(exprType)) {
+                holder.registerProblem(
+                    expression,
+                    "Cannot assign <code>${exprType.render()}</code> to variable of type <code>${defType.render()}</code>",
+                    ProblemHighlightType.GENERIC_ERROR,
+                )
+            }
+        }
+
         override fun visitBinExpression(bin: TolkBinExpression) {
             if (bin.binaryOp.eq != null || bin.isSetAssignment) {
                 checkAssignment(bin)

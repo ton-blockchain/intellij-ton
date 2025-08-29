@@ -1716,10 +1716,10 @@ class TolkInferenceWalker(
                 armFlow.setSymbol(sinkExpression, armType)
             }
             if (matchExpression != null) {
-                armFlow = inferExpression(matchExpression, armFlow, usedAsCondition).outFlow
+                armFlow = inferExpression(matchExpression, armFlow, usedAsCondition, hint).outFlow
                 matchOutFlow = matchOutFlow.join(armFlow)
                 val exprType = ctx.getType(matchExpression)
-                unifiedType = exprType.join(unifiedType ?: hint)
+                unifiedType = exprType.join(unifiedType ?: hint, hint)
                 return@forEach
             }
             val returnStatement = matchBody?.returnStatement

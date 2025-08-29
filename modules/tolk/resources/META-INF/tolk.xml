@@ -234,6 +234,7 @@
     </applicationListeners>
 
     <actions>
+        <!--suppress PluginXmlI18n -->
         <action id="NewTolkFile" class="org.ton.intellij.tolk.action.file.TolkCreateFileAction"
                 text="Tolk File" description="Create new Tolk file">
             <add-to-group group-id="NewGroup"/>

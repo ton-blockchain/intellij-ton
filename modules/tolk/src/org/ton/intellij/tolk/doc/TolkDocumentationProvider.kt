@@ -141,7 +141,12 @@ fun TolkTy.generateDoc(): String = buildString {
         TolkTy.Never          -> colorize("never", asKeyword)
 
         is TolkTyStruct       -> {
-            colorize(psi.name ?: "Anonymous", asStruct)
+            val name = psi.name ?: "Anonymous"
+            if (name == "map") {
+                colorize(name, asKeyword)
+            } else {
+                colorize(name, asStruct)
+            }
             renderTypeParameters(typeArguments, this@buildString)
         }
 

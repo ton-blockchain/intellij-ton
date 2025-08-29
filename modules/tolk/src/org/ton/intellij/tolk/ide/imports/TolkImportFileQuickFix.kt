@@ -25,11 +25,16 @@ import com.intellij.util.ui.JBUI
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.TolkCallExpression
+import org.ton.intellij.tolk.psi.TolkConstVar
 import org.ton.intellij.tolk.psi.TolkDotExpression
+import org.ton.intellij.tolk.psi.TolkEnum
 import org.ton.intellij.tolk.psi.TolkFile
+import org.ton.intellij.tolk.psi.TolkFunction
+import org.ton.intellij.tolk.psi.TolkGlobalVar
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
-import org.ton.intellij.tolk.psi.TolkTypeParameter
+import org.ton.intellij.tolk.psi.TolkStruct
+import org.ton.intellij.tolk.psi.TolkTypeDef
 import org.ton.intellij.tolk.psi.reference.TolkSymbolReference
 import org.ton.intellij.tolk.psi.reference.TolkTypeReference
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
@@ -219,7 +224,7 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
         private fun getText(element: PsiElement, filesToImport: List<SmartPsiElementPointer<TolkFile>>): String {
             if (filesToImport.isEmpty()) return ""
             val containingFile = element.containingFile ?: return ""
-            return filesToImport.first().relativePath(containingFile) + "? " + if (filesToImport.size > 1) "(multiple choices...) " else ""
+            return "'" + filesToImport.first().relativePath(containingFile) + "'? " + if (filesToImport.size > 1) "(multiple choices...) " else ""
         }
 
         private fun notQualified(startElement: PsiElement?): Boolean {
@@ -253,7 +258,9 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
         }
 
         fun findImportVariants(symbolToImport: String, context: PsiElement): List<TolkFile> {
-            val candidates = TolkNamedElementIndex.find(symbolToImport, context.project, null).filter { it !is TolkTypeParameter }
+            val candidates = TolkNamedElementIndex.find(symbolToImport, context.project, null).filter {
+                it is TolkFunction || it is TolkStruct || it is TolkTypeDef || it is TolkConstVar || it is TolkGlobalVar || it is TolkEnum
+            }
             val files = candidates.mapNotNull { it.containingFile }
             return files
                 .filterIsInstance<TolkFile>()

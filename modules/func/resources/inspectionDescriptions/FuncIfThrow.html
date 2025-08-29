@@ -1,0 +1,32 @@
+<html>
+<body>
+Reports <code>if</code> and <code>ifnot</code> statements that contain only a single <code>throw</code> call in their
+body.
+Such constructs can be converted to the more idiomatic <code>throw_if</code> or <code>throw_unless</code> functions.
+<br>
+<br>
+Examples:
+<br>
+<br>
+
+<b>Before:</b>
+<pre><code>
+if (i > b) {
+  throw(error);
+}
+
+ifnot (condition) {
+  throw(error);
+}
+</code></pre>
+<b>After:</b>
+<pre><code>
+throw_if(error, i > b);
+
+throw_unless(error, condition);
+</code></pre>
+
+The <code>throw_if</code> and <code>throw_unless</code> functions are part of the FunC standard library and are
+syntactically more correct and idiomatic for conditional error throwing.
+</body>
+</html>

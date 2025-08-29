@@ -193,6 +193,10 @@ class FuncPsiFactory private constructor(val project: Project) {
         createFromText("#include \"$text\";")
             ?: error("Failed to create include definition from text: `$text`")
 
+    fun createConstVarList(name: String, value: String): FuncConstVarList =
+        createFromText("const $name = $value;")
+            ?: error("Failed to create const var from text: `const $name = $value;`")
+
     private inline fun <reified T : FuncElement> createFromText(
         code: CharSequence
     ): T? = createFile(code).descendantOfTypeStrict()

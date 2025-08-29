@@ -44,11 +44,6 @@ data class TolkLookupElementData(
     val isSelfTypeNullableCompatible: Boolean = true,
 
     /**
-     * `true` if the lookup element must show only if a completion result is empty.
-     */
-    val isDeferredLookup: Boolean = false,
-
-    /**
      * `true` if the lookup element refers to a local declaration, e.g. inside a function body
      */
     val isLocal: Boolean = false,
@@ -84,6 +79,7 @@ data class TolkLookupElementData(
         DEFAULT,
         DEPRECATED,
         ENTRY_POINT_FUNCTION,
-        FROM_UNRESOLVED_IMPORT
+        FROM_UNRESOLVED_IMPORT,
+        LOW_LEVEL_METHOD,
     }
 }

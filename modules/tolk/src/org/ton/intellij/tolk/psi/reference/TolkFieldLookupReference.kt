@@ -186,6 +186,10 @@ fun collectMethodCandidates(
     }
 
     if (viable.isEmpty()) {
+        if (forCompletion) {
+            return emptyList()
+        }
+
         // We cannot always infer a type of generic functions like
         // ```
         // fun getWrapperValue2<T>(c: T) {

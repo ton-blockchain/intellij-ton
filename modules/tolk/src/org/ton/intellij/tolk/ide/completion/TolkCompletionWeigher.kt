@@ -22,7 +22,6 @@ interface TolkCompletionWeigher {
             "prefix",
             "stats",
             "proximity",
-            preferTrue(P::isDeferredLookup, id = "tolk-prefer-deferred-lookup"),
         )
     }
 }

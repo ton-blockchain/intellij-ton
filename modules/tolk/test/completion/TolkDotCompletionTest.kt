@@ -12,7 +12,7 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "Red", "Blue", "foo"
+        "Red", "Blue"
     )
 
     fun `test enum completion with static method`() = checkEquals(
@@ -44,7 +44,7 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "Red", "Blue", "foo"
+        "Red", "Blue",
     )
 
     fun `test enum completion via instance without methods`() = checkEquals(
@@ -58,7 +58,6 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "foo"
     )
 
     fun `test enum completion via instance with instance method`() = checkEquals(
@@ -105,7 +104,6 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
         """,
         1,
         "value",
-        "foo",
     )
 
     fun `test simple instance method completion`() = checkOrderedEquals(

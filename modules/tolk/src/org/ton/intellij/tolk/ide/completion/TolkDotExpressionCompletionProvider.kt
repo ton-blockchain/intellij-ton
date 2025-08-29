@@ -148,9 +148,21 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
             // don't complete static methods for instance expression
             if (!isStaticReceiver && isStatic) continue
 
+            // when call instance method as static
+            val methodCallTypeMismatch = isStaticReceiver && !isStatic
+
+            val isLowLevelMethod = when (name) {
+                "getDeclaredPackPrefix",
+                "getDeclaredPackPrefixLen",
+                "forceLoadLazyObject",
+                "stackMoveToTop",
+                     -> true
+
+                else -> false
+            }
             val lookupElement = function.toLookupElementBuilder(ctx)
                 .withBoldness(receiverType == calledType)
-                .applyIf(isStaticReceiver && !isStatic) {
+                .applyIf(methodCallTypeMismatch || isLowLevelMethod) {
                     withItemTextForeground(JBColor.GRAY)
                 }
                 .toTolkLookupElement(
@@ -163,25 +175,14 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                             !isResolved                      -> TolkLookupElementData.ElementKind.FROM_UNRESOLVED_IMPORT
                             function.isEntryPoint            -> TolkLookupElementData.ElementKind.ENTRY_POINT_FUNCTION
                             function.hasDeprecatedAnnotation -> TolkLookupElementData.ElementKind.DEPRECATED
-                            isStatic                         -> TolkLookupElementData.ElementKind.STATIC_FUNCTION
+                            isStatic && !isLowLevelMethod    -> TolkLookupElementData.ElementKind.STATIC_FUNCTION
+                            isLowLevelMethod                 -> TolkLookupElementData.ElementKind.LOW_LEVEL_METHOD
                             else                             -> TolkLookupElementData.ElementKind.DEFAULT
                         },
-                        isDeferredLookup = when (name) {
-                            "getDeclaredPackPrefix",
-                            "getDeclaredPackPrefixLen",
-                            "stackMoveToTop",
-                                 -> true
-
-                            else -> false
-                        }
                     )
                 )
 
             result.addElement(lookupElement)
-        }
-
-        if (result is DeferredCompletionResultSet) {
-            result.flushDeferredElements()
         }
     }
 }

@@ -174,10 +174,6 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         }
 
         if (!TolkNamedElementIndex.processAllElements(project, processor = ::processNamedElement)) return
-
-        if (result is DeferredCompletionResultSet) {
-            result.flushDeferredElements()
-        }
     }
 
     private fun TolkNamedElement.toLookupElement(
@@ -188,20 +184,23 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         val builder = toLookupElementBuilder(ctx)
         return when (this) {
             is TolkFunction -> {
+                val isLowLevelMethod = when (name) {
+                    "getDeclaredPackPrefix",
+                    "getDeclaredPackPrefixLen",
+                    "forceLoadLazyObject",
+                    "stackMoveToTop"
+                         -> true
+
+                    else -> false
+                }
                 builder.toTolkLookupElement(
                     TolkLookupElementData(
-                        isDeferredLookup = when (name) {
-                            "getDeclaredPackPrefix",
-                            "getDeclaredPackPrefixLen",
-                            "stackMoveToTop" -> true
-
-                            else -> false
-                        },
                         elementKind = when {
                             !isResolved -> TolkLookupElementData.ElementKind.FROM_UNRESOLVED_IMPORT
                             isEntryPoint -> TolkLookupElementData.ElementKind.ENTRY_POINT_FUNCTION
                             hasDeprecatedAnnotation -> TolkLookupElementData.ElementKind.DEPRECATED
-                            isStatic -> TolkLookupElementData.ElementKind.STATIC_FUNCTION
+                            isStatic && !isLowLevelMethod -> TolkLookupElementData.ElementKind.STATIC_FUNCTION
+                            isLowLevelMethod -> TolkLookupElementData.ElementKind.LOW_LEVEL_METHOD
                             else -> TolkLookupElementData.ElementKind.DEFAULT
                         },
                     )

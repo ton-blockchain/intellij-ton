@@ -1,0 +1,26 @@
+<html>
+<body>
+Reports FunC-style constant functions that should be converted to proper constants.
+
+<p>
+In Tolk, instead of using functions with asm blocks containing only PUSHINT operations,
+you should use const declarations for better readability and performance.
+</p>
+
+<p>Example:</p>
+<pre><code>// Bad:
+fun OP_INTERNAL_TRANSFER(): int
+    asm "0x178d4519 PUSHINT";
+
+// Good:
+const OP_INTERNAL_TRANSFER = 0x178d4519;
+</code></pre>
+
+<p>The inspection provides quick fixes to:</p>
+<ul>
+<li>Convert a single function to a constant</li>
+<li>Convert all FunC-style constants in the file</li>
+<li>Update all function calls to reference the new constants</li>
+</ul>
+</body>
+</html>

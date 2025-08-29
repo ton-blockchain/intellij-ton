@@ -62,6 +62,10 @@ class TolkPsiFactory private constructor(val project: Project) {
         createFromText("import \"$text\";")
             ?: error("Failed to create include definition from text: `$text`")
 
+    fun createConstant(name: String, value: String): TolkConstVar =
+        createFromText("const $name = $value;")
+            ?: error("Failed to create constant from name: `$name` and value: `$value`")
+
     private inline fun <reified T : TolkElement> createFromText(
         code: CharSequence
     ): T? = createFile(code).descendantOfTypeStrict()

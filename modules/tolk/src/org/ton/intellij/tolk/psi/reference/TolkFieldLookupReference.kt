@@ -21,10 +21,11 @@ class TolkFieldLookupReference(
 fun resolveFieldLookupReferenceWithReceiver(
     receiverType: TolkTy,
     fieldLookup: TolkFieldLookup,
+    isStaticReceiver: Boolean,
 ): List<Pair<TolkTypedElement, Substitution>> {
     val name = fieldLookup.referenceName ?: return emptyList()
     val unwrappedReceiverType = receiverType.unwrapTypeAlias()
-    if (unwrappedReceiverType is TolkTyStruct) {
+    if (unwrappedReceiverType is TolkTyStruct && !isStaticReceiver) {
         val sub = Substitution.instantiate(unwrappedReceiverType.psi.declaredType, receiverType.unwrapTypeAlias())
         unwrappedReceiverType.psi.structFields.forEachIndexed { index, field ->
             if (index.toString() != name && field.name != name) {

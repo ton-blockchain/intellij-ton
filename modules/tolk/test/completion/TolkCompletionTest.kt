@@ -287,9 +287,20 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """, """
         fun foo() {
-            return;/*caret*/
+            return ;/*caret*/
         }
     """.trimIndent())
+
+    fun `test return, no explicit return type`() = checkEquals(
+        """
+            fun foo() {
+                return/*caret*/
+            }
+        """,
+        1,
+        "return", // expr
+        "return;",
+    )
 
     fun `test return, int type`() = doFirstCompletion("""
         fun foo(): int {

@@ -20,7 +20,7 @@ class TolkFunKeywordExpectedInspection : TolkInspectionBase() {
                 val nextAfterGet = getKeyword.treeNext ?: getKeyword
                 holder.registerProblem(
                     o,
-                    TolkBundle.message("inspection.message.fun_keyword_expected"),
+                    TolkBundle.message("inspection.message.fun.keyword.expected.message"),
                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
                     nextAfterGet.textRangeInParent,
                     AddFunKeywordQuickFix()
@@ -31,7 +31,7 @@ class TolkFunKeywordExpectedInspection : TolkInspectionBase() {
 
     private class AddFunKeywordQuickFix : LocalQuickFix {
         override fun getFamilyName(): @IntentionFamilyName String =
-            TolkBundle.message("intention.family.name.add_fun_keyword")
+            TolkBundle.message("intention.family.name.add.fun.keyword.quickfix.family.name")
 
         override fun applyFix(
             project: Project,

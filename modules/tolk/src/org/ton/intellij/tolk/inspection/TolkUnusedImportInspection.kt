@@ -34,7 +34,7 @@ class TolkUnusedImportInspection : TolkInspectionBase() {
 }
 
 val OPTIMIZE_IMPORTS_QUICK_FIX = object : LocalQuickFix {
-    override fun getFamilyName() = TolkBundle.message("inspection.tolk.optimize.imports.family.name")
+    override fun getFamilyName() = TolkBundle.message("inspection.tolk.optimize.imports.quickfix.family.name")
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         val element = descriptor.psiElement ?: return

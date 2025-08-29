@@ -19,7 +19,7 @@ class TolkTypeProvider : ExpressionTypeProvider<TolkTypedElement>() {
         return (element.type ?: TolkTy.Unknown).render()
     }
 
-    override fun getErrorHint(): @NlsContexts.HintText String = TolkBundle.message("codeInsight.hint.error_hint")
+    override fun getErrorHint(): @NlsContexts.HintText String = TolkBundle.message("codeInsight.hint.error.hint")
 
     override fun getExpressionsAt(elementAt: PsiElement): List<TolkTypedElement> {
         return elementAt.parents(true).filterIsInstance<TolkExpression>().filter {

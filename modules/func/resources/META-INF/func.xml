@@ -114,6 +114,12 @@
                          groupKey="group.style.name" enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.func.inspection.style.FuncIfThrowInspection"
                          key="inspection.func.if.throw.display.name"/>
+        <localInspection language="FunC" groupPath="FunC"
+                         bundle="messages.FuncBundle"
+                         key="inspection.func.style.constant.name"
+                         groupKey="group.style.name"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.func.inspection.style.FuncFuncStyleConstantInspection"/>
 
         <!-- numeric issues -->
         <localInspection language="FunC" groupPath="FunC"

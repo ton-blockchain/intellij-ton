@@ -1,0 +1,25 @@
+<html>
+<body>
+Reports functions that return constant values using assembly and can be converted to idiomatic constant declarations.
+<br>
+<br>
+Functions that use <code>asm</code> with <code>PUSHINT</code> instruction to return constant integer values
+can be replaced with more readable and efficient <code>const</code> declarations.
+<br>
+<br>
+Example:
+<br>
+<br>
+<b>Before:</b>
+<pre><code>
+int min_tons_for_storage() asm "10000000 PUSHINT";
+</code></pre>
+<b>After:</b>
+<pre><code>
+const min_tons_for_storage = 10000000;
+</code></pre>
+<br>
+Using <code>const</code> declarations instead of assembly functions for constants improves code readability,
+reduces gas costs, and makes the code more maintainable. The compiler can also optimize constant usage better.
+</body>
+</html>

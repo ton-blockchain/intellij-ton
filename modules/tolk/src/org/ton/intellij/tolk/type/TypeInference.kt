@@ -1513,7 +1513,12 @@ class TolkInferenceWalker(
         var inferredType: TolkTy? = null
         var fieldSymbol: TolkTypedElement? = null
         if (fieldLookup != null) {
-            val (fieldType, resolvedVariants) = inferFieldLookup(receiverType ?: TolkTy.Unknown, fieldLookup, hint)
+            val (fieldType, resolvedVariants) = inferFieldLookup(
+                receiverType ?: TolkTy.Unknown,
+                fieldLookup,
+                isStaticReceiver = receiverSymbol != null,
+                hint
+            )
             inferredType = fieldType
             if (resolvedVariants.isNotEmpty()) {
                 fieldSymbol = resolvedVariants.singleOrNull()
@@ -1547,9 +1552,10 @@ class TolkInferenceWalker(
     private fun inferFieldLookup(
         receiver: TolkTy,
         fieldLookup: TolkFieldLookup,
+        isStaticReceiver: Boolean,
         hint: TolkTy?
     ): Pair<TolkTy, List<TolkTypedElement>> {
-        val variants = resolveFieldLookupReferenceWithReceiver(receiver, fieldLookup)
+        val variants = resolveFieldLookupReferenceWithReceiver(receiver, fieldLookup, isStaticReceiver)
         val firstVariant = variants.firstOrNull()
         if (firstVariant == null) {
             val types = when (val receiverType = receiver.unwrapTypeAlias().actualType()) {

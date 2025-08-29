@@ -202,6 +202,13 @@
                                  implementationClass="org.ton.intellij.tolk.psi.reference.manipulators.TolkStringLiteralManipulator"/>
         <!-- endregion Refactorings -->
 
+        <!-- region Intentions -->
+        <intentionAction>
+            <language>Tolk</language>
+            <className>org.ton.intellij.tolk.ide.intentions.TolkConvertNumberLiteralIntention</className>
+        </intentionAction>
+        <!-- endregion Intentions -->
+
         <consoleFilterProvider implementation="org.ton.intellij.tolk.ide.TolkConsoleFilterProvider"/>
         <readWriteAccessDetector implementation="org.ton.intellij.tolk.ide.usages.TolkReadWriteAccessDetector"/>
 

@@ -1,0 +1,34 @@
+<html>
+<body>
+Converts number literals between different bases (binary, hexadecimal, and decimal formats).
+
+<p>
+    This intention helps you quickly convert numeric literals from one numeral system to another. 
+    You can convert between decimal (42), hexadecimal (0x2A), and binary (0b101010) representations.
+    The intention automatically detects the current format and offers appropriate conversion options.
+</p>
+
+<p>
+    Examples:
+</p>
+<pre><code>
+let decimal = 42;       // Convert to 0x2a or 0b101010
+let hex = 0xFF;         // Convert to 255 or 0b11111111  
+let binary = 0b1010;    // Convert to 10 or 0xa
+let negative = -42;     // Convert to -0x2a or -0b101010
+</code></pre>
+
+<p>
+    The intention supports:
+</p>
+<ul>
+    <li>Positive and negative numbers</li>
+    <li>Numbers with underscores (1_000_000)</li>
+    <li>All standard Tolk number formats</li>
+    <li>Interactive popup menu for multiple conversion options</li>
+</ul>
+
+<!-- tooltip end -->
+<p>To use this intention, place your cursor on any integer literal and press Alt+Enter to see available conversions.</p>
+</body>
+</html>

@@ -12,7 +12,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.TolkFile
 
-object TolkStorageSnippetCompletionProvider : TolkCompletionProvider() {
+object TolkTopLevelSnippetsCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
         PlatformPatterns.psiElement()
             .withSuperParent(2, TolkFile::class.java)
@@ -55,6 +55,49 @@ object TolkStorageSnippetCompletionProvider : TolkCompletionProvider() {
                                 contract.setData(self.toCell());
                             }
                         """.trimIndent(), true, "name" to ConstantNode("Storage")
+                    ).handleInsert(context, item)
+                }
+        )
+
+        val file = parameters.originalFile as? TolkFile ?: return
+        val firstType = file.structs.firstOrNull() ?: file.typeDefs.firstOrNull() ?: file.enums.firstOrNull()
+
+        result.addElement(
+            LookupElementBuilder.create("method fun")
+                .withIcon(AllIcons.Actions.RealIntentionBulb)
+                .withTailText(" Generates instance method", true)
+                .withInsertHandler { context, item ->
+                    // We need to remove the automatically inserted `method fun`
+                    // and insert the correct text instead
+                    val document = context.document
+                    val start = context.startOffset
+                    document.deleteString(start, start + "method fun".length)
+                    TemplateStringInsertHandler(
+                        "fun \$type$.\$name$(self\$params$)\$return$ {\n\$END$\n}", true,
+                        "type" to ConstantNode(firstType?.name ?: "Foo"),
+                        "name" to ConstantNode("name"),
+                        "params" to ConstantNode(""),
+                        "return" to ConstantNode(""),
+                    ).handleInsert(context, item)
+                }
+        )
+
+        result.addElement(
+            LookupElementBuilder.create("static method fun")
+                .withIcon(AllIcons.Actions.RealIntentionBulb)
+                .withTailText(" Generates static method", true)
+                .withInsertHandler { context, item ->
+                    // We need to remove the automatically inserted `static method fun`
+                    // and insert the correct text instead
+                    val document = context.document
+                    val start = context.startOffset
+                    document.deleteString(start, start + "static method fun".length)
+                    TemplateStringInsertHandler(
+                        "fun \$type$.\$name$(\$params$)\$return$ {\n\$END$\n}", true,
+                        "type" to ConstantNode(firstType?.name ?: "Foo"),
+                        "name" to ConstantNode("name"),
+                        "params" to ConstantNode(""),
+                        "return" to ConstantNode(""),
                     ).handleInsert(context, item)
                 }
         )

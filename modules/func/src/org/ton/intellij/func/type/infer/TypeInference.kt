@@ -18,7 +18,7 @@ fun inferTypesIn(element: FuncInferenceContextOwner): FuncInferenceResult {
 }
 
 interface FuncInferenceData {
-    fun getExprTy(expr: FuncExpression): FuncTy
+    fun getExprTy(expr: FuncExpression?): FuncTy
 
     fun getResolvedRefs(element: FuncReferenceExpression): OrderedSet<PsiElementResolveResult>
 }
@@ -29,7 +29,7 @@ data class FuncInferenceResult(
     val exprTypes: Map<FuncExpression, FuncTy>,
     val resolvedRefs: Map<FuncReferenceExpression, OrderedSet<PsiElementResolveResult>>
 ) : FuncInferenceData {
-    override fun getExprTy(expr: FuncExpression): FuncTy =
+    override fun getExprTy(expr: FuncExpression?): FuncTy =
         exprTypes[expr] ?: FuncTyUnknown
 
     override fun getResolvedRefs(element: FuncReferenceExpression): OrderedSet<PsiElementResolveResult> {
@@ -46,10 +46,11 @@ class FuncInferenceContext(
     private val resolvedRefs = HashMap<FuncReferenceExpression, OrderedSet<PsiElementResolveResult>>()
     private val diagnostics = ArrayList<FuncDiagnostic>()
 
-    override fun getExprTy(expr: FuncExpression): FuncTy =
+    override fun getExprTy(expr: FuncExpression?): FuncTy =
         exprTypes[expr] ?: FuncTyUnknown
 
-    fun setExprTy(expr: FuncExpression, ty: FuncTy) {
+    fun setExprTy(expr: FuncExpression?, ty: FuncTy?) {
+        if (expr == null || ty == null) return
         exprTypes[expr] = ty
     }
 

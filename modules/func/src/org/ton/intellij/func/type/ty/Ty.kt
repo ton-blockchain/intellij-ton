@@ -21,6 +21,11 @@ sealed class FuncTy : FuncTyFoldable<FuncTy>, FuncTyProvider {
     fun isEquivalentTo(other: FuncTy?): Boolean = other != null && isEquivalentToInner(other)
 
     protected open fun isEquivalentToInner(other: FuncTy): Boolean = equals(other)
+
+    open fun canRhsBeAssigned(other: FuncTy): Boolean {
+        if (other is FuncTyUnknown) return true
+        return this == other || this.isEquivalentToInner(other)
+    }
 }
 
 data class FuncTyTensor(
@@ -49,6 +54,17 @@ data class FuncTyTensor(
         return true
     }
 
+    override fun canRhsBeAssigned(other: FuncTy): Boolean {
+        if (other is FuncTyTensor) {
+            if (types.size != other.types.size) return false
+            for (i in types.indices) {
+                if (!types[i].canRhsBeAssigned(other.types[i])) return false
+            }
+            return true
+        }
+        return super.canRhsBeAssigned(other)
+    }
+
     override fun toString(): String = types.joinToString(", ", "(", ")")
 }
 
@@ -74,6 +90,17 @@ data class FuncTyTuple(
         return true
     }
 
+    override fun canRhsBeAssigned(other: FuncTy): Boolean {
+        if (other is FuncTyTuple) {
+            if (types.size != other.types.size) return false
+            for (i in types.indices) {
+                if (!types[i].canRhsBeAssigned(other.types[i])) return false
+            }
+            return true
+        }
+        return super.canRhsBeAssigned(other)
+    }
+
     override fun toString(): String = types.joinToString(", ", "[", "]")
 }
 
@@ -86,9 +113,9 @@ fun FuncTy(types: List<FuncTy>): FuncTy {
 }
 
 data object FuncTyUnknown : FuncTy() {
-    override fun toString(): String {
-        return "???"
-    }
+    override fun toString() = "unknown"
+
+    override fun canRhsBeAssigned(other: FuncTy): Boolean = true
 }
 
 data class FuncTyMap(
@@ -105,7 +132,19 @@ data class FuncTyMap(
         return from.isEquivalentTo(other.from) && to.isEquivalentTo(other.to)
     }
 
-    override fun toString(): String = "($from) -> $to"
+    override fun canRhsBeAssigned(other: FuncTy): Boolean {
+        if (other is FuncTyMap) {
+            return from.canRhsBeAssigned(other.from) && to.canRhsBeAssigned(other.to)
+        }
+        return super.canRhsBeAssigned(other)
+    }
+
+    override fun toString(): String {
+        if (from is FuncTyTensor || from is FuncTyUnit) {
+            return "($from -> $to"
+        }
+        return "($from) -> $to"
+    }
 }
 
 sealed class FuncTyAtomic : FuncTy() {
@@ -118,6 +157,13 @@ data object FuncTyUnit : FuncTyAtomic() {
     override fun isEquivalentToInner(other: FuncTy): Boolean {
         if (this === other) return true
         return other is FuncTyTensor && other.types.isEmpty()
+    }
+
+    override fun canRhsBeAssigned(other: FuncTy): Boolean {
+        if (other is FuncTyUnit) {
+            return true
+        }
+        return super.canRhsBeAssigned(other)
     }
 
     override fun toString(): String = "()"
@@ -159,7 +205,9 @@ data object FuncTyAtomicTuple : FuncTyAtomic() {
     override fun toString(): String = "tuple"
 }
 
-class FuncTyVar : FuncTy()
+class FuncTyVar : FuncTy() {
+    override fun canRhsBeAssigned(other: FuncTy): Boolean = true
+}
 
 val FuncTypeReference.rawType: FuncTy
     get() {
@@ -188,10 +236,23 @@ val FuncTypeReference.rawType: FuncTy
             )
 
             is FuncMapType -> FuncTyMap(
-                from?.rawType ?: FuncTyUnknown,
+                from.rawType,
                 to?.rawType ?: return FuncTyUnknown
             )
 
             else -> FuncTyUnknown
+        }
+    }
+
+val FuncPrimitiveTypeExpression.rawType: FuncTy
+    get() {
+        return when {
+            this.primitiveType.builderKeyword != null -> FuncTyBuilder
+            this.primitiveType.cellKeyword != null    -> FuncTyCell
+            this.primitiveType.contKeyword != null    -> FuncTyCont
+            this.primitiveType.intKeyword != null     -> FuncTyInt
+            this.primitiveType.sliceKeyword != null   -> FuncTySlice
+            this.primitiveType.tupleKeyword != null   -> FuncTyAtomicTuple
+            else                                      -> FuncTyUnknown
         }
     }

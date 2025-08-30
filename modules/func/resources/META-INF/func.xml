@@ -57,6 +57,9 @@
 
         <gotoSymbolContributor implementation="org.ton.intellij.func.ide.navigation.FuncGotoSymbolContributor"/>
 
+        <codeInsight.typeInfo language="FunC"
+                              implementationClass="org.ton.intellij.func.codeInsight.hint.FuncTypeProvider"/>
+
         <!-- Hints -->
         <codeInsight.parameterInfo language="FunC"
                                    implementationClass="org.ton.intellij.func.ide.FuncParameterInfoHandler"/>
@@ -80,6 +83,15 @@
                                               nameKey="codeInsight.hint.other.method.id"
                                               descriptionKey="codeInsight.hint.description.values.method.id"
                                               providerId="func.other.hints.method.id"/>
+
+        <codeInsight.declarativeInlayProvider bundle="messages.FuncBundle"
+                                              group="TYPES_GROUP"
+                                              implementationClass="org.ton.intellij.func.ide.hints.FuncVariableTypeHintsProvider"
+                                              isEnabledByDefault="true"
+                                              language="FunC"
+                                              nameKey="codeInsight.hint.types.variable.types"
+                                              descriptionKey="codeInsight.hint.description.types.variable.types"
+                                              providerId="func.types.hints.variable.types"/>
 
         <annotator language="FunC" implementationClass="org.ton.intellij.func.highlighting.FuncAnnotator"/>
         <annotator language="FunC" implementationClass="org.ton.intellij.func.highlighting.FuncDocAnnotator"/>
@@ -161,6 +173,10 @@
                          groupKey="group.general.name"
                          enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.func.inspection.style.FuncMissingImpureInspection"/>
+        <localInspection language="FunC" displayName="Type mismatch" groupPath="FunC"
+                         bundle="messages.FuncBundle"
+                         groupKey="group.general.name" enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.func.inspection.FuncTypeMismatchInspection"/>
 
         <!-- Completion -->
         <completion.contributor language="FunC"

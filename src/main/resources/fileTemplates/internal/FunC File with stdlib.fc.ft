@@ -1,0 +1,4 @@
+\#include "${STDLIB_PATH}";
+
+#pragma version >=0.4.0;
+

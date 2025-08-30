@@ -394,6 +394,12 @@ fun TolkEnum.generateDoc(): String {
 
         colorize(name ?: "", asEnum)
 
+        val serializationType = typeExpression?.type
+        if (serializationType != null) {
+            append(": ")
+            append(serializationType.generateDoc())
+        }
+
         generateEnumMembers(enumBody?.enumMemberList ?: emptyList())
 
         append(DocumentationMarkup.DEFINITION_END)

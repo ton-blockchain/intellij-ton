@@ -12,7 +12,9 @@ class FuncCreateFileAction : CreateFileFromTemplateAction(
     override fun buildDialog(project: Project, directory: PsiDirectory, builder: CreateFileFromTemplateDialog.Builder) {
         builder
             .setTitle(NEW_FUNC_FILE)
-            .addKind("Empty file", FuncIcons.FILE, FILE_TEMPLATE)
+            .addKind("Empty file", FuncIcons.FILE, "FunC File")
+            .addKind("With stdlib.fc", FuncIcons.FILE, "FunC File with stdlib")
+            .addKind("Contract template", FuncIcons.FILE, "FunC Contract")
     }
 
     override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?): String {

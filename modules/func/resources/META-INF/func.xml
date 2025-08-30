@@ -63,6 +63,8 @@
                 contextId="funcExpression"
                 implementation="org.ton.intellij.func.template.FuncExpressionContextType"/>
         <defaultLiveTemplates file="/liveTemplates/FunC.xml"/>
+        
+        <defaultTemplatePropertiesProvider implementation="org.ton.intellij.func.template.FuncFileTemplateProvider"/>
 
         <gotoSymbolContributor implementation="org.ton.intellij.func.ide.navigation.FuncGotoSymbolContributor"/>
 

@@ -1,0 +1,9 @@
+\#include "${STDLIB_PATH}";
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    ;; Contract implementation here
+}
+
+int get_seqno() method_id {
+    return 0;
+}

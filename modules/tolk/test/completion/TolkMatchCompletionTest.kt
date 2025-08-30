@@ -14,7 +14,7 @@ class TolkMatchCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "color", "Color", "Color.Blue", "Color.Red", "else",
+        "color", "Color.Blue", "Color.Red", "else",
     )
 
     fun `test match arms completion for enum type with complete`() = doFirstCompletion(

@@ -12,10 +12,12 @@ import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
+import com.intellij.util.applyIf
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
 import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.TolkTyEnum
 import org.ton.intellij.tolk.type.TolkTyPsiHolder
 import org.ton.intellij.tolk.type.TolkTyUnion
 import org.ton.intellij.util.REGISTRY_IDE_COMPLETION_VARIANT_LIMIT
@@ -55,6 +57,13 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             if (matchExpr != null) {
                 declaredMatchArms = matchExpr.matchArmList.mapNotNull { it.matchPattern.matchPatternReference?.text }
                 expectType = matchExpr.expression?.type?.unwrapTypeAlias()
+            }
+        }
+        if (elementParent is TolkBinExpression && (elementParent.binaryOp.eq != null || elementParent.isSetAssignment)) {
+            val left = elementParent.left
+            val leftType = left.type
+            if (leftType is TolkTyEnum) {
+                expectType = leftType
             }
         }
         fun TolkTy?.canAddElement(elementType: TolkTy?): Boolean {
@@ -157,6 +166,23 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                     if (!canAddByExpectType && !canAddAsUnionMatchVariant) return true
                     if (!checkLimit()) return false
                     result.addElement(element.toLookupElement(currentFile, ctx))
+                }
+                is TolkEnumMember -> {
+                    val canAddByExpectType = expectType.canAddElement(element.type)
+                    if (!canAddByExpectType) return true
+                    if (!checkLimit()) return false
+
+                    if (elementParent is TolkMatchPattern) return false // handled separately
+
+                    val sameType = expectType?.isEquivalentTo(element.parentEnum.declaredType) ?: false
+
+                    result.addElement(
+                        element
+                            .toLookupElement(currentFile, ctx)
+                            .applyIf(sameType) {
+                                withPriority(TolkCompletionPriorities.KEYWORD)
+                            }
+                    )
                 }
             }
             return true

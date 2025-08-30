@@ -177,7 +177,8 @@ fun TolkNamedElement.toLookupElementBuilder(
             }
 
         is TolkEnumMember -> {
-            if (context.context?.parent is TolkMatchPattern) {
+            if (context.context?.parent !is TolkDotExpression) {
+                // Add qualifier for `Red` completion without qualifier.
                 // Inside the match arm expression we need `Enum.Member` form.
                 val fqn = "${parentEnum.name}.$name"
                 return base

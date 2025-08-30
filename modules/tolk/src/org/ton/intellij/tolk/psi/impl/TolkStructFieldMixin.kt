@@ -24,6 +24,12 @@ abstract class TolkStructFieldMixin : TolkNamedElementImpl<TolkStructFieldStub>,
         get() = childOfType<TolkDocComment>()
 
     override fun getIcon(flags: Int): Icon = TolkIcons.FIELD
+
+    val isPrivate: Boolean
+        get() = structFieldModifiers?.structFieldModifierList?.any { it.text == "private" } == true
+
+    val isReadonly: Boolean
+        get() = structFieldModifiers?.structFieldModifierList?.any { it.text == "readonly" } == true
 }
 
 val TolkStructField.parentStruct: TolkStruct

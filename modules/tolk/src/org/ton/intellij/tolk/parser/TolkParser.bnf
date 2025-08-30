@@ -129,6 +129,8 @@
             LAZY_KEYWORD                 = 'LAZY_KEYWORD'
             IMPORT_KEYWORD              = 'import'
             TOLK_KEYWORD                = 'tolk'
+            PRIVATE_KEYWORD             = 'private'
+            READONLY_KEYWORD            = 'readonly'
 
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
@@ -263,8 +265,8 @@ private StructBodyElements ::= (StructBody_MultipleElement | StructBody_SingleEl
 private StructBody_SingleElement ::= StructField
 private StructBody_MultipleElement ::= StructField ((','|';')? StructField)+
 
-StructField ::= IDENTIFIER ':' TypeExpression StructFieldDefault? {
-    pin = 1
+StructField ::= StructFieldModifiers? IDENTIFIER ':' TypeExpression StructFieldDefault? {
+    pin = 2
     recoverWhile = StructField_recover
     mixin="org.ton.intellij.tolk.psi.impl.TolkStructFieldMixin"
     implements=[
@@ -277,6 +279,10 @@ StructField ::= IDENTIFIER ':' TypeExpression StructFieldDefault? {
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
 private StructField_recover ::= !(';'|','|'}'|IDENTIFIER)
+
+StructFieldModifiers ::= StructFieldModifier+ {}
+StructFieldModifier ::= 'private' | 'readonly' {}
+
 private StructFieldDefault ::= '=' Expression {
     pin=1
     recoverWhile = StructField_recover

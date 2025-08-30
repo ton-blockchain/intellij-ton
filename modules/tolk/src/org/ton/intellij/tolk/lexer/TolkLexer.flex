@@ -280,6 +280,8 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "as"                     { return AS_KEYWORD; }
       "is"                     { return IS_KEYWORD; }
       "self"                   { return SELF_KEYWORD; }
+      "private"                { return PRIVATE_KEYWORD; }
+      "readonly"               { return READONLY_KEYWORD; }
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
       {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }

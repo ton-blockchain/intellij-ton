@@ -19,7 +19,7 @@ class TolkKeywordCompletionProvider(
 ) : CompletionProvider<CompletionParameters>() {
     constructor(priority: Double, vararg keywords: String) : this(priority, keywords.toList())
 
-    override fun addCompletions(
+    public override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
         result: CompletionResultSet,

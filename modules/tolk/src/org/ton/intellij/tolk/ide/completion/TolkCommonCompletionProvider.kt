@@ -172,6 +172,8 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                     if (!canAddByExpectType) return true
                     if (!checkLimit()) return false
 
+                    if (elementParent is TolkMatchPattern) return false // handled separately
+
                     val sameType = expectType?.isEquivalentTo(element.parentEnum.declaredType) ?: false
 
                     result.addElement(

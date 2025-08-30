@@ -822,6 +822,30 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """.trimIndent())
 
+    fun `test method snippet`() = doFirstCompletion("""
+        struct Name {}
+
+        method/*caret*/
+    """, """
+        struct Name {}
+        
+        fun Name.name(self) {
+            /*caret*/
+        }
+    """.trimIndent())
+
+    fun `test static method snippet`() = doFirstCompletion("""
+        type A = int
+
+        static/*caret*/
+    """, """
+        type A = int
+        
+        fun A.name() {
+            /*caret*/
+        }
+    """.trimIndent())
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

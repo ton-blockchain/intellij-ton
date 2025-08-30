@@ -79,7 +79,7 @@ class TolkCompletionContributor : CompletionContributor() {
         extend(TolkBuiltinCompletionProvider)
         extend(TolkSnippetsCompletionProvider)
         extend(TolkReturnCompletionProvider)
-        extend(TolkStorageSnippetCompletionProvider)
+        extend(TolkTopLevelSnippetsCompletionProvider)
         extend(TolkFunctionNameCompletionProvider)
     }
 

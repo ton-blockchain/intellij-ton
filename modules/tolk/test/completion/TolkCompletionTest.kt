@@ -822,6 +822,15 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """.trimIndent())
 
+    fun `test enum serialization type`() = checkContainsCompletion(
+        "uint8",
+        """
+            enum Color: /*caret*/ {
+                Red
+            }
+        """,
+    )
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

@@ -17,3 +17,7 @@ enum EPartialAssigned {
     P6 = SIX,
     Max = 0x7FFFFFFF,
 }
+
+enum Color: uint8 {
+    Red,
+}

@@ -282,7 +282,7 @@ private StructFieldDefault ::= '=' Expression {
     recoverWhile = StructField_recover
 }
 
-upper Enum ::= 'enum' IDENTIFIER EnumBody {
+upper Enum ::= 'enum' IDENTIFIER (':' TypeExpression) EnumBody {
     pin=1
     mixin = "org.ton.intellij.tolk.psi.impl.TolkEnumMixin"
     implements = [

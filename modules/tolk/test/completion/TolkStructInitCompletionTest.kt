@@ -1,6 +1,61 @@
 package org.ton.intellij.tolk.completion
 
 class TolkStructInitCompletionTest : TolkCompletionTestBase() {
+    fun `test field completion inside empty struct instance`() = checkEquals(
+        """
+            struct Foo {
+                a: int,
+                b: int,
+            }
+            
+            fun main() {
+                Foo {
+                    /*caret*/
+                }
+            }
+        """.trimIndent(),
+        1,
+        "0", // Fill all fields...
+        "a",
+        "b",
+    )
+
+    fun `test field completion inside struct instance with single field`() = checkEquals(
+        """
+            struct Foo {
+                a: int,
+                b: int,
+            }
+            
+            fun main() {
+                Foo {
+                    a: 10,
+                    /*caret*/
+                }
+            }
+        """.trimIndent(),
+        1,
+        "b",
+    )
+
+    fun `test field completion inside struct instance with all fields`() = checkEquals(
+        """
+            struct Foo {
+                a: int,
+                b: int,
+            }
+            
+            fun main() {
+                Foo {
+                    a: 10,
+                    b: 20,
+                    /*caret*/
+                }
+            }
+        """.trimIndent(),
+        1,
+    )
+
     fun `test field completion with enum type`() = doFirstCompletion(
         """
             enum Color {

@@ -1,0 +1,134 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<templateSet group="FunC">
+    <template description='If statement' id='func_lang_if' name='if' toReformat='true' toShortenFQNames='true'
+              value='if ($CONDITION$) {&#10;    $END$&#10;}'>
+        <variable alwaysStopAt='true' expression='&quot;true&quot;' defaultValue='true' name='CONDITION'/>
+        <context>
+            <option name='funcStatement' value='true'/>
+        </context>
+    </template>
+
+    <template description='Ifnot statement' id='func_lang_ifnot' name='ifnot' toReformat='true'
+              toShortenFQNames='true'
+              value='ifnot ($CONDITION$) {&#10;    $END$&#10;}'>
+        <variable alwaysStopAt='true' expression='&quot;false&quot;' defaultValue='false' name='CONDITION'/>
+        <context>
+            <option name='funcStatement' value='true'/>
+        </context>
+    </template>
+
+    <template description='Repeat loop' id='func_lang_repeat' name='repeat' toReformat='true'
+              toShortenFQNames='true'
+              value='repeat ($COUNT$) {&#10;    $END$&#10;}'>
+        <variable alwaysStopAt='true' expression='&quot;10&quot;' defaultValue='10' name='COUNT'/>
+        <context>
+            <option name='funcStatement' value='true'/>
+        </context>
+    </template>
+
+    <template description='While loop' id='func_lang_while' name='while' toReformat='true' toShortenFQNames='true'
+              value='while ($CONDITION$) {&#10;    $END$&#10;}'>
+        <variable alwaysStopAt='true' expression='&quot;true&quot;' defaultValue='true' name='CONDITION'/>
+        <context>
+            <option name='funcStatement' value='true'/>
+        </context>
+    </template>
+
+    <template description='Do-until loop' id='func_lang_do' name='do' toReformat='true' toShortenFQNames='true'
+              value='do {&#10;    $END$&#10;} until ($CONDITION$);'>
+        <variable alwaysStopAt='true' expression='&quot;false&quot;' defaultValue='false' name='CONDITION'/>
+        <context>
+            <option name='funcStatement' value='true'/>
+        </context>
+    </template>
+
+    <template description='Try-catch statement' id='func_try_catch' name='try' toReformat='true' toShortenFQNames='true'
+              value='try {&#10;    $BODY$&#10;} catch ($EXCEPTION$) {&#10;    $END$&#10;}'>
+        <variable alwaysStopAt='true' expression='' defaultValue='' name='BODY'/>
+        <variable alwaysStopAt='true' expression='&quot;_, exit_code&quot;' defaultValue='_, exit_code'
+                  name='EXCEPTION'/>
+        <context>
+            <option name='funcStatement' value='true'/>
+        </context>
+    </template>
+
+    <template description='Receive internal message handler' id='func_recv_internal' name='recvi' toReformat='true'
+              toShortenFQNames='true'
+              value='() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {&#10;    $END$&#10;}'>
+        <context>
+            <option name='funcTopLevel' value='true'/>
+        </context>
+    </template>
+
+    <template description='Receive external message handler' id='func_recv_external' name='recve' toReformat='true'
+              toShortenFQNames='true'
+              value='() recv_external(slice in_msg_body) impure {&#10;    $END$&#10;}'>
+        <context>
+            <option name='funcTopLevel' value='true'/>
+        </context>
+    </template>
+
+    <template description='Get method with method_id' id='func_get_method' name='getm' toReformat='true'
+              toShortenFQNames='true'
+              value='$TYPE$ get_$NAME$() method_id {&#10;    $END$&#10;}'>
+        <variable alwaysStopAt='true' expression='&quot;int&quot;' defaultValue='int' name='TYPE'/>
+        <variable alwaysStopAt='true' expression='&quot;seqno&quot;' defaultValue='seqno' name='NAME'/>
+        <context>
+            <option name='funcTopLevel' value='true'/>
+        </context>
+    </template>
+
+    <template description='Function definition' id='func_function' name='fun' toReformat='true' toShortenFQNames='true'
+              value='$RETURN_TYPE$ $NAME$($PARAMS$) {&#10;    $END$&#10;}'>
+        <variable alwaysStopAt='true' expression='&quot;()&quot;' defaultValue='()' name='RETURN_TYPE'/>
+        <variable alwaysStopAt='true' expression='&quot;my_function&quot;' defaultValue='my_function' name='NAME'/>
+        <variable alwaysStopAt='true' expression='&quot;&quot;' defaultValue='' name='PARAMS'/>
+        <context>
+            <option name='funcTopLevel' value='true'/>
+        </context>
+    </template>
+
+    <template description='Impure function definition' id='func_impure_function' name='funi' toReformat='true'
+              toShortenFQNames='true'
+              value='$RETURN_TYPE$ $NAME$($PARAMS$) impure {&#10;    $END$&#10;}'>
+        <variable alwaysStopAt='true' expression='&quot;()&quot;' defaultValue='()' name='RETURN_TYPE'/>
+        <variable alwaysStopAt='true' expression='&quot;my_impure_function&quot;' defaultValue='my_impure_function'
+                  name='NAME'/>
+        <variable alwaysStopAt='true' expression='&quot;&quot;' defaultValue='' name='PARAMS'/>
+        <context>
+            <option name='funcTopLevel' value='true'/>
+        </context>
+    </template>
+
+    <template description='Inline function definition' id='func_inline_function' name='funin' toReformat='true'
+              toShortenFQNames='true'
+              value='$RETURN_TYPE$ $NAME$($PARAMS$) inline {&#10;    $END$&#10;}'>
+        <variable alwaysStopAt='true' expression='&quot;int&quot;' defaultValue='int' name='RETURN_TYPE'/>
+        <variable alwaysStopAt='true' expression='&quot;my_inline_function&quot;' defaultValue='my_inline_function'
+                  name='NAME'/>
+        <variable alwaysStopAt='true' expression='&quot;int x&quot;' defaultValue='int x' name='PARAMS'/>
+        <context>
+            <option name='funcTopLevel' value='true'/>
+        </context>
+    </template>
+
+    <template description='Global variable declaration' id='func_global_var' name='global' toReformat='true'
+              toShortenFQNames='true'
+              value='global $TYPE$ $NAME$;'>
+        <variable alwaysStopAt='true' expression='&quot;int&quot;' defaultValue='int' name='TYPE'/>
+        <variable alwaysStopAt='true' expression='&quot;my_global_var&quot;' defaultValue='my_global_var' name='NAME'/>
+        <context>
+            <option name='funcTopLevel' value='true'/>
+        </context>
+    </template>
+
+    <template description='Constant declaration' id='func_const' name='const' toReformat='true' toShortenFQNames='true'
+              value='const $TYPE$ $NAME$ = $VALUE$;'>
+        <variable alwaysStopAt='true' expression='&quot;int&quot;' defaultValue='int' name='TYPE'/>
+        <variable alwaysStopAt='true' expression='&quot;MY_CONSTANT&quot;' defaultValue='MY_CONSTANT' name='NAME'/>
+        <variable alwaysStopAt='true' expression='&quot;100&quot;' defaultValue='100' name='VALUE'/>
+        <context>
+            <option name='funcTopLevel' value='true'/>
+        </context>
+    </template>
+</templateSet>

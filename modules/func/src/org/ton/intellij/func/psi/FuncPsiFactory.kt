@@ -205,6 +205,10 @@ class FuncPsiFactory private constructor(val project: Project) {
         createFromText("const $name = $value;")
             ?: error("Failed to create const var from text: `const $name = $value;`")
 
+    fun createTypeReference(typeText: String): FuncTypeReference =
+        createFromText("$typeText foo() {}")
+            ?: error("Failed to create type reference from text: `$typeText`")
+
     private inline fun <reified T : FuncElement> createFromText(
         code: CharSequence
     ): T? = createFile(code).descendantOfTypeStrict()

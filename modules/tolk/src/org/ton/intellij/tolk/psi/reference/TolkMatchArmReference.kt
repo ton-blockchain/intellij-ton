@@ -11,11 +11,11 @@ class TolkMatchArmReference(
     element: TolkMatchPatternReference
 ) : PsiPolyVariantReferenceBase<TolkMatchPatternReference>(element) {
     override fun multiResolve(incompleteCode: Boolean): Array<out ResolveResult?> {
-        val symbolResult = TolkSymbolReference(element).multiResolve(incompleteCode)
-        if (symbolResult.isNotEmpty()) return symbolResult
-
         val typeResult = TolkTypeReference(element).multiResolve(incompleteCode)
         if (typeResult.isNotEmpty()) return typeResult
+
+        val symbolResult = TolkSymbolReference(element).multiResolve(incompleteCode)
+        if (symbolResult.isNotEmpty()) return symbolResult
 
         return ResolveResult.EMPTY_ARRAY
     }

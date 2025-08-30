@@ -82,5 +82,5 @@ object TolkReturnCompletionProvider : TolkCompletionProvider(), DumbAware {
 
     private fun createReturnExprElement2(value: String): TolkLookupElement = LookupElementBuilder.create("return ${value};")
         .bold()
-        .toTolkLookupElement(TolkLookupElementData(keywordKind = CONTEXT_RETURN_KEYWORD))
+        .toTolkLookupElement(TolkLookupElementData())
 }

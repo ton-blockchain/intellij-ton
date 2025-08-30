@@ -9,13 +9,17 @@ import com.intellij.psi.PsiFile
 import org.ton.intellij.func.psi.*
 
 class RenameUnderscoreFix(
-    val element: FuncReferenceExpression
+    val elementName: String,
+    val element: FuncElement,
 ) : LocalQuickFixAndIntentionActionOnPsiElement(element) {
+
+    constructor(element: FuncReferenceExpression) : this(element.name ?: "", element)
+
     override fun getFamilyName(): String =
         CodeInsightBundle.message("rename.element.family")
 
     override fun getText(): String =
-        CodeInsightBundle.message("rename.named.element.text", element.name, "_")
+        CodeInsightBundle.message("rename.named.element.text", elementName, "_")
 
     override fun invoke(
         project: Project,

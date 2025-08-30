@@ -53,6 +53,8 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         if (parent.identifier != element) return
 
         val structExpr = parent.parentOfType<TolkStructExpression>() ?: return
+        val initedFields = structExpr.structExpressionBody.structExpressionFieldList
+        val isEmptyStructExpression = initedFields.isEmpty() || initedFields.size == 1 && initedFields[0].text == "IntellijIdeaRulezzz"
 
         val originalStructExpr = parameters.originalPosition?.parentOfType<TolkStructExpression>() ?: return
         val document = parameters.editor.document
@@ -62,7 +64,6 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         val comma = if (!singleLine) "," else ""
 
         val structTy = structExpr.type?.unwrapTypeAlias() as? TolkTyStruct ?: return
-        val initedFields = structExpr.structExpressionBody.structExpressionFieldList
         val initedFieldNames = initedFields.mapNotNull {
             if (it == parent) return@mapNotNull null
             it.referenceName
@@ -91,23 +92,25 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         val allFields = structTy.psi.structFields
         val requiredFields = allFields.filter { isFieldRequired(it) }
 
-        result.addElement(
-            LookupElementBuilder.create("0")
-                .withPresentableText("Fill all fields…")
-                .withIcon(AllIcons.Actions.RealIntentionBulb)
-                .withInsertHandler(FillFieldsInsertHandler(allFields))
-                .withPriority(TolkCompletionPriorities.KEYWORD)
-        )
-
-        // no need to show this variant if it works like `Fill all fields` and there are some required fields to fill
-        if (allFields.size != requiredFields.size && requiredFields.isNotEmpty()) {
+        if (isEmptyStructExpression) {
             result.addElement(
-                LookupElementBuilder.create("1")
-                    .withPresentableText("Fill required fields…")
+                LookupElementBuilder.create("0")
+                    .withPresentableText("Fill all fields…")
                     .withIcon(AllIcons.Actions.RealIntentionBulb)
-                    .withInsertHandler(FillFieldsInsertHandler(requiredFields))
+                    .withInsertHandler(FillFieldsInsertHandler(allFields))
                     .withPriority(TolkCompletionPriorities.KEYWORD)
             )
+
+            // no need to show this variant if it works like `Fill all fields` and there are some required fields to fill
+            if (allFields.size != requiredFields.size && requiredFields.isNotEmpty()) {
+                result.addElement(
+                    LookupElementBuilder.create("1")
+                        .withPresentableText("Fill required fields…")
+                        .withIcon(AllIcons.Actions.RealIntentionBulb)
+                        .withInsertHandler(FillFieldsInsertHandler(requiredFields))
+                        .withPriority(TolkCompletionPriorities.KEYWORD)
+                )
+            }
         }
     }
 

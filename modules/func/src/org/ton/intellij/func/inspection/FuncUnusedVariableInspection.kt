@@ -38,6 +38,18 @@ class FuncUnusedVariableInspection : FuncInspectionBase() {
                             fixes.add(RemoveElementFix(stmt))
                         }
                     }
+
+                    // (int a, int b) = ...
+                    // ^^^^^^^^^^^^^^ this
+                    if (grandParent is FuncTensorExpression) {
+                        // (int a, int b) = ...
+                        // ^^^^^^^^^^^^^^^^^^^^ this
+                        val grandGrandParent = grandParent.parent
+                        if (grandGrandParent is FuncBinExpression && grandGrandParent.left == grandParent) {
+                            // rename `int a` -> (_, int b)
+                            fixes.add(RenameUnderscoreFix(o.name ?: "", parent))
+                        }
+                    }
                 }
 
                 holder.registerProblem(

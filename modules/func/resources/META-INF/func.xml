@@ -53,7 +53,16 @@
         <liveTemplateContext
                 contextId="func"
                 implementation="org.ton.intellij.func.template.FuncEverywhereContextType"/>
-        <defaultLiveTemplates file="/liveTemplates/funcHidden.xml" hidden="true"/>
+        <liveTemplateContext
+                contextId="funcTopLevel"
+                implementation="org.ton.intellij.func.template.FuncTopLevelContextType"/>
+        <liveTemplateContext
+                contextId="funcStatement"
+                implementation="org.ton.intellij.func.template.FuncStatementContextType"/>
+        <liveTemplateContext
+                contextId="funcExpression"
+                implementation="org.ton.intellij.func.template.FuncExpressionContextType"/>
+        <defaultLiveTemplates file="/liveTemplates/FunC.xml"/>
 
         <gotoSymbolContributor implementation="org.ton.intellij.func.ide.navigation.FuncGotoSymbolContributor"/>
 

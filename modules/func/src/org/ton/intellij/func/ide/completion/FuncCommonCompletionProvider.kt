@@ -20,6 +20,7 @@ import org.ton.intellij.func.stub.index.FuncNamedElementIndex
 import org.ton.intellij.func.type.ty.FuncTyAtomic
 import org.ton.intellij.func.type.ty.FuncTyTensor
 import org.ton.intellij.func.type.ty.FuncTyUnit
+import org.ton.intellij.func.type.ty.rawType
 import org.ton.intellij.util.processAllKeys
 import org.ton.intellij.util.psiElement
 import java.util.*
@@ -38,39 +39,56 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
         if (element.isVariableDefinition()) {
             return
         }
-        val elementName = element.name ?: return
+        val expectedName = element.name ?: return
 
-        val ctx = FuncCompletionContext(
-            element
-        )
+        val ctx = FuncCompletionContext(element)
+        val file = element.containingFile.originalFile as? FuncFile ?: return
+        val inference = element.inference
+
+        // foo.<caret>
+        val completeMethod = expectedName.startsWith(".") || expectedName.startsWith("~")
+        // foo
+        val qualifier = element.prevSibling as? FuncExpression
+        val qualifierType = inference?.getExprTy(qualifier)
 
         val processed = HashMap<String, FuncNamedElement>()
-
-        val file = element.containingFile.originalFile as? FuncFile ?: return
-
-        fun collectVariant(resolvedElement: FuncNamedElement): Boolean {
-            val resolvedName = resolvedElement.name ?: return false
-            if (processed.put(resolvedName, resolvedElement) != null) return false
-            when (resolvedElement) {
+        fun processVariant(variant: FuncNamedElement): Boolean {
+            val variantName = variant.name ?: return false
+            if (processed.put(variantName, variant) != null) return false
+            when (variant) {
                 is FuncFunction -> {
-                    if (!elementName.startsWith("~") && !resolvedName.startsWith("~")) {
+                    val firstParameterType = variant.functionParameterList.firstOrNull()?.typeReference?.rawType
+
+                    if (completeMethod && variant.functionParameterList.isEmpty()) {
+                        // cannot call a function without parameters as a method
+                        return false
+                    }
+
+                    if (completeMethod && firstParameterType != null && qualifierType != null) {
+                        if (!firstParameterType.canRhsBeAssigned(qualifierType)) {
+                            return false
+                        }
+                    }
+
+                    if (!expectedName.startsWith("~") && !variantName.startsWith("~")) {
                         return true
                     }
-                    if (elementName.startsWith("~")) {
-                        return (if (resolvedName.startsWith("~")) {
-                            true
-                        } else {
-                            val returnType = resolvedElement.rawReturnType
 
-                            if (returnType is FuncTyTensor && returnType.types.size == 2) {
-                                val retModifyType = returnType.types.first()
-                                val argType = resolvedElement.rawParamType
-                                argType == retModifyType ||
-                                        (argType is FuncTyTensor && argType.types.first() == retModifyType)
-                            } else {
-                                false
-                            }
-                        })
+                    if (expectedName.startsWith("~")) {
+                        if (variantName.startsWith("~")) {
+                           return true
+                        }
+
+                        val returnType = variant.rawReturnType
+
+                        if (returnType is FuncTyTensor && returnType.types.size == 2) {
+                            val retModifyType = returnType.types.first()
+                            val argType = variant.rawParamType
+                            return argType == retModifyType ||
+                                    (argType is FuncTyTensor && argType.types.first() == retModifyType)
+                        }
+
+                        return false
                     }
                     return false
                 }
@@ -80,7 +98,7 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
         }
 
         collectLocalVariants(element) {
-            if (collectVariant(it)) {
+            if (processVariant(it)) {
                 result.addElement(it.toLookupElementBuilder(ctx, true))
             }
         }
@@ -88,7 +106,7 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
         val files = setOf(FuncPsiFactory[file.project].builtinFile) + file.collectIncludedFiles()
         files.forEach { f ->
             collectFileVariants(f) {
-                if (collectVariant(it)) {
+                if (processVariant(it)) {
                     result.addElement(it.toLookupElementBuilder(ctx, true))
                 }
                 true
@@ -108,7 +126,7 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
         globalNamedElements.sortedBy {
             VfsUtilCore.findRelativePath(file.virtualFile, it.containingFile.virtualFile, '/')?.count { c -> c == '/' }
         }.forEach {
-            if (collectVariant(it)) {
+            if (processVariant(it)) {
                 result.addElement(it.toLookupElementBuilder(ctx, false))
             }
         }

@@ -21,3 +21,11 @@ struct(123) TaggedStruct {
 /// Empty struct
 struct Empty {
 }
+
+/// Struct with private readonly fields
+struct Empty {
+    private foo: int,
+    private readonly bar: int,
+    readonly bar: int,
+    baz: int,
+}

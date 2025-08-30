@@ -4,8 +4,8 @@ import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.openapi.util.TextRange
-import org.ton.intellij.func.psi.FuncReferenceExpression
-import org.ton.intellij.func.psi.FuncVisitor
+import org.ton.intellij.func.ide.fixes.FuncCreateFunctionQuickfix
+import org.ton.intellij.func.psi.*
 
 class FuncUnresolvedReferenceInspection : FuncInspectionBase() {
     override fun buildFuncVisitor(
@@ -20,12 +20,31 @@ class FuncUnresolvedReferenceInspection : FuncInspectionBase() {
 
             val id = o.identifier
             val range = TextRange.from(id.startOffsetInParent, id.textLength)
+
+            val fixes = mutableListOf<FuncCreateFunctionQuickfix>()
+            if (isFunctionCall(o)) {
+                fixes.add(FuncCreateFunctionQuickfix(id))
+            }
+
             holder.registerProblem(
                 o,
                 "Unresolved reference <code>#ref</code>",
                 ProblemHighlightType.LIKE_UNKNOWN_SYMBOL,
-                range
+                range,
+                *fixes.toTypedArray()
             )
+        }
+
+        private fun isFunctionCall(ref: FuncReferenceExpression): Boolean {
+            return when (val parent = ref.parent) {
+                is FuncApplyExpression        -> parent.left == ref
+                is FuncSpecialApplyExpression -> {
+                    val applyExpr = parent.left as? FuncApplyExpression
+                    applyExpr?.left == ref
+                }
+
+                else                          -> false
+            }
         }
     }
 }

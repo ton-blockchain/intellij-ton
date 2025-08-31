@@ -71,10 +71,6 @@ data class FuncTyTensor(
 data class FuncTyTuple(
     val types: List<FuncTy>
 ) : FuncTy() {
-    init {
-        assert(types.isNotEmpty()) { "TyTuple should not be empty" }
-    }
-
     override fun superFoldWith(folder: FuncTyFolder): FuncTy =
         FuncTyTuple(types.map { it.foldWith(folder) })
 

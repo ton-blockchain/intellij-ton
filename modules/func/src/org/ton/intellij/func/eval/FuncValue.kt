@@ -118,3 +118,18 @@ val FuncLiteralExpression.value: FuncValue
         }
         return FuncIntValue(BigInteger.ZERO)
     }
+
+val FuncLiteralExpression.isIntegerString: Boolean
+    get() {
+        val stringLiteral = stringLiteral ?: return false
+        val text = stringLiteral.text
+        if (text.length < 2) return false
+        val tag = text.lastOrNull()
+        if (tag == '"') {
+            return false
+        }
+        return when (tag) {
+            'u', 'h', 'H', 'c' -> true
+            else               -> false
+        }
+    }

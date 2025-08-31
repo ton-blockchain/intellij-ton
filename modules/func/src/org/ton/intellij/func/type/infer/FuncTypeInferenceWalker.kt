@@ -1,6 +1,7 @@
 package org.ton.intellij.func.type.infer
 
 import com.intellij.psi.PsiElementResolveResult
+import org.ton.intellij.func.eval.isIntegerString
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.psi.impl.rawType
 import org.ton.intellij.func.resolve.FuncGlobalLookup
@@ -106,6 +107,9 @@ class FuncTypeInferenceWalker(
         if (expr.integerLiteral != null || expr.trueKeyword != null || expr.falseKeyword != null) {
             return FuncTyInt
         } else if (expr.stringLiteral != null) {
+            if (expr.isIntegerString) {
+                return FuncTyInt
+            }
             return FuncTySlice
         }
         return null
@@ -200,6 +204,10 @@ class FuncTypeInferenceWalker(
         val left = left
         val leftTy = left.inferType()
         val rightTy = right?.inferTypeCoercibleTo(leftTy)
+
+        if (binaryOp.divmod != null) {
+            return FuncTyTensor(FuncTyInt, FuncTyInt)
+        }
 
         if (binaryOp.eq != null) {
             if (left is FuncApplyExpression && left.left is FuncHoleTypeExpression) {

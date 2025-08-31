@@ -65,6 +65,9 @@
         <defaultLiveTemplates file="/liveTemplates/FunC.xml"/>
         
         <defaultTemplatePropertiesProvider implementation="org.ton.intellij.func.template.FuncFileTemplateProvider"/>
+        
+        <lang.importOptimizer language="FunC"
+                              implementationClass="org.ton.intellij.func.codeInsight.imports.FuncImportOptimizer"/>
 
         <gotoSymbolContributor implementation="org.ton.intellij.func.ide.navigation.FuncGotoSymbolContributor"/>
 
@@ -124,6 +127,9 @@
         <localInspection language="FunC" displayName="Unused type parameter inspection" groupPath="FunC"
                          groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.func.inspection.FuncUnusedTypeParameterInspection"/>
+        <localInspection language="FunC" displayName="Unused include inspection" groupPath="FunC"
+                         groupName="Declaration redundancy" enabledByDefault="true" level="WARNING"
+                         implementationClass="org.ton.intellij.func.inspection.FuncUnusedIncludeInspection"/>
 
         <!-- style issues -->
         <localInspection language="FunC" groupPath="FunC"

@@ -5,6 +5,7 @@ import com.intellij.lang.ASTNode
 import com.intellij.psi.TokenType
 import com.intellij.psi.formatter.common.AbstractBlock
 import com.intellij.psi.tree.TokenSet
+import org.ton.intellij.tolk.doc.psi.TolkDocComment
 import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_BLOCK_COMMENT
 import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_EOL_COMMENT
 import org.ton.intellij.tolk.psi.TolkElementTypes.*
@@ -50,7 +51,7 @@ class TolkFormattingBlock(
     indent: Indent? = null,
     childIndent: Indent? = null,
 ) : AbstractTolkBlock(node, spacingBuilder, wrap, alignment, indent, childIndent) {
-    
+
     override fun getSpacing(child1: Block?, child2: Block): Spacing? {
         if (child1 != null) {
             val node1 = (child1 as? AbstractTolkBlock)?.node
@@ -59,7 +60,7 @@ class TolkFormattingBlock(
                 val assertStatement = myNode
                 val hasThrowStatement = assertStatement.getChildren(TokenSet.create(THROW_STATEMENT)).isNotEmpty()
                 val hasComma = assertStatement.getChildren(TokenSet.create(COMMA)).isNotEmpty()
-                
+
                 return if (hasThrowStatement && !hasComma) {
                     // assert (...) throw ...
                     Spacing.createSpacing(1, 1, 0, false, 0)
@@ -69,10 +70,14 @@ class TolkFormattingBlock(
                 }
             }
         }
-        
+
         return spacingBuilder.getSpacing(this, child1, child2)
     }
     override fun buildChildren(): MutableList<Block> {
+        if (myNode is TolkDocComment) {
+            return mutableListOf()
+        }
+
         val childrenBlocks = LinkedList<Block>()
         var child = myNode.firstChildNode
         while (child != null) {

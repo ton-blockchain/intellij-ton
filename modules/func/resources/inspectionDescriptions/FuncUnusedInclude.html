@@ -1,0 +1,49 @@
+<html>
+<body>
+Reports unused include statements in FunC code.
+
+<p>This inspection identifies include statements that do not contribute any symbols to the current file. 
+It performs intelligent analysis considering:</p>
+
+<ul>
+    <li><strong>Direct usage</strong> - symbols used directly in the current file</li>
+    <li><strong>Transitive dependencies</strong> - symbols imported through chains of includes</li>
+    <li><strong>Re-export scenarios</strong> - includes needed by files that import the current file</li>
+</ul>
+
+<p>The inspection automatically excludes <code>stdlib.fc</code> and <code>stdlib.func</code> from analysis 
+as they are commonly needed system libraries.</p>
+
+<p><strong>Examples of unused includes:</strong></p>
+<pre><code>
+#include "math.fc"     // Contains: add(int, int), multiply(int, int)
+#include "strings.fc"  // Contains: concat(slice, slice), length(slice)
+
+() main() impure {
+    // Only using functions from strings.fc
+    slice result = concat("hello", "world");
+    
+    // math.fc is unused - will be flagged
+}
+</code></pre>
+
+<p><strong>Examples of includes that appear unused but are actually needed:</strong></p>
+<pre><code>
+// utils.fc
+#include "math.fc"    // Not used directly here, but needed for re-export
+
+// main.fc  
+#include "utils.fc"
+
+// other.fc
+#include "main.fc"
+() other() {
+    int sum = add(1, 2);  // Uses add() from math.fc via utils.fc -> main.fc
+    // math.fc include in utils.fc is NOT flagged as unused
+}
+</code></pre>
+
+<p>This inspection helps maintain clean, efficient code by removing unnecessary dependencies 
+while preserving includes required for proper functionality.</p>
+</body>
+</html>

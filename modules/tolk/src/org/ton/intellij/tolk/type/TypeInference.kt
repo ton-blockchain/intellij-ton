@@ -1520,6 +1520,14 @@ class TolkInferenceWalker(
                 hint
             )
             inferredType = fieldType
+            if (fieldType is TolkTyUnknown && fieldLookup.integerLiteral != null && hint != null) {
+                // var a = createEmptyTuple();
+                // var b: int = a.1;
+                //
+                // hint = int
+                inferredType = hint
+            }
+
             if (resolvedVariants.isNotEmpty()) {
                 fieldSymbol = resolvedVariants.singleOrNull()
                 ctx.setResolvedRefs(fieldLookup, resolvedVariants.map { PsiElementResolveResult(it) })

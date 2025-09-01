@@ -1,7 +1,7 @@
 tolk 1.0
 
 import "@stdlib/tvm-dicts";
-import "../utils.tolk";
+import "../utils.tolk"
 
 /**
  * @dev Contract module that allows children to implement role-based access
@@ -263,7 +263,7 @@ fun AccessControl<T>.hasRole(self, role: int, account: address): bool {
 ///
 /// Format of the revert message is described in {requireRole}.
 fun AccessControl<T>.requireRoleSender(self, role: int, msgFull: cell): void {
-    val sender = self.msgSender(msgFull);
+    val sender = self.msgSender(msgFull, createEmptyCell());
     self.requireRole(role, sender);
 }
 

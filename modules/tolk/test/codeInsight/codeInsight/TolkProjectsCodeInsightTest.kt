@@ -2,6 +2,10 @@ package org.ton.intellij.tolk.codeInsight.codeInsight
 
 import org.ton.intellij.tolk.codeInsight.TolkCodeInsightBaseTest
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
+import org.ton.intellij.tolk.inspection.TolkCallArgumentsCountMismatchInspection
+import org.ton.intellij.tolk.inspection.TolkExpectTypeBuiltinInspection
+import org.ton.intellij.tolk.inspection.TolkStructInitializationInspection
+import org.ton.intellij.tolk.inspection.TolkUnresolvedReferenceInspection
 import java.io.File
 
 class TolkProjectsCodeInsightTest : TolkCodeInsightBaseTest() {
@@ -11,6 +15,10 @@ class TolkProjectsCodeInsightTest : TolkCodeInsightBaseTest() {
         super.setUp()
         val file = myFixture.copyDirectoryToProject("../tolk-stdlib", "tolk-stdlib")
         project.tolkSettings.explicitPathToStdlib = file.url
+        myFixture.enableInspections(TolkCallArgumentsCountMismatchInspection::class.java)
+        myFixture.enableInspections(TolkExpectTypeBuiltinInspection::class.java)
+        myFixture.enableInspections(TolkStructInitializationInspection::class.java)
+        myFixture.enableInspections(TolkUnresolvedReferenceInspection::class.java)
     }
 
     fun `test tolk bench project`() = doRecursiveTest("tolk-bench")

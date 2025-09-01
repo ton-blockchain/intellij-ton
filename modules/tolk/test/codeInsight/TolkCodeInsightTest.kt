@@ -1,6 +1,10 @@
 package org.ton.intellij.tolk.codeInsight
 
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
+import org.ton.intellij.tolk.inspection.TolkCallArgumentsCountMismatchInspection
+import org.ton.intellij.tolk.inspection.TolkExpectTypeBuiltinInspection
+import org.ton.intellij.tolk.inspection.TolkStructInitializationInspection
+import org.ton.intellij.tolk.inspection.TolkUnresolvedReferenceInspection
 
 class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
     override fun getTestDataPath(): String = "${super.testDataPath}/tests"
@@ -10,6 +14,10 @@ class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
         val file = myFixture.copyDirectoryToProject("../tolk-stdlib", "tolk-stdlib")
         project.tolkSettings.explicitPathToStdlib = file.url
         myFixture.copyDirectoryToProject("imports", "imports")
+        myFixture.enableInspections(TolkCallArgumentsCountMismatchInspection::class.java)
+        myFixture.enableInspections(TolkExpectTypeBuiltinInspection::class.java)
+        myFixture.enableInspections(TolkStructInitializationInspection::class.java)
+        myFixture.enableInspections(TolkUnresolvedReferenceInspection::class.java)
     }
 
     fun `test a-tests`() = doTest()

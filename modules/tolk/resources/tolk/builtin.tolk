@@ -102,7 +102,7 @@ fun `_>=_`(x: int, y: int): bool builtin;
 fun `_<=>_`(x: int, y: int): int builtin;
 
 @pure
-fun T.estimatePackSize(self): (int, int, int, int)
+fun T.estimatePackSize(): (int, int, int, int)
     builtin;
 
 // functions not presented in stdlib at all

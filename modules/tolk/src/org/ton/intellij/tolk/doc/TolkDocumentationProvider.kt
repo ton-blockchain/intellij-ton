@@ -175,7 +175,7 @@ fun TolkTy.generateDoc(): String = buildString {
             }
             colorize(")", asParen)
             append(" ")
-            colorize("->", asKeyword)
+            colorize("->", asComma)
             append(" ")
             append(returnType.generateDoc())
         }

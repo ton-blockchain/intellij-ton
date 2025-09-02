@@ -7,13 +7,18 @@ import com.intellij.util.Processor
 import org.ton.intellij.tolk.ide.colors.TolkColor
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkFunction
+import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkTypeDef
 import org.ton.intellij.tolk.psi.TolkTypedElement
 import org.ton.intellij.tolk.psi.impl.hasReceiver
+import org.ton.intellij.tolk.psi.impl.members
 import org.ton.intellij.tolk.psi.impl.receiverTy
 import org.ton.intellij.tolk.psi.impl.structFields
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
+import org.ton.intellij.tolk.type.TolkTyEnum
+import org.ton.intellij.tolk.type.TolkTyParam
+import org.ton.intellij.tolk.type.TolkTyStruct
 import org.ton.intellij.util.doc.DocumentationUtils
 
 object TolkDocumentationUtils : DocumentationUtils() {
@@ -53,17 +58,30 @@ fun resolveDocumentationReference(name: String, owner: PsiElement): PsiElement? 
         val typeName = parts[0]
         val methodOrFieldName = parts[1]
 
-        val typeReference = resolveDocumentationTypeReference(containingFile, typeName) ?: return null
-        if (typeReference is TolkStruct) {
-            val fields = typeReference.structFields
-            for (field in fields) {
-                if (field.name == methodOrFieldName) {
-                    return field
-                }
-            }
+        val typeReference = resolveDocumentationTypeReference(containingFile, typeName)
+
+        val searchReceiverType = if (typeName == "T" || typeName == "U") {
+            TolkTyParam.create(TolkPsiFactory[owner.project].createTypeParameter(typeName))
+        } else if (typeReference != null) {
+            (typeReference as? TolkTypedElement)?.type ?: return null
+        } else {
+            // try to resolve as parameter or anything else
+            val reference = resolveDocumentationReference(owner, typeName, containingFile)
+            (reference as? TolkTypedElement)?.type ?: return null
         }
 
-        val searchReceiverType = (typeReference as? TolkTypedElement)?.type ?: return null
+        if (searchReceiverType is TolkTyStruct) {
+            val found = searchReceiverType.psi.structFields.find { it.name == methodOrFieldName }
+            if (found != null) {
+                return found
+            }
+        }
+        if (searchReceiverType is TolkTyEnum) {
+            val found = searchReceiverType.psi.members.find { it.name == methodOrFieldName }
+            if (found != null) {
+                return found
+            }
+        }
 
         var foundElement: PsiElement? = null
 
@@ -84,6 +102,24 @@ fun resolveDocumentationReference(name: String, owner: PsiElement): PsiElement? 
         return foundElement
     }
 
+    val reference = resolveDocumentationReference(owner, name, containingFile)
+    if (reference != null) {
+        return reference
+    }
+
+    val typeReference = resolveDocumentationTypeReference(containingFile, name)
+    if (typeReference != null) {
+        return typeReference
+    }
+
+    return null
+}
+
+private fun resolveDocumentationReference(
+    owner: PsiElement,
+    name: String,
+    containingFile: TolkFile,
+): PsiElement? {
     if (owner is TolkFunction) {
         val params = owner.parameterList?.parameterList ?: emptyList()
         for (param in params) {
@@ -138,11 +174,6 @@ fun resolveDocumentationReference(name: String, owner: PsiElement): PsiElement? 
         if (global.name == name) {
             return global
         }
-    }
-
-    val typeReference = resolveDocumentationTypeReference(containingFile, name)
-    if (typeReference != null) {
-        return typeReference
     }
 
     return null

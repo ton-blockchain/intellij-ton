@@ -58,6 +58,13 @@ class TolkPsiFactory private constructor(val project: Project) {
         return function.identifier!!
     }
 
+    fun createTypeParameter(name: String): TolkTypeParameter {
+        val funcFile = createFile("fun foo<$name>() {}")
+        val function = funcFile.functions.first()
+        return function.typeParameterList?.typeParameterList?.firstOrNull()
+            ?: error("Failed to create type parameter from name: `$name`")
+    }
+
     fun createIncludeDefinition(text: String): TolkIncludeDefinition =
         createFromText("import \"$text\";")
             ?: error("Failed to create include definition from text: `$text`")
@@ -67,7 +74,7 @@ class TolkPsiFactory private constructor(val project: Project) {
             ?: error("Failed to create constant from name: `$name` and value: `$value`")
 
     private inline fun <reified T : TolkElement> createFromText(
-        code: CharSequence
+        code: CharSequence,
     ): T? = createFile(code).descendantOfTypeStrict()
 
     companion object {

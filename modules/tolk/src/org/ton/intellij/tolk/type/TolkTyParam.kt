@@ -18,6 +18,12 @@ class TolkTyParam private constructor(
 
     override fun equals(other: Any?): Boolean = other is TolkTyParam && other.parameter == this.parameter
 
+    override fun isEquivalentToInner(other: TolkTy): Boolean {
+        if (other == this) return true
+        if (other !is TolkTyParam) return false
+        return other.name == name
+    }
+
     override fun canRhsBeAssigned(other: TolkTy): Boolean = true
 
     override fun hashCode(): Int = parameter.hashCode()

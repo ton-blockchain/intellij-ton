@@ -5,6 +5,7 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.PlatformPatterns.psiElement
+import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.TolkStructBody
@@ -17,14 +18,14 @@ object TolkStructFieldModifierCompletionProvider : TolkCompletionProvider() {
         .andNot(psiElement().withParent(TolkStructField::class.java).afterLeaf(":"))
         .and(psiElement().with(object : PatternCondition<PsiElement>("notAfterColon") {
             override fun accepts(t: PsiElement, context: ProcessingContext?): Boolean {
-                return t.prevVisibleOrNewLine?.text != ":"
+                return t.prevVisibleOrNewLine?.text != ":" && t !is PsiComment
             }
         }))
 
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         val provider = TolkKeywordCompletionProvider(
             TolkCompletionContributor.CONTEXT_KEYWORD_PRIORITY,

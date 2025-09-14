@@ -6,9 +6,20 @@ interface TolkTypeParameterListOwner : TolkNamedElement {
     val typeParameterList: TolkTypeParameterList?
 
     fun resolveGenericType(name: String): TolkTyParam? {
+        val param = resolveGenericParam(name) ?: return null
+        if (param is TolkTypeParameter) {
+            return TolkTyParam.create(param)
+        }
+        if (param is TolkReferenceTypeExpression) {
+            return TolkTyParam.create(param)
+        }
+        return null
+    }
+
+    fun resolveGenericParam(name: String): TolkElement? {
         val typeParam = typeParameterList?.typeParameterList?.firstOrNull { it.name == name }
         if (typeParam != null) {
-            return TolkTyParam.create(typeParam)
+            return typeParam
         }
         if (this !is TolkFunction) return null
         functionReceiver?.let { functionReceiver ->
@@ -16,7 +27,7 @@ interface TolkTypeParameterListOwner : TolkNamedElement {
             functionReceiver.accept(visitor)
             val element = visitor.unresolvedAsGenerics[name]
             if (element != null) {
-                return TolkTyParam.create(element)
+                return element
             }
         }
         return null

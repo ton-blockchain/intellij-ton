@@ -2,6 +2,13 @@
 
 ## [3.0.0]
 
+v3.0.0 is the biggest update of the plugin ever.
+We have improved every part of the plugin, every supported language.
+The list of supported languages has expanded, and now the plugin also supports TASM, the future assembler standard in
+the Tolk language, and Fift assembly has received its improved support as part of Fift support.
+BoC files are no longer just binary files, you can open them and see the disassembled code!
+In this version, we also supported the latest release of Tolk 1.1.
+
 ### Tolk
 
 #### Features
@@ -12,18 +19,20 @@
 - feat(tolk/1.1): support enums in https://github.com/ton-blockchain/intellij-ton/pull/473
 - feat(tolk/asm): add injection of assembly language for Tolk assembly functions in https://github.com/ton-blockchain/intellij-ton/pull/329
 - feat(tolk/completion): add "Fill all fields..." and "Fill required fields..." completion in https://github.com/ton-blockchain/intellij-ton/pull/367
+- feat(tolk/completion): add `lazy` keyword completion in https://github.com/ton-blockchain/intellij-ton/pull/241
 - feat(tolk/completion): add `return <expr>;` completion item for functions without an explicit return type in https://github.com/ton-blockchain/intellij-ton/pull/519
+- feat(tolk/completion): add a completion variant to fill all match arms in https://github.com/ton-blockchain/intellij-ton/pull/314
 - feat(tolk/completion): add a default field value on field completion inside a struct instance in https://github.com/ton-blockchain/intellij-ton/pull/362
+- feat(tolk/completion): add a string argument for @deprecated annotation completion in https://github.com/ton-blockchain/intellij-ton/pull/269
 - feat(tolk/completion): add better completion for match arms for enum types in https://github.com/ton-blockchain/intellij-ton/pull/475
 - feat(tolk/completion): add completion for `@on_bounced_policy` annotation in https://github.com/ton-blockchain/intellij-ton/pull/307
+- feat(tolk/completion): add completion for `builtin` keyword in https://github.com/ton-blockchain/intellij-ton/pull/243
 - feat(tolk/completion): add completion for entry point functions like `onInternalMessage` and special methods `unpackFromSlice` and `packToBuilder` in https://github.com/ton-blockchain/intellij-ton/pull/389
-- feat(tolk/completion): add a completion variant to fill all match arms in https://github.com/ton-blockchain/intellij-ton/pull/314
 - feat(tolk/completion): add enum keyword completion in https://github.com/ton-blockchain/intellij-ton/pull/486
 - feat(tolk/completion): add enum members completion without a qualifier in https://github.com/ton-blockchain/intellij-ton/pull/525
 - feat(tolk/completion): add postfix completion  in https://github.com/ton-blockchain/intellij-ton/pull/271
 - feat(tolk/completion): add snippet completion for block keywords in https://github.com/ton-blockchain/intellij-ton/pull/265
 - feat(tolk/completion): add snippets for instance and static methods in https://github.com/ton-blockchain/intellij-ton/pull/524
-- feat(tolk/completion): add a string argument for @deprecated annotation completion in https://github.com/ton-blockchain/intellij-ton/pull/269
 - feat(tolk/completion): better completion for complex types like generics in https://github.com/ton-blockchain/intellij-ton/pull/483
 - feat(tolk/completion): better context return keyword completion in https://github.com/ton-blockchain/intellij-ton/pull/267
 - feat(tolk/completion): better match completion in https://github.com/ton-blockchain/intellij-ton/pull/316
@@ -39,6 +48,7 @@
 - feat(tolk/formatting): don't add space after `assert` in `assert()` without throw in https://github.com/ton-blockchain/intellij-ton/pull/520
 - feat(tolk/formatting): support enum formatting in https://github.com/ton-blockchain/intellij-ton/pull/484
 - feat(tolk/grammar): support `type int = builtin` in https://github.com/ton-blockchain/intellij-ton/pull/375
+- feat(tolk/gutter): add gutter icon for recursive calls in https://github.com/ton-blockchain/intellij-ton/pull/245
 - feat(tolk/highlighting): add special highlighting for mutable parameters and mutable self parameters in https://github.com/ton-blockchain/intellij-ton/pull/370
 - feat(tolk/highlighting): add underline highlighting for mutable variables in https://github.com/ton-blockchain/intellij-ton/pull/263
 - feat(tolk/highlighting): calculate read/write access for variables in https://github.com/ton-blockchain/intellij-ton/pull/337
@@ -49,6 +59,7 @@
 - feat(tolk/ide): show a type of struct field in the structure view in https://github.com/ton-blockchain/intellij-ton/pull/335
 - feat(tolk/inlay-hints): add an inlay hint with exit code short description in https://github.com/ton-blockchain/intellij-ton/pull/312
 - feat(tolk/inlay-hints): add an inlay hint with implicit method id in https://github.com/ton-blockchain/intellij-ton/pull/261
+- feat(tolk/inlay-hints): don't show parameter hints for the same name field access and function/method call in https://github.com/ton-blockchain/intellij-ton/pull/255
 - feat(tolk/inlay-hints): enable a constant type hint by default in https://github.com/ton-blockchain/intellij-ton/pull/279
 - feat(tolk/inspections): add `CallArgumentsCountMismatch` inspection in https://github.com/ton-blockchain/intellij-ton/pull/403
 - feat(tolk/inspections): add a quickfix for unresolved references in https://github.com/ton-blockchain/intellij-ton/pull/355
@@ -181,10 +192,6 @@
 ### TASM
 
 - feat(tasm): initial support and highlighting for TASM in https://github.com/ton-blockchain/intellij-ton/pull/463
-- feat(tolk/completion): add `lazy` keyword completion in https://github.com/ton-blockchain/intellij-ton/pull/241
-- feat(tolk/completion): add completion for `builtin` keyword in https://github.com/ton-blockchain/intellij-ton/pull/243
-- feat(tolk/gutter): add gutter icon for recursive calls in https://github.com/ton-blockchain/intellij-ton/pull/245
-- feat(tolk/inlay-hints): don't show parameter hints for the same name field access and function/method call in https://github.com/ton-blockchain/intellij-ton/pull/255
 
 ### BoC
 

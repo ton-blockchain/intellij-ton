@@ -278,7 +278,7 @@ StructField ::= StructFieldModifiers? IDENTIFIER ':' TypeExpression StructFieldD
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
-private StructField_recover ::= !(';'|','|'}'|IDENTIFIER)
+private StructField_recover ::= !(';'|','|'}'|IDENTIFIER|'private'|'readonly')
 
 StructFieldModifiers ::= StructFieldModifier+ {}
 StructFieldModifier ::= 'private' | 'readonly' {}

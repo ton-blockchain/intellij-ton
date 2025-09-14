@@ -75,7 +75,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                     for (field in calledType.psi.structBody?.structFieldList.orEmpty()) {
                         if (!checkLimit()) return
                         val lookupElement = field.toLookupElementBuilder(ctx, sub)
-                        if (prefixMatcher.prefixMatches(lookupElement)) {
+                        if (prefixMatcher.prefixMatches(lookupElement) && field.canUse(calledType, element)) {
                             result.addElement(
                                 lookupElement.toTolkLookupElement(
                                     TolkLookupElementData(

@@ -31,6 +31,8 @@ class TolkTyAlias private constructor(
                 }
             }
 
+            if (psi.name == other.psi.name) return true
+
             // given `type UserId = int` and `type OwnerId = int`, treat them as NOT equal (they are also not assignable);
             // (but nevertheless, they will have the same type_id, and `UserId | OwnerId` is not a valid union)
             if (this.underlyingType.isEquivalentTo(other.underlyingType)) {

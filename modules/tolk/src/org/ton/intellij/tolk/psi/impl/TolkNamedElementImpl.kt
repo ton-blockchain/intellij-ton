@@ -85,6 +85,15 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> : TolkStubbedElementIm
                     append((type ?: TolkTy.Unknown).render())
                 }
 
+                is TolkEnumMember -> buildString {
+                    append(name)
+
+                    if (expression != null) {
+                        append(" = ")
+                        append(expression?.text)
+                    }
+                }
+
                 is TolkTypeDef -> name
                 else -> name
             }

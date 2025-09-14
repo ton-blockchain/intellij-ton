@@ -855,6 +855,16 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         }
     """.trimIndent())
 
+    fun `test enum type completion`() = doFirstCompletion("""
+        enum Color {}
+
+        fun foo(): /*caret*/ {}
+    """, """
+        enum Color {}
+
+        fun foo(): Color/*caret*/ {}
+    """.trimIndent())
+
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;
 //        fun Foo.foo(self) {}

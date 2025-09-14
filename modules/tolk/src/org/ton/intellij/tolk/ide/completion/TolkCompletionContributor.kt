@@ -5,6 +5,7 @@ import com.intellij.codeInsight.completion.impl.CompletionSorterImpl
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementWeigher
 import com.intellij.patterns.PlatformPatterns.psiElement
+import org.ton.intellij.tolk.doc.psi.TolkDocComment
 import org.ton.intellij.tolk.psi.*
 
 class TolkCompletionContributor : CompletionContributor() {
@@ -31,6 +32,8 @@ class TolkCompletionContributor : CompletionContributor() {
                         psiElement().withText(""),
                         psiElement().inside(TolkTopLevelElement::class.java)
                     )
+                ).andNot(
+                    psiElement().inside(TolkDocComment::class.java)
                 ),
             TolkKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,

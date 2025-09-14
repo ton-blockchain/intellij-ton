@@ -12,6 +12,7 @@ import com.intellij.psi.NavigatablePsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.util.containers.map2Array
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.impl.members
 
 class TolkPsiStructureViewFactory : PsiStructureViewFactory {
     override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder? {
@@ -35,7 +36,9 @@ class TolkStructureViewModel(
             TolkConstVar::class.java,
             TolkTypeDef::class.java,
             TolkStruct::class.java,
-            TolkStructField::class.java
+            TolkStructField::class.java,
+            TolkEnum::class.java,
+            TolkEnumMember::class.java,
         )
     }
 
@@ -47,6 +50,7 @@ class TolkStructureViewModel(
             is TolkStructField,
             is TolkConstVar,
             is TolkGlobalVar,
+            is TolkEnumMember,
             is TolkTypeDef -> true
 
             else -> false
@@ -94,10 +98,12 @@ class TolkStructureViewElement(
                     is TolkConstVar -> it
                     is TolkTypeDef -> it
                     is TolkStruct -> it
+                    is TolkEnum -> it
                     else -> null
                 }
             }
             is TolkStruct -> psi.structBody?.structFieldList ?: emptyList()
+            is TolkEnum -> psi.members
             else -> emptyList()
         }
 }

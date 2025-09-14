@@ -9,6 +9,7 @@ import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
+import org.ton.intellij.tolk.doc.psi.TolkDocComment
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkTopLevelElement
 
@@ -21,6 +22,9 @@ object TolkImportKeywordCompletionProvider : TolkCompletionProvider(), DumbAware
                     psiElement().withText(""),
                     psiElement().inside(TolkTopLevelElement::class.java)
                 )
+            )
+            .andNot(
+                psiElement().inside(TolkDocComment::class.java)
             )
 
     override fun addCompletions(

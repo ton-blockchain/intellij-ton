@@ -365,4 +365,18 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
         1,
         "some",
     )
+
+    fun `test completion for alias methods`() = checkOrderedEquals(
+        """
+            type bar = int
+            
+            fun bar.method(self) {}
+            
+            fun main(foo: bar) {
+                foo./*caret*/;
+            }
+        """,
+        1,
+        "method",
+    )
 }

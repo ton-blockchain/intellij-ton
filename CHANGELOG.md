@@ -6,7 +6,7 @@ v3.0.0 is the biggest update of the plugin ever.
 We have improved every part of the plugin, every supported language.
 The list of supported languages has expanded, and now the plugin also supports TASM, the future assembler standard in
 the Tolk language, and Fift assembly has received its improved support as part of Fift support.
-BoC files are no longer just binary files, you can open them and see the disassembled code!
+BoC files are no longer just opaque binary files, you can open them and see the disassembled code!
 In this version, we also supported the latest release of Tolk 1.1.
 
 ### Tolk

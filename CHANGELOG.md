@@ -83,12 +83,14 @@ In this version, we also supported the latest release of Tolk 1.1.
 #### Fixes
 
 - fix(tolk/builtin): fix `T.estimatePackSize` signature in https://github.com/ton-blockchain/intellij-ton/pull/541
+  fix(tolk/completion): don't add duplicate completion variant for primitive types in Tolk 1.1 in https://github.com/ton-blockchain/intellij-ton/pull/561
 - fix(tolk/completion): add `match` postfix completion only for expressions in https://github.com/ton-blockchain/intellij-ton/pull/380
 - fix(tolk/completion): add `storage` snippet in https://github.com/ton-blockchain/intellij-ton/pull/386
 - fix(tolk/completion): add completion for `@stdlib` in an import path in https://github.com/ton-blockchain/intellij-ton/pull/384
 - fix(tolk/completion): don't complete `private` and `readonly` keywords inside struct fields comments in https://github.com/ton-blockchain/intellij-ton/pull/553
 - fix(tolk/completion): don't gray out method completion if the qualifier is unresolved in https://github.com/ton-blockchain/intellij-ton/pull/556
 - fix(tolk/completion): don't show "Fill all fields" for a non-empty struct instance in https://github.com/ton-blockchain/intellij-ton/pull/522
+- fix(tolk/completion): don't show top level completion inside doc comments in https://github.com/ton-blockchain/intellij-ton/pull/567
 - fix(tolk/completion): fix auto-import insertion for files without imports in https://github.com/ton-blockchain/intellij-ton/pull/356
 - fix(tolk/completion): fix backticked declarations completion in https://github.com/ton-blockchain/intellij-ton/pull/414
 - fix(tolk/completion): make `return <expr>;` the first option for return completion in https://github.com/ton-blockchain/intellij-ton/pull/526

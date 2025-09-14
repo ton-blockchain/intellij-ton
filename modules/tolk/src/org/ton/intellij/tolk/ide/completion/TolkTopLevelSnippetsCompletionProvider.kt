@@ -9,8 +9,10 @@ import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiWhiteSpace
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.TolkFile
+import org.ton.intellij.util.prevLeaf
 
 object TolkTopLevelSnippetsCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> =
@@ -22,7 +24,7 @@ object TolkTopLevelSnippetsCompletionProvider : TolkCompletionProvider() {
                     // <caret>
                     // but not
                     // fun <caret>
-                    return t.prevSibling == null
+                    return t.prevSibling == null && t.prevLeaf is PsiWhiteSpace
                 }
             })
 

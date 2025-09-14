@@ -206,6 +206,10 @@ fun collectMethodCandidates(
         return viable.map { it.method to it.substitutedTs }
     }
 
+    if (forCompletion) {
+        return viable.map { it.method to EmptySubstitution }
+    }
+
     // okay, we have multiple viable methods, and need to locate the better
 
     // 1) exact match candidates with equal_to()
@@ -221,10 +225,6 @@ fun collectMethodCandidates(
     }
     if (exact.isNotEmpty()) {
         viable = exact
-    }
-
-    if (forCompletion) {
-        return viable.map { it.method to EmptySubstitution }
     }
 
     // 2) if there are both generic and non-generic functions, filter out generic

@@ -379,4 +379,21 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
         1,
         "method",
     )
+
+    fun `test completion for deep alias methods`() = checkOrderedEquals(
+        """
+            type bar = int
+            type baz = bar
+            
+            fun bar.method(self) {}
+            fun baz.method2(self) {}
+            
+            fun main(foo: baz) {
+                foo./*caret*/;
+            }
+        """,
+        1,
+        "method",
+        "method2",
+    )
 }

@@ -124,7 +124,10 @@ class TolkTyUnion private constructor(
         }
 
         private fun flattenVariants(variants: Collection<TolkTy>): TolkTy {
-            check(variants.isNotEmpty()) { "Cannot create union from an empty set of types" }
+            if (variants.isEmpty()) {
+                // may happen with broken union type declaration while typing
+                return TolkTyUnion(listOf(TolkTyUnknown))
+            }
             val flatVariants = ArrayList<TolkTy>(variants.size)
             for (variant in variants) {
                 val nestedUnion = variant.unwrapTypeAlias() as? TolkTyUnion

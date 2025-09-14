@@ -1474,6 +1474,7 @@ class TolkInferenceWalker(
 
         if (receiver is TolkReferenceExpression) {
             receiverType = resolveTypeReferenceType(receiver)
+            receiverSymbol = resolveTypeReference(receiver)
             when (receiverType) {
                 is TolkTyParam -> {
                     receiverSymbol = receiverType.parameter.psi
@@ -1495,9 +1496,9 @@ class TolkInferenceWalker(
                     nextFlow = inferExpression(receiver, nextFlow, false).outFlow
                     receiverType = ctx.getType(receiver)
                     receiverObject = ctx.getResolvedRefs(receiver).singleOrNull()?.element as? TolkSymbolElement
+                    receiverSymbol = null
                 }
             }
-            receiverSymbol = receiverSymbol ?: resolveTypeReference(receiver)
             if (receiverType != null) {
                 ctx.setType(receiver, receiverType)
             }

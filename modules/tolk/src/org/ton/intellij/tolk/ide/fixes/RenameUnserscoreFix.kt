@@ -7,8 +7,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import org.ton.intellij.tolk.psi.TolkNamedElement
+import org.ton.intellij.tolk.psi.TolkPsiFactory
+import org.ton.intellij.tolk.psi.TolkVarTensor
+import org.ton.intellij.tolk.psi.TolkVarTuple
 
-// TODO: fix apply expressions
 class RenameUnderscoreFix(
     val element: TolkNamedElement
 ) : LocalQuickFixAndIntentionActionOnPsiElement(element) {
@@ -25,6 +27,10 @@ class RenameUnderscoreFix(
         startElement: PsiElement,
         endElement: PsiElement
     ) {
+        if (element.parent is TolkVarTensor || element.parent is TolkVarTuple) {
+            element.replace(TolkPsiFactory[project].createIdentifier("_"))
+            return
+        }
         element.setName("_")
     }
 }

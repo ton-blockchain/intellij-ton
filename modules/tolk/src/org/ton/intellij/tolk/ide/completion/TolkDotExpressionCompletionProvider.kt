@@ -43,7 +43,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         val resolvedReceiver = qualifier.reference?.resolve()
         val calledType = qualifier.type?.actualType() ?: return
 
-        val isStaticReceiver = qualifier !is TolkDotExpression && resolvedReceiver == null || resolvedReceiver is TolkTypeSymbolElement
+        val isStaticReceiver = qualifier !is TolkDotExpression && resolvedReceiver is TolkTypeSymbolElement
         val isBeforeParenthesis = parameters.originalPosition?.let {
             val text = it.containingFile.text
             val offset = it.textOffset + it.textLength

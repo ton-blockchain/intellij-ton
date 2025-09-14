@@ -109,4 +109,31 @@ class TolkStructInitCompletionTest : TolkCompletionTestBase() {
             }
         """.trimIndent(),
     )
+
+    fun `test private field completion in function`() = checkEquals(
+        """
+            struct Foo {
+                private foo: int
+            }
+            
+            fun foo() {
+                Foo { fo/*caret*/ };
+            }
+        """,
+        1,
+    )
+
+    fun `test private field completion in struct method`() = checkEquals(
+        """
+            struct Foo {
+                private foo: int
+            }
+            
+            fun Foo.create(self) {
+                return Foo { fo/*caret*/ };
+            }
+        """,
+        1,
+        "foo"
+    )
 }

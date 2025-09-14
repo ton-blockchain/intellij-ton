@@ -58,6 +58,8 @@ import org.ton.intellij.tolk.psi.TolkVar
 import org.ton.intellij.tolk.psi.TolkVarExpression
 import org.ton.intellij.tolk.psi.impl.TolkStructFieldMixin
 import org.ton.intellij.tolk.psi.impl.hasReceiver
+import org.ton.intellij.tolk.psi.impl.isPrivate
+import org.ton.intellij.tolk.psi.impl.isReadonly
 import org.ton.intellij.tolk.psi.impl.receiverTy
 import org.ton.intellij.tolk.psi.impl.returnTy
 import org.ton.intellij.tolk.type.*
@@ -367,9 +369,8 @@ fun TolkStructField.generateDoc(): String {
         }
 
         val modifiers = mutableListOf<String>()
-        val mixin = this@generateDoc as? TolkStructFieldMixin
-        if (mixin?.isPrivate == true) modifiers.add("private")
-        if (mixin?.isReadonly == true) modifiers.add("readonly")
+        if (isPrivate) modifiers.add("private")
+        if (isReadonly) modifiers.add("readonly")
         
         if (modifiers.isNotEmpty()) {
             modifiers.forEach { modifier ->
@@ -624,9 +625,8 @@ private fun StringBuilder.generateStructFields(fields: List<TolkStructField>) {
                 append("   ")
                 
                 val modifiers = mutableListOf<String>()
-                val mixin = field as? TolkStructFieldMixin
-                if (mixin?.isPrivate == true) modifiers.add("private")
-                if (mixin?.isReadonly == true) modifiers.add("readonly")
+                if (field.isPrivate) modifiers.add("private")
+                if (field.isReadonly) modifiers.add("readonly")
                 
                 if (modifiers.isNotEmpty()) {
                     modifiers.forEach { modifier ->

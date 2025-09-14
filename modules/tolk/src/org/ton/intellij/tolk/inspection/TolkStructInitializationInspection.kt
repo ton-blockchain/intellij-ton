@@ -4,6 +4,7 @@ import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.tolk.psi.impl.hasPrivateFields
 import org.ton.intellij.tolk.type.TolkTyNever
 import org.ton.intellij.tolk.type.TolkTyParam
 import org.ton.intellij.tolk.type.TolkTyStruct
@@ -21,6 +22,11 @@ class TolkStructInitializationInspection : TolkInspectionBase() {
 
     private fun checkStructInitialization(expression: TolkStructExpression, holder: ProblemsHolder) {
         val structDecl = resolveStructDeclaration(expression) ?: return
+
+        if (structDecl.hasPrivateFields) {
+            // Don't add an error in this case
+            return
+        }
 
         val requiredFields = structDecl.structBody?.structFieldList?.filter { !canFieldBeOmitted(it) } ?: emptyList()
         val initializedFields = getInitializedFields(expression)

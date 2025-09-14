@@ -156,6 +156,12 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                         return expectType.variants.any { it != type && it.canRhsBeAssigned(type) }
                     }
 
+                    if (element is TolkTypeDef) {
+                        if (element.builtinKeyword != null) {
+                            return true
+                        }
+                    }
+
                     val canAddAsUnionMatchVariant = canAddAsUnionMatchVariant()
                     if (inMatchPattern && expectType is TolkTyUnion && !canAddAsUnionMatchVariant) {
                         // union variant has already been processed

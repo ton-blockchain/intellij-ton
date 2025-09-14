@@ -108,7 +108,13 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
             true
         }
 
-        typeCandidates.forEach { typeDef ->
+        for (typeDef in typeCandidates) {
+            if (typeDef is TolkTypeDef) {
+                if (typeDef.builtinKeyword != null) {
+                    continue
+                }
+            }
+
             result.addElement(typeDef.toLookupElementBuilder(ctx))
         }
     }

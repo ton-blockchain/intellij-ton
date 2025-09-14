@@ -1497,6 +1497,7 @@ class TolkInferenceWalker(
                     receiverObject = ctx.getResolvedRefs(receiver).singleOrNull()?.element as? TolkSymbolElement
                 }
             }
+            receiverSymbol = receiverSymbol ?: resolveTypeReference(receiver)
             if (receiverType != null) {
                 ctx.setType(receiver, receiverType)
             }
@@ -1969,6 +1970,22 @@ class TolkInferenceWalker(
             return null
         } ?: return TolkPrimitiveTy.fromName(name)
         return resolveTypeReferenceType(reference, symbolTy)
+    }
+
+    private fun resolveTypeReference(
+        reference: TolkReferenceElement,
+    ): TolkElement? {
+        val name = reference.referenceName ?: return null
+        if (localSymbols.contains(reference)) return null
+        val genericParam = currentFunction?.resolveGenericParam(name)
+        if (genericParam != null) {
+            return genericParam
+        }
+        return try {
+            resolveToGlobalSymbols(reference, name).singleOrNull()
+        } catch (_: CyclicReferenceException) {
+            return null
+        }
     }
 
     private fun resolveTypeReferenceType(

@@ -19,6 +19,8 @@ import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.psi.TolkStructExpression
 import org.ton.intellij.tolk.psi.TolkStructExpressionField
 import org.ton.intellij.tolk.psi.TolkStructField
+import org.ton.intellij.tolk.psi.impl.canUse
+import org.ton.intellij.tolk.psi.impl.hasPrivateFields
 import org.ton.intellij.tolk.psi.impl.members
 import org.ton.intellij.tolk.psi.impl.structFields
 import org.ton.intellij.tolk.type.TolkBitsNTy
@@ -70,8 +72,12 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         }
 
         val ctx = TolkCompletionContext(parent)
-        structTy.psi.structFields.asReversed().forEachIndexed { index, field ->
+        val structDecl = structTy.psi
+
+        structDecl.structFields.asReversed().forEachIndexed { index, field ->
             if (field.name in initedFieldNames) return@forEachIndexed
+
+            if (!field.canUse(structTy, element)) return@forEachIndexed
 
             result.addElement(
                 PrioritizedLookupElement.withPriority(
@@ -89,10 +95,10 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
             )
         }
 
-        val allFields = structTy.psi.structFields
+        val allFields = structDecl.structFields
         val requiredFields = allFields.filter { isFieldRequired(it) }
 
-        if (isEmptyStructExpression) {
+        if (isEmptyStructExpression && !structDecl.hasPrivateFields) {
             result.addElement(
                 LookupElementBuilder.create("0")
                     .withPresentableText("Fill all fields…")

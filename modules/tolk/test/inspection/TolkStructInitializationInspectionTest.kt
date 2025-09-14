@@ -301,4 +301,20 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
             TolkStructInitializationInspection()
         )
     }
+
+    fun `test no error for struct with private fields`() {
+        doInspectionTest(
+            """
+            struct Point {
+                private x: int;
+                private y: int;
+            }
+
+            fun foo() {
+                Point {};
+            }
+            """.trimIndent(),
+            TolkStructInitializationInspection()
+        )
+    }
 }

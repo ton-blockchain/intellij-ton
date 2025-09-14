@@ -250,4 +250,119 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
         "method3",
         "method1",
     )
+
+    fun `test private field completion, in function`() = checkOrderedEquals(
+        """
+            struct Foo {
+                private foo: int
+            }
+            
+            fun main(foo: Foo) {
+                foo./*caret*/;
+            }
+        """,
+        1,
+    )
+
+    fun `test private field completion, in some method`() = checkOrderedEquals(
+        """
+            struct Foo {
+                private foo: int
+            }
+            
+            fun int.some(foo: Foo) {
+                foo./*caret*/;
+            }
+        """,
+        1,
+    )
+
+    fun `test private field completion, in static struct method via argument`() = checkOrderedEquals(
+        """
+            struct Foo {
+                private foo: int
+            }
+            
+            fun Foo.some(foo: Foo) {
+                foo./*caret*/;
+            }
+        """,
+        1,
+        "foo"
+    )
+
+    fun `test private field completion, in static struct method with local variable`() = checkOrderedEquals(
+        """
+            struct Foo {
+                private foo: int
+            }
+            
+            fun Foo.some() {
+                val f: Foo;
+                f./*caret*/;
+            }
+        """,
+        1,
+        "foo"
+    )
+
+    fun `test private field completion, in instance struct method via self`() = checkOrderedEquals(
+        """
+            struct Foo {
+                private foo: int
+            }
+            
+            fun Foo.some(self) {
+                self./*caret*/;
+            }
+        """,
+        1,
+        "foo",
+        "some",
+    )
+
+    fun `test private field completion, in instance struct method via argument`() = checkOrderedEquals(
+        """
+            struct Foo {
+                private foo: int
+            }
+            
+            fun Foo.some(self, arg: Foo) {
+                arg./*caret*/;
+            }
+        """,
+        1,
+        "foo",
+        "some",
+    )
+
+    fun `test private field completion, in instance struct method with local variable`() = checkOrderedEquals(
+        """
+            struct Foo {
+                private foo: int
+            }
+            
+            fun Foo.some(self) {
+                val f: Foo;
+                f./*caret*/;
+            }
+        """,
+        1,
+        "foo",
+        "some",
+    )
+
+    fun `test private field completion, in optional instance struct method`() = checkOrderedEquals(
+        """
+            struct Foo {
+                private foo: int
+            }
+            
+            fun Foo?.some(self) {
+                self./*caret*/;
+            }
+        """,
+        1,
+        "some",
+    )
 }

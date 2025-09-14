@@ -42,3 +42,5 @@ val TolkStruct?.structFields: List<TolkStructField>
         // todo: optimize by stub
         return this?.structBody?.structFieldList ?: emptyList()
     }
+
+val TolkStruct.hasPrivateFields get() = structBody?.structFieldList?.any { it.isPrivate } ?: false

@@ -129,8 +129,8 @@ class TolkStructInitCompletionTest : TolkCompletionTestBase() {
                 private foo: int
             }
             
-            fun Foo.create(self) {
-                return Foo { fo/*caret*/ };
+            fun Foo.create() {
+                return Foo { /*caret*/ };
             }
         """,
         1,

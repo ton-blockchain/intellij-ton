@@ -317,7 +317,8 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "foo"
+        "foo",
+        "some",
     )
 
     fun `test private field completion, in instance struct method via argument`() = checkOrderedEquals(

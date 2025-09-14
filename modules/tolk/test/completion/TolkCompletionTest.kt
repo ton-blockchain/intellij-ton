@@ -655,6 +655,7 @@ class TolkCompletionTest : TolkCompletionTestBase() {
     """)
 
     fun `test storage snippet completion`() = doFirstCompletion("""
+
         storage/*caret*/
     """, """
         struct Storage {

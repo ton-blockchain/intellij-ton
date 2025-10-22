@@ -143,6 +143,8 @@
         <!-- region Code Insight -->
         <codeInsight.lineMarkerProvider language="Tolk"
                                         implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkRecursiveCallLineMarkerProvider"/>
+        <runLineMarkerContributor id="TolkTestRunLineMarkerProvider" language="Tolk"
+                                implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkTestLineMarkerProvider"/>
         <codeInsight.typeInfo language="Tolk"
                               implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkTypeProvider"/>
         <!-- endregion Code Insight -->
@@ -219,6 +221,11 @@
 
         <additionalLibraryRootsProvider
                 implementation="org.ton.intellij.tolk.toolchain.TolkSdkSyntheticLibraryProvider"/>
+
+        <!-- Test Framework -->
+        <configurationType implementation="org.ton.intellij.tolk.ide.test.configuration.TolkTestConfigurationType"/>
+        <runConfigurationProducer implementation="org.ton.intellij.tolk.ide.test.configuration.TolkTestConfigurationProducer"/>
+        <testSourcesFilter implementation="org.ton.intellij.tolk.ide.test.TolkTestSourcesFilter"/>
     </extensions>
 
     <extensions defaultExtensionNs="org.ton">
@@ -246,5 +253,7 @@
                 text="Tolk File" description="Create new Tolk file">
             <add-to-group group-id="NewGroup"/>
         </action>
+        <action id="Tolk.RunTest" class="org.ton.intellij.tolk.action.TolkRunTestAction"
+                text="Run Tolk Test" description="Run selected Tolk test function"/>
     </actions>
 </idea-plugin>

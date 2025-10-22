@@ -54,6 +54,12 @@ class TolkProjectSettingsService(
             notifySettingsChanged()
             reloadProject()
         }
+    var testToolPath: String?
+        get() = state.testToolPath
+        set(value) {
+            state.testToolPath = value
+            notifySettingsChanged()
+        }
     val stdlibDir: VirtualFile?
         get() {
             return explicitPathToStdlib?.let {
@@ -101,6 +107,7 @@ class TolkProjectSettingsService(
     class TolkProjectSettings : BaseState() {
         var toolchainLocation by string()
         var explicitPathToStdlib by string()
+        var testToolPath by string()
 
         fun copy() = TolkProjectSettings().also { it.copyFrom(this) }
     }

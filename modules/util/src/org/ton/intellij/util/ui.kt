@@ -22,6 +22,18 @@ fun pathToDirectoryTextField(
         onTextChanged
     )
 
+fun pathToExecutableTextField(
+    disposable: Disposable,
+    @DialogTitle title: String,
+    onTextChanged: () -> Unit = {}
+): TextFieldWithBrowseButton =
+    pathTextField(
+        FileChooserDescriptorFactory.createSingleFileOrExecutableAppDescriptor(),
+        disposable,
+        title,
+        onTextChanged
+    )
+
 fun pathTextField(
     fileChooserDescriptor: FileChooserDescriptor,
     disposable: Disposable,

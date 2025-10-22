@@ -16,4 +16,5 @@ object TolkIcons {
     val ENUM = AllIcons.Nodes.Enum
     val TYPE_ALIAS = IconLoader.getIcon("/icons/typeAlias.svg", TolkIcons::class.java)
     val GLOBAL_VARIABLE = IconLoader.getIcon("/icons/globalVariable.svg", TolkIcons::class.java)
+    val TEST_FUNCTION = AllIcons.RunConfigurations.TestState.Run
 }

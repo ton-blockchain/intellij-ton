@@ -10,7 +10,7 @@ class TolkTestConfigurationType : ConfigurationTypeBase(
     ID,
     TolkBundle.message("tolk.test.configuration.name"),
     TolkBundle.message("tolk.test.configuration.description"),
-    TolkIcons.TEST_FUNCTION
+    TolkIcons.FILE
 ) {
     val factory: ConfigurationFactory = TolkTestConfigurationFactory(this)
 

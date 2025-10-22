@@ -39,6 +39,7 @@ class TolkTestConfigurationRunState(
             .withExePath(testToolPath)
             .withWorkDirectory(workingDir)
             .withParameters("test")
+            .withParameters("--teamcity")
 
         when (conf.scope) {
             TolkTestScope.Directory -> {

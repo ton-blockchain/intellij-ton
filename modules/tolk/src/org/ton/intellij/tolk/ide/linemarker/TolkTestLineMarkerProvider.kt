@@ -36,7 +36,7 @@ class TolkTestLineMarkerProvider : RunLineMarkerContributor() {
                 TestStateInfo.Magnitude.ERROR_INDEX,
                 TestStateInfo.Magnitude.FAILED_INDEX -> AllIcons.RunConfigurations.TestState.Red2
 
-                else -> AllIcons.RunConfigurations.TestState.Run_run
+                else -> AllIcons.RunConfigurations.TestState.Run
             }
 
             return Info(icon, contextActions) { "Run Test" }

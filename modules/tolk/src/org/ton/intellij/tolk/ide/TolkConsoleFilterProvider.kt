@@ -25,36 +25,63 @@ class TolkConsoleFilterProvider : ConsoleFilterProviderEx {
 
 class TolkConsoleFilter(val project: Project, val scope: GlobalSearchScope) : Filter {
     override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
-        val match = pattern.find(line) ?: return null
+        // Try to match Tolk test output format: "at /path/to/file.tolk:line"
+        val testMatch = testPattern.find(line)
+        if (testMatch != null) {
+            val path = testMatch.groupValues[1]
+            val lineNumber = testMatch.groupValues[2].toInt() - 1
 
-        val path = match.groupValues[1]
-        val lineNumber = match.groupValues[2].toInt() - 1
-        val column = match.groupValues[3].toInt() - 1
+            val attrs = EditorColorsManager.getInstance().globalScheme.getAttributes(CodeInsightColors.HYPERLINK_ATTRIBUTES)
 
-        val projectDir = project.basePath ?: return null
-        val fullPath = File(projectDir, path).absolutePath
+            val pathStart = testMatch.groups[1]!!.range.first
+            val lineEnd = testMatch.groups[2]!!.range.last
 
-        val attrs = EditorColorsManager.getInstance().globalScheme.getAttributes(CodeInsightColors.HYPERLINK_ATTRIBUTES)
+            val offset = entireLength - line.length
+            return Filter.Result(
+                offset + pathStart,
+                offset + lineEnd,
+                TolkFileHyperlinkInfo(path, lineNumber, 0),
+                attrs
+            )
+        }
 
-        val pathStart = match.groups[1]!!.range.first
-        val columnEnd = match.groups[3]!!.range.last
+        // Try to match Tolk compiler error format: "path.tolk:line:column"
+        val compilerMatch = compilerPattern.find(line)
+        if (compilerMatch != null) {
+            val path = compilerMatch.groupValues[1]
+            val lineNumber = compilerMatch.groupValues[2].toInt() - 1
+            val column = compilerMatch.groupValues[3].toInt() - 1
 
-        val offset = entireLength - line.length
-        return Filter.Result(
-            offset + pathStart,
-            offset + columnEnd + 1,
-            TactFileHyperlinkInfo(fullPath, lineNumber, column),
-            attrs
-        )
+            val projectDir = project.basePath ?: return null
+            val fullPath = File(projectDir, path).absolutePath
+
+            val attrs = EditorColorsManager.getInstance().globalScheme.getAttributes(CodeInsightColors.HYPERLINK_ATTRIBUTES)
+
+            val pathStart = compilerMatch.groups[1]!!.range.first
+            val columnEnd = compilerMatch.groups[3]!!.range.last
+
+            val offset = entireLength - line.length
+            return Filter.Result(
+                offset + pathStart,
+                offset + columnEnd + 1,
+                TolkFileHyperlinkInfo(fullPath, lineNumber, column),
+                attrs
+            )
+        }
+
+        return null
     }
 
     companion object {
-        // Matches file paths in tact error messages
-        private val pattern = Regex("""([0-9a-zA-Z_\-\\./]+\.tolk):(\d+):(\d+)""")
+        // Matches file paths in Tolk test output: "at /path/to/file.tolk:line"
+        private val testPattern = Regex("""at\s+(/[^\s:]+):(\d+)""")
+
+        // Matches file paths in Tolk compiler error messages: "path.tolk:line:column"
+        private val compilerPattern = Regex("""([0-9a-zA-Z_\-\\./]+\.tolk):(\d+):(\d+)""")
     }
 }
 
-class TactFileHyperlinkInfo(val path: String, val line: Int, val column: Int) : HyperlinkInfo {
+class TolkFileHyperlinkInfo(val path: String, val line: Int, val column: Int) : HyperlinkInfo {
     override fun navigate(project: Project) {
         val f = LocalFileSystem.getInstance().findFileByPath(FileUtil.toSystemIndependentName(path))
         if (f != null) {

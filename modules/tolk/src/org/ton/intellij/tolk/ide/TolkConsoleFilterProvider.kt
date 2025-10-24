@@ -19,29 +19,30 @@ class TolkConsoleFilterProvider : ConsoleFilterProviderEx {
 
     override fun getDefaultFilters(
         project: Project,
-        scope: GlobalSearchScope
+        scope: GlobalSearchScope,
     ): Array<out Filter?> =
         arrayOf(TolkConsoleFilter(project, scope))
 }
 
 class TolkConsoleFilter(val project: Project, val scope: GlobalSearchScope) : Filter {
     override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
-        // Try to match Tolk test output format: "at /path/to/file.tolk:line"
+        // Try to match Tolk test output format: "at /path/to/file.tolk:line:column"
         val testMatch = testPattern.find(line)
         if (testMatch != null) {
             val path = testMatch.groupValues[1]
             val lineNumber = testMatch.groupValues[2].toInt() - 1
+            val column = testMatch.groupValues[3].toInt() - 1
 
             val attrs = EditorColorsManager.getInstance().globalScheme.getAttributes(CodeInsightColors.HYPERLINK_ATTRIBUTES)
 
             val pathStart = testMatch.groups[1]!!.range.first
-            val lineEnd = testMatch.groups[2]!!.range.last
+            val columnEnd = testMatch.groups[3]!!.range.last
 
             val offset = entireLength - line.length
             return Filter.Result(
                 offset + pathStart,
-                offset + lineEnd + 1,
-                TolkFileHyperlinkInfo(path, lineNumber, 0),
+                offset + columnEnd + 1,
+                TolkFileHyperlinkInfo(path, lineNumber, column),
                 attrs
             )
         }
@@ -74,8 +75,8 @@ class TolkConsoleFilter(val project: Project, val scope: GlobalSearchScope) : Fi
     }
 
     companion object {
-        // Matches file paths in Tolk test output: "at /path/to/file.tolk:line"
-        private val testPattern = Regex("""at\s+(/[^\s:]+):(\d+)""")
+        // Matches file paths in Tolk test output: "at /path/to/file.tolk:line:column"
+        private val testPattern = Regex("""at\s+(/[^\s:]+):(\d+):(\d+)""")
 
         // Matches file paths in Tolk compiler error messages: "path.tolk:line:column"
         private val compilerPattern = Regex("""([0-9a-zA-Z_\-\\./]+\.tolk):(\d+):(\d+)""")

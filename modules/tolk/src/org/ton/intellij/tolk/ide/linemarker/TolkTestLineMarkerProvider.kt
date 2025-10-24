@@ -12,8 +12,9 @@ import org.ton.intellij.tolk.ide.test.configuration.TolkTestLocator
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkNamedElement
-import org.ton.intellij.tolk.psi.impl.isGetMethod
+import org.ton.intellij.tolk.psi.impl.isTestFunction
 
+@Suppress("UnstableApiUsage")
 class TolkTestLineMarkerProvider : RunLineMarkerContributor() {
     private val contextActions = ExecutorAction.getActions(0)
 
@@ -21,11 +22,7 @@ class TolkTestLineMarkerProvider : RunLineMarkerContributor() {
         if (element.elementType != TolkElementTypes.IDENTIFIER) return null
 
         val parent = element.parent
-        if (parent is TolkFunction) {
-            if (!parent.isTestFunction()) {
-                return null
-            }
-
+        if (parent is TolkFunction && parent.isTestFunction()) {
             val magnitude = getTestState(parent)
                 ?.let { TestIconMapper.getMagnitude(it.magnitude) }
 
@@ -43,12 +40,6 @@ class TolkTestLineMarkerProvider : RunLineMarkerContributor() {
         }
 
         return null
-    }
-
-    private fun TolkFunction.isTestFunction(): Boolean {
-        if (!isGetMethod) return false
-        val name = name ?: return false
-        return name.startsWith("test_") || name.startsWith("test-")
     }
 
     companion object {

@@ -6,6 +6,6 @@ enum class TolkTestScope {
     Function;
 
     companion object {
-        fun from(s: String): TolkTestScope = TolkTestScope.values().find { it.name == s } ?: Directory
+        fun from(s: String): TolkTestScope = TolkTestScope.entries.find { it.name == s } ?: Directory
     }
 }

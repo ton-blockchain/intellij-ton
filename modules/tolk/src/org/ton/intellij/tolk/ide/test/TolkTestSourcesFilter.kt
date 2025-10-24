@@ -16,7 +16,6 @@ class TolkTestSourcesFilter : TestSourcesFilter() {
             return false
         }
 
-        // Consider files with "test" in name as test files
-        return file.name.contains("test") || file.name.contains("Test")
+        return file.name.contains("_test")
     }
 }

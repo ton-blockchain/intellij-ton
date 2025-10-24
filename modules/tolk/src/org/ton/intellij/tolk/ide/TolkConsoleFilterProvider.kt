@@ -11,6 +11,7 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.psi.search.GlobalSearchScope
 import java.io.File
+import kotlin.io.path.Path
 
 class TolkConsoleFilterProvider : ConsoleFilterProviderEx {
     override fun getDefaultFilters(project: Project): Array<out Filter?> =
@@ -39,7 +40,7 @@ class TolkConsoleFilter(val project: Project, val scope: GlobalSearchScope) : Fi
             val offset = entireLength - line.length
             return Filter.Result(
                 offset + pathStart,
-                offset + lineEnd,
+                offset + lineEnd + 1,
                 TolkFileHyperlinkInfo(path, lineNumber, 0),
                 attrs
             )
@@ -53,7 +54,7 @@ class TolkConsoleFilter(val project: Project, val scope: GlobalSearchScope) : Fi
             val column = compilerMatch.groupValues[3].toInt() - 1
 
             val projectDir = project.basePath ?: return null
-            val fullPath = File(projectDir, path).absolutePath
+            val fullPath = if (Path(path).isAbsolute) path else File(projectDir, path).absolutePath
 
             val attrs = EditorColorsManager.getInstance().globalScheme.getAttributes(CodeInsightColors.HYPERLINK_ATTRIBUTES)
 

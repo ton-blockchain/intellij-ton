@@ -9,9 +9,12 @@ import com.intellij.openapi.roots.TestSourcesFilter
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiElement
+import com.intellij.psi.search.GlobalSearchScope
+import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkFunction
-import org.ton.intellij.tolk.psi.impl.isGetMethod
+import org.ton.intellij.tolk.psi.impl.isTestFunction
+import org.ton.intellij.util.parentOfType
 
 class TolkTestConfigurationProducer : LazyRunConfigurationProducer<TolkTestConfiguration>() {
     override fun getConfigurationFactory(): ConfigurationFactory =
@@ -37,7 +40,7 @@ class TolkTestConfigurationProducer : LazyRunConfigurationProducer<TolkTestConfi
             return false
         }
 
-        val parent = element.parent ?: element.containingFile
+        val parent = element.parentOfType<TolkFunction>()
 
         if (parent is TolkFunction && parent.isTestFunction()) {
             val functionName = parent.name
@@ -59,6 +62,18 @@ class TolkTestConfigurationProducer : LazyRunConfigurationProducer<TolkTestConfi
         val element = getSourceElement(sourceElement.get()) ?: return false
 
         if (element is PsiDirectory) {
+            val tolkFiles = element.getFiles(GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(element.project), TolkFileType))
+            if (tolkFiles.isEmpty()) {
+                // No Tolk files in the directory, so no need to create a configuration
+                return false
+            }
+
+            val testFiles = tolkFiles.count { it is TolkFile && it.isTestFile() }
+            if (testFiles == 0) {
+                // No test files in the directory
+                return false
+            }
+
             configuration.scope = TolkTestScope.Directory
             configuration.name = "Tolk Test ${element.name}"
             configuration.directory = element.virtualFile.path
@@ -67,9 +82,9 @@ class TolkTestConfigurationProducer : LazyRunConfigurationProducer<TolkTestConfi
             return true
         }
 
-        val parent = element.parent ?: return false
+        val parent = element.parentOfType<TolkFunction>()
 
-        if (parent is TolkFunction) {
+        if (parent is TolkFunction && parent.isTestFunction()) {
             val functionName = parent.name ?: return false
             configuration.scope = TolkTestScope.Function
             configuration.name = "Tolk Test $functionName"
@@ -78,6 +93,10 @@ class TolkTestConfigurationProducer : LazyRunConfigurationProducer<TolkTestConfi
             configuration.pattern = functionName
 
             return true
+        }
+
+        if (element.containingFile !is TolkFile) {
+            return false
         }
 
         val file = element.containingFile.virtualFile.name
@@ -98,10 +117,4 @@ class TolkTestConfigurationProducer : LazyRunConfigurationProducer<TolkTestConfi
 
     override fun shouldReplace(self: ConfigurationFromContext, other: ConfigurationFromContext) =
         other.configuration !is TolkTestConfiguration
-}
-
-private fun TolkFunction.isTestFunction(): Boolean {
-    if (!isGetMethod) return false
-    val name = name ?: return false
-    return name.startsWith("test_") || name.startsWith("test-")
 }

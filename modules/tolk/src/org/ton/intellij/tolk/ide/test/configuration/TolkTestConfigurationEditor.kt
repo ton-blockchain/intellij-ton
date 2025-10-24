@@ -18,8 +18,8 @@ class TolkTestConfigurationEditor : SettingsEditor<TolkTestConfiguration>() {
     }
 
     override fun createEditor(): JComponent = panel {
-        row("Additional parameters:") {
-            cell(additionalParametersField)
-        }
+//        row("Additional parameters:") {
+//            cell(additionalParametersField)
+//        }
     }
 }

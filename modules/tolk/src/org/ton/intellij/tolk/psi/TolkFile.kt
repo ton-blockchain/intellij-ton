@@ -26,6 +26,8 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
 
     override fun getStub(): TolkFileStub? = super.getStub() as? TolkFileStub
 
+    fun isTestFile() = name.endsWith("_test.tolk")
+
     private val cachedDeclarations = CachedValuesManager.getManager(manager.project).createCachedValue({
         val declarations = findDeclarations(skipTypes = false)
         if (!isPhysical) {

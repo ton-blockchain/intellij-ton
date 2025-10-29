@@ -213,6 +213,11 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
         }
 
         private fun canBeFileImported(file: TolkFile): Boolean {
+            if (file.name == "common.tolk") {
+                // This can be a some stdlib file, check if it contains map<K, V>
+                return file.structs.find { it.name == "map" } != null
+            }
+
             val path = file.virtualFile.path
             val normalizedPath = path.replace(File.separatorChar, '/')
             return !normalizedPath.contains("test/") &&

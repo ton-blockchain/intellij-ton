@@ -220,7 +220,11 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                     "getDeclaredPackPrefix",
                     "getDeclaredPackPrefixLen",
                     "forceLoadLazyObject",
-                    "stackMoveToTop"
+                    "stackMoveToTop",
+                    "typeName",
+                    "typeNameOfObject",
+                    "fromTuple",
+                    "toTuple",
                          -> true
 
                     else -> false

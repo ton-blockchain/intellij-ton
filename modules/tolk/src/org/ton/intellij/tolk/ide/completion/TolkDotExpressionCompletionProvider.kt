@@ -156,6 +156,10 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                 "getDeclaredPackPrefixLen",
                 "forceLoadLazyObject",
                 "stackMoveToTop",
+                "typeName",
+                "typeNameOfObject",
+                "fromTuple",
+                "toTuple",
                      -> true
 
                 else -> false

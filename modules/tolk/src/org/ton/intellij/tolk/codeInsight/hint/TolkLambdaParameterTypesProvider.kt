@@ -16,7 +16,7 @@ class TolkLambdaParameterTypesProvider : AbstractTolkInlayHintProvider() {
         if (element !is TolkLambdaFunExpression) return
 
         for (parameter in element.parameterList.parameterList) {
-            if (parameter.typeExpression != null) continue // already has explicit ype
+            if (parameter.typeExpression != null) continue // already has explicit type
             val parameterType = parameter.type ?: continue // no data information
             if (parameterType is TolkTyUnknown) continue   // the unknown type doesn't add any information
 

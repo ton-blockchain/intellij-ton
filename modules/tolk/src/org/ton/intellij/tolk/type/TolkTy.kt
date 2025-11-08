@@ -132,6 +132,7 @@ interface TolkTy : TypeFoldable<TolkTy> {
         val VarUInt16 = TolkTyVarUInt16
         val VarUInt32 = TolkTyVarUInt32
         val Address = TolkTyAddress
+        val AnyAddress = TolkTyAnyAddress
 
         // add to TolkTypeCompletionProvider also
         fun byName(text: String) = TolkPrimitiveTy.fromName(text)
@@ -247,6 +248,7 @@ interface TolkPrimitiveTy : TolkTy {
                 "varint32" -> TolkTy.VarInt32
                 "varuint32" -> TolkTy.VarUInt32
                 "address" -> TolkTy.Address
+                "any_address" -> TolkTy.AnyAddress
                 "unknown" -> TolkTy.Unknown
                 else -> null
             }
@@ -333,6 +335,12 @@ object TolkTyAddress : TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
 
     override fun toString(): String = "address"
+}
+
+object TolkTyAnyAddress : TolkPrimitiveTy {
+    override fun isSuperType(other: TolkTy): Boolean = other == this
+
+    override fun toString(): String = "any_address"
 }
 
 interface TolkIntTyFamily : TolkPrimitiveTy {

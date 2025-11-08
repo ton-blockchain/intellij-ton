@@ -23,7 +23,7 @@ class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<Str
                 append(parameter.name)
                 if (parameter is TolkParameter) {
                     append(": ")
-                    append((parameter.typeExpression.type ?: TolkTy.Unknown).render())
+                    append((parameter.typeExpression?.type ?: TolkTy.Unknown).render())
                     val parameterDefault = parameter.parameterDefault
                     val defExpr = parameterDefault?.expression?.unwrapParentheses()
                     if (defExpr != null) {

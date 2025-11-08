@@ -62,22 +62,15 @@ class TolkTestConfigurationProducer : LazyRunConfigurationProducer<TolkTestConfi
         val element = getSourceElement(sourceElement.get()) ?: return false
 
         if (element is PsiDirectory) {
-            val tolkFiles = element.getFiles(GlobalSearchScope.getScopeRestrictedByFileTypes(GlobalSearchScope.allScope(element.project), TolkFileType))
-            if (tolkFiles.isEmpty()) {
-                // No Tolk files in the directory, so no need to create a configuration
-                return false
-            }
-
-            val testFiles = tolkFiles.count { it is TolkFile && it.isTestFile() }
-            if (testFiles == 0) {
-                // No test files in the directory
+            val testFiles = findTestFilesRecursively(element, element.project)
+            if (testFiles.isEmpty()) {
                 return false
             }
 
             configuration.scope = TolkTestScope.Directory
             configuration.name = "Tolk Test ${element.name}"
             configuration.directory = element.virtualFile.path
-            configuration.filename = element.virtualFile.children.find { TestSourcesFilter.isTestSources(it, element.project) }?.path ?: ""
+            configuration.filename = testFiles.firstOrNull()?.virtualFile?.path ?: ""
 
             return true
         }
@@ -106,6 +99,29 @@ class TolkTestConfigurationProducer : LazyRunConfigurationProducer<TolkTestConfi
         configuration.filename = element.containingFile.virtualFile.path
 
         return true
+    }
+
+    private fun findTestFilesRecursively(
+        directory: PsiDirectory,
+        project: com.intellij.openapi.project.Project,
+        currentDepth: Int = 0,
+        maxDepth: Int = 10,
+    ): List<TolkFile> {
+        if (currentDepth > maxDepth) return emptyList()
+
+        val result = mutableListOf<TolkFile>()
+
+        val allScope = GlobalSearchScope.allScope(project)
+        val tolkFiles = directory.getFiles(GlobalSearchScope.getScopeRestrictedByFileTypes(allScope, TolkFileType))
+        result.addAll(tolkFiles.filterIsInstance<TolkFile>().filter { it.isTestFile() })
+
+        if (currentDepth < maxDepth) {
+            directory.subdirectories.forEach { subDir ->
+                result.addAll(findTestFilesRecursively(subDir, project, currentDepth + 1, maxDepth))
+            }
+        }
+
+        return result
     }
 
     private fun getSourceElement(sourceElement: PsiElement?): PsiElement? {

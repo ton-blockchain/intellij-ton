@@ -27,7 +27,7 @@ object TolkTestLocator : SMTestLocator {
         val file = VirtualFileManager.getInstance().findFileByNioPath(Path.of(filepath)) ?: return mutableListOf()
         val psiFile = PsiManager.getInstance(project).findFile(file) as? TolkFile ?: return mutableListOf()
 
-        val function = psiFile.functions.find { it.name == functionName } ?: return mutableListOf()
+        val function = psiFile.functions.find { normalizeTestName(it.name ?: "") == functionName } ?: return mutableListOf()
 
         return mutableListOf(PsiLocation(function))
     }
@@ -35,8 +35,11 @@ object TolkTestLocator : SMTestLocator {
     fun getTestUrl(element: TolkNamedElement): String {
         val containingFile = element.containingFile
         val name = element.name ?: return ""
-        return "$PROTOCOL_ID://${containingFile.virtualFile.path}:$name"
+        val normalized = normalizeTestName(name)
+        return "$PROTOCOL_ID://${containingFile.virtualFile.path}:$normalized"
     }
+
+    private fun normalizeTestName(name: String): String = name.replace('-', ' ').replace('_', ' ').removePrefix("test ")
 
     private const val PROTOCOL_ID = "tolk_qn"
 }

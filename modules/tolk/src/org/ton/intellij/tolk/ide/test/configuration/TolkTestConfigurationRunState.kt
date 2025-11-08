@@ -1,5 +1,6 @@
 package org.ton.intellij.tolk.ide.test.configuration
 
+import com.intellij.coverage.CoverageExecutor
 import com.intellij.execution.DefaultExecutionResult
 import com.intellij.execution.ExecutionResult
 import com.intellij.execution.Executor
@@ -16,7 +17,6 @@ import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.util.execution.ParametersListUtil
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
-import java.io.File
 
 class TolkTestConfigurationRunState(
     env: ExecutionEnvironment,
@@ -40,6 +40,12 @@ class TolkTestConfigurationRunState(
             .withWorkDirectory(workingDir)
             .withParameters("test")
             .withParameters("--teamcity")
+
+        if (exec is CoverageExecutor) {
+            commandLine.withParameters("--coverage")
+            commandLine.withParameters("--format")
+            commandLine.withParameters("lcov")
+        }
 
         when (conf.scope) {
             TolkTestScope.Directory -> {

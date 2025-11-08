@@ -1,4 +1,11 @@
 <idea-plugin package="org.ton.intellij.tolk" xmlns:xi="http://www.w3.org/2001/XInclude">
+    <!--suppress PluginXmlValidity -->
+    <dependencies>
+        <plugin id="com.intellij.modules.coverage"/>
+        <plugin id="com.intellij.modules.platform"/>
+        <plugin id="com.intellij.modules.lang"/>
+    </dependencies>
+
     <xi:include href="/META-INF/inspections.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -209,6 +216,10 @@
             <language>Tolk</language>
             <className>org.ton.intellij.tolk.ide.intentions.TolkConvertNumberLiteralIntention</className>
         </intentionAction>
+        <intentionAction>
+            <language>Tolk</language>
+            <className>org.ton.intellij.tolk.ide.intentions.TolkAddPackPrefixIntention</className>
+        </intentionAction>
         <!-- endregion Intentions -->
 
         <consoleFilterProvider implementation="org.ton.intellij.tolk.ide.TolkConsoleFilterProvider"/>
@@ -226,6 +237,12 @@
         <configurationType implementation="org.ton.intellij.tolk.ide.test.configuration.TolkTestConfigurationType"/>
         <runConfigurationProducer implementation="org.ton.intellij.tolk.ide.test.configuration.TolkTestConfigurationProducer"/>
         <testSourcesFilter implementation="org.ton.intellij.tolk.ide.test.TolkTestSourcesFilter"/>
+
+        <!-- Coverage -->
+        <programRunner implementation="org.ton.intellij.tolk.coverage.TolkCoverageProgramRunner"/>
+        <coverageEngine implementation="org.ton.intellij.tolk.coverage.TolkCoverageEngine"/>
+        <coverageRunner implementation="org.ton.intellij.tolk.coverage.TolkCoverageRunner"/>
+        <projectService serviceImplementation="org.ton.intellij.tolk.coverage.TolkCoverageAnnotator"/>
     </extensions>
 
     <extensions defaultExtensionNs="org.ton">

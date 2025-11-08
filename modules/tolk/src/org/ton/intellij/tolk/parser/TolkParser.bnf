@@ -552,6 +552,7 @@ Expression ::=
     | AtomicExpression
     | MatchExpression
     | DotExpression // expr80
+    | LambdaFunExpression
 {
     implements=[
         "org.ton.intellij.tolk.psi.TolkTypedElement"
@@ -855,6 +856,8 @@ TypeArgumentList_pinned ::= '<' <<list_with_recover TypeExpression>> '>' {
     elementType=TypeArgumentList
 }
 
+LambdaFunExpression ::= 'fun' ParameterList ReturnType? FunctionBody
+
 //private TypeArgumentElements ::= <<comma_separated_list TypeArgument>> {
 ////    recoverWhile=TypeArgumentList_recovery
 //}
@@ -871,7 +874,7 @@ ParameterList ::= '(' !',' SelfParameter_with_comma? Parameter_with_recover* ')'
     elementTypeFactory = "org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
 
-Parameter ::= 'mutate'? IDENTIFIER ':' TypeExpression ParameterDefault? {
+Parameter ::= 'mutate'? IDENTIFIER (':' TypeExpression)? ParameterDefault? {
     mixin="org.ton.intellij.tolk.psi.impl.TolkParameterMixin"
     implements=[
         "org.ton.intellij.tolk.psi.TolkParameterElement"

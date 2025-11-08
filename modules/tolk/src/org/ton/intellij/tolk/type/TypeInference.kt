@@ -50,23 +50,23 @@ data class TolkInferenceResult(
     private val structExpressionTypes: Map<TolkStructExpressionField, TolkTy>,
     private val varTypes: Map<TolkVarDefinition, TolkTy>,
     private val constTypes: Map<TolkConstVar, TolkTy>,
+    private val paramsTypes: Map<TolkParameter, TolkTy>,
     private val resolvedFunctions: Map<TolkCallExpression, TolkFunction>,
     override val returnStatements: List<TolkReturnStatement>,
     val unreachable: TolkUnreachableKind? = null
 ) : TolkInferenceData {
-    val timestamp = System.nanoTime()
 
     override fun getResolvedRefs(element: TolkElement): Collection<PsiElementResolveResult> {
         return resolvedRefs[element] ?: EMPTY_RESOLVED_SET
     }
 
     override fun getType(element: TolkTypedElement?): TolkTy? {
-        if (element is TolkVarDefinition) {
-            return varTypes[element]
-        } else if (element is TolkConstVar) {
-            return constTypes[element]
+        return when (element) {
+            is TolkVarDefinition -> varTypes[element]
+            is TolkConstVar      -> constTypes[element]
+            is TolkParameter     -> paramsTypes[element]
+            else                 -> expressionTypes[element ?: return null]
         }
-        return expressionTypes[element ?: return null]
     }
 
     fun getType(element: TolkStructExpressionField?): TolkTy? {
@@ -87,6 +87,7 @@ class TolkInferenceContext(
     private val resolvedRefs = HashMap<TolkElement, Collection<PsiElementResolveResult>>()
     private val diagnostics = LinkedList<TolkDiagnostic>()
     private val varTypes = HashMap<TolkVarDefinition, TolkTy>()
+    private val paramsTypes = HashMap<TolkParameter, TolkTy>() // lambdas parameters
     private val constTypes = HashMap<TolkConstVar, TolkTy>()
     private val resolvedFields: MutableMap<TolkFieldLookup, List<TolkElement>> = hashMapOf()
     private val resolvedFunctions: MutableMap<TolkCallExpression, TolkFunction> = hashMapOf()
@@ -108,17 +109,24 @@ class TolkInferenceContext(
     }
 
     override fun getType(element: TolkTypedElement?): TolkTy? {
-        if (element is TolkVarDefinition) {
-            return varTypes[element]
-        } else if (element is TolkConstVar) {
-            return constTypes[element]
+        return when (element) {
+            is TolkVarDefinition -> varTypes[element]
+            is TolkConstVar      -> constTypes[element]
+            is TolkParameter     -> paramsTypes[element]
+            else                 -> expressionTypes[element]
         }
-        return expressionTypes[element]
     }
 
     fun <T : TolkTy> setType(element: TolkVarDefinition, type: T?): T? {
         if (type != null) {
             varTypes[element] = type
+        }
+        return type
+    }
+
+    fun <T : TolkTy> setType(element: TolkParameter, type: T?): T? {
+        if (type != null) {
+            paramsTypes[element] = type
         }
         return type
     }
@@ -194,6 +202,7 @@ class TolkInferenceContext(
             structExpressionTypes,
             varTypes,
             constTypes,
+            paramsTypes,
             resolvedFunctions,
             returnStatements,
             unreachable
@@ -324,6 +333,13 @@ class AssignLocalSymbolsVisitor : TolkVisitor() {
             o.functionBody?.blockStatement?.accept(this@AssignLocalSymbolsVisitor)
         }
     }
+
+    override fun visitLambdaFunExpression(o: TolkLambdaFunExpression) {
+        currentScope.useScope {
+            o.parameterList.accept(this@AssignLocalSymbolsVisitor)
+            o.functionBody.blockStatement?.accept(this@AssignLocalSymbolsVisitor)
+        }
+    }
 }
 
 class TolkExpressionInferenceResult(
@@ -413,7 +429,7 @@ class TolkInferenceWalker(
         flow: TolkFlowContext
     ): TolkFlowContext {
         val expression = element.expression ?: return flow
-        val typeHint = element.parentOfType<TolkParameter>()!!.typeExpression.type
+        val typeHint = element.parentOfType<TolkParameter>()?.typeExpression?.type
         inferExpression(expression, flow, false, typeHint).outFlow
         return flow
     }
@@ -791,9 +807,93 @@ class TolkInferenceWalker(
             is TolkMatchExpression -> inferMatchExpression(element, flow, usedAsCondition, hint)
             is TolkUnitExpression -> inferUnitExpression(element, flow, usedAsCondition)
             is TolkStructExpression -> inferStructExpression(element, flow, hint ?: TolkTy.Unknown)
+            is TolkLambdaFunExpression -> inferLambdaFunExpression(element, flow, hint)
 //            else -> error("Can't infer type of ${element.type} ${element::class}")
             else -> TolkExpressionFlowContext(flow, usedAsCondition)
         }
+    }
+
+    fun inferLambdaFunExpression(
+        lambda: TolkLambdaFunExpression,
+        flow: TolkFlowContext,
+        hint: TolkTy?,
+    ): TolkExpressionFlowContext {
+        val callableTy = if (hint != null) hint.unwrapTypeAlias() as? TolkTyFunction else null
+
+        // Since lambda parameters can omit types, we need to infer it from the hint type
+        // > fun call(f: (int) -> slice) { ... }
+        // > call(fun(i) { ... })
+        // then type of i is int
+        val paramTypes = mutableListOf<TolkTy>()
+        for ((index, parameter) in lambda.parameterList.parameterList.withIndex()) {
+            if (parameter.typeExpression != null) {
+                paramTypes.add(parameter.type!!)
+            } else if (callableTy != null && index < callableTy.parametersType.size && !callableTy.parametersType[index].hasGenerics()) {
+                paramTypes.add(callableTy.parametersType[index])
+            }
+        }
+
+        // Same for return type
+        // > fun call(f: (int) -> slice) { ... }
+        // > call(fun(i) { ... })
+        // return type is slice
+        var explicitReturnType: TolkTy? = null
+        if (lambda.returnType != null) {
+            explicitReturnType = lambda.returnType?.typeExpression?.type
+        } else if (callableTy != null && !callableTy.returnType.hasGenerics()) {
+            explicitReturnType = callableTy.returnType
+        }
+
+        for ((index, parameter) in lambda.parameterList.parameterList.withIndex()) {
+            val parameterType = paramTypes.getOrNull(index) ?: TolkTy.Unknown
+            ctx.setType(parameter, parameterType)
+
+            val name = parameter.nameIdentifier as? TolkExpression
+            if (name != null) {
+                ctx.setType(name, parameterType)
+            }
+        }
+
+        var nextFlow = flow
+
+        for ((index, parameter) in lambda.parameterList.parameterList.withIndex()) {
+            val parameterType = paramTypes.getOrNull(index) ?: TolkTy.Unknown
+            nextFlow.setSymbol(parameter, parameterType)
+        }
+
+        // Save an old state to restore it after lambda is processed
+        val oldReturnStatements = ctx.returnStatements
+        val oldUnreachable = flow.unreachable
+        ctx.returnStatements.clear()
+
+        lambda.functionBody.blockStatement?.let {
+            nextFlow = processBlockStatement(it, nextFlow)
+        }
+
+        // Here we infer the return type in the same way as for standalone functions
+        val returnTy = explicitReturnType ?: if (ctx.returnStatements.isNotEmpty()) {
+            ctx.returnStatements.asSequence().map {
+                ctx.getType(it.expression)
+            }.filterNotNull().fold<TolkTy, TolkTy?>(null) { a, b ->
+                a?.join(b) ?: b
+            } ?: TolkTy.Void
+        } else if (nextFlow.unreachable != null) {
+            TolkTy.Never
+        } else {
+            TolkTy.Void
+        }
+
+        // And after body inference restore the old state
+        ctx.returnStatements.clear()
+        for (statement in oldReturnStatements) {
+            ctx.returnStatements.push(statement)
+        }
+        nextFlow.unreachable = oldUnreachable
+
+        val finalType = TolkTyFunction(paramTypes, returnTy)
+        ctx.setType(lambda, finalType)
+
+        return TolkExpressionFlowContext(nextFlow, true)
     }
 
     private fun inferLiteralExpression(

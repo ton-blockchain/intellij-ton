@@ -120,6 +120,14 @@
                                               bundle="messages.TolkBundle"
                                               nameKey="codeInsight.hint.parameters"
                                               descriptionKey="codeInsight.hint.description.parameters"/>
+        <codeInsight.declarativeInlayProvider group="PARAMETERS_GROUP"
+                                              implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkLambdaParameterTypesProvider"
+                                              isEnabledByDefault="true"
+                                              language="Tolk"
+                                              providerId="tolk.lambda.parameters.hints"
+                                              bundle="messages.TolkBundle"
+                                              nameKey="codeInsight.hint.lambda.parameters"
+                                              descriptionKey="codeInsight.hint.description.lambda.parameters"/>
         <codeInsight.parameterInfo language="Tolk"
                                    implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkParameterInfoHandler"/>
         <!-- Code vision -->

@@ -31,6 +31,7 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         TolkTy.Never,
         TolkTy.Coins,
         TolkTy.Address,
+        TolkTy.AnyAddress,
         TolkTy.Int,
         TolkIntNTy.fromName("uint8")!!,
         TolkIntNTy.fromName("uint16")!!,

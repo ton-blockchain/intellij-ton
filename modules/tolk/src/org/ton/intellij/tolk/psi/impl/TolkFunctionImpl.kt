@@ -57,7 +57,7 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
                 parametersType = ArrayList(parameters.size)
             }
             parameters.forEach {
-                val type = it.typeExpression.type ?: TolkTy.Unknown
+                val type = it.typeExpression?.type ?: TolkTy.Unknown
                 parametersType.add(type)
             }
 

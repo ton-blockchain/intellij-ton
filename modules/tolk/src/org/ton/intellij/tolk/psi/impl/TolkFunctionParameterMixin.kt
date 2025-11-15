@@ -6,6 +6,7 @@ import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.psi.TolkParameter
 import org.ton.intellij.tolk.stub.TolkParameterStub
 import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.inference
 import javax.swing.Icon
 
 abstract class TolkParameterMixin : TolkNamedElementImpl<TolkParameterStub>, TolkParameter {
@@ -17,7 +18,12 @@ abstract class TolkParameterMixin : TolkNamedElementImpl<TolkParameterStub>, Tol
 
     override val type: TolkTy?
         get() {
-            val t = typeExpression.type
+            if (typeExpression == null) {
+                // for lambdas use the inferred type
+                return inference?.getType(this)
+            }
+
+            val t = typeExpression?.type
             return t
         }
 

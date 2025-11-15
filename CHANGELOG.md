@@ -1,5 +1,11 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [3.1.0]
+
+- feat(tolk): support lambdas from Tolk 1.2 by @i582 in https://github.com/ton-blockchain/intellij-ton/pull/586
+- feat(tolk/completion): gray out new low-level functions from Tolk 1.2 in completion by @i582 in https://github.com/ton-blockchain/intellij-ton/pull/587
+- feat(tolk): support `any_address` type from Tolk 1.2 by @i582 in https://github.com/ton-blockchain/intellij-ton/pull/588
+
 ## [3.0.0]
 
 v3.0.0 is the biggest update of the plugin ever.

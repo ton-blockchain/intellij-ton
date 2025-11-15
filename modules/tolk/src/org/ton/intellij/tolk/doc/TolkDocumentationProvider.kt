@@ -133,6 +133,7 @@ fun TolkTy.generateDoc(): String = buildString {
         TolkTy.Null           -> colorize("null", asKeyword)
         TolkTy.Coins          -> colorize("coins", asPrimitive)
         TolkTy.Address        -> colorize("address", asPrimitive)
+        TolkTy.AnyAddress     -> colorize("any_address", asPrimitive)
         TolkTy.VarInt16       -> colorize("varint16", asPrimitive)
         TolkTy.VarUInt16      -> colorize("varuint16", asPrimitive)
         TolkTy.VarInt32       -> colorize("varint32", asPrimitive)

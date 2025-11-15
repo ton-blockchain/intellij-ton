@@ -1,5 +1,9 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [3.1.1]
+
+Fixed small issues in Tolk 1.2 support.
+
 ## [3.1.0]
 
 - feat(tolk): support lambdas from Tolk 1.2 by @i582 in https://github.com/ton-blockchain/intellij-ton/pull/586

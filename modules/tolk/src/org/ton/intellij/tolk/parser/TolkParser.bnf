@@ -451,8 +451,8 @@ private BlockElement_with_recovery ::= Statement {
     recoverWhile=BlockElement_recovery
 }
 private BlockElement_recovery ::= !(StatementFirst | ExpressionFirst | '}')
-private StatementFirst ::= 'return'|'{'|'repeat'|'if'|'do'|'while'|'assert'|'throw'|'try'|'var'|'val'|'match'|';'
-private ExpressionFirst ::= IDENTIFIER | INTEGER_LITERAL | '-' | '+' | '!' | '(' | '[' | 'match' | 'self'
+private StatementFirst ::= 'return'|'{'|'repeat'|'if'|'do'|'while'|'assert'|'throw'|'try'|'var'|'val'|'match'|'fun'|';'
+private ExpressionFirst ::= IDENTIFIER | INTEGER_LITERAL | '-' | '+' | '!' | '(' | '[' | 'match' | 'self' | 'fun'
 
 RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}
 

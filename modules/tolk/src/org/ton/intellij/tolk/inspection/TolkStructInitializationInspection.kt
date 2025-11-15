@@ -8,6 +8,7 @@ import org.ton.intellij.tolk.psi.impl.hasPrivateFields
 import org.ton.intellij.tolk.type.TolkTyNever
 import org.ton.intellij.tolk.type.TolkTyParam
 import org.ton.intellij.tolk.type.TolkTyStruct
+import org.ton.intellij.tolk.type.TolkTyVoid
 
 class TolkStructInitializationInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(
@@ -58,12 +59,15 @@ class TolkStructInitializationInspection : TolkInspectionBase() {
             return true
         }
         val fieldType = field.type
-        if (fieldType is TolkTyNever) {
+        if (fieldType is TolkTyNever || fieldType is TolkTyVoid) {
             return true
         }
         if (fieldType is TolkTyParam) {
             val defaultType = (fieldType.parameter as? TolkTyParam.NamedTypeParameter)?.psi?.defaultTypeParameter?.typeExpression?.type
             if (defaultType is TolkTyNever) {
+                return true
+            }
+            if (defaultType is TolkTyVoid) {
                 return true
             }
         }

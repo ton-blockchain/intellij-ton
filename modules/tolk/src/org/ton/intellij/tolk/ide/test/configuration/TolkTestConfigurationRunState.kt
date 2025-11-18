@@ -39,7 +39,7 @@ class TolkTestConfigurationRunState(
             .withExePath(testToolPath)
             .withWorkDirectory(workingDir)
             .withParameters("test")
-            .withParameters("--teamcity")
+            .withParameters("--reporter", "console,teamcity")
 
         if (exec is CoverageExecutor) {
             commandLine.withParameters("--coverage")

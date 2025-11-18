@@ -20,6 +20,7 @@ dependencies {
 
     compileOnly("com.jetbrains.intellij.platform:coverage-agent:243.26574.91")
     implementation(project(":asm"))
+    implementation(project(":tasm"))
     implementation(project(":util"))
     testImplementation(project(":util"))
 }

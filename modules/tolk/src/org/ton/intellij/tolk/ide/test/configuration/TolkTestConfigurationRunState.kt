@@ -43,7 +43,7 @@ class TolkTestConfigurationRunState(
 
         if (exec is CoverageExecutor) {
             commandLine.withParameters("--coverage")
-            commandLine.withParameters("--format")
+            commandLine.withParameters("--coverage-format")
             commandLine.withParameters("lcov")
         }
 

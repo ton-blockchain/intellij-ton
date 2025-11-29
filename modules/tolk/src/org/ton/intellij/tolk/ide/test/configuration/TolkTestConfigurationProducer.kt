@@ -32,7 +32,7 @@ class TolkTestConfigurationProducer : LazyRunConfigurationProducer<TolkTestConfi
         }
 
         val containingFile = element.containingFile ?: return false
-        if (containingFile !is TolkFile) {
+        if (containingFile !is TolkFile || !containingFile.isTestFile()) {
             return false
         }
 
@@ -88,7 +88,8 @@ class TolkTestConfigurationProducer : LazyRunConfigurationProducer<TolkTestConfi
             return true
         }
 
-        if (element.containingFile !is TolkFile) {
+        val containingFile = element.containingFile
+        if (containingFile !is TolkFile || !containingFile.isTestFile()) {
             return false
         }
 

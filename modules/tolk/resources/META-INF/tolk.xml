@@ -160,6 +160,8 @@
                                         implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkRecursiveCallLineMarkerProvider"/>
         <runLineMarkerContributor id="TolkTestRunLineMarkerProvider" language="Tolk"
                                 implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkTestLineMarkerProvider"/>
+        <runLineMarkerContributor id="TolkScriptRunLineMarkerProvider" language="Tolk"
+                                implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkRunScriptLineMarkerProvider"/>
         <codeInsight.typeInfo language="Tolk"
                               implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkTypeProvider"/>
         <!-- endregion Code Insight -->
@@ -245,6 +247,10 @@
         <configurationType implementation="org.ton.intellij.tolk.ide.test.configuration.TolkTestConfigurationType"/>
         <runConfigurationProducer implementation="org.ton.intellij.tolk.ide.test.configuration.TolkTestConfigurationProducer"/>
         <testSourcesFilter implementation="org.ton.intellij.tolk.ide.test.TolkTestSourcesFilter"/>
+
+        <!-- Script -->
+        <configurationType implementation="org.ton.intellij.tolk.ide.run.configuration.TolkRunScriptConfigurationType"/>
+        <runConfigurationProducer implementation="org.ton.intellij.tolk.ide.run.configuration.TolkRunScriptConfigurationProducer"/>
 
         <!-- Coverage -->
         <programRunner implementation="org.ton.intellij.tolk.coverage.TolkCoverageProgramRunner"/>

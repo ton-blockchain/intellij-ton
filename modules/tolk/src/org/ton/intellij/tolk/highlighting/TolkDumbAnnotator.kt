@@ -22,7 +22,11 @@ class TolkDumbAnnotator : Annotator, DumbAware {
             TolkElementTypes.IDENTIFIER -> {
                 val parent = element.parent
                 if (parent is TolkReferenceElement) return
-                identifierColor(parent) ?: return
+                if (element.text == "contract" && parent is TolkContractDefinition) {
+                    TolkColor.KEYWORD.textAttributesKey
+                } else {
+                    identifierColor(parent) ?: return
+                }
             }
             TolkElementTypes.GET_KEYWORD,
             TolkElementTypes.LAZY_KEYWORD -> TolkColor.KEYWORD.textAttributesKey
@@ -84,6 +88,7 @@ class TolkDumbAnnotator : Annotator, DumbAware {
                 is TolkEnum -> TolkColor.ENUM.textAttributesKey
                 is TolkTypeDef -> TolkColor.TYPE_ALIAS.textAttributesKey
                 is TolkStructField -> TolkColor.FIELD.textAttributesKey
+                is TolkContractFieldName -> TolkColor.FIELD.textAttributesKey
                 is TolkEnumMember -> TolkColor.ENUM_MEMBER.textAttributesKey
                 is TolkStructExpressionField -> TolkColor.FIELD.textAttributesKey
                 is TolkVar -> if (element.isMutable) {

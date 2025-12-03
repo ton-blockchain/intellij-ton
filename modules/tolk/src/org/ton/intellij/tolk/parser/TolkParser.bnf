@@ -149,9 +149,9 @@ private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelElement {
     recoverWhile = TopLevelDefinition_recover
 }
 private TopLevelDefinition_recover ::= !(TopLevelDefinition_first)
-private TopLevelDefinition_first ::= 'tolk' | 'fun' | 'import' | 'global' | 'const' | ';' | '@' | 'enum' | 'struct' | 'type' | "get"
+private TopLevelDefinition_first ::= 'tolk' | 'fun' | 'import' | 'global' | 'const' | ';' | '@' | 'enum' | 'struct' | 'type' | "get" | "contract"
 
-Item ::= Annotations (ConstVar | GlobalVar | TypeDef | Struct | Enum | Function) {
+Item ::= Annotations (ContractDefinition | ConstVar | GlobalVar | TypeDef | Struct | Enum | Function) {
     name = "item"
     elementType = ToBeUpped
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
@@ -225,6 +225,19 @@ VersionValue ::= (('='|'>'|'>='|'<'|'<='|'^')? INTEGER_LITERAL) VersionValueElem
 private VersionValueElement ::= '.' INTEGER_LITERAL {
     pin=1
 }
+
+ContractDefinition ::= "contract" IDENTIFIER ContractBody {
+    pin=1
+    implements=[
+        "org.ton.intellij.tolk.psi.TolkTopLevelElement"
+    ]
+}
+
+ContractBody ::= '{' ContractField* '}'
+
+ContractField ::= ContractFieldName ':' Expression ','?
+
+ContractFieldName ::= IDENTIFIER
 
 upper TypeDef ::= 'type' IDENTIFIER TypeParameterList? '=' !'auto' (TypeExpression | 'builtin') ';'? {
     pin = 1

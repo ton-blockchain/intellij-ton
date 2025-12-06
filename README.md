@@ -35,7 +35,7 @@ The plugin supports the following languages:
 
 - Manually:
 
-  Download the [latest release](https://github.com/andreypfau/intellij-ton/releases/latest) and install it manually using
+  Download the [latest release](https://github.com/ton-blockchain/intellij-ton/releases/latest) and install it manually using
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
 ## Community

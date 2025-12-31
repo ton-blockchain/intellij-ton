@@ -3,6 +3,7 @@ package org.ton.intellij.func.ide.formatter
 import com.intellij.application.options.CodeStyleAbstractConfigurable
 import com.intellij.application.options.CodeStyleAbstractPanel
 import com.intellij.application.options.TabbedLanguageCodeStylePanel
+import com.intellij.lang.Language
 import com.intellij.psi.codeStyle.CodeStyleConfigurable
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.codeStyle.CodeStyleSettingsProvider
@@ -12,6 +13,8 @@ class FuncCodeStyleSettingsProvider : CodeStyleSettingsProvider() {
     override fun createCustomSettings(settings: CodeStyleSettings) = FuncCodeStyleSettings(settings)
 
     override fun getConfigurableDisplayName() = "FunC"
+
+    override fun getLanguage() = FuncLanguage
 
     override fun createConfigurable(
         settings: CodeStyleSettings,

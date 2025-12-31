@@ -39,7 +39,7 @@ object TolkTestLocator : SMTestLocator {
         return "$PROTOCOL_ID://${containingFile.virtualFile.path}:$normalized"
     }
 
-    private fun normalizeTestName(name: String): String = name.replace('-', ' ').replace('_', ' ').removePrefix("test ")
+    private fun normalizeTestName(name: String): String = name
 
     private const val PROTOCOL_ID = "tolk_qn"
 }

@@ -12,14 +12,16 @@ plugins {
 dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
-        webstorm(version)
+        rustRover(version)
         bundledPlugin("com.intellij.dev")
+        bundledPlugin("org.toml.lang")
         bundledModule("intellij.platform.coverage")
         testFramework(TestFrameworkType.Platform)
     }
 
     compileOnly("com.jetbrains.intellij.platform:coverage-agent:243.26574.91")
     implementation(project(":asm"))
+    implementation(project(":acton"))
     implementation(project(":tasm"))
     implementation(project(":util"))
     testImplementation(project(":util"))

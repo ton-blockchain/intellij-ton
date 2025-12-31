@@ -21,6 +21,8 @@
     <xi:include href="/META-INF/fift.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/boc.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/tasm.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <xi:include href="/META-INF/acton.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <depends optional="true" config-file="tolk-toml.xml">org.jetbrains.plugins.toml</depends>
     <depends optional="true" config-file="org.ton.intellij-ton.dev.xml">com.intellij.dev</depends>
     <depends optional="true" config-file="org.ton.intellij-ton.javascript.xml">JavaScript</depends>
 

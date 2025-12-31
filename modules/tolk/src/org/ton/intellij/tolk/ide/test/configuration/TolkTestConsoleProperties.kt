@@ -9,9 +9,10 @@ import com.intellij.execution.testframework.sm.runner.ui.TestStackTraceParser
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.project.Project
+import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 
 class TolkTestConsoleProperties(
-    configuration: TolkTestConfiguration,
+    configuration: ActonCommandConfiguration,
     executor: Executor
 ) : SMTRunnerConsoleProperties(configuration, "TolkTest", executor), SMStacktraceParser {
 

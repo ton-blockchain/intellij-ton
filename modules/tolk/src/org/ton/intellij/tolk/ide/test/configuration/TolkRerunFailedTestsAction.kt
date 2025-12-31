@@ -7,6 +7,9 @@ import com.intellij.execution.testframework.TestConsoleProperties
 import com.intellij.execution.testframework.actions.AbstractRerunFailedTestsAction
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.openapi.project.Project
+import org.ton.intellij.acton.cli.ActonCommand
+import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
+import org.ton.intellij.acton.runconfig.ActonCommandRunState
 
 class TolkRerunFailedTestsAction(
     consoleView: ConsoleView,
@@ -18,7 +21,7 @@ class TolkRerunFailedTestsAction(
     }
 
     override fun getRunProfile(environment: ExecutionEnvironment): MyRunProfile {
-        val configuration = myConsoleProperties.configuration as TolkTestConfiguration
+        val configuration = myConsoleProperties.configuration as ActonCommandConfiguration
         return TolkRerunProfile(configuration, getFailedTestPatterns(configuration.project))
     }
 
@@ -34,14 +37,14 @@ class TolkRerunFailedTestsAction(
     }
 
     private class TolkRerunProfile(
-        private val conf: TolkTestConfiguration,
+        private val conf: ActonCommandConfiguration,
         private val failed: List<String>
     ) : MyRunProfile(conf) {
 
         override fun getState(exec: Executor, env: ExecutionEnvironment): RunProfileState? {
-            conf.pattern = failed.joinToString("|")
-            conf.scope = TolkTestScope.Function
-            return TolkTestConfigurationRunState(env, conf)
+            conf.testTarget = failed.joinToString("|")
+            conf.testMode = ActonCommand.Test.TestMode.FUNCTION
+            return ActonCommandRunState(env, conf)
         }
     }
 }

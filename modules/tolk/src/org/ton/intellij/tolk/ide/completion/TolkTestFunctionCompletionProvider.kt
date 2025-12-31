@@ -21,7 +21,7 @@ object TolkTestFunctionCompletionProvider : TolkCompletionProvider() {
             .with(object : PatternCondition<PsiElement>("atLineStart") {
                 override fun accepts(t: PsiElement, context: ProcessingContext?): Boolean {
                     val file = t.containingFile.originalFile
-                    if (file.virtualFile?.name?.endsWith("_test.tolk") == false) return false
+                    if (file.virtualFile?.name?.endsWith(".test.tolk") == false) return false
 
                     // accept
                     // <caret>

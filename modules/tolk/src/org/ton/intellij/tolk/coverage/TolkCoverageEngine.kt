@@ -30,7 +30,7 @@ import com.intellij.util.ui.ColumnInfo
 import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.coverage.LcovCoverageReport.Serialization.writeLcov
-import org.ton.intellij.tolk.ide.test.configuration.TolkTestConfiguration
+import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.tolk.psi.TolkFile
 import java.io.File
 import java.io.IOException
@@ -65,7 +65,8 @@ class TolkCoverageEngine : CoverageEngine() {
 
     override fun getCoverageAnnotator(project: Project): CoverageAnnotator = TolkCoverageAnnotator.getInstance(project)
 
-    override fun isApplicableTo(conf: RunConfigurationBase<*>): Boolean = conf is TolkTestConfiguration
+    override fun isApplicableTo(conf: RunConfigurationBase<*>): Boolean = 
+        conf is ActonCommandConfiguration && conf.command == "test"
 
     override fun createEmptyCoverageSuite(coverageRunner: CoverageRunner): CoverageSuite = TolkCoverageSuite()
 
@@ -209,7 +210,7 @@ class TolkCoverageEngine : CoverageEngine() {
         config: CoverageEnabledConfiguration,
     ): CoverageSuite? {
         if (config !is TolkCoverageEnabledConfiguration) return null
-        val configuration = config.configuration as? TolkTestConfiguration ?: return null
+        val configuration = config.configuration as? ActonCommandConfiguration ?: return null
         return TolkCoverageSuite(
             configuration.project,
             name,

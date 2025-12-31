@@ -12,14 +12,14 @@ import com.intellij.execution.runners.GenericProgramRunner
 import com.intellij.execution.runners.executeState
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.project.guessProjectDir
-import org.ton.intellij.tolk.ide.test.configuration.TolkTestConfiguration
+import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import java.io.File
 
 class TolkCoverageProgramRunner : GenericProgramRunner<RunnerSettings>() {
     override fun getRunnerId(): String = RUNNER_ID
 
     override fun canRun(executorId: String, profile: RunProfile): Boolean {
-        return executorId == CoverageExecutor.EXECUTOR_ID && profile is TolkTestConfiguration
+        return executorId == CoverageExecutor.EXECUTOR_ID && profile is ActonCommandConfiguration && profile.command == "test"
     }
 
     override fun doExecute(state: RunProfileState, environment: ExecutionEnvironment): RunContentDescriptor? {

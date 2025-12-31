@@ -1,4 +1,6 @@
 <idea-plugin>
+    <depends>com.intellij.modules.json</depends>
+
     <extensionPoints>
         <extensionPoint qualifiedName="org.ton.intellij.acton.testConsolePropertiesProvider"
                         interface="org.ton.intellij.acton.runconfig.ActonTestConsolePropertiesProvider"
@@ -11,5 +13,9 @@
                              parentId="language"
                              id="acton"
                              displayName="Acton"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="JavaScript">
+        <JsonSchema.ProviderFactory implementation="org.ton.intellij.acton.toml.ActonTomlJsonSchemaProviderFactory"/>
     </extensions>
 </idea-plugin>

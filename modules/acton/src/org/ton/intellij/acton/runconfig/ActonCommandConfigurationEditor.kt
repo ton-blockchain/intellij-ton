@@ -57,9 +57,13 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
     private val testClearCacheCheckBox = JBCheckBox("Clear compilation cache before testing", false)
     private var testMode: ActonCommand.Test.TestMode = ActonCommand.Test.TestMode.DIRECTORY
 
+    // Run specific
+    private val runScriptNameField = createTextFieldWithCompletion(ActonScriptCompletionProvider(project))
+
     private var buildGroup: Row? = null
     private var scriptGroup: Row? = null
     private var testGroup: Row? = null
+    private var runGroup: Row? = null
     private var additionalArgumentsRow: Row? = null
 
     private var testTargetRow: Row? = null
@@ -92,6 +96,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         setupExpandableSupport(commandField)
         setupExpandableSupport(parametersField)
         setupExpandableSupport(buildContractIdField)
+        setupExpandableSupport(runScriptNameField)
 
         commandField.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
@@ -108,11 +113,13 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         val isBuild = command == "build"
         val isScript = command == "script"
         val isTest = command == "test"
+        val isRun = command == "run"
         val isKnown = command in knownCommands
 
         buildGroup?.visible(isBuild)
         scriptGroup?.visible(isScript)
         testGroup?.visible(isTest)
+        runGroup?.visible(isRun)
         additionalArgumentsRow?.visible(isKnown)
 
         if (isTest) {
@@ -194,6 +201,8 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         testFunctionNameField.text = configuration.testFunctionName
         testClearCacheCheckBox.isSelected = configuration.testClearCache
         
+        runScriptNameField.text = configuration.runScriptName
+        
         mainPanel.reset()
         updateVisibility()
         updateEnabledState()
@@ -223,6 +232,8 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         configuration.testTarget = testTargetBrowseField.text.trim()
         configuration.testFunctionName = testFunctionNameField.text.trim()
         configuration.testClearCache = testClearCacheCheckBox.isSelected
+
+        configuration.runScriptName = runScriptNameField.text.trim()
     }
 
     override fun createEditor(): JComponent {
@@ -292,6 +303,12 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
 
                 row {
                     cell(testClearCacheCheckBox)
+                }
+            }.topGap(TopGap.NONE)
+
+            runGroup = group("Run arguments") {
+                row("Script name:") {
+                    cell(runScriptNameField).align(AlignX.FILL)
                 }
             }.topGap(TopGap.NONE)
 

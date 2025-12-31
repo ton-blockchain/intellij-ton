@@ -47,6 +47,9 @@ class ActonCommandConfiguration(
     var testFunctionName: String = ""
     var testClearCache: Boolean = false
 
+    // Run command specific settings (Acton.toml scripts)
+    var runScriptName: String = ""
+
     fun getActonCommand(): ActonCommand {
         return when (command) {
             "build"  -> ActonCommand.Build(buildContractId, buildClearCache, buildOutDir)
@@ -56,6 +59,7 @@ class ActonCommandConfiguration(
             )
 
             "test"   -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache)
+            "run"    -> ActonCommand.Run(runScriptName)
             else     -> ActonCommand.Custom(command)
         }
     }
@@ -98,6 +102,9 @@ class ActonCommandConfiguration(
         element.setAttribute("testFunctionName", testFunctionName)
         element.setAttribute("testClearCache", testClearCache.toString())
 
+        // Run settings
+        element.setAttribute("runScriptName", runScriptName)
+
         env.writeExternal(element)
     }
 
@@ -131,6 +138,9 @@ class ActonCommandConfiguration(
         testTarget = element.getAttributeValue("testTarget") ?: ""
         testFunctionName = element.getAttributeValue("testFunctionName") ?: ""
         testClearCache = element.getAttributeValue("testClearCache")?.toBoolean() ?: false
+
+        // Run settings
+        runScriptName = element.getAttributeValue("runScriptName") ?: ""
 
         env = EnvironmentVariablesData.readExternal(element)
     }

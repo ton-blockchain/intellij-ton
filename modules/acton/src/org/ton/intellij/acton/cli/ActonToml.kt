@@ -8,13 +8,23 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.PsiTreeUtil
 import org.toml.lang.psi.TomlFile
 import org.toml.lang.psi.TomlTable
-
 import java.nio.file.Path
 
 class ActonToml(val virtualFile: VirtualFile, val project: Project) {
     private val psiFile: TomlFile? get() = PsiManager.getInstance(project).findFile(virtualFile) as? TomlFile
 
     val workingDir: Path get() = virtualFile.parent.toNioPath()
+
+    fun getScripts(): Map<String, String> {
+        val file = psiFile ?: return emptyMap()
+        val scriptsTable = PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
+            ?.find { it.header.key?.segments?.firstOrNull()?.name == "scripts" }
+            ?: return emptyMap()
+
+        return scriptsTable.entries.associate { entry ->
+            entry.key.text to (entry.value?.text?.removeSurrounding("\"") ?: "")
+        }
+    }
 
     fun getContractIds(): List<String> {
         val file = psiFile ?: return emptyList()

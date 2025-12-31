@@ -100,6 +100,16 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
+    data class Run(
+        var scriptName: String = "",
+    ) : ActonCommand("run") {
+        override fun getArguments(): List<String> = buildList {
+            if (scriptName.isNotBlank()) {
+                add(scriptName)
+            }
+        }
+    }
+
     data class Custom(
         var command: String = "",
     ) : ActonCommand(command) {

@@ -25,7 +25,7 @@ plugins {
     kotlin("jvm") version "2.0.10"
     id("org.jetbrains.intellij.platform")
     id("org.jetbrains.grammarkit") version "2023.3.0.1"
-    id("org.jetbrains.changelog") version "2.4.0"
+    id("org.jetbrains.changelog") version "2.5.0"
 }
 
 allprojects {

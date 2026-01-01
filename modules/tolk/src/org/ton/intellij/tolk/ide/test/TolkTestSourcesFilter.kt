@@ -16,6 +16,6 @@ class TolkTestSourcesFilter : TestSourcesFilter() {
             return false
         }
 
-        return file.name.contains("_test")
+        return file.name.endsWith(".test.tolk")
     }
 }

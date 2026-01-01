@@ -69,6 +69,7 @@ class TolkActonTomlLineMarkerProvider : RunLineMarkerContributor() {
             configuration.command = "build"
             configuration.workingDirectory = workingDir
             configuration.buildContractId = contractName
+            configuration.parameters = "--info"
 
             runManager.addConfiguration(settings)
             runManager.selectedConfiguration = settings

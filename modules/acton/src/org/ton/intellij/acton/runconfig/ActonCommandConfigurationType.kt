@@ -4,14 +4,14 @@ import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.ConfigurationTypeBase
 import com.intellij.execution.configurations.ConfigurationTypeUtil
 import com.intellij.execution.configurations.RunConfiguration
-import com.intellij.icons.AllIcons
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.IconLoader
 
 class ActonCommandConfigurationType : ConfigurationTypeBase(
     "ActonCommandRunConfiguration",
     "Acton",
     "Acton command run configuration",
-    AllIcons.Actions.Compile // Use appropriate icon
+    IconLoader.getIcon("/icons/acton.svg", ActonCommandConfigurationType::class.java)
 ) {
     init {
         addFactory(ActonConfigurationFactory(this))

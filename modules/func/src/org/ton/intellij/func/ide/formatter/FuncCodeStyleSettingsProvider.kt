@@ -9,6 +9,8 @@ import com.intellij.psi.codeStyle.CodeStyleSettingsProvider
 import org.ton.intellij.func.FuncLanguage
 
 class FuncCodeStyleSettingsProvider : CodeStyleSettingsProvider() {
+    override fun getLanguage() = FuncLanguage
+
     override fun createCustomSettings(settings: CodeStyleSettings) = FuncCodeStyleSettings(settings)
 
     override fun getConfigurableDisplayName() = "FunC"

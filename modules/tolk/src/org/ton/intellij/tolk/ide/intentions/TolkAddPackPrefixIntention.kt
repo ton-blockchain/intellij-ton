@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.util.findParentOfType
 import com.intellij.util.ThrowableRunnable
 import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.tolk.psi.TolkStruct
@@ -17,12 +18,12 @@ class TolkAddPackPrefixIntention : PsiElementBaseIntentionAction() {
     override fun getText(): String = TolkBundle.message("intention.add.pack.prefix.text")
 
     override fun isAvailable(project: Project, editor: Editor?, element: PsiElement): Boolean {
-        val struct = findStruct(element) ?: return false
+        val struct = element.findParentOfType<TolkStruct>() ?: return false
         return struct.structConstructorTag == null
     }
 
     override fun invoke(project: Project, editor: Editor?, element: PsiElement) {
-        val struct = findStruct(element) ?: return
+        val struct = element.findParentOfType<TolkStruct>() ?: return
         val structName = struct.name ?: return
 
         val crc32 = CRC32()
@@ -44,16 +45,5 @@ class TolkAddPackPrefixIntention : PsiElementBaseIntentionAction() {
 
     override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo {
         return IntentionPreviewInfo.EMPTY
-    }
-
-    private fun findStruct(element: PsiElement): TolkStruct? {
-        var current: PsiElement? = element
-        while (current != null) {
-            if (current is TolkStruct) {
-                return current
-            }
-            current = current.parent
-        }
-        return null
     }
 }

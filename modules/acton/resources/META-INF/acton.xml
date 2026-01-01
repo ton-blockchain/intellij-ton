@@ -1,0 +1,21 @@
+<idea-plugin>
+    <depends>com.intellij.modules.json</depends>
+
+    <extensionPoints>
+        <extensionPoint qualifiedName="org.ton.intellij.acton.testConsolePropertiesProvider"
+                        interface="org.ton.intellij.acton.runconfig.ActonTestConsolePropertiesProvider"
+                        dynamic="true"/>
+    </extensionPoints>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <configurationType implementation="org.ton.intellij.acton.runconfig.ActonCommandConfigurationType"/>
+        <projectConfigurable instance="org.ton.intellij.acton.settings.ActonConfigurable"
+                             parentId="language"
+                             id="acton"
+                             displayName="Acton"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="JavaScript">
+        <JsonSchema.ProviderFactory implementation="org.ton.intellij.acton.toml.ActonTomlJsonSchemaProviderFactory"/>
+    </extensions>
+</idea-plugin>

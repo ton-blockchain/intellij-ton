@@ -36,6 +36,7 @@ import java.io.File
 import java.io.IOException
 import java.util.*
 
+@Suppress("UnstableApiUsage")
 class TolkCoverageEngine : CoverageEngine() {
     override fun getQualifiedNames(sourceFile: PsiFile): Set<String> {
         val qName = getQName(sourceFile)
@@ -190,6 +191,7 @@ class TolkCoverageEngine : CoverageEngine() {
 
     override fun collectSrcLinesForUntouchedFile(classFile: File, suite: CoverageSuitesBundle): List<Int>? = null
 
+    @Deprecated("deprecated in Java")
     override fun createCoverageSuite(
         covRunner: CoverageRunner,
         name: String,
@@ -203,6 +205,7 @@ class TolkCoverageEngine : CoverageEngine() {
         project: Project,
     ): CoverageSuite = TolkCoverageSuite(project, name, coverageDataFileProvider, covRunner, project.guessProjectDir()?.path)
 
+    @Deprecated("deprecated in Java")
     override fun createCoverageSuite(
         covRunner: CoverageRunner,
         name: String,
@@ -216,7 +219,7 @@ class TolkCoverageEngine : CoverageEngine() {
             name,
             coverageDataFileProvider,
             covRunner,
-            null, // working directory
+            null,
         )
     }
 

@@ -75,11 +75,11 @@ class TolkConsoleFilter(val project: Project, val scope: GlobalSearchScope) : Fi
     }
 
     companion object {
-        // Matches file paths in Tolk test output: "at /path/to/file.tolk:line:column"
-        private val testPattern = Regex("""at\s+(/[^\s:]+):(\d+):(\d+)""")
-
         // Matches file paths in Tolk compiler error messages: "path.tolk:line:column"
         private val compilerPattern = Regex("""([0-9a-zA-Z_\-\\./]+\.tolk):(\d+):(\d+)""")
+
+        // Matches file paths in Tolk test output: "at path.tolk:line:column"
+        private val testPattern = Regex("""at\s+$compilerPattern""")
     }
 }
 

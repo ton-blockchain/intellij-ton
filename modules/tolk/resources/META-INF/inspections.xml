@@ -92,5 +92,13 @@
                          enabledByDefault="true" level="WARNING"
                          implementationClass="org.ton.intellij.tolk.inspection.style.TolkFuncStyleConstantInspection"/>
 
+        <!-- test issues -->
+        <localInspection language="Tolk" groupPath="Tolk"
+                         bundle="messages.TolkBundle"
+                         key="inspection.tolk.test.failed.line.display.name"
+                         groupKey="inspection.tolk.test.issues"
+                         enabledByDefault="true" level="ERROR"
+                         implementationClass="org.ton.intellij.tolk.inspection.TolkTestFailedLineInspection"/>
+
     </extensions>
 </idea-plugin>

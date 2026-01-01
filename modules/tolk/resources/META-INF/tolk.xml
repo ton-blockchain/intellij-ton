@@ -227,6 +227,32 @@
 
         <additionalLibraryRootsProvider
                 implementation="org.ton.intellij.tolk.toolchain.TolkSdkSyntheticLibraryProvider"/>
+
+        <!-- Test Framework -->
+        <runConfigurationProducer
+                implementation="org.ton.intellij.tolk.ide.test.configuration.ActonTestConfigurationProducer"/>
+        <testSourcesFilter implementation="org.ton.intellij.tolk.ide.test.TolkTestSourcesFilter"/>
+        <runLineMarkerContributor id="TolkScriptRunLineMarkerProvider" language="Tolk"
+                                  implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkRunScriptLineMarkerProvider"/>
+
+        <!-- Script -->
+        <runConfigurationProducer
+                implementation="org.ton.intellij.tolk.ide.run.configuration.ActonRunScriptConfigurationProducer"/>
+        <runConfigurationProducer
+                implementation="org.ton.intellij.tolk.ide.run.configuration.ActonRunScriptBroadcastConfigurationProducer"/>
+        <runLineMarkerContributor id="TolkTestRunLineMarkerProvider" language="Tolk"
+                                  implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkTestLineMarkerProvider"/>
+
+        <!-- Coverage -->
+        <programRunner implementation="org.ton.intellij.tolk.coverage.TolkCoverageProgramRunner"/>
+        <coverageEngine implementation="org.ton.intellij.tolk.coverage.TolkCoverageEngine"/>
+        <coverageRunner implementation="org.ton.intellij.tolk.coverage.TolkCoverageRunner"/>
+        <projectService serviceImplementation="org.ton.intellij.tolk.coverage.TolkCoverageAnnotator"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="org.ton.intellij.acton">
+        <testConsolePropertiesProvider
+                implementation="org.ton.intellij.tolk.ide.test.configuration.TolkActonTestConsolePropertiesProvider"/>
     </extensions>
 
     <extensions defaultExtensionNs="org.ton">

@@ -14,13 +14,14 @@ import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.impl.computeMethodId
 import org.ton.intellij.tolk.psi.impl.getKeyword
 import org.ton.intellij.tolk.psi.impl.isGetMethod
+import org.ton.intellij.tolk.psi.impl.isTestFunction
 
 class TolkMethodIdHintsProvider : InlayHintsProvider {
     override fun createCollector(file: PsiFile, editor: Editor) = Collector()
 
     class Collector : SharedBypassCollector {
         override fun collectFromElement(element: PsiElement, sink: InlayTreeSink) {
-            if (element is TolkFunction && element.isGetMethod) {
+            if (element is TolkFunction && element.isGetMethod && !element.isTestFunction()) {
                 val (id, explicit) = element.computeMethodId()
                 if (explicit) {
                     return

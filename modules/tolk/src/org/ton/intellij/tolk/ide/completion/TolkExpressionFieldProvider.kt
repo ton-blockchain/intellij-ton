@@ -167,12 +167,8 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
 
         if (type is TolkTyStruct) {
             if (type.typeArguments.isNotEmpty() && type.psi.name == "Cell") {
-                // `Cell<T>` -> `T {}.toCell()` or `defaultOfT.toCell()`
+                // `Cell<T>` -> `T {}.toCell()` or `defaultOf(T).toCell()`
                 val arg = type.typeArguments[0]
-                if (arg is TolkTyStruct) {
-                    return "${arg.render()} {}.toCell()"
-                }
-
                 return "${typeDefaultValue(arg)}.toCell()"
             }
 

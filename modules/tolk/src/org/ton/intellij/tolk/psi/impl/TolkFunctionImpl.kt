@@ -230,3 +230,9 @@ fun TolkFunction.computeMethodId(): Pair<String, Boolean> {
 
     return "0x" + ((crc16(this.name ?: "") and 0xFF_FF) or 0x1_00_00).toString(16) to false
 }
+
+fun TolkFunction.isTestFunction(): Boolean {
+    if (!isGetMethod) return false
+    val name = name ?: return false
+    return name.startsWith("test_") || name.startsWith("test-") || name.startsWith("test ")
+}

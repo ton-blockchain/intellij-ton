@@ -14,9 +14,12 @@ dependencies {
         val version = providers.gradleProperty("platformVersion")
         webstorm(version)
         bundledPlugin("com.intellij.dev")
+        bundledModule("intellij.platform.coverage")
         testFramework(TestFrameworkType.Platform)
     }
 
+    compileOnly("com.jetbrains.intellij.platform:coverage-agent:243.26574.91")
+    implementation(project(":acton"))
     implementation(project(":asm"))
     implementation(project(":util"))
     testImplementation(project(":util"))

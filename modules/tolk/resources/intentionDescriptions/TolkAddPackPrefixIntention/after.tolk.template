@@ -1,0 +1,4 @@
+struct (0x12345678) MyStruct {
+    field1: int32;
+    field2: bits32;
+}

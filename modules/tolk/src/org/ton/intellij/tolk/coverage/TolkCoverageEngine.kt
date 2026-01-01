@@ -191,7 +191,7 @@ class TolkCoverageEngine : CoverageEngine() {
 
     override fun collectSrcLinesForUntouchedFile(classFile: File, suite: CoverageSuitesBundle): List<Int>? = null
 
-    @Deprecated
+    @Deprecated("deprecated in Java")
     override fun createCoverageSuite(
         covRunner: CoverageRunner,
         name: String,
@@ -205,7 +205,7 @@ class TolkCoverageEngine : CoverageEngine() {
         project: Project,
     ): CoverageSuite = TolkCoverageSuite(project, name, coverageDataFileProvider, covRunner, project.guessProjectDir()?.path)
 
-    @Deprecated
+    @Deprecated("deprecated in Java")
     override fun createCoverageSuite(
         covRunner: CoverageRunner,
         name: String,

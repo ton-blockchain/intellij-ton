@@ -1,0 +1,37 @@
+<html>
+<body>
+Adds a pack prefix to struct declarations based on CRC32 hash of the struct name.
+
+<p>
+    This intention automatically generates a 32-bit pack prefix for struct declarations
+    that don't already have one. The prefix is calculated using CRC32 hash of the struct name
+    and formatted as a hexadecimal number (e.g., (0x12345678)).
+</p>
+
+<p>
+    Examples:
+</p>
+<pre><code>
+// Before
+struct MyStruct {
+    field1: int32;
+    field2: bits32;
+}
+
+// After applying intention
+struct (0x12345678) MyStruct {
+    field1: int32;
+    field2: bits32;
+}
+</code></pre>
+
+<p>
+    The generated prefix is deterministic — the same struct name will always produce
+    the same CRC32 hash, ensuring consistency across different codebases and compilations.
+</p>
+
+<!-- tooltip end -->
+<p>To use this intention, place your cursor on a struct declaration without a pack prefix and press Alt+Enter.</p>
+</body>
+</html>
+

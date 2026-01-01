@@ -1,0 +1,8 @@
+<idea-plugin>
+    <depends>org.toml.lang</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <runLineMarkerContributor language="TOML"
+                                implementationClass="org.ton.intellij.acton.toml.ActonTomlLineMarkerProvider"/>
+    </extensions>
+</idea-plugin>

@@ -20,6 +20,7 @@ dependencyResolutionManagement {
 }
 
 //include(":blueprint")
+module("acton")
 module("asm")
 module("tolk")
 module("util")

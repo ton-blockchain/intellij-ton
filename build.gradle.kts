@@ -60,13 +60,15 @@ allprojects {
 dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
-        webstorm(version)
+        rustRover(version)
+        bundledPlugin("org.toml.lang")
         testFramework(TestFrameworkType.Platform)
     }
     implementation(project(":util"))
     implementation(project(":blueprint"))
     implementation(project(":asm"))
     implementation(project(":boc"))
+    implementation(project(":acton"))
     implementation(project(":tolk"))
     implementation(project(":fift"))
     implementation(project(":func"))
@@ -114,6 +116,8 @@ intellijPlatform {
             }
         }
     }
+
+    buildSearchableOptions = false
 }
 
 val mergePluginJarsTask = tasks.register<Jar>("mergePluginJars") {

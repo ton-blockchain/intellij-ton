@@ -215,6 +215,10 @@
             <language>Tolk</language>
             <className>org.ton.intellij.tolk.ide.intentions.TolkConvertNumberLiteralIntention</className>
         </intentionAction>
+        <intentionAction>
+            <language>Tolk</language>
+            <className>org.ton.intellij.tolk.ide.intentions.TolkAddPackPrefixIntention</className>
+        </intentionAction>
         <!-- endregion Intentions -->
 
         <consoleFilterProvider implementation="org.ton.intellij.tolk.ide.TolkConsoleFilterProvider"/>

@@ -411,13 +411,13 @@ In this version, we also supported the latest release of Tolk 1.1.
 
 ### Added
 
-- Impure functions smart-inspections ([#17](https://github.com/andreypfau/intellij-ton/issues/17))
-- TON-specific words in spellchecker dictionary ([#16](https://github.com/andreypfau/intellij-ton/issues/16))
+- Impure functions smart-inspections ([#17](https://github.com/ton-blockchain/intellij-ton/issues/17))
+- TON-specific words in spellchecker dictionary ([#16](https://github.com/ton-blockchain/intellij-ton/issues/16))
 
 ### Fixed
 
-- Ternary expression statements ([#15](https://github.com/andreypfau/intellij-ton/issues/15))
-- Code suggestions don't show after `.` (dot) ([#13](https://github.com/andreypfau/intellij-ton/issues/13))
+- Ternary expression statements ([#15](https://github.com/ton-blockchain/intellij-ton/issues/15))
+- Code suggestions don't show after `.` (dot) ([#13](https://github.com/ton-blockchain/intellij-ton/issues/13))
 
 ## [0.7.0]
 
@@ -473,8 +473,8 @@ In this version, we also supported the latest release of Tolk 1.1.
 
 ### Fixed
 
-- [#4](https://github.com/andreypfau/intellij-ton/issues/4) `elseif` & `elseifnot` statements
-- [#5](https://github.com/andreypfau/intellij-ton/issues/5) Complete revision of the Fift gramamr
+- [#4](https://github.com/ton-blockchain/intellij-ton/issues/4) `elseif` & `elseifnot` statements
+- [#5](https://github.com/ton-blockchain/intellij-ton/issues/5) Complete revision of the Fift gramamr
 
 ## [0.3.0]
 

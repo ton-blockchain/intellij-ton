@@ -27,7 +27,12 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
     override fun getStub(): TolkFileStub? = super.getStub() as? TolkFileStub
 
     fun isTestFile() = name.endsWith(".test.tolk")
-    fun isActonFile() = virtualFile.path.contains(".acton")
+    fun isActonFile() = virtualFile?.path?.contains(".acton") == true
+
+    fun isInScriptsFolder(): Boolean {
+        val path = virtualFile?.path ?: return false
+        return path.contains("/scripts/") || path.contains("\\scripts\\")
+    }
 
     private val cachedDeclarations = CachedValuesManager.getManager(manager.project).createCachedValue({
         val declarations = findDeclarations(skipTypes = false)

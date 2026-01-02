@@ -270,5 +270,10 @@
                 text="Tolk File" description="Create new Tolk file">
             <add-to-group group-id="NewGroup"/>
         </action>
+
+        <action id="TolkShowAssembly" class="org.ton.intellij.tolk.ide.actions.TolkShowAssemblyAction"
+                text="Show Assembly" description="Show assembly for the current Tolk file">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
     </actions>
 </idea-plugin>

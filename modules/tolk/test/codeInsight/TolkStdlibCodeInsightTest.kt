@@ -10,7 +10,7 @@ class TolkStdlibCodeInsightTest : TolkCodeInsightBaseTest() {
     override fun setUp() {
         super.setUp()
         val file = myFixture.copyDirectoryToProject(".", ".")
-        project.tolkSettings.explicitPathToStdlib = file.url
+        project.tolkSettings.stdlibPath = file.url
     }
 
     fun `test common`() = doTest()

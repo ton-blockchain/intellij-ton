@@ -131,6 +131,12 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
     fun import(file: TolkFile) {
         if (file == this) return
         if (!file.isPhysical) return
+        if (file.name == "common.tolk") {
+            // This can be a some stdlib file or not, check if it contains map<K, V>
+            val containsMap = file.structs.find { it.name == "map" } != null
+            if (containsMap) return
+        }
+
         var path = VfsUtil.findRelativePath(virtualFile ?: return, file.virtualFile ?: return, '/') ?: return
         val needImport = includeDefinitions.none { (it.resolve() as? TolkFile)?.virtualFile == file.virtualFile }
         if (!needImport) return

@@ -8,5 +8,5 @@ class BocBase64Panel(
     file: VirtualFile,
     onInstalled: (() -> Unit)? = null,
 ) : BocBasePanel(project, file, onInstalled = onInstalled) {
-    override fun runTask() = TasmService.readFileAsBase64(file.path)
+    override fun runTask() = BocActonService.readFileAsBase64(file.path)
 }

@@ -23,6 +23,7 @@ import com.intellij.openapi.project.guessProjectDir
 import com.intellij.testFramework.LightVirtualFile
 import org.ton.intellij.tasm.TasmFileType
 import org.ton.intellij.tolk.TolkFileType
+import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
@@ -78,10 +79,11 @@ class TolkShowAssemblyAction : AnAction("Show Assembly") {
         val workingDir = project.guessProjectDir()?.toNioPath()
             ?: return Result.failure(IllegalStateException("Cannot determine project directory"))
 
+        val compileCommand = ActonCommand.Compile(path = sourcePath, base64Only = true)
         val compileCommandLine = ActonCommandLine(
-            command = "compile",
+            command = compileCommand.name,
             workingDirectory = workingDir,
-            additionalArguments = listOf(sourcePath, "--base64-only")
+            additionalArguments = compileCommand.getArguments()
         ).toGeneralCommandLine(project)
 
         val compileResult = runExternal(compileCommandLine)
@@ -94,10 +96,11 @@ class TolkShowAssemblyAction : AnAction("Show Assembly") {
             return Result.failure(IllegalStateException("Compilation succeeded but produced empty output"))
         }
 
+        val disasmCommand = ActonCommand.Disasm(string = base64Code)
         val disasmCommandLine = ActonCommandLine(
-            command = "disasm",
+            command = disasmCommand.name,
             workingDirectory = workingDir,
-            additionalArguments = listOf("-s", base64Code)
+            additionalArguments = disasmCommand.getArguments()
         ).toGeneralCommandLine(project)
 
         val disasmResult = runExternal(disasmCommandLine)

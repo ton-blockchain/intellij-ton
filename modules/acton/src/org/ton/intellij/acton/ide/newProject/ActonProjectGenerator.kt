@@ -78,6 +78,8 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
                 }
             }
         }
+
+        createDefaultRunConfigurations(project, baseDir)
     }
 
     override fun createPeer(): ProjectGeneratorPeer<ActonProjectSettings> = ActonProjectGeneratorPeer()

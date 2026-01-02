@@ -1,3 +1,5 @@
+package org.ton.intellij.func
+
 import junit.framework.Test
 import org.junit.internal.MethodSorter
 import org.junit.runners.BlockJUnit4ClassRunner

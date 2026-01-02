@@ -1,6 +1,4 @@
-package inspection
-
-import org.ton.intellij.func.inspection.FuncTypeMismatchInspection
+package org.ton.intellij.func.inspection
 
 class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
 

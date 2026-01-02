@@ -1,6 +1,6 @@
-package inspection
+package org.ton.intellij.func.inspection
 
-import FuncTestBase
+import org.ton.intellij.func.FuncTestBase
 import com.intellij.codeInspection.InspectionProfileEntry
 import com.intellij.codeInspection.LocalInspectionTool
 import org.intellij.lang.annotations.Language

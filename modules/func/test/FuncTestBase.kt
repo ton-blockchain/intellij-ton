@@ -1,3 +1,5 @@
+package org.ton.intellij.func
+
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import org.junit.runner.RunWith
 

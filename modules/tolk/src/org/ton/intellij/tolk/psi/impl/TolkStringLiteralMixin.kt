@@ -5,6 +5,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.LiteralTextEscaper
 import com.intellij.psi.PsiLanguageInjectionHost
 import com.intellij.psi.PsiReference
+import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry
 import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.reference.TolkLiteralFileReferenceSet
@@ -23,7 +24,7 @@ abstract class TolkStringLiteralMixin : TolkStubbedElementImpl<TolkStringLiteral
             val fileSet = TolkLiteralFileReferenceSet(contents, this, rawString.startOffsetInParent)
             return fileSet.allReferences
         }
-        return PsiReference.EMPTY_ARRAY
+        return ReferenceProvidersRegistry.getReferencesFromProviders(this)
     }
 
     override fun isValidHost(): Boolean {

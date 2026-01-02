@@ -19,6 +19,13 @@
                              parentId="language"
                              id="acton"
                              displayName="Acton"/>
+        
+        <psi.referenceContributor language="TOML"
+                                  implementation="org.ton.intellij.acton.toml.ActonTomlReferenceContributor"/>
+        <lang.findUsagesProvider language="TOML"
+                                 implementationClass="org.ton.intellij.acton.toml.ActonTomlFindUsagesProvider"
+                                 order="first"/>
+        <useScopeEnlarger implementation="org.ton.intellij.acton.toml.ActonTomlUseScopeEnlarger"/>
     </extensions>
 
     <extensions defaultExtensionNs="JavaScript">

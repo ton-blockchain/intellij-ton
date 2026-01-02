@@ -137,6 +137,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             when (element) {
                 is TolkFunction -> {
                     if (element.isEntryPoint) return true
+                    if (element.isTestFunction()) return true
                     if (!expectType.canAddElement(element.declaredType.returnType)) return true
                     if (!checkLimit()) return false
                     result.addElement(element.toLookupElement(currentFile, ctx))

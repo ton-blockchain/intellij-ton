@@ -24,6 +24,7 @@ class TolkPostfixTemplateProvider : PostfixTemplateProvider {
         TolkParPostfixTemplate(),
         TolkMatchPostfixTemplate(),
         TolkNotPostfixTemplate(),
+        TolkPrintlnPostfixTemplate(),
     )
 
     override fun isTerminalSymbol(currentChar: Char) = currentChar == '.'

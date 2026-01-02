@@ -135,7 +135,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         if (!needImport) return
 
         val factory = TolkPsiFactory[project]
-        val sdk = project.tolkSettings.toolchain.stdlibDir
+        val sdk = project.tolkSettings.stdlibDir
         if (sdk != null && VfsUtil.isAncestor(sdk, file.virtualFile, false)) {
             val sdkPath = sdk.path
             path = file.virtualFile.path.replace(sdkPath, "@stdlib")

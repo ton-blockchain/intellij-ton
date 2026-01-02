@@ -259,20 +259,6 @@
                 implementation="org.ton.intellij.tolk.ide.test.configuration.TolkActonTestConsolePropertiesProvider"/>
     </extensions>
 
-    <extensions defaultExtensionNs="org.ton">
-        <tolk.toolchainFlavor id="tolk.nodeModulesFlavor"
-                              implementation="org.ton.intellij.tolk.toolchain.flavor.TolkNodeModulesToolchainFlavor"
-                              order="first"/>
-        <tolk.toolchainFlavor id="tolk.compilerRepositoryFlavor"
-                              implementation="org.ton.intellij.tolk.toolchain.flavor.TolkCompilerRepositoryToolchainFlavor"/>
-    </extensions>
-
-    <extensionPoints>
-        <extensionPoint qualifiedName="org.ton.tolk.toolchainFlavor"
-                        interface="org.ton.intellij.tolk.toolchain.flavor.TolkToolchainFlavor"
-                        dynamic="true"/>
-    </extensionPoints>
-
     <applicationListeners>
         <listener class="org.ton.intellij.tolk.psi.impl.TolkBuiltins$UnregisterListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>

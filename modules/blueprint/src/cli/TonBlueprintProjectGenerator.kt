@@ -26,12 +26,10 @@ import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.PathUtil
 import org.ton.intellij.blueprint.BlueprintIcons
-import org.ton.intellij.tolk.ide.configurable.tolkSettings
-import org.ton.intellij.tolk.toolchain.TolkToolchain
 import java.io.File
 import javax.swing.Icon
 
-class TonBlueprintProjectGenerator() : NpmPackageProjectGenerator() {
+class TonBlueprintProjectGenerator : NpmPackageProjectGenerator() {
     override fun getId(): String = "create-ton"
 
     override fun getName(): String = "TON"
@@ -81,10 +79,6 @@ class TonBlueprintProjectGenerator() : NpmPackageProjectGenerator() {
 
     override fun postInstall(project: Project, baseDir: VirtualFile, workingDir: File): Runnable = Runnable {
         super.postInstall(project, baseDir, workingDir).run()
-        val tolkToolchain = TolkToolchain.suggest(project)
-        if (tolkToolchain != null) {
-            project.tolkSettings.toolchain = tolkToolchain
-        }
     }
 
     override fun configureProject(project: Project, baseDir: VirtualFile) {

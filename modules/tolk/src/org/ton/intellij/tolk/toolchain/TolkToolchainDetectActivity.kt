@@ -8,12 +8,9 @@ import org.ton.intellij.tolk.ide.configurable.tolkSettings
 class TolkToolchainDetectActivity : ProjectActivity {
 
     override suspend fun execute(project: Project) {
-        LOG.warn("Detecting toolchain for project ${project.name}")
-
-        val tolkToolchainService = project.tolkSettings
-        guessAndSetupTolkProject(project, true)
-
-        LOG.warn("Detected toolchain: ${tolkToolchainService.toolchain}")
+        LOG.warn("Detecting Tolk standard library for project ${project.name}")
+        val stdlibDir = project.tolkSettings.stdlibDir
+        LOG.warn("Detected Tolk standard library: $stdlibDir")
     }
 
     companion object {

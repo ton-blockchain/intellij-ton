@@ -273,7 +273,7 @@ fun SmartPsiElementPointer<TolkFile>.relativePath(file: PsiFile): String {
     val path = virtualFile.path
     val containingFile = file.virtualFile.parent?.path ?: ""
 
-    val sdk = project.tolkSettings.toolchain.stdlibDir
+    val sdk = project.tolkSettings.stdlibDir
     val sdkPath = sdk?.path
     if (sdkPath != null && path.contains(sdkPath)) {
         // @stdlib/gas-payments

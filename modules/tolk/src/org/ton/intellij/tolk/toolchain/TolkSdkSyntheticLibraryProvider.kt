@@ -14,22 +14,8 @@ class TolkSdkSyntheticLibraryProvider : AdditionalLibraryRootsProvider() {
 
     override fun getAdditionalProjectLibraries(project: Project): Collection<SyntheticLibrary> {
         val settings = project.tolkSettings
-
-        val stdlibDir = settings.stdlibDir
-        if (stdlibDir == null) {
-//            LOG.warn("Tolk stdlib dir is null, toolchain: ${settings.toolchain}")
-            return emptyList()
-        }
-
-        val toolchain = settings.toolchain
-        if (toolchain.stdlibDir == stdlibDir) {
-            val library = TolkLibrary(toolchain)
-//            LOG.warn("Found Tolk stdlib: $stdlibDir")
-            return listOf(library)
-        }
-
-        val library = TolkLibrary("Tolk stdlib", stdlibDir)
-//        LOG.warn("Found unversioned Tolk stdlib: $stdlibDir")
+        val stdlibDir = settings.stdlibDir ?: return emptyList()
+        val library = TolkLibrary("Tolk", stdlibDir)
         return listOf(library)
     }
 
@@ -40,7 +26,6 @@ class TolkSdkSyntheticLibraryProvider : AdditionalLibraryRootsProvider() {
         private val name: String,
         private val sourceRoot: VirtualFile?,
     ) : SyntheticLibrary(), ItemPresentation {
-        constructor(toolchain: TolkToolchain) : this("Tolk ${toolchain.version}", toolchain.stdlibDir)
 
         override fun getSourceRoots() =
             if (sourceRoot == null) emptyList() else listOf(sourceRoot)

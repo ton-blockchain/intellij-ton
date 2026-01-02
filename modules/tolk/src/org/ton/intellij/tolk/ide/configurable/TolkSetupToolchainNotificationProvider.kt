@@ -11,7 +11,6 @@ import com.intellij.ui.EditorNotifications
 import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.tolk.ide.configurable.TolkProjectSettingsService.TolkSettingsListener
 import org.ton.intellij.tolk.psi.isTolkFile
-import org.ton.intellij.tolk.toolchain.guessAndSetupTolkProject
 import java.util.function.Function
 import javax.swing.JComponent
 
@@ -34,7 +33,6 @@ class TolkSetupToolchainNotificationProvider(
     ): Function<in FileEditor, out JComponent?>? {
         if (!file.isTolkFile) return null
         if (isNotificationDisabled()) return null
-        if (guessAndSetupTolkProject(project)) return null
 
         val tolkSettings = project.tolkSettings
         if (!tolkSettings.hasStdlib) {

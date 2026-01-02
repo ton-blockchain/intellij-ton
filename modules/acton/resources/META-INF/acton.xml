@@ -26,6 +26,9 @@
                                  implementationClass="org.ton.intellij.acton.toml.ActonTomlFindUsagesProvider"
                                  order="first"/>
         <useScopeEnlarger implementation="org.ton.intellij.acton.toml.ActonTomlUseScopeEnlarger"/>
+
+        <notificationGroup id="Acton Update" displayType="BALLOON"/>
+        <postStartupActivity implementation="org.ton.intellij.acton.ide.ActonUpdateActivity"/>
     </extensions>
 
     <extensions defaultExtensionNs="JavaScript">

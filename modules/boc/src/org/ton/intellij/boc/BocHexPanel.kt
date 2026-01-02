@@ -8,5 +8,5 @@ class BocHexPanel(
     file: VirtualFile,
     onInstalled: (() -> Unit)? = null,
 ) : BocBasePanel(project, file, onInstalled = onInstalled) {
-    override fun runTask() = TasmService.readFileAsHex(file.path)
+    override fun runTask() = BocActonService.readFileAsHex(file.path)
 }

@@ -138,6 +138,78 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
+    data class Disasm(
+        var bocFile: String = "",
+        var string: String = "",
+        var output: String = "",
+        var showHashes: Boolean = false,
+        var showOffsets: Boolean = false,
+        var address: String = "",
+        var apiKey: String = "",
+        var net: String = "",
+        var followLibraries: Boolean = false,
+    ) : ActonCommand("disasm") {
+        override fun getArguments(): List<String> = buildList {
+            if (showHashes) add("--show-hashes")
+            if (showOffsets) add("--show-offsets")
+            if (string.isNotBlank()) {
+                add("--string")
+                add(string)
+            }
+            if (output.isNotBlank()) {
+                add("--output")
+                add(output)
+            }
+            if (address.isNotBlank()) {
+                add("--address")
+                add(address)
+            }
+            if (apiKey.isNotBlank()) {
+                add("--api-key")
+                add(apiKey)
+            }
+            if (net.isNotBlank()) {
+                add("--net")
+                add(net)
+            }
+            if (followLibraries) add("--follow-libraries")
+            if (bocFile.isNotBlank()) {
+                add(bocFile)
+            }
+        }
+    }
+
+    data class Compile(
+        var path: String = "",
+        var json: Boolean = false,
+        var base64Only: Boolean = false,
+        var boc: String? = null,
+        var fift: String? = null,
+        var sourceMap: String? = null,
+        var clearCache: Boolean = false,
+    ) : ActonCommand("compile") {
+        override fun getArguments(): List<String> = buildList {
+            if (json) add("--json")
+            if (base64Only) add("--base64-only")
+            boc?.let {
+                add("--boc")
+                add(it)
+            }
+            fift?.let {
+                add("--fift")
+                add(it)
+            }
+            sourceMap?.let {
+                add("--source-map")
+                add(it)
+            }
+            if (clearCache) add("--clear-cache")
+            if (path.isNotBlank()) {
+                add(path)
+            }
+        }
+    }
+
     data class Custom(
         var command: String = "",
     ) : ActonCommand(command) {
@@ -159,6 +231,46 @@ sealed class ActonCommand(val name: String) {
                     i++
                 }
                 build
+            }
+
+            "disasm" -> {
+                val args = ParametersListUtil.parse(parameters)
+                val disasm = Disasm()
+                var i = 0
+                while (i < args.size) {
+                    when (val arg = args[i]) {
+                        "--show-hashes"     -> disasm.showHashes = true
+                        "--show-offsets"    -> disasm.showOffsets = true
+                        "--string", "-s"    -> if (i + 1 < args.size) disasm.string = args[++i]
+                        "--output", "-o"    -> if (i + 1 < args.size) disasm.output = args[++i]
+                        "--address"         -> if (i + 1 < args.size) disasm.address = args[++i]
+                        "--api-key"         -> if (i + 1 < args.size) disasm.apiKey = args[++i]
+                        "--net"             -> if (i + 1 < args.size) disasm.net = args[++i]
+                        "--follow-libraries" -> disasm.followLibraries = true
+                        else                -> if (!arg.startsWith("-")) disasm.bocFile = arg
+                    }
+                    i++
+                }
+                disasm
+            }
+
+            "compile" -> {
+                val args = ParametersListUtil.parse(parameters)
+                val compile = Compile()
+                var i = 0
+                while (i < args.size) {
+                    when (val arg = args[i]) {
+                        "--json"        -> compile.json = true
+                        "--base64-only" -> compile.base64Only = true
+                        "--boc"         -> if (i + 1 < args.size) compile.boc = args[++i]
+                        "--fift"        -> if (i + 1 < args.size) compile.fift = args[++i]
+                        "--source-map"  -> if (i + 1 < args.size) compile.sourceMap = args[++i]
+                        "--clear-cache" -> compile.clearCache = true
+                        else            -> if (!arg.startsWith("-")) compile.path = arg
+                    }
+                    i++
+                }
+                compile
             }
 
             else    -> Custom("$name $parameters")

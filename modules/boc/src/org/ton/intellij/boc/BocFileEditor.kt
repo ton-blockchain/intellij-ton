@@ -22,7 +22,7 @@ class BocFileEditor(
 ) : FileEditorBase() {
 
     private val disassemblyPanel = BocDisassemblyPanel(project, file) { onInstalled() }
-    private val cellTreePanel = BocCellTreePanel(project, file) { onInstalled() }
+    private val detailedDisassemblyPanel = BocDetailedDisassemblyPanel(project, file) { onInstalled() }
     private val hexPanel = BocHexPanel(project, file) { onInstalled() }
     private val base64Panel = BocBase64Panel(project, file) { onInstalled() }
 
@@ -32,13 +32,13 @@ class BocFileEditor(
     }
 
     private val tasmTab = TabInfo(disassemblyPanel).setText("TASM")
-    private val cellTab = TabInfo(cellTreePanel).setText("Cell Tree")
+    private val detailedTab = TabInfo(detailedDisassemblyPanel).setText("Detailed TASM")
     private val hexTab = TabInfo(hexPanel).setText("Hex")
     private val base64Tab = TabInfo(base64Panel).setText("Base64")
 
     init {
         tabs.addTab(tasmTab)
-        tabs.addTab(cellTab)
+        tabs.addTab(detailedTab)
         tabs.addTab(hexTab)
         tabs.addTab(base64Tab)
         tabs.select(tasmTab, true)
@@ -46,14 +46,14 @@ class BocFileEditor(
 
     private fun onInstalled() {
         disassemblyPanel.onTasmInstalled()
-        cellTreePanel.onTasmInstalled()
+        detailedDisassemblyPanel.onTasmInstalled()
         hexPanel.onTasmInstalled()
         base64Panel.onTasmInstalled()
     }
 
     override fun getComponent(): JComponent = tabs.component
     override fun getPreferredFocusedComponent(): JComponent = tabs.component
-    override fun getName(): String = "BOC Viewer"
+    override fun getName(): String = "BoC Viewer"
     override fun setState(state: FileEditorState) {}
     override fun isModified(): Boolean = false
     override fun isValid(): Boolean = file.isValid
@@ -65,7 +65,7 @@ class BocFileEditor(
 
     override fun dispose() {
         disassemblyPanel.dispose()
-        cellTreePanel.dispose()
+        detailedDisassemblyPanel.dispose()
         super.dispose()
     }
 }

@@ -7,7 +7,7 @@ class TolkCreateGlobalVariableQuickfixTest : TolkQuickfixTestBase() {
     override fun setUp() {
         super.setUp()
         val file = myFixture.copyDirectoryToProject("tolk-stdlib", "tolk-stdlib")
-        project.tolkSettings.explicitPathToStdlib = file.url
+        project.tolkSettings.stdlibPath = file.url
         myFixture.enableInspections(TolkUnresolvedReferenceInspection::class.java)
     }
 

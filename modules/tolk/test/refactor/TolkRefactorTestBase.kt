@@ -15,7 +15,7 @@ abstract class TolkRefactorTestBase : TolkTestBase() {
     override fun setUp() {
         super.setUp()
         val file = myFixture.copyDirectoryToProject("tolk-stdlib", "tolk-stdlib")
-        project.tolkSettings.explicitPathToStdlib = file.url
+        project.tolkSettings.stdlibPath = file.url
     }
 
     protected fun doRefactorTest(

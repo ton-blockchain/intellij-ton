@@ -110,6 +110,34 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
+    data class New(
+        var path: String = ".",
+        var projectName: String? = null,
+        var description: String? = null,
+        var template: String? = null,
+        var license: String? = null,
+    ) : ActonCommand("new") {
+        override fun getArguments(): List<String> = buildList {
+            add(path)
+            projectName?.let {
+                add("--name")
+                add(it)
+            }
+            description?.let {
+                add("--description")
+                add(it)
+            }
+            template?.let {
+                add("--template")
+                add(it)
+            }
+            license?.let {
+                add("--license")
+                add(it)
+            }
+        }
+    }
+
     data class Custom(
         var command: String = "",
     ) : ActonCommand(command) {

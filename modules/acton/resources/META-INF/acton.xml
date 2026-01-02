@@ -8,6 +8,12 @@
     </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">
+        <moduleType id="ACTON_MODULE" implementationClass="org.ton.intellij.acton.ide.newProject.ActonModuleType"/>
+        <moduleBuilder builderClass="org.ton.intellij.acton.ide.newProject.ActonModuleBuilder"/>
+
+        <directoryProjectGenerator implementation="org.ton.intellij.acton.ide.newProject.ActonProjectGenerator"/>
+        <newProjectWizard.language implementation="org.ton.intellij.acton.ide.newProject.ActonNewProjectWizard"/>
+
         <configurationType implementation="org.ton.intellij.acton.runconfig.ActonCommandConfigurationType"/>
         <projectConfigurable instance="org.ton.intellij.acton.settings.ActonConfigurable"
                              parentId="language"

@@ -40,6 +40,39 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
             } ?: emptyList()
     }
 
+    data class WalletInfo(val name: String, val isLocal: Boolean)
+
+    fun getWallets(): List<WalletInfo> {
+        val result = mutableListOf<WalletInfo>()
+        val projectDir = virtualFile.parent ?: return emptyList()
+
+        projectDir.findChild("wallets.toml")?.let {
+            val names = getWalletNames(PsiManager.getInstance(project).findFile(it) as? TomlFile)
+            result.addAll(names.map { name -> WalletInfo(name, true) })
+        }
+
+        // add global wallets later to filter it by `distinctBy`, since local > global
+        projectDir.findChild("global.wallets.toml")?.let {
+            val names = getWalletNames(PsiManager.getInstance(project).findFile(it) as? TomlFile)
+            result.addAll(names.map { name -> WalletInfo(name, false) })
+        }
+
+        return result.distinctBy { it.name }
+    }
+
+    private fun getWalletNames(file: TomlFile?): List<String> {
+        if (file == null) return emptyList()
+        return PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
+            ?.mapNotNull { table ->
+                val segments = table.header.key?.segments ?: return@mapNotNull null
+                if (segments.size == 2 && segments[0].name == "wallets") {
+                    segments[1].name
+                } else {
+                    null
+                }
+            } ?: emptyList()
+    }
+
     companion object {
         fun find(project: Project): ActonToml? {
             val files = FilenameIndex.getVirtualFilesByName("Acton.toml", GlobalSearchScope.projectScope(project))

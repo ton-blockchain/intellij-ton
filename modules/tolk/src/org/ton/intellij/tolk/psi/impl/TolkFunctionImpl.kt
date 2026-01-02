@@ -233,6 +233,6 @@ fun TolkFunction.computeMethodId(): Pair<String, Boolean> {
 
 fun TolkFunction.isTestFunction(): Boolean {
     if (!isGetMethod) return false
-    val name = name ?: return false
+    val name = name?.removeSurrounding("`") ?: return false
     return name.startsWith("test_") || name.startsWith("test-") || name.startsWith("test ")
 }

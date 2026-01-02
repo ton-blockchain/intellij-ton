@@ -1,0 +1,5 @@
+<idea-plugin package="org.ton.intellij" xmlns:xi="http://www.w3.org/2001/XInclude">
+    <id>org.ton.intellij.func</id>
+    <xi:include href="/META-INF/func.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <xi:include href="/META-INF/asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
+</idea-plugin>

@@ -71,7 +71,7 @@ class TolkShowAssemblyAction : AnAction("Show Assembly") {
         ApplicationManager.getApplication().invokeLater {
             val fileEditorManagerEx = FileEditorManagerEx.getInstanceEx(project)
             val currentWindow = fileEditorManagerEx.currentWindow ?: return@invokeLater
-            currentWindow.split(SwingConstants.VERTICAL, false, file, true)
+            currentWindow.split(SwingConstants.VERTICAL, false, file, focusNew = true, fileIsSecondaryComponent = true)
         }
     }
 

@@ -167,6 +167,12 @@
         <lookup.charFilter implementation="org.ton.intellij.tolk.ide.completion.TolkCharFilter"/>
         <typedHandler implementation="org.ton.intellij.tolk.codeInsight.editorActions.TolkTypedHandler"/>
 
+        <typedHandler implementation="org.ton.intellij.tolk.codeInsight.editorActions.TolkAngleBraceTypedHandler"
+                      id="TolkAngleBraceTypedHandler"/>
+        <backspaceHandlerDelegate
+                implementation="org.ton.intellij.tolk.codeInsight.editorActions.TolkAngleBraceBackspaceHandler"
+                id="TolkAngleBraceBackspaceHandler"/>
+
         <liveTemplateContext
                 contextId="tolk"
                 implementation="org.ton.intellij.tolk.template.TolkEverywhereContextType"/>

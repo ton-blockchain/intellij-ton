@@ -65,5 +65,7 @@ class ActonModuleBuilder : ModuleBuilder() {
                 }
             }
         }
+
+        createDefaultRunConfigurations(project, root)
     }
 }

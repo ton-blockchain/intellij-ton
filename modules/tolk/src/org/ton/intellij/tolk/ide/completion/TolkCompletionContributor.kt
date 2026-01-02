@@ -6,6 +6,9 @@ import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementWeigher
 import com.intellij.patterns.PlatformPatterns.psiElement
 import org.ton.intellij.tolk.doc.psi.TolkDocComment
+import org.ton.intellij.tolk.ide.completion.acton.TolkContractIdCompletionProvider
+import org.ton.intellij.tolk.ide.completion.acton.TolkGetMethodCompletionProvider
+import org.ton.intellij.tolk.ide.completion.acton.TolkWalletNameCompletionProvider
 import org.ton.intellij.tolk.psi.*
 
 class TolkCompletionContributor : CompletionContributor() {
@@ -86,6 +89,11 @@ class TolkCompletionContributor : CompletionContributor() {
         extend(TolkFunctionNameCompletionProvider)
         extend(TolkStructFieldModifierCompletionProvider)
         extend(TolkTestFunctionCompletionProvider)
+
+        // Acton
+        extend(TolkWalletNameCompletionProvider)
+        extend(TolkContractIdCompletionProvider)
+        extend(TolkGetMethodCompletionProvider)
     }
 
     fun extend(provider: TolkCompletionProvider) {

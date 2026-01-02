@@ -62,6 +62,7 @@ dependencies {
         val version = providers.gradleProperty("platformVersion")
         rustRover(version)
         bundledPlugin("org.toml.lang")
+        bundledPlugin("com.intellij.modules.json")
         testFramework(TestFrameworkType.Platform)
     }
     implementation(project(":util"))

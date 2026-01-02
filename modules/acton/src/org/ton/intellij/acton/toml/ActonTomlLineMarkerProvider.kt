@@ -1,11 +1,11 @@
 package org.ton.intellij.acton.toml
 
-import com.intellij.execution.lineMarker.RunLineMarkerContributor
-import com.intellij.icons.AllIcons
-import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.execution.RunManager
 import com.intellij.execution.executors.DefaultRunExecutor
+import com.intellij.execution.lineMarker.RunLineMarkerContributor
 import com.intellij.execution.runners.ExecutionUtil
+import com.intellij.icons.AllIcons
+import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.psi.PsiElement
@@ -13,6 +13,7 @@ import org.toml.lang.psi.TomlKeySegment
 import org.toml.lang.psi.TomlKeyValue
 import org.toml.lang.psi.TomlTable
 import org.toml.lang.psi.TomlTableHeader
+import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
 
@@ -50,7 +51,41 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
             }
         }
 
+        // Handle [test]
+        if (header != null) {
+            val segments = header.key?.segments ?: return null
+            if (segments.size == 1 && segments[0].name == "test" && segments[0] == element) {
+                return Info(
+                    AllIcons.RunConfigurations.TestState.Run,
+                    arrayOf(ActonRunTestsAction()),
+                ) { "Run tests" }
+            }
+        }
+
         return null
+    }
+
+    private class ActonRunTestsAction : AnAction("Run All Tests", null, AllIcons.Actions.Execute) {
+        override fun actionPerformed(e: AnActionEvent) {
+            val project = e.project ?: return
+            val file = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
+            val workingDir = file.parent?.toNioPath() ?: return
+
+            val runManager = RunManager.getInstance(project)
+            val configurationName = "Run all tests"
+            val settings = runManager.createConfiguration(configurationName, ActonCommandConfigurationType.getInstance().factory)
+            val configuration = settings.configuration as ActonCommandConfiguration
+
+            configuration.command = "test"
+            configuration.workingDirectory = workingDir
+            configuration.testMode = ActonCommand.Test.TestMode.DIRECTORY
+            configuration.testTarget = "."
+
+            runManager.addConfiguration(settings)
+            runManager.selectedConfiguration = settings
+
+            ExecutionUtil.runConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance())
+        }
     }
 
     private class TolkBuildContractAction(private val contractName: String) :

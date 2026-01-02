@@ -85,6 +85,7 @@ class TolkCompletionContributor : CompletionContributor() {
         extend(TolkTopLevelSnippetsCompletionProvider)
         extend(TolkFunctionNameCompletionProvider)
         extend(TolkStructFieldModifierCompletionProvider)
+        extend(TolkTestFunctionCompletionProvider)
     }
 
     fun extend(provider: TolkCompletionProvider) {

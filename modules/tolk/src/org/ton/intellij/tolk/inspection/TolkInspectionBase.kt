@@ -21,10 +21,14 @@ abstract class TolkInspectionBase : LocalInspectionTool() {
         isOnTheFly: Boolean,
         session: LocalInspectionToolSession,
     ): PsiElementVisitor {
-        val file = session.file as? TolkFile
-        return if (file != null && TolkPsiUtil.allowed(file, null)) {
-            buildTolkVisitor(holder, session)
-        } else DUMMY_VISITOR
+        val file = session.file as? TolkFile ?: return DUMMY_VISITOR
+        if (file.isActonFile()) {
+            return DUMMY_VISITOR
+        }
+        if (!TolkPsiUtil.allowed(file, null)) {
+            return DUMMY_VISITOR
+        }
+        return buildTolkVisitor(holder, session)
     }
 
     protected open fun buildTolkVisitor(

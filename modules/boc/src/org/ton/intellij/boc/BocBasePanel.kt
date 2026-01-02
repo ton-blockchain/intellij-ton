@@ -57,9 +57,8 @@ abstract class BocBasePanel(
             return
         }
 
-        file.refresh(false, false)
-
         ApplicationManager.getApplication().executeOnPooledThread {
+            file.refresh(false, false)
             val result = runTask()
 
             ApplicationManager.getApplication().invokeLater {

@@ -31,6 +31,20 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
         return getContractElements().map { it.name ?: "" }
     }
 
+    fun getContractSources(): List<String> {
+        val file = psiFile ?: return emptyList()
+
+        return PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
+            ?.mapNotNull { table ->
+                val segments = table.header.key?.segments ?: return@mapNotNull null
+                if (segments.size == 2 && segments[0].name == "contracts") {
+                    table.entries.find { it.key.text == "src" }?.value?.text?.removeSurrounding("\"")?.removeSurrounding("'")
+                } else {
+                    null
+                }
+            } ?: emptyList()
+    }
+
     fun getContractElements(): List<TomlKeySegment> {
         val file = psiFile ?: return emptyList()
 

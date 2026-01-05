@@ -5,6 +5,8 @@ import com.google.gson.annotations.SerializedName
 import com.intellij.execution.configuration.EnvironmentVariablesData
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.icons.AllIcons
+import com.intellij.ide.BrowserUtil
+import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
@@ -17,18 +19,18 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
-import com.intellij.ui.PopupHandler
-import com.intellij.ui.ToolbarDecorator
+import com.intellij.ui.components.JBLabel
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.dsl.builder.*
-import com.intellij.ui.table.JBTable
 import com.intellij.util.ui.JBUI
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
 import java.awt.BorderLayout
+import java.awt.Graphics
+import java.awt.Graphics2D
+import java.awt.RenderingHints
 import java.awt.datatransfer.StringSelection
 import javax.swing.*
-import javax.swing.table.DefaultTableModel
 
 class ActonWalletToolWindowFactory : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
@@ -39,8 +41,14 @@ class ActonWalletToolWindowFactory : ToolWindowFactory {
 }
 
 class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
-    private val tableModel = createTableModel()
-    private val table = JBTable(tableModel)
+    private val cardsPanel = JPanel().apply {
+        layout = BoxLayout(this, BoxLayout.Y_AXIS)
+        background = JBUI.CurrentTheme.Table.background(false, false)
+    }
+    private val scrollPane = com.intellij.ui.components.JBScrollPane(cardsPanel).apply {
+        border = JBUI.Borders.empty()
+        verticalScrollBar.unitIncrement = 16
+    }
     private val gson = Gson()
 
     companion object {
@@ -51,78 +59,175 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
     }
 
     init {
-        setupTable(table)
-
-        val decorator = ToolbarDecorator.createDecorator(table)
-            .setAddAction { createNewWallet() }
-            .setAddActionName("New Wallet")
-            .addExtraAction(object : AnAction("Import Wallet", null, AllIcons.ToolbarDecorator.Import) {
-                override fun actionPerformed(e: AnActionEvent) = importWallet()
-            })
-            .addExtraAction(object : AnAction("Refresh Wallets", null, AllIcons.Actions.Refresh) {
+        val actionGroup = DefaultActionGroup().apply {
+            add(object : AnAction("Refresh Wallets", "Update wallet list", AllIcons.Actions.Refresh) {
                 override fun actionPerformed(e: AnActionEvent) = refreshWallets()
             })
-            .disableRemoveAction()
-            .disableUpDownActions()
+            add(object : AnAction("New Wallet", "Create a new wallet", AllIcons.General.Add) {
+                override fun actionPerformed(e: AnActionEvent) = createNewWallet()
+            })
+            add(object : AnAction("Import Wallet", "Import existing wallet", AllIcons.ToolbarDecorator.Import) {
+                override fun actionPerformed(e: AnActionEvent) = importWallet()
+            })
+        }
 
-        add(decorator.createPanel().apply {
-            border = JBUI.Borders.empty()
-        }, BorderLayout.CENTER)
+        val toolbar = ActionManager.getInstance().createActionToolbar("ActonWalletToolbar", actionGroup, true)
+        toolbar.targetComponent = this
+
+        val toolbarPanel = JPanel(BorderLayout())
+        toolbarPanel.add(toolbar.component, BorderLayout.WEST)
+        toolbarPanel.border = JBUI.Borders.empty()
+
+        add(toolbarPanel, BorderLayout.NORTH)
+        add(scrollPane, BorderLayout.CENTER)
 
         border = JBUI.Borders.empty()
         refreshWallets()
     }
 
-    private fun createTableModel() = object : DefaultTableModel(arrayOf("Name", "Address", "Type", "Scope"), 0) {
-        override fun isCellEditable(row: Int, column: Int) = false
-    }
-
-    private fun setupTable(table: JBTable) {
-        val copyAction = object : AnAction("Copy Address", null, AllIcons.Actions.Copy) {
-            override fun actionPerformed(e: AnActionEvent) {
-                val row = table.selectedRow
-                if (row != -1) {
-                    val address = table.getValueAt(row, 1) as String
-                    CopyPasteManager.getInstance().setContents(StringSelection(address))
-                }
-            }
-        }
-
-        val group = DefaultActionGroup()
-        group.add(copyAction)
-
-        table.addMouseListener(object : PopupHandler() {
-            override fun invokePopup(comp: java.awt.Component, x: Int, y: Int) {
-                val menu = com.intellij.openapi.actionSystem.ActionManager.getInstance()
-                    .createActionPopupMenu("ActonWalletPopup", group)
-                menu.component.show(comp, x, y)
-            }
-        })
-    }
-
     private fun refreshWallets() {
         ApplicationManager.getApplication().executeOnPooledThread {
+            val projectDir = project.guessProjectDir()
+            if (projectDir == null) {
+                showError("Could not find project directory")
+                return@executeOnPooledThread
+            }
+
             val walletCommand = ActonCommand.Wallet.ListCmd(json = true)
             val commandLine = ActonCommandLine(
                 command = walletCommand.name,
-                workingDirectory = project.guessProjectDir()?.toNioPath() ?: return@executeOnPooledThread,
+                workingDirectory = projectDir.toNioPath(),
                 additionalArguments = walletCommand.getArguments(),
                 environmentVariables = EnvironmentVariablesData.DEFAULT
             ).toGeneralCommandLine(project)
 
             val handler = CapturingProcessHandler(commandLine)
             val output = handler.runProcess(10000)
-            if (output.exitCode == 0) {
-                val info = gson.fromJson(output.stdout, WalletListInfo::class.java)
-                if (info.success) {
-                    ApplicationManager.getApplication().invokeLater {
-                        tableModel.rowCount = 0
-                        info.wallets.forEach {
-                            tableModel.addRow(arrayOf(it.name, it.address, it.kind, if (it.isGlobal) "Global" else "Local"))
+
+            ApplicationManager.getApplication().invokeLater {
+                cardsPanel.removeAll()
+
+                if (output.exitCode != 0) {
+                    val error = stripAnsiColors(output.stderr.ifBlank { output.stdout })
+                    addStatusLabel("Error: $error")
+                } else {
+                    try {
+                        val info = gson.fromJson(output.stdout, WalletListInfo::class.java)
+                        if (info.success) {
+                            if (info.wallets.isEmpty()) {
+                                addStatusLabel("No wallets found")
+                            } else {
+                                info.wallets.forEach {
+                                    cardsPanel.add(WalletCard(it))
+                                    cardsPanel.add(Box.createVerticalStrut(8))
+                                }
+                                cardsPanel.add(Box.createVerticalGlue())
+                            }
+                        } else {
+                            addStatusLabel("Failed to list wallets")
                         }
+                    } catch (e: Exception) {
+                        addStatusLabel("Error parsing response: ${e.message}")
                     }
                 }
+
+                cardsPanel.revalidate()
+                cardsPanel.repaint()
             }
+        }
+    }
+
+    private fun addStatusLabel(text: String) {
+        cardsPanel.add(Box.createVerticalGlue())
+        val label = JBLabel(text, SwingConstants.CENTER).apply {
+            alignmentX = CENTER_ALIGNMENT
+            foreground = JBUI.CurrentTheme.Label.disabledForeground()
+        }
+        cardsPanel.add(label)
+        cardsPanel.add(Box.createVerticalGlue())
+    }
+
+    private fun showError(message: String) {
+        ApplicationManager.getApplication().invokeLater {
+            Messages.showErrorDialog(project, message, "Acton Wallet Error")
+        }
+    }
+
+    private inner class WalletCard(val info: WalletInfo) : JPanel(BorderLayout()) {
+        init {
+            isOpaque = false
+            border = JBUI.Borders.empty(4)
+            alignmentX = LEFT_ALIGNMENT
+
+            val content = object : JPanel(BorderLayout()) {
+                override fun paintComponent(g: Graphics) {
+                    val g2 = g.create() as Graphics2D
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+                    g2.color = JBUI.CurrentTheme.EditorTabs.background()
+                    g2.fillRoundRect(0, 0, width, height, 12, 12)
+                    g2.dispose()
+                }
+            }.apply {
+                isOpaque = false
+                border = JBUI.Borders.empty(8, 12)
+
+                val mainInfo = panel {
+                    row {
+                        label(info.name).bold().align(AlignX.LEFT)
+                        label(if (info.isGlobal) "Global" else "Local")
+                            .applyToComponent {
+                                foreground = JBUI.CurrentTheme.Label.disabledForeground()
+                                font = JBUI.Fonts.smallFont()
+                            }
+                            .align(AlignX.RIGHT)
+                    }
+                    row {
+                        val truncatedAddr = if (info.address.length > 20) {
+                            info.address.take(8) + "…" + info.address.takeLast(8)
+                        } else info.address
+
+                        link(truncatedAddr) {
+                            BrowserUtil.browse("https://testnet.tonviewer.com/${info.address}")
+                        }.applyToComponent {
+                            toolTipText = "Open ${info.address} in Tonviewer"
+                        }
+
+                        icon(AllIcons.Actions.Copy).applyToComponent {
+                            cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR)
+                            toolTipText = "Copy address"
+                            val originalIcon = icon
+                            addMouseListener(object : java.awt.event.MouseAdapter() {
+                                override fun mouseClicked(e: java.awt.event.MouseEvent) {
+                                    CopyPasteManager.getInstance().setContents(StringSelection(info.address))
+                                    icon = AllIcons.General.InspectionsOK
+
+                                    val timer = Timer(1500) {
+                                        icon = originalIcon
+                                    }
+                                    timer.isRepeats = false
+                                    timer.start()
+                                }
+                            })
+                        }
+                    }
+                    row {
+                        label("Type: ${info.kind}").applyToComponent {
+                            font = JBUI.Fonts.smallFont()
+                            foreground = JBUI.CurrentTheme.Label.disabledForeground()
+                        }
+                    }
+                }.apply {
+                    background = JBUI.CurrentTheme.EditorTabs.background()
+                    isOpaque = false
+                }
+                add(mainInfo, BorderLayout.CENTER)
+            }
+
+            add(content, BorderLayout.CENTER)
+        }
+
+        override fun getMaximumSize(): java.awt.Dimension {
+            return java.awt.Dimension(Int.MAX_VALUE, preferredSize.height)
         }
     }
 

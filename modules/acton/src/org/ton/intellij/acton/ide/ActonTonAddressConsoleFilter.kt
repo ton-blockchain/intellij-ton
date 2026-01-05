@@ -5,6 +5,7 @@ import com.intellij.execution.filters.HyperlinkInfo
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -22,7 +23,6 @@ class ActonTonAddressConsoleFilter : Filter {
 
         val results = mutableListOf<Filter.ResultItem>()
         val offset = entireLength - line.length
-        val attrs = EditorColorsManager.getInstance().globalScheme.getAttributes(CodeInsightColors.HYPERLINK_ATTRIBUTES)
 
         // raw addresses
         rawPattern.findAll(line).forEach { match ->
@@ -32,7 +32,7 @@ class ActonTonAddressConsoleFilter : Filter {
                     offset + match.range.first,
                     offset + match.range.last + 1,
                     TonAddressHyperlinkInfo(address, false),
-                    attrs
+                    getAttrs(), // most lines won't contain addresses, so getting the attributes for each link should be faster.
                 )
             )
         }
@@ -46,12 +46,17 @@ class ActonTonAddressConsoleFilter : Filter {
                     offset + match.range.first,
                     offset + match.range.last + 1,
                     TonAddressHyperlinkInfo(address, isTestnet),
-                    attrs
+                    getAttrs(),
                 )
             )
         }
 
         return if (results.isEmpty()) null else Filter.Result(results)
+    }
+
+    private fun getAttrs(): TextAttributes? {
+        val attrs = EditorColorsManager.getInstance().globalScheme.getAttributes(CodeInsightColors.HYPERLINK_ATTRIBUTES)
+        return attrs
     }
 
     companion object {

@@ -13,5 +13,5 @@ class ActonConsoleFilterProvider : ConsoleFilterProviderEx {
         project: Project,
         scope: GlobalSearchScope,
     ): Array<out Filter?> =
-        arrayOf(ActonTonAddressConsoleFilter())
+        arrayOf(ActonTonAddressConsoleFilter(), ActonWalletQuickFixFilter())
 }

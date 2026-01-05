@@ -29,6 +29,8 @@
 
         <notificationGroup id="Acton Update" displayType="BALLOON"/>
         <postStartupActivity implementation="org.ton.intellij.acton.ide.ActonUpdateActivity"/>
+
+        <consoleFilterProvider implementation="org.ton.intellij.acton.ide.ActonConsoleFilterProvider"/>
     </extensions>
 
     <extensions defaultExtensionNs="JavaScript">

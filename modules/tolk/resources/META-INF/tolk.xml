@@ -192,6 +192,8 @@
         <!-- region Editor -->
         <editorNotificationProvider
                 implementation="org.ton.intellij.tolk.ide.configurable.TolkSetupToolchainNotificationProvider"/>
+        <editorNotificationProvider
+                implementation="org.ton.intellij.tolk.ide.notification.TolkUnregisteredContractNotificationProvider"/>
 
         <postStartupActivity implementation="org.ton.intellij.tolk.ide.TolkAttachTestConsoleFiltersAtStartup"/>
         <postStartupActivity implementation="org.ton.intellij.tolk.psi.impl.TolkBuiltins$RegisterActivity"/>

@@ -210,6 +210,21 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
+    data class InternalRegisterContract(
+        var path: String = "",
+        var id: String? = null,
+    ) : ActonCommand("internal-register-contract") {
+        override fun getArguments(): List<String> = buildList {
+            id?.let {
+                add("--id")
+                add(it)
+            }
+            if (path.isNotBlank()) {
+                add(path)
+            }
+        }
+    }
+
     data class Custom(
         var command: String = "",
     ) : ActonCommand(command) {

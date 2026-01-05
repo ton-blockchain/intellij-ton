@@ -17,6 +17,7 @@ import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.components.JBLabel
@@ -326,13 +327,12 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
     private fun refreshVfs() {
         val projectDir = project.guessProjectDir()
         if (projectDir != null) {
-            projectDir.findChild("wallets.toml")?.refresh(false, false)
-            projectDir.findChild("global.wallets.toml")?.refresh(false, false)
+            VfsUtil.markDirtyAndRefresh(true, true, true, projectDir)
         }
 
         val home = System.getProperty("user.home")
-        val globalPath = java.nio.file.Paths.get(home, ".acton", "wallets", "global.wallets.toml")
-        LocalFileSystem.getInstance().findFileByNioFile(globalPath)?.refresh(false, false)
+        val globalPath = java.nio.file.Paths.get(home, ".acton", "wallets", "global.wallets.toml").toFile()
+        LocalFileSystem.getInstance().refreshIoFiles(listOf(globalPath))
     }
 }
 

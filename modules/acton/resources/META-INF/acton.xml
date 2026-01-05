@@ -31,6 +31,12 @@
         <postStartupActivity implementation="org.ton.intellij.acton.ide.ActonUpdateActivity"/>
 
         <consoleFilterProvider implementation="org.ton.intellij.acton.ide.ActonConsoleFilterProvider"/>
+
+        <toolWindow id="Acton Wallets"
+                    secondary="true"
+                    icon="com.intellij.icons.AllIcons.General.User"
+                    anchor="right"
+                    factoryClass="org.ton.intellij.acton.ide.ActonWalletToolWindowFactory"/>
     </extensions>
 
     <extensions defaultExtensionNs="JavaScript">

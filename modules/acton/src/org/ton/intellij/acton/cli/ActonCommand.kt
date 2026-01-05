@@ -225,6 +225,82 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
+    sealed class Wallet(val subcommand: String) : ActonCommand("wallet") {
+        override fun getArguments(): List<String> = listOf(subcommand) + getSubcommandArguments()
+        abstract fun getSubcommandArguments(): List<String>
+
+        data class ListCmd(
+            val balance: Boolean = false,
+            val apiKey: String? = null,
+            val json: Boolean = true
+        ) : Wallet("list") {
+            override fun getSubcommandArguments(): List<String> = buildList {
+                if (balance) add("--balance")
+                apiKey?.let {
+                    add("--api-key")
+                    add(it)
+                }
+                if (json) add("--json")
+            }
+        }
+
+        data class New(
+            val walletName: String? = null,
+            val version: String? = null,
+            val global: Boolean = false,
+            val local: Boolean = false,
+            val secure: Boolean? = null,
+            val json: Boolean = true
+        ) : Wallet("new") {
+            override fun getSubcommandArguments(): List<String> = buildList {
+                walletName?.let {
+                    add("--name")
+                    add(it)
+                }
+                version?.let {
+                    add("--version")
+                    add(it)
+                }
+                if (global) add("--global")
+                if (local) add("--local")
+                secure?.let {
+                    add("--secure")
+                    add(it.toString())
+                }
+                if (json) add("--json")
+            }
+        }
+
+        data class Import(
+            val walletName: String? = null,
+            val mnemonics: List<String> = emptyList(),
+            val version: String? = null,
+            val global: Boolean = false,
+            val local: Boolean = false,
+            val secure: Boolean? = null,
+            val json: Boolean = true
+        ) : Wallet("import") {
+            override fun getSubcommandArguments(): List<String> = buildList {
+                walletName?.let {
+                    add("--name")
+                    add(it)
+                }
+                version?.let {
+                    add("--version")
+                    add(it)
+                }
+                if (global) add("--global")
+                if (local) add("--local")
+                secure?.let {
+                    add("--secure")
+                    add(it.toString())
+                }
+                if (json) add("--json")
+                addAll(mnemonics)
+            }
+        }
+    }
+
     data class Custom(
         var command: String = "",
     ) : ActonCommand(command) {

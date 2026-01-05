@@ -15,6 +15,7 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.Alarm
+import org.ton.intellij.acton.ActonUtils.stripAnsiColors
 import org.ton.intellij.util.pathToExecutableTextField
 import javax.swing.JLabel
 
@@ -84,7 +85,7 @@ class ActonConfigurable(val project: Project) : BoundConfigurable("Acton"), Disp
                 val handler = CapturingProcessHandler(commandLine)
                 val output = handler.runProcess(2000)
                 if (output.exitCode == 0) {
-                    output.stdout.trim()
+                    stripAnsiColors(output.stdout.trim())
                 } else {
                     null
                 }

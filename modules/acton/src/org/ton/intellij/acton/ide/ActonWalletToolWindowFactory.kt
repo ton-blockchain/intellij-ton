@@ -100,7 +100,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                 return@executeOnPooledThread
             }
 
-            val walletCommand = ActonCommand.Wallet.ListCmd(json = true)
+            val walletCommand = ActonCommand.Wallet.ListCmd(balance = true, json = true)
             val commandLine = ActonCommandLine(
                 command = walletCommand.name,
                 workingDirectory = projectDir.toNioPath(),
@@ -199,11 +199,12 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                             BrowserUtil.browse("https://testnet.tonviewer.com/${info.address}")
                         }.applyToComponent {
                             toolTipText = "Open ${info.address} in Tonviewer"
-                        }
+                        }.gap(RightGap.SMALL)
 
                         icon(AllIcons.Actions.Copy).applyToComponent {
                             cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR)
                             toolTipText = "Copy address"
+                            foreground = JBUI.CurrentTheme.Label.disabledForeground()
                             val originalIcon = icon
                             addMouseListener(object : java.awt.event.MouseAdapter() {
                                 override fun mouseClicked(e: java.awt.event.MouseEvent) {
@@ -220,6 +221,16 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                         }
                     }
                     row {
+                        val balanceInTon = try {
+                            info.balance?.toBigDecimal()?.movePointLeft(9)?.stripTrailingZeros()?.toPlainString() ?: "0"
+                        } catch (_: Exception) {
+                            "0"
+                        }
+                        label("$balanceInTon TON").bold().applyToComponent {
+                            foreground = com.intellij.ui.JBColor.GREEN
+                            font = JBUI.Fonts.smallFont()
+                        }
+
                         label("Type: ${info.kind}").applyToComponent {
                             font = JBUI.Fonts.smallFont()
                             foreground = JBUI.CurrentTheme.Label.disabledForeground()
@@ -238,7 +249,8 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                             })
                         }
 
-                        val helpLabel = ContextHelpLabel.create("Request testnet TONs from faucet by solving a small Proof-of-Work challenge")
+                        val helpLabel =
+                            ContextHelpLabel.create("Request testnet TONs from faucet by solving a small Proof-of-Work challenge")
 
                         panel {
                             row {
@@ -414,6 +426,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
         val address: String,
         val kind: String,
         @SerializedName("is_global") val isGlobal: Boolean,
+        val balance: String?,
     )
 
     private fun stripAnsiColors(text: String): String {

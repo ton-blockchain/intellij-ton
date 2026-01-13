@@ -4,7 +4,12 @@ import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.intellij.execution.configuration.EnvironmentVariablesData
 import com.intellij.execution.process.CapturingProcessHandler
+import com.intellij.execution.process.OSProcessHandler
+import com.intellij.execution.process.ProcessAdapter
+import com.intellij.execution.process.ProcessEvent
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.util.Key
+import javax.swing.Timer
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
@@ -20,6 +25,7 @@ import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
+import com.intellij.ui.ContextHelpLabel
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.dsl.builder.*
@@ -155,6 +161,8 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
     }
 
     private inner class WalletCard(val info: WalletInfo) : JPanel(BorderLayout()) {
+        private var progressBar: JProgressBar? = null
+
         init {
             isOpaque = false
             border = JBUI.Borders.empty(4)
@@ -216,6 +224,36 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                             font = JBUI.Fonts.smallFont()
                             foreground = JBUI.CurrentTheme.Label.disabledForeground()
                         }
+
+                        val airdropLabel = JBLabel("Request testnet TON", SwingConstants.LEFT).apply label@{
+                            font = JBUI.Fonts.smallFont()
+                            foreground = JBUI.CurrentTheme.Link.Foreground.ENABLED
+                            cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR)
+                            addMouseListener(object : java.awt.event.MouseAdapter() {
+                                override fun mouseClicked(e: java.awt.event.MouseEvent) {
+                                    if (isEnabled) {
+                                        performAirdrop(this@label)
+                                    }
+                                }
+                            })
+                        }
+
+                        val helpLabel = ContextHelpLabel.create("Request testnet TONs from faucet by solving a small Proof-of-Work challenge")
+
+                        panel {
+                            row {
+                                cell(airdropLabel).gap(RightGap.SMALL)
+                                cell(helpLabel)
+                            }
+                        }.align(AlignX.RIGHT)
+                    }
+                    row {
+                        progressBar = JProgressBar(0, 100).apply {
+                            isVisible = false
+                            isIndeterminate = true
+                            preferredSize = java.awt.Dimension(150, 4)
+                        }
+                        cell(progressBar!!).align(Align.FILL)
                     }
                 }.apply {
                     background = JBUI.CurrentTheme.EditorTabs.background()
@@ -225,6 +263,64 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
             }
 
             add(content, BorderLayout.CENTER)
+        }
+
+        private fun performAirdrop(label: JBLabel) {
+            val projectDir = project.guessProjectDir() ?: return
+            label.isEnabled = false
+            label.text = "Requesting..."
+            progressBar?.isVisible = true
+            progressBar?.isIndeterminate = true
+
+            ApplicationManager.getApplication().executeOnPooledThread {
+                val airdropCommand = ActonCommand.Wallet.Airdrop(walletName = info.name, json = true)
+                val commandLine = ActonCommandLine(
+                    command = airdropCommand.name,
+                    workingDirectory = projectDir.toNioPath(),
+                    additionalArguments = airdropCommand.getArguments(),
+                    environmentVariables = EnvironmentVariablesData.DEFAULT
+                ).toGeneralCommandLine(project)
+
+                val handler = OSProcessHandler(commandLine)
+                handler.addProcessListener(object : ProcessAdapter() {
+                    override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                        val text = event.text.trim()
+                        if (text.startsWith("{")) {
+                            try {
+                                val json = gson.fromJson(text, Map::class.java)
+                                if (json["success"] != null) {
+                                    val success = json["success"] as Boolean
+                                    val message = json["message"] as? String ?: json["error"] as? String ?: "Finished"
+                                    ApplicationManager.getApplication().invokeLater {
+                                        progressBar?.isVisible = false
+                                        label.isEnabled = true
+                                        label.text = "Request testnet TON"
+                                        if (!success) {
+                                            Messages.showErrorDialog(project, message, "Airdrop Error")
+                                        } else {
+                                            Messages.showInfoMessage(project, message, "Airdrop Success")
+                                            refreshWallets()
+                                        }
+                                    }
+                                }
+                            } catch (_: Exception) {
+                                // ignore parse errors
+                            }
+                        }
+                    }
+
+                    override fun processTerminated(event: ProcessEvent) {
+                        ApplicationManager.getApplication().invokeLater {
+                            progressBar?.isVisible = false
+                            label.isEnabled = true
+                            if (label.text == "Requesting...") {
+                                label.text = "Request testnet TON"
+                            }
+                        }
+                    }
+                })
+                handler.startNotify()
+            }
         }
 
         override fun getMaximumSize(): java.awt.Dimension {

@@ -299,6 +299,23 @@ sealed class ActonCommand(val name: String) {
                 addAll(mnemonics)
             }
         }
+
+        data class Airdrop(
+            val walletName: String? = null,
+            val faucetUrl: String? = null,
+            val json: Boolean = true
+        ) : Wallet("airdrop") {
+            override fun getSubcommandArguments(): List<String> = buildList {
+                walletName?.let {
+                    add(it)
+                }
+                faucetUrl?.let {
+                    add("--faucet-url")
+                    add(it)
+                }
+                if (json) add("--json")
+            }
+        }
     }
 
     data class Custom(

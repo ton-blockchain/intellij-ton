@@ -210,6 +210,16 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
+    data class Check(
+        var fix: Boolean = false,
+        var json: Boolean = false,
+    ) : ActonCommand("check") {
+        override fun getArguments(): List<String> = buildList {
+            if (fix) add("--fix")
+            if (json) add("--json")
+        }
+    }
+
     data class InternalRegisterContract(
         var path: String = "",
         var id: String? = null,
@@ -379,6 +389,21 @@ sealed class ActonCommand(val name: String) {
                     i++
                 }
                 compile
+            }
+
+            "check" -> {
+                val args = ParametersListUtil.parse(parameters)
+                val check = Check()
+                var i = 0
+                while (i < args.size) {
+                    when (args[i]) {
+                        "--fix" -> check.fix = true
+                        "--json" -> check.json = true
+                        else     -> {} // ignore unknown arguments
+                    }
+                    i++
+                }
+                check
             }
 
             else    -> Custom("$name $parameters")

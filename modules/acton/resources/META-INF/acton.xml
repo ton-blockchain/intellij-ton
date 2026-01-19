@@ -1,4 +1,6 @@
 <idea-plugin>
+    <resource-bundle>messages.ActonBundle</resource-bundle>
+
     <depends>com.intellij.modules.json</depends>
 
     <extensionPoints>
@@ -19,7 +21,7 @@
                              parentId="language"
                              id="acton"
                              displayName="Acton"/>
-        
+
         <psi.referenceContributor language="TOML"
                                   implementation="org.ton.intellij.acton.toml.ActonTomlReferenceContributor"/>
         <lang.findUsagesProvider language="TOML"
@@ -37,6 +39,13 @@
                     icon="com.intellij.icons.AllIcons.General.User"
                     anchor="right"
                     factoryClass="org.ton.intellij.acton.ide.ActonWalletToolWindowFactory"/>
+
+        <highlightingPassFactory implementation="org.ton.intellij.acton.ide.ActonHighlightingPassFactoryRegistrar"/>
+        <projectConfigurable instance="org.ton.intellij.acton.settings.ActonExternalLinterConfigurable"
+                             parentId="acton"
+                             id="acton.external.linter"
+                             bundle="messages.ActonBundle"
+                             key="settings.acton.external.linter.title.name"/>
     </extensions>
 
     <extensions defaultExtensionNs="JavaScript">

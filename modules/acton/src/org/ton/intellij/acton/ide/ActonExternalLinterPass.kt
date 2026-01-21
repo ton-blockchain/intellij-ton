@@ -159,10 +159,8 @@ class ActonExternalLinterPassFactory(
         false
     )
 
-    @Suppress("UnstableApiUsage")
     override fun createHighlightingPass(file: PsiFile, editor: Editor): TextEditorHighlightingPass? {
-        val manager = CodeInsightContextManager.getInstance(file.project)
-        FileStatusMap.getDirtyTextRange(editor.document, manager.currentCodeInsightContext, file, myPassId) ?: return null
+        FileStatusMap.getDirtyTextRange(editor.document, file, myPassId) ?: return null
         return ActonExternalLinterPass(this, file, editor)
     }
 

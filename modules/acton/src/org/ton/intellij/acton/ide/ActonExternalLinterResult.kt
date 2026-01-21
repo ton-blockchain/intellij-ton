@@ -28,6 +28,8 @@ private data class ActonLinterResponse(
 
 data class ActonDiagnostic(
     val file: String?,
+    @SerializedName("name")
+    val name: String? = null,
     @SerializedName("severity")
     private val _severity: String? = null,
     @SerializedName("message")

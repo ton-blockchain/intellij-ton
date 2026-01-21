@@ -3,29 +3,28 @@ package org.ton.intellij.acton.ide
 import com.intellij.codeInsight.daemon.HighlightDisplayKey
 import com.intellij.codeInsight.daemon.impl.HighlightInfo
 import com.intellij.codeInsight.daemon.impl.HighlightInfoType
+import com.intellij.codeInspection.SuppressIntentionAction
+import com.intellij.codeInspection.SuppressIntentionActionFromFix.convertBatchToSuppressIntentionActions
 import com.intellij.execution.configuration.EnvironmentVariablesData
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.application.TransactionGuard
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.TextRange
-import com.intellij.util.execution.ParametersListUtil
-import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.AnyPsiChangeListener
 import com.intellij.psi.impl.PsiManagerImpl
 import com.intellij.psi.util.PsiModificationTracker
+import com.intellij.util.execution.ParametersListUtil
 import com.intellij.util.messages.MessageBus
 import org.apache.commons.lang3.StringEscapeUtils
 import org.jetbrains.annotations.Nls
@@ -133,6 +132,7 @@ data class ActonExternalLinterFilteredMessage(
     @Nls val message: String,
     @Nls val htmlTooltip: String,
     val quickFixes: List<ActonApplySuggestionFix>,
+    val suppressionFixes: List<SuppressIntentionAction>,
 ) {
     companion object {
         fun filterMessage(file: PsiFile, document: Document, diagnostic: ActonDiagnostic): ActonExternalLinterFilteredMessage? {
@@ -170,12 +170,17 @@ data class ActonExternalLinterFilteredMessage(
                     ActonApplySuggestionFix.fromFix(fix, document)
                 }
 
+            val ruleName = diagnostic.name ?: "unknown"
+            val actions = arrayOf(ActonSuppressLinterFix(ruleName), ActonSuppressLinterFix("all"))
+            val suppressionOptions = convertBatchToSuppressIntentionActions(actions).toList()
+
             return ActonExternalLinterFilteredMessage(
                 severity,
                 textRange,
                 diagnostic.message,
                 tooltip,
-                quickFixes
+                quickFixes,
+                suppressionOptions
             )
         }
     }
@@ -234,7 +239,7 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(
             .needsUpdateOnTyping(true)
 
         for (fix in message.quickFixes) {
-            highlightBuilder.registerFix(fix, null, null, message.textRange, key)
+            highlightBuilder.registerFix(fix, message.suppressionFixes, null, message.textRange, key)
         }
 
         highlightBuilder.create()?.let(::add)

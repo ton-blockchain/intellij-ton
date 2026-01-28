@@ -235,6 +235,13 @@
         "type": "string"
       }
     },
+    "mappings": {
+      "type": "object",
+      "description": "Path mappings for imports (e.g., 'core' = './foo/core' maps to '@core/...')",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
     "lint": {
       "type": "object",
       "description": "Linter configuration for the project",

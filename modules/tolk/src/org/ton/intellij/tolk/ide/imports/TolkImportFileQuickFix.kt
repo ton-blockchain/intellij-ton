@@ -22,6 +22,7 @@ import com.intellij.ui.SimpleColoredComponent
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.util.IncorrectOperationException
 import com.intellij.util.ui.JBUI
+import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.TolkCallExpression
@@ -46,21 +47,24 @@ import kotlin.io.path.relativeTo
 class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, HintAction, HighPriorityAction {
     private val symbolToResolve: String
     private var filesToImport: List<SmartPsiElementPointer<TolkFile>>? = null
+    private var actonToml: ActonToml? = null
 
     constructor(element: PsiElement, file: TolkFile) : super(element) {
         symbolToResolve = ""
         filesToImport = listOf(SmartPointerManager.createPointer(file))
+        actonToml = ActonToml.find(file.project)
     }
 
     constructor(reference: PsiReference) : super(reference.element) {
         symbolToResolve = reference.canonicalText
+        actonToml = ActonToml.find(reference.element.project)
     }
 
     override fun showHint(editor: Editor) = doAutoImportOrShowHint(editor, true)
 
     override fun getText(): String {
         val element = startElement ?: return "Import file"
-        return "Import " + getText(element, findImportVariants(element))
+        return "Import " + getText(element, findImportVariants(element), actonToml)
     }
 
     override fun getFamilyName() = "Import file"
@@ -129,7 +133,7 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
 
         HintManager.getInstance().showQuestionHint(
             editor,
-            ShowAutoImportPass.getMessage(filesToImport.size > 1, filesToImport.first().relativePath(file)),
+            ShowAutoImportPass.getMessage(filesToImport.size > 1, filesToImport.first().relativePath(file, actonToml)),
             referenceRange.startOffset,
             referenceRange.endOffset
         ) {
@@ -159,7 +163,7 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
         if (filesToImport.size > 1 && editor != null) {
             val renderer = SelectionAwareListCellRenderer<SmartPsiElementPointer<TolkFile>> { file ->
                 val name = runReadAction { startElement.text }
-                val relativePath = file.relativePath(containingFile)
+                val relativePath = file.relativePath(containingFile, actonToml)
 
                 SimpleColoredComponent().apply {
                     icon = TolkIcons.FILE
@@ -216,15 +220,17 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
             val path = file.virtualFile.path
             val normalizedPath = path.replace(File.separatorChar, '/')
             return !normalizedPath.contains("test/") &&
-                    !normalizedPath.contains("test-failed/")
+                    !normalizedPath.contains("test-failed/") &&
+                    !file.isTestFile()
         }
 
         private fun isSupportedReference(reference: PsiReference?) = reference is TolkSymbolReference || reference is TolkTypeReference
 
-        private fun getText(element: PsiElement, filesToImport: List<SmartPsiElementPointer<TolkFile>>): String {
+        private fun getText(element: PsiElement, filesToImport: List<SmartPsiElementPointer<TolkFile>>, actonToml: ActonToml?): String {
             if (filesToImport.isEmpty()) return ""
             val containingFile = element.containingFile ?: return ""
-            return "'" + filesToImport.first().relativePath(containingFile) + "'? " + if (filesToImport.size > 1) "(multiple choices...) " else ""
+            return "'" + filesToImport.first()
+                .relativePath(containingFile, actonToml) + "'? " + if (filesToImport.size > 1) "(multiple choices...) " else ""
         }
 
         private fun notQualified(startElement: PsiElement?): Boolean {
@@ -269,7 +275,7 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
     }
 }
 
-fun SmartPsiElementPointer<TolkFile>.relativePath(file: PsiFile): String {
+fun SmartPsiElementPointer<TolkFile>.relativePath(file: PsiFile, actonToml: ActonToml?): String {
     val path = virtualFile.path
     val containingFile = file.virtualFile.parent?.path ?: ""
 
@@ -278,6 +284,17 @@ fun SmartPsiElementPointer<TolkFile>.relativePath(file: PsiFile): String {
     if (sdkPath != null && path.contains(sdkPath)) {
         // @stdlib/gas-payments
         return path.replace(sdkPath, "@stdlib").removeSuffix(".tolk")
+    }
+
+    if (actonToml != null) {
+        val mappings = runReadAction { actonToml.getMappings() }
+        for ((key, value) in mappings) {
+            val mappingDir = actonToml.workingDir.resolve(value).normalize().toString()
+            if (path.startsWith(mappingDir)) {
+                val subPath = path.substring(mappingDir.length).removePrefix("/").removePrefix("\\").replace('\\', '/')
+                return "@$key/$subPath".removeSuffix(".tolk")
+            }
+        }
     }
 
     return Path(path).relativeTo(Path(containingFile)).pathString.removeSuffix(".tolk")

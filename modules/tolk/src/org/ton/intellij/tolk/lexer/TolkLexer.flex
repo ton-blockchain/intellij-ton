@@ -103,7 +103,7 @@ import static org.ton.intellij.tolk.psi.TolkElementTypes.*;
 %eof{
   return;
 %eof}
-%xstate STRING RAW_STRING
+%xstate STRING MULTILINE_STRING
 
 %s IN_BLOCK_COMMENT IN_BLOCK_DOC
 %s IN_EOL_DOC_COMMENT
@@ -142,11 +142,10 @@ IDENTIFIER = {QUOTE_ESCAPED_IDENTIFIER}|{PLAIN_IDENTIFIER}
 
 // ANY_ESCAPE_SEQUENCE = \\[^]
 THREE_QUO = (\"\"\")
-QUOTE_SUFFIX = [s|a|u|h|H|c]
-THREE_OR_MORE_QUO = ({THREE_QUO}\"*{QUOTE_SUFFIX}?)
+THREE_OR_MORE_QUO = ({THREE_QUO}\"*)
 
-ESCAPE_SEQUENCE=\\(u{HEX_DIGIT}{HEX_DIGIT}{HEX_DIGIT}{HEX_DIGIT}|[^\n])
-CLOSING_QUOTE=\"{QUOTE_SUFFIX}?
+ESCAPE_SEQUENCE=\\([nrt0\\'\"u])
+CLOSING_QUOTE=\"
 
 REGULAR_STRING_PART=[^\\\"\n]+
 
@@ -160,6 +159,7 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
 <YYINITIAL> {
       {WHITE_SPACE}            { return WHITE_SPACE; }
 
+      {THREE_QUO}              { pushState(MULTILINE_STRING); return OPEN_QUOTE; }
       \"                       { pushState(STRING); return OPEN_QUOTE; }
 
       "/**/" {
@@ -284,32 +284,39 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "readonly"               { return READONLY_KEYWORD; }
 
       {INTEGER_LITERAL}        { return INTEGER_LITERAL; }
-      {THREE_QUO}              { pushState(RAW_STRING); return OPEN_QUOTE; }
       {IDENTIFIER}             { return IDENTIFIER; }
       \!is{IDENTIFIER_PART}    { yypushback(3); return EXCL; }
       "!is"                    { return NOT_IS_KEYWORD; }
 }
 
-<RAW_STRING> \n                  { return TolkElementTypes.RAW_STRING_ELEMENT; }
-<RAW_STRING> \"                  { return TolkElementTypes.RAW_STRING_ELEMENT; }
-<RAW_STRING> \\                  { return TolkElementTypes.RAW_STRING_ELEMENT; }
-<RAW_STRING> {THREE_OR_MORE_QUO} {
-                                    int length = yytext().length();
-                                    if (length <= 3) { // closing """
-                                        popState();
-                                        return TolkElementTypes.CLOSING_QUOTE;
-                                    }
-                                    else { // some quotes at the end of a string, e.g. """ "foo""""
-                                        yypushback(3); // return the closing quotes (""") to the stream
-                                        return TolkElementTypes.RAW_STRING_ELEMENT;
-                                    }
-                                 }
+<MULTILINE_STRING> {
+  {THREE_OR_MORE_QUO} {
+    int length = yytext().length();
+    if (length <= 3) { // closing """
+        popState();
+        return TolkElementTypes.CLOSING_QUOTE;
+    }
+    else { // some quotes at the end of a string, e.g. """ "foo""""
+        yypushback(3); // return the closing quotes (""") to the stream
+        return TolkElementTypes.RAW_STRING_ELEMENT;
+    }
+  }
+  {ESCAPE_SEQUENCE}  { return ESCAPE_SEQUENCE; }
+  \\u{HEX_DIGIT}{HEX_DIGIT}{HEX_DIGIT}{HEX_DIGIT} { return ESCAPE_SEQUENCE; }
+  \\                 { return ESCAPE_SEQUENCE; }
+  \" { return TolkElementTypes.RAW_STRING_ELEMENT; }
+  \n { return TolkElementTypes.RAW_STRING_ELEMENT; }
+  {REGULAR_STRING_PART} { return TolkElementTypes.RAW_STRING_ELEMENT; }
+}
 
-<STRING> \n                 { popState(); yypushback(1); return DANGLING_NEWLINE; }
-<STRING> {CLOSING_QUOTE}    { popState(); return CLOSING_QUOTE; }
-<STRING> {ESCAPE_SEQUENCE}  { return ESCAPE_SEQUENCE; }
-
-<STRING, RAW_STRING> {REGULAR_STRING_PART}         { return TolkElementTypes.RAW_STRING_ELEMENT; }
+<STRING> {
+  \n                 { popState(); yypushback(1); return DANGLING_NEWLINE; }
+  {CLOSING_QUOTE}    { popState(); return CLOSING_QUOTE; }
+  {ESCAPE_SEQUENCE}  { return ESCAPE_SEQUENCE; }
+  \\u{HEX_DIGIT}{HEX_DIGIT}{HEX_DIGIT}{HEX_DIGIT} { return ESCAPE_SEQUENCE; }
+  \\                 { return ESCAPE_SEQUENCE; }
+  {REGULAR_STRING_PART} { return TolkElementTypes.RAW_STRING_ELEMENT; }
+}
 
 <IN_BLOCK_COMMENT, IN_BLOCK_DOC> {
     "/*" {

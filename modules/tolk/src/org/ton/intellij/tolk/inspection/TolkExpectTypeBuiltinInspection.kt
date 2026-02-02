@@ -2,7 +2,7 @@ package org.ton.intellij.tolk.inspection
 
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemsHolder
-import org.ton.intellij.tolk.eval.TolkSliceValue
+import org.ton.intellij.tolk.eval.TolkStringValue
 import org.ton.intellij.tolk.eval.value
 import org.ton.intellij.tolk.psi.TolkCallExpression
 import org.ton.intellij.tolk.psi.TolkLiteralExpression
@@ -19,7 +19,7 @@ class TolkExpectTypeBuiltinInspection  : TolkInspectionBase() {
             val argumentList = o.argumentList.argumentList
             val left = argumentList.firstOrNull() ?: return
             val right = argumentList.getOrNull(1) ?: return
-            val expectTypeText = ((right.expression as? TolkLiteralExpression)?.value as? TolkSliceValue)?.value ?: return
+            val expectTypeText = ((right.expression as? TolkLiteralExpression)?.value as? TolkStringValue)?.value ?: return
             val actualType = left.expression.type ?: return
 
             val actualTypeText = actualType.render(unknown = "unknown")

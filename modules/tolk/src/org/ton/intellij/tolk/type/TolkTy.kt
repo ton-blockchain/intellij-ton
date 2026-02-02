@@ -121,6 +121,7 @@ interface TolkTy : TypeFoldable<TolkTy> {
         val Void = TolkTyVoid
         val Cell = TolkCellTy
         val Slice = TolkSliceTy
+        val String = TolkStringTy
         val Builder = TolkTyBuilder
         val Continuation = TolkTyContinuation
         val Tuple = TolkTyTuple
@@ -236,6 +237,7 @@ interface TolkPrimitiveTy : TolkTy {
                 "int" -> TolkTy.Int
                 "cell" -> Cell
                 "slice" -> Slice
+                "string" -> TolkTy.String
                 "builder" -> TolkTy.Builder
                 "continuation" -> TolkTy.Continuation
                 "tuple" -> TolkTy.Tuple
@@ -293,6 +295,12 @@ object TolkSliceTy : TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
 
     override fun toString(): String = "slice"
+}
+
+object TolkStringTy : TolkPrimitiveTy {
+    override fun isSuperType(other: TolkTy): Boolean = other == this
+
+    override fun toString(): String = "string"
 }
 
 object TolkTyBuilder : TolkPrimitiveTy {

@@ -134,6 +134,7 @@
 
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
+            RAW_STRING_ELEMENT = "RAW_STRING_ELEMENT"
 //            VERSION_VALUE = "regexp:((=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?)"
             IDENTIFIER = "regexp:[a-zA-Z_$?:][0-9a-zA-Z_$?:]*"
 //            WHITESPACE = 'regexp:[\ \n\t\f]'
@@ -158,7 +159,7 @@ Item ::= Annotations (ConstVar | GlobalVar | TypeDef | Struct | Enum | Function)
 }
 private Annotations ::= Annotation*
 
-RawString ::= RAW_STRING_ELEMENT*
+RawString ::= (RAW_STRING_ELEMENT | ESCAPE_SEQUENCE)*
 
 StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE {
     pin=1

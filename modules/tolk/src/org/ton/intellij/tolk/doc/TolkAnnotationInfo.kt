@@ -30,6 +30,12 @@ object TolkAnnotationInfo {
         "method_id" to AnnotationInfo(
             "Specifies the method ID (as a number literal) for the function in smart contract interface. " +
                     "See <a href=\"https://docs.ton.org/v3/guidelines/smart-contracts/get-methods\">documentation</a> for more details"
+        ),
+        "abi" to AnnotationInfo(
+            "Describes ABI metadata for declaration."
+        ),
+        "test" to AnnotationInfo(
+            "Describes additional metadata for test function."
         )
     )
 

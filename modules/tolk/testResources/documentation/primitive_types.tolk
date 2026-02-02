@@ -1,3 +1,5 @@
+type tuple = builtin
+
 /// Test all primitive types
 fun primitiveTypes(
     /// Basic integer

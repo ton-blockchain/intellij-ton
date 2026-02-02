@@ -19,8 +19,8 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
         if (element !is TolkCallExpression) return
 
         val function = element.functionSymbol
-        if (function?.name == "ton") {
-            // Obvious and `floatString:` is too long for a parameter hint here
+        if (function?.name == "ton" || function?.name == "address") {
+            // the parameters for these functions are obvious
             return
         }
 

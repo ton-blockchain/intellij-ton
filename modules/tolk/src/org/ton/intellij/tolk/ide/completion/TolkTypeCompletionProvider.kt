@@ -93,9 +93,13 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
             result.addElement(lookup)
         }
 
-        val typeCandidates = HashSet<TolkSymbolElement>()
-
+        val сandidates = HashSet<TolkTypeSymbolElement>()
+        val allKeys = mutableListOf<String>()
         StubIndex.getInstance().processAllKeys(TolkTypeSymbolIndex.KEY, project) { key ->
+            allKeys.add(key)
+            true
+        }
+        for (key in allKeys) {
             StubIndex.getInstance().processElements(
                 TolkTypeSymbolIndex.KEY,
                 key,
@@ -103,20 +107,19 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
                 GlobalSearchScope.allScope(project),
                 TolkTypeSymbolElement::class.java
             ) {
-                typeCandidates.add(it)
+                сandidates.add(it)
                 true
             }
-            true
         }
 
-        for (typeDef in typeCandidates) {
-            if (typeDef is TolkTypeDef) {
-                if (typeDef.builtinKeyword != null) {
+        for (type in сandidates) {
+            if (type is TolkTypeDef) {
+                if (type.builtinKeyword != null) {
                     continue
                 }
             }
 
-            result.addElement(typeDef.toLookupElementBuilder(ctx))
+            result.addElement(type.toLookupElementBuilder(ctx))
         }
     }
 }

@@ -4,5 +4,9 @@
     <extensions defaultExtensionNs="com.intellij">
         <runLineMarkerContributor language="TOML"
                                 implementationClass="org.ton.intellij.acton.toml.ActonTomlLineMarkerProvider"/>
+        <completion.contributor language="TOML"
+                                implementationClass="org.ton.intellij.acton.toml.ActonTomlCompletionContributor"/>
+        <lang.documentationProvider language="TOML"
+                                implementationClass="org.ton.intellij.acton.toml.ActonTomlDocumentationProvider"/>
     </extensions>
 </idea-plugin>

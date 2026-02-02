@@ -21,8 +21,6 @@ import com.intellij.openapi.startup.ProjectActivity
 import org.ton.intellij.acton.cli.ActonCommandLine
 import org.ton.intellij.acton.settings.actonApplicationSettings
 import org.ton.intellij.acton.settings.actonSettings
-import java.nio.file.Path
-import kotlin.io.path.absolute
 
 class ActonUpdateActivity : ProjectActivity {
     override suspend fun execute(project: Project) {

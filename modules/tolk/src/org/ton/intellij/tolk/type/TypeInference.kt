@@ -194,6 +194,11 @@ class TolkInferenceContext(
                 val walker = TolkInferenceWalker(this)
                 walker.inferParameterDefault(element, TolkFlowContext())
             }
+
+            is TolkContractDefinition -> {
+                val walker = TolkInferenceWalker(this)
+                walker.inferContractDefinition(element, TolkFlowContext())
+            }
         }
 
         return TolkInferenceResult(
@@ -431,6 +436,17 @@ class TolkInferenceWalker(
         val expression = element.expression ?: return flow
         val typeHint = element.parentOfType<TolkParameter>()?.typeExpression?.type
         inferExpression(expression, flow, false, typeHint).outFlow
+        return flow
+    }
+
+    fun inferContractDefinition(
+        element: TolkContractDefinition,
+        flow: TolkFlowContext,
+    ): TolkFlowContext {
+        val fields = element.contractDefinitionBody?.contractFieldList ?: emptyList()
+        fields.forEach { field ->
+            field.expression?.let { inferExpression(it, flow, false) }
+        }
         return flow
     }
 

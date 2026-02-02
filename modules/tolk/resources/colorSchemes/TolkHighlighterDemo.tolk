@@ -1,3 +1,8 @@
+<KEYWORD>contract<KEYWORD> Counter {
+    <FIELD>author</FIELD>: "me"
+    <FIELD>storage</FIELD>: <STRUCT>Point</STRUCT>
+}
+
 // This is a line comment
 /// This is a doc comment
 const <CONSTANT>CONST_VALUE</CONSTANT> = <FUNCTION_CALL>stringCrc32</FUNCTION_CALL>("some_str")

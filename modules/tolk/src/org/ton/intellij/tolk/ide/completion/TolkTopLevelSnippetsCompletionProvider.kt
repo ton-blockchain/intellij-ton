@@ -61,6 +61,39 @@ object TolkTopLevelSnippetsCompletionProvider : TolkCompletionProvider() {
                 }
         )
 
+        result.addElement(
+            LookupElementBuilder.create("contract")
+                .withIcon(AllIcons.Actions.RealIntentionBulb)
+                .withTailText(" Generates contract header", true)
+                .withInsertHandler { context, item ->
+                    val document = context.document
+                    val start = context.startOffset
+                    document.deleteString(start, start + "contract".length)
+
+                    val fileName = context.file.name.removeSuffix(".tolk")
+                    val pascalName = fileName.split('-', '_', ' ')
+                        .filter { it.isNotEmpty() }
+                        .joinToString("") { it.replaceFirstChar { char -> char.uppercaseChar() } }
+                        .ifEmpty { "Main" }
+
+                    TemplateStringInsertHandler(
+                        """
+                            contract ${'$'}name$ {
+                                version: "${'$'}version$"
+                                description: "${'$'}description$"
+                                incomingMessages: ${'$'}messages$
+                                storage: ${'$'}storage$
+                            }
+                        """.trimIndent(), true,
+                        "name" to ConstantNode(pascalName),
+                        "version" to ConstantNode("1.0.0"),
+                        "description" to ConstantNode("My TON contract"),
+                        "messages" to ConstantNode("AllowedMessages"),
+                        "storage" to ConstantNode("Storage")
+                    ).handleInsert(context, item)
+                }
+        )
+
         val file = parameters.originalFile as? TolkFile ?: return
         val firstType = file.structs.firstOrNull() ?: file.typeDefs.firstOrNull() ?: file.enums.firstOrNull()
 

@@ -1,3 +1,38 @@
+contract ${NAME} {
+    author: ""
+    version: "1.0.0"
+    description: "My TON contract"
+    incomingMessages: AllowedMessages
+    storage: Storage
+}
+
+struct (0x00000001) SomeMessage {
+    // add message fields here
+}
+
+struct Storage {
+    // add persistent storage fields here
+}
+
+fun Storage.load() {
+    return Storage.fromCell(contract.getData());
+}
+
+fun Storage.save(self) {
+    contract.setData(self.toCell());
+}
+
+type AllowedMessages =
+    | SomeMessage
+
 fun onInternalMessage(in: InMessage) {
-    
+    val msg = lazy AllowedMessages.fromSlice(in.body);
+    match (msg) {
+        SomeMessage => {
+            // handle message
+        }
+        else => {
+            assert (in.body.isEmpty()) throw 0xFFFF;
+        }
+    }
 }

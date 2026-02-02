@@ -1,4 +1,4 @@
-<KEYWORD>contract<KEYWORD> Counter {
+<KEYWORD>contract</KEYWORD> Counter {
     <FIELD>author</FIELD>: "me"
     <FIELD>storage</FIELD>: <STRUCT>Point</STRUCT>
 }

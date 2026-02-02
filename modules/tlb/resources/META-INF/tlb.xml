@@ -89,6 +89,8 @@
                 groupName="TL-B"
                 implementationClass="org.ton.intellij.tlb.inspection.TlbImplicitConstructorTagInspection"
                 enabledByDefault="true" level="WARNING"/>
+
+        <internalFileTemplate name="TL-B empty schema"/>
     </extensions>
 
     <actions>

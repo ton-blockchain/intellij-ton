@@ -117,9 +117,15 @@ object TolkFunctionNameCompletionProvider : TolkCompletionProvider() {
 
     private fun addTypeCompletions(project: Project, position: PsiElement, result: CompletionResultSet) {
         val ctx = TolkCompletionContext(position.parent as? TolkElement)
-        val candidates = HashSet<TolkSymbolElement>()
+        val candidates = HashSet<TolkTypeSymbolElement>()
+        val allKeys = mutableListOf<String>()
 
         StubIndex.getInstance().processAllKeys(TolkTypeSymbolIndex.KEY, project) { key ->
+            allKeys.add(key)
+            true
+        }
+
+        for (key in allKeys) {
             StubIndex.getInstance().processElements(
                 TolkTypeSymbolIndex.KEY,
                 key,
@@ -130,7 +136,6 @@ object TolkFunctionNameCompletionProvider : TolkCompletionProvider() {
                 candidates.add(it)
                 true
             }
-            true
         }
 
         for (type in candidates) {

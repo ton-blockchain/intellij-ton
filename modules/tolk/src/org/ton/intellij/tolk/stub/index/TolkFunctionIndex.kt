@@ -22,8 +22,16 @@ class TolkFunctionIndex : StringStubIndexExtension<TolkFunction>() {
             project: Project,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
             processor: Processor<TolkFunction>
-        ): Boolean = processAllKeys(project, scope) {
-            processElements(project, it, scope, processor)
+        ): Boolean {
+            val allKeys = mutableListOf<String>()
+            processAllKeys(project, scope) {
+                allKeys.add(it)
+                true
+            }
+            for (key in allKeys) {
+                if (!processElements(project, key, scope, processor)) return false
+            }
+            return true
         }
 
         fun processElements(

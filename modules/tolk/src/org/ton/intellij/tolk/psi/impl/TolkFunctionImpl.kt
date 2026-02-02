@@ -18,6 +18,7 @@ import org.ton.intellij.tolk.stub.TolkFunctionStub
 import org.ton.intellij.tolk.type.CyclicReferenceException
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkTyFunction
+import org.ton.intellij.tolk.type.TolkTyUnknown
 import org.ton.intellij.tolk.type.inference
 import org.ton.intellij.util.childOfType
 import org.ton.intellij.util.crc16
@@ -39,37 +40,43 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
     }
 
     override val type: TolkTyFunction
-        get() = CachedValuesManager.getCachedValue(this, FUNCTION_TYPE) {
-            val returnTy = returnTy
-            val parameterList = parameterList ?: return@getCachedValue CachedValueProvider.Result.create(
-                TolkTyFunction(
-                    emptyList(),
-                    returnTy
-                ), this
-            )
-            val selfParameter = parameterList.selfParameter
-            val parameters = parameterList.parameterList
-            val parametersType: ArrayList<TolkTy>
-            if (selfParameter != null) {
-                parametersType = ArrayList(parameters.size + 1)
-                parametersType.add(selfParameter.type ?: TolkTy.Unknown)
-            } else {
-                parametersType = ArrayList(parameters.size)
-            }
-            parameters.forEach {
-                val type = it.typeExpression?.type ?: TolkTy.Unknown
-                parametersType.add(type)
-            }
+        get() {
+            if (!isValid) return TolkTyFunction(emptyList(), TolkTyUnknown)
+            return CachedValuesManager.getCachedValue(this, FUNCTION_TYPE) {
+                val returnTy = returnTy
+                val parameterList = parameterList ?: return@getCachedValue CachedValueProvider.Result.create(
+                    TolkTyFunction(
+                        emptyList(),
+                        returnTy
+                    ), this
+                )
+                val selfParameter = parameterList.selfParameter
+                val parameters = parameterList.parameterList
+                val parametersType: ArrayList<TolkTy>
+                if (selfParameter != null) {
+                    parametersType = ArrayList(parameters.size + 1)
+                    parametersType.add(selfParameter.type ?: TolkTy.Unknown)
+                } else {
+                    parametersType = ArrayList(parameters.size)
+                }
+                parameters.forEach {
+                    val type = it.typeExpression?.type ?: TolkTy.Unknown
+                    parametersType.add(type)
+                }
 
-            val type = TolkTyFunction(parametersType, returnTy)
+                val type = TolkTyFunction(parametersType, returnTy)
 
-            createCachedResult(type)
+                createCachedResult(type)
+            }
         }
 
     val returnTy: TolkTy
-        get() = CachedValuesManager.getCachedValue(this, RETURN_TYPE_KEY) {
-            val returnType = resolveReturnType()
-            createCachedResult(returnType)
+        get() {
+            if (!isValid) return TolkTyUnknown
+            return CachedValuesManager.getCachedValue(this, RETURN_TYPE_KEY) {
+                val returnType = resolveReturnType()
+                createCachedResult(returnType)
+            }
         }
 
     val receiverTy: TolkTy

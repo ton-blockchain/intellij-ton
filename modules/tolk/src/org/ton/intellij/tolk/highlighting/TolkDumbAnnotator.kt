@@ -25,7 +25,8 @@ class TolkDumbAnnotator : Annotator, DumbAware {
                 identifierColor(parent) ?: return
             }
             TolkElementTypes.GET_KEYWORD,
-            TolkElementTypes.LAZY_KEYWORD -> TolkColor.KEYWORD.textAttributesKey
+            TolkElementTypes.LAZY_KEYWORD,
+            TolkElementTypes.CONTRACT_KEYWORD -> TolkColor.KEYWORD.textAttributesKey
             TolkElementTypes.SELF_KEYWORD -> {
                 when (val parent = element.parent) {
                     is TolkSelfExpression -> {
@@ -70,7 +71,8 @@ class TolkDumbAnnotator : Annotator, DumbAware {
                 is TolkGlobalVar -> TolkColor.GLOBAL_VARIABLE.textAttributesKey
                 is TolkConstVar -> TolkColor.CONSTANT.textAttributesKey
                 is TolkStruct -> {
-                    if (element.name == "map") {
+                    // map and array are special builtin types, so we want to highlight it as a keyword
+                    if (element.name == "map" || element.name == "array") {
                         return TolkColor.KEYWORD.textAttributesKey
                     }
                     val tag = element.structConstructorTag
@@ -84,6 +86,7 @@ class TolkDumbAnnotator : Annotator, DumbAware {
                 is TolkEnum -> TolkColor.ENUM.textAttributesKey
                 is TolkTypeDef -> TolkColor.TYPE_ALIAS.textAttributesKey
                 is TolkStructField -> TolkColor.FIELD.textAttributesKey
+                is TolkContractField -> TolkColor.FIELD.textAttributesKey
                 is TolkEnumMember -> TolkColor.ENUM_MEMBER.textAttributesKey
                 is TolkStructExpressionField -> TolkColor.FIELD.textAttributesKey
                 is TolkVar -> if (element.isMutable) {

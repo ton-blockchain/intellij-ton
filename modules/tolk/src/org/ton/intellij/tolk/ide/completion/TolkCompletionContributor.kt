@@ -89,6 +89,7 @@ class TolkCompletionContributor : CompletionContributor() {
         extend(TolkFunctionNameCompletionProvider)
         extend(TolkStructFieldModifierCompletionProvider)
         extend(TolkTestFunctionCompletionProvider)
+        extend(TolkContractFieldCompletionProvider)
 
         // Acton
         extend(TolkWalletNameCompletionProvider)

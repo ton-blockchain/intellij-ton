@@ -24,7 +24,7 @@ inline fun <reified T : PsiElement> InsertionContext.getElementOfType(strict: Bo
 val InsertionContext.alreadyHasCallParens: Boolean
     get() = nextCharIs('(')
 
-private val InsertionContext.alreadyHasAngleBrackets: Boolean
+val InsertionContext.alreadyHasAngleBrackets: Boolean
     get() = nextCharIs('<')
 
 private val InsertionContext.alreadyHasStructBraces: Boolean
@@ -87,6 +87,8 @@ fun TolkNamedElement.toLookupElementBuilder(
     val base = LookupElementBuilder.createWithSmartPointer(name, this)
         .withIcon(this.getIcon(0))
         .withStrikeoutness(isDeprecated)
+
+    val hasTypeParameters = this is TolkTypeParameterListOwner && typeParameterList?.typeParameterList?.isNotEmpty() == true
 
     return when (this) {
         is TolkFunction -> {
@@ -173,8 +175,17 @@ fun TolkNamedElement.toLookupElementBuilder(
             .withTypeText(type?.render())
 
         is TolkStruct -> base
+            .let { builder ->
+                typeParameterList.appendTypeParametersIfAny(builder)
+            }
             .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
-            .withInsertHandler { context, item ->
+            .withInsertHandler { context, _ ->
+                if (hasTypeParameters && !context.alreadyHasAngleBrackets) {
+                    context.document.insertString(context.selectionEndOffset, "<>")
+                    EditorModificationUtil.moveCaretRelatively(context.editor, 1)
+                    AutoPopupController.getInstance(context.project)?.autoPopupParameterInfo(context.editor, this)
+                }
+
                 context.commitDocument()
 
                 val insertFile = context.file as? TolkFile ?: return@withInsertHandler
@@ -213,8 +224,17 @@ fun TolkNamedElement.toLookupElementBuilder(
         }
 
         is TolkTypeDef -> base
+            .let { builder ->
+                typeParameterList.appendTypeParametersIfAny(builder)
+            }
             .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
-            .withInsertHandler { context, item ->
+            .withInsertHandler { context, _ ->
+                if (hasTypeParameters && !context.alreadyHasAngleBrackets) {
+                    context.document.insertString(context.selectionEndOffset, "<>")
+                    EditorModificationUtil.moveCaretRelatively(context.editor, 1)
+                    AutoPopupController.getInstance(context.project)?.autoPopupParameterInfo(context.editor, this)
+                }
+
                 context.commitDocument()
 
                 val insertFile = context.file as? TolkFile ?: return@withInsertHandler
@@ -224,6 +244,15 @@ fun TolkNamedElement.toLookupElementBuilder(
 
         else -> base
     }
+}
+
+private fun TolkTypeParameterList?.appendTypeParametersIfAny(builder: LookupElementBuilder): LookupElementBuilder {
+    if (this == null) {
+        return builder
+    }
+
+    val list = this.typeParameterList.joinToString(prefix = "<", postfix = ">") { it.name.toString() }
+    return builder.appendTailText(list, true)
 }
 
 fun TolkPrimitiveTy.toLookupElement(): LookupElementBuilder {

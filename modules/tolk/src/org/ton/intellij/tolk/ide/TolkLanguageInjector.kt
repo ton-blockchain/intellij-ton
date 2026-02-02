@@ -14,8 +14,9 @@ class TolkLanguageInjector : MultiHostInjector {
     private fun shouldInjectExpectType(element: TolkStringLiteral): Boolean {
         val argument = element.parent?.parent as? TolkArgument ?: return false
         val callExpr = argument.parent?.parent as? TolkCallExpression ?: return false
+        val index = callExpr.argumentList.argumentList.indexOf(argument)
         val calleeRef = callExpr.expression as? TolkReferenceExpression ?: return false
-        return calleeRef.referenceName == "__expect_type"
+        return index == 1 && calleeRef.referenceName == "__expect_type" // inject only in the second argument
     }
 
     override fun getLanguagesToInject(
@@ -30,7 +31,6 @@ class TolkLanguageInjector : MultiHostInjector {
             registrar.startInjecting(TolkLanguage)
                 .addPlace("type __DUMMY = ", ";", context, contentRange)
                 .doneInjecting()
-            return
         }
     }
 

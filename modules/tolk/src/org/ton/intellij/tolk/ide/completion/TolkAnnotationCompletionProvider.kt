@@ -17,6 +17,7 @@ import org.ton.intellij.tolk.psi.TolkAnnotationHolder
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.impl.isEntryPoint
+import org.ton.intellij.tolk.psi.impl.isGetMethod
 
 typealias Applicability = (PsiElement) -> Boolean
 
@@ -26,6 +27,7 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
 
     val forAny: Applicability = { true }
     val forFunctions: Applicability = { it is TolkFunction }
+    val forGetMethods: Applicability = { it is TolkFunction && it.isGetMethod }
     val forStructs: Applicability = { it is TolkStruct }
     val forEntryPoints: Applicability = { it is TolkFunction && it.isEntryPoint }
 
@@ -34,7 +36,9 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
         LookupElementBuilder.create("noinline") to forFunctions,
         LookupElementBuilder.create("inline") to forFunctions,
         LookupElementBuilder.create("inline_ref") to forFunctions,
+        LookupElementBuilder.create("test").withInsertHandler(ParInsertHandler) to forGetMethods,
         LookupElementBuilder.create("method_id").withInsertHandler(ParInsertHandler) to forFunctions,
+        LookupElementBuilder.create("abi").withInsertHandler(ParInsertHandler) to forAny,
         LookupElementBuilder.create("deprecated").withTailText("(\"reason\")")
             .withInsertHandler(StringArgumentInsertHandler("")) to forAny,
         LookupElementBuilder.create("custom").withInsertHandler(ParInsertHandler) to forAny,

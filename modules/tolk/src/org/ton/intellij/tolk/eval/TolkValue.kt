@@ -1,10 +1,7 @@
 package org.ton.intellij.tolk.eval
 
-import org.apache.commons.codec.binary.Hex
 import org.ton.intellij.tolk.psi.TolkLiteralExpression
 import java.math.BigInteger
-import java.security.MessageDigest
-import java.util.zip.CRC32
 
 sealed interface TolkValue
 
@@ -19,7 +16,7 @@ data class TolkTupleValue(val values: List<TolkValue?>) : TolkValue
 
 data class TolkTensorValue(val values: List<TolkValue?>) : TolkValue
 
-data class TolkSliceValue(val value: String) : TolkValue
+data class TolkStringValue(val value: String) : TolkValue
 
 @OptIn(ExperimentalUnsignedTypes::class)
 val TolkLiteralExpression.value: TolkValue
@@ -56,52 +53,10 @@ val TolkLiteralExpression.value: TolkValue
         val stringLiteral = stringLiteral
         if (stringLiteral != null) {
             val text = stringLiteral.text
-            if (text.length < 2) return TolkIntValue(BigInteger.ZERO)
-            val tag = text.lastOrNull()
-            if (tag == '"') {
-                return TolkSliceValue(text.removeSurrounding("\""))
+            if (text.startsWith("\"\"\"") && text.endsWith("\"\"\"")) {
+                return TolkStringValue(text.removeSurrounding("\"\"\""))
             }
-            when (tag) {
-                'u' -> {
-                    if (text.length <= 3) return TolkIntValue(BigInteger.ZERO)
-                    val rawValue = text.substring(1, text.length - 2)
-                    val intValue = BigInteger(Hex.encodeHexString(rawValue.encodeToByteArray()), 16)
-                    return TolkIntValue(intValue)
-                }
-
-                'h' -> {
-                    if (text.length <= 3) return TolkIntValue(BigInteger.ZERO)
-                    val rawValue = text.substring(1, text.length - 2)
-                    val digestValue = MessageDigest.getInstance("SHA-256").apply {
-                        update(rawValue.toByteArray())
-                    }.digest()
-                    val intValue = BigInteger(Hex.encodeHexString(digestValue).substring(0, 8), 16)
-                    return TolkIntValue(intValue)
-                }
-
-                'H' -> {
-                    if (text.length <= 3) return TolkIntValue(BigInteger.ZERO)
-                    val rawValue = text.substring(1, text.length - 2)
-                    val digestValue = MessageDigest.getInstance("SHA-256").apply {
-                        update(rawValue.toByteArray())
-                    }.digest()
-                    val intValue = BigInteger(Hex.encodeHexString(digestValue), 16)
-                    return TolkIntValue(intValue)
-                }
-
-                'c' -> {
-                    if (text.length <= 3) return TolkIntValue(BigInteger.ZERO)
-                    val rawValue = text.substring(1, text.length - 2)
-                    val intValue = CRC32().apply {
-                        update(rawValue.toByteArray())
-                    }.value
-                    return TolkIntValue(BigInteger.valueOf(intValue))
-                }
-
-                else -> {
-                    return TolkIntValue(BigInteger.ZERO)
-                }
-            }
+            return TolkStringValue(text.removeSurrounding("\""))
         }
         return TolkIntValue(BigInteger.ZERO)
     }

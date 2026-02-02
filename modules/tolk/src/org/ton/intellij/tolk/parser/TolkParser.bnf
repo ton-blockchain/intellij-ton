@@ -50,6 +50,7 @@
             EXCL                = '!'
             DOT                 = '.'
             AT                  = '@'
+            QUESTQUEST          = '??'
 
             EQEQ                = '=='
             NEQ                 = '!='
@@ -126,7 +127,8 @@
             CONST_KEYWORD               = 'const'
             BUILTIN_KEYWORD             = 'builtin'
             GET_KEYWORD                 = 'GET_KEYWORD'
-            LAZY_KEYWORD                 = 'LAZY_KEYWORD'
+            LAZY_KEYWORD                = 'LAZY_KEYWORD'
+            CONTRACT_KEYWORD            = 'CONTRACT_KEYWORD'
             IMPORT_KEYWORD              = 'import'
             TOLK_KEYWORD                = 'tolk'
             PRIVATE_KEYWORD             = 'private'
@@ -134,6 +136,7 @@
 
             ESCAPE_SEQUENCE = "ESCAPE_SEQUENCE"
             DANGLING_NEWLINE = "DANGLING_NEWLINE"
+            RAW_STRING_ELEMENT = "RAW_STRING_ELEMENT"
 //            VERSION_VALUE = "regexp:((=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?)"
             IDENTIFIER = "regexp:[a-zA-Z_$?:][0-9a-zA-Z_$?:]*"
 //            WHITESPACE = 'regexp:[\ \n\t\f]'
@@ -143,13 +146,41 @@
 
 private root ::= TopLevelDefinition_with_recover*
 
-private TopLevelElement ::= (IncludeDefinition | VersionDefinition | Item | ';')
+private TopLevelElement ::= (IncludeDefinition | VersionDefinition | ContractDefinition | Item | ';')
 private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelElement {
     pin = 1
     recoverWhile = TopLevelDefinition_recover
 }
 private TopLevelDefinition_recover ::= !(TopLevelDefinition_first)
-private TopLevelDefinition_first ::= 'tolk' | 'fun' | 'import' | 'global' | 'const' | ';' | '@' | 'enum' | 'struct' | 'type' | "get"
+private TopLevelDefinition_first ::= 'tolk' | 'fun' | 'import' | 'global' | 'const' | ';' | '@' | 'enum' | 'struct' | 'type' | "get" | contract
+
+ContractDefinition ::= contract IDENTIFIER ContractDefinitionBody {
+    pin = 1
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkContractDefinitionMixin"
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkTopLevelElement"
+        "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
+        "org.ton.intellij.tolk.psi.TolkNamedElement"
+    ]
+    stubClass = "org.ton.intellij.tolk.stub.TolkContractDefinitionStub"
+    elementTypeFactory = "org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
+}
+
+ContractDefinitionBody ::= '{' ContractBodyElement* '}'
+
+private contract ::= <<contractKeyword>>
+
+private ContractBodyElement ::= ContractField ','?
+
+ContractField ::= IDENTIFIER ':' (TypeExpression | Expression) {
+    pin = 1
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkContractFieldMixin"
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkElement"
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkNamedElement"
+    ]
+}
 
 Item ::= Annotations (ConstVar | GlobalVar | TypeDef | Struct | Enum | Function) {
     name = "item"
@@ -158,7 +189,7 @@ Item ::= Annotations (ConstVar | GlobalVar | TypeDef | Struct | Enum | Function)
 }
 private Annotations ::= Annotation*
 
-RawString ::= RAW_STRING_ELEMENT*
+RawString ::= (RAW_STRING_ELEMENT | ESCAPE_SEQUENCE)*
 
 StringLiteral ::= OPEN_QUOTE RawString CLOSING_QUOTE {
     pin=1
@@ -388,7 +419,7 @@ AnnotationArgument ::= Expression {
 FunctionBody ::= ';' | AsmDefinition | BlockStatement | ('builtin' ';'?)
 private FunctionBody_first ::= ';' | 'asm' | '{' | 'builtin'
 
-TypeParameterList ::= '<' << comma_separated_list TypeParameter >> '>' {
+TypeParameterList ::= '<' << comma_separated_list TypeParameter >>? '>' {
     pin=1
     extends = "org.ton.intellij.tolk.psi.impl.TolkStubbedElementImpl<?>"
     stubClass = "org.ton.intellij.tolk.stub.TolkTypeParameterListStub"
@@ -536,6 +567,7 @@ CatchParameter ::= IDENTIFIER {
 Expression ::=
     VarExpression
     | AssignBinExpression // expr10
+    | NullCoalesceBinExpression // expr10
     | TernaryExpression // expr10
     | LogicalBinExpression //expr13
     | BitwiseBinExpression // expr14
@@ -588,6 +620,11 @@ VarExpression ::= ('var'|'val') VarDefinition ('=' Expression)? {
     pin = 1
 }
 AssignBinExpression ::= Expression AssignBinOp Expression {
+    pin=2
+    rightAssociative=true
+}
+NullCoalesceBinOp ::= '??' { name = "operator" }
+NullCoalesceBinExpression ::= Expression NullCoalesceBinOp Expression {
     pin=2
     rightAssociative=true
 }
@@ -813,8 +850,8 @@ private TensorOrParenElement ::= Expression {
 
 private TensorExpressionValue_recovery ::= !(','|')'|';')
 
-TupleExpression ::= '[' [ <<comma_separated_list TupleElement>> ] ']' {
-    pin=1
+TupleExpression ::= ReferenceTypeExpression? ('[' [ <<comma_separated_list TupleElement>> ] ']') {
+    pin=2
     extends=Expression
 }
 private TupleElement ::= Expression {
@@ -846,12 +883,12 @@ ReferenceExpression ::= IDENTIFIER TypeArgumentList? {
     ]
 }
 
-TypeArgumentList ::= '<' <<list_with_recover TypeExpression>> '>' {
+TypeArgumentList ::= '<' <<list_with_recover TypeExpression>>? '>' {
     extends = "org.ton.intellij.tolk.psi.impl.TolkStubbedElementImpl<?>"
     stubClass = "org.ton.intellij.tolk.stub.TolkTypeArgumentListStub"
     elementTypeFactory = "org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
-TypeArgumentList_pinned ::= '<' <<list_with_recover TypeExpression>> '>' {
+TypeArgumentList_pinned ::= '<' <<list_with_recover TypeExpression>>? '>' {
     pin=1
     elementType=TypeArgumentList
 }

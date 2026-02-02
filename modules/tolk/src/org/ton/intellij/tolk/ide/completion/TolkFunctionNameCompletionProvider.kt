@@ -3,18 +3,20 @@ package org.ton.intellij.tolk.ide.completion
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.openapi.project.Project
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.psi.PsiElement
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.util.elementType
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.TolkIcons
-import org.ton.intellij.tolk.psi.TolkElementTypes
-import org.ton.intellij.tolk.psi.TolkFile
-import org.ton.intellij.tolk.psi.TolkFunction
+import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.hasReceiver
 import org.ton.intellij.tolk.psi.impl.receiverTy
+import org.ton.intellij.tolk.stub.index.TolkTypeSymbolIndex
 import org.ton.intellij.tolk.type.TolkTyAlias
 import org.ton.intellij.tolk.type.TolkTyUnknown
 import org.ton.intellij.util.parentOfType
@@ -50,6 +52,11 @@ object TolkFunctionNameCompletionProvider : TolkCompletionProvider() {
         context: ProcessingContext,
         result: CompletionResultSet,
     ) {
+        val prefix = result.prefixMatcher.prefix
+        if (prefix.isNotEmpty() && prefix[0].isUpperCase()) {
+            addTypeCompletions(parameters.originalFile.project, parameters.position, result)
+        }
+
         val func = parameters.position.parentOfType<TolkFunction>() ?: return
         val file = parameters.originalFile as? TolkFile ?: return
         val definedFunctions = file.functions.associateBy { it.name ?: "" }
@@ -105,6 +112,35 @@ object TolkFunctionNameCompletionProvider : TolkCompletionProvider() {
                     )
                 }
             }
+        }
+    }
+
+    private fun addTypeCompletions(project: Project, position: PsiElement, result: CompletionResultSet) {
+        val ctx = TolkCompletionContext(position.parent as? TolkElement)
+        val candidates = HashSet<TolkTypeSymbolElement>()
+        val allKeys = mutableListOf<String>()
+
+        StubIndex.getInstance().processAllKeys(TolkTypeSymbolIndex.KEY, project) { key ->
+            allKeys.add(key)
+            true
+        }
+
+        for (key in allKeys) {
+            StubIndex.getInstance().processElements(
+                TolkTypeSymbolIndex.KEY,
+                key,
+                project,
+                GlobalSearchScope.allScope(project),
+                TolkTypeSymbolElement::class.java
+            ) {
+                candidates.add(it)
+                true
+            }
+        }
+
+        for (type in candidates) {
+            val lookup = type.toLookupElementBuilder(ctx)
+            result.addElement(lookup)
         }
     }
 }

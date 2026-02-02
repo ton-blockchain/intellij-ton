@@ -50,55 +50,8 @@ abstract class TolkLiteralExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(
             if (nullKeyword != null) {
                 return TolkTy.Null
             }
-            val stringLiteral = stringLiteral
             if (stringLiteral != null) {
-                val text = stringLiteral.text
-                if (text.length < 2) return TolkTy.Slice
-                val tag = text.lastOrNull()
-                if (tag == '"') {
-                    return TolkTy.Slice
-                }
-                when (tag) {
-                    'u' -> {
-                        if (text.length <= 3) return TolkConstantIntTy(BigInteger.ZERO)
-                        val rawValue = text.substring(1, text.length - 2)
-                        val intValue = BigInteger(Hex.encodeHexString(rawValue.encodeToByteArray()), 16)
-                        return TolkConstantIntTy(intValue)
-                    }
-
-                    'h' -> {
-                        if (text.length <= 3) return TolkConstantIntTy(BigInteger.ZERO)
-                        val rawValue = text.substring(1, text.length - 2)
-                        val digestValue = MessageDigest.getInstance("SHA-256").apply {
-                            update(rawValue.toByteArray())
-                        }.digest()
-                        val intValue = BigInteger(Hex.encodeHexString(digestValue).substring(0, 8), 16)
-                        return TolkConstantIntTy(intValue)
-                    }
-
-                    'H' -> {
-                        if (text.length <= 3) return TolkConstantIntTy(BigInteger.ZERO)
-                        val rawValue = text.substring(1, text.length - 2)
-                        val digestValue = MessageDigest.getInstance("SHA-256").apply {
-                            update(rawValue.toByteArray())
-                        }.digest()
-                        val intValue = BigInteger(Hex.encodeHexString(digestValue), 16)
-                        return TolkConstantIntTy(intValue)
-                    }
-
-                    'c' -> {
-                        if (text.length <= 3) return TolkConstantIntTy(BigInteger.ZERO)
-                        val rawValue = text.substring(1, text.length - 2)
-                        val intValue = CRC32().apply {
-                            update(rawValue.toByteArray())
-                        }.value
-                        return TolkConstantIntTy(BigInteger.valueOf(intValue))
-                    }
-
-                    else -> {
-                        return TolkTy.Unknown
-                    }
-                }
+                return TolkTy.String
             }
             return TolkTy.Unknown
         }

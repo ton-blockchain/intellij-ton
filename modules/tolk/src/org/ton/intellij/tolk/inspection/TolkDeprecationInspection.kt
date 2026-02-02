@@ -9,9 +9,10 @@ class TolkDeprecationInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor {
         return object : TolkVisitor() {
             override fun visitElement(ref: TolkElement) {
-                if (ref !is TolkReferenceElement) return
+                if (!ref.isValid || ref !is TolkReferenceElement) return
 
                 val original = ref.reference?.resolve() ?: return
+                if (!original.isValid) return
                 val identifier = ref.referenceNameElement ?: return
                 val name = ref.referenceName ?: return
 

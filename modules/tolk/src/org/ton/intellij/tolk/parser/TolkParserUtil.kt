@@ -39,6 +39,11 @@ object TolkParserUtil : GeneratedParserUtilBase() {
         return softKeyword(b, "lazy", TolkElementTypes.LAZY_KEYWORD)
     }
 
+    @JvmStatic
+    fun contractKeyword(b: PsiBuilder, level: Int): Boolean {
+        return softKeyword(b, "contract", TolkElementTypes.CONTRACT_KEYWORD)
+    }
+
     private fun softKeyword(b: PsiBuilder, keyword: String, elementType: IElementType): Boolean {
         val tokenType = b.tokenType
         if (tokenType == elementType) {

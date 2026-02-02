@@ -37,8 +37,16 @@ class TolkTypeSymbolIndex : StringStubIndexExtension<TolkTypeSymbolElement>() {
             project: Project,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
             processor: (TolkTypeSymbolElement) -> Boolean
-        ): Boolean = StubIndex.getInstance().processAllKeys(KEY, Processor { key ->
-            processElements(project, key, scope, processor)
-        }, scope)
+        ): Boolean {
+            val allKeys = mutableListOf<String>()
+            StubIndex.getInstance().processAllKeys(KEY, { key ->
+                allKeys.add(key)
+                true
+            }, scope)
+            for (key in allKeys) {
+                if (!processElements(project, key, scope, processor)) return false
+            }
+            return true
+        }
     }
 }

@@ -121,9 +121,9 @@ interface TolkTy : TypeFoldable<TolkTy> {
         val Void = TolkTyVoid
         val Cell = TolkCellTy
         val Slice = TolkSliceTy
+        val String = TolkStringTy
         val Builder = TolkTyBuilder
         val Continuation = TolkTyContinuation
-        val Tuple = TolkTyTuple
         val Unknown = TolkTyUnknown
         val Never = TolkTyNever
         val Coins = TolkTyCoins
@@ -148,6 +148,8 @@ interface TolkTy : TypeFoldable<TolkTy> {
         fun tensor(elements: List<TolkTy>): TolkTy = TolkTyTensor.create(elements)
 
         fun typedTuple(elements: List<TolkTy>): TolkTy = TolkTyTypedTuple.create(elements)
+
+        fun array(elementType: TolkTy): TolkTy = TolkTyArray.create(elementType)
 
         fun uint(n: Int): TolkTy = TolkIntNTy(n, unsigned = true)
 
@@ -236,9 +238,9 @@ interface TolkPrimitiveTy : TolkTy {
                 "int" -> TolkTy.Int
                 "cell" -> Cell
                 "slice" -> Slice
+                "string" -> TolkTy.String
                 "builder" -> TolkTy.Builder
                 "continuation" -> TolkTy.Continuation
-                "tuple" -> TolkTy.Tuple
                 "void" -> TolkTy.Void
                 "bool" -> TolkTy.Bool
                 "never" -> Never
@@ -293,6 +295,12 @@ object TolkSliceTy : TolkPrimitiveTy {
     override fun isSuperType(other: TolkTy): Boolean = other == this
 
     override fun toString(): String = "slice"
+}
+
+object TolkStringTy : TolkPrimitiveTy {
+    override fun isSuperType(other: TolkTy): Boolean = other == this
+
+    override fun toString(): String = "string"
 }
 
 object TolkTyBuilder : TolkPrimitiveTy {

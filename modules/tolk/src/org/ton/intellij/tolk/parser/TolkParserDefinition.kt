@@ -115,7 +115,8 @@ class TolkParserDefinition : ParserDefinition {
             TolkElementTypes.ANDLET,
             TolkElementTypes.ORLET,
             TolkElementTypes.XORLET,
-            TolkElementTypes.MAPSTO
+            TolkElementTypes.MAPSTO,
+            TolkElementTypes.QUESTQUEST
         )
     }
 }

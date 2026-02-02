@@ -44,7 +44,9 @@ enum class TolkColor(
     KEYWORD(TolkBundle.messagePointer("settings.tolk.color.keyword"), Default.KEYWORD),
     NUMBER(TolkBundle.messagePointer("settings.tolk.color.number"), Default.NUMBER),
     STRING(TolkBundle.messagePointer("settings.tolk.color.string"), Default.STRING),
-    
+    VALID_STRING_ESCAPE(TolkBundle.messagePointer("settings.tolk.color.valid_escape"), Default.VALID_STRING_ESCAPE),
+    INVALID_STRING_ESCAPE(TolkBundle.messagePointer("settings.tolk.color.invalid_escape"), Default.INVALID_STRING_ESCAPE),
+
     LINE_COMMENT(TolkBundle.messagePointer("settings.tolk.color.line_comment"), Default.LINE_COMMENT),
     BLOCK_COMMENT(TolkBundle.messagePointer("settings.tolk.color.block_comment"), Default.BLOCK_COMMENT),
     DOC_COMMENT(TolkBundle.messagePointer("settings.tolk.color.doc.comment"), Default.DOC_COMMENT),

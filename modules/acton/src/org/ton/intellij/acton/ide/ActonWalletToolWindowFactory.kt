@@ -106,7 +106,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                 workingDirectory = projectDir.toNioPath(),
                 additionalArguments = walletCommand.getArguments(),
                 environmentVariables = EnvironmentVariablesData.DEFAULT
-            ).toGeneralCommandLine(project)
+            ).toGeneralCommandLine(project) ?: return@executeOnPooledThread
 
             val handler = CapturingProcessHandler(commandLine)
             val output = handler.runProcess(10000)
@@ -291,7 +291,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                     workingDirectory = projectDir.toNioPath(),
                     additionalArguments = airdropCommand.getArguments(),
                     environmentVariables = EnvironmentVariablesData.DEFAULT
-                ).toGeneralCommandLine(project)
+                ).toGeneralCommandLine(project) ?: return@executeOnPooledThread
 
                 val handler = OSProcessHandler(commandLine)
                 handler.addProcessListener(object : ProcessAdapter() {
@@ -362,7 +362,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                     workingDirectory = project.guessProjectDir()?.toNioPath() ?: return@executeOnPooledThread,
                     additionalArguments = walletCommand.getArguments(),
                     environmentVariables = EnvironmentVariablesData.DEFAULT
-                ).toGeneralCommandLine(project)
+                ).toGeneralCommandLine(project) ?: return@executeOnPooledThread
 
                 val handler = CapturingProcessHandler(commandLine)
                 val output = handler.runProcess(30000)
@@ -403,7 +403,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                     workingDirectory = project.guessProjectDir()?.toNioPath() ?: return@executeOnPooledThread,
                     additionalArguments = walletCommand.getArguments(),
                     environmentVariables = EnvironmentVariablesData.DEFAULT
-                ).toGeneralCommandLine(project)
+                ).toGeneralCommandLine(project) ?: return@executeOnPooledThread
 
                 val handler = CapturingProcessHandler(commandLine)
                 val output = handler.runProcess(30000)

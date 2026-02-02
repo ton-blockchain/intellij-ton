@@ -74,7 +74,8 @@ class ActonCommandRunState(
             environmentVariables = configuration.env
         )
 
-        var commandLine = actonCommandLine.toGeneralCommandLine(configuration.project)
+        var commandLine =
+            actonCommandLine.toGeneralCommandLine(configuration.project) ?: throw IllegalStateException("Cannot find acton executable")
         if (configuration.emulateTerminal && configuration.command != "test") {
             commandLine = PtyCommandLine(commandLine)
                 .withInitialColumns(PtyCommandLine.MAX_COLUMNS)

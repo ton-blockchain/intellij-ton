@@ -48,7 +48,7 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
             workingDirectory = Paths.get(baseDir.path),
             additionalArguments = command.getArguments(),
             environmentVariables = settings.env
-        ).toGeneralCommandLine(project)
+        ).toGeneralCommandLine(project) ?: return
 
         ProgressManager.getInstance().runProcessWithProgressSynchronously(
             {

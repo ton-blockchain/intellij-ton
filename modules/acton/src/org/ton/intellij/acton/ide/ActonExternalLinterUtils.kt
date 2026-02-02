@@ -93,6 +93,9 @@ object ActonExternalLinterUtils {
 
         return try {
             check(project, workingDirectory)
+        } catch (e: Exception) {
+            LOG.warn("Cannot check project", e)
+            return null
         } finally {
         }
     }
@@ -119,7 +122,7 @@ object ActonExternalLinterUtils {
             command = command.name,
             additionalArguments = command.getArguments() + ParametersListUtil.parse(settings.additionalArguments),
             environmentVariables = EnvironmentVariablesData.create(settings.envs, settings.isPassParentEnvs)
-        ).toGeneralCommandLine(project)
+        ).toGeneralCommandLine(project) ?: return null
 
         val handler = CapturingProcessHandler(commandLine)
         val output = handler.runProcess(10000)

@@ -67,7 +67,7 @@ class TolkUnregisteredContractNotificationProvider(
             command = command.name,
             workingDirectory = actonToml.workingDir,
             additionalArguments = command.getArguments()
-        ).toGeneralCommandLine(project)
+        ).toGeneralCommandLine(project) ?: return
 
         ApplicationManager.getApplication().executeOnPooledThread {
             try {

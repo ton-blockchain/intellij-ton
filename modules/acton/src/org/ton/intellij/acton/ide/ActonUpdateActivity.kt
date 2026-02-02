@@ -43,16 +43,16 @@ class ActonUpdateActivity : ProjectActivity {
             workingDirectory = project.guessProjectDir()?.toNioPath() ?: return null,
             additionalArguments = listOf("--check"),
             environmentVariables = EnvironmentVariablesData.DEFAULT
-        ).toGeneralCommandLine(project)
-
-        val handler = CapturingProcessHandler(commandLine)
-        val output = handler.runProcess(10000)
-        if (output.exitCode != 0) return null
+        ).toGeneralCommandLine(project) ?: return null
 
         return try {
+            val handler = CapturingProcessHandler(commandLine)
+            val output = handler.runProcess(10000)
+            if (output.exitCode != 0) return null
+
             Gson().fromJson(output.stdout, UpdateInfo::class.java)
         } catch (e: Exception) {
-            LOG.error("Failed to parse update info", e)
+            LOG.warn("Failed to parse update info", e)
             null
         }
     }
@@ -89,7 +89,7 @@ class ActonUpdateActivity : ProjectActivity {
             command = "up",
             workingDirectory = project.guessProjectDir()?.toNioPath() ?: return,
             additionalArguments = listOf("--yes")
-        ).toGeneralCommandLine(project)
+        ).toGeneralCommandLine(project) ?: return
 
         commandLine = PtyCommandLine(commandLine)
             .withInitialColumns(PtyCommandLine.MAX_COLUMNS)

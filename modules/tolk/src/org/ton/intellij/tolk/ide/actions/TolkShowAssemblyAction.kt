@@ -84,7 +84,7 @@ class TolkShowAssemblyAction : AnAction("Show Assembly") {
             command = compileCommand.name,
             workingDirectory = workingDir,
             additionalArguments = compileCommand.getArguments()
-        ).toGeneralCommandLine(project)
+        ).toGeneralCommandLine(project) ?: return Result.failure(IllegalStateException("Cannot find acton executable"))
 
         val compileResult = runExternal(compileCommandLine)
             .getOrElse {
@@ -101,7 +101,7 @@ class TolkShowAssemblyAction : AnAction("Show Assembly") {
             command = disasmCommand.name,
             workingDirectory = workingDir,
             additionalArguments = disasmCommand.getArguments()
-        ).toGeneralCommandLine(project)
+        ).toGeneralCommandLine(project) ?: return Result.failure(IllegalStateException("Cannot find acton executable"))
 
         val disasmResult = runExternal(disasmCommandLine)
             .getOrElse {

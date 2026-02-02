@@ -791,7 +791,7 @@ class TolkInferenceWalker(
         return when (element) {
             is TolkLiteralExpression -> inferLiteralExpression(element, flow, usedAsCondition)
             is TolkTernaryExpression -> inferTernaryExpression(element, flow, usedAsCondition, hint)
-            is TolkBinExpression -> inferBinExpression(element, flow, usedAsCondition)
+            is TolkBinExpression -> inferBinExpression(element, flow, usedAsCondition, hint)
             is TolkIsExpression -> inferIsExpression(element, flow, usedAsCondition)
             is TolkReferenceExpression -> inferReferenceExpression(element, flow, usedAsCondition).context
             is TolkSelfExpression -> inferSelfExpression(element, flow, usedAsCondition)
@@ -981,7 +981,8 @@ class TolkInferenceWalker(
     private fun inferBinExpression(
         element: TolkBinExpression,
         flow: TolkFlowContext,
-        usedAsCondition: Boolean
+        usedAsCondition: Boolean,
+        hint: TolkTy?,
     ): TolkExpressionFlowContext {
         val binaryOp = element.binaryOp
         val operatorType = binaryOp.node.firstChildNode.elementType
@@ -1027,6 +1028,43 @@ class TolkInferenceWalker(
                 val falseFlow = afterRight.falseFlow
 
                 return TolkExpressionFlowContext(outFlow, trueFlow, falseFlow)
+            }
+
+            TolkElementTypes.QUESTQUEST -> {
+                val afterLeft = inferExpression(left, nextFlow, false, hint)
+                val leftType = ctx.getType(left) ?: TolkTy.Unknown
+                if (right == null) {
+                    // incomplete code `a ??`
+                    ctx.setType(element, leftType)
+                    return TolkExpressionFlowContext(afterLeft.outFlow, usedAsCondition)
+                }
+
+                val rhsFlow = afterLeft.outFlow.clone()
+                extractSinkExpression(left)?.let { sExpr ->
+                    // a ?? a
+                    //      ^ type: null
+                    rhsFlow.setSymbol(sExpr, TolkTy.Null)
+                }
+
+                val afterRight = inferExpression(right, rhsFlow, false, hint)
+
+                val withoutNullType = leftType.subtract(TolkTy.Null)
+                if (leftType == TolkTy.Null) {
+                    // `null ?? rhs` — lhs is always null, rhs is always executed
+                    ctx.setType(element, ctx.getType(right))
+                } else if (withoutNullType == TolkTy.Never) {
+                    // `1 ?? rhs` — lhs can never be null, rhs is never executed
+                    rhsFlow.unreachable = TolkUnreachableKind.CantHappen
+                    ctx.setType(element, leftType)
+                } else {
+                    // regular situation: `lhs ?? rhs`, will generate a runtime branch
+                    val rightType = ctx.getType(right) ?: TolkTy.Unknown
+                    val resultType = withoutNullType.join(rightType, hint)
+                    ctx.setType(element, resultType)
+                }
+
+                val outFlow = afterLeft.outFlow.join(afterRight.outFlow)
+                return TolkExpressionFlowContext(outFlow, usedAsCondition)
             }
 
             in ASIGMENT_OPERATORS -> return inferSetAssigment(element, flow, usedAsCondition)

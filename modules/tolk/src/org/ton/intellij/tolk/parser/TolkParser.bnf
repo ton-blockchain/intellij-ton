@@ -50,6 +50,7 @@
             EXCL                = '!'
             DOT                 = '.'
             AT                  = '@'
+            QUESTQUEST          = '??'
 
             EQEQ                = '=='
             NEQ                 = '!='
@@ -537,6 +538,7 @@ CatchParameter ::= IDENTIFIER {
 Expression ::=
     VarExpression
     | AssignBinExpression // expr10
+    | NullCoalesceBinExpression // expr10
     | TernaryExpression // expr10
     | LogicalBinExpression //expr13
     | BitwiseBinExpression // expr14
@@ -589,6 +591,11 @@ VarExpression ::= ('var'|'val') VarDefinition ('=' Expression)? {
     pin = 1
 }
 AssignBinExpression ::= Expression AssignBinOp Expression {
+    pin=2
+    rightAssociative=true
+}
+NullCoalesceBinOp ::= '??' { name = "operator" }
+NullCoalesceBinExpression ::= Expression NullCoalesceBinOp Expression {
     pin=2
     rightAssociative=true
 }

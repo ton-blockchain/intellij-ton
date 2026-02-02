@@ -37,13 +37,12 @@ class TolkLiteralFileReferenceSet(
         }
 
         val actonToml = ActonToml.find(project) ?: return contexts
-        val mappings = actonToml.getMappings()
+        val mappings = actonToml.getNormalizedMappings()
         val firstSegment = pathString.split('/').firstOrNull() ?: return contexts
         if (!firstSegment.startsWith("@")) return contexts
 
-        val mappingValue = mappings[firstSegment.substring(1)] ?: return contexts
-        val mappingPath = actonToml.workingDir.resolve(mappingValue).normalize()
-        val virtualFile = element.containingFile.originalFile.virtualFile.fileSystem.findFileByPath(mappingPath.absolutePathString()) ?: return contexts
+        val mappingPath = mappings[firstSegment.substring(1)] ?: return contexts
+        val virtualFile = element.containingFile.originalFile.virtualFile.fileSystem.findFileByPath(mappingPath) ?: return contexts
         val psiDirectory = PsiManager.getInstance(project).findDirectory(virtualFile) ?: return contexts
         return listOf(psiDirectory as PsiFileSystemItem)
     }

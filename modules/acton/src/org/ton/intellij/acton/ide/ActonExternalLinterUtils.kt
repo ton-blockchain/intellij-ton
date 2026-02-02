@@ -53,6 +53,7 @@ object ActonExternalLinterUtils {
     fun checkLazily(
         project: Project,
         workingDirectory: Path,
+        document: Document?,
     ): Lazy<ActonExternalLinterResult?> {
         val modificationTracker = PsiModificationTracker.getInstance(project)
         val modificationCount = modificationTracker.modificationCount
@@ -69,7 +70,7 @@ object ActonExternalLinterUtils {
         }
 
         val newLazyResult = lazy {
-            checkWrapped(project, workingDirectory)
+            checkWrapped(project, workingDirectory, document)
         }
 
         cache[key] = modificationCount to newLazyResult
@@ -79,19 +80,28 @@ object ActonExternalLinterUtils {
     private fun checkWrapped(
         project: Project,
         workingDirectory: Path,
+        document: Document?,
     ): ActonExternalLinterResult? {
         val application = ApplicationManager.getApplication()
         if (application.isDispatchThread) {
-            saveAllDocumentsAsTheyAre()
+            saveDocument(document)
         } else {
             ApplicationManager.getApplication().invokeAndWait({
-                saveAllDocumentsAsTheyAre()
+                saveDocument(document)
             }, ModalityState.nonModal())
         }
 
         return try {
             check(project, workingDirectory)
         } finally {
+        }
+    }
+
+    private fun saveDocument(document: Document?) {
+        if (document != null) {
+            FileDocumentManager.getInstance().saveDocument(document)
+        } else {
+            saveAllDocumentsAsTheyAre()
         }
     }
 
@@ -113,15 +123,22 @@ object ActonExternalLinterUtils {
 
         val handler = CapturingProcessHandler(commandLine)
         val output = handler.runProcess(10000)
-        if (output.exitCode != 0) {
-            LOG.warn("Acton check failed with exit code ${output.exitCode}: ${output.stderr}")
-            return null
-        }
         val finish = Instant.now()
+        val executionTime = finish.toEpochMilli() - started.toEpochMilli()
+
+        if (output.exitCode != 0) {
+            val errorMessage = "Acton check failed with exit code ${output.exitCode}: ${output.stderr}"
+            LOG.warn(errorMessage)
+            return ActonExternalLinterResult(
+                commandOutput = "",
+                executionTime = executionTime,
+                error = errorMessage
+            )
+        }
 
         return ActonExternalLinterResult(
             commandOutput = output.stdout,
-            executionTime = finish.toEpochMilli() - started.toEpochMilli()
+            executionTime = executionTime
         )
     }
 }
@@ -187,10 +204,17 @@ data class ActonExternalLinterFilteredMessage(
 }
 
 private fun ActonRange.toTextRange(document: Document): TextRange? {
-    val startOffset = document.getLineStartOffset(start.line) + start.character
-    val endOffset = document.getLineStartOffset(end.line) + end.character
+    val startLine = start.line
+    val endLine = end.line
+    
+    if (startLine !in 0 until document.lineCount || endLine !in 0 until document.lineCount) {
+        return null
+    }
+    
+    val startOffset = (document.getLineStartOffset(startLine) + start.character).coerceIn(0, document.textLength)
+    val endOffset = (document.getLineStartOffset(endLine) + end.character).coerceIn(0, document.textLength)
 
-    if (startOffset < 0 || endOffset < 0 || startOffset > document.textLength || endOffset > document.textLength) {
+    if (startOffset > endOffset) {
         return null
     }
 
@@ -223,6 +247,14 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(
     val doc = file.viewProvider.document
         ?: error("Can't find document for $file in external linter")
 
+    if (annotationResult.error != null) {
+        val highlightBuilder = HighlightInfo.newHighlightInfo(HighlightInfoType.WEAK_WARNING)
+            .severity(HighlightSeverity.WEAK_WARNING)
+            .description(annotationResult.error)
+            .range(TextRange(0, 0))
+        highlightBuilder.create()?.let(::add)
+    }
+
     val filteredMessages = annotationResult.diagnostics
         .mapNotNull { diagnostic -> filterMessage(file, doc, diagnostic) }
         .distinct()
@@ -238,8 +270,14 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(
             .range(message.textRange)
             .needsUpdateOnTyping(true)
 
-        for (fix in message.quickFixes) {
-            highlightBuilder.registerFix(fix, message.suppressionFixes, null, message.textRange, key)
+        if (message.quickFixes.isEmpty()) {
+            for (suppressionFix in message.suppressionFixes) {
+                highlightBuilder.registerFix(suppressionFix, null, null, message.textRange, key)
+            }
+        } else {
+            for (fix in message.quickFixes) {
+                highlightBuilder.registerFix(fix, message.suppressionFixes, null, message.textRange, key)
+            }
         }
 
         highlightBuilder.create()?.let(::add)

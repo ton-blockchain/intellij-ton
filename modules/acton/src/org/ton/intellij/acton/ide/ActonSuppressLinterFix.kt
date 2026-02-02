@@ -13,14 +13,12 @@ class ActonSuppressLinterFix(
     override fun getFamilyName(): String =
         if (ruleName == "all") ActonBundle.message("intention.family.name.suppress.all.acton.fix") else ActonBundle.message("intention.family.name.suppress.acton.fix")
 
-    override fun getName(): String = if (ruleName == "all") ActonBundle.message(
-        "intention.name.suppress.all.fix",
-        ruleName
-    ) else ActonBundle.message("intention.name.suppress.fix", ruleName)
+    override fun getName(): String = if (ruleName == "all") ActonBundle.message("intention.name.suppress.all.fix")
+    else ActonBundle.message("intention.name.suppress.fix", ruleName)
 
     override fun isAvailable(project: Project, context: PsiElement): Boolean = context.isValid
 
-    override fun isSuppressAll(): Boolean = false
+    override fun isSuppressAll(): Boolean = ruleName == "all"
 
     override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
         val element = descriptor.psiElement ?: return

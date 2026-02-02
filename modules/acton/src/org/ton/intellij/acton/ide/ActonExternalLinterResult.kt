@@ -7,8 +7,11 @@ import fleet.util.logging.logger
 class ActonExternalLinterResult(
     val commandOutput: String,
     val executionTime: Long,
+    val error: String? = null,
 ) {
-    val diagnostics: List<ActonDiagnostic> = try {
+    val diagnostics: List<ActonDiagnostic> = if (error != null) {
+        emptyList()
+    } else try {
         LOG.info("external linter took: ${executionTime}ms")
         GSON.fromJson(commandOutput, ActonLinterResponse::class.java)?.diagnostics?.filter { it.file != null } ?: emptyList()
     } catch (e: Exception) {

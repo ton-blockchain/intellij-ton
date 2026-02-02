@@ -6,8 +6,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
-import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValueProvider.Result.create
 import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.psi.util.PsiTreeUtil
 import org.toml.lang.psi.TomlFile
 import org.toml.lang.psi.TomlKeySegment
@@ -20,26 +21,42 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
     val workingDir: Path get() = virtualFile.parent.toNioPath()
 
     fun getScripts(): Map<String, String> {
-        val file = psiFile ?: return emptyMap()
-        val scriptsTable = PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
-            ?.find { it.header.key?.segments?.firstOrNull()?.name == "scripts" }
-            ?: return emptyMap()
+        return CachedValuesManager.getCachedValue(psiFile ?: return emptyMap()) {
+            val scriptsTable = PsiTreeUtil.getChildrenOfType(psiFile, TomlTable::class.java)
+                ?.find { it.header.key?.segments?.firstOrNull()?.name == "scripts" }
+            
+            val result = scriptsTable?.entries?.associate { entry ->
+                val key = entry.key.segments.firstOrNull()?.name ?: entry.key.text
+                val value = entry.value?.text?.removeSurrounding("\"")?.removeSurrounding("'") ?: ""
+                key to value
+            } ?: emptyMap()
 
-        return scriptsTable.entries.associate { entry ->
-            val key = entry.key.segments.firstOrNull()?.name ?: entry.key.text
-            key to (entry.value?.text?.removeSurrounding("\"")?.removeSurrounding("'") ?: "")
+            create(result, psiFile)
         }
     }
 
     fun getMappings(): Map<String, String> {
-        val file = psiFile ?: return emptyMap()
-        val mappingsTable = PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
-            ?.find { it.header.key?.segments?.firstOrNull()?.name == "mappings" }
-            ?: return emptyMap()
+        return CachedValuesManager.getCachedValue(psiFile ?: return emptyMap()) {
+            val mappingsTable = PsiTreeUtil.getChildrenOfType(psiFile, TomlTable::class.java)
+                ?.find { it.header.key?.segments?.firstOrNull()?.name == "mappings" }
+            
+            val result = mappingsTable?.entries?.associate { entry ->
+                val key = entry.key.segments.firstOrNull()?.name ?: entry.key.text
+                val value = entry.value?.text?.removeSurrounding("\"")?.removeSurrounding("'") ?: ""
+                key to value
+            } ?: emptyMap()
 
-        return mappingsTable.entries.associate { entry ->
-            val key = entry.key.segments.firstOrNull()?.name ?: entry.key.text
-            key to (entry.value?.text?.removeSurrounding("\"")?.removeSurrounding("'") ?: "")
+            create(result, psiFile)
+        }
+    }
+
+    fun getNormalizedMappings(): Map<String, String> {
+        return CachedValuesManager.getCachedValue(psiFile ?: return emptyMap()) {
+            val mappings = getMappings()
+            val result = mappings.mapValues { (_, value) ->
+                workingDir.resolve(value).normalize().toString().replace('\\', '/')
+            }
+            create(result, psiFile)
         }
     }
 
@@ -116,7 +133,7 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
                 val virtualFile = actonTomlFile ?: FilenameIndex.getVirtualFilesByName("Acton.toml", GlobalSearchScope.projectScope(project)).firstOrNull()
                 
                 val actonToml = virtualFile?.let { ActonToml(it, project) }
-                CachedValueProvider.Result.create(actonToml, com.intellij.openapi.vfs.VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS)
+                create(actonToml, com.intellij.openapi.vfs.VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS, PsiModificationTracker.MODIFICATION_COUNT)
             }
         }
     }

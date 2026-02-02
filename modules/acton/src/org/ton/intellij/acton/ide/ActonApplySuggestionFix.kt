@@ -24,18 +24,28 @@ class ActonApplySuggestionFix(
 
     override fun invoke(project: Project, editor: Editor, file: PsiFile) {
         val sortedEdits = edits.sortedByDescending { edit ->
-            val startOffset = document.getLineStartOffset(edit.range.start.line) + edit.range.start.character
+            val line = edit.range.start.line
+            val startOffset = if (line in 0 until document.lineCount) {
+                document.getLineStartOffset(line) + edit.range.start.character
+            } else {
+                Int.MAX_VALUE
+            }
             startOffset
         }
 
         for (edit in sortedEdits) {
-            val startOffset = document.getLineStartOffset(edit.range.start.line) + edit.range.start.character
-            val endOffset = document.getLineStartOffset(edit.range.end.line) + edit.range.end.character
+            val startLine = edit.range.start.line
+            val endLine = edit.range.end.line
+            
+            if (startLine !in 0 until document.lineCount || endLine !in 0 until document.lineCount) continue
+            
+            val lineStartOffset = document.getLineStartOffset(startLine)
+            val lineEndOffset = document.getLineStartOffset(endLine)
+            
+            val startOffset = (lineStartOffset + edit.range.start.character).coerceIn(0, document.textLength)
+            val endOffset = (lineEndOffset + edit.range.end.character).coerceIn(0, document.textLength)
 
-            if (startOffset >= 0 && endOffset >= 0 &&
-                startOffset <= document.textLength && endOffset <= document.textLength &&
-                startOffset <= endOffset
-            ) {
+            if (startOffset <= endOffset) {
                 document.replaceString(startOffset, endOffset, edit.newText)
             }
         }

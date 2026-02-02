@@ -58,6 +58,7 @@ class ActonExternalLinterPass(
         annotationInfo = ActonExternalLinterUtils.checkLazily(
             myProject,
             workingDirectory,
+            document
         )
     }
 

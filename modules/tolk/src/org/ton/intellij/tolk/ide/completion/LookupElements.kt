@@ -64,9 +64,8 @@ fun TolkNamedElement.toLookupElementBuilder(
                 val actonToml = ActonToml.find(project)
                 var mappedPath: String? = null
                 if (actonToml != null) {
-                    val mappings = actonToml.getMappings()
-                    for ((key, value) in mappings) {
-                        val mappingDir = actonToml.workingDir.resolve(value).normalize().toString()
+                    val mappings = actonToml.getNormalizedMappings()
+                    for ((key, mappingDir) in mappings) {
                         if (elementVirtualFile.path.startsWith(mappingDir)) {
                             val subPath = elementVirtualFile.path.substring(mappingDir.length).removePrefix("/").removePrefix("\\").replace('\\', '/')
                             mappedPath = "@$key/$subPath"

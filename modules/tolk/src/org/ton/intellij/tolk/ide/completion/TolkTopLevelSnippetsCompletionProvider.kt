@@ -79,6 +79,7 @@ object TolkTopLevelSnippetsCompletionProvider : TolkCompletionProvider() {
                     TemplateStringInsertHandler(
                         """
                             contract ${'$'}name$ {
+                                author: "${'$'}author$"
                                 version: "${'$'}version$"
                                 description: "${'$'}description$"
                                 incomingMessages: ${'$'}messages$
@@ -86,6 +87,7 @@ object TolkTopLevelSnippetsCompletionProvider : TolkCompletionProvider() {
                             }
                         """.trimIndent(), true,
                         "name" to ConstantNode(pascalName),
+                        "author" to ConstantNode(""),
                         "version" to ConstantNode("1.0.0"),
                         "description" to ConstantNode("My TON contract"),
                         "messages" to ConstantNode("AllowedMessages"),

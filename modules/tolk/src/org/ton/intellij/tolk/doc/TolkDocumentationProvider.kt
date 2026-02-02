@@ -586,6 +586,12 @@ private fun List<TolkParameter>.generateDoc(selfParameter: TolkSelfParameter?): 
                     val nameLength = name?.length ?: 0
                     append("".padEnd(max(paramNameMaxWidth - nameLength, 0)))
                     append(param.type?.generateDoc())
+
+                    val defaultValue = param.parameterDefault?.expression
+                    if (defaultValue != null) {
+                        append(" = ")
+                        append(defaultValue.generateDoc())
+                    }
                 }
             } + ","
         )
@@ -605,6 +611,12 @@ private fun TolkParameter.generateDocForMethod(): String {
             append(": ")
         }
         append(type?.generateDoc())
+
+        val defaultValue = parameterDefault?.expression
+        if (defaultValue != null) {
+            append(" = ")
+            append(defaultValue.generateDoc())
+        }
     }
 }
 

@@ -22,15 +22,11 @@ object ActonLintRulesProvider {
             return cached.rules
         }
 
-        val commandLine = try {
-            ActonCommandLine(
-                command = "check",
-                workingDirectory = workingDir,
-                additionalArguments = listOf("--list-lint-rules"),
-            ).toGeneralCommandLine(project)
-        } catch (_: Exception) {
-            return emptyList()
-        }
+        val commandLine = ActonCommandLine(
+            command = "check",
+            workingDirectory = workingDir,
+            additionalArguments = listOf("--list-lint-rules"),
+        ).toGeneralCommandLine(project) ?: return emptyList()
 
         return try {
             val output = ApplicationManager.getApplication().executeOnPooledThread(Callable {

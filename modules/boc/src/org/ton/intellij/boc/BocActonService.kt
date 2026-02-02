@@ -28,8 +28,8 @@ object BocActonService {
     }
 
     fun disassemble(project: Project, bocFilePath: String) = executeActonCommand(project, ActonCommand.Disasm(bocFile = bocFilePath))
-    
-    fun disassembleDetailed(project: Project, bocFilePath: String) = 
+
+    fun disassembleDetailed(project: Project, bocFilePath: String) =
         executeActonCommand(project, ActonCommand.Disasm(bocFile = bocFilePath, showHashes = true, showOffsets = true))
 
     fun readFileAsHex(path: String): Result<String> = try {
@@ -56,8 +56,8 @@ object BocActonService {
             command = command.name,
             workingDirectory = workingDir,
             additionalArguments = command.getArguments()
-        )
-        return executeCommand(actonCommandLine.toGeneralCommandLine(project))
+        ).toGeneralCommandLine(project) ?: return Result.failure(IllegalStateException("Cannot find acton executable"))
+        return executeCommand(actonCommandLine)
     }
 
     private fun executeCommand(cmd: GeneralCommandLine): Result<String> {

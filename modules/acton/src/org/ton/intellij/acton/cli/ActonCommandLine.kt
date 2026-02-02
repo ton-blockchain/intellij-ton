@@ -14,10 +14,10 @@ data class ActonCommandLine(
     val additionalArguments: List<String> = emptyList(),
     val environmentVariables: EnvironmentVariablesData = EnvironmentVariablesData.DEFAULT
 ) {
-    fun toGeneralCommandLine(project: Project): GeneralCommandLine {
+    fun toGeneralCommandLine(project: Project): GeneralCommandLine? {
         val actonPath = project.actonSettings.actonPath 
             ?: PathEnvironmentVariableUtil.findInPath("acton")?.absolutePath 
-            ?: "acton"
+            ?: return null
         
         val globalEnvs = project.actonSettings.env
         val mergedEnvs = globalEnvs.envs.toMutableMap().apply {

@@ -146,7 +146,7 @@ fun TolkTy.generateDoc(): String = buildString {
 
         is TolkTyStruct       -> {
             val name = psi.name ?: "Anonymous"
-            if (name == "map") {
+            if (name == "map" || name == "array") {
                 colorize(name, asKeyword)
             } else {
                 colorize(name, asStruct)
@@ -291,7 +291,7 @@ fun TolkGlobalVar.generateDoc(): String {
 }
 
 fun TolkTypeDef.generateDoc(): String {
-    val isPrimitiveType = TolkPrimitiveTy.fromName(name ?: "") != null || name == "map"
+    val isPrimitiveType = TolkPrimitiveTy.fromName(name ?: "") != null || name == "map" || name == "array"
 
     return buildString {
         append(DocumentationMarkup.DEFINITION_START)

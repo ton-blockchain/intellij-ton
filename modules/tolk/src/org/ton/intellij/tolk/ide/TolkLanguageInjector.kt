@@ -31,7 +31,6 @@ class TolkLanguageInjector : MultiHostInjector {
             registrar.startInjecting(TolkLanguage)
                 .addPlace("type __DUMMY = ", ";", context, contentRange)
                 .doneInjecting()
-            return
         }
     }
 

@@ -16,7 +16,7 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
         element: PsiElement,
         sink: InlayTreeSink,
     ) {
-        if (element !is TolkCallExpression) return
+        if (!element.isValid || element !is TolkCallExpression) return
 
         val function = element.functionSymbol
         if (function?.name == "ton" || function?.name == "address") {
@@ -27,6 +27,7 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
         iterateOverParameters(
             element
         ) { parameter, argument ->
+            if (!parameter.isValid || argument?.isValid == false) return@iterateOverParameters
             val parameterName = parameter.name ?: return@iterateOverParameters
             val expression = argument?.expression?.unwrapParentheses() ?: return@iterateOverParameters
 

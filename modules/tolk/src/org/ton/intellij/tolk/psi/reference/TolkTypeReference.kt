@@ -24,6 +24,7 @@ class TolkTypeReference(
     }
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
+        if (!element.isValid) return emptyArray()
         val myElement = myElement
         return buildList<ResolveResult> {
             val typeParameterName = element.referenceName ?: return@buildList
@@ -72,6 +73,7 @@ class TolkTypeReference(
 
         return file.resolveSymbols(target)
             .filterIsInstance<TolkTypeSymbolElement>()
+            .filter { it.isValid }
             .map { PsiElementResolveResult(it) }
             .toList()
     }

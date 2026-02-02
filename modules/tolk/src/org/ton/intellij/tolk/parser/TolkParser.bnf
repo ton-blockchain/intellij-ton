@@ -162,6 +162,8 @@ ContractDefinition ::= contract IDENTIFIER ContractDefinitionBody {
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
         "org.ton.intellij.tolk.psi.TolkNamedElement"
     ]
+    stubClass = "org.ton.intellij.tolk.stub.TolkContractDefinitionStub"
+    elementTypeFactory = "org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
 
 ContractDefinitionBody ::= '{' ContractBodyElement* '}'

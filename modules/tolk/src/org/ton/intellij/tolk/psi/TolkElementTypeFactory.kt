@@ -42,6 +42,7 @@ object TolkElementTypeFactory {
         "TYPE_ARGUMENT_LIST"        -> TolkTypeArgumentListStub.Type(name)
         "TYPE_PARAMETER_LIST"       -> TolkTypeParameterListStub.Type(name)
         "STRING_LITERAL"            -> TolkStringLiteralStub.Type(name)
+        "CONTRACT_DEFINITION"       -> TolkContractDefinitionStub.Type
         else                        -> throw RuntimeException("Unknown element type: $name")
     }
 }

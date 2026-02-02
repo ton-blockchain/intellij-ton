@@ -39,7 +39,7 @@ class TolkReferencesCodeVisionProvider : ReferencesCodeVisionProvider() {
     override fun getHint(element: PsiElement, file: PsiFile): String? = getVisionInfo(element, file)?.text
 
     override fun getVisionInfo(element: PsiElement, file: PsiFile): CodeVisionInfo? {
-        if (element !is PsiNamedElement) return null
+        if (!element.isValid || element !is PsiNamedElement) return null
         val elementName = element.name ?: return null
         val scope = GlobalSearchScope.projectScope(element.project)
         val costSearchOutsideCurrentFile =

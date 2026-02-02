@@ -19,9 +19,10 @@ class TolkRecursiveCallLineMarkerProvider : LineMarkerProvider {
     override fun collectSlowLineMarkers(elements: List<PsiElement>, result: MutableCollection<in LineMarkerInfo<*>?>) {
         val lines = mutableSetOf<Int>()
         for (element in elements) {
-            if (element !is TolkCallExpression) continue
+            if (!element.isValid || element !is TolkCallExpression) continue
 
             val function = resolveCalledFunction(element) ?: continue
+            if (!function.isValid) continue
 
             if (isRecursiveCall(element, function)) {
                 val document = PsiDocumentManager.getInstance(element.project).getDocument(element.containingFile) ?: continue
@@ -36,6 +37,7 @@ class TolkRecursiveCallLineMarkerProvider : LineMarkerProvider {
     }
 
     fun resolveCalledFunction(call: TolkCallExpression): TolkFunction? {
+        if (!call.isValid) return null
         val expr = call.expression
         if (expr is TolkReferenceExpression) {
             // foo()

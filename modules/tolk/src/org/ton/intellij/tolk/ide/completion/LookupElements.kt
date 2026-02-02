@@ -72,6 +72,8 @@ fun TolkNamedElement.toLookupElementBuilder(
         .withIcon(this.getIcon(0))
         .withStrikeoutness(isDeprecated)
 
+    val hasTypeParameters = this is TolkTypeParameterListOwner && typeParameterList?.typeParameterList?.isNotEmpty() == true
+
     return when (this) {
         is TolkFunction -> {
             val returnType = (type as? TolkTyFunction)?.returnType
@@ -157,8 +159,16 @@ fun TolkNamedElement.toLookupElementBuilder(
             .withTypeText(type?.render())
 
         is TolkStruct -> base
+            .let { builder ->
+                typeParameterList.appendTypeParametersIfAny(builder)
+            }
             .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
-            .withInsertHandler { context, item ->
+            .withInsertHandler { context, _ ->
+                if (hasTypeParameters && !context.alreadyHasAngleBrackets) {
+                    context.document.insertString(context.selectionEndOffset, "<>")
+                    EditorModificationUtil.moveCaretRelatively(context.editor, 1)
+                }
+
                 context.commitDocument()
 
                 val insertFile = context.file as? TolkFile ?: return@withInsertHandler
@@ -197,8 +207,16 @@ fun TolkNamedElement.toLookupElementBuilder(
         }
 
         is TolkTypeDef -> base
+            .let { builder ->
+                typeParameterList.appendTypeParametersIfAny(builder)
+            }
             .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
-            .withInsertHandler { context, item ->
+            .withInsertHandler { context, _ ->
+                if (hasTypeParameters && !context.alreadyHasAngleBrackets) {
+                    context.document.insertString(context.selectionEndOffset, "<>")
+                    EditorModificationUtil.moveCaretRelatively(context.editor, 1)
+                }
+
                 context.commitDocument()
 
                 val insertFile = context.file as? TolkFile ?: return@withInsertHandler
@@ -208,6 +226,15 @@ fun TolkNamedElement.toLookupElementBuilder(
 
         else -> base
     }
+}
+
+private fun TolkTypeParameterList?.appendTypeParametersIfAny(builder: LookupElementBuilder): LookupElementBuilder {
+    if (this == null) {
+        return builder
+    }
+
+    val list = this.typeParameterList.joinToString(prefix = "<", postfix = ">") { it.name.toString() }
+    return builder.appendTailText(list, true)
 }
 
 fun TolkPrimitiveTy.toLookupElement(): LookupElementBuilder {

@@ -19,7 +19,7 @@ class TolkPrimitiveTypeCompletionTest : TolkCompletionTestBase() {
     """.trimIndent())
 
     private fun doTest(@Language("Tolk") text: String) {
-        val primitiveTypes = TolkIntNTy.VALUES + TolkTy.Int + Cell + Slice + TolkTy.String + TolkTy.Builder + TolkTy.Tuple + TolkTy.Coins
+        val primitiveTypes = TolkIntNTy.VALUES + TolkTy.Int + Cell + Slice + TolkTy.String + TolkTy.Builder + TolkTy.Coins
         val primitiveTypeNames = primitiveTypes.map { it.render() }
         checkContainsCompletion(primitiveTypeNames, text)
     }

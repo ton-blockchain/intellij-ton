@@ -52,7 +52,7 @@ class TolkTyTypedTuple private constructor(
     override fun isEquivalentToInner(other: TolkTy): Boolean {
         if (this == other) return true
         if (other is TolkTyAlias) return this.isEquivalentTo(other.underlyingType)
-        if (other !is TolkTyTensor) return false
+        if (other !is TolkTyTypedTuple) return false
         if (elements.size != other.elements.size) return false
         for (i in elements.indices) {
             val element = elements[i]

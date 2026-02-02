@@ -7,7 +7,7 @@ import org.ton.intellij.util.printPsi
 fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
     when (type) {
         is TolkTyParam -> {
-            printPsi(type.parameter.psi, type.name ?: "<unknown>")
+            printPsi(type.parameter.psi, type.name ?: "unknown")
         }
 
         is TolkTyAlias -> {
@@ -17,13 +17,13 @@ fun PresentationTreeBuilder.printTolkType(type: TolkTy) {
 
         is TolkTyStruct -> {
             val psi = type.psi
-            printPsi(psi, psi.name ?: "<unknown>")
+            printPsi(psi, psi.name ?: "unknown")
             printTolkTypeArguments(type.typeArguments)
         }
 
         is TolkTyEnum -> {
             val psi = type.psi
-            printPsi(psi, psi.name ?: "<unknown>")
+            printPsi(psi, psi.name ?: "unknown")
         }
 
         is TolkTyFunction -> {

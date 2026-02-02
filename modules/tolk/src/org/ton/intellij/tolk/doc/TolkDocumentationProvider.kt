@@ -133,7 +133,6 @@ fun TolkTy.generateDoc(): String = buildString {
         TolkStringTy          -> colorize("string", asPrimitive)
         TolkTy.Builder        -> colorize("builder", asPrimitive)
         TolkTy.Continuation   -> colorize("continuation", asPrimitive)
-        TolkTy.Tuple          -> colorize("tuple", asPrimitive)
         TolkTy.Void           -> colorize("void", asPrimitive)
         TolkTy.Null           -> colorize("null", asKeyword)
         TolkTy.Coins          -> colorize("coins", asPrimitive)
@@ -204,6 +203,13 @@ fun TolkTy.generateDoc(): String = buildString {
                 append(element.generateDoc())
             }
             colorize("]", asParen)
+        }
+
+        is TolkTyArray        -> {
+            colorize("array", asKeyword)
+            colorize("<", asParen)
+            append(elementType.generateDoc())
+            colorize(">", asParen)
         }
 
         is TolkTyUnion        -> {

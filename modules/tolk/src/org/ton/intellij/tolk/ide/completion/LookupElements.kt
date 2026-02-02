@@ -8,6 +8,8 @@ import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
+import org.ton.intellij.acton.cli.ActonToml
+import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.presentation.TolkPsiRenderer
 import org.ton.intellij.tolk.presentation.renderParameterList
 import org.ton.intellij.tolk.presentation.renderTypeExpression
@@ -55,10 +57,24 @@ fun TolkNamedElement.toLookupElementBuilder(
         val contextVirtualFile = contextFile.virtualFile
         val elementVirtualFile = file.virtualFile
         if (contextVirtualFile != null && elementVirtualFile != null) {
-            if (elementVirtualFile.parent.name == "tolk-stdlib") {
+            val sdk = project.tolkSettings.stdlibDir
+            if (sdk != null && VfsUtilCore.isAncestor(sdk, elementVirtualFile, false)) {
                 "@stdlib/${elementVirtualFile.name}"
             } else {
-                VfsUtilCore.findRelativePath(contextVirtualFile, elementVirtualFile, '/') ?: ""
+                val actonToml = ActonToml.find(project)
+                var mappedPath: String? = null
+                if (actonToml != null) {
+                    val mappings = actonToml.getMappings()
+                    for ((key, value) in mappings) {
+                        val mappingDir = actonToml.workingDir.resolve(value).normalize().toString()
+                        if (elementVirtualFile.path.startsWith(mappingDir)) {
+                            val subPath = elementVirtualFile.path.substring(mappingDir.length).removePrefix("/").removePrefix("\\").replace('\\', '/')
+                            mappedPath = "@$key/$subPath"
+                            break
+                        }
+                    }
+                }
+                mappedPath ?: VfsUtilCore.findRelativePath(contextVirtualFile, elementVirtualFile, '/') ?: ""
             }
         } else {
             file.name

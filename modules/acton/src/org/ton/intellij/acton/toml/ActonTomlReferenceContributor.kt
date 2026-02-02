@@ -24,21 +24,31 @@ class ActonTomlValueReferenceProvider : PsiReferenceProvider() {
 
         val keyValue = literal.parent as? TomlKeyValue ?: return PsiReference.EMPTY_ARRAY
         val key = keyValue.key.text
-        if (key == "src") {
-            val table = keyValue.parent as? TomlTable ?: return PsiReference.EMPTY_ARRAY
-            val header = table.header
-            val segments = header.key?.segments ?: return PsiReference.EMPTY_ARRAY
+        val table = keyValue.parent as? TomlTable ?: return PsiReference.EMPTY_ARRAY
+        val header = table.header
+        val segments = header.key?.segments ?: return PsiReference.EMPTY_ARRAY
+
+        if (key == "src" || key == "output") {
             if (segments.size == 2 && segments[0].name == "contracts") {
-                val text = literal.text
-                if (text.startsWith("\"") && text.endsWith("\"") && text.length >= 2) {
-                    val path = text.substring(1, text.length - 1)
-                    return FileReferenceSet(path, literal, 1, null, true).allReferences
-                        .map { it as PsiReference }
-                        .toTypedArray()
-                }
+                return createFileReferences(literal)
             }
         }
 
+        if (segments.size == 1 && segments[0].name == "mappings") {
+            return createFileReferences(literal)
+        }
+
+        return PsiReference.EMPTY_ARRAY
+    }
+
+    private fun createFileReferences(literal: TomlLiteral): Array<PsiReference> {
+        val text = literal.text
+        if (text.length >= 2 && ((text.startsWith("\"") && text.endsWith("\"")) || (text.startsWith("'") && text.endsWith("'")))) {
+            val path = text.substring(1, text.length - 1)
+            return FileReferenceSet(path, literal, 1, null, true).allReferences
+                .map { it as PsiReference }
+                .toTypedArray()
+        }
         return PsiReference.EMPTY_ARRAY
     }
 }

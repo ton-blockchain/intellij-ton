@@ -880,10 +880,12 @@ class TolkInferenceWalker(
         // then type of i is int
         val paramTypes = mutableListOf<TolkTy>()
         for ((index, parameter) in lambda.parameterList.parameterList.withIndex()) {
-            if (parameter.typeExpression != null) {
+            if (parameter.typeExpression != null && parameter.type != null) {
                 paramTypes.add(parameter.type!!)
             } else if (callableTy != null && index < callableTy.parametersType.size && !callableTy.parametersType[index].hasGenerics()) {
                 paramTypes.add(callableTy.parametersType[index])
+            } else {
+                paramTypes.add(TolkTyUnknown)
             }
         }
 

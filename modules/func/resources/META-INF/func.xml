@@ -204,6 +204,10 @@
         <langCodeStyleSettingsProvider
                 implementation="org.ton.intellij.func.ide.formatter.FuncLanguageCodeStyleSettingsProvider"/>
 
+        <internalFileTemplate name="FunC Contract"/>
+        <internalFileTemplate name="FunC File"/>
+        <internalFileTemplate name="FunC File with stdlib.fc"/>
+
         <!--        <projectConfigurable instance="org.ton.intellij.func.ide.configurable.FuncProjectConfigurable"-->
         <!--                             groupId="language"-->
         <!--                             id="language.func"-->

@@ -232,6 +232,9 @@
         </intentionAction>
         <!-- endregion Intentions -->
 
+        <internalFileTemplate name="Tolk Contract"/>
+        <internalFileTemplate name="Tolk File"/>
+
         <consoleFilterProvider implementation="org.ton.intellij.tolk.ide.TolkConsoleFilterProvider"/>
         <readWriteAccessDetector implementation="org.ton.intellij.tolk.ide.usages.TolkReadWriteAccessDetector"/>
 

@@ -44,9 +44,12 @@ abstract class TolkReferenceTypeExpressionMixin : TolkTypeExpressionImpl, TolkRe
     val isPrimitive get() = primitiveType != null
 
     override val type: TolkTy?
-        get() = CachedValuesManager.getCachedValue(this) {
-            val type = resolveType()
-            CachedValueProvider.Result.create(type, this)
+        get() {
+            if (!isValid) return TolkTyUnknown
+            return CachedValuesManager.getCachedValue(this) {
+                val type = resolveType()
+                CachedValueProvider.Result.create(type, this)
+            }
         }
 
     override val referenceNameElement: PsiElement get() = identifier

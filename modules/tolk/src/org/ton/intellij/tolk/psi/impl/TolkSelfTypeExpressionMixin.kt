@@ -17,7 +17,10 @@ abstract class TolkSelfTypeExpressionMixin : TolkStubbedElementImpl<TolkTypeStub
     constructor(stub: TolkTypeStub<*>, stubType: IStubElementType<*, *>) : super(stub, stubType)
 
     override val type: TolkTy
-        get() = reference.resolve()?.type ?: TolkTy.Unknown
+        get() {
+            if (!isValid) return TolkTy.Unknown
+            return reference.resolve()?.type ?: TolkTy.Unknown
+        }
 
     private val reference = SelfTypeReference(this)
 

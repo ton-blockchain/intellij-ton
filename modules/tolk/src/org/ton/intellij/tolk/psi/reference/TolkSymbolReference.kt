@@ -26,7 +26,7 @@ class TolkSymbolReference(
         val inference = element.inference
         val inferenceResolved = inference?.getResolvedRefs(element)
         if (!inferenceResolved.isNullOrEmpty()) {
-            return@PolyVariantResolver inferenceResolved.toTypedArray()
+            return@PolyVariantResolver inferenceResolved.filter { it.element?.isValid == true }.toTypedArray()
         }
         ResolveResult.EMPTY_ARRAY
     }

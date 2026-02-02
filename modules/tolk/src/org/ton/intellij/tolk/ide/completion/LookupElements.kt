@@ -167,6 +167,7 @@ fun TolkNamedElement.toLookupElementBuilder(
                 if (hasTypeParameters && !context.alreadyHasAngleBrackets) {
                     context.document.insertString(context.selectionEndOffset, "<>")
                     EditorModificationUtil.moveCaretRelatively(context.editor, 1)
+                    AutoPopupController.getInstance(context.project)?.autoPopupParameterInfo(context.editor, this)
                 }
 
                 context.commitDocument()
@@ -215,6 +216,7 @@ fun TolkNamedElement.toLookupElementBuilder(
                 if (hasTypeParameters && !context.alreadyHasAngleBrackets) {
                     context.document.insertString(context.selectionEndOffset, "<>")
                     EditorModificationUtil.moveCaretRelatively(context.editor, 1)
+                    AutoPopupController.getInstance(context.project)?.autoPopupParameterInfo(context.editor, this)
                 }
 
                 context.commitDocument()

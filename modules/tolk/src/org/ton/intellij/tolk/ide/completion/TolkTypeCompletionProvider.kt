@@ -28,7 +28,6 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         TolkTy.Slice,
         TolkTy.String,
         TolkTy.Builder,
-        TolkTy.Tuple,
         TolkTy.Never,
         TolkTy.Coins,
         TolkTy.Address,

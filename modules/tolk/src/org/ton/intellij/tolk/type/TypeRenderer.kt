@@ -2,7 +2,7 @@ package org.ton.intellij.tolk.type
 
 fun TolkTy.render(
     level: Int = Int.MAX_VALUE,
-    unknown: String = "<unknown>",
+    unknown: String = "unknown",
     anonymous: String = "<anonymous>",
     includeTypeArguments: Boolean = true,
     useAliasNames: Boolean = true,
@@ -49,6 +49,7 @@ private class TypeRenderer(
                 "int${ty.n}"
             }
             is TolkIntTy -> "int"
+            is TolkTyArray -> "array<${render(ty.elementType)}>"
             is TolkTyTensor -> ty.elements.joinToString(", ", "(", ")", transform = render)
             is TolkTyTypedTuple -> ty.elements.joinToString(", ", "[", "]", transform = render)
             is TolkTyFunction -> buildString {

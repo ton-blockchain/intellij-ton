@@ -111,7 +111,18 @@ open class Substitution(
                     val argItem = argTuple.elements[i]
                     sub = sub.deduce(paramItem, argItem, applyDefault)
                 }
-                return sub
+                sub
+            }
+
+            paramType is TolkTyArray -> {
+                // `arg: array<T>` called as `f(arrOfUnknown)` => T is unknown
+                val unwrapped = argType.unwrapTypeAlias()
+
+                var sub = this
+                if (unwrapped is TolkTyArray) {
+                    sub = sub.deduce(paramType.elementType, unwrapped.elementType, applyDefault)
+                }
+                sub
             }
 
             paramType is TolkTyUnion -> {

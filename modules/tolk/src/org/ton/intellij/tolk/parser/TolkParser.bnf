@@ -848,8 +848,8 @@ private TensorOrParenElement ::= Expression {
 
 private TensorExpressionValue_recovery ::= !(','|')'|';')
 
-TupleExpression ::= '[' [ <<comma_separated_list TupleElement>> ] ']' {
-    pin=1
+TupleExpression ::= ReferenceTypeExpression? ('[' [ <<comma_separated_list TupleElement>> ] ']') {
+    pin=2
     extends=Expression
 }
 private TupleElement ::= Expression {

@@ -220,7 +220,7 @@ fun collectMethodCandidates(
             exact.add(candidate)
         }
     }
-    if (exact.size == 1 && !forCompletion) {
+    if (exact.size == 1) {
         return exact.map { it.method to it.substitutedTs }
     }
     if (exact.isNotEmpty()) {
@@ -260,7 +260,7 @@ fun collectMethodCandidates(
             bestByShape.add(candidate)
         }
     }
-    if (bestByShape.size == 1 && !forCompletion) {
+    if (bestByShape.size == 1) {
         return bestByShape.map { it.method to it.substitutedTs }
     }
     if (bestByShape.isNotEmpty()) {

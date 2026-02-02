@@ -22,7 +22,7 @@ inline fun <reified T : PsiElement> InsertionContext.getElementOfType(strict: Bo
 val InsertionContext.alreadyHasCallParens: Boolean
     get() = nextCharIs('(')
 
-private val InsertionContext.alreadyHasAngleBrackets: Boolean
+val InsertionContext.alreadyHasAngleBrackets: Boolean
     get() = nextCharIs('<')
 
 private val InsertionContext.alreadyHasStructBraces: Boolean

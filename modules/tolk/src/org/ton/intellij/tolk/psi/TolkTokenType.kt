@@ -57,6 +57,7 @@ val TOLK_KEYWORDS = tokenSetOf(
     TolkElementTypes.SELF_KEYWORD,
     TolkElementTypes.PRIVATE_KEYWORD,
     TolkElementTypes.READONLY_KEYWORD,
+    TolkElementTypes.CONTRACT_KEYWORD,
 )
 
 val TOLK_NUMBERS = tokenSetOf(

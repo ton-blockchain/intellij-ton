@@ -127,7 +127,8 @@
             CONST_KEYWORD               = 'const'
             BUILTIN_KEYWORD             = 'builtin'
             GET_KEYWORD                 = 'GET_KEYWORD'
-            LAZY_KEYWORD                 = 'LAZY_KEYWORD'
+            LAZY_KEYWORD                = 'LAZY_KEYWORD'
+            CONTRACT_KEYWORD            = 'CONTRACT_KEYWORD'
             IMPORT_KEYWORD              = 'import'
             TOLK_KEYWORD                = 'tolk'
             PRIVATE_KEYWORD             = 'private'
@@ -145,13 +146,39 @@
 
 private root ::= TopLevelDefinition_with_recover*
 
-private TopLevelElement ::= (IncludeDefinition | VersionDefinition | Item | ';')
+private TopLevelElement ::= (IncludeDefinition | VersionDefinition | ContractDefinition | Item | ';')
 private TopLevelDefinition_with_recover ::= !<<eof>> TopLevelElement {
     pin = 1
     recoverWhile = TopLevelDefinition_recover
 }
 private TopLevelDefinition_recover ::= !(TopLevelDefinition_first)
-private TopLevelDefinition_first ::= 'tolk' | 'fun' | 'import' | 'global' | 'const' | ';' | '@' | 'enum' | 'struct' | 'type' | "get"
+private TopLevelDefinition_first ::= 'tolk' | 'fun' | 'import' | 'global' | 'const' | ';' | '@' | 'enum' | 'struct' | 'type' | "get" | contract
+
+ContractDefinition ::= contract IDENTIFIER ContractDefinitionBody {
+    pin = 1
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkContractDefinitionMixin"
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkTopLevelElement"
+        "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
+        "org.ton.intellij.tolk.psi.TolkNamedElement"
+    ]
+}
+
+ContractDefinitionBody ::= '{' ContractBodyElement* '}'
+
+private contract ::= <<contractKeyword>>
+
+private ContractBodyElement ::= ContractField ','?
+
+ContractField ::= IDENTIFIER ':' (TypeExpression | Expression) {
+    pin = 1
+    mixin = "org.ton.intellij.tolk.psi.impl.TolkContractFieldMixin"
+    implements = [
+        "org.ton.intellij.tolk.psi.TolkElement"
+        "org.ton.intellij.tolk.psi.TolkTypedElement"
+        "org.ton.intellij.tolk.psi.TolkNamedElement"
+    ]
+}
 
 Item ::= Annotations (ConstVar | GlobalVar | TypeDef | Struct | Enum | Function) {
     name = "item"

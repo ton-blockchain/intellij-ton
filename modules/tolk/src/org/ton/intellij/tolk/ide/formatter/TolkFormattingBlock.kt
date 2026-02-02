@@ -128,7 +128,7 @@ class TolkFormattingBlock(
             TYPE_DEF -> return indentForTypeDefChild(child)
             MATCH_EXPRESSION -> if (type != MATCH_KEYWORD) return indentIfNotBrace(child)
             CALL_EXPRESSION -> if (type == ARGUMENT_LIST) return Indent.getNormalIndent()
-            PARAMETER_LIST, BLOCK_STATEMENT, STRUCT_EXPRESSION_BODY, STRUCT_BODY, ENUM_BODY -> return indentIfNotBrace(child)
+            PARAMETER_LIST, BLOCK_STATEMENT, STRUCT_EXPRESSION_BODY, STRUCT_BODY, ENUM_BODY, CONTRACT_DEFINITION_BODY, -> return indentIfNotBrace(child)
             DOT_EXPRESSION, TERNARY_EXPRESSION -> if (parent.firstChildNode != child) return Indent.getNormalIndent()
             VAR_TENSOR, TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE_EXPRESSION, PAREN_TYPE_EXPRESSION, ARGUMENT_LIST -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
             VAR_TUPLE, TUPLE_TYPE_EXPRESSION, TUPLE_EXPRESSION -> if (type != LBRACK && type != RBRACK) return Indent.getNormalIndent()

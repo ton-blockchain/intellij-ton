@@ -39,6 +39,8 @@ import org.ton.intellij.tolk.psi.TOLK_STRING_LITERALS
 import org.ton.intellij.tolk.psi.TolkAnnotation
 import org.ton.intellij.tolk.psi.TolkCatchParameter
 import org.ton.intellij.tolk.psi.TolkConstVar
+import org.ton.intellij.tolk.psi.TolkContractDefinition
+import org.ton.intellij.tolk.psi.TolkContractField
 import org.ton.intellij.tolk.psi.TolkDocOwner
 import org.ton.intellij.tolk.psi.TolkEnum
 import org.ton.intellij.tolk.psi.TolkEnumMember
@@ -84,6 +86,8 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
         is TolkTypeParameter      -> element.generateDoc()
         is TolkCatchParameter     -> element.generateDoc()
         is TolkAnnotation         -> element.generateDoc()
+        is TolkContractDefinition -> element.generateDoc()
+        is TolkContractField      -> element.generateDoc()
         else                      -> null
     }
 
@@ -845,4 +849,50 @@ fun TolkExpression.generateDoc(): String {
     }
 
     return builder.toString()
+}
+
+fun TolkContractDefinition.generateDoc(): String {
+    return buildString {
+        append(DocumentationMarkup.DEFINITION_START)
+        part("contract", asKeyword)
+        colorize(name ?: "", asStruct)
+        append(DocumentationMarkup.DEFINITION_END)
+        generateCommentsPart(this@generateDoc as? TolkDocOwner)
+    }
+}
+
+private val CONTRACT_FIELD_DOCS = mapOf(
+    "contractName" to "Name of the contract.",
+    "author" to "Author of the contract.",
+    "version" to "Version of the contract.",
+    "description" to "Description of the contract.",
+    "symbolsNamespace" to "Namespace for contract symbols.",
+    "incomingMessages" to "Defines the type of allowed incoming internal messages. Usually a union type of all supported message structs.",
+    "incomingExternal" to "Defines the type of allowed incoming external messages.",
+    "storage" to "Defines the persistent storage structure for the contract. This field usually points to a struct type.",
+    "storageAtDeployment" to "Defines the storage structure at the moment of deployment.",
+    "forceAbiExport" to "List of types to additionally export to ABI."
+)
+
+fun TolkContractField.generateDoc(): String {
+    val fieldName = identifier.text
+    val description = CONTRACT_FIELD_DOCS[fieldName]
+
+    return buildString {
+        append(DocumentationMarkup.DEFINITION_START)
+        val owner = parentOfType<TolkContractDefinition>()
+        if (owner != null) {
+            part("contract", asKeyword)
+            colorize(owner.name ?: "", asStruct)
+            append("\n")
+        }
+        colorize(fieldName, asField)
+        append(DocumentationMarkup.DEFINITION_END)
+
+        if (description != null) {
+            append(DocumentationMarkup.CONTENT_START)
+            append(description)
+            append(DocumentationMarkup.CONTENT_END)
+        }
+    }
 }

@@ -20,6 +20,7 @@ class TolkSyntaxHighlighter : SyntaxHighlighterBase() {
             TolkElementTypes.OPEN_QUOTE   -> TolkColor.STRING
             TolkElementTypes.ESCAPE_SEQUENCE -> TolkColor.VALID_STRING_ESCAPE
             TolkElementTypes.INTEGER_LITERAL -> TolkColor.NUMBER
+            TolkElementTypes.CONTRACT_KEYWORD -> TolkColor.KEYWORD
             TolkElementTypes.SEMICOLON -> TolkColor.SEMICOLON
             TolkElementTypes.COMMA -> TolkColor.COMMA
             TolkElementTypes.DOT -> TolkColor.DOT

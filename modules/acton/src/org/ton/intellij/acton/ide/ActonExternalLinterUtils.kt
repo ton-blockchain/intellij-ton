@@ -171,7 +171,6 @@ data class ActonExternalLinterFilteredMessage(
             @NlsSafe val tooltip = buildString {
                 append(StringEscapeUtils.escapeHtml4(diagnostic.message))
 
-                // Add annotations
                 val additionalMessages = diagnostic.annotations
                     .filter { !it.isPrimary && it.message != null }
                     .map { StringEscapeUtils.escapeHtml4(it.message!!) }

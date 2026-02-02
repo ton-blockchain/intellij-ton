@@ -155,10 +155,9 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
         } else {
             val actonToml = ActonToml.find(project)
             if (actonToml != null) {
-                val mappings = actonToml.getMappings()
+                val mappings = actonToml.getNormalizedMappings()
                 val filePath = file.virtualFile.path
-                val mappingDirStrings = mappings.mapValues { (_, value) -> actonToml.workingDir.resolve(value).normalize().toString() }
-                for ((key, mappingDir) in mappingDirStrings) {
+                for ((key, mappingDir) in mappings) {
                     if (filePath.startsWith(mappingDir)) {
                         val subPath = filePath.substring(mappingDir.length).removePrefix("/").removePrefix("\\").replace('\\', '/')
                         path = "@$key/$subPath"

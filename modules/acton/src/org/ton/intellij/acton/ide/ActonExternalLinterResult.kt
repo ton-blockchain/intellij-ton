@@ -2,7 +2,7 @@ package org.ton.intellij.acton.ide
 
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
-import fleet.util.logging.logger
+import com.intellij.openapi.diagnostic.logger
 
 class ActonExternalLinterResult(
     val commandOutput: String,
@@ -15,7 +15,7 @@ class ActonExternalLinterResult(
         LOG.info("external linter took: ${executionTime}ms")
         GSON.fromJson(commandOutput, ActonLinterResponse::class.java)?.diagnostics?.filter { it.file != null } ?: emptyList()
     } catch (e: Exception) {
-        LOG.error(e, "Failed to parse external linter output")
+        LOG.error("Failed to parse external linter output", e)
         emptyList()
     }
 

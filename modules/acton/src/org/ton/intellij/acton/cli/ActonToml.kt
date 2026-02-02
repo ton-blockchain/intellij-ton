@@ -1,10 +1,13 @@
 package org.ton.intellij.acton.cli
 
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FilenameIndex
 import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiTreeUtil
 import org.toml.lang.psi.TomlFile
 import org.toml.lang.psi.TomlKeySegment
@@ -23,7 +26,20 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
             ?: return emptyMap()
 
         return scriptsTable.entries.associate { entry ->
-            entry.key.text to (entry.value?.text?.removeSurrounding("\"") ?: "")
+            val key = entry.key.segments.firstOrNull()?.name ?: entry.key.text
+            key to (entry.value?.text?.removeSurrounding("\"")?.removeSurrounding("'") ?: "")
+        }
+    }
+
+    fun getMappings(): Map<String, String> {
+        val file = psiFile ?: return emptyMap()
+        val mappingsTable = PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
+            ?.find { it.header.key?.segments?.firstOrNull()?.name == "mappings" }
+            ?: return emptyMap()
+
+        return mappingsTable.entries.associate { entry ->
+            val key = entry.key.segments.firstOrNull()?.name ?: entry.key.text
+            key to (entry.value?.text?.removeSurrounding("\"")?.removeSurrounding("'") ?: "")
         }
     }
 
@@ -94,8 +110,14 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
 
     companion object {
         fun find(project: Project): ActonToml? {
-            val files = FilenameIndex.getVirtualFilesByName("Acton.toml", GlobalSearchScope.projectScope(project))
-            return files.firstOrNull()?.let { ActonToml(it, project) }
+            return CachedValuesManager.getManager(project).getCachedValue(project) {
+                val projectDir = project.guessProjectDir()
+                val actonTomlFile = projectDir?.findChild("Acton.toml")
+                val virtualFile = actonTomlFile ?: FilenameIndex.getVirtualFilesByName("Acton.toml", GlobalSearchScope.projectScope(project)).firstOrNull()
+                
+                val actonToml = virtualFile?.let { ActonToml(it, project) }
+                CachedValueProvider.Result.create(actonToml, com.intellij.openapi.vfs.VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS)
+            }
         }
     }
 }

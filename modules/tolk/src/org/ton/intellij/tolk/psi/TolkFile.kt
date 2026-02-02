@@ -5,14 +5,12 @@ import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.FileViewProvider
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiWhiteSpace
-import com.intellij.psi.ResolveState
+import com.intellij.psi.*
 import com.intellij.psi.scope.PsiScopeProcessor
 import com.intellij.psi.util.CachedValueProvider.Result
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
+import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
@@ -154,6 +152,20 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             if (path == "@stdlib/common.tolk") {
                 return
             }
+        } else {
+            val actonToml = ActonToml.find(project)
+            if (actonToml != null) {
+                val mappings = actonToml.getMappings()
+                val filePath = file.virtualFile.path
+                val mappingDirStrings = mappings.mapValues { (_, value) -> actonToml.workingDir.resolve(value).normalize().toString() }
+                for ((key, mappingDir) in mappingDirStrings) {
+                    if (filePath.startsWith(mappingDir)) {
+                        val subPath = filePath.substring(mappingDir.length).removePrefix("/").removePrefix("\\").replace('\\', '/')
+                        path = "@$key/$subPath"
+                        break
+                    }
+                }
+            }
         }
         val newInclude = factory.createIncludeDefinition(path.removeSuffix(".tolk"))
 
@@ -273,10 +285,13 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
 private val INCLUDE_COMPARE: Comparator<TolkIncludeDefinition> =
     compareBy(
         {
-            if (it.stringLiteral?.rawString?.text?.startsWith("@stdlib") == true) {
+            val text = it.stringLiteral?.rawString?.text ?: ""
+            if (text.startsWith("@stdlib") || text.startsWith("\"@stdlib")) {
                 0
-            } else {
+            } else if (text.startsWith("@") || text.startsWith("\"@")) {
                 1
+            } else {
+                2
             }
         },
         {

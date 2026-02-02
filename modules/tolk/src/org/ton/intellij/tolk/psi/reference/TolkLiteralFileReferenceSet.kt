@@ -5,9 +5,11 @@ import com.intellij.psi.PsiFileSystemItem
 import com.intellij.psi.PsiManager
 import com.intellij.psi.impl.source.resolve.reference.impl.providers.FileReference
 import com.intellij.psi.impl.source.resolve.reference.impl.providers.FileReferenceSet
+import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.TolkStringLiteral
+import kotlin.io.path.absolutePathString
 
 private val SUITABLE_FILE_TYPES = arrayOf(TolkFileType)
 
@@ -26,17 +28,28 @@ class TolkLiteralFileReferenceSet(
 ) {
     override fun computeDefaultContexts(): Collection<PsiFileSystemItem> {
         val contexts = super.computeDefaultContexts()
+        val project = element.project
+
         if (pathString.startsWith("@stdlib")) {
-            val project = element.project
             val stdlibDir = project.tolkSettings.stdlibDir ?: return contexts
             val psiFile = PsiManager.getInstance(project).findDirectory(stdlibDir) ?: return contexts
             return listOf(psiFile as PsiFileSystemItem)
         }
-        return contexts
+
+        val actonToml = ActonToml.find(project) ?: return contexts
+        val mappings = actonToml.getMappings()
+        val firstSegment = pathString.split('/').firstOrNull() ?: return contexts
+        if (!firstSegment.startsWith("@")) return contexts
+
+        val mappingValue = mappings[firstSegment.substring(1)] ?: return contexts
+        val mappingPath = actonToml.workingDir.resolve(mappingValue).normalize()
+        val virtualFile = element.containingFile.originalFile.virtualFile.fileSystem.findFileByPath(mappingPath.absolutePathString()) ?: return contexts
+        val psiDirectory = PsiManager.getInstance(project).findDirectory(virtualFile) ?: return contexts
+        return listOf(psiDirectory as PsiFileSystemItem)
     }
 
     override fun createFileReference(range: TextRange, index: Int, text: String): FileReference {
-        if (text == "@stdlib") {
+        if (text.startsWith("@")) {
             return FileReference(this, range, index, ".")
         }
         if (!text.endsWith(".tolk") && range.endOffset - 1 == this.pathString.length) {

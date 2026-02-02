@@ -70,7 +70,8 @@ class TolkDumbAnnotator : Annotator, DumbAware {
                 is TolkGlobalVar -> TolkColor.GLOBAL_VARIABLE.textAttributesKey
                 is TolkConstVar -> TolkColor.CONSTANT.textAttributesKey
                 is TolkStruct -> {
-                    if (element.name == "map") {
+                    // map and array are special builtin types, so we want to highlight it as a keyword
+                    if (element.name == "map" || element.name == "array") {
                         return TolkColor.KEYWORD.textAttributesKey
                     }
                     val tag = element.structConstructorTag

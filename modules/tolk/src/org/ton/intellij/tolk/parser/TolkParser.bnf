@@ -388,7 +388,7 @@ AnnotationArgument ::= Expression {
 FunctionBody ::= ';' | AsmDefinition | BlockStatement | ('builtin' ';'?)
 private FunctionBody_first ::= ';' | 'asm' | '{' | 'builtin'
 
-TypeParameterList ::= '<' << comma_separated_list TypeParameter >> '>' {
+TypeParameterList ::= '<' << comma_separated_list TypeParameter >>? '>' {
     pin=1
     extends = "org.ton.intellij.tolk.psi.impl.TolkStubbedElementImpl<?>"
     stubClass = "org.ton.intellij.tolk.stub.TolkTypeParameterListStub"
@@ -846,12 +846,12 @@ ReferenceExpression ::= IDENTIFIER TypeArgumentList? {
     ]
 }
 
-TypeArgumentList ::= '<' <<list_with_recover TypeExpression>> '>' {
+TypeArgumentList ::= '<' <<list_with_recover TypeExpression>>? '>' {
     extends = "org.ton.intellij.tolk.psi.impl.TolkStubbedElementImpl<?>"
     stubClass = "org.ton.intellij.tolk.stub.TolkTypeArgumentListStub"
     elementTypeFactory = "org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
 }
-TypeArgumentList_pinned ::= '<' <<list_with_recover TypeExpression>> '>' {
+TypeArgumentList_pinned ::= '<' <<list_with_recover TypeExpression>>? '>' {
     pin=1
     elementType=TypeArgumentList
 }

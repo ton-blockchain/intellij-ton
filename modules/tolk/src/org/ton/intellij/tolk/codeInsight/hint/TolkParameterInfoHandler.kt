@@ -2,17 +2,31 @@ package org.ton.intellij.tolk.codeInsight.hint
 
 import com.intellij.lang.parameterInfo.*
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiFile
-import com.intellij.refactoring.suggested.startOffset
+import com.intellij.psi.PsiElement
+import com.intellij.psi.util.startOffset
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.parentOfType
 
-class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<String>> {
-    override fun findElementForParameterInfo(context: CreateParameterInfoContext): TolkArgumentList? {
-        val argumentList = findArgumentList(context.file, context.offset) ?: return null
-        val callExpression = argumentList.parentOfType<TolkCallExpression>() ?: return null
+class TolkParameterInfoHandler : ParameterInfoHandler<PsiElement, List<String>> {
+    override fun findElementForParameterInfo(context: CreateParameterInfoContext): PsiElement? {
+        val element = context.file.findElementAt(context.offset) ?: return null
+        val typeArgumentList = element.parentOfType<TolkTypeArgumentList>()
+        if (typeArgumentList != null) {
+            return typeParametersInfo(typeArgumentList, context)
+        }
+
+        val argumentList = element.parentOfType<TolkArgumentList>()
+        if (argumentList != null) {
+            return parametersInfo(argumentList, context)
+        }
+
+        return null
+    }
+
+    private fun parametersInfo(arguments: TolkArgumentList, context: CreateParameterInfoContext): TolkArgumentList? {
+        val callExpression = arguments.parentOfType<TolkCallExpression>() ?: return null
 
         val parameterInfos: ArrayList<String> = ArrayList()
         iterateOverParameters(callExpression) { parameter, _ ->
@@ -46,24 +60,43 @@ class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<Str
         }
 
         context.itemsToShow = arrayOf(parameterInfos)
-        return callExpression.argumentList
+        return arguments
     }
 
-    override fun showParameterInfo(
-        element: TolkArgumentList,
-        context: CreateParameterInfoContext
-    ) {
+    private fun typeParametersInfo(typeArguments: TolkTypeArgumentList, context: CreateParameterInfoContext): TolkTypeArgumentList? {
+        val typeParameterListOwner = when (val parent = typeArguments.parent) {
+            is TolkReferenceExpression     -> parent.reference?.resolve() as? TolkTypeParameterListOwner
+            is TolkReferenceTypeExpression -> parent.reference?.resolve() as? TolkTypeParameterListOwner
+            is TolkFieldLookup             -> parent.reference?.resolve() as? TolkTypeParameterListOwner
+            is TolkMatchPatternReference   -> parent.reference?.resolve() as? TolkTypeParameterListOwner
+            else                           -> null
+        } ?: return null
+
+        val typeParameters = typeParameterListOwner.typeParameterList?.typeParameterList ?: return null
+        val parameterInfos = typeParameters.map { param ->
+            buildString {
+                append(param.name)
+                param.defaultTypeParameter?.typeExpression?.let {
+                    append(" = ")
+                    append(it.type?.render() ?: it.text)
+                }
+            }
+        }
+
+        context.itemsToShow = arrayOf(parameterInfos)
+        return typeArguments
+    }
+
+    override fun showParameterInfo(element: PsiElement, context: CreateParameterInfoContext) {
         context.showHint(element, element.textRange.startOffset, this)
     }
 
-    override fun findElementForUpdatingParameterInfo(context: UpdateParameterInfoContext): TolkArgumentList? {
-        return findArgumentList(context.file, context.offset)
+    override fun findElementForUpdatingParameterInfo(context: UpdateParameterInfoContext): PsiElement? {
+        val element = context.file.findElementAt(context.offset) ?: return null
+        return element.parentOfType<TolkArgumentList>() ?: element.parentOfType<TolkTypeArgumentList>()
     }
 
-    override fun updateParameterInfo(
-        parameterOwner: TolkArgumentList,
-        context: UpdateParameterInfoContext
-    ) {
+    override fun updateParameterInfo(parameterOwner: PsiElement, context: UpdateParameterInfoContext) {
         if (context.parameterOwner != parameterOwner) {
             context.removeHint()
             return
@@ -76,10 +109,7 @@ class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<Str
         context.setCurrentParameter(currentParameterIndex)
     }
 
-    override fun updateUI(
-        p: List<String>,
-        context: ParameterInfoUIContext
-    ) {
+    override fun updateUI(p: List<String>, context: ParameterInfoUIContext) {
         val range = getArgumentRange(p, context.currentParameterIndex)
         updateUI(presentText(p), range, context)
     }
@@ -89,10 +119,6 @@ class TolkParameterInfoHandler : ParameterInfoHandler<TolkArgumentList, List<Str
         val start = arguments.take(index).sumOf { it.length + 2 }
         val end = start + arguments[index].length
         return TextRange(start, end)
-    }
-
-    private fun findArgumentList(file: PsiFile, offset: Int): TolkArgumentList? {
-        return file.findElementAt(offset)?.parentOfType<TolkArgumentList>()
     }
 
     private fun presentText(params: List<String>): String {

@@ -28,6 +28,7 @@ import org.ton.intellij.tolk.type.TolkBytesNTy
 import org.ton.intellij.tolk.type.TolkCellTy
 import org.ton.intellij.tolk.type.TolkIntTyFamily
 import org.ton.intellij.tolk.type.TolkSliceTy
+import org.ton.intellij.tolk.type.TolkStringTy
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkTyAddress
 import org.ton.intellij.tolk.type.TolkTyBool
@@ -159,6 +160,10 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
 
         if (type is TolkSliceTy) {
             return "createEmptySlice()"
+        }
+
+        if (type is TolkStringTy) {
+            return "\"\""
         }
 
         if (type is TolkTyBuilder) {

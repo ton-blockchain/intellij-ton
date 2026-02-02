@@ -24,6 +24,11 @@ class TolkAnnotator : Annotator {
             val parent = element.parent as? TolkReferenceElement ?: return
             highlightReference(parent, holder)
         }
+        if (elementType == TolkElementTypes.ESCAPE_SEQUENCE && element.text == "\\") {
+            holder.newAnnotation(HighlightSeverity.ERROR, "Invalid escape sequence")
+                .textAttributes(TolkColor.INVALID_STRING_ESCAPE.textAttributesKey)
+                .create()
+        }
     }
 
     private fun highlightReference(

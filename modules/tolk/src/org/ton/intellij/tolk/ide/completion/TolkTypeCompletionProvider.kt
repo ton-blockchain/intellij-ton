@@ -26,6 +26,7 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
         TolkTy.Null,
         TolkTy.Cell,
         TolkTy.Slice,
+        TolkTy.String,
         TolkTy.Builder,
         TolkTy.Tuple,
         TolkTy.Never,

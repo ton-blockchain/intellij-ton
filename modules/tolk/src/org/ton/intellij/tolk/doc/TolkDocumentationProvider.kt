@@ -126,6 +126,7 @@ fun TolkTy.generateDoc(): String = buildString {
         TolkTy.Int            -> colorize("int", asPrimitive)
         TolkCellTy            -> colorize("cell", asPrimitive)
         TolkSliceTy           -> colorize("slice", asPrimitive)
+        TolkStringTy          -> colorize("string", asPrimitive)
         TolkTy.Builder        -> colorize("builder", asPrimitive)
         TolkTy.Continuation   -> colorize("continuation", asPrimitive)
         TolkTy.Tuple          -> colorize("tuple", asPrimitive)

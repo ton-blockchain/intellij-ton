@@ -1765,12 +1765,13 @@ class TolkInferenceWalker(
         val variants = resolveFieldLookupReferenceWithReceiver(receiver, fieldLookup, isStaticReceiver)
         val firstVariant = variants.firstOrNull()
         if (firstVariant == null) {
+            val fieldIndex = fieldLookup.integerLiteral?.text?.toIntOrNull() ?: return TolkTy.Unknown to emptyList()
             val types = when (val receiverType = receiver.unwrapTypeAlias().actualType()) {
                 is TolkTyTypedTuple -> receiverType.elements
                 is TolkTyTensor -> receiverType.elements
+                is TolkTyArray -> return receiverType.elementType to emptyList()
                 else -> return TolkTy.Unknown to emptyList()
             }
-            val fieldIndex = fieldLookup.integerLiteral?.text?.toIntOrNull() ?: return TolkTy.Unknown to emptyList()
             return (types.getOrNull(fieldIndex) ?: TolkTy.Unknown) to emptyList()
         } else {
             val (resolved, sub) = firstVariant

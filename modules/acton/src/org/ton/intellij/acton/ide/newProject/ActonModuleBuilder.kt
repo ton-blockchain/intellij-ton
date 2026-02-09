@@ -8,6 +8,7 @@ import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.module.ModuleType
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.roots.ModifiableRootModel
+import com.intellij.openapi.vfs.VfsUtil
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
 import java.nio.file.Paths
@@ -47,8 +48,9 @@ class ActonModuleBuilder : ModuleBuilder() {
             true,
             project
         )
-        
+
         root.refresh(false, true)
+        VfsUtil.markDirtyAndRefresh(false, true, true, root)
 
         val fileToOpen = when (settings.template) {
             "empty" -> "contracts/contract.tolk"

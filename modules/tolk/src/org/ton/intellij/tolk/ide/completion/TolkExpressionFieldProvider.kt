@@ -31,6 +31,7 @@ import org.ton.intellij.tolk.type.TolkSliceTy
 import org.ton.intellij.tolk.type.TolkStringTy
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkTyAddress
+import org.ton.intellij.tolk.type.TolkTyArray
 import org.ton.intellij.tolk.type.TolkTyBool
 import org.ton.intellij.tolk.type.TolkTyBuilder
 import org.ton.intellij.tolk.type.TolkTyCoins
@@ -186,6 +187,10 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         if (type is TolkTyEnum) {
             val member = type.psi.members.firstOrNull() ?: return type.render()
             return "${type.render()}.${member.name}"
+        }
+
+        if (type is TolkTyArray) {
+            return "[]"
         }
 
         if (type is TolkTyTypedTuple) {

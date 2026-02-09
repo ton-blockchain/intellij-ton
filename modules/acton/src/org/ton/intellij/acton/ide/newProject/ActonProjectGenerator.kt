@@ -10,6 +10,7 @@ import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.DirectoryProjectGeneratorBase
 import com.intellij.platform.GeneratorPeerImpl
@@ -62,6 +63,7 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
         )
 
         baseDir.refresh(false, true)
+        VfsUtil.markDirtyAndRefresh(false, true, true, baseDir)
 
         val fileToOpen = when (settings.template) {
             "empty" -> "contracts/contract.tolk"

@@ -32,7 +32,10 @@ import com.intellij.ui.dsl.builder.*
 import com.intellij.util.ui.JBUI
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
+import com.intellij.openapi.options.ShowSettingsUtil
+import org.ton.intellij.acton.settings.ActonConfigurable
 import java.awt.BorderLayout
+import java.awt.FlowLayout
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.RenderingHints
@@ -106,7 +109,17 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                 workingDirectory = projectDir.toNioPath(),
                 additionalArguments = walletCommand.getArguments(),
                 environmentVariables = EnvironmentVariablesData.DEFAULT
-            ).toGeneralCommandLine(project) ?: return@executeOnPooledThread
+            ).toGeneralCommandLine(project)
+
+            if (commandLine == null) {
+                ApplicationManager.getApplication().invokeLater {
+                    cardsPanel.removeAll()
+                    addActonNotConfiguredError()
+                    cardsPanel.revalidate()
+                    cardsPanel.repaint()
+                }
+                return@executeOnPooledThread
+            }
 
             val handler = CapturingProcessHandler(commandLine)
             val output = handler.runProcess(10000)
@@ -151,6 +164,31 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
             foreground = JBUI.CurrentTheme.Label.disabledForeground()
         }
         cardsPanel.add(label)
+        cardsPanel.add(Box.createVerticalGlue())
+    }
+
+    private fun addActonNotConfiguredError() {
+        cardsPanel.add(Box.createVerticalGlue())
+
+        val label = JBLabel("Acton is not configured", SwingConstants.CENTER).apply {
+            alignmentX = CENTER_ALIGNMENT
+            foreground = JBUI.CurrentTheme.Label.disabledForeground()
+        }
+        cardsPanel.add(label)
+        cardsPanel.add(Box.createVerticalStrut(JBUI.scale(0)))
+
+        val linkPanel = JPanel(FlowLayout(FlowLayout.CENTER)).apply {
+            isOpaque = false
+            alignmentX = CENTER_ALIGNMENT
+        }
+        val settingsLink = com.intellij.ui.components.ActionLink("Configure...") {
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, ActonConfigurable::class.java)
+        }.apply {
+            alignmentX = CENTER_ALIGNMENT
+        }
+        linkPanel.add(settingsLink)
+        cardsPanel.add(linkPanel)
+
         cardsPanel.add(Box.createVerticalGlue())
     }
 

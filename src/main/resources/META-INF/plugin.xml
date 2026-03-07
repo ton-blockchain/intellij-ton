@@ -23,12 +23,11 @@
     <xi:include href="/META-INF/tasm.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/acton.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <depends optional="true" config-file="acton-toml.xml">org.toml.lang</depends>
+    <depends optional="true" config-file="org.ton.intellij-ton.spellchecker.xml">com.intellij.modules.spellchecker</depends>
     <depends optional="true" config-file="org.ton.intellij-ton.dev.xml">com.intellij.dev</depends>
     <depends optional="true" config-file="org.ton.intellij-ton.javascript.xml">JavaScript</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <spellchecker.bundledDictionaryProvider
-                implementation="org.ton.intellij.ide.spellchecker.TonDictionaryProvider"/>
         <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
     </extensions>
 </idea-plugin>

@@ -60,6 +60,9 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
         verticalScrollBar.unitIncrement = 16
     }
     private val gson = Gson()
+    private var initialWalletsViewReady = false
+    private var pendingCreateWalletDialog = false
+    private var pendingWalletNameForCreateDialog: String? = null
 
     companion object {
         val WALLET_VERSIONS = listOf(
@@ -95,11 +98,23 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
         refreshWallets()
     }
 
+    fun openCreateWalletDialog(suggestedWalletName: String? = null, waitForWalletsView: Boolean = false) {
+        if (waitForWalletsView && !initialWalletsViewReady) {
+            pendingCreateWalletDialog = true
+            pendingWalletNameForCreateDialog = suggestedWalletName
+            return
+        }
+        createNewWallet(suggestedWalletName)
+    }
+
     private fun refreshWallets() {
         ApplicationManager.getApplication().executeOnPooledThread {
             val projectDir = project.guessProjectDir()
             if (projectDir == null) {
                 showError("Could not find project directory")
+                ApplicationManager.getApplication().invokeLater {
+                    markInitialWalletsViewReady()
+                }
                 return@executeOnPooledThread
             }
 
@@ -117,6 +132,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                     addActonNotConfiguredError()
                     cardsPanel.revalidate()
                     cardsPanel.repaint()
+                    markInitialWalletsViewReady()
                 }
                 return@executeOnPooledThread
             }
@@ -153,8 +169,25 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
 
                 cardsPanel.revalidate()
                 cardsPanel.repaint()
+                markInitialWalletsViewReady()
             }
         }
+    }
+
+    private fun markInitialWalletsViewReady() {
+        if (initialWalletsViewReady) {
+            return
+        }
+        initialWalletsViewReady = true
+
+        if (!pendingCreateWalletDialog) {
+            return
+        }
+
+        val walletName = pendingWalletNameForCreateDialog
+        pendingCreateWalletDialog = false
+        pendingWalletNameForCreateDialog = null
+        createNewWallet(walletName)
     }
 
     private fun addStatusLabel(text: String) {
@@ -378,8 +411,8 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
         }
     }
 
-    private fun createNewWallet() {
-        val dialog = NewWalletDialog(project)
+    private fun createNewWallet(initialWalletName: String? = null) {
+        val dialog = NewWalletDialog(project, initialWalletName)
         if (dialog.showAndGet()) {
             val name = dialog.walletName
             val version = dialog.version ?: "v5r1"
@@ -483,8 +516,8 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
     }
 }
 
-class NewWalletDialog(project: Project) : DialogWrapper(project) {
-    var walletName: String = ""
+class NewWalletDialog(project: Project, initialWalletName: String? = null) : DialogWrapper(project) {
+    var walletName: String = initialWalletName.orEmpty()
     var version: String? = "v5r1"
     var isGlobal: Boolean = false
     var isSecure: Boolean = true

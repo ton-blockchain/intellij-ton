@@ -77,6 +77,7 @@ sealed class ActonCommand(val name: String) {
         var target: String = "",
         var functionName: String = "",
         var clearCache: Boolean = false,
+        var useColors: Boolean = false,
     ) : ActonCommand("test") {
         enum class TestMode { FUNCTION, FILE, DIRECTORY }
 
@@ -84,6 +85,10 @@ sealed class ActonCommand(val name: String) {
             add("--reporter")
             add("console,teamcity")
             if (clearCache) add("--clear-cache")
+            if (useColors) {
+                add("--color")
+                add("always")
+            }
             when (mode) {
                 TestMode.FUNCTION -> {
                     if (functionName.isNotBlank()) {
@@ -216,7 +221,10 @@ sealed class ActonCommand(val name: String) {
     ) : ActonCommand("check") {
         override fun getArguments(): List<String> = buildList {
             if (fix) add("--fix")
-            if (json) add("--json")
+            if (json) {
+                add("--output-format")
+                add("json")
+            }
         }
     }
 

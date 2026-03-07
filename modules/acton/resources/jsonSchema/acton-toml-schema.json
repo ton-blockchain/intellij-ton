@@ -3,18 +3,12 @@
   "title": "Acton Configuration Schema",
   "description": "JSON schema for Acton.toml configuration file",
   "type": "object",
-  "required": [
-    "package"
-  ],
+  "required": ["package"],
   "properties": {
     "package": {
       "type": "object",
       "description": "Package metadata for the Acton project",
-      "required": [
-        "name",
-        "description",
-        "version"
-      ],
+      "required": ["name", "description", "version"],
       "properties": {
         "name": {
           "type": "string",
@@ -39,6 +33,24 @@
         }
       }
     },
+    "networks": {
+      "type": "object",
+      "description": "Custom network configurations",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["v2-url", "v3-url"],
+        "properties": {
+          "v2-url": {
+            "type": "string",
+            "description": "The URL for the TonCenter API v2"
+          },
+          "v3-url": {
+            "type": "string",
+            "description": "The URL for the TonCenter API v3"
+          }
+        }
+      }
+    },
     "test": {
       "type": "object",
       "description": "Default settings for the test runner",
@@ -52,12 +64,7 @@
           "description": "List of test reporters to use",
           "items": {
             "type": "string",
-            "enum": [
-              "console",
-              "teamcity",
-              "junit",
-              "dot"
-            ]
+            "enum": ["console", "teamcity", "junit", "dot"]
           }
         },
         "debug": {
@@ -158,6 +165,50 @@
           "items": {
             "type": "string"
           }
+        },
+        "separate-import-groups": {
+          "type": "boolean",
+          "description": "Insert an empty line between import groups (@stdlib, @acton, @<other>, ../, ./)",
+          "default": false
+        }
+      }
+    },
+    "build": {
+      "type": "object",
+      "description": "Default settings for the build command",
+      "properties": {
+        "output-fift": {
+          "type": "string",
+          "description": "Directory where per-contract compiled Fift files are saved"
+        }
+      }
+    },
+    "litenode": {
+      "type": "object",
+      "description": "Default settings for `acton litenode` commands",
+      "properties": {
+        "port": {
+          "type": "integer",
+          "description": "Litenode port used by `acton litenode` commands",
+          "minimum": 0,
+          "maximum": 65535,
+          "default": 3000
+        },
+        "fork-net": {
+          "type": "string",
+          "description": "Network to fork from used by `acton litenode start`"
+        },
+        "fork-block-number": {
+          "type": "integer",
+          "description": "Block sequence number used by `acton litenode start` when forking from historical state",
+          "minimum": 0
+        },
+        "accounts": {
+          "type": "array",
+          "description": "Wallet names from [wallets] that are automatically funded and deployed on `acton litenode start`",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -166,10 +217,7 @@
       "description": "Definition of contracts in the project",
       "additionalProperties": {
         "type": "object",
-        "required": [
-          "name",
-          "src"
-        ],
+        "required": ["name", "src"],
         "properties": {
           "name": {
             "type": "string",
@@ -191,9 +239,7 @@
                 {
                   "type": "object",
                   "description": "Detailed dependency configuration",
-                  "required": [
-                    "name"
-                  ],
+                  "required": ["name"],
                   "properties": {
                     "name": {
                       "type": "string",
@@ -202,10 +248,7 @@
                     "kind": {
                       "type": "string",
                       "description": "Dependency type",
-                      "enum": [
-                        "embed_code",
-                        "library_ref"
-                      ],
+                      "enum": ["embed_code", "library_ref"],
                       "default": "embed_code"
                     },
                     "function": {
@@ -228,6 +271,13 @@
         }
       }
     },
+    "mappings": {
+      "type": "object",
+      "description": "Path mappings for Tolk compiler imports (e.g., 'core' = './foo/core' maps to '@core/...')",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
     "scripts": {
       "type": "object",
       "description": "Custom scripts that can be run with 'acton run'",
@@ -235,40 +285,48 @@
         "type": "string"
       }
     },
-    "mappings": {
-      "type": "object",
-      "description": "Path mappings for imports (e.g., 'core' = './foo/core' maps to '@core/...')",
-      "additionalProperties": {
-        "type": "string"
-      }
-    },
     "lint": {
       "type": "object",
       "description": "Linter configuration for the project",
-      "additionalProperties": {
-        "anyOf": [
-          {
-            "type": "string",
-            "enum": [
-              "allow",
-              "warn",
-              "deny"
-            ],
-            "description": "Global lint level for a rule"
-          },
-          {
-            "type": "object",
-            "description": "Contract-specific lint overrides",
-            "additionalProperties": {
-              "type": "string",
-              "enum": [
-                "allow",
-                "warn",
-                "deny"
-              ]
-            }
+      "properties": {
+        "exclude": {
+          "type": "array",
+          "description": "Glob patterns for files to exclude from lint diagnostics",
+          "items": {
+            "type": "string"
           }
-        ]
+        },
+        "max-warnings": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum allowed warning count before `acton check` exits with a non-zero code"
+        },
+        "output-format": {
+          "type": "string",
+          "enum": ["plain", "json", "sarif", "github"],
+          "description": "Output format for `acton check` diagnostics"
+        },
+        "rules": {
+          "type": "object",
+          "description": "Lint rules and contract-specific overrides",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": ["allow", "warn", "deny"],
+                "description": "Global lint level for a rule"
+              },
+              {
+                "type": "object",
+                "description": "Contract-specific lint overrides",
+                "additionalProperties": {
+                  "type": "string",
+                  "enum": ["allow", "warn", "deny"]
+                }
+              }
+            ]
+          }
+        }
       }
     }
   }

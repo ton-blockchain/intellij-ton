@@ -39,6 +39,8 @@ data class ActonDiagnostic(
     private val _severity: String? = null,
     @SerializedName("message")
     private val _message: String? = null,
+    @SerializedName("help")
+    private val _help: String? = null,
     @SerializedName("annotations")
     private val _annotations: List<ActonAnnotation>? = null,
     @SerializedName("fixes")
@@ -48,6 +50,7 @@ data class ActonDiagnostic(
 ) {
     val severity: String get() = _severity ?: "error"
     val message: String get() = _message ?: ""
+    val help: String get() = _help ?: ""
     val annotations: List<ActonAnnotation> get() = _annotations?.filter { it.isValid } ?: emptyList()
     val fixes: List<ActonFix> get() = _fixes?.filter { it.isValid } ?: emptyList()
     val source: String get() = _source ?: "tolk"

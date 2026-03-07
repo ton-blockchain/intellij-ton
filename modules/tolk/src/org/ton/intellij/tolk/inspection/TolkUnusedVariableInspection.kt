@@ -18,7 +18,7 @@ class TolkUnusedVariableInspection : TolkInspectionBase() {
     ): TolkVisitor = object : TolkVisitor() {
         override fun visitVar(element: TolkVar) {
             val id = element.identifier
-            if (id.text == "_") return
+            if (id.text.startsWith("_")) return
             val reference = ReferencesSearch.search(element, element.useScope).findFirst()
             if (reference != null) return
             val fixes = LinkedList<LocalQuickFix>()

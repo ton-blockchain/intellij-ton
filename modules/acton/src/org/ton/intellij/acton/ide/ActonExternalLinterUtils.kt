@@ -129,16 +129,6 @@ object ActonExternalLinterUtils {
         val finish = Instant.now()
         val executionTime = finish.toEpochMilli() - started.toEpochMilli()
 
-        if (output.exitCode != 0) {
-            val errorMessage = "Acton check failed with exit code ${output.exitCode}: ${output.stderr}"
-            LOG.warn(errorMessage)
-            return ActonExternalLinterResult(
-                commandOutput = "",
-                executionTime = executionTime,
-                error = errorMessage
-            )
-        }
-
         return ActonExternalLinterResult(
             commandOutput = output.stdout,
             executionTime = executionTime
@@ -146,15 +136,23 @@ object ActonExternalLinterUtils {
     }
 }
 
+data class ActonExternalLinterAdditionalAnnotation(
+    val textRange: TextRange,
+    @Nls val message: String,
+)
+
 data class ActonExternalLinterFilteredMessage(
     val severity: HighlightSeverity,
     val textRange: TextRange,
     @Nls val message: String,
+    @Nls val help: String,
     @Nls val htmlTooltip: String,
+    val additional: List<ActonExternalLinterAdditionalAnnotation>,
     val quickFixes: List<ActonApplySuggestionFix>,
     val suppressionFixes: List<SuppressIntentionAction>,
 ) {
     companion object {
+        @Suppress("DEPRECATION")
         fun filterMessage(file: PsiFile, document: Document, diagnostic: ActonDiagnostic): ActonExternalLinterFilteredMessage? {
             val severity = when (diagnostic.severity) {
                 "error"   -> HighlightSeverity.ERROR
@@ -171,15 +169,28 @@ data class ActonExternalLinterFilteredMessage(
 
             val textRange = primaryAnnotation.range.toTextRange(document) ?: return null
 
+            val additionalMessages = diagnostic.annotations.filter { !it.isPrimary && it.message != null }.mapNotNull {
+                ActonExternalLinterAdditionalAnnotation(
+                    it.range.toTextRange(document) ?: return@mapNotNull null,
+                    it.message!!,
+                )
+            }
+
             @NlsSafe val tooltip = buildString {
                 append(StringEscapeUtils.escapeHtml4(diagnostic.message))
 
-                val additionalMessages = diagnostic.annotations
-                    .filter { !it.isPrimary && it.message != null }
+                val primaryAnnotations = diagnostic.annotations
+                    .filter { it.isPrimary && it.message != null }
                     .map { StringEscapeUtils.escapeHtml4(it.message!!) }
 
-                if (additionalMessages.isNotEmpty()) {
-                    append(additionalMessages.joinToString(prefix = "<br>", separator = "<br>"))
+                if (primaryAnnotations.isNotEmpty()) {
+                    append(primaryAnnotations.joinToString(prefix = "<br>", separator = "<br>"))
+                }
+
+                if (diagnostic.help.isNotEmpty()) {
+                    append("<br>")
+                    append("help: ")
+                    append(diagnostic.help)
                 }
             }
 
@@ -190,14 +201,17 @@ data class ActonExternalLinterFilteredMessage(
                 }
 
             val ruleName = diagnostic.name ?: "unknown"
-            val actions = arrayOf(ActonSuppressLinterFix(ruleName), ActonSuppressLinterFix("all"))
+            val actions =
+                if (ruleName == "compiler-error") arrayOf() else arrayOf(ActonSuppressLinterFix(ruleName), ActonSuppressLinterFix("all"))
             val suppressionOptions = convertBatchToSuppressIntentionActions(actions).toList()
 
             return ActonExternalLinterFilteredMessage(
                 severity,
                 textRange,
                 diagnostic.message,
+                diagnostic.help,
                 tooltip,
+                additionalMessages,
                 quickFixes,
                 suppressionOptions
             )
@@ -208,11 +222,11 @@ data class ActonExternalLinterFilteredMessage(
 private fun ActonRange.toTextRange(document: Document): TextRange? {
     val startLine = start.line
     val endLine = end.line
-    
+
     if (startLine !in 0 until document.lineCount || endLine !in 0 until document.lineCount) {
         return null
     }
-    
+
     val startOffset = (document.getLineStartOffset(startLine) + start.character).coerceIn(0, document.textLength)
     val endOffset = (document.getLineStartOffset(endLine) + end.character).coerceIn(0, document.textLength)
 
@@ -268,7 +282,7 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(
         val highlightBuilder = HighlightInfo.newHighlightInfo(convertSeverity(message.severity))
             .severity(message.severity)
             .description(message.message)
-            .escapedToolTip(message.htmlTooltip)
+            .escapedToolTip(message.htmlTooltip.replace("\n", "<br>"))
             .range(message.textRange)
             .needsUpdateOnTyping(true)
 
@@ -283,6 +297,16 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(
         }
 
         highlightBuilder.create()?.let(::add)
+
+        for (annotation in message.additional) {
+            val highlightBuilder = HighlightInfo.newHighlightInfo(HighlightInfoType.WEAK_WARNING)
+                .severity(HighlightSeverity.WEAK_WARNING)
+                .description(annotation.message)
+                .escapedToolTip(annotation.message.replace("\n", "<br>"))
+                .range(annotation.textRange)
+                .needsUpdateOnTyping(true)
+            highlightBuilder.create()?.let(::add)
+        }
     }
 }
 

@@ -1,21 +1,14 @@
 package org.ton.intellij.acton.toml
 
-import com.google.gson.Gson
 import com.intellij.codeInsight.AutoPopupController
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
-import com.intellij.execution.process.CapturingProcessHandler
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.guessProjectDir
 import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
-import org.toml.lang.psi.TomlKey
 import org.toml.lang.psi.TomlKeySegment
-import org.toml.lang.psi.TomlKeyValue
 import org.toml.lang.psi.TomlTable
-import org.ton.intellij.util.psiElement
 
 class ActonTomlCompletionContributor : CompletionContributor() {
     init {
@@ -40,7 +33,7 @@ class ActonTomlCompletionContributor : CompletionContributor() {
                     val table = element.parent?.parent?.parent as? TomlTable ?: return
                     val header = table.header
                     val segments = header.key?.segments ?: return
-                    if (segments.isEmpty() || segments[0].name != "lint") return
+                    if (segments.size != 2 || segments[0].name != "lint" || segments[1].name != "rules") return
 
                     val project = parameters.editor.project ?: return
                     val rules = ActonLintRulesProvider.getLintRules(project)

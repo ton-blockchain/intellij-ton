@@ -58,7 +58,7 @@ class ActonCommandConfiguration(
                 scriptBroadcast, scriptBroadcastNet, scriptExplorer, scriptDebug, scriptDebugPort
             )
 
-            "test"   -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache)
+            "test"   -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache, true)
             "run"    -> ActonCommand.Run(runScriptName)
             else     -> ActonCommand.Custom(command)
         }

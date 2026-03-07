@@ -10,6 +10,7 @@ import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.JBColor
 import com.intellij.ui.dsl.builder.AlignX
@@ -22,6 +23,7 @@ import javax.swing.JLabel
 class ActonConfigurable(val project: Project) : BoundConfigurable("Acton"), Disposable {
     private val actonPathField = pathToExecutableTextField(this, "Choose Acton Executable")
     private val actonVersionLabel = JLabel()
+    private val explorerComboBox = ComboBox(ActonExplorer.entries.toTypedArray())
     private val environmentVariables = EnvironmentVariablesComponent()
     private val alarm = Alarm(Alarm.ThreadToUse.POOLED_THREAD, this)
 
@@ -39,15 +41,22 @@ class ActonConfigurable(val project: Project) : BoundConfigurable("Acton"), Disp
         row(environmentVariables.label) {
             cell(environmentVariables).align(AlignX.FILL)
         }
+        row("Explorer:") {
+            cell(explorerComboBox)
+                .align(AlignX.FILL)
+                .comment("Used for TON address links and Acton commands")
+        }
 
         val settings = project.actonSettings
         onApply {
             settings.actonPath = actonPathField.text.ifBlank { null }
+            settings.explorer = explorerComboBox.selectedItem as? ActonExplorer ?: ActonExplorer.DEFAULT
             settings.env = environmentVariables.envData
         }
         onReset {
             val savedPath = settings.actonPath
             actonPathField.text = savedPath ?: findActonInPath() ?: ""
+            explorerComboBox.selectedItem = settings.explorer
             environmentVariables.envData = settings.env
             
             val cachedVersion = settings.actonVersion
@@ -61,6 +70,7 @@ class ActonConfigurable(val project: Project) : BoundConfigurable("Acton"), Disp
         }
         onIsModified {
             actonPathField.text != (settings.actonPath ?: "") ||
+            explorerComboBox.selectedItem != settings.explorer ||
             environmentVariables.envData != settings.env
         }
 

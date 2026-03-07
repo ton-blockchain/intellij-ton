@@ -34,6 +34,7 @@ import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
 import com.intellij.openapi.options.ShowSettingsUtil
 import org.ton.intellij.acton.settings.ActonConfigurable
+import org.ton.intellij.acton.settings.actonSettings
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import java.awt.Graphics
@@ -288,9 +289,10 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                         } else info.address
 
                         link(truncatedAddr) {
-                            BrowserUtil.browse("https://testnet.tonviewer.com/${info.address}")
+                            val explorerUrl = project.actonSettings.explorer.addressUrl(info.address, isTestnet = true)
+                            BrowserUtil.browse(explorerUrl)
                         }.applyToComponent {
-                            toolTipText = "Open ${info.address} in Tonviewer"
+                            toolTipText = "Open ${info.address} in explorer"
                         }.gap(RightGap.SMALL)
 
                         icon(AllIcons.Actions.Copy).applyToComponent {

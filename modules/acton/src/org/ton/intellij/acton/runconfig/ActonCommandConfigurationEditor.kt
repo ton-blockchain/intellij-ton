@@ -49,7 +49,6 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
 
     private val scriptBroadcastCheckBox = JBCheckBox("Broadcast", false)
     private val scriptBroadcastNetComboBox = ComboBox(arrayOf("", "testnet", "mainnet"))
-    private val scriptExplorerComboBox = ComboBox(arrayOf("", "tonscan", "toncx", "dton", "tonviewer"))
 
     // Test specific
     private val testTargetBrowseField = TextFieldWithBrowseButton()
@@ -137,7 +136,6 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
 
         val broadcastEnabled = scriptBroadcastCheckBox.isSelected
         scriptBroadcastNetComboBox.isEnabled = broadcastEnabled
-        scriptExplorerComboBox.isEnabled = broadcastEnabled
     }
 
     private fun createTextFieldWithCompletion(provider: TextFieldCompletionProvider?): TextFieldWithCompletion {
@@ -187,7 +185,6 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         scriptApiKeyField.setText(configuration.scriptApiKey)
         scriptBroadcastCheckBox.isSelected = configuration.scriptBroadcast
         scriptBroadcastNetComboBox.selectedItem = configuration.scriptBroadcastNet
-        scriptExplorerComboBox.selectedItem = configuration.scriptExplorer
 
         testMode = configuration.testMode
         testTargetBrowseField.text = configuration.testTarget
@@ -220,8 +217,6 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         configuration.scriptBroadcast = scriptBroadcastCheckBox.isSelected
         configuration.scriptBroadcastNet =
             if (scriptBroadcastCheckBox.isSelected) (scriptBroadcastNetComboBox.selectedItem as? String ?: "") else ""
-        configuration.scriptExplorer =
-            if (scriptBroadcastCheckBox.isSelected) (scriptExplorerComboBox.selectedItem as? String ?: "") else ""
 
         configuration.testMode = testMode
         configuration.testTarget = testTargetBrowseField.text.trim()
@@ -269,9 +264,6 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
                     }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
                     row("Network:") {
                         cell(scriptBroadcastNetComboBox).align(AlignX.FILL)
-                    }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
-                    row("Explorer:") {
-                        cell(scriptExplorerComboBox).align(AlignX.FILL).comment("Explorer to use for transaction links")
                     }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
                 }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
             }.topGap(TopGap.NONE)

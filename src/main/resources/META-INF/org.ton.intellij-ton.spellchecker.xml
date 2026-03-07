@@ -1,0 +1,6 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <spellchecker.bundledDictionaryProvider
+                implementation="org.ton.intellij.ide.spellchecker.TonDictionaryProvider"/>
+    </extensions>
+</idea-plugin>

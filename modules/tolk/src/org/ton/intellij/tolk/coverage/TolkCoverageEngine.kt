@@ -66,7 +66,7 @@ class TolkCoverageEngine : CoverageEngine() {
 
     override fun getCoverageAnnotator(project: Project): CoverageAnnotator = TolkCoverageAnnotator.getInstance(project)
 
-    override fun isApplicableTo(conf: RunConfigurationBase<*>): Boolean = 
+    override fun isApplicableTo(conf: RunConfigurationBase<*>): Boolean =
         conf is ActonCommandConfiguration && conf.command == "test"
 
     override fun createEmptyCoverageSuite(coverageRunner: CoverageRunner): CoverageSuite = TolkCoverageSuite()
@@ -191,18 +191,12 @@ class TolkCoverageEngine : CoverageEngine() {
 
     override fun collectSrcLinesForUntouchedFile(classFile: File, suite: CoverageSuitesBundle): List<Int>? = null
 
-    @Deprecated("deprecated in Java")
     override fun createCoverageSuite(
-        covRunner: CoverageRunner,
         name: String,
-        coverageDataFileProvider: CoverageFileProvider,
-        filters: Array<out String?>?,
-        lastCoverageTimeStamp: Long,
-        suiteToMerge: String?,
-        coverageByTestEnabled: Boolean,
-        tracingEnabled: Boolean,
-        trackTestFolders: Boolean,
         project: Project,
+        covRunner: CoverageRunner,
+        coverageDataFileProvider: CoverageFileProvider,
+        timestamp: Long,
     ): CoverageSuite = TolkCoverageSuite(project, name, coverageDataFileProvider, covRunner, project.guessProjectDir()?.path)
 
     @Deprecated("deprecated in Java")

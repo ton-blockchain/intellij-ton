@@ -22,7 +22,7 @@ val pluginVersion = prop("pluginVersion").let { pluginVersion ->
 version = pluginVersion
 
 plugins {
-    kotlin("jvm") version "2.0.10"
+    kotlin("jvm") version "2.1.0"
     id("org.jetbrains.intellij.platform")
     id("org.jetbrains.grammarkit") version "2023.3.0.1"
     id("org.jetbrains.changelog") version "2.5.0"
@@ -63,6 +63,7 @@ dependencies {
         rustRover(version)
         bundledPlugin("org.toml.lang")
         bundledPlugin("com.intellij.modules.json")
+        bundledModule("intellij.spellchecker")
         testFramework(TestFrameworkType.Platform)
     }
     implementation(project(":util"))

@@ -6,9 +6,9 @@ import com.intellij.execution.configurations.*
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.io.FileUtil
 import org.jdom.Element
 import org.ton.intellij.acton.cli.ActonCommand
+import org.ton.intellij.acton.settings.actonSettings
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -37,7 +37,6 @@ class ActonCommandConfiguration(
     var scriptApiKey: String = ""
     var scriptBroadcast: Boolean = false
     var scriptBroadcastNet: String = ""
-    var scriptExplorer: String = ""
     var scriptDebug: Boolean = false
     var scriptDebugPort: String = ""
 
@@ -55,7 +54,7 @@ class ActonCommandConfiguration(
             "build"  -> ActonCommand.Build(buildContractId, buildClearCache, buildOutDir)
             "script" -> ActonCommand.Script(
                 scriptPath, scriptClearCache, scriptForkNet, scriptForkBlockNumber, scriptApiKey,
-                scriptBroadcast, scriptBroadcastNet, scriptExplorer, scriptDebug, scriptDebugPort
+                scriptBroadcast, scriptBroadcastNet, project.actonSettings.explorer.id, scriptDebug, scriptDebugPort
             )
 
             "test"   -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache, true)
@@ -92,7 +91,6 @@ class ActonCommandConfiguration(
         element.setAttribute("scriptApiKey", scriptApiKey)
         element.setAttribute("scriptBroadcast", scriptBroadcast.toString())
         element.setAttribute("scriptBroadcastNet", scriptBroadcastNet)
-        element.setAttribute("scriptExplorer", scriptExplorer)
         element.setAttribute("scriptDebug", scriptDebug.toString())
         element.setAttribute("scriptDebugPort", scriptDebugPort)
 
@@ -128,7 +126,6 @@ class ActonCommandConfiguration(
         scriptApiKey = element.getAttributeValue("scriptApiKey") ?: ""
         scriptBroadcast = element.getAttributeValue("scriptBroadcast")?.toBoolean() ?: false
         scriptBroadcastNet = element.getAttributeValue("scriptBroadcastNet") ?: ""
-        scriptExplorer = element.getAttributeValue("scriptExplorer") ?: ""
         scriptDebug = element.getAttributeValue("scriptDebug")?.toBoolean() ?: false
         scriptDebugPort = element.getAttributeValue("scriptDebugPort") ?: ""
 

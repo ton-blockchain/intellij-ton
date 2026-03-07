@@ -38,11 +38,18 @@ class ActonSettingsService : SimplePersistentStateComponent<ActonSettingsService
             state.isPassParentEnvs = value.isPassParentEnvs
         }
 
+    var explorer: ActonExplorer
+        get() = ActonExplorer.fromId(state.explorer)
+        set(value) {
+            state.explorer = value.id
+        }
+
     class ActonSettingsState : BaseState() {
         var actonPath by string()
         var actonVersion by string()
         var skipUpdateVersion by string()
         var envs by map<String, String>()
         var isPassParentEnvs by property(true)
+        var explorer by string()
     }
 }

@@ -7,8 +7,7 @@ import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import org.ton.intellij.acton.settings.actonSettings
 
 class ActonTonAddressConsoleFilter : Filter {
     override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
@@ -67,8 +66,7 @@ class ActonTonAddressConsoleFilter : Filter {
 
 class TonAddressHyperlinkInfo(private val address: String, private val isTestnet: Boolean) : HyperlinkInfo {
     override fun navigate(project: Project) {
-        val domain = if (isTestnet) "testnet.tonviewer.com" else "tonviewer.com"
-        val encodedAddress = URLEncoder.encode(address, StandardCharsets.UTF_8.toString()).replace("+", "%20")
-        BrowserUtil.browse("https://$domain/$encodedAddress")
+        val explorerUrl = project.actonSettings.explorer.addressUrl(address, isTestnet)
+        BrowserUtil.browse(explorerUrl)
     }
 }

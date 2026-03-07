@@ -107,13 +107,14 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
         createNewWallet(suggestedWalletName)
     }
 
-    private fun refreshWallets() {
+    private fun refreshWallets(onWalletsUpdated: (() -> Unit)? = null) {
         ApplicationManager.getApplication().executeOnPooledThread {
             val projectDir = project.guessProjectDir()
             if (projectDir == null) {
                 showError("Could not find project directory")
                 ApplicationManager.getApplication().invokeLater {
                     markInitialWalletsViewReady()
+                    onWalletsUpdated?.invoke()
                 }
                 return@executeOnPooledThread
             }
@@ -133,6 +134,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                     cardsPanel.revalidate()
                     cardsPanel.repaint()
                     markInitialWalletsViewReady()
+                    onWalletsUpdated?.invoke()
                 }
                 return@executeOnPooledThread
             }
@@ -170,6 +172,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                 cardsPanel.revalidate()
                 cardsPanel.repaint()
                 markInitialWalletsViewReady()
+                onWalletsUpdated?.invoke()
             }
         }
     }
@@ -188,6 +191,23 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
         pendingCreateWalletDialog = false
         pendingWalletNameForCreateDialog = null
         createNewWallet(walletName)
+    }
+
+    private fun triggerAirdropForWallet(walletName: String) {
+        val walletCard = cardsPanel.components
+            .filterIsInstance<WalletCard>()
+            .firstOrNull { it.info.name == walletName }
+
+        if (walletCard != null) {
+            walletCard.triggerAirdropFromUi()
+            return
+        }
+
+        Messages.showWarningDialog(
+            project,
+            "Wallet was created, but the wallet card was not found to start airdrop automatically.",
+            "Airdrop Not Started"
+        )
     }
 
     private fun addStatusLabel(text: String) {
@@ -233,6 +253,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
 
     private inner class WalletCard(val info: WalletInfo) : JPanel(BorderLayout()) {
         private var progressBar: JProgressBar? = null
+        private var airdropLabel: JBLabel? = null
 
         init {
             isOpaque = false
@@ -307,14 +328,15 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                             foreground = JBUI.CurrentTheme.Label.disabledForeground()
                         }
 
-                        val airdropLabel = JBLabel("Request testnet TON", SwingConstants.LEFT).apply label@{
+                        val airdropLabel = JBLabel("Request testnet TON", SwingConstants.LEFT).apply {
+                            this@WalletCard.airdropLabel = this
                             font = JBUI.Fonts.smallFont()
                             foreground = JBUI.CurrentTheme.Link.Foreground.ENABLED
                             cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR)
                             addMouseListener(object : java.awt.event.MouseAdapter() {
                                 override fun mouseClicked(e: java.awt.event.MouseEvent) {
                                     if (isEnabled) {
-                                        performAirdrop(this@label)
+                                        requestAirdrop()
                                     }
                                 }
                             })
@@ -348,7 +370,16 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
             add(content, BorderLayout.CENTER)
         }
 
-        private fun performAirdrop(label: JBLabel) {
+        fun triggerAirdropFromUi() {
+            requestAirdrop()
+        }
+
+        private fun requestAirdrop() {
+            val label = airdropLabel ?: return
+            if (!label.isEnabled) {
+                return
+            }
+
             val projectDir = project.guessProjectDir() ?: return
             label.isEnabled = false
             label.text = "Requesting..."
@@ -418,6 +449,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
             val version = dialog.version ?: "v5r1"
             val global = dialog.isGlobal
             val secure = dialog.isSecure
+            val requestAirdropAfterCreation = dialog.requestAirdrop
 
             ApplicationManager.getApplication().executeOnPooledThread {
                 val walletCommand = ActonCommand.Wallet.New(
@@ -440,7 +472,13 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                 ApplicationManager.getApplication().invokeLater {
                     if (output.exitCode == 0) {
                         refreshVfs()
-                        refreshWallets()
+                        if (requestAirdropAfterCreation) {
+                            refreshWallets {
+                                triggerAirdropForWallet(name)
+                            }
+                        } else {
+                            refreshWallets()
+                        }
                     } else {
                         val errorMessage = stripAnsiColors(output.stderr.ifBlank { output.stdout })
                         Messages.showErrorDialog(project, errorMessage, "Error Creating Wallet")
@@ -521,6 +559,7 @@ class NewWalletDialog(project: Project, initialWalletName: String? = null) : Dia
     var version: String? = "v5r1"
     var isGlobal: Boolean = false
     var isSecure: Boolean = true
+    var requestAirdrop: Boolean = true
     private lateinit var panel: com.intellij.openapi.ui.DialogPanel
 
     init {
@@ -543,6 +582,10 @@ class NewWalletDialog(project: Project, initialWalletName: String? = null) : Dia
             row {
                 checkBox("Store in global wallets")
                     .bindSelected(::isGlobal)
+            }
+            row {
+                checkBox("Request testnet TON after creation")
+                    .bindSelected(::requestAirdrop)
             }
             row {
                 checkBox("Use secure native store")

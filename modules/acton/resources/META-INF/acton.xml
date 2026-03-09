@@ -30,6 +30,7 @@
         <useScopeEnlarger implementation="org.ton.intellij.acton.toml.ActonTomlUseScopeEnlarger"/>
 
         <notificationGroup id="Acton Update" displayType="BALLOON"/>
+        <notificationGroup id="Acton Formatter" displayType="BALLOON"/>
         <postStartupActivity implementation="org.ton.intellij.acton.ide.ActonUpdateActivity"/>
 
         <consoleFilterProvider implementation="org.ton.intellij.acton.ide.ActonConsoleFilterProvider"/>
@@ -41,6 +42,7 @@
                     factoryClass="org.ton.intellij.acton.ide.ActonWalletToolWindowFactory"/>
 
         <highlightingPassFactory implementation="org.ton.intellij.acton.ide.ActonHighlightingPassFactoryRegistrar"/>
+        <formattingService implementation="org.ton.intellij.acton.ide.formatter.ActonFmtFormattingService"/>
         <projectConfigurable instance="org.ton.intellij.acton.settings.ActonExternalLinterConfigurable"
                              parentId="acton"
                              id="acton.external.linter"

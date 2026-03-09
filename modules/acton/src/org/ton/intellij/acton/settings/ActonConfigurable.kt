@@ -16,8 +16,10 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.Alarm
+import org.ton.intellij.acton.ActonBundle
 import org.ton.intellij.acton.ActonUtils.stripAnsiColors
 import org.ton.intellij.util.pathToExecutableTextField
+import javax.swing.JCheckBox
 import javax.swing.JLabel
 
 class ActonConfigurable(val project: Project) : BoundConfigurable("Acton"), Disposable {
@@ -25,6 +27,8 @@ class ActonConfigurable(val project: Project) : BoundConfigurable("Acton"), Disp
     private val actonVersionLabel = JLabel()
     private val explorerComboBox = ComboBox(ActonExplorer.entries.toTypedArray())
     private val environmentVariables = EnvironmentVariablesComponent()
+    private val useActonFmtForTolkFormattingCheckbox =
+        JCheckBox(ActonBundle.message("settings.acton.use.acton.fmt.for.tolk.formatting.label"))
     private val alarm = Alarm(Alarm.ThreadToUse.POOLED_THREAD, this)
 
     override fun dispose() {
@@ -46,18 +50,24 @@ class ActonConfigurable(val project: Project) : BoundConfigurable("Acton"), Disp
                 .align(AlignX.FILL)
                 .comment("Used for TON address links and Acton commands")
         }
+        row {
+            cell(useActonFmtForTolkFormattingCheckbox)
+                .comment(ActonBundle.message("settings.acton.use.acton.fmt.for.tolk.formatting.comment"))
+        }
 
         val settings = project.actonSettings
         onApply {
             settings.actonPath = actonPathField.text.ifBlank { null }
             settings.explorer = explorerComboBox.selectedItem as? ActonExplorer ?: ActonExplorer.DEFAULT
             settings.env = environmentVariables.envData
+            settings.useActonFmtForTolkFormatting = useActonFmtForTolkFormattingCheckbox.isSelected
         }
         onReset {
             val savedPath = settings.actonPath
             actonPathField.text = savedPath ?: findActonInPath() ?: ""
             explorerComboBox.selectedItem = settings.explorer
             environmentVariables.envData = settings.env
+            useActonFmtForTolkFormattingCheckbox.isSelected = settings.useActonFmtForTolkFormatting
             
             val cachedVersion = settings.actonVersion
             if (cachedVersion != null) {
@@ -71,7 +81,8 @@ class ActonConfigurable(val project: Project) : BoundConfigurable("Acton"), Disp
         onIsModified {
             actonPathField.text != (settings.actonPath ?: "") ||
             explorerComboBox.selectedItem != settings.explorer ||
-            environmentVariables.envData != settings.env
+            environmentVariables.envData != settings.env ||
+            useActonFmtForTolkFormattingCheckbox.isSelected != settings.useActonFmtForTolkFormatting
         }
 
         actonPathField.textField.addActionListener { updateVersion() }

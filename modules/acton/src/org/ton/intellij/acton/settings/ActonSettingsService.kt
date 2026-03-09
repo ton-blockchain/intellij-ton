@@ -44,6 +44,12 @@ class ActonSettingsService : SimplePersistentStateComponent<ActonSettingsService
             state.explorer = value.id
         }
 
+    var useActonFmtForTolkFormatting: Boolean
+        get() = state.useActonFmtForTolkFormatting
+        set(value) {
+            state.useActonFmtForTolkFormatting = value
+        }
+
     class ActonSettingsState : BaseState() {
         var actonPath by string()
         var actonVersion by string()
@@ -51,5 +57,6 @@ class ActonSettingsService : SimplePersistentStateComponent<ActonSettingsService
         var envs by map<String, String>()
         var isPassParentEnvs by property(true)
         var explorer by string()
+        var useActonFmtForTolkFormatting by property(true)
     }
 }

@@ -18,7 +18,7 @@ import java.nio.file.Path
 class ActonToml(val virtualFile: VirtualFile, val project: Project) {
     private val psiFile: TomlFile? get() = PsiManager.getInstance(project).findFile(virtualFile) as? TomlFile
 
-    val workingDir: Path get() = virtualFile.parent.toNioPath()
+    val workingDir: Path get() = Path.of(virtualFile.parent.path)
 
     fun getScripts(): Map<String, String> {
         return CachedValuesManager.getCachedValue(psiFile ?: return emptyMap()) {

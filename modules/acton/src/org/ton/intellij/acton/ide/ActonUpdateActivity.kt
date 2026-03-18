@@ -20,17 +20,17 @@ import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.startup.ProjectActivity
 import org.ton.intellij.acton.cli.ActonCommandLine
 import org.ton.intellij.acton.settings.actonApplicationSettings
-import org.ton.intellij.acton.settings.actonSettings
 
 class ActonUpdateActivity : ProjectActivity {
     override suspend fun execute(project: Project) {
-        if (actonApplicationSettings.disableUpdateChecks) return
+        val applicationSettings = actonApplicationSettings
+        if (applicationSettings.disableUpdateChecks) return
 
         val updateInfo = checkUpdate(project) ?: return
         if (!updateInfo.updateAvailable || !updateInfo.success) return
 
-        val settings = project.actonSettings
-        if (settings.skipUpdateVersion == updateInfo.latestVersion) return
+        val skippedVersion = applicationSettings.skipUpdateVersion
+        if (skippedVersion == updateInfo.latestVersion) return
 
         ApplicationManager.getApplication().invokeLater {
             showUpdateNotification(project, updateInfo)
@@ -72,7 +72,7 @@ class ActonUpdateActivity : ProjectActivity {
         })
 
         notification.addAction(NotificationAction.createSimple("Don't show for this version") {
-            project.actonSettings.skipUpdateVersion = info.latestVersion
+            actonApplicationSettings.skipUpdateVersion = info.latestVersion
             notification.expire()
         })
 

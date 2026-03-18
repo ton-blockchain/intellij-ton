@@ -25,12 +25,6 @@ class ActonSettingsService : SimplePersistentStateComponent<ActonSettingsService
             state.actonVersion = value
         }
 
-    var skipUpdateVersion: String?
-        get() = state.skipUpdateVersion
-        set(value) {
-            state.skipUpdateVersion = value
-        }
-
     var env: EnvironmentVariablesData
         get() = EnvironmentVariablesData.create(state.envs, state.isPassParentEnvs)
         set(value) {
@@ -53,7 +47,6 @@ class ActonSettingsService : SimplePersistentStateComponent<ActonSettingsService
     class ActonSettingsState : BaseState() {
         var actonPath by string()
         var actonVersion by string()
-        var skipUpdateVersion by string()
         var envs by map<String, String>()
         var isPassParentEnvs by property(true)
         var explorer by string()

@@ -17,7 +17,14 @@ class ActonApplicationSettingsService : SimplePersistentStateComponent<ActonAppl
             state.disableUpdateChecks = value
         }
 
+    var skipUpdateVersion: String?
+        get() = state.skipUpdateVersion
+        set(value) {
+            state.skipUpdateVersion = value
+        }
+
     class ActonApplicationSettingsState : BaseState() {
         var disableUpdateChecks by property(false)
+        var skipUpdateVersion by string()
     }
 }

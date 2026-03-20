@@ -243,6 +243,12 @@
                              id="language.tolk"
                              bundle="messages.TolkBundle" key="tolk.name"/>
 
+        <configurationType implementation="org.ton.intellij.tolk.debug.retrace.TolkRetraceConfigurationType"/>
+        <programRunner implementation="org.ton.intellij.tolk.debug.retrace.TolkRetraceProgramRunner"/>
+        <platform.dap.debugAdapterSupportProvider implementation="org.ton.intellij.tolk.debug.TolkRetraceDebugAdapterSupportProvider"/>
+        <xdebugger.breakpointType implementation="org.ton.intellij.tolk.debug.TolkLineBreakpointType"/>
+        <xdebugger.breakpointType implementation="org.ton.intellij.tolk.debug.TolkExceptionBreakpointType"/>
+
         <additionalLibraryRootsProvider
                 implementation="org.ton.intellij.tolk.toolchain.TolkSdkSyntheticLibraryProvider"/>
 
@@ -288,6 +294,11 @@
         <action id="TolkShowAssembly" class="org.ton.intellij.tolk.ide.actions.TolkShowAssemblyAction"
                 text="Show Assembly" description="Show assembly for the current Tolk file">
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+
+        <action id="TolkRetraceByHash" class="org.ton.intellij.tolk.ide.actions.TolkRetraceByHashAction"
+                text="Retrace Transaction by Hash" description="Start a Tolk retrace debug session for a transaction hash">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
     </actions>
 </idea-plugin>

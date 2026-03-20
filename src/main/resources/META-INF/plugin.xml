@@ -13,6 +13,9 @@
     </description>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
+    <dependencies>
+        <module name="intellij.platform.dap"/>
+    </dependencies>
 
     <xi:include href="/META-INF/asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/tolk.xml" xpointer="xpointer(/idea-plugin/*)"/>

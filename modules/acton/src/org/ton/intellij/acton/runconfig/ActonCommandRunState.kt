@@ -2,12 +2,15 @@ package org.ton.intellij.acton.runconfig
 
 import com.intellij.coverage.CoverageExecutor
 import com.intellij.execution.DefaultExecutionResult
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.ExecutionResult
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.CommandLineState
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PtyCommandLine
 import com.intellij.execution.process.KillableColoredProcessHandler
+import com.intellij.execution.process.ProcessAdapter
+import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
@@ -17,16 +20,49 @@ import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
 import com.intellij.execution.testframework.sm.runner.SMTestProxy
 import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView
 import com.intellij.execution.ui.ConsoleView
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.guessProjectDir
+import com.intellij.openapi.util.Key
 import com.intellij.util.execution.ParametersListUtil
+import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
 
 class ActonCommandRunState(
     environment: ExecutionEnvironment,
     private val configuration: ActonCommandConfiguration,
 ) : CommandLineState(environment) {
+    private val executionLock = Any()
+    @Volatile
+    private var cachedExecutionResult: ExecutionResult? = null
+    @Volatile
+    private var scriptDebugPortOverride: Int? = null
+
+    fun enableScriptDebug(port: Int) {
+        scriptDebugPortOverride = port
+    }
+
+    fun prepareForDebugLaunch(executor: Executor, runner: ProgramRunner<*>): PreparedActonDebugExecution {
+        val executionResult = execute(executor, runner)
+        val processHandler = executionResult.processHandler
+            ?: throw ExecutionException("Acton script process handler is not available")
+        if (!processHandler.isStartNotified) {
+            processHandler.startNotify()
+            LOG.info("Started process notifications for acton script DAP session on port ${processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)?.port}")
+        }
+        val debugSession = processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)
+            ?: throw ExecutionException("Acton script debug session metadata is not available")
+        return PreparedActonDebugExecution(executionResult, processHandler, debugSession)
+    }
 
     override fun execute(executor: Executor, runner: ProgramRunner<*>): ExecutionResult {
+        cachedExecutionResult?.let { return it }
+        synchronized(executionLock) {
+            cachedExecutionResult?.let { return it }
+            return doExecute(executor, runner).also { cachedExecutionResult = it }
+        }
+    }
+
+    private fun doExecute(executor: Executor, runner: ProgramRunner<*>): ExecutionResult {
         if (configuration.command == "test") {
             val consoleProperties = ActonTestConsolePropertiesProvider.EP_NAME.extensionList.firstNotNullOfOrNull {
                 it.createConsoleProperties(configuration, executor)
@@ -57,7 +93,7 @@ class ActonCommandRunState(
             ?: configuration.project.guessProjectDir()?.toNioPath()
             ?: throw IllegalStateException("Working directory not set")
 
-        val actonCommand = configuration.getActonCommand()
+        val actonCommand = createActonCommand()
         val additionalArgs = ParametersListUtil.parse(configuration.parameters)
 
         val args = actonCommand.getArguments().toMutableList()
@@ -76,13 +112,76 @@ class ActonCommandRunState(
 
         var commandLine =
             actonCommandLine.toGeneralCommandLine(configuration.project) ?: throw IllegalStateException("Cannot find acton executable")
-        if (configuration.emulateTerminal && configuration.command != "test") {
+        if (configuration.emulateTerminal && configuration.command != "test" && !isDebugScript(actonCommand)) {
             commandLine = PtyCommandLine(commandLine)
                 .withInitialColumns(PtyCommandLine.MAX_COLUMNS)
                 .withConsoleMode(false)
         }
 
         val handler = KillableColoredProcessHandler(commandLine)
+        attachDebugSessionIfNeeded(handler, commandLine, workingDir, actonCommand)
         return handler
     }
+
+    private fun createActonCommand() = when (val command = configuration.getActonCommand()) {
+        is ActonCommand.Script -> {
+            val debugPort = scriptDebugPortOverride?.toString() ?: command.debugPort
+            command.copy(
+                debug = scriptDebugPortOverride != null || command.debug,
+                debugPort = debugPort
+            )
+        }
+        else -> command
+    }
+
+    private fun attachDebugSessionIfNeeded(
+        handler: KillableColoredProcessHandler,
+        commandLine: GeneralCommandLine,
+        workingDir: java.nio.file.Path,
+        actonCommand: ActonCommand
+    ) {
+        val scriptCommand = actonCommand as? ActonCommand.Script ?: return
+        if (!isDebugScript(scriptCommand)) return
+
+        val port = scriptCommand.debugPort.toIntOrNull() ?: return
+        val debugSession = ActonDebugSession(
+            displayName = "acton script",
+            port = port,
+            readinessMarkers = listOf(
+                "Debugger server listening on 127.0.0.1:$port",
+                "Retrace DAP listening on 127.0.0.1:$port"
+            )
+        )
+        debugSession.recordStartup(commandLine.commandLineString, workingDir)
+        handler.putUserData(ACTON_DEBUG_SESSION_KEY, debugSession)
+        handler.addProcessListener(object : ProcessAdapter() {
+            override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                debugSession.append(event.text)
+                event.text
+                    .trimEnd('\r', '\n')
+                    .takeIf { it.isNotBlank() }
+                    ?.let { LOG.info("acton script [$port][$outputType] $it") }
+            }
+
+            override fun processTerminated(event: ProcessEvent) {
+                LOG.info("acton script [$port] terminated with exit code ${event.exitCode}")
+                debugSession.processTerminated(event.exitCode)
+            }
+        })
+    }
+
+    private fun isDebugScript(actonCommand: ActonCommand): Boolean {
+        val scriptCommand = actonCommand as? ActonCommand.Script ?: return false
+        return scriptCommand.debug && !scriptCommand.broadcast
+    }
+
+    companion object {
+        private val LOG = logger<ActonCommandRunState>()
+    }
 }
+
+data class PreparedActonDebugExecution(
+    val executionResult: ExecutionResult,
+    val processHandler: ProcessHandler,
+    val debugSession: ActonDebugSession
+)

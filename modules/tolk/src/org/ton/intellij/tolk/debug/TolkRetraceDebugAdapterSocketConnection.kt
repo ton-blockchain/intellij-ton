@@ -30,15 +30,15 @@ internal suspend fun connectTolkRetraceDebugAdapterSocket(
     var lastError: Throwable? = null
     repeat(3) { attempt ->
         try {
-            LOG.info("Connecting to retrace DAP socket $host:$port (attempt ${attempt + 1}/3)")
+            LOG.info("Connecting to Acton DAP socket $host:$port (attempt ${attempt + 1}/3)")
             return TolkRetraceDebugAdapterSocketHandle(host, port, onDisconnect)
         } catch (t: Throwable) {
             lastError = t
-            LOG.warn("Failed to connect to retrace DAP socket $host:$port on attempt ${attempt + 1}/3", t)
+            LOG.warn("Failed to connect to Acton DAP socket $host:$port on attempt ${attempt + 1}/3", t)
             delay(300)
         }
     }
-    throw ExecutionException(lastError ?: IllegalStateException("Failed to connect to retrace DAP socket"))
+    throw ExecutionException(lastError ?: IllegalStateException("Failed to connect to Acton DAP socket"))
 }
 
 internal fun normalizeDapMessages(
@@ -140,7 +140,8 @@ private class TolkRetraceDebugAdapterSocketHandle(
     private val socketInput = socket.getInputStream()
     override val output: OutputStream = LoggingDapOutputStream(
         socket.getOutputStream(),
-        "IDE -> retrace ($host:$port)"
+        "IDE -> acton debug ($host:$port)",
+        ::observeOutgoingMessage
     )
     private val normalizedInput = PipedInputStream(64 * 1024)
     override val input: InputStream = normalizedInput
@@ -149,11 +150,12 @@ private class TolkRetraceDebugAdapterSocketHandle(
     private val configDoneAcknowledged = AtomicBoolean(false)
     private val sawStopLikeEvent = AtomicBoolean(false)
     private val syntheticInitialStopInjected = AtomicBoolean(false)
+    private val pendingConfigurationDoneRequestSeq = AtomicLong(-1)
     private val lastIncomingSeq = AtomicLong(0)
     private val syntheticSeq = AtomicLong(1_000_000)
     private val normalizedWriteLock = Any()
     private val pumpThread = thread(
-        name = "Tolk retrace DAP normalizer $port",
+        name = "Tolk Acton DAP normalizer $port",
         start = false,
         isDaemon = true
     ) {
@@ -161,7 +163,7 @@ private class TolkRetraceDebugAdapterSocketHandle(
     }
 
     init {
-        LOG.info("Connected to retrace DAP socket ${socket.remoteSocketAddress} from ${socket.localSocketAddress}")
+        LOG.info("Connected to Acton DAP socket ${socket.remoteSocketAddress} from ${socket.localSocketAddress}")
         pumpThread.start()
     }
 
@@ -170,7 +172,7 @@ private class TolkRetraceDebugAdapterSocketHandle(
             if (!disconnected.compareAndSet(false, true)) {
                 return@withContext
             }
-            LOG.info("Disconnecting retrace DAP socket ${socket.remoteSocketAddress}")
+            LOG.info("Disconnecting Acton DAP socket ${socket.remoteSocketAddress}")
             runCatching { socket.close() }
             runCatching { normalizedInputWriter.close() }
             runCatching { input.close() }
@@ -182,13 +184,13 @@ private class TolkRetraceDebugAdapterSocketHandle(
         try {
             while (true) {
                 val message = readDapMessage(socketInput) ?: break
-                logDapMessage("retrace -> IDE (${socket.remoteSocketAddress})", message.headers, message.body)
+                logDapMessage("acton debug -> IDE (${socket.remoteSocketAddress})", message.headers, message.body)
                 observeIncomingMessage(message.body)
                 writeNormalizedMessage(message.headers, message.body)
             }
         } catch (e: Throwable) {
             if (!disconnected.get()) {
-                LOG.warn("Failed to normalize retrace DAP input", e)
+                LOG.warn("Failed to normalize Acton DAP input", e)
             }
         } finally {
             runCatching { normalizedInputWriter.close() }
@@ -203,19 +205,29 @@ private class TolkRetraceDebugAdapterSocketHandle(
             when {
                 bodyText.contains("\"event\":\"stopped\"") -> {
                     sawStopLikeEvent.set(true)
-                    LOG.info("Retrace DAP reported a native stopped event")
+                    LOG.info("Acton DAP reported a native stopped event")
                 }
                 bodyText.contains("\"event\":\"terminated\"") || bodyText.contains("\"event\":\"exited\"") -> {
                     sawStopLikeEvent.set(true)
-                    LOG.info("Retrace DAP reported termination before an initial stop")
+                    LOG.info("Acton DAP reported termination before an initial stop")
                 }
             }
         }
 
         if (bodyText.contains("\"type\":\"response\"") && bodyText.contains("\"command\":\"configurationDone\"")) {
             configDoneAcknowledged.set(true)
-            LOG.info("Retrace DAP acknowledged configurationDone")
+            pendingConfigurationDoneRequestSeq.set(-1)
+            LOG.info("Acton DAP acknowledged configurationDone")
             return
+        }
+
+        val pendingConfigDoneSeq = pendingConfigurationDoneRequestSeq.get()
+        if (
+            pendingConfigDoneSeq > 0 &&
+            !configDoneAcknowledged.get() &&
+            (bodyText.contains("\"type\":\"response\"") || bodyText.contains("\"type\":\"event\""))
+        ) {
+            injectSyntheticConfigurationDoneAck(pendingConfigDoneSeq)
         }
 
         if (
@@ -227,6 +239,35 @@ private class TolkRetraceDebugAdapterSocketHandle(
         ) {
             injectSyntheticInitialStop()
         }
+    }
+
+    private fun observeOutgoingMessage(body: ByteArray) {
+        val bodyText = String(body, StandardCharsets.UTF_8)
+        if (
+            bodyText.contains("\"type\":\"request\"") &&
+            bodyText.contains("\"command\":\"configurationDone\"")
+        ) {
+            val requestSeq = SEQ_REGEX.find(bodyText)?.groupValues?.getOrNull(1)?.toLongOrNull() ?: return
+            pendingConfigurationDoneRequestSeq.set(requestSeq)
+            configDoneAcknowledged.set(false)
+            syntheticInitialStopInjected.set(false)
+            LOG.info("Acton DAP configurationDone request sent with seq=$requestSeq")
+        }
+    }
+
+    private fun injectSyntheticConfigurationDoneAck(requestSeq: Long) {
+        if (!configDoneAcknowledged.compareAndSet(false, true)) {
+            return
+        }
+        pendingConfigurationDoneRequestSeq.compareAndSet(requestSeq, -1)
+
+        val seq = maxOf(syntheticSeq.incrementAndGet(), lastIncomingSeq.get() + 1)
+        val bodyText = """
+            {"type":"response","seq":$seq,"request_seq":$requestSeq,"success":true,"command":"configurationDone"}
+        """.trimIndent()
+        val body = bodyText.toByteArray(StandardCharsets.UTF_8)
+        LOG.info("Acton DAP did not answer configurationDone; injecting synthetic success response for request_seq=$requestSeq")
+        writeNormalizedMessage(listOf("Content-Length" to body.size.toString()), body)
     }
 
     private fun injectSyntheticInitialStop() {
@@ -242,7 +283,7 @@ private class TolkRetraceDebugAdapterSocketHandle(
             {"type":"event","seq":$seq,"event":"stopped","body":{"reason":"entry","threadId":1,"allThreadsStopped":true}}
         """.trimIndent()
         val body = bodyText.toByteArray(StandardCharsets.UTF_8)
-        LOG.info("Retrace DAP produced no initial stopped event; injecting synthetic stopped(entry) with seq=$seq")
+        LOG.info("Acton DAP produced no initial stopped event; injecting synthetic stopped(entry) with seq=$seq")
         writeNormalizedMessage(listOf("Content-Length" to body.size.toString()), body)
     }
 
@@ -255,7 +296,8 @@ private class TolkRetraceDebugAdapterSocketHandle(
 
 private class LoggingDapOutputStream(
     private val delegate: OutputStream,
-    private val directionLabel: String
+    private val directionLabel: String,
+    private val onMessage: ((ByteArray) -> Unit)? = null
 ) : OutputStream() {
     private val buffer = ByteArrayOutputStream()
 
@@ -285,6 +327,7 @@ private class LoggingDapOutputStream(
         while (true) {
             val message = parseBufferedDapMessage(bytes, offset) ?: break
             logDapMessage(directionLabel, message.headers, message.body)
+            onMessage?.invoke(message.body)
             offset = message.nextOffset
         }
         if (offset == 0) {

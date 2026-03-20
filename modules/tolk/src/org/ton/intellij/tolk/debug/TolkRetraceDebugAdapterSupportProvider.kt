@@ -9,8 +9,8 @@ import com.intellij.platform.dap.DapBreakpointsDescription
 import com.intellij.platform.dap.DebugAdapterDescriptor
 import com.intellij.platform.dap.DebugAdapterSupportProvider
 import com.intellij.platform.dap.connection.DebugAdapterHandle
+import org.ton.intellij.acton.runconfig.ACTON_DEBUG_SESSION_KEY
 import kotlinx.coroutines.TimeoutCancellationException
-import org.ton.intellij.tolk.debug.retrace.TolkRetraceRunState
 import java.util.concurrent.CancellationException
 
 class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkRetraceDebugAdapter> {
@@ -31,18 +31,18 @@ class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkR
                 sessionId: String
             ): DebugAdapterHandle {
                 val processHandler = executionResult?.processHandler
-                    ?: throw ExecutionException("Retrace process handler is not available")
-                val retraceSession = processHandler.getUserData(TolkRetraceRunState.RETRACE_SESSION_KEY)
-                    ?: throw ExecutionException("Retrace session metadata is not available")
-                LOG.info("Waiting for retrace DAP readiness on port ${retraceSession.port} for session $sessionId")
+                    ?: throw ExecutionException("Acton debug process handler is not available")
+                val debugSession = processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)
+                    ?: throw ExecutionException("Acton debug session metadata is not available")
+                LOG.info("Waiting for ${debugSession.displayName} DAP readiness on port ${debugSession.port} for session $sessionId")
 
                 try {
-                    retraceSession.awaitReady()
-                    LOG.info("Retrace DAP reported ready on port ${retraceSession.port} for session $sessionId")
+                    debugSession.awaitReady()
+                    LOG.info("${debugSession.displayName} DAP reported ready on port ${debugSession.port} for session $sessionId")
                 } catch (e: TimeoutCancellationException) {
                     stopProcess(processHandler)
                     throw ExecutionException(
-                        "Timed out waiting for acton retrace to listen on port ${retraceSession.port}\n\n${retraceSession.transcript()}",
+                        "Timed out waiting for ${debugSession.displayName} to listen on port ${debugSession.port}\n\n${debugSession.transcript()}",
                         e
                     )
                 } catch (e: CancellationException) {
@@ -53,19 +53,19 @@ class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkR
                     throw e
                 } catch (e: Throwable) {
                     stopProcess(processHandler)
-                    throw ExecutionException("Failed to start retrace DAP session", e)
+                    throw ExecutionException("Failed to start Acton DAP session", e)
                 }
 
                 try {
-                    LOG.info("Opening retrace DAP socket on 127.0.0.1:${retraceSession.port} for session $sessionId")
-                    return connectTolkRetraceDebugAdapterSocket("127.0.0.1", retraceSession.port) {
-                        LOG.info("Stopping retrace process for session $sessionId")
+                    LOG.info("Opening Acton DAP socket on 127.0.0.1:${debugSession.port} for session $sessionId")
+                    return connectTolkRetraceDebugAdapterSocket("127.0.0.1", debugSession.port) {
+                        LOG.info("Stopping Acton debug process for session $sessionId")
                         stopProcess(processHandler)
                     }
                 } catch (e: ExecutionException) {
                     stopProcess(processHandler)
                     throw ExecutionException(
-                        "Failed to connect to retrace DAP on port ${retraceSession.port}\n\n${retraceSession.transcript()}",
+                        "Failed to connect to ${debugSession.displayName} DAP on port ${debugSession.port}\n\n${debugSession.transcript()}",
                         e
                     )
                 }

@@ -29,6 +29,7 @@ class ActonModuleBuilder : ModuleBuilder() {
             projectName = projectName,
             description = "A TON blockchain project",
             template = settings.template,
+            app = settings.template == "counter" && settings.addTypeScriptApp,
             license = settings.license
         )
         val commandLine = ActonCommandLine(

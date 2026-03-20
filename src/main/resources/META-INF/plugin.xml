@@ -15,6 +15,8 @@
     <depends>com.intellij.modules.lang</depends>
     <dependencies>
         <module name="intellij.platform.dap"/>
+        <module name="intellij.profiler.common"/>
+        <module name="intellij.profiler.clion"/>
     </dependencies>
 
     <xi:include href="/META-INF/asm.xml" xpointer="xpointer(/idea-plugin/*)"/>

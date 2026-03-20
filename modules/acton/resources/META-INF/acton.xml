@@ -13,6 +13,11 @@
         <moduleType id="ACTON_MODULE" implementationClass="org.ton.intellij.acton.ide.newProject.ActonModuleType"/>
         <moduleBuilder builderClass="org.ton.intellij.acton.ide.newProject.ActonModuleBuilder"/>
 
+        <profiler.api.ProfilerDumpParserProvider
+                implementation="org.ton.intellij.acton.profiler.ActonCollapsedProfileDumpParserProvider"/>
+        <profiler.clion.profilerRunChecker
+                implementation="org.ton.intellij.acton.profiler.ActonProfilerRunChecker"/>
+
         <directoryProjectGenerator implementation="org.ton.intellij.acton.ide.newProject.ActonProjectGenerator"/>
         <newProjectWizard.language implementation="org.ton.intellij.acton.ide.newProject.ActonNewProjectWizard"/>
 

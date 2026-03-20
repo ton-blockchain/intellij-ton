@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.psi.search.GlobalSearchScope
+import org.ton.intellij.tolk.debug.retrace.TolkRetraceTransactionConsoleFilter
 import java.io.File
 import kotlin.io.path.Path
 
@@ -21,7 +22,10 @@ class TolkConsoleFilterProvider : ConsoleFilterProviderEx {
         project: Project,
         scope: GlobalSearchScope,
     ): Array<out Filter?> =
-        arrayOf(TolkConsoleFilter(project, scope))
+        arrayOf(
+            TolkConsoleFilter(project, scope),
+            TolkRetraceTransactionConsoleFilter()
+        )
 }
 
 class TolkConsoleFilter(val project: Project, val scope: GlobalSearchScope) : Filter {

@@ -42,6 +42,7 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
             projectName = projectName,
             description = "A TON blockchain project",
             template = settings.template,
+            app = settings.template == "counter" && settings.addTypeScriptApp,
             license = settings.license
         )
         val commandLine = ActonCommandLine(
@@ -90,15 +91,20 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
 class ActonProjectGeneratorPeer : GeneratorPeerImpl<ActonProjectSettings>() {
     private val propertyGraph = PropertyGraph()
     private val template = propertyGraph.property("counter")
+    private val addTypeScriptApp = propertyGraph.property(false)
     private val license = propertyGraph.property("MIT")
     private val environmentVariables = EnvironmentVariablesComponent()
+    private var addTypeScriptAppRow: Row? = null
 
     private var checkValid: Runnable? = null
 
     private val settings = ActonProjectSettings()
 
     init {
-        template.afterChange { checkValid?.run() }
+        template.afterChange {
+            updateAddTypeScriptAppVisibility()
+            checkValid?.run()
+        }
         license.afterChange { checkValid?.run() }
     }
 
@@ -118,14 +124,26 @@ class ActonProjectGeneratorPeer : GeneratorPeerImpl<ActonProjectSettings>() {
             row(environmentVariables.label) {
                 cell(environmentVariables)
                     .align(AlignX.FILL)
+            }.bottomGap(BottomGap.NONE)
+            addTypeScriptAppRow = row {
+                checkBox("Add TypeScript app")
+                    .bindSelected(addTypeScriptApp)
+                    .comment("Include the template's TypeScript app scaffold")
             }
+        }.also {
+            updateAddTypeScriptAppVisibility()
         }
     }
 
     override fun getSettings(): ActonProjectSettings = settings.apply {
         template = this@ActonProjectGeneratorPeer.template.get()
+        addTypeScriptApp = this@ActonProjectGeneratorPeer.addTypeScriptApp.get()
         license = this@ActonProjectGeneratorPeer.license.get()
         env = environmentVariables.envData
+    }
+
+    private fun updateAddTypeScriptAppVisibility() {
+        addTypeScriptAppRow?.visible(template.get() == "counter")
     }
 
     override fun validate(): com.intellij.openapi.ui.ValidationInfo? = null

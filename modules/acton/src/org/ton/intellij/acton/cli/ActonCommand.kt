@@ -120,6 +120,7 @@ sealed class ActonCommand(val name: String) {
         var projectName: String? = null,
         var description: String? = null,
         var template: String? = null,
+        var app: Boolean = false,
         var license: String? = null,
     ) : ActonCommand("new") {
         override fun getArguments(): List<String> = buildList {
@@ -135,6 +136,9 @@ sealed class ActonCommand(val name: String) {
             template?.let {
                 add("--template")
                 add(it)
+            }
+            if (app) {
+                add("--app")
             }
             license?.let {
                 add("--license")

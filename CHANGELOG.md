@@ -1,5 +1,43 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [3.2.0]
+
+v3.2.0 focuses on Tolk 1.3 support, editor improvements and compatibility updates for newer JetBrains platforms.
+
+### Tolk
+
+- feat(tolk): add a default value for array fields in https://github.com/ton-blockchain/intellij-ton/pull/683
+- feat(tolk): add an intention to generate a pack prefix for structs in https://github.com/ton-blockchain/intellij-ton/pull/603
+- feat(tolk): don't auto-import `common.tolk` from the standard library in https://github.com/ton-blockchain/intellij-ton/pull/612
+- feat(tolk): don't show the inlay hint for `address()` in https://github.com/ton-blockchain/intellij-ton/pull/648
+- feat(tolk/1.3): add contract definition stubs and validity checks in https://github.com/ton-blockchain/intellij-ton/pull/665
+- feat(tolk/1.3): add type inference for array indexing in https://github.com/ton-blockchain/intellij-ton/pull/674
+- feat(tolk/1.3): support `??` operator in https://github.com/ton-blockchain/intellij-ton/pull/654
+- feat(tolk/1.3): support `@test` and `@abi` annotations in https://github.com/ton-blockchain/intellij-ton/pull/652
+- feat(tolk/1.3): support contract definitions from Tolk 1.3 in https://github.com/ton-blockchain/intellij-ton/pull/657
+- feat(tolk/1.3): support string type from Tolk 1.3 in https://github.com/ton-blockchain/intellij-ton/pull/650
+- feat(tolk/1.3): support the new array type from Tolk 1.3 in https://github.com/ton-blockchain/intellij-ton/pull/659
+- feat(tolk/completion): add `<>` on generic struct and type alias completion in https://github.com/ton-blockchain/intellij-ton/pull/644
+- feat(tolk/completion): add signature help for generic parameters in https://github.com/ton-blockchain/intellij-ton/pull/647
+- feat(tolk/completion): add type completion for function names that start with an uppercase letter in https://github.com/ton-blockchain/intellij-ton/pull/661
+- feat(tolk/completion): complete `<>` in generics and auto-delete `>` on `<` delete in https://github.com/ton-blockchain/intellij-ton/pull/622
+- feat(tolk/completion): improve the default value for `Cell<T>` in completion in https://github.com/ton-blockchain/intellij-ton/pull/606
+- feat(tolk/documentation): show default parameter values in hover docs in https://github.com/ton-blockchain/intellij-ton/pull/663
+- feat(tolk/highlighting): highlight `array` as a builtin type in https://github.com/ton-blockchain/intellij-ton/pull/642
+- fix(tolk): don't use nested stub index access in https://github.com/ton-blockchain/intellij-ton/pull/662
+- fix(tolk): use `createEmptyMap()` as the default value for map fields in https://github.com/ton-blockchain/intellij-ton/pull/682
+
+### Other
+
+- build: update GrammarKit tooling in https://github.com/ton-blockchain/intellij-ton/pull/592
+- build: update changelog tooling in https://github.com/ton-blockchain/intellij-ton/pull/594
+- build: update platform settings tooling in https://github.com/ton-blockchain/intellij-ton/pull/593
+- feat(all): add plugin support for 2025.2 in https://github.com/ton-blockchain/intellij-ton/pull/689
+- feat(all): highlight TON addresses as links in the terminal in https://github.com/ton-blockchain/intellij-ton/pull/632
+- fix(all): define templates in configs in https://github.com/ton-blockchain/intellij-ton/pull/666
+- fix(all): fix the IDE exception caused by a missing language in https://github.com/ton-blockchain/intellij-ton/pull/601
+- fix(all): raise the since-build version to 243 in https://github.com/ton-blockchain/intellij-ton/pull/629
+
 ## [3.1.1]
 
 Fixed small issues in Tolk 1.2 support.

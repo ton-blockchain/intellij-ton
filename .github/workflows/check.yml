@@ -137,7 +137,7 @@ jobs:
           key: plugin-verifier-${{ hashFiles('build/listProductsReleases.txt') }}
 
       - name: Run Plugin Verification tasks
-        run: ./gradlew verifyPlugin -Dplugin.verifier.home.dir=${{ needs.build.outputs.pluginVerifierHomeDir }}
+        run: ./gradlew verifyPlugin -PpluginVerificationRustRoverVersions=2025.1.5,2025.2.5,2025.3.5,261.22158.214 -Dplugin.verifier.home.dir=${{ needs.build.outputs.pluginVerifierHomeDir }}
 
       - name: Collect Plugin Verifier Result
         if: ${{ always() }}

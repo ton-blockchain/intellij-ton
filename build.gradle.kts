@@ -1,6 +1,7 @@
 
 import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -78,6 +79,16 @@ dependencies {
     implementation(project(":tasm"))
 }
 
+val verificationRustRoverVersions = providers
+    .gradleProperty("pluginVerificationRustRoverVersions")
+    // RR 2024.3.7 (243 line) is currently rejected by Plugin Verifier as an invalid IDE layout.
+    // RustRover macOS installers are also rejected by Plugin Verifier on Apple Silicon, so keep the matrix explicit in CI.
+    .orNull
+    ?.split(',')
+    ?.map(String::trim)
+    ?.filter(String::isNotEmpty)
+    .orEmpty()
+
 intellijPlatform {
     autoReload.set(false)
     instrumentCode.set(false)
@@ -112,9 +123,9 @@ intellijPlatform {
     }
     pluginVerification {
         ides {
-            recommended()
-            select {
-
+            verificationRustRoverVersions.forEach { version ->
+                create(IntelliJPlatformType.RustRover, version) {
+                }
             }
         }
     }
@@ -152,6 +163,9 @@ tasks {
     }
     verifyPlugin {
         dependsOn(mergePluginJarsTask)
+        onlyIf("pluginVerificationRustRoverVersions is configured") {
+            verificationRustRoverVersions.isNotEmpty()
+        }
     }
 }
 

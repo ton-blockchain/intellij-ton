@@ -28,7 +28,7 @@ class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkR
             override suspend fun launchDebugAdapter(
                 environment: ExecutionEnvironment,
                 executionResult: ExecutionResult?,
-                sessionId: String
+                sessionId: String,
             ): DebugAdapterHandle {
                 val processHandler = executionResult?.processHandler
                     ?: throw ExecutionException("Acton debug process handler is not available")
@@ -58,7 +58,10 @@ class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkR
 
                 try {
                     LOG.info("Opening Acton DAP socket on 127.0.0.1:${debugSession.port} for session $sessionId")
-                    return connectTolkRetraceDebugAdapterSocket("127.0.0.1", debugSession.port) {
+                    return connectTolkRetraceDebugAdapterSocket(
+                        host = "127.0.0.1",
+                        port = debugSession.port
+                    ) {
                         LOG.info("Stopping Acton debug process for session $sessionId")
                         stopProcess(processHandler)
                     }

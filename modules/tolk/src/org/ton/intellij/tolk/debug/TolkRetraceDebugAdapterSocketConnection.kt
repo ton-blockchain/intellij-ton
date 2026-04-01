@@ -16,11 +16,14 @@ import java.io.PipedOutputStream
 import java.net.Socket
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
 import kotlin.concurrent.thread
 
 private val LOG = logger<TolkRetraceDebugAdapterSocketHandle>()
 private val SEQ_REGEX = """"seq"\s*:\s*(\d+)""".toRegex()
+private val CONFIGURATION_DONE_EMPTY_ARGS_WITH_LEADING_COMMA_REGEX =
+    Regex(""",\s*"arguments"\s*:\s*\{\s*}""")
+private val CONFIGURATION_DONE_EMPTY_ARGS_WITH_TRAILING_COMMA_REGEX =
+    Regex(""""arguments"\s*:\s*\{\s*},\s*""")
 
 internal suspend fun connectTolkRetraceDebugAdapterSocket(
     host: String,
@@ -141,18 +144,12 @@ private class TolkRetraceDebugAdapterSocketHandle(
     override val output: OutputStream = LoggingDapOutputStream(
         socket.getOutputStream(),
         "IDE -> acton debug ($host:$port)",
-        ::observeOutgoingMessage
+        ::normalizeOutgoingDapMessageForActon
     )
     private val normalizedInput = PipedInputStream(64 * 1024)
     override val input: InputStream = normalizedInput
     private val normalizedInputWriter = PipedOutputStream(normalizedInput)
     private val disconnected = AtomicBoolean(false)
-    private val configDoneAcknowledged = AtomicBoolean(false)
-    private val sawStopLikeEvent = AtomicBoolean(false)
-    private val syntheticInitialStopInjected = AtomicBoolean(false)
-    private val pendingConfigurationDoneRequestSeq = AtomicLong(-1)
-    private val lastIncomingSeq = AtomicLong(0)
-    private val syntheticSeq = AtomicLong(1_000_000)
     private val normalizedWriteLock = Any()
     private val pumpThread = thread(
         name = "Tolk Acton DAP normalizer $port",
@@ -185,7 +182,6 @@ private class TolkRetraceDebugAdapterSocketHandle(
             while (true) {
                 val message = readDapMessage(socketInput) ?: break
                 logDapMessage("acton debug -> IDE (${socket.remoteSocketAddress})", message.headers, message.body)
-                observeIncomingMessage(message.body)
                 writeNormalizedMessage(message.headers, message.body)
             }
         } catch (e: Throwable) {
@@ -195,96 +191,6 @@ private class TolkRetraceDebugAdapterSocketHandle(
         } finally {
             runCatching { normalizedInputWriter.close() }
         }
-    }
-
-    private fun observeIncomingMessage(body: ByteArray) {
-        val bodyText = String(body, StandardCharsets.UTF_8)
-        SEQ_REGEX.find(bodyText)?.groupValues?.getOrNull(1)?.toLongOrNull()?.let(lastIncomingSeq::set)
-
-        if (bodyText.contains("\"type\":\"event\"")) {
-            when {
-                bodyText.contains("\"event\":\"stopped\"") -> {
-                    sawStopLikeEvent.set(true)
-                    LOG.info("Acton DAP reported a native stopped event")
-                }
-                bodyText.contains("\"event\":\"terminated\"") || bodyText.contains("\"event\":\"exited\"") -> {
-                    sawStopLikeEvent.set(true)
-                    LOG.info("Acton DAP reported termination before an initial stop")
-                }
-            }
-        }
-
-        if (bodyText.contains("\"type\":\"response\"") && bodyText.contains("\"command\":\"configurationDone\"")) {
-            configDoneAcknowledged.set(true)
-            pendingConfigurationDoneRequestSeq.set(-1)
-            LOG.info("Acton DAP acknowledged configurationDone")
-            return
-        }
-
-        val pendingConfigDoneSeq = pendingConfigurationDoneRequestSeq.get()
-        if (
-            pendingConfigDoneSeq > 0 &&
-            !configDoneAcknowledged.get() &&
-            (bodyText.contains("\"type\":\"response\"") || bodyText.contains("\"type\":\"event\""))
-        ) {
-            injectSyntheticConfigurationDoneAck(pendingConfigDoneSeq)
-        }
-
-        if (
-            configDoneAcknowledged.get() &&
-            !sawStopLikeEvent.get() &&
-            !syntheticInitialStopInjected.get() &&
-            bodyText.contains("\"type\":\"response\"") &&
-            bodyText.contains("\"command\":\"threads\"")
-        ) {
-            injectSyntheticInitialStop()
-        }
-    }
-
-    private fun observeOutgoingMessage(body: ByteArray) {
-        val bodyText = String(body, StandardCharsets.UTF_8)
-        if (
-            bodyText.contains("\"type\":\"request\"") &&
-            bodyText.contains("\"command\":\"configurationDone\"")
-        ) {
-            val requestSeq = SEQ_REGEX.find(bodyText)?.groupValues?.getOrNull(1)?.toLongOrNull() ?: return
-            pendingConfigurationDoneRequestSeq.set(requestSeq)
-            configDoneAcknowledged.set(false)
-            syntheticInitialStopInjected.set(false)
-            LOG.info("Acton DAP configurationDone request sent with seq=$requestSeq")
-        }
-    }
-
-    private fun injectSyntheticConfigurationDoneAck(requestSeq: Long) {
-        if (!configDoneAcknowledged.compareAndSet(false, true)) {
-            return
-        }
-        pendingConfigurationDoneRequestSeq.compareAndSet(requestSeq, -1)
-
-        val seq = maxOf(syntheticSeq.incrementAndGet(), lastIncomingSeq.get() + 1)
-        val bodyText = """
-            {"type":"response","seq":$seq,"request_seq":$requestSeq,"success":true,"command":"configurationDone"}
-        """.trimIndent()
-        val body = bodyText.toByteArray(StandardCharsets.UTF_8)
-        LOG.info("Acton DAP did not answer configurationDone; injecting synthetic success response for request_seq=$requestSeq")
-        writeNormalizedMessage(listOf("Content-Length" to body.size.toString()), body)
-    }
-
-    private fun injectSyntheticInitialStop() {
-        if (!syntheticInitialStopInjected.compareAndSet(false, true)) {
-            return
-        }
-        if (disconnected.get() || sawStopLikeEvent.get()) {
-            return
-        }
-
-        val seq = maxOf(syntheticSeq.incrementAndGet(), lastIncomingSeq.get() + 1)
-        val bodyText = """
-            {"type":"event","seq":$seq,"event":"stopped","body":{"reason":"entry","threadId":1,"allThreadsStopped":true}}
-        """.trimIndent()
-        val body = bodyText.toByteArray(StandardCharsets.UTF_8)
-        LOG.info("Acton DAP produced no initial stopped event; injecting synthetic stopped(entry) with seq=$seq")
-        writeNormalizedMessage(listOf("Content-Length" to body.size.toString()), body)
     }
 
     private fun writeNormalizedMessage(headers: List<Pair<String, String>>, body: ByteArray) {
@@ -297,18 +203,16 @@ private class TolkRetraceDebugAdapterSocketHandle(
 private class LoggingDapOutputStream(
     private val delegate: OutputStream,
     private val directionLabel: String,
-    private val onMessage: ((ByteArray) -> Unit)? = null
+    private val transformMessage: ((List<Pair<String, String>>, ByteArray) -> DapMessage)? = null
 ) : OutputStream() {
     private val buffer = ByteArrayOutputStream()
 
     override fun write(b: Int) {
-        delegate.write(b)
         buffer.write(b)
         drainMessages()
     }
 
     override fun write(b: ByteArray, off: Int, len: Int) {
-        delegate.write(b, off, len)
         buffer.write(b, off, len)
         drainMessages()
     }
@@ -326,8 +230,10 @@ private class LoggingDapOutputStream(
         var offset = 0
         while (true) {
             val message = parseBufferedDapMessage(bytes, offset) ?: break
-            logDapMessage(directionLabel, message.headers, message.body)
-            onMessage?.invoke(message.body)
+            val transformed = transformMessage?.invoke(message.headers, message.body)
+                ?: DapMessage(message.headers, message.body)
+            writeDapMessage(delegate, transformed.headers, transformed.body)
+            logDapMessage(directionLabel, transformed.headers, transformed.body)
             offset = message.nextOffset
         }
         if (offset == 0) {
@@ -367,6 +273,57 @@ private fun parseBufferedDapMessage(bytes: ByteArray, startOffset: Int): Buffere
         return null
     }
     return BufferedDapMessage(headers, bytes.copyOfRange(bodyStart, bodyEnd), bodyEnd)
+}
+
+internal fun normalizeOutgoingDapBodyForActon(body: ByteArray): ByteArray {
+    val bodyText = String(body, StandardCharsets.UTF_8)
+    if (
+        !bodyText.contains(""""type":"request"""") ||
+        !bodyText.contains(""""command":"configurationDone"""")
+    ) {
+        return body
+    }
+
+    val normalizedText = bodyText
+        .replace(CONFIGURATION_DONE_EMPTY_ARGS_WITH_LEADING_COMMA_REGEX, "")
+        .replace(CONFIGURATION_DONE_EMPTY_ARGS_WITH_TRAILING_COMMA_REGEX, "")
+    return if (normalizedText == bodyText) {
+        body
+    } else {
+        normalizedText.toByteArray(StandardCharsets.UTF_8)
+    }
+}
+
+private fun normalizeOutgoingDapMessageForActon(
+    headers: List<Pair<String, String>>,
+    body: ByteArray
+): DapMessage {
+    val normalizedBody = normalizeOutgoingDapBodyForActon(body)
+    if (normalizedBody.contentEquals(body)) {
+        return DapMessage(headers, body)
+    }
+
+    LOG.info("Rewriting configurationDone request to drop empty arguments for Acton DAP compatibility")
+    return DapMessage(
+        updateContentLengthHeader(headers, normalizedBody.size),
+        normalizedBody
+    )
+}
+
+private fun updateContentLengthHeader(
+    headers: List<Pair<String, String>>,
+    contentLength: Int
+): List<Pair<String, String>> {
+    var replaced = false
+    val updatedHeaders = headers.map { (name, value) ->
+        if (name.equals("Content-Length", ignoreCase = true)) {
+            replaced = true
+            name to contentLength.toString()
+        } else {
+            name to value
+        }
+    }
+    return if (replaced) updatedHeaders else updatedHeaders + ("Content-Length" to contentLength.toString())
 }
 
 private fun findHeaderEnd(bytes: ByteArray, startOffset: Int): Int? {

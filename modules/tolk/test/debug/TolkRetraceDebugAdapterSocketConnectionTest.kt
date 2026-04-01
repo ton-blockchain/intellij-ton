@@ -25,6 +25,29 @@ class TolkRetraceDebugAdapterSocketConnectionTest {
         )
     }
 
+    @Test
+    fun `test drops empty arguments from configurationDone request`() {
+        val body =
+            """{"type":"request","seq":3,"command":"configurationDone","arguments":{}}"""
+
+        val normalized = normalizeOutgoingDapBodyForActon(body.toByteArray(StandardCharsets.UTF_8))
+
+        assertEquals(
+            """{"type":"request","seq":3,"command":"configurationDone"}""",
+            String(normalized, StandardCharsets.UTF_8)
+        )
+    }
+
+    @Test
+    fun `test leaves other requests unchanged`() {
+        val body =
+            """{"type":"request","seq":2,"command":"launch","arguments":{"request":"launch"}}"""
+
+        val normalized = normalizeOutgoingDapBodyForActon(body.toByteArray(StandardCharsets.UTF_8))
+
+        assertEquals(body, String(normalized, StandardCharsets.UTF_8))
+    }
+
     private fun buggyMessage(body: String): String {
         val contentLength = body.toByteArray(StandardCharsets.UTF_8).size
         return "Content-Length: $contentLength\r\n\r\n$body\r\n"

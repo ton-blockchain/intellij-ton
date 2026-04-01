@@ -19,10 +19,8 @@ import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsAdapter
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
 import com.intellij.execution.testframework.sm.runner.SMTestProxy
 import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView
-import com.intellij.execution.ui.ConsoleView
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.Key
 import com.intellij.profiler.actions.ImportProfilerResultAction
@@ -33,7 +31,6 @@ import com.intellij.util.execution.ParametersListUtil
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
 import org.ton.intellij.acton.profiler.ActonCollapsedProfileDumpParserProvider
-import java.util.concurrent.ConcurrentHashMap
 
 class ActonCommandRunState(
     environment: ExecutionEnvironment,
@@ -201,13 +198,6 @@ class ActonCommandRunState(
             readinessMarkers = debugInfo.readinessMarkers
         )
         debugSession.recordStartup(commandLine.commandLineString, workingDir)
-        ActiveActonDebugProcessRegistry.register(
-            project = configuration.project,
-            workingDir = workingDir,
-            processHandler = handler,
-            displayName = debugInfo.displayName,
-            commandLine = commandLine.commandLineString
-        )
         handler.putUserData(ACTON_DEBUG_SESSION_KEY, debugSession)
         handler.addProcessListener(object : ProcessAdapter() {
             override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
@@ -220,11 +210,6 @@ class ActonCommandRunState(
 
             override fun processTerminated(event: ProcessEvent) {
                 LOG.info("${debugInfo.displayName} [${debugInfo.port}] terminated with exit code ${event.exitCode}")
-                ActiveActonDebugProcessRegistry.unregister(
-                    project = configuration.project,
-                    workingDir = workingDir,
-                    processHandler = handler
-                )
                 debugSession.processTerminated(event.exitCode)
             }
         })
@@ -291,68 +276,6 @@ private data class DebugSessionInfo(
     val displayName: String,
     val port: Int,
     val readinessMarkers: List<String>
-)
-
-private object ActiveActonDebugProcessRegistry {
-    private val activeProcesses = ConcurrentHashMap<String, ActiveActonDebugProcess>()
-
-    fun register(
-        project: Project,
-        workingDir: java.nio.file.Path,
-        processHandler: ProcessHandler,
-        displayName: String,
-        commandLine: String
-    ) {
-        val key = key(project, workingDir)
-        val candidate = ActiveActonDebugProcess(processHandler, displayName, commandLine)
-        while (true) {
-            val existing = activeProcesses[key]
-            if (existing == null) {
-                if (activeProcesses.putIfAbsent(key, candidate) == null) {
-                    return
-                }
-                continue
-            }
-
-            if (existing.processHandler.isProcessTerminating || existing.processHandler.isProcessTerminated) {
-                activeProcesses.remove(key, existing)
-                continue
-            }
-
-            throw ExecutionException(
-                "Another ${existing.displayName} session is still running for ${workingDir.toAbsolutePath()} " +
-                    "and holds the Acton compilation cache.\n" +
-                    "Stop it before starting a new debug session.\n\n" +
-                    "Existing command: ${existing.commandLine}"
-            )
-        }
-    }
-
-    fun unregister(
-        project: Project,
-        workingDir: java.nio.file.Path,
-        processHandler: ProcessHandler
-    ) {
-        val key = key(project, workingDir)
-        val existing = activeProcesses[key] ?: return
-        if (existing.processHandler === processHandler) {
-            activeProcesses.remove(key, existing)
-        }
-    }
-
-    private fun key(project: Project, workingDir: java.nio.file.Path): String {
-        return buildString {
-            append(project.locationHash)
-            append("::")
-            append(workingDir.toAbsolutePath().normalize())
-        }
-    }
-}
-
-private data class ActiveActonDebugProcess(
-    val processHandler: ProcessHandler,
-    val displayName: String,
-    val commandLine: String
 )
 
 data class PreparedActonDebugExecution(

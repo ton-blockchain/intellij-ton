@@ -1,14 +1,9 @@
 package org.ton.intellij.acton.runconfig
 
 import com.intellij.execution.ExecutionException
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.util.Key
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
-import java.net.BindException
-import java.net.InetAddress
-import java.net.ServerSocket
 import java.nio.file.Path
 
 val ACTON_DEBUG_SESSION_KEY: Key<ActonDebugSession> = Key.create("acton.debug.session")
@@ -22,7 +17,6 @@ class ActonDebugSession(
     private val transcript = StringBuilder()
     private val processOutput = StringBuilder()
     private var commandLine: String? = null
-    private val log = logger<ActonDebugSession>()
 
     fun append(text: String) {
         synchronized(this) {
@@ -72,14 +66,6 @@ class ActonDebugSession(
 
     suspend fun awaitReady() {
         withTimeout(120_000) {
-            while (!readySignal.isCompleted) {
-                if (isPortReservedByProcess()) {
-                    log.info("Detected $displayName DAP listener on port $port by socket bind check")
-                    readySignal.complete(Unit)
-                    break
-                }
-                delay(200)
-            }
             readySignal.await()
         }
     }
@@ -131,13 +117,5 @@ class ActonDebugSession(
             trimmed.startsWith("warning:") ||
             ": error:" in trimmed ||
             ": warning:" in trimmed
-    }
-
-    private fun isPortReservedByProcess(): Boolean {
-        return try {
-            ServerSocket(port, 0, InetAddress.getByName("127.0.0.1")).use { false }
-        } catch (_: BindException) {
-            true
-        }
     }
 }

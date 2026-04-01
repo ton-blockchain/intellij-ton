@@ -12,6 +12,7 @@ import com.intellij.platform.dap.DapBreakpointsDescription
 import com.intellij.platform.dap.DapStartRequest
 import com.intellij.platform.dap.DebugAdapterDescriptor
 import com.intellij.platform.dap.DebugAdapterSupportProvider
+import com.intellij.platform.dap.connection.DebugAdapterSocketConnection
 import com.intellij.platform.dap.connection.DebugAdapterHandle
 import com.intellij.platform.dap.xdebugger.DapXDebugProcess
 import com.intellij.xdebugger.XDebugSession
@@ -19,6 +20,7 @@ import org.ton.intellij.acton.runconfig.ACTON_DEBUG_SESSION_KEY
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.CoroutineScope
 import java.util.concurrent.CancellationException
+import kotlin.time.Duration.Companion.milliseconds
 
 class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkRetraceDebugAdapter> {
     override val adapterId: TolkRetraceDebugAdapter = TolkRetraceDebugAdapter
@@ -101,14 +103,19 @@ class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkR
 
                 try {
                     LOG.info("Opening Acton DAP socket on 127.0.0.1:${debugSession.port} for session $sessionId")
-                    return connectTolkRetraceDebugAdapterSocket(
+                    return DebugAdapterSocketConnection(
                         host = "127.0.0.1",
-                        port = debugSession.port
+                        port = debugSession.port,
+                        connectionAttempts = 3,
+                        intervalBetweenAttempts = 300.milliseconds
                     ) {
                         LOG.info("Stopping Acton debug process for session $sessionId")
                         stopProcess(processHandler)
                     }
-                } catch (e: ExecutionException) {
+                } catch (e: CancellationException) {
+                    stopProcess(processHandler)
+                    throw e
+                } catch (e: Throwable) {
                     stopProcess(processHandler)
                     throw ExecutionException(
                         "Failed to connect to ${debugSession.displayName} DAP on port ${debugSession.port}\n\n${debugSession.transcript()}",

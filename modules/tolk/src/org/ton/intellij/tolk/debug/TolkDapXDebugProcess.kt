@@ -3,6 +3,7 @@ package org.ton.intellij.tolk.debug
 import com.intellij.execution.ExecutionResult
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.ui.ExecutionConsole
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.platform.dap.DapDebugSession
 import com.intellij.platform.dap.DapStartRequest
 import com.intellij.platform.dap.DebugAdapterDescriptor
@@ -31,7 +32,21 @@ internal class TolkDapXDebugProcess(
     startRequestType,
     startRequestArguments
 ) {
+    init {
+        runCatching {
+            val field = DapXDebugProcess::class.java.getDeclaredField("presentationFactory")
+            field.isAccessible = true
+            field.set(this, TolkDapXDebuggerPresentationFactory)
+        }.onFailure {
+            LOG.warn("Failed to install custom Tolk DAP presentation factory", it)
+        }
+    }
+
     override fun createConsole(): ExecutionConsole {
         return backingExecutionResult.executionConsole ?: super.createConsole()
+    }
+
+    companion object {
+        private val LOG = logger<TolkDapXDebugProcess>()
     }
 }

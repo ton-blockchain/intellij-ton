@@ -20,19 +20,25 @@ class ActonDebugSession(
 ) {
     private val readySignal = CompletableDeferred<Unit>()
     private val transcript = StringBuilder()
+    private val processOutput = StringBuilder()
+    private var commandLine: String? = null
     private val log = logger<ActonDebugSession>()
 
     fun append(text: String) {
         synchronized(this) {
             transcript.append(text)
-            if (!readySignal.isCompleted && readinessMarkers.any(transcript::contains)) {
+            processOutput.append(text)
+            if (!readySignal.isCompleted && readinessMarkers.any(processOutput::contains)) {
                 readySignal.complete(Unit)
             }
         }
     }
 
     fun recordStartup(commandLine: String, workingDirectory: Path, note: String? = null) {
-        append(
+        synchronized(this) {
+            this.commandLine = commandLine
+        }
+        appendStartup(
             buildString {
                 append("Starting ")
                 append(displayName)
@@ -59,7 +65,7 @@ class ActonDebugSession(
     fun processTerminated(exitCode: Int) {
         if (!readySignal.isCompleted) {
             readySignal.completeExceptionally(
-                ExecutionException("$displayName exited before DAP startup (code=$exitCode)\n\n${transcript()}")
+                ExecutionException(startupFailureMessage(exitCode))
             )
         }
     }
@@ -79,6 +85,53 @@ class ActonDebugSession(
     }
 
     fun transcript(): String = synchronized(this) { transcript.toString() }
+
+    private fun appendStartup(text: String) {
+        synchronized(this) {
+            transcript.append(text)
+        }
+    }
+
+    internal fun startupFailureMessage(exitCode: Int): String {
+        val details = cleanedFailureOutput().ifBlank { transcript() }
+        return buildString {
+            append(displayName)
+            append(" failed before DAP startup (code=")
+            append(exitCode)
+            append(")\n\n")
+            append(details)
+        }
+    }
+
+    private fun cleanedFailureOutput(): String {
+        val (rawOutput, commandLine) = synchronized(this) {
+            processOutput.toString() to commandLine
+        }
+        if (rawOutput.isBlank()) return ""
+
+        val normalizedLines = rawOutput
+            .replace("\r\n", "\n")
+            .replace('\r', '\n')
+            .lineSequence()
+            .map(String::trimEnd)
+            .toList()
+
+        val withoutEcho = normalizedLines
+            .dropWhile { line -> line.isBlank() || line == commandLine }
+
+        val errorIndex = withoutEcho.indexOfFirst(::isDiagnosticHeader)
+        val relevantLines = if (errorIndex >= 0) withoutEcho.drop(errorIndex) else withoutEcho
+        return relevantLines.joinToString("\n").trim()
+    }
+
+    private fun isDiagnosticHeader(line: String): Boolean {
+        val trimmed = line.trimStart()
+        return trimmed.startsWith("Error:") ||
+            trimmed.startsWith("error:") ||
+            trimmed.startsWith("warning:") ||
+            ": error:" in trimmed ||
+            ": warning:" in trimmed
+    }
 
     private fun isPortReservedByProcess(): Boolean {
         return try {

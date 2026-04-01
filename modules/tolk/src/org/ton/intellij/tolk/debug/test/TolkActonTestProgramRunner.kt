@@ -15,6 +15,7 @@ import org.jetbrains.concurrency.Promise
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandRunState
 import org.ton.intellij.acton.runconfig.PreparedActonDebugExecution
+import org.ton.intellij.tolk.debug.TolkDebugFailureRunContent
 import org.ton.intellij.tolk.debug.TolkDapSessionStarter
 import org.ton.intellij.tolk.debug.TolkRetraceDebugAdapter
 import java.net.ServerSocket
@@ -65,6 +66,22 @@ class TolkActonTestProgramRunner : AsyncProgramRunner<RunnerSettings>() {
                 }
                 promise.setResult(descriptor[0])
             } catch (t: Throwable) {
+                val fallbackDescriptor = preparedExecution?.executionResult?.let { executionResult ->
+                    val descriptor = arrayOfNulls<RunContentDescriptor>(1)
+                    ApplicationManager.getApplication().invokeAndWait {
+                        descriptor[0] = TolkDebugFailureRunContent.showIfTerminatedBeforeDap(
+                            environment = environment,
+                            executionResult = executionResult,
+                            error = t,
+                            title = profile.name
+                        )
+                    }
+                    descriptor[0]
+                }
+                if (fallbackDescriptor != null) {
+                    promise.setResult(fallbackDescriptor)
+                    return@executeOnPooledThread
+                }
                 preparedExecution?.processHandler
                     ?.takeUnless { it.isProcessTerminating || it.isProcessTerminated }
                     ?.destroyProcess()

@@ -78,6 +78,8 @@ sealed class ActonCommand(val name: String) {
         var functionName: String = "",
         var clearCache: Boolean = false,
         var useColors: Boolean = false,
+        var debug: Boolean = false,
+        var debugPort: String = "",
     ) : ActonCommand("test") {
         enum class TestMode { FUNCTION, FILE, DIRECTORY }
 
@@ -88,6 +90,13 @@ sealed class ActonCommand(val name: String) {
             if (useColors) {
                 add("--color")
                 add("always")
+            }
+            if (debug) {
+                add("--debug")
+                if (debugPort.isNotBlank()) {
+                    add("--debug-port")
+                    add(debugPort)
+                }
             }
             when (mode) {
                 TestMode.FUNCTION -> {

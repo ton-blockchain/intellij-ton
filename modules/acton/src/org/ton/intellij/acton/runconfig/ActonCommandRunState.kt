@@ -22,6 +22,7 @@ import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.Key
 import com.intellij.profiler.actions.ImportProfilerResultAction
@@ -32,6 +33,7 @@ import com.intellij.util.execution.ParametersListUtil
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
 import org.ton.intellij.acton.profiler.ActonCollapsedProfileDumpParserProvider
+import java.util.concurrent.ConcurrentHashMap
 
 class ActonCommandRunState(
     environment: ExecutionEnvironment,
@@ -42,21 +44,30 @@ class ActonCommandRunState(
     private var cachedExecutionResult: ExecutionResult? = null
     @Volatile
     private var scriptDebugPortOverride: Int? = null
+    @Volatile
+    private var testDebugPortOverride: Int? = null
 
     fun enableScriptDebug(port: Int) {
         scriptDebugPortOverride = port
     }
 
+    fun enableTestDebug(port: Int) {
+        testDebugPortOverride = port
+    }
+
     fun prepareForDebugLaunch(executor: Executor, runner: ProgramRunner<*>): PreparedActonDebugExecution {
         val executionResult = execute(executor, runner)
         val processHandler = executionResult.processHandler
-            ?: throw ExecutionException("Acton script process handler is not available")
+            ?: throw ExecutionException("Acton debug process handler is not available")
         if (!processHandler.isStartNotified) {
             processHandler.startNotify()
-            LOG.info("Started process notifications for acton script DAP session on port ${processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)?.port}")
+            LOG.info(
+                "Started process notifications for ${processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)?.displayName ?: "acton debug"} " +
+                    "DAP session on port ${processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)?.port}"
+            )
         }
         val debugSession = processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)
-            ?: throw ExecutionException("Acton script debug session metadata is not available")
+            ?: throw ExecutionException("Acton debug session metadata is not available")
         return PreparedActonDebugExecution(executionResult, processHandler, debugSession)
     }
 
@@ -145,6 +156,13 @@ class ActonCommandRunState(
                 debugPort = debugPort
             )
         }
+        is ActonCommand.Test -> {
+            val debugPort = testDebugPortOverride?.toString() ?: command.debugPort
+            command.copy(
+                debug = testDebugPortOverride != null || command.debug,
+                debugPort = debugPort
+            )
+        }
         else -> command
     }
 
@@ -154,19 +172,42 @@ class ActonCommandRunState(
         workingDir: java.nio.file.Path,
         actonCommand: ActonCommand
     ) {
-        val scriptCommand = actonCommand as? ActonCommand.Script ?: return
-        if (!isDebugScript(scriptCommand)) return
+        val debugInfo = when (actonCommand) {
+            is ActonCommand.Script -> {
+                if (!isDebugScript(actonCommand)) return
+                DebugSessionInfo(
+                    displayName = "acton script",
+                    port = actonCommand.debugPort.toIntOrNull() ?: return,
+                    readinessMarkers = listOf(
+                        "Debugger server listening on 127.0.0.1:${actonCommand.debugPort}",
+                        "Retrace DAP listening on 127.0.0.1:${actonCommand.debugPort}"
+                    )
+                )
+            }
+            is ActonCommand.Test -> {
+                if (!isDebugTest(actonCommand)) return
+                DebugSessionInfo(
+                    displayName = "acton test",
+                    port = actonCommand.debugPort.toIntOrNull() ?: return,
+                    readinessMarkers = listOf("Debugger server listening on 127.0.0.1:${actonCommand.debugPort}")
+                )
+            }
+            else -> return
+        }
 
-        val port = scriptCommand.debugPort.toIntOrNull() ?: return
         val debugSession = ActonDebugSession(
-            displayName = "acton script",
-            port = port,
-            readinessMarkers = listOf(
-                "Debugger server listening on 127.0.0.1:$port",
-                "Retrace DAP listening on 127.0.0.1:$port"
-            )
+            displayName = debugInfo.displayName,
+            port = debugInfo.port,
+            readinessMarkers = debugInfo.readinessMarkers
         )
         debugSession.recordStartup(commandLine.commandLineString, workingDir)
+        ActiveActonDebugProcessRegistry.register(
+            project = configuration.project,
+            workingDir = workingDir,
+            processHandler = handler,
+            displayName = debugInfo.displayName,
+            commandLine = commandLine.commandLineString
+        )
         handler.putUserData(ACTON_DEBUG_SESSION_KEY, debugSession)
         handler.addProcessListener(object : ProcessAdapter() {
             override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
@@ -174,11 +215,16 @@ class ActonCommandRunState(
                 event.text
                     .trimEnd('\r', '\n')
                     .takeIf { it.isNotBlank() }
-                    ?.let { LOG.info("acton script [$port][$outputType] $it") }
+                    ?.let { LOG.info("${debugInfo.displayName} [${debugInfo.port}][$outputType] $it") }
             }
 
             override fun processTerminated(event: ProcessEvent) {
-                LOG.info("acton script [$port] terminated with exit code ${event.exitCode}")
+                LOG.info("${debugInfo.displayName} [${debugInfo.port}] terminated with exit code ${event.exitCode}")
+                ActiveActonDebugProcessRegistry.unregister(
+                    project = configuration.project,
+                    workingDir = workingDir,
+                    processHandler = handler
+                )
                 debugSession.processTerminated(event.exitCode)
             }
         })
@@ -187,6 +233,11 @@ class ActonCommandRunState(
     private fun isDebugScript(actonCommand: ActonCommand): Boolean {
         val scriptCommand = actonCommand as? ActonCommand.Script ?: return false
         return scriptCommand.debug && !scriptCommand.broadcast
+    }
+
+    private fun isDebugTest(actonCommand: ActonCommand): Boolean {
+        val testCommand = actonCommand as? ActonCommand.Test ?: return false
+        return testCommand.debug
     }
 
     private fun createProfilerDumpIfNeeded(): ProfilerDumpDescriptor? {
@@ -235,6 +286,74 @@ class ActonCommandRunState(
         private val CPU_PROFILE_PARSER_PROVIDER = ActonCollapsedProfileDumpParserProvider()
     }
 }
+
+private data class DebugSessionInfo(
+    val displayName: String,
+    val port: Int,
+    val readinessMarkers: List<String>
+)
+
+private object ActiveActonDebugProcessRegistry {
+    private val activeProcesses = ConcurrentHashMap<String, ActiveActonDebugProcess>()
+
+    fun register(
+        project: Project,
+        workingDir: java.nio.file.Path,
+        processHandler: ProcessHandler,
+        displayName: String,
+        commandLine: String
+    ) {
+        val key = key(project, workingDir)
+        val candidate = ActiveActonDebugProcess(processHandler, displayName, commandLine)
+        while (true) {
+            val existing = activeProcesses[key]
+            if (existing == null) {
+                if (activeProcesses.putIfAbsent(key, candidate) == null) {
+                    return
+                }
+                continue
+            }
+
+            if (existing.processHandler.isProcessTerminating || existing.processHandler.isProcessTerminated) {
+                activeProcesses.remove(key, existing)
+                continue
+            }
+
+            throw ExecutionException(
+                "Another ${existing.displayName} session is still running for ${workingDir.toAbsolutePath()} " +
+                    "and holds the Acton compilation cache.\n" +
+                    "Stop it before starting a new debug session.\n\n" +
+                    "Existing command: ${existing.commandLine}"
+            )
+        }
+    }
+
+    fun unregister(
+        project: Project,
+        workingDir: java.nio.file.Path,
+        processHandler: ProcessHandler
+    ) {
+        val key = key(project, workingDir)
+        val existing = activeProcesses[key] ?: return
+        if (existing.processHandler === processHandler) {
+            activeProcesses.remove(key, existing)
+        }
+    }
+
+    private fun key(project: Project, workingDir: java.nio.file.Path): String {
+        return buildString {
+            append(project.locationHash)
+            append("::")
+            append(workingDir.toAbsolutePath().normalize())
+        }
+    }
+}
+
+private data class ActiveActonDebugProcess(
+    val processHandler: ProcessHandler,
+    val displayName: String,
+    val commandLine: String
+)
 
 data class PreparedActonDebugExecution(
     val executionResult: ExecutionResult,

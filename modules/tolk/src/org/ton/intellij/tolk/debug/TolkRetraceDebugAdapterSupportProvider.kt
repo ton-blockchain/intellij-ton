@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package org.ton.intellij.tolk.debug
 
 import com.intellij.execution.ExecutionException
@@ -5,12 +7,17 @@ import com.intellij.execution.ExecutionResult
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
+import com.intellij.platform.dap.DapDebugSession
 import com.intellij.platform.dap.DapBreakpointsDescription
+import com.intellij.platform.dap.DapStartRequest
 import com.intellij.platform.dap.DebugAdapterDescriptor
 import com.intellij.platform.dap.DebugAdapterSupportProvider
 import com.intellij.platform.dap.connection.DebugAdapterHandle
+import com.intellij.platform.dap.xdebugger.DapXDebugProcess
+import com.intellij.xdebugger.XDebugSession
 import org.ton.intellij.acton.runconfig.ACTON_DEBUG_SESSION_KEY
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.CoroutineScope
 import java.util.concurrent.CancellationException
 
 class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkRetraceDebugAdapter> {
@@ -24,6 +31,42 @@ class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkR
                 TolkLineBreakpointType::class.java,
                 TolkExceptionBreakpointType::class.java
             )
+
+            override fun createXDebugProcess(
+                session: XDebugSession,
+                dapDebugSession: DapDebugSession,
+                xDebugProcessScope: CoroutineScope,
+                globalScope: CoroutineScope,
+                debugAdapterDescriptor: DebugAdapterDescriptor<*>,
+                executionEnvironment: ExecutionEnvironment,
+                executionResult: ExecutionResult?,
+                startRequestType: DapStartRequest,
+                startRequestArguments: Map<String, Any?>
+            ): DapXDebugProcess {
+                val preparedExecutionResult = executionResult
+                    ?: return super.createXDebugProcess(
+                        session,
+                        dapDebugSession,
+                        xDebugProcessScope,
+                        globalScope,
+                        debugAdapterDescriptor,
+                        executionEnvironment,
+                        executionResult,
+                        startRequestType,
+                        startRequestArguments
+                    )
+                return TolkDapXDebugProcess(
+                    session = session,
+                    dapDebugSession = dapDebugSession,
+                    xDebugProcessScope = xDebugProcessScope,
+                    globalScope = globalScope,
+                    debugAdapterDescriptor = debugAdapterDescriptor,
+                    executionEnvironment = executionEnvironment,
+                    backingExecutionResult = preparedExecutionResult,
+                    startRequestType = startRequestType,
+                    startRequestArguments = startRequestArguments
+                )
+            }
 
             override suspend fun launchDebugAdapter(
                 environment: ExecutionEnvironment,

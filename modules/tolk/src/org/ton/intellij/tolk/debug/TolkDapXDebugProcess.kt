@@ -9,6 +9,7 @@ import com.intellij.platform.dap.DapStartRequest
 import com.intellij.platform.dap.DebugAdapterDescriptor
 import com.intellij.platform.dap.xdebugger.DapXDebugProcess
 import com.intellij.xdebugger.XDebugSession
+import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import kotlinx.coroutines.CoroutineScope
 
 internal class TolkDapXDebugProcess(
@@ -44,6 +45,10 @@ internal class TolkDapXDebugProcess(
 
     override fun createConsole(): ExecutionConsole {
         return backingExecutionResult.executionConsole ?: super.createConsole()
+    }
+
+    override fun getEditorsProvider(): XDebuggerEditorsProvider {
+        return TolkDebuggerEditorsProvider
     }
 
     companion object {

@@ -18,6 +18,8 @@ import org.ton.intellij.tolk.psi.TolkTypeParameter
 import org.ton.intellij.tolk.psi.TolkVisitor
 import org.ton.intellij.tolk.psi.impl.functionSymbol
 import org.ton.intellij.tolk.psi.impl.hasSelf
+import org.ton.intellij.tolk.type.TolkTyParam
+import org.ton.intellij.tolk.type.TolkTyVoid
 
 class TolkCallArgumentsCountMismatchInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(
@@ -39,7 +41,7 @@ class TolkCallArgumentsCountMismatchInspection : TolkInspectionBase() {
             val maxParams = params.size
 
             var minParams = maxParams
-            while (minParams > 0 && (params[minParams - 1] as? TolkParameter)?.parameterDefault != null) {
+            while (minParams > 0 && canBeOmittedInCall(params[minParams - 1] as? TolkParameter)) {
                 minParams--
             }
 
@@ -75,6 +77,33 @@ class TolkCallArgumentsCountMismatchInspection : TolkInspectionBase() {
             }
         }
     }
+}
+
+private fun canBeOmittedInCall(parameter: TolkParameter?): Boolean {
+    if (parameter == null) {
+        return false
+    }
+    if (parameter.parameterDefault != null) {
+        return true
+    }
+
+    val parameterType = parameter.type?.unwrapTypeAlias()
+    if (parameterType is TolkTyVoid) {
+        return true
+    }
+    if (parameterType is TolkTyParam) {
+        val defaultType = (parameterType.parameter as? TolkTyParam.NamedTypeParameter)
+            ?.psi
+            ?.defaultTypeParameter
+            ?.typeExpression
+            ?.type
+            ?.unwrapTypeAlias()
+        if (defaultType is TolkTyVoid) {
+            return true
+        }
+    }
+
+    return false
 }
 
 fun isInstanceMethodCall(call: TolkCallExpression): Boolean {

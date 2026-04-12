@@ -19,18 +19,13 @@ import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsAdapter
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
 import com.intellij.execution.testframework.sm.runner.SMTestProxy
 import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.Key
-import com.intellij.profiler.actions.ImportProfilerResultAction
-import com.intellij.profiler.api.ProfilerDumpDescriptor
-import com.intellij.profiler.api.ProfilerDumpManager
-import com.intellij.profiler.clion.ProfilerExecutor
 import com.intellij.util.execution.ParametersListUtil
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
-import org.ton.intellij.acton.profiler.ActonCollapsedProfileDumpParserProvider
+import org.ton.intellij.acton.profiler.ActonProfilerSupport
 
 class ActonCommandRunState(
     environment: ExecutionEnvironment,
@@ -116,13 +111,8 @@ class ActonCommandRunState(
             args.add("--coverage-format")
             args.add("lcov")
         }
-        val profilerDump = createProfilerDumpIfNeeded()
-        if (profilerDump != null) {
-            args.add("--profile-format")
-            args.add("collapsed")
-            args.add("--cpuprofile")
-            args.add(profilerDump.file.absolutePath)
-        }
+        val profilerSession = createProfilerSessionIfNeeded(environment.executor)
+        profilerSession?.let { args.addAll(it.additionalArguments) }
 
         val actonCommandLine = ActonCommandLine(
             command = actonCommand.name,
@@ -140,7 +130,7 @@ class ActonCommandRunState(
         }
 
         val handler = KillableColoredProcessHandler(commandLine)
-        attachCpuProfileImportIfNeeded(handler, profilerDump)
+        profilerSession?.attachToProcess(handler)
         attachDebugSessionIfNeeded(handler, commandLine, workingDir, actonCommand)
         return handler
     }
@@ -217,7 +207,7 @@ class ActonCommandRunState(
 
     private fun isDebugScript(actonCommand: ActonCommand): Boolean {
         val scriptCommand = actonCommand as? ActonCommand.Script ?: return false
-        return scriptCommand.debug && !scriptCommand.broadcast
+        return scriptCommand.debug && scriptCommand.broadcastNet.isBlank()
     }
 
     private fun isDebugTest(actonCommand: ActonCommand): Boolean {
@@ -225,50 +215,15 @@ class ActonCommandRunState(
         return testCommand.debug
     }
 
-    private fun createProfilerDumpIfNeeded(): ProfilerDumpDescriptor? {
+    private fun createProfilerSessionIfNeeded(executor: Executor): org.ton.intellij.acton.profiler.ActonProfilerSession? {
         if (configuration.command != "test") return null
-        if (environment.executor.id != ProfilerExecutor.EXECUTOR_ID) return null
-
-        val dumpManager = ProfilerDumpManager.getInstance(configuration.project)
-        val dumpName = configuration.name.takeIf { it.isNotBlank() } ?: "Acton Test"
-        return dumpManager.createDump(dumpName, CPU_PROFILE_PARSER_PROVIDER)
-    }
-
-    private fun attachCpuProfileImportIfNeeded(
-        handler: KillableColoredProcessHandler,
-        profilerDump: ProfilerDumpDescriptor?
-    ) {
-        if (profilerDump == null) return
-
-        handler.addProcessListener(object : ProcessAdapter() {
-            override fun processTerminated(event: ProcessEvent) {
-                val dumpFile = profilerDump.file
-                if (!dumpFile.exists() || dumpFile.length() == 0L) {
-                    LOG.warn("Acton CPU profile was not produced for '${configuration.name}' at ${dumpFile.absolutePath}")
-                    profilerDump.remove()
-                    return
-                }
-
-                LOG.info("Importing Acton CPU profile from ${dumpFile.absolutePath}")
-                ApplicationManager.getApplication().invokeLater {
-                    if (configuration.project.isDisposed) {
-                        profilerDump.remove()
-                        return@invokeLater
-                    }
-                    ImportProfilerResultAction.Companion.importProfilerDump(
-                        configuration.project,
-                        profilerDump,
-                        null,
-                        null
-                    )
-                }
-            }
-        })
+        return ActonProfilerSupport.EP_NAME.extensionList.firstNotNullOfOrNull {
+            it.createTestSession(configuration, executor)
+        }
     }
 
     companion object {
         private val LOG = logger<ActonCommandRunState>()
-        private val CPU_PROFILE_PARSER_PROVIDER = ActonCollapsedProfileDumpParserProvider()
     }
 }
 

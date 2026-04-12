@@ -4,6 +4,7 @@ package org.ton.intellij.tolk.debug
 
 import com.intellij.icons.AllIcons
 import com.intellij.platform.dap.DapCommandProcessor
+import com.intellij.platform.dap.CommandScope
 import com.intellij.platform.dap.DapLazyVariable
 import com.intellij.platform.dap.DapScope
 import com.intellij.platform.dap.DapStackFrame
@@ -15,7 +16,6 @@ import com.intellij.platform.dap.ValueKind
 import com.intellij.platform.dap.xdebugger.AbstractDapXValue
 import com.intellij.platform.dap.xdebugger.DapXDebuggerPresentationFactory
 import com.intellij.platform.dap.xdebugger.DapXSuspendContext
-import com.intellij.platform.dap.xdebugger.DefaultDapXDebuggerEvaluator
 import com.intellij.platform.dap.xdebugger.DefaultDapXExecutionStack
 import com.intellij.platform.dap.xdebugger.DefaultDapXScope
 import com.intellij.platform.dap.xdebugger.DefaultDapXSuspendContext
@@ -34,7 +34,8 @@ import com.intellij.xdebugger.frame.XValuePlace
 import com.intellij.xdebugger.frame.XValueGroup
 import com.intellij.xdebugger.frame.presentation.XRegularValuePresentation
 import com.intellij.xdebugger.frame.presentation.XValuePresentation
-import com.intellij.xdebugger.frame.presentation.XValuePresentation.XValueTextRenderer
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import org.ton.intellij.tolk.TolkIcons
 import javax.swing.Icon
 
@@ -103,13 +104,16 @@ private class TolkDapXScope(
     }
 }
 
-private class TolkDapXStackFrame(
+internal class TolkDapXStackFrame(
     factory: DapXDebuggerPresentationFactory,
-    commandProcessor: DapCommandProcessor,
+    private val commandProcessor: DapCommandProcessor,
     private val thread: DapThread,
     private val frame: DapStackFrame
 ) : XStackFrame() {
     private val delegate = DefaultDapXStackFrame(factory, commandProcessor, thread, frame)
+    internal val completionItems: List<TolkDebugEvaluateCompletion.Item> by lazy(LazyThreadSafetyMode.PUBLICATION) {
+        loadCompletionItems()
+    }
 
     override fun getEvaluator(): XDebuggerEvaluator {
         return delegate.evaluator
@@ -148,6 +152,35 @@ private class TolkDapXStackFrame(
 
     override fun getEqualityObject(): Any? {
         return delegate.equalityObject
+    }
+
+    private fun loadCompletionItems(): List<TolkDebugEvaluateCompletion.Item> {
+        return runBlocking {
+            withTimeoutOrNull(DEBUG_EVALUATE_COMPLETION_TIMEOUT_MS) {
+                commandProcessor.submitCommandAsync {
+                    collectCompletionItems(this)
+                }.await()
+            }.orEmpty()
+        }
+    }
+
+    private suspend fun collectCompletionItems(commandScope: CommandScope): List<TolkDebugEvaluateCompletion.Item> {
+        val itemsByName = LinkedHashMap<String, TolkDebugEvaluateCompletion.Item>()
+        val scopes = with(frame) {
+            commandScope.scopes()
+        }
+        for (scope in scopes) {
+            if (scope.isExpensive) continue
+
+            val variables = with(scope) {
+                commandScope.variables()
+            }
+            for (variable in variables) {
+                val item = variable.toDebugEvaluateCompletionItem(scope.name) ?: continue
+                itemsByName.putIfAbsent(item.lookupString, item)
+            }
+        }
+        return itemsByName.values.toList()
     }
 }
 
@@ -316,5 +349,28 @@ private data class TolkValuePresentationState(
     val fullValueText: String?,
     val hasChildren: Boolean
 )
+
+private const val DEBUG_EVALUATE_COMPLETION_TIMEOUT_MS = 1_000L
+private val DEBUG_EVALUATE_IDENTIFIER = Regex("^[A-Z_a-z]\\w*$")
+
+private fun DapVariable.toDebugEvaluateCompletionItem(scopeName: String?): TolkDebugEvaluateCompletion.Item? {
+    val presentableText = name.takeIf { !it.isNullOrBlank() } ?: return null
+    val lookupString = evaluateName
+        ?.takeIf { !it.isBlank() && DEBUG_EVALUATE_IDENTIFIER.matches(it) }
+        ?: presentableText.asDebugEvaluateLookupString()
+
+    return TolkDebugEvaluateCompletion.Item(
+        lookupString = lookupString,
+        presentableText = presentableText,
+        typeText = type?.takeIf { it.isNotBlank() },
+        scopeName = scopeName?.takeIf { it.isNotBlank() }
+    )
+}
+
+private fun String.asDebugEvaluateLookupString(): String {
+    if (isBlank()) return this
+    if (startsWith("`") && endsWith("`")) return this
+    return if (DEBUG_EVALUATE_IDENTIFIER.matches(this)) this else "`$this`"
+}
 
 private const val INLINE_VALUE_SUFFIX = "..."

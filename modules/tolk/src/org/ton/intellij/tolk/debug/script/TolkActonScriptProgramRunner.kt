@@ -28,7 +28,7 @@ class TolkActonScriptProgramRunner : AsyncProgramRunner<RunnerSettings>() {
         return executorId == DefaultDebugExecutor.EXECUTOR_ID &&
             profile is ActonCommandConfiguration &&
             profile.command == "script" &&
-            !profile.scriptBroadcast
+            !profile.isScriptBroadcast()
     }
 
     override fun execute(

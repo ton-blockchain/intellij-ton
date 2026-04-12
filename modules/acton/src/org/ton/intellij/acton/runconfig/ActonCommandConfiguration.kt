@@ -35,7 +35,6 @@ class ActonCommandConfiguration(
     var scriptForkNet: String = ""
     var scriptForkBlockNumber: String = ""
     var scriptApiKey: String = ""
-    var scriptBroadcast: Boolean = false
     var scriptBroadcastNet: String = ""
     var scriptDebug: Boolean = false
     var scriptDebugPort: String = ""
@@ -54,7 +53,7 @@ class ActonCommandConfiguration(
             "build"  -> ActonCommand.Build(buildContractId, buildClearCache, buildOutDir)
             "script" -> ActonCommand.Script(
                 scriptPath, scriptClearCache, scriptForkNet, scriptForkBlockNumber, scriptApiKey,
-                scriptBroadcast, scriptBroadcastNet, project.actonSettings.explorer.id, scriptDebug, scriptDebugPort
+                scriptBroadcastNet, project.actonSettings.explorer.id, scriptDebug, scriptDebugPort
             )
 
             "test"   -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache, true)
@@ -89,7 +88,6 @@ class ActonCommandConfiguration(
         element.setAttribute("scriptForkNet", scriptForkNet)
         element.setAttribute("scriptForkBlockNumber", scriptForkBlockNumber)
         element.setAttribute("scriptApiKey", scriptApiKey)
-        element.setAttribute("scriptBroadcast", scriptBroadcast.toString())
         element.setAttribute("scriptBroadcastNet", scriptBroadcastNet)
         element.setAttribute("scriptDebug", scriptDebug.toString())
         element.setAttribute("scriptDebugPort", scriptDebugPort)
@@ -124,7 +122,6 @@ class ActonCommandConfiguration(
         scriptForkNet = element.getAttributeValue("scriptForkNet") ?: ""
         scriptForkBlockNumber = element.getAttributeValue("scriptForkBlockNumber") ?: ""
         scriptApiKey = element.getAttributeValue("scriptApiKey") ?: ""
-        scriptBroadcast = element.getAttributeValue("scriptBroadcast")?.toBoolean() ?: false
         scriptBroadcastNet = element.getAttributeValue("scriptBroadcastNet") ?: ""
         scriptDebug = element.getAttributeValue("scriptDebug")?.toBoolean() ?: false
         scriptDebugPort = element.getAttributeValue("scriptDebugPort") ?: ""
@@ -141,4 +138,6 @@ class ActonCommandConfiguration(
 
         env = EnvironmentVariablesData.readExternal(element)
     }
+
+    fun isScriptBroadcast(): Boolean = scriptBroadcastNet.isNotBlank()
 }

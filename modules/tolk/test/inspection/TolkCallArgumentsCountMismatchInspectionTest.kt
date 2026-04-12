@@ -184,6 +184,40 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
         )
     }
 
+    fun `test trailing generic parameters with void defaults can be omitted`() {
+        doInspectionTest(
+            """
+            fun println<T1, T2 = void, T3 = void>(
+                value1: T1,
+                value2: T2,
+                value3: T3,
+            ): void {
+            }
+
+            fun main() {
+                println(1);
+                println(1, 2);
+                println(1, 2, 3);
+            }
+            """.trimIndent(),
+            TolkCallArgumentsCountMismatchInspection()
+        )
+    }
+
+    fun `test void parameter can be omitted only when it is trailing`() {
+        doInspectionTest(
+            """
+            fun foo(a: int, b: void, c: int): void {
+            }
+
+            fun main() {
+                foo(1<error descr="Too few arguments in call to 'foo', expected 3, have 1">)</error>;
+            }
+            """.trimIndent(),
+            TolkCallArgumentsCountMismatchInspection()
+        )
+    }
+
     fun `test instance method call, correct arguments`() {
         doInspectionTest(
             """

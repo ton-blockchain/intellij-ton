@@ -59,7 +59,8 @@ class TolkRetraceRunState(
             }
             add("--contract")
             add(configuration.contractId)
-            add("--dap-port")
+            add("--debug")
+            add("--debug-port")
             add(port.toString())
         }
         val commandLine = ActonCommandLine(

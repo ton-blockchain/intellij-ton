@@ -28,7 +28,6 @@ sealed class ActonCommand(val name: String) {
         var forkNet: String = "",
         var forkBlockNumber: String = "",
         var apiKey: String = "",
-        var broadcast: Boolean = false,
         var broadcastNet: String = "",
         var explorer: String = "",
         var debug: Boolean = false,
@@ -48,12 +47,9 @@ sealed class ActonCommand(val name: String) {
                 add("--api-key")
                 add(apiKey)
             }
-            if (broadcast) {
-                add("--broadcast")
-                if (broadcastNet.isNotBlank()) {
-                    add("--net")
-                    add(broadcastNet)
-                }
+            if (broadcastNet.isNotBlank()) {
+                add("--net")
+                add(broadcastNet)
                 if (explorer.isNotBlank()) {
                     add("--explorer")
                     add(explorer)

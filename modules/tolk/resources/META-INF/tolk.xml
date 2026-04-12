@@ -264,8 +264,6 @@
         <!-- Script -->
         <runConfigurationProducer
                 implementation="org.ton.intellij.tolk.ide.run.configuration.ActonRunScriptConfigurationProducer"/>
-        <runConfigurationProducer
-                implementation="org.ton.intellij.tolk.ide.run.configuration.ActonRunScriptBroadcastConfigurationProducer"/>
         <runLineMarkerContributor id="TolkTestRunLineMarkerProvider" language="Tolk"
                                   implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkTestLineMarkerProvider"/>
 

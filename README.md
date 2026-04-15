@@ -40,7 +40,6 @@ The plugin supports the following languages:
 
 ## Community
 
-- [`@intellijton` on Telegram](https://t.me/intellijton) — News about IntelliJ TON plugin development
 - [`@tondev_eng` on Telegram](https://t.me/tondev_eng) — Main TON community chat and discussion group.
 - [`@tondev` on Telegram](https://t.me/tondev) — Main Russian TON community chat and discussion group.
 

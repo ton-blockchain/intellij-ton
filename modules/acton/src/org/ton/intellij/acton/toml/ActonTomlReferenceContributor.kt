@@ -132,13 +132,3 @@ private fun PsiElement.containingActonToml(): ActonToml? {
     if (file.name != "Acton.toml") return null
     return ActonToml(file, project)
 }
-
-private fun TomlLiteral.valueTextRange(): TextRange {
-    val text = text
-    val isQuoted = text.length >= 2 && ((text.startsWith("\"") && text.endsWith("\"")) || (text.startsWith("'") && text.endsWith("'")))
-    return if (isQuoted) TextRange(1, text.length - 1) else TextRange(0, text.length)
-}
-
-private fun TomlLiteral.stringValue(): String {
-    return text.removeSurrounding("\"").removeSurrounding("'")
-}

@@ -13,6 +13,7 @@
     </description>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
+    <depends optional="true" config-file="org.ton.intellij-ton.profiler.xml">intellij.profiler.clion</depends>
     <dependencies>
         <module name="intellij.platform.dap"/>
     </dependencies>

@@ -28,7 +28,9 @@ class TolkColorSettingsPage : ColorSettingsPage {
     override fun getDisplayName(): @NlsContexts.ConfigurableName String = "Tolk"
 
     companion object {
-        private val ATTRS: Array<AttributesDescriptor> = TolkColor.entries.map { it.attributesDescriptor }.toTypedArray()
+        private val ATTRS: Array<AttributesDescriptor> = TolkColor.entries.map {
+            it.attributesDescriptor
+        }.toTypedArray()
         private val ANNOTATOR_TAGS = TolkColor.entries.associateBy({ it.name }, { it.textAttributesKey })
 
         private val DEMO_TEXT: String by lazy {

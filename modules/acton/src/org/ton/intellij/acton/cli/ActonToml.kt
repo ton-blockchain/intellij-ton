@@ -24,7 +24,7 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
         return CachedValuesManager.getCachedValue(psiFile ?: return emptyMap()) {
             val scriptsTable = PsiTreeUtil.getChildrenOfType(psiFile, TomlTable::class.java)
                 ?.find { it.header.key?.segments?.firstOrNull()?.name == "scripts" }
-            
+
             val result = scriptsTable?.entries?.associate { entry ->
                 val key = entry.key.segments.firstOrNull()?.name ?: entry.key.text
                 val value = entry.value?.text?.removeSurrounding("\"")?.removeSurrounding("'") ?: ""
@@ -39,7 +39,7 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
         return CachedValuesManager.getCachedValue(psiFile ?: return emptyMap()) {
             val mappingsTable = PsiTreeUtil.getChildrenOfType(psiFile, TomlTable::class.java)
                 ?.find { it.header.key?.segments?.firstOrNull()?.name == "import-mappings" }
-            
+
             val result = mappingsTable?.entries?.associate { entry ->
                 val key = entry.key.segments.firstOrNull()?.name?.removePrefix("@") ?: entry.key.text
                 val value = entry.value?.text?.removeSurrounding("\"")?.removeSurrounding("'") ?: ""
@@ -60,17 +60,11 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
         }
     }
 
-    fun getContractIds(): List<String> {
-        return getContracts().map { it.id }
-    }
+    fun getContractIds(): List<String> = getContracts().map { it.id }
 
-    fun getContractSources(): List<String> {
-        return getContracts().mapNotNull { it.sourcePath }
-    }
+    fun getContractSources(): List<String> = getContracts().mapNotNull { it.sourcePath }
 
-    fun getContractElements(): List<TomlKeySegment> {
-        return getContracts().map { it.element }
-    }
+    fun getContractElements(): List<TomlKeySegment> = getContracts().map { it.element }
 
     data class ContractInfo(val id: String, val sourcePath: String?, val element: TomlKeySegment)
 
@@ -128,9 +122,7 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
         return result.distinctBy { it.name }
     }
 
-    fun getCustomNetworkNames(): List<String> {
-        return getCustomNetworkElements().mapNotNull { it.name }.distinct()
-    }
+    fun getCustomNetworkNames(): List<String> = getCustomNetworkElements().mapNotNull { it.name }.distinct()
 
     fun getCustomNetworkElements(): List<TomlKeySegment> {
         val file = psiFile ?: return emptyList()
@@ -169,15 +161,22 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
     private fun normalizePath(path: String): String = path.replace('\\', '/')
 
     companion object {
-        fun find(project: Project): ActonToml? {
-            return CachedValuesManager.getManager(project).getCachedValue(project) {
-                val projectDir = project.guessProjectDir()
-                val actonTomlFile = projectDir?.findChild("Acton.toml")
-                val virtualFile = actonTomlFile ?: FilenameIndex.getVirtualFilesByName("Acton.toml", GlobalSearchScope.projectScope(project)).firstOrNull()
-                
-                val actonToml = virtualFile?.let { ActonToml(it, project) }
-                create(actonToml, com.intellij.openapi.vfs.VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS, PsiModificationTracker.MODIFICATION_COUNT)
-            }
+        fun find(project: Project): ActonToml? = CachedValuesManager.getManager(project).getCachedValue(project) {
+            val projectDir = project.guessProjectDir()
+            val actonTomlFile = projectDir?.findChild("Acton.toml")
+            val virtualFile =
+                actonTomlFile
+                    ?: FilenameIndex.getVirtualFilesByName(
+                        "Acton.toml",
+                        GlobalSearchScope.projectScope(project),
+                    ).firstOrNull()
+
+            val actonToml = virtualFile?.let { ActonToml(it, project) }
+            create(
+                actonToml,
+                com.intellij.openapi.vfs.VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS,
+                PsiModificationTracker.MODIFICATION_COUNT,
+            )
         }
     }
 }

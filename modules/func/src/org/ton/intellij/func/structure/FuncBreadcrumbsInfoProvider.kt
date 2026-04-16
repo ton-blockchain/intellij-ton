@@ -108,10 +108,10 @@ class FuncBreadcrumbsInfoProvider : BreadcrumbsProvider {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun handler(e: PsiElement): ElementHandler<in FuncElement>? {
-        return if (e is FuncElement)
-            handlers.firstOrNull { it.accepts(e) } as ElementHandler<in FuncElement>?
-        else null
+    private fun handler(e: PsiElement): ElementHandler<in FuncElement>? = if (e is FuncElement) {
+        handlers.firstOrNull { it.accepts(e) } as ElementHandler<in FuncElement>?
+    } else {
+        null
     }
 
     override fun getLanguages(): Array<Language> = arrayOf(FuncLanguage)
@@ -121,7 +121,8 @@ class FuncBreadcrumbsInfoProvider : BreadcrumbsProvider {
 
 private const val ELLIPSIS = "${Typography.ellipsis}"
 
-private fun String.truncate(): String {
-    return if (length > 16) "${substring(0, 16 - ELLIPSIS.length)}$ELLIPSIS"
-    else this
+private fun String.truncate(): String = if (length > 16) {
+    "${substring(0, 16 - ELLIPSIS.length)}$ELLIPSIS"
+} else {
+    this
 }

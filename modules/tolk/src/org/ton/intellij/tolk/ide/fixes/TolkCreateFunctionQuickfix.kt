@@ -29,7 +29,7 @@ class TolkCreateFunctionQuickfix(identifier: PsiElement) : TolkCreateTopLevelDec
         val parameters = arguments.mapIndexed { index, arg ->
             val expr = arg.expression
             val argTy = expr.type ?: TolkTyUnknown
-            val name = if (expr is TolkReferenceExpression) expr.text else "param${index}"
+            val name = if (expr is TolkReferenceExpression) expr.text else "param$index"
 
             return@mapIndexed name to argTy
         }

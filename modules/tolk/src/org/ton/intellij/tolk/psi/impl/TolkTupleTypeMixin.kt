@@ -6,7 +6,9 @@ import org.ton.intellij.tolk.psi.TolkTupleTypeExpression
 import org.ton.intellij.tolk.stub.TolkTypeStub
 import org.ton.intellij.tolk.type.TolkTy
 
-abstract class TolkTupleTypeMixin : TolkTypeExpressionImpl, TolkTupleTypeExpression {
+abstract class TolkTupleTypeMixin :
+    TolkTypeExpressionImpl,
+    TolkTupleTypeExpression {
     override val type: TolkTy?
         get() = TolkTy.typedTuple(typeExpressionList.map { it.type ?: return null })
 

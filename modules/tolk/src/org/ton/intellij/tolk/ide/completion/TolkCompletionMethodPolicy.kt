@@ -8,7 +8,7 @@ internal fun isLowLevelMethodName(name: String): Boolean = when (name) {
     "typeName",
     "fromTuple",
     "toTuple",
-         -> true
+    -> true
 
     else -> false
 }

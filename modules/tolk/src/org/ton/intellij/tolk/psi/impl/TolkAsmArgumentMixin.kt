@@ -12,7 +12,9 @@ import org.ton.intellij.tolk.psi.TolkAsmArgument
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 
-abstract class TolkAsmArgumentMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkAsmArgument {
+abstract class TolkAsmArgumentMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    TolkAsmArgument {
     override fun getReferences(): Array<PsiReference> = arrayOf(TolkAsmArgumentReference(this))
 
     override fun getReference(): PsiReference? = references.firstOrNull()

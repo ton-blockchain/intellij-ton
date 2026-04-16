@@ -13,7 +13,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
                 out-dir = "generated/<caret>"
             """.trimIndent(),
             "output",
-            "wrappers"
+            "wrappers",
         )
     }
 
@@ -31,7 +31,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
                 depends = [{ name = "counter", path = "generated/<caret>" }]
             """.trimIndent(),
             "contracts",
-            "wrappers"
+            "wrappers",
         )
     }
 
@@ -44,7 +44,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
 
                 [wallets.bob]
                 mnemonic = "local"
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertCompletionContains(
@@ -53,7 +53,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
                 accounts = ["<caret>"]
             """.trimIndent(),
             "alice",
-            "bob"
+            "bob",
         )
     }
 
@@ -71,7 +71,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
                 depends = ["<caret>"]
             """.trimIndent(),
             "counter",
-            "wallet"
+            "wallet",
         )
     }
 
@@ -88,7 +88,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
                 co<caret>
             """.trimIndent(),
             "counter",
-            "core"
+            "core",
         )
     }
 
@@ -103,7 +103,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
                 fork-net = { custom = "<caret>" }
             """.trimIndent(),
             "devnet",
-            "staging"
+            "staging",
         )
     }
 
@@ -115,7 +115,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
             """.trimIndent(),
             "flip_plus",
             "flip_minus",
-            "flip_gt_ge"
+            "flip_gt_ge",
         )
     }
 
@@ -125,7 +125,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
                 [package]
                 license = "A<caret>"
             """.trimIndent(),
-            "Apache-2.0"
+            "Apache-2.0",
         )
     }
 
@@ -141,7 +141,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
             "contracts/",
             "contracts/**",
             "scripts/",
-            "scripts/**"
+            "scripts/**",
         )
     }
 
@@ -157,7 +157,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
             "tests/integration/",
             "tests/integration/**",
             "tests/unit/",
-            "tests/unit/**"
+            "tests/unit/**",
         )
     }
 
@@ -172,7 +172,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
                 exclude = ["generated/r<caret>"]
             """.trimIndent(),
             "generated/report.json",
-            "generated/runtime.log"
+            "generated/runtime.log",
         )
     }
 

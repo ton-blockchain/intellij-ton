@@ -13,17 +13,12 @@ import org.ton.intellij.util.InspectionBundle
 import java.math.BigInteger
 
 class FuncDivideByZeroInspection : FuncInspectionBase() {
-    override fun getGroupDisplayName(): String {
-        return InspectionBundle.message("group.numeric.name")
-    }
+    override fun getGroupDisplayName(): String = InspectionBundle.message("group.numeric.name")
 
-    override fun getDisplayName(): String {
-        return InspectionBundle.message("inspection.numeric.divide_by_zero.name")
-    }
+    override fun getDisplayName(): String = InspectionBundle.message("inspection.numeric.divide_by_zero.name")
 
-    override fun buildFuncVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): FuncVisitor {
-        return DivideByZeroVisitor(holder)
-    }
+    override fun buildFuncVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): FuncVisitor =
+        DivideByZeroVisitor(holder)
 
     private inner class DivideByZeroVisitor(val holder: ProblemsHolder) : FuncVisitor() {
         override fun visitBinExpression(o: FuncBinExpression) {

@@ -1,7 +1,5 @@
 package org.ton.intellij.tolk.completion
 
-import org.ton.intellij.tolk.ide.completion.isLowLevelMethodName
-
 class TolkDotCompletionTest : TolkCompletionTestBase() {
     fun `test enum completion`() = checkEquals(
         """
@@ -14,7 +12,8 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "Red", "Blue"
+        "Red",
+        "Blue",
     )
 
     fun `test enum completion with static method`() = checkEquals(
@@ -30,7 +29,9 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "Red", "Blue", "max",
+        "Red",
+        "Blue",
+        "max",
     )
 
     fun `test enum completion via alias`() = checkEquals(
@@ -46,7 +47,8 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "Red", "Blue",
+        "Red",
+        "Blue",
     )
 
     fun `test enum completion via instance without methods`() = checkEquals(
@@ -264,7 +266,7 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
             fun main(foo: Foo) {
                 foo./*caret*/
             }
-        """
+        """,
     )
 
     fun `test private field completion, in function`() = checkOrderedEquals(
@@ -304,7 +306,7 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "foo"
+        "foo",
     )
 
     fun `test private field completion, in static struct method with local variable`() = checkOrderedEquals(
@@ -319,7 +321,7 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "foo"
+        "foo",
     )
 
     fun `test private field completion, in instance struct method via self`() = checkOrderedEquals(

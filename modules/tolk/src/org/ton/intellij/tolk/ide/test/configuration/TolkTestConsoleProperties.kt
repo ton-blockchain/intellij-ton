@@ -11,10 +11,9 @@ import com.intellij.execution.ui.ConsoleViewContentType
 import com.intellij.openapi.project.Project
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 
-class TolkTestConsoleProperties(
-    configuration: ActonCommandConfiguration,
-    executor: Executor
-) : SMTRunnerConsoleProperties(configuration, "TolkTest", executor), SMStacktraceParser {
+class TolkTestConsoleProperties(configuration: ActonCommandConfiguration, executor: Executor) :
+    SMTRunnerConsoleProperties(configuration, "TolkTest", executor),
+    SMStacktraceParser {
 
     init {
         isUsePredefinedMessageFilter = false
@@ -22,9 +21,8 @@ class TolkTestConsoleProperties(
         isPrintTestingStartedTime = false
     }
 
-    override fun getTestStackTraceParser(url: String, proxy: SMTestProxy, project: Project): TestStackTraceParser? {
-        return object : TestStackTraceParser(0, null, proxy.errorMessage, proxy.stacktrace) {}
-    }
+    override fun getTestStackTraceParser(url: String, proxy: SMTestProxy, project: Project): TestStackTraceParser? =
+        object : TestStackTraceParser(0, null, proxy.errorMessage, proxy.stacktrace) {}
 
     override fun getTestLocator() = TolkTestLocator
 
@@ -36,7 +34,6 @@ class TolkTestConsoleProperties(
         printer.print(expected, ConsoleViewContentType.ERROR_OUTPUT)
     }
 
-    override fun createRerunFailedTestsAction(consoleView: ConsoleView): TolkRerunFailedTestsAction {
-        return TolkRerunFailedTestsAction(consoleView, this)
-    }
+    override fun createRerunFailedTestsAction(consoleView: ConsoleView): TolkRerunFailedTestsAction =
+        TolkRerunFailedTestsAction(consoleView, this)
 }

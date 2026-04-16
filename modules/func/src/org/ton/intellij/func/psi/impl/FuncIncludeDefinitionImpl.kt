@@ -9,22 +9,24 @@ import com.intellij.psi.tree.IElementType
 import org.ton.intellij.func.psi.FuncIncludeDefinition
 import org.ton.intellij.func.stub.FuncIncludeDefinitionStub
 
-abstract class FuncIncludeDefinitionMixin : StubBasedPsiElementBase<FuncIncludeDefinitionStub>, FuncIncludeDefinition {
+abstract class FuncIncludeDefinitionMixin :
+    StubBasedPsiElementBase<FuncIncludeDefinitionStub>,
+    FuncIncludeDefinition {
     constructor(stub: FuncIncludeDefinitionStub, type: IStubElementType<*, *>) : super(stub, type)
     constructor(node: ASTNode) : super(node)
     constructor(stub: FuncIncludeDefinitionStub?, type: IElementType?, node: ASTNode?) : super(stub, type, node)
 
-    override fun getReferences(): Array<FileReference> {
-        return FuncIncludePathReference(this).allReferences
-    }
+    override fun getReferences(): Array<FileReference> = FuncIncludePathReference(this).allReferences
 
     override fun getReference(): PsiReference? = references.lastOrNull()
 
     override fun getTextOffset(): Int {
         val stringLiteral = stringLiteral
         return if (stringLiteral != null) {
-            stringLiteral.startOffsetInParent + (stringLiteral.rawString?.startOffsetInParent
-                ?: return super.getTextOffset())
+            stringLiteral.startOffsetInParent + (
+                stringLiteral.rawString?.startOffsetInParent
+                    ?: return super.getTextOffset()
+                )
         } else {
             super.getTextOffset()
         }

@@ -4,10 +4,8 @@ import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementDecorator
 
-class TolkLookupElement(
-    delegate: LookupElement,
-    val data: TolkLookupElementData
-) : LookupElementDecorator<LookupElement>(delegate) {
+class TolkLookupElement(delegate: LookupElement, val data: TolkLookupElementData) :
+    LookupElementDecorator<LookupElement>(delegate) {
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
         if (javaClass != o?.javaClass) return false
@@ -61,7 +59,7 @@ data class TolkLookupElementData(
     /**
      * Some classification of an element
      */
-    val elementKind: ElementKind = ElementKind.DEFAULT
+    val elementKind: ElementKind = ElementKind.DEFAULT,
 ) {
     enum class KeywordKind {
         // Top Priority

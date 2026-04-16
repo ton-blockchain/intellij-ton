@@ -4,9 +4,9 @@ class UnificationException(val t1: HMType, val t2: HMType) : IllegalArgumentExce
 
 // Type Representation
 sealed class HMType {
-    data class Var(val name: String) : HMType()         // Type variable
+    data class Var(val name: String) : HMType() // Type variable
     data class Func(val from: HMType, val to: HMType) : HMType() // Function type
-    data class Const<T>(val value: T) : HMType()       // Constant type (e.g., Int, Bool)
+    data class Const<T>(val value: T) : HMType() // Constant type (e.g., Int, Bool)
     data class ForAll(val vars: List<String>, val body: HMType) : HMType() {
         // Instantiate: Replace quantified variables with fresh type variables
         fun instantiate(typeGen: TypeGenerator): HMType {
@@ -24,35 +24,35 @@ sealed class HMType {
 
     companion object {
         // Unification: Solves constraints
-        fun unify(t1: HMType, t2: HMType): HMSubstitution {
-            return when {
-                t1 == t2 -> HMSubstitution()
-                t1 is Var -> HMSubstitution.bind(t1.name, t2)
-                t2 is Var -> HMSubstitution.bind(t2.name, t1)
-                t1 is Func && t2 is Func -> {
-                    val s1 = unify(t1.from, t2.from)
-                    val s2 = unify(substitute(t1.to, s1), substitute(t2.to, s1))
-                    s1 + s2
-                }
-
-                t1 is Tensor && t2 is Tensor -> {
-                    if (t1.elements.size != t2.elements.size)
-                        throw IllegalArgumentException("Cannot unify tuples of different sizes: $t1 and $t2")
-                    t1.elements.zip(t2.elements).fold(HMSubstitution()) { acc, (e1, e2) ->
-                        acc + unify(substitute(e1, acc), substitute(e2, acc))
-                    }
-                }
-
-                t1 is Tuple && t2 is Tuple -> {
-                    if (t1.elements.size != t2.elements.size)
-                        throw IllegalArgumentException("Cannot unify tuples of different sizes: $t1 and $t2")
-                    t1.elements.zip(t2.elements).fold(HMSubstitution()) { acc, (e1, e2) ->
-                        acc + unify(substitute(e1, acc), substitute(e2, acc))
-                    }
-                }
-
-                else -> throw UnificationException(t1, t2)
+        fun unify(t1: HMType, t2: HMType): HMSubstitution = when {
+            t1 == t2 -> HMSubstitution()
+            t1 is Var -> HMSubstitution.bind(t1.name, t2)
+            t2 is Var -> HMSubstitution.bind(t2.name, t1)
+            t1 is Func && t2 is Func -> {
+                val s1 = unify(t1.from, t2.from)
+                val s2 = unify(substitute(t1.to, s1), substitute(t2.to, s1))
+                s1 + s2
             }
+
+            t1 is Tensor && t2 is Tensor -> {
+                if (t1.elements.size != t2.elements.size) {
+                    throw IllegalArgumentException("Cannot unify tuples of different sizes: $t1 and $t2")
+                }
+                t1.elements.zip(t2.elements).fold(HMSubstitution()) { acc, (e1, e2) ->
+                    acc + unify(substitute(e1, acc), substitute(e2, acc))
+                }
+            }
+
+            t1 is Tuple && t2 is Tuple -> {
+                if (t1.elements.size != t2.elements.size) {
+                    throw IllegalArgumentException("Cannot unify tuples of different sizes: $t1 and $t2")
+                }
+                t1.elements.zip(t2.elements).fold(HMSubstitution()) { acc, (e1, e2) ->
+                    acc + unify(substitute(e1, acc), substitute(e2, acc))
+                }
+            }
+
+            else -> throw UnificationException(t1, t2)
         }
 
         // Substitute type variables
@@ -60,7 +60,7 @@ sealed class HMType {
             is Var -> sub[type.name] ?: type
             is Func -> Func(
                 substitute(type.from, sub),
-                substitute(type.to, sub)
+                substitute(type.to, sub),
             )
 
             is Tuple -> Tuple(type.elements.map { substitute(it, sub) })
@@ -72,9 +72,7 @@ sealed class HMType {
 }
 
 // Substitution Map
-class HMSubstitution(
-    val values: Map<String, HMType> = emptyMap()
-) {
+class HMSubstitution(val values: Map<String, HMType> = emptyMap()) {
     operator fun get(name: String): HMType? = values[name]
 
     operator fun plus(other: HMSubstitution): HMSubstitution = composeSubs(this, other)
@@ -103,24 +101,24 @@ class TypeGenerator {
     fun fresh(): HMType.Var = HMType.Var("t${counter++}")
 }
 
-//// Generalize: Convert a type into a polymorphic type
-//fun generalize(env: HMTypeEnv, type: HMType): HMType {
+// // Generalize: Convert a type into a polymorphic type
+// fun generalize(env: HMTypeEnv, type: HMType): HMType {
 //    val envVars = env.values.flatMap { freeTypeVars(it) }.toSet()
 //    val typeVars = freeTypeVars(type)
 //    val generalizedVars = typeVars - envVars
 //    return if (generalizedVars.isEmpty()) type
 //    else HMType.ForAll(generalizedVars.toList(), type)
-//}
+// }
 //
-//// Extract free type variables from a type
-//fun freeTypeVars(type: HMType): Set<String> = when (type) {
+// // Extract free type variables from a type
+// fun freeTypeVars(type: HMType): Set<String> = when (type) {
 //    is HMType.Var -> setOf(type.name)
 //    is HMType.Func -> freeTypeVars(type.from) + freeTypeVars(type.to)
 //    is HMType.Tuple -> type.elements.flatMap { freeTypeVars(it) }.toSet()
 //    is HMType.Tensor -> type.elements.flatMap { freeTypeVars(it) }.toSet()
 //    is HMType.Const<*> -> emptySet()
 //    is HMType.ForAll -> freeTypeVars(type.body) - type.vars.toSet()
-//}
+// }
 
 // Hindley–Milner Algorithm
 class HindleyMilner {
@@ -183,41 +181,40 @@ fun main() {
     fun test<T>(a: (int, T), b: bool) -> (T, bool)
 
     val (a: int, b) = test((int, int), bool)
-    */
+     */
 
     HMType.ForAll(
         listOf("T"),
         HMType.Func(
             HMType.Tensor(
-                listOf(HMType.Const("Int"), HMType.Var("T"))
+                listOf(HMType.Const("Int"), HMType.Var("T")),
             ),
-            HMType.Tensor(listOf(HMType.Var("T"), HMType.Const("Bool")))
+            HMType.Tensor(listOf(HMType.Var("T"), HMType.Const("Bool"))),
         ),
     )
-
 }
 
 //
-//val hm = HindleyMilner()
-//val env = mutableMapOf<String, HMType>()
+// val hm = HindleyMilner()
+// val env = mutableMapOf<String, HMType>()
 //
-//env.put("aToInt", HMType.ForAll(
+// env.put("aToInt", HMType.ForAll(
 //    listOf("a"),
 //    HMType.Func(
 //        HMType.Var("a"),
 //        HMType.Tuple(listOf(HMType.Const("Int"), HMType.Var("a")))
 //    )
-//))
-//env.put("AddToList", HMType.ForAll(
+// ))
+// env.put("AddToList", HMType.ForAll(
 //    listOf("a"),
 //    HMType.Func(
 //
 //    )
-//))
+// ))
 //
-//val expr = HindleyMilnerExpr.App(
+// val expr = HindleyMilnerExpr.App(
 //    HindleyMilnerExpr.Var("aToInt"),
 //    HindleyMilnerExpr.Const(HMType.Const("None"))
-//)
+// )
 //
-//hm.infer(env, expr)
+// hm.infer(env, expr)

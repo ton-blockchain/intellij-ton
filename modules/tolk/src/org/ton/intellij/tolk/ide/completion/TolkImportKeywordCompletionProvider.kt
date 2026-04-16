@@ -20,24 +20,24 @@ object TolkImportKeywordCompletionProvider : TolkCompletionProvider(), DumbAware
             .andNot(
                 psiElement().afterLeafSkipping(
                     psiElement().withText(""),
-                    psiElement().inside(TolkTopLevelElement::class.java)
-                )
+                    psiElement().inside(TolkTopLevelElement::class.java),
+                ),
             )
             .andNot(
-                psiElement().inside(TolkDocComment::class.java)
+                psiElement().inside(TolkDocComment::class.java),
             )
 
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         result.addElement(
             LookupElementBuilder.create("import").bold().withInsertHandler { context, item ->
                 context.document.insertString(context.selectionEndOffset, " \"\"")
                 context.editor.caretModel.moveToOffset(context.selectionEndOffset - 1)
                 AutoPopupController.getInstance(context.project).scheduleAutoPopup(context.editor)
-            }
+            },
         )
     }
 }

@@ -12,7 +12,9 @@ import org.ton.intellij.tolk.type.inference
 import org.ton.intellij.util.parentOfType
 import javax.swing.Icon
 
-abstract class TolkVarMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkVar {
+abstract class TolkVarMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    TolkVar {
     override fun getName(): String = identifier.text.removeSurrounding("`")
 
     override val rawName: String? get() = identifier.text
@@ -38,4 +40,3 @@ abstract class TolkVarMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkVar
 
 val TolkVar.isMutable: Boolean
     get() = parentOfType<TolkVarExpression>()?.varKeyword != null
-

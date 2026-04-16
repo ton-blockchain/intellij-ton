@@ -17,13 +17,9 @@ import org.ton.intellij.asm.lexer.AsmLexer
 import org.ton.intellij.asm.psi.AsmElementTypes
 
 class AsmParserDefinition : ParserDefinition {
-    override fun createLexer(project: Project?): Lexer {
-        return AsmLexer()
-    }
+    override fun createLexer(project: Project?): Lexer = AsmLexer()
 
-    override fun createParser(project: Project?): PsiParser {
-        return AsmParser()
-    }
+    override fun createParser(project: Project?): PsiParser = AsmParser()
 
     override fun getFileNodeType(): IFileElementType = AsmFileElementType
 
@@ -31,11 +27,7 @@ class AsmParserDefinition : ParserDefinition {
 
     override fun getStringLiteralElements(): TokenSet = TokenSet.EMPTY
 
-    override fun createElement(node: ASTNode?): PsiElement {
-        return AsmElementTypes.Factory.createElement(node)
-    }
+    override fun createElement(node: ASTNode?): PsiElement = AsmElementTypes.Factory.createElement(node)
 
-    override fun createFile(viewProvider: FileViewProvider): PsiFile {
-        return AsmFile(viewProvider, AsmLanguage)
-    }
+    override fun createFile(viewProvider: FileViewProvider): PsiFile = AsmFile(viewProvider, AsmLanguage)
 }

@@ -18,14 +18,14 @@ class FuncFormatter : FormattingModelBuilder {
             wrap = null,
             alignment = null,
             indent = Indent.getNoneIndent(),
-            childIndent = Indent.getNoneIndent()
+            childIndent = Indent.getNoneIndent(),
         )
 
         return FormattingModelProvider.createFormattingModelForPsiFile(containingFile, block, settings)
     }
 
-    private fun createSpacingBuilder(codeStyleSettings: CodeStyleSettings): SpacingBuilder {
-        return SpacingBuilder(codeStyleSettings, FuncLanguage)
+    private fun createSpacingBuilder(codeStyleSettings: CodeStyleSettings): SpacingBuilder =
+        SpacingBuilder(codeStyleSettings, FuncLanguage)
             .after(TokenSet.create(LPAREN, LBRACK)).none()
             .after(
                 TokenSet.create(
@@ -42,7 +42,7 @@ class FuncFormatter : FormattingModelBuilder {
                     ELSE_KEYWORD,
                     ELSEIF_KEYWORD,
                     ELSEIFNOT_KEYWORD,
-                )
+                ),
             ).spaces(1)
             .before(TokenSet.create(COMMA, SEMICOLON)).none()
             .after(TokenSet.create(COMMA, VAR_KEYWORD)).spaces(1)
@@ -62,8 +62,10 @@ class FuncFormatter : FormattingModelBuilder {
                     TENSOR_TYPE,
                     TUPLE_TYPE,
                     TYPE_IDENTIFIER,
-                    HOLE_TYPE
-                ), TokenSet.create(IDENTIFIER, TILDE), FUNCTION
+                    HOLE_TYPE,
+                ),
+                TokenSet.create(IDENTIFIER, TILDE),
+                FUNCTION,
             ).spaces(1)
             .afterInside(TYPE_REFERENCE, FUNCTION).spaces(1)
             .afterInside(TokenSet.create(TILDE), FUNCTION).none()
@@ -82,11 +84,11 @@ class FuncFormatter : FormattingModelBuilder {
                     EQ, PLUSLET, MINUSLET, TIMESLET, DIVLET, DIVCLET, DIVRLET, MODLET, MODCLET, MODRLET,
                     LSHIFTLET, RSHIFTLET, RSHIFTCLET, RSHIFTRLET, ANDLET, ORLET, XORLET, EQEQ, NEQ, LEQ,
                     GEQ, GT, LT, SPACESHIP, LSHIFT, RSHIFTR, RSHIFTC, MINUS, PLUS, OR, XOR, TIMES, DIV, MOD,
-                    DIVMOD, DIVC, DIVR, MODR, MODC, AND
-                ), BIN_EXPRESSION
+                    DIVMOD, DIVC, DIVR, MODR, MODC, AND,
+                ),
+                BIN_EXPRESSION,
             ).spaces(1)
             .afterInside(MINUS, UNARY_MINUS_EXPRESSION).none()
             .afterInside(TILDE, INV_EXPRESSION).spaces(1)
             .around(TokenSet.create(IMPURE_KEYWORD, INLINE_KEYWORD, INLINE_REF_KEYWORD, METHOD_ID_KEYWORD)).spaces(1)
-    }
 }

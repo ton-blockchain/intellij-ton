@@ -15,7 +15,9 @@ import org.ton.intellij.tolk.type.TolkTyStruct
 import org.ton.intellij.util.childOfType
 import javax.swing.Icon
 
-abstract class TolkStructFieldMixin : TolkNamedElementImpl<TolkStructFieldStub>, TolkStructField {
+abstract class TolkStructFieldMixin :
+    TolkNamedElementImpl<TolkStructFieldStub>,
+    TolkStructField {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TolkStructFieldStub, stubType: IStubElementType<*, *>) : super(stub, stubType)

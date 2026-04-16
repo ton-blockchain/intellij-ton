@@ -12,8 +12,9 @@ import org.ton.intellij.tolk.type.TolkPrimitiveTy
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.inference
 
-
-abstract class TolkReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkReferenceExpression,
+abstract class TolkReferenceExpressionMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    TolkReferenceExpression,
     TolkReferenceElement {
     override val typeArgumentList: TolkTypeArgumentList?
         get() = findChildByClass(TolkTypeArgumentList::class.java)

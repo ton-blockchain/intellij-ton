@@ -11,9 +11,7 @@ import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 
 @Service(Service.Level.PROJECT)
-class TolkBuiltins(
-    val project: Project,
-) {
+class TolkBuiltins(val project: Project) {
     private var file: TolkFile? = null
     private val functions = mutableMapOf<String, TolkFunction>()
 
@@ -50,7 +48,9 @@ class TolkBuiltins(
         }
     }
 
-    class RegisterActivity : ProjectActivity, DumbAware {
+    class RegisterActivity :
+        ProjectActivity,
+        DumbAware {
         override suspend fun execute(project: Project) {
             invokeLater {
                 TolkBuiltins[project].registerBuiltin()

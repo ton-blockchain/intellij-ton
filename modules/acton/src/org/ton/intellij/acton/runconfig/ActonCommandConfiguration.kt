@@ -12,11 +12,8 @@ import org.ton.intellij.acton.settings.actonSettings
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class ActonCommandConfiguration(
-    project: Project,
-    factory: ConfigurationFactory,
-    name: String,
-) : LocatableConfigurationBase<ActonCommandRunState>(project, factory, name) {
+class ActonCommandConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
+    LocatableConfigurationBase<ActonCommandRunState>(project, factory, name) {
 
     var command: String = "build"
     var workingDirectory: Path? = null
@@ -54,28 +51,24 @@ class ActonCommandConfiguration(
     var retraceContractId: String = ""
     var retraceNetwork: String = ""
 
-    fun getActonCommand(): ActonCommand {
-        return when (command) {
-            "build"  -> ActonCommand.Build(buildContractId, buildClearCache, buildOutDir)
-            "script" -> ActonCommand.Script(
-                scriptPath, scriptClearCache, scriptForkNet, scriptForkBlockNumber, scriptApiKey,
-                scriptBroadcastNet, project.actonSettings.explorer.id, scriptDebug, scriptDebugPort
-            )
+    fun getActonCommand(): ActonCommand = when (command) {
+        "build" -> ActonCommand.Build(buildContractId, buildClearCache, buildOutDir)
+        "script" -> ActonCommand.Script(
+            scriptPath, scriptClearCache, scriptForkNet, scriptForkBlockNumber, scriptApiKey,
+            scriptBroadcastNet, project.actonSettings.explorer.id, scriptDebug, scriptDebugPort,
+        )
 
-            "test"   -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache, true, testUi)
-            "run"    -> ActonCommand.Run(runScriptName)
-            "retrace" -> ActonCommand.Retrace(retraceTransactionHash, retraceNetwork, retraceContractId)
-            else     -> ActonCommand.Custom(command)
-        }
+        "test" -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache, true, testUi)
+        "run" -> ActonCommand.Run(runScriptName)
+        "retrace" -> ActonCommand.Retrace(retraceTransactionHash, retraceNetwork, retraceContractId)
+        else -> ActonCommand.Custom(command)
     }
 
-    override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState {
-        return ActonCommandRunState(environment, this)
-    }
+    override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState =
+        ActonCommandRunState(environment, this)
 
-    override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> {
-        return ActonCommandConfigurationEditor(project)
-    }
+    override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> =
+        ActonCommandConfigurationEditor(project)
 
     override fun writeExternal(element: Element) {
         super.writeExternal(element)
@@ -141,7 +134,8 @@ class ActonCommandConfiguration(
 
         // Test settings
         testMode =
-            element.getAttributeValue("testMode")?.let { ActonCommand.Test.TestMode.valueOf(it) } ?: ActonCommand.Test.TestMode.DIRECTORY
+            element.getAttributeValue("testMode")?.let { ActonCommand.Test.TestMode.valueOf(it) }
+                ?: ActonCommand.Test.TestMode.DIRECTORY
         testTarget = element.getAttributeValue("testTarget") ?: ""
         testFunctionName = element.getAttributeValue("testFunctionName") ?: ""
         testClearCache = element.getAttributeValue("testClearCache")?.toBoolean() ?: false

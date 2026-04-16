@@ -16,25 +16,21 @@ import org.jetbrains.concurrency.Promise
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandRunState
 import org.ton.intellij.acton.runconfig.PreparedActonDebugExecution
-import org.ton.intellij.tolk.debug.TolkDebugFailureRunContent
 import org.ton.intellij.tolk.debug.TolkDapSessionStarter
+import org.ton.intellij.tolk.debug.TolkDebugFailureRunContent
 import org.ton.intellij.tolk.debug.TolkRetraceDebugAdapter
 import java.net.ServerSocket
 
 class TolkActonScriptProgramRunner : AsyncProgramRunner<RunnerSettings>() {
     override fun getRunnerId(): String = RUNNER_ID
 
-    override fun canRun(executorId: String, profile: RunProfile): Boolean {
-        return executorId == DefaultDebugExecutor.EXECUTOR_ID &&
+    override fun canRun(executorId: String, profile: RunProfile): Boolean =
+        executorId == DefaultDebugExecutor.EXECUTOR_ID &&
             profile is ActonCommandConfiguration &&
             profile.command == "script" &&
             !profile.isScriptBroadcast()
-    }
 
-    override fun execute(
-        environment: ExecutionEnvironment,
-        state: RunProfileState
-    ): Promise<RunContentDescriptor?> {
+    override fun execute(environment: ExecutionEnvironment, state: RunProfileState): Promise<RunContentDescriptor?> {
         val profile = environment.runProfile as? ActonCommandConfiguration
             ?: throw IllegalArgumentException("TolkActonScriptProgramRunner can only execute ActonCommandConfiguration")
         val scriptState = state as? ActonCommandRunState
@@ -46,16 +42,18 @@ class TolkActonScriptProgramRunner : AsyncProgramRunner<RunnerSettings>() {
             try {
                 val port = findFreePort()
                 scriptState.enableScriptDebug(port)
-                LOG.info("Starting acton script debug session via TolkActonScriptProgramRunner on port $port for '${profile.name}'")
+                LOG.info(
+                    "Starting acton script debug session via TolkActonScriptProgramRunner on port $port for '${profile.name}'",
+                )
                 preparedExecution = scriptState.prepareForDebugLaunch(environment.executor, this)
                 LOG.info(
-                    "Waiting for acton script DAP readiness on port ${preparedExecution.debugSession.port} before opening XDebugger session for '${profile.name}'"
+                    "Waiting for acton script DAP readiness on port ${preparedExecution.debugSession.port} before opening XDebugger session for '${profile.name}'",
                 )
                 runBlocking {
                     preparedExecution.debugSession.awaitReady()
                 }
                 LOG.info(
-                    "Acton script DAP became ready on port ${preparedExecution.debugSession.port} before session start for '${profile.name}'"
+                    "Acton script DAP became ready on port ${preparedExecution.debugSession.port} before session start for '${profile.name}'",
                 )
 
                 val descriptor = arrayOfNulls<RunContentDescriptor>(1)
@@ -67,7 +65,7 @@ class TolkActonScriptProgramRunner : AsyncProgramRunner<RunnerSettings>() {
                         adapterId = TolkRetraceDebugAdapter,
                         request = DapStartRequest.Launch,
                         arguments = emptyMap(),
-                        logLabel = "acton script"
+                        logLabel = "acton script",
                     )
                 }
                 promise.setResult(descriptor[0])
@@ -79,7 +77,7 @@ class TolkActonScriptProgramRunner : AsyncProgramRunner<RunnerSettings>() {
                             environment = environment,
                             executionResult = executionResult,
                             error = t,
-                            title = profile.name
+                            title = profile.name,
                         )
                     }
                     handled[0]

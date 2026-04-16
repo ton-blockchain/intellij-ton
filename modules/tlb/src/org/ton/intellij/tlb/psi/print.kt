@@ -1,11 +1,6 @@
 package org.ton.intellij.tlb.psi
 
-
-
-fun TlbFieldList.print(
-    appendable: Appendable,
-    showBraces: Boolean = true,
-) {
+fun TlbFieldList.print(appendable: Appendable, showBraces: Boolean = true) {
     fieldList.forEachIndexed { index, field ->
         if (index > 0) {
             appendable.append(" ")
@@ -14,10 +9,7 @@ fun TlbFieldList.print(
     }
 }
 
-fun TlbField.print(
-    appendable: Appendable,
-    showBraces: Boolean = true,
-) {
+fun TlbField.print(appendable: Appendable, showBraces: Boolean = true) {
     when (this) {
         is TlbImplicitField -> {
             if (showBraces) {
@@ -55,15 +47,9 @@ fun TlbField.print(
     }
 }
 
-fun TlbConstructor.printToString(
-    skipTag: Boolean = false,
-    showBraces: Boolean = true,
-) = buildString { print(this, skipTag, showBraces) }
-fun TlbConstructor.print(
-    appendable: Appendable,
-    skipTag: Boolean = false,
-    implicitBraces: Boolean = true,
-) {
+fun TlbConstructor.printToString(skipTag: Boolean = false, showBraces: Boolean = true) =
+    buildString { print(this, skipTag, showBraces) }
+fun TlbConstructor.print(appendable: Appendable, skipTag: Boolean = false, implicitBraces: Boolean = true) {
     appendable.append(name)
     if (!skipTag) {
         val constructorTag = constructorTag?.text
@@ -99,11 +85,7 @@ fun TlbConstructor.print(
     }
 }
 
-fun TlbTypeExpression.print(
-    appendable: Appendable,
-    priority: Int = 0,
-    skipParens: Boolean = false
-) {
+fun TlbTypeExpression.print(appendable: Appendable, priority: Int = 0, skipParens: Boolean = false) {
     if (priority > 0 && skipParens) {
         return print(appendable, 0, true)
     }

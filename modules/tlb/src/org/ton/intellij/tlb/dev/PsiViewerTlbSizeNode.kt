@@ -6,14 +6,12 @@ import com.intellij.dev.psiViewer.properties.tree.nodes.psiViewerApiClassesExten
 import com.intellij.dev.psiViewer.properties.tree.nodes.psiViewerPsiTypeAttributes
 import org.ton.intellij.tlb.TlbSize
 
-class PsiViewerTlbSizeNode(
-    private val size: TlbSize,
-    private val nodeContext: PsiViewerPropertyNode.Context
-) : PsiViewerPropertyNode {
+class PsiViewerTlbSizeNode(private val size: TlbSize, private val nodeContext: PsiViewerPropertyNode.Context) :
+    PsiViewerPropertyNode {
     class Factory : PsiViewerPropertyNode.Factory {
         override suspend fun createNode(
             nodeContext: PsiViewerPropertyNode.Context,
-            returnedValue: Any
+            returnedValue: Any,
         ): PsiViewerPropertyNode? {
             val type = returnedValue as? TlbSize ?: return null
             return PsiViewerTlbSizeNode(type, nodeContext)

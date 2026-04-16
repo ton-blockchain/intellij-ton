@@ -16,34 +16,32 @@ import org.ton.intellij.func.inspection.FuncInspectionBase
 import org.ton.intellij.func.psi.*
 
 class FuncFuncStyleConstantInspection : FuncInspectionBase() {
-    override fun buildFuncVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): FuncVisitor = object : FuncVisitor() {
-        override fun visitFunction(function: FuncFunction) {
-            if (!isFuncStyleConstant(function)) return
+    override fun buildFuncVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): FuncVisitor =
+        object : FuncVisitor() {
+            override fun visitFunction(function: FuncFunction) {
+                if (!isFuncStyleConstant(function)) return
 
-            val constantValue = extractConstantValue(function) ?: return
+                val constantValue = extractConstantValue(function) ?: return
 
-            holder.registerProblem(
-                function.identifier,
-                FuncBundle.message("inspection.func.style.constant.message"),
-                ProblemHighlightType.WEAK_WARNING,
-                FuncConvertToConstantFix(function, constantValue),
-                FuncConvertAllToConstantsFix(function)
-            )
+                holder.registerProblem(
+                    function.identifier,
+                    FuncBundle.message("inspection.func.style.constant.message"),
+                    ProblemHighlightType.WEAK_WARNING,
+                    FuncConvertToConstantFix(function, constantValue),
+                    FuncConvertAllToConstantsFix(function),
+                )
+            }
         }
-    }
 }
 
-class FuncConvertToConstantFix(
-    element: PsiElement,
-    private val constantValue: String,
-) : LocalQuickFixAndIntentionActionOnPsiElement(element), LocalQuickFix {
+class FuncConvertToConstantFix(element: PsiElement, private val constantValue: String) :
+    LocalQuickFixAndIntentionActionOnPsiElement(element),
+    LocalQuickFix {
 
     override fun getFamilyName() = FuncBundle.message("inspection.func.style.constant.fix.family.name")
     override fun getText() = FuncBundle.message("inspection.func.style.constant.fix.text", constantValue)
-    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo = IntentionPreviewInfo.EMPTY
+    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo =
+        IntentionPreviewInfo.EMPTY
 
     override fun invoke(
         project: Project,
@@ -57,13 +55,14 @@ class FuncConvertToConstantFix(
     }
 }
 
-class FuncConvertAllToConstantsFix(
-    element: PsiElement,
-) : LocalQuickFixAndIntentionActionOnPsiElement(element), LocalQuickFix {
+class FuncConvertAllToConstantsFix(element: PsiElement) :
+    LocalQuickFixAndIntentionActionOnPsiElement(element),
+    LocalQuickFix {
 
     override fun getFamilyName() = FuncBundle.message("inspection.func.style.constant.fix.all.family.name")
     override fun getText() = FuncBundle.message("inspection.func.style.constant.fix.all.text")
-    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo = IntentionPreviewInfo.EMPTY
+    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo =
+        IntentionPreviewInfo.EMPTY
 
     override fun invoke(
         project: Project,

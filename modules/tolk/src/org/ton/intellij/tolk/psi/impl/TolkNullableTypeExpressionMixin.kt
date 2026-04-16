@@ -6,7 +6,9 @@ import org.ton.intellij.tolk.psi.TolkNullableTypeExpression
 import org.ton.intellij.tolk.stub.TolkTypeStub
 import org.ton.intellij.tolk.type.TolkTy
 
-abstract class TolkNullableTypeExpressionMixin : TolkTypeExpressionImpl, TolkNullableTypeExpression {
+abstract class TolkNullableTypeExpressionMixin :
+    TolkTypeExpressionImpl,
+    TolkNullableTypeExpression {
     override val type: TolkTy? get() = typeExpression.type?.nullable()
 
     constructor(node: ASTNode) : super(node)

@@ -47,7 +47,10 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
             val actonToml = ActonToml.find(project) ?: return
 
             val runManager = RunManager.getInstance(project)
-            val settings = runManager.createConfiguration("Build $contractId", ActonCommandConfigurationType.getInstance().factory)
+            val settings = runManager.createConfiguration(
+                "Build $contractId",
+                ActonCommandConfigurationType.getInstance().factory,
+            )
             val configuration = settings.configuration as ActonCommandConfiguration
 
             configuration.command = "build"

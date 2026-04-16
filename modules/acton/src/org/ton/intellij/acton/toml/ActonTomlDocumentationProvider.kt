@@ -12,7 +12,6 @@ import org.intellij.markdown.html.SimpleTagProvider
 import org.intellij.markdown.html.URI
 import org.intellij.markdown.parser.LinkMap
 import org.intellij.markdown.parser.MarkdownParser
-import org.toml.lang.psi.TomlKey
 import org.toml.lang.psi.TomlKeySegment
 import org.toml.lang.psi.TomlTable
 import kotlin.collections.set
@@ -39,16 +38,14 @@ class ActonTomlDocumentationProvider : AbstractDocumentationProvider() {
     override fun getDocumentationElementForLookupItem(
         psiManager: com.intellij.psi.PsiManager?,
         `object`: Any?,
-        element: PsiElement?
-    ): PsiElement? {
-        return element
-    }
+        element: PsiElement?,
+    ): PsiElement? = element
 }
 
 class ActonDocMarkdownFlavourDescriptor(
     private val gfm: MarkdownFlavourDescriptor = GFMFlavourDescriptor(
         useSafeLinks = false,
-        absolutizeAnchorLinks = true
+        absolutizeAnchorLinks = true,
     ),
 ) : MarkdownFlavourDescriptor by gfm {
     override fun createHtmlGeneratingProviders(linkMap: LinkMap, baseURI: URI?): Map<IElementType, GeneratingProvider> {

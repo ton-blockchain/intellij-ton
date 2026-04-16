@@ -34,7 +34,7 @@ class FiftAssemblyInfoHintsProvider : InlayHintsProvider {
                 HintFormat.default
                     .withColorKind(HintColorKind.TextWithoutBackground)
                     .withHorizontalMargin(HintMarginPadding.MarginAndSmallerPadding)
-                    .withFontSize(HintFontSize.AsInEditor)
+                    .withFontSize(HintFontSize.AsInEditor),
             ) {
                 text(presentation)
             }

@@ -34,12 +34,9 @@ abstract class AbstractTolkBlock(
             wrap: Wrap? = null,
             indent: Indent? = null,
             buildChildren: () -> List<Block> = { emptyList() },
-        ) =
-            object : AbstractTolkBlock(node, spacingBuilder, wrap = wrap, indent = indent) {
-                override fun buildChildren(): List<Block> {
-                    return buildChildren.invoke()
-                }
-            }
+        ) = object : AbstractTolkBlock(node, spacingBuilder, wrap = wrap, indent = indent) {
+            override fun buildChildren(): List<Block> = buildChildren.invoke()
+        }
     }
 }
 
@@ -112,7 +109,7 @@ class TolkFormattingBlock(
             wrap,
             null,
             indent,
-            childIndent
+            childIndent,
         )
     }
 
@@ -128,10 +125,21 @@ class TolkFormattingBlock(
             TYPE_DEF -> return indentForTypeDefChild(child)
             MATCH_EXPRESSION -> if (type != MATCH_KEYWORD) return indentIfNotBrace(child)
             CALL_EXPRESSION -> if (type == ARGUMENT_LIST) return Indent.getNormalIndent()
-            PARAMETER_LIST, BLOCK_STATEMENT, STRUCT_EXPRESSION_BODY, STRUCT_BODY, ENUM_BODY, CONTRACT_DEFINITION_BODY, -> return indentIfNotBrace(child)
+            PARAMETER_LIST, BLOCK_STATEMENT, STRUCT_EXPRESSION_BODY, STRUCT_BODY, ENUM_BODY, CONTRACT_DEFINITION_BODY -> return indentIfNotBrace(
+                child,
+            )
             DOT_EXPRESSION, TERNARY_EXPRESSION -> if (parent.firstChildNode != child) return Indent.getNormalIndent()
-            VAR_TENSOR, TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE_EXPRESSION, PAREN_TYPE_EXPRESSION, ARGUMENT_LIST -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
-            VAR_TUPLE, TUPLE_TYPE_EXPRESSION, TUPLE_EXPRESSION -> if (type != LBRACK && type != RBRACK) return Indent.getNormalIndent()
+            VAR_TENSOR, TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE_EXPRESSION, PAREN_TYPE_EXPRESSION, ARGUMENT_LIST -> if (type !=
+                LPAREN &&
+                type != RPAREN
+            ) {
+                return Indent.getNormalIndent()
+            }
+            VAR_TUPLE, TUPLE_TYPE_EXPRESSION, TUPLE_EXPRESSION -> if (type != LBRACK &&
+                type != RBRACK
+            ) {
+                return Indent.getNormalIndent()
+            }
             UNION_TYPE_EXPRESSION -> Indent.getContinuationIndent()
             FUNCTION_BODY -> if (type == BUILTIN_KEYWORD || type == ASM_DEFINITION) return Indent.getNormalIndent()
         }
@@ -140,9 +148,7 @@ class TolkFormattingBlock(
         return Indent.getNoneIndent()
     }
 
-    private fun calcWrap(child: ASTNode): Wrap? {
-        return null
-    }
+    private fun calcWrap(child: ASTNode): Wrap? = null
 
     companion object {
         private val BRACES_TOKEN_SET = TokenSet.create(
@@ -151,7 +157,7 @@ class TolkFormattingBlock(
             LBRACK,
             RBRACK,
             LPAREN,
-            RPAREN
+            RPAREN,
         )
 
         private val FUNCTION_PARTS = TokenSet.create(
@@ -159,13 +165,13 @@ class TolkFormattingBlock(
             IDENTIFIER,
             TYPE_PARAMETER_LIST,
             PARAMETER_LIST,
-            RETURN_TYPE
+            RETURN_TYPE,
         )
 
         private val CONST_PARTS = TokenSet.create(
             ANNOTATION,
             CONST_KEYWORD,
-            IDENTIFIER
+            IDENTIFIER,
         )
 
         private val GLOBAL_VAR_PARTS = TokenSet.create(

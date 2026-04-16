@@ -12,13 +12,13 @@ data class ActonCommandLine(
     val command: String,
     val workingDirectory: Path,
     val additionalArguments: List<String> = emptyList(),
-    val environmentVariables: EnvironmentVariablesData = EnvironmentVariablesData.DEFAULT
+    val environmentVariables: EnvironmentVariablesData = EnvironmentVariablesData.DEFAULT,
 ) {
     fun toGeneralCommandLine(project: Project): GeneralCommandLine? {
-        val actonPath = project.actonSettings.actonPath 
-            ?: PathEnvironmentVariableUtil.findInPath("acton")?.absolutePath 
+        val actonPath = project.actonSettings.actonPath
+            ?: PathEnvironmentVariableUtil.findInPath("acton")?.absolutePath
             ?: return null
-        
+
         val globalEnvs = project.actonSettings.env
         val mergedEnvs = globalEnvs.envs.toMutableMap().apply {
             putAll(environmentVariables.envs)
@@ -30,7 +30,7 @@ data class ActonCommandLine(
             .withParameters(ParametersListUtil.parse(command))
             .withParameters(additionalArguments)
             .withEnvironment(mergedEnvs)
-        
+
         // Local setting overrides global setting for parent envs
         val passParentEnvs = if (environmentVariables != EnvironmentVariablesData.DEFAULT) {
             environmentVariables.isPassParentEnvs
@@ -41,7 +41,7 @@ data class ActonCommandLine(
         if (!passParentEnvs) {
             commandLine.withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.NONE)
         }
-        
+
         return commandLine
     }
 
@@ -50,13 +50,11 @@ data class ActonCommandLine(
             project: Project,
             command: String,
             workingDirectory: Path,
-            additionalArguments: List<String> = emptyList()
-        ): ActonCommandLine {
-            return ActonCommandLine(
-                command = command,
-                workingDirectory = workingDirectory,
-                additionalArguments = additionalArguments
-            )
-        }
+            additionalArguments: List<String> = emptyList(),
+        ): ActonCommandLine = ActonCommandLine(
+            command = command,
+            workingDirectory = workingDirectory,
+            additionalArguments = additionalArguments,
+        )
     }
 }

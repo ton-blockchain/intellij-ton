@@ -12,10 +12,7 @@ import org.ton.intellij.util.loadTextResource
 import javax.swing.Icon
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
-enum class TasmColor(
-    displayName: String,
-    default: TextAttributesKey,
-) {
+enum class TasmColor(displayName: String, default: TextAttributesKey) {
     COMMENT("Comment", Defaults.LINE_COMMENT),
 
     BRACES("Braces", Defaults.BRACES),
@@ -30,7 +27,7 @@ enum class TasmColor(
     BOC_LITERAL("BoC literal", Defaults.NUMBER),
     KEYWORD("Keyword", Defaults.KEYWORD),
 
-    INSTRUCTION("Instruction", XmlHighlighterColors.HTML_TAG)
+    INSTRUCTION("Instruction", XmlHighlighterColors.HTML_TAG),
     ;
 
     val textAttributesKey =
@@ -43,8 +40,12 @@ class TasmColorSettingsPage : ColorSettingsPage {
         loadTextResource(TasmColorSettingsPage::class.java, "colors/highlighter_example.tasm")
     }
 
-    override fun getAdditionalHighlightingTagToDescriptorMap() = TasmColor.entries.associateBy({ it.name }, { it.textAttributesKey })
-    override fun getAttributeDescriptors(): Array<AttributesDescriptor> = TasmColor.entries.map { it.attributesDescriptor }.toTypedArray()
+    override fun getAdditionalHighlightingTagToDescriptorMap() = TasmColor.entries.associateBy({
+        it.name
+    }, { it.textAttributesKey })
+    override fun getAttributeDescriptors(): Array<AttributesDescriptor> = TasmColor.entries.map {
+        it.attributesDescriptor
+    }.toTypedArray()
     override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
     override fun getDisplayName(): String = TasmLanguage.displayName
     override fun getIcon(): Icon = TasmIcons.FILE

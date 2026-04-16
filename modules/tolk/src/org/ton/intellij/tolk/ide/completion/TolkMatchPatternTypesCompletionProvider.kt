@@ -46,11 +46,11 @@ object TolkMatchPatternTypesCompletionProvider : TolkCompletionProvider() {
                 }
 
                 val element = when (unionVariant) {
-                    is TolkTyStruct    -> unionVariant.psi.toLookupElementBuilder(ctx).forMatchArm()
-                    is TolkTyEnum      -> unionVariant.psi.toLookupElementBuilder(ctx).forMatchArm()
-                    is TolkTyAlias     -> unionVariant.psi.toLookupElementBuilder(ctx).forMatchArm()
+                    is TolkTyStruct -> unionVariant.psi.toLookupElementBuilder(ctx).forMatchArm()
+                    is TolkTyEnum -> unionVariant.psi.toLookupElementBuilder(ctx).forMatchArm()
+                    is TolkTyAlias -> unionVariant.psi.toLookupElementBuilder(ctx).forMatchArm()
                     is TolkPrimitiveTy -> unionVariant.toLookupElement().forMatchArm()
-                    else               -> LookupElementBuilder.create(unionVariant.render()).forMatchArm()
+                    else -> LookupElementBuilder.create(unionVariant.render()).forMatchArm()
                 }
 
                 result.addElement(element)
@@ -75,13 +75,11 @@ object TolkMatchPatternTypesCompletionProvider : TolkCompletionProvider() {
             result.addElement(
                 LookupElementBuilder.create("else")
                     .withTailText(" => {}", true)
-                    .withInsertHandler(TemplateStringInsertHandler(" => {\n\$END$\n}"))
+                    .withInsertHandler(TemplateStringInsertHandler(" => {\n\$END$\n}")),
             )
         }
     }
 
-    fun LookupElementBuilder.forMatchArm(): LookupElementBuilder {
-        return this.withTailText(" => {}", true)
-            .withInsertHandler(TemplateStringInsertHandler(" => {\n\$END$\n}"))
-    }
+    fun LookupElementBuilder.forMatchArm(): LookupElementBuilder = this.withTailText(" => {}", true)
+        .withInsertHandler(TemplateStringInsertHandler(" => {\n\$END$\n}"))
 }

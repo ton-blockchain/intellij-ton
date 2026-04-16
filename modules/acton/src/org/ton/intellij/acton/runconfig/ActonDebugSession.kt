@@ -8,11 +8,7 @@ import java.nio.file.Path
 
 val ACTON_DEBUG_SESSION_KEY: Key<ActonDebugSession> = Key.create("acton.debug.session")
 
-class ActonDebugSession(
-    val displayName: String,
-    val port: Int,
-    private val readinessMarkers: List<String>
-) {
+class ActonDebugSession(val displayName: String, val port: Int, private val readinessMarkers: List<String>) {
     private val readySignal = CompletableDeferred<Unit>()
     private val transcript = StringBuilder()
     private val processOutput = StringBuilder()
@@ -52,14 +48,14 @@ class ActonDebugSession(
                         append(it)
                         append('\n')
                     }
-            }
+            },
         )
     }
 
     fun processTerminated(exitCode: Int) {
         if (!readySignal.isCompleted) {
             readySignal.completeExceptionally(
-                ExecutionException(startupFailureMessage(exitCode))
+                ExecutionException(startupFailureMessage(exitCode)),
             )
         }
     }

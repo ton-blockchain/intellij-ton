@@ -42,7 +42,7 @@ class ActonUpdateActivity : ProjectActivity {
             command = "up",
             workingDirectory = project.guessProjectDir()?.toNioPath() ?: return null,
             additionalArguments = listOf("--check"),
-            environmentVariables = EnvironmentVariablesData.DEFAULT
+            environmentVariables = EnvironmentVariablesData.DEFAULT,
         ).toGeneralCommandLine(project) ?: return null
 
         return try {
@@ -63,23 +63,29 @@ class ActonUpdateActivity : ProjectActivity {
             .createNotification(
                 "Acton update available",
                 "A new version of Acton is available: ${info.latestVersion} (current: ${info.currentVersion})",
-                NotificationType.INFORMATION
+                NotificationType.INFORMATION,
             )
 
-        notification.addAction(NotificationAction.createSimple("Update now") {
-            notification.expire()
-            runUpdate(project)
-        })
+        notification.addAction(
+            NotificationAction.createSimple("Update now") {
+                notification.expire()
+                runUpdate(project)
+            },
+        )
 
-        notification.addAction(NotificationAction.createSimple("Don't show for this version") {
-            actonApplicationSettings.skipUpdateVersion = info.latestVersion
-            notification.expire()
-        })
+        notification.addAction(
+            NotificationAction.createSimple("Don't show for this version") {
+                actonApplicationSettings.skipUpdateVersion = info.latestVersion
+                notification.expire()
+            },
+        )
 
-        notification.addAction(NotificationAction.createSimple("Never show again") {
-            actonApplicationSettings.disableUpdateChecks = true
-            notification.expire()
-        })
+        notification.addAction(
+            NotificationAction.createSimple("Never show again") {
+                actonApplicationSettings.disableUpdateChecks = true
+                notification.expire()
+            },
+        )
 
         notification.notify(project)
     }
@@ -88,7 +94,7 @@ class ActonUpdateActivity : ProjectActivity {
         var commandLine = ActonCommandLine(
             command = "up",
             workingDirectory = project.guessProjectDir()?.toNioPath() ?: return,
-            additionalArguments = listOf("--yes")
+            additionalArguments = listOf("--yes"),
         ).toGeneralCommandLine(project) ?: return
 
         commandLine = PtyCommandLine(commandLine)

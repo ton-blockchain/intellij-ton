@@ -35,7 +35,7 @@ interface TolkTypeParameterListOwner : TolkNamedElement {
 
     private class GenericVisitor(
         val unresolvedAsGenerics: MutableMap<String, TolkReferenceTypeExpression> = mutableMapOf(),
-    )  : TolkRecursiveElementWalkingVisitor() {
+    ) : TolkRecursiveElementWalkingVisitor() {
         override fun visitReferenceTypeExpression(o: TolkReferenceTypeExpression) {
             val typeArgumentList = o.typeArgumentList
             if (typeArgumentList != null) {

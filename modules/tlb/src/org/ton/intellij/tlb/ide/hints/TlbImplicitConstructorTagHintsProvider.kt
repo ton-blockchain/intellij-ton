@@ -24,7 +24,10 @@ class TlbImplicitConstructorTagHintsProvider : InlayHintsProvider {
                     sink.addPresentation(
                         InlineInlayPosition(element.firstChild.textRange.endOffset, true),
                         listOf(),
-                        null, HintFormat.default.withColorKind(HintColorKind.Parameter).withHorizontalMargin(HintMarginPadding.OnlyPadding)
+                        null,
+                        HintFormat.default.withColorKind(
+                            HintColorKind.Parameter,
+                        ).withHorizontalMargin(HintMarginPadding.OnlyPadding),
                     ) {
                         text(computedTag.toString())
                     }

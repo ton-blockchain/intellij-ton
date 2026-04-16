@@ -69,7 +69,7 @@ class LcovCoverageReport {
                         report.mergeFileReport(
                             localBaseDir,
                             checkNotNull(currentFileName),
-                            checkNotNull(lineDataList)
+                            checkNotNull(lineDataList),
                         )
                         currentFileName = null
                         lineDataList = null

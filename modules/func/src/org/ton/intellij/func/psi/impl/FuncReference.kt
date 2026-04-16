@@ -9,10 +9,8 @@ import com.intellij.psi.impl.source.resolve.ResolveCache
 import org.ton.intellij.func.psi.*
 import org.ton.intellij.util.parentOfType
 
-class FuncReference(
-    element: FuncReferenceExpression,
-    rangeInElement: TextRange,
-) : PsiReferenceBase.Poly<FuncReferenceExpression>(element, rangeInElement, false) {
+class FuncReference(element: FuncReferenceExpression, rangeInElement: TextRange) :
+    PsiReferenceBase.Poly<FuncReferenceExpression>(element, rangeInElement, false) {
     val identifier: PsiElement get() = element.identifier
 
     private val resolver = ResolveCache.PolyVariantResolver<FuncReference> { t, incompleteCode ->
@@ -92,7 +90,6 @@ class FuncReference(
         return ResolveCache.getInstance(myElement.project).resolveWithCaching(this, resolver, false, incompleteCode)
     }
 
-    override fun handleElementRename(newElementName: String): PsiElement {
-        return element.identifier.replace(FuncPsiFactory[element.project].createIdentifier(newElementName))
-    }
+    override fun handleElementRename(newElementName: String): PsiElement =
+        element.identifier.replace(FuncPsiFactory[element.project].createIdentifier(newElementName))
 }

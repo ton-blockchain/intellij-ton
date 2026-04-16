@@ -14,22 +14,28 @@ class FiftAssemblyReference(element: FiftTvmInstruction) : FiftReferenceBase<Fif
 
         if (!element.isNotInstruction()) return emptySequence()
 
-        val definitions = file.assemblyDefinitions().filter { it.name() == name }.map { it.firstChild.firstChild.firstChild }
+        val definitions = file.assemblyDefinitions().filter {
+            it.name() == name
+        }.map { it.firstChild.firstChild.firstChild }
         val declarations =
-            file.assemblyDeclarations().filter { it.globalVar != null && it.name() == name }.map { it.lastChild.lastChild.firstChild }
+            file.assemblyDeclarations().filter {
+                it.globalVar != null && it.name() == name
+            }.map { it.lastChild.lastChild.firstChild }
         return (definitions + declarations).asSequence()
     }
 
     override fun handleElementRename(newElementName: String): PsiElement {
         val newNameElement = PsiFileFactory.getInstance(element.project)
             .createFileFromText(
-                "dummy.fif", FiftFileType, """
+                "dummy.fif",
+                FiftFileType,
+                """
                 PROGRAM{
                     foo PROCINLINE:<{
                         $newElementName CALLDICT
                     }>
                 }
-            """.trimIndent()
+                """.trimIndent(),
             )
 
         val instr = PsiTreeUtil.findChildrenOfAnyType(newNameElement, FiftTvmInstruction::class.java).firstOrNull()

@@ -63,13 +63,16 @@ class TolkParameterInfoHandler : ParameterInfoHandler<PsiElement, List<String>> 
         return arguments
     }
 
-    private fun typeParametersInfo(typeArguments: TolkTypeArgumentList, context: CreateParameterInfoContext): TolkTypeArgumentList? {
+    private fun typeParametersInfo(
+        typeArguments: TolkTypeArgumentList,
+        context: CreateParameterInfoContext,
+    ): TolkTypeArgumentList? {
         val typeParameterListOwner = when (val parent = typeArguments.parent) {
-            is TolkReferenceExpression     -> parent.reference?.resolve() as? TolkTypeParameterListOwner
+            is TolkReferenceExpression -> parent.reference?.resolve() as? TolkTypeParameterListOwner
             is TolkReferenceTypeExpression -> parent.reference?.resolve() as? TolkTypeParameterListOwner
-            is TolkFieldLookup             -> parent.reference?.resolve() as? TolkTypeParameterListOwner
-            is TolkMatchPatternReference   -> parent.reference?.resolve() as? TolkTypeParameterListOwner
-            else                           -> null
+            is TolkFieldLookup -> parent.reference?.resolve() as? TolkTypeParameterListOwner
+            is TolkMatchPatternReference -> parent.reference?.resolve() as? TolkTypeParameterListOwner
+            else -> null
         } ?: return null
 
         val typeParameters = typeParameterListOwner.typeParameterList?.typeParameterList ?: return null
@@ -121,9 +124,8 @@ class TolkParameterInfoHandler : ParameterInfoHandler<PsiElement, List<String>> 
         return TextRange(start, end)
     }
 
-    private fun presentText(params: List<String>): String {
-        return if (params.isEmpty()) "<no arguments>" else params.joinToString(", ")
-    }
+    private fun presentText(params: List<String>): String =
+        if (params.isEmpty()) "<no arguments>" else params.joinToString(", ")
 
     private fun updateUI(text: String, range: TextRange, context: ParameterInfoUIContext) {
         context.setupUIComponentPresentation(
@@ -133,7 +135,7 @@ class TolkParameterInfoHandler : ParameterInfoHandler<PsiElement, List<String>> 
             !context.isUIComponentEnabled,
             false,
             false,
-            context.defaultParameterColor
+            context.defaultParameterColor,
         )
     }
 }

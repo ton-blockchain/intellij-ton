@@ -13,11 +13,11 @@ import com.intellij.openapi.project.guessProjectDir
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
 import org.ton.intellij.acton.settings.actonSettings
-import java.util.concurrent.TimeUnit
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.Base64
 import java.util.HexFormat
+import java.util.concurrent.TimeUnit
 
 object BocActonService {
     private val LOG = logger<BocActonService>()
@@ -27,7 +27,8 @@ object BocActonService {
         return path != null
     }
 
-    fun disassemble(project: Project, bocFilePath: String) = executeActonCommand(project, ActonCommand.Disasm(bocFile = bocFilePath))
+    fun disassemble(project: Project, bocFilePath: String) =
+        executeActonCommand(project, ActonCommand.Disasm(bocFile = bocFilePath))
 
     fun disassembleDetailed(project: Project, bocFilePath: String) =
         executeActonCommand(project, ActonCommand.Disasm(bocFile = bocFilePath, showHashes = true, showOffsets = true))
@@ -55,7 +56,7 @@ object BocActonService {
         val actonCommandLine = ActonCommandLine(
             command = command.name,
             workingDirectory = workingDir,
-            additionalArguments = command.getArguments()
+            additionalArguments = command.getArguments(),
         ).toGeneralCommandLine(project) ?: return Result.failure(IllegalStateException("Cannot find acton executable"))
         return executeCommand(actonCommandLine)
     }

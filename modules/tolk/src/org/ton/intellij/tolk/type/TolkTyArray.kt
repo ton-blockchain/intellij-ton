@@ -3,7 +3,7 @@ package org.ton.intellij.tolk.type
 class TolkTyArray private constructor(
     val elementType: TolkTy,
     private val hasGenerics: Boolean = elementType.hasGenerics(),
-    override val hasTypeAlias: Boolean = elementType.hasTypeAlias
+    override val hasTypeAlias: Boolean = elementType.hasTypeAlias,
 ) : TolkTy {
     private var hashCode: Int = 0
 
@@ -11,12 +11,10 @@ class TolkTyArray private constructor(
 
     override fun actualType(): TolkTyArray = TolkTyArray(
         elementType.actualType(),
-        hasGenerics
+        hasGenerics,
     )
 
-    override fun superFoldWith(folder: TypeFolder): TolkTy {
-        return create(elementType.foldWith(folder))
-    }
+    override fun superFoldWith(folder: TypeFolder): TolkTy = create(elementType.foldWith(folder))
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (this == other) return true
@@ -59,8 +57,6 @@ class TolkTyArray private constructor(
     }
 
     companion object {
-        fun create(elementType: TolkTy): TolkTy {
-            return TolkTyArray(elementType)
-        }
+        fun create(elementType: TolkTy): TolkTy = TolkTyArray(elementType)
     }
 }

@@ -18,24 +18,21 @@ class TolkParameterListStub : StubWithText<TolkParameterList> {
 
     constructor(
         parent: StubElement<*>?,
-        elementType: IStubElementType<*, *>?, text: String?,
+        elementType: IStubElementType<*, *>?,
+        text: String?,
     ) : this(parent, elementType, StringRef.fromString(text))
 
     class Type(name: String) : TolkStubElementType<TolkParameterListStub, TolkParameterList>(name) {
-        override fun createPsi(stub: TolkParameterListStub): TolkParameterList {
-            return TolkParameterListImpl(stub, this)
-        }
+        override fun createPsi(stub: TolkParameterListStub): TolkParameterList = TolkParameterListImpl(stub, this)
 
-        override fun createStub(psi: TolkParameterList, parentStub: StubElement<*>?): TolkParameterListStub {
-            return TolkParameterListStub(parentStub, this, psi.text)
-        }
+        override fun createStub(psi: TolkParameterList, parentStub: StubElement<*>?): TolkParameterListStub =
+            TolkParameterListStub(parentStub, this, psi.text)
 
         override fun serialize(stub: TolkParameterListStub, dataStream: StubOutputStream) {
             dataStream.writeName(stub.getText())
         }
 
-        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): TolkParameterListStub {
-            return TolkParameterListStub(parentStub, this, dataStream.readName())
-        }
+        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): TolkParameterListStub =
+            TolkParameterListStub(parentStub, this, dataStream.readName())
     }
 }

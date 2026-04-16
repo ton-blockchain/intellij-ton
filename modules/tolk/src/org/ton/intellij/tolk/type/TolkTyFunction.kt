@@ -9,7 +9,7 @@ class TolkTyFunction(
     val parametersType: List<TolkTy>,
     val returnType: TolkTy,
     val hasGenerics: Boolean = parametersType.any { it.hasGenerics() } || returnType.hasGenerics(),
-    override val hasTypeAlias: Boolean = parametersType.any { it.hasTypeAlias } || returnType.hasTypeAlias
+    override val hasTypeAlias: Boolean = parametersType.any { it.hasTypeAlias } || returnType.hasTypeAlias,
 ) : TolkTy {
     private var hashCode: Int = 0
 
@@ -37,25 +37,21 @@ class TolkTyFunction(
 
     override fun hasGenerics(): Boolean = hasGenerics
 
-    override fun actualType(): TolkTy {
-        return TolkTyFunction(
-            parametersType = parametersType.map { it.actualType() },
-            returnType = returnType.actualType()
-        )
-    }
+    override fun actualType(): TolkTy = TolkTyFunction(
+        parametersType = parametersType.map { it.actualType() },
+        returnType = returnType.actualType(),
+    )
 
-    override fun superFoldWith(folder: TypeFolder): TolkTy {
-        return TolkTyFunction(
-            parametersType.map { it.foldWith(folder) },
-            returnType.foldWith(folder)
-        )
-    }
+    override fun superFoldWith(folder: TypeFolder): TolkTy = TolkTyFunction(
+        parametersType.map { it.foldWith(folder) },
+        returnType.foldWith(folder),
+    )
 
     override fun join(other: TolkTy, hint: TolkTy?): TolkTy {
         if (this == other.unwrapTypeAlias()) return other
         if (other is TolkTyFunction) {
             var hasGenerics = false
-            val newParameterType = parametersType.asSequence().zip(other.parametersType.asSequence()).map { (a,b) ->
+            val newParameterType = parametersType.asSequence().zip(other.parametersType.asSequence()).map { (a, b) ->
                 val join = a.join(b)
                 hasGenerics = hasGenerics || join.hasGenerics()
                 join

@@ -8,11 +8,12 @@ val Project.actonSettings: ActonSettingsService get() = service()
 
 @State(
     name = "ActonSettings",
-    storages = [Storage(StoragePathMacros.WORKSPACE_FILE)]
+    storages = [Storage(StoragePathMacros.WORKSPACE_FILE)],
 )
 @Service(Service.Level.PROJECT)
-class ActonSettingsService : SimplePersistentStateComponent<ActonSettingsService.ActonSettingsState>(ActonSettingsState()) {
-    
+class ActonSettingsService :
+    SimplePersistentStateComponent<ActonSettingsService.ActonSettingsState>(ActonSettingsState()) {
+
     var actonPath: String?
         get() = state.actonPath
         set(value) {

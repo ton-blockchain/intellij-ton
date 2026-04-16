@@ -13,11 +13,8 @@ import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tlb.settings.TlbSettingsState
 
-class TlbReference(
-    val project: Project,
-    element: TlbParamTypeExpression,
-    rangeInElement: TextRange,
-) : PsiReferenceBase.Poly<TlbParamTypeExpression>(element, rangeInElement, false) {
+class TlbReference(val project: Project, element: TlbParamTypeExpression, rangeInElement: TextRange) :
+    PsiReferenceBase.Poly<TlbParamTypeExpression>(element, rangeInElement, false) {
 
     private val resolver = ResolveCache.PolyVariantResolver<TlbReference> { t, incompleteCode ->
         if (!myElement.isValid) return@PolyVariantResolver ResolveResult.EMPTY_ARRAY
@@ -102,10 +99,8 @@ class TlbReference(
         return element
     }
 
-    override fun multiResolve(incompleteCode: Boolean): Array<out ResolveResult> {
-        return ResolveCache.getInstance(project)
-            .resolveWithCaching(this, resolver, true, incompleteCode)
-    }
+    override fun multiResolve(incompleteCode: Boolean): Array<out ResolveResult> = ResolveCache.getInstance(project)
+        .resolveWithCaching(this, resolver, true, incompleteCode)
 
     private fun searchInDependencies(
         tlbFile: TlbFile,

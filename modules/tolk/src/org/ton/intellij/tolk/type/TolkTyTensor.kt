@@ -9,7 +9,7 @@ package org.ton.intellij.tolk.type
 class TolkTyTensor private constructor(
     val elements: List<TolkTy>,
     val hasGenerics: Boolean = elements.any { it.hasGenerics() },
-    override val hasTypeAlias: Boolean = elements.any { it.hasTypeAlias }
+    override val hasTypeAlias: Boolean = elements.any { it.hasTypeAlias },
 ) : TolkTy {
     private var hashCode: Int = 0
 
@@ -35,15 +35,13 @@ class TolkTyTensor private constructor(
         return result
     }
 
-    override fun superFoldWith(folder: TypeFolder): TolkTy {
-        return create(
-            elements.map { it.foldWith(folder) }
-        )
-    }
+    override fun superFoldWith(folder: TypeFolder): TolkTy = create(
+        elements.map { it.foldWith(folder) },
+    )
 
     override fun actualType(): TolkTyTensor = TolkTyTensor(
         elements.map { it.actualType() },
-        hasGenerics
+        hasGenerics,
     )
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
@@ -79,16 +77,12 @@ class TolkTyTensor private constructor(
     companion object {
         val EMPTY = TolkTyTensor(emptyList())
 
-        fun create(vararg elements: TolkTy): TolkTy {
-            return create(elements.toList())
-        }
+        fun create(vararg elements: TolkTy): TolkTy = create(elements.toList())
 
-        fun create(elements: List<TolkTy>): TolkTy {
-            return when(elements.size) {
-                0 -> EMPTY
-                1 -> elements[0]
-                else -> TolkTyTensor(elements)
-            }
+        fun create(elements: List<TolkTy>): TolkTy = when (elements.size) {
+            0 -> EMPTY
+            1 -> elements[0]
+            else -> TolkTyTensor(elements)
         }
     }
 }

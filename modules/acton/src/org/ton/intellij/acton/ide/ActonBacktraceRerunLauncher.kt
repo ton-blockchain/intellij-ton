@@ -20,7 +20,7 @@ object ActonBacktraceRerunLauncher {
         val runManager = RunManager.getInstance(project)
         val settings = runManager.createConfiguration(
             buildConfigurationName(sourceConfiguration, failedTestName),
-            ActonCommandConfigurationType.getInstance().factory
+            ActonCommandConfigurationType.getInstance().factory,
         )
         val configuration = settings.configuration as ActonCommandConfiguration
         configuration.copyFrom(sourceConfiguration)
@@ -49,7 +49,7 @@ object ActonBacktraceRerunLauncher {
         if (BACKTRACE_REGEX.containsMatchIn(trimmed)) {
             return BACKTRACE_REGEX.replace(trimmed) { match ->
                 val prefix = match.groups[1]?.value.orEmpty()
-                "${prefix}--backtrace full"
+                "$prefix--backtrace full"
             }
         }
         return "$trimmed --backtrace full"

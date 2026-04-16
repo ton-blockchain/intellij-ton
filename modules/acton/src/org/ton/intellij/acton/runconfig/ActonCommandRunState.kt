@@ -7,13 +7,13 @@ import com.intellij.execution.Executor
 import com.intellij.execution.configurations.CommandLineState
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PtyCommandLine
+import com.intellij.execution.filters.TextConsoleBuilderImpl
 import com.intellij.execution.process.KillableColoredProcessHandler
 import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
-import com.intellij.execution.filters.TextConsoleBuilderImpl
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsAdapter
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
@@ -31,19 +31,22 @@ import org.ton.intellij.acton.cli.ActonCommandLine
 import org.ton.intellij.acton.ide.ActonBacktraceConsoleFilter
 import org.ton.intellij.acton.profiler.ActonProfilerSupport
 
-class ActonCommandRunState(
-    environment: ExecutionEnvironment,
-    private val configuration: ActonCommandConfiguration,
-) : CommandLineState(environment) {
+class ActonCommandRunState(environment: ExecutionEnvironment, private val configuration: ActonCommandConfiguration) :
+    CommandLineState(environment) {
     private val executionLock = Any()
+
     @Volatile
     private var cachedExecutionResult: ExecutionResult? = null
+
     @Volatile
     private var scriptDebugPortOverride: Int? = null
+
     @Volatile
     private var testDebugPortOverride: Int? = null
+
     @Volatile
     private var retraceDebugPortOverride: Int? = null
+
     @Volatile
     private var retraceDebugContractIdOverride: String? = null
 
@@ -51,11 +54,9 @@ class ActonCommandRunState(
         if (configuration.emulateTerminal) {
             consoleBuilder = object : TextConsoleBuilderImpl(
                 environment.project,
-                ExecutionSearchScopes.executionScope(environment.project, configuration)
+                ExecutionSearchScopes.executionScope(environment.project, configuration),
             ) {
-                override fun createConsole(): ConsoleView {
-                    return TerminalExecutionConsole(project, null)
-                }
+                override fun createConsole(): ConsoleView = TerminalExecutionConsole(project, null)
             }
         }
     }
@@ -80,8 +81,10 @@ class ActonCommandRunState(
         if (!processHandler.isStartNotified) {
             processHandler.startNotify()
             LOG.info(
-                "Started process notifications for ${processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)?.displayName ?: "acton debug"} " +
-                    "DAP session on port ${processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)?.port}"
+                "Started process notifications for ${processHandler.getUserData(
+                    ACTON_DEBUG_SESSION_KEY,
+                )?.displayName ?: "acton debug"} " +
+                    "DAP session on port ${processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)?.port}",
             )
         }
         val debugSession = processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)
@@ -103,17 +106,23 @@ class ActonCommandRunState(
                 it.createConsoleProperties(configuration, executor)
             }
             if (consoleProperties != null) {
-                val console = SMTestRunnerConnectionUtil.createConsole(consoleProperties.testFrameworkName, consoleProperties) as SMTRunnerConsoleView
+                val console = SMTestRunnerConnectionUtil.createConsole(
+                    consoleProperties.testFrameworkName,
+                    consoleProperties,
+                ) as SMTRunnerConsoleView
                 console.addMessageFilter(ActonBacktraceConsoleFilter(configuration))
                 val handler = startProcess()
                 console.attachToProcess(handler)
 
                 val connection = configuration.project.messageBus.connect()
-                connection.subscribe(SMTRunnerEventsListener.TEST_STATUS, object : SMTRunnerEventsAdapter() {
-                    override fun onBeforeTestingFinished(testsRoot: SMTestProxy.SMRootTestProxy) {
-                        testsRoot.setFinished()
-                    }
-                })
+                connection.subscribe(
+                    SMTRunnerEventsListener.TEST_STATUS,
+                    object : SMTRunnerEventsAdapter() {
+                        override fun onBeforeTestingFinished(testsRoot: SMTestProxy.SMRootTestProxy) {
+                            testsRoot.setFinished()
+                        }
+                    },
+                )
 
                 val smTestProxy = console.resultsViewer.root as SMTestProxy.SMRootTestProxy
                 smTestProxy.setTestsReporterAttached()
@@ -148,11 +157,12 @@ class ActonCommandRunState(
             command = actonCommand.name,
             workingDirectory = workingDir,
             additionalArguments = args + additionalArgs,
-            environmentVariables = configuration.env
+            environmentVariables = configuration.env,
         )
 
         var commandLine =
-            actonCommandLine.toGeneralCommandLine(configuration.project) ?: throw IllegalStateException("Cannot find acton executable")
+            actonCommandLine.toGeneralCommandLine(configuration.project)
+                ?: throw IllegalStateException("Cannot find acton executable")
         if (configuration.emulateTerminal) {
             commandLine = PtyCommandLine(commandLine)
                 .withInitialColumns(PtyCommandLine.MAX_COLUMNS)
@@ -170,14 +180,14 @@ class ActonCommandRunState(
             val debugPort = scriptDebugPortOverride?.toString() ?: command.debugPort
             command.copy(
                 debug = scriptDebugPortOverride != null || command.debug,
-                debugPort = debugPort
+                debugPort = debugPort,
             )
         }
         is ActonCommand.Test -> {
             val debugPort = testDebugPortOverride?.toString() ?: command.debugPort
             command.copy(
                 debug = testDebugPortOverride != null || command.debug,
-                debugPort = debugPort
+                debugPort = debugPort,
             )
         }
         is ActonCommand.Retrace -> {
@@ -185,7 +195,7 @@ class ActonCommandRunState(
             command.copy(
                 contractId = retraceDebugContractIdOverride ?: command.contractId,
                 debug = retraceDebugPortOverride != null || command.debug,
-                debugPort = debugPort
+                debugPort = debugPort,
             )
         }
         else -> command
@@ -195,7 +205,7 @@ class ActonCommandRunState(
         handler: KillableColoredProcessHandler,
         commandLine: GeneralCommandLine,
         workingDir: java.nio.file.Path,
-        actonCommand: ActonCommand
+        actonCommand: ActonCommand,
     ) {
         val debugInfo = when (actonCommand) {
             is ActonCommand.Script -> {
@@ -205,8 +215,8 @@ class ActonCommandRunState(
                     port = actonCommand.debugPort.toIntOrNull() ?: return,
                     readinessMarkers = listOf(
                         "Debugger server listening on 127.0.0.1:${actonCommand.debugPort}",
-                        "Retrace DAP listening on 127.0.0.1:${actonCommand.debugPort}"
-                    )
+                        "Retrace DAP listening on 127.0.0.1:${actonCommand.debugPort}",
+                    ),
                 )
             }
             is ActonCommand.Test -> {
@@ -214,7 +224,7 @@ class ActonCommandRunState(
                 DebugSessionInfo(
                     displayName = "acton test",
                     port = actonCommand.debugPort.toIntOrNull() ?: return,
-                    readinessMarkers = listOf("Debugger server listening on 127.0.0.1:${actonCommand.debugPort}")
+                    readinessMarkers = listOf("Debugger server listening on 127.0.0.1:${actonCommand.debugPort}"),
                 )
             }
             is ActonCommand.Retrace -> {
@@ -224,8 +234,8 @@ class ActonCommandRunState(
                     port = actonCommand.debugPort.toIntOrNull() ?: return,
                     readinessMarkers = listOf(
                         "Debugger listening on 127.0.0.1:${actonCommand.debugPort}",
-                        "Retrace DAP listening on 127.0.0.1:${actonCommand.debugPort}"
-                    )
+                        "Retrace DAP listening on 127.0.0.1:${actonCommand.debugPort}",
+                    ),
                 )
             }
             else -> return
@@ -234,7 +244,7 @@ class ActonCommandRunState(
         val debugSession = ActonDebugSession(
             displayName = debugInfo.displayName,
             port = debugInfo.port,
-            readinessMarkers = debugInfo.readinessMarkers
+            readinessMarkers = debugInfo.readinessMarkers,
         )
         debugSession.recordStartup(commandLine.commandLineString, workingDir)
         handler.putUserData(ACTON_DEBUG_SESSION_KEY, debugSession)
@@ -269,7 +279,9 @@ class ActonCommandRunState(
         return retraceCommand.debug
     }
 
-    private fun createProfilerSessionIfNeeded(executor: Executor): org.ton.intellij.acton.profiler.ActonProfilerSession? {
+    private fun createProfilerSessionIfNeeded(
+        executor: Executor,
+    ): org.ton.intellij.acton.profiler.ActonProfilerSession? {
         if (configuration.command != "test") return null
         return ActonProfilerSupport.EP_NAME.extensionList.firstNotNullOfOrNull {
             it.createTestSession(configuration, executor)
@@ -281,14 +293,10 @@ class ActonCommandRunState(
     }
 }
 
-private data class DebugSessionInfo(
-    val displayName: String,
-    val port: Int,
-    val readinessMarkers: List<String>
-)
+private data class DebugSessionInfo(val displayName: String, val port: Int, val readinessMarkers: List<String>)
 
 data class PreparedActonDebugExecution(
     val executionResult: ExecutionResult,
     val processHandler: ProcessHandler,
-    val debugSession: ActonDebugSession
+    val debugSession: ActonDebugSession,
 )

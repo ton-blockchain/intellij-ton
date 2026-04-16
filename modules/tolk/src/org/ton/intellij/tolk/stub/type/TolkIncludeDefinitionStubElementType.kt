@@ -10,11 +10,10 @@ import org.ton.intellij.tolk.psi.impl.TolkIncludeDefinitionImpl
 import org.ton.intellij.tolk.psi.impl.path
 import org.ton.intellij.tolk.stub.TolkIncludeDefinitionStub
 
-class TolkIncludeDefinitionStubElementType(
-    debugName: String,
-) : TolkStubElementType<TolkIncludeDefinitionStub, TolkIncludeDefinition>(
-    debugName
-) {
+class TolkIncludeDefinitionStubElementType(debugName: String) :
+    TolkStubElementType<TolkIncludeDefinitionStub, TolkIncludeDefinition>(
+        debugName,
+    ) {
     override fun serialize(stub: TolkIncludeDefinitionStub, dataStream: StubOutputStream) {
         dataStream.writeUTFFast(stub.path)
     }
@@ -27,13 +26,10 @@ class TolkIncludeDefinitionStubElementType(
     override fun createStub(
         psi: TolkIncludeDefinition,
         parentStub: StubElement<out PsiElement>,
-    ): TolkIncludeDefinitionStub {
-        return TolkIncludeDefinitionStub(parentStub, this, psi.path)
-    }
+    ): TolkIncludeDefinitionStub = TolkIncludeDefinitionStub(parentStub, this, psi.path)
 
-    override fun createPsi(stub: TolkIncludeDefinitionStub): TolkIncludeDefinition {
-        return TolkIncludeDefinitionImpl(stub, this)
-    }
+    override fun createPsi(stub: TolkIncludeDefinitionStub): TolkIncludeDefinition =
+        TolkIncludeDefinitionImpl(stub, this)
 
     companion object {
         val EMPTY_ARRAY = emptyArray<TolkIncludeDefinition>()

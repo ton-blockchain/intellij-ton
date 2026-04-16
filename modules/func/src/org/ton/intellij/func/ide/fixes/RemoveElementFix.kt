@@ -7,10 +7,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 
-class RemoveElementFix(
-    element: PsiElement,
-    private val removingElementName: String = "`${element.text}`"
-) : LocalQuickFixAndIntentionActionOnPsiElement(element), LocalQuickFix {
+class RemoveElementFix(element: PsiElement, private val removingElementName: String = "`${element.text}`") :
+    LocalQuickFixAndIntentionActionOnPsiElement(element),
+    LocalQuickFix {
     override fun getFamilyName(): String = "Remove"
 
     override fun getText(): String = "Remove $removingElementName"
@@ -20,7 +19,7 @@ class RemoveElementFix(
         file: PsiFile,
         editor: Editor?,
         startElement: PsiElement,
-        endElement: PsiElement
+        endElement: PsiElement,
     ) {
         startElement.delete()
     }

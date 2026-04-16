@@ -17,6 +17,6 @@ object TolkDebuggerEditorsProvider : XDebuggerEditorsProvider() {
         project: Project,
         text: String,
         sourcePosition: XSourcePosition?,
-        mode: EvaluationMode
+        mode: EvaluationMode,
     ): Document = EditorFactory.getInstance().createDocument(text)
 }

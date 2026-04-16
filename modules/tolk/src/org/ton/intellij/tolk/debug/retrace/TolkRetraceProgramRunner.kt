@@ -25,16 +25,12 @@ import java.net.ServerSocket
 class TolkRetraceProgramRunner : AsyncProgramRunner<RunnerSettings>() {
     override fun getRunnerId(): String = RUNNER_ID
 
-    override fun canRun(executorId: String, profile: RunProfile): Boolean {
-        return executorId == DefaultDebugExecutor.EXECUTOR_ID &&
+    override fun canRun(executorId: String, profile: RunProfile): Boolean =
+        executorId == DefaultDebugExecutor.EXECUTOR_ID &&
             profile is ActonCommandConfiguration &&
             profile.command == "retrace"
-    }
 
-    override fun execute(
-        environment: ExecutionEnvironment,
-        state: RunProfileState
-    ): Promise<RunContentDescriptor?> {
+    override fun execute(environment: ExecutionEnvironment, state: RunProfileState): Promise<RunContentDescriptor?> {
         val profile = environment.runProfile as? ActonCommandConfiguration
             ?: throw IllegalArgumentException("TolkRetraceProgramRunner can only execute ActonCommandConfiguration")
         val retraceState = state as? ActonCommandRunState
@@ -50,16 +46,18 @@ class TolkRetraceProgramRunner : AsyncProgramRunner<RunnerSettings>() {
                 }
                 val port = findFreePort()
                 retraceState.enableRetraceDebug(port, contractId)
-                LOG.info("Starting acton retrace debug session via TolkRetraceProgramRunner on port $port for '${profile.name}'")
+                LOG.info(
+                    "Starting acton retrace debug session via TolkRetraceProgramRunner on port $port for '${profile.name}'",
+                )
                 preparedExecution = retraceState.prepareForDebugLaunch(environment.executor, this)
                 LOG.info(
-                    "Waiting for acton retrace DAP readiness on port ${preparedExecution.debugSession.port} before opening XDebugger session for '${profile.name}'"
+                    "Waiting for acton retrace DAP readiness on port ${preparedExecution.debugSession.port} before opening XDebugger session for '${profile.name}'",
                 )
                 runBlocking {
                     preparedExecution.debugSession.awaitReady()
                 }
                 LOG.info(
-                    "Acton retrace DAP became ready on port ${preparedExecution.debugSession.port} before session start for '${profile.name}'"
+                    "Acton retrace DAP became ready on port ${preparedExecution.debugSession.port} before session start for '${profile.name}'",
                 )
 
                 val descriptor = arrayOfNulls<RunContentDescriptor>(1)
@@ -71,7 +69,7 @@ class TolkRetraceProgramRunner : AsyncProgramRunner<RunnerSettings>() {
                         adapterId = TolkRetraceDebugAdapter,
                         request = DapStartRequest.Launch,
                         arguments = emptyMap(),
-                        logLabel = "acton retrace"
+                        logLabel = "acton retrace",
                     )
                 }
                 promise.setResult(descriptor[0])
@@ -83,7 +81,7 @@ class TolkRetraceProgramRunner : AsyncProgramRunner<RunnerSettings>() {
                             environment = environment,
                             executionResult = executionResult,
                             error = t,
-                            title = profile.name
+                            title = profile.name,
                         )
                     }
                     handled[0]

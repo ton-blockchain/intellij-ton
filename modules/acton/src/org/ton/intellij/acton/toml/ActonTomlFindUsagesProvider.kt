@@ -14,24 +14,16 @@ class ActonTomlFindUsagesProvider : FindUsagesProvider {
         TomlLexer(),
         TokenSet.create(TomlElementTypes.BARE_KEY),
         TokenSet.EMPTY,
-        TokenSet.EMPTY
+        TokenSet.EMPTY,
     )
 
-    override fun canFindUsagesFor(psiElement: PsiElement): Boolean {
-        return psiElement is TomlKeySegment
-    }
+    override fun canFindUsagesFor(psiElement: PsiElement): Boolean = psiElement is TomlKeySegment
 
     override fun getHelpId(psiElement: PsiElement): String? = null
 
-    override fun getType(element: PsiElement): String {
-        return "Acton element"
-    }
+    override fun getType(element: PsiElement): String = "Acton element"
 
-    override fun getDescriptiveName(element: PsiElement): String {
-        return (element as? TomlKeySegment)?.name ?: ""
-    }
+    override fun getDescriptiveName(element: PsiElement): String = (element as? TomlKeySegment)?.name ?: ""
 
-    override fun getNodeText(element: PsiElement, useFullName: Boolean): String {
-        return getDescriptiveName(element)
-    }
+    override fun getNodeText(element: PsiElement, useFullName: Boolean): String = getDescriptiveName(element)
 }

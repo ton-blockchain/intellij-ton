@@ -47,7 +47,7 @@ object AngleBraceHandler : BraceHandler {
                 true
             }
 
-            else       -> false
+            else -> false
         }
     }
 

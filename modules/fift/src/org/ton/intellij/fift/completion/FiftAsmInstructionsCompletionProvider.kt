@@ -9,7 +9,11 @@ import org.ton.intellij.util.asm.AsmDataProvider
 import org.ton.intellij.util.asm.getStackPresentation
 
 object FiftAsmInstructionsCompletionProvider : CompletionProvider<CompletionParameters>() {
-    override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
+    override fun addCompletions(
+        parameters: CompletionParameters,
+        context: ProcessingContext,
+        result: CompletionResultSet,
+    ) {
         val data = AsmDataProvider.getAsmData()
 
         data.instructions.forEach { instr ->

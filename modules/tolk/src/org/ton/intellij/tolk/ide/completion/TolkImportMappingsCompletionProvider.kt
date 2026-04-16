@@ -16,8 +16,11 @@ import org.ton.intellij.tolk.psi.TolkIncludeDefinition
 import org.ton.intellij.tolk.psi.TolkStringLiteral
 
 object TolkImportMappingsCompletionProvider : TolkCompletionProvider(), DumbAware {
-    override val elementPattern: ElementPattern<out PsiElement> = psiElement().withSuperParent(2, TolkStringLiteral::class.java).and(
-        psiElement().withSuperParent(3, TolkIncludeDefinition::class.java)
+    override val elementPattern: ElementPattern<out PsiElement> = psiElement().withSuperParent(
+        2,
+        TolkStringLiteral::class.java,
+    ).and(
+        psiElement().withSuperParent(3, TolkIncludeDefinition::class.java),
     )
 
     override fun addCompletions(

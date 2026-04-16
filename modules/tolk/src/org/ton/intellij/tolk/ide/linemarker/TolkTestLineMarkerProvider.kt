@@ -27,10 +27,12 @@ class TolkTestLineMarkerProvider : RunLineMarkerContributor() {
 
             val icon = when (magnitude) {
                 TestStateInfo.Magnitude.PASSED_INDEX,
-                TestStateInfo.Magnitude.COMPLETE_INDEX -> AllIcons.RunConfigurations.TestState.Green2
+                TestStateInfo.Magnitude.COMPLETE_INDEX,
+                -> AllIcons.RunConfigurations.TestState.Green2
 
                 TestStateInfo.Magnitude.ERROR_INDEX,
-                TestStateInfo.Magnitude.FAILED_INDEX -> AllIcons.RunConfigurations.TestState.Red2
+                TestStateInfo.Magnitude.FAILED_INDEX,
+                -> AllIcons.RunConfigurations.TestState.Red2
 
                 else -> AllIcons.RunConfigurations.TestState.Run
             }

@@ -21,12 +21,11 @@ val Project.tolkSettings: TolkProjectSettingsService get() = service()
 
 @State(
     name = "TolkProjectSettings",
-    storages = [Storage(StoragePathMacros.WORKSPACE_FILE)]
+    storages = [Storage(StoragePathMacros.WORKSPACE_FILE)],
 )
 @Service(Service.Level.PROJECT)
-class TolkProjectSettingsService(
-    private val project: Project,
-) : SimplePersistentStateComponent<TolkProjectSettingsService.TolkProjectSettings>(TolkProjectSettings()) {
+class TolkProjectSettingsService(private val project: Project) :
+    SimplePersistentStateComponent<TolkProjectSettingsService.TolkProjectSettings>(TolkProjectSettings()) {
 
     var stdlibPath: String?
         get() {
@@ -109,7 +108,7 @@ class TolkProjectSettingsService(
             val TOPIC = Topic.create(
                 "Tolk settings changes",
                 TolkSettingsListener::class.java,
-                Topic.BroadcastDirection.TO_PARENT
+                Topic.BroadcastDirection.TO_PARENT,
             )
         }
     }

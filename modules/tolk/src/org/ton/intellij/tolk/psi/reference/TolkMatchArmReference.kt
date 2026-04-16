@@ -7,9 +7,8 @@ import com.intellij.psi.ResolveResult
 import org.ton.intellij.tolk.psi.TolkMatchPatternReference
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 
-class TolkMatchArmReference(
-    element: TolkMatchPatternReference
-) : PsiPolyVariantReferenceBase<TolkMatchPatternReference>(element) {
+class TolkMatchArmReference(element: TolkMatchPatternReference) :
+    PsiPolyVariantReferenceBase<TolkMatchPatternReference>(element) {
     override fun multiResolve(incompleteCode: Boolean): Array<out ResolveResult?> {
         val typeResult = TolkTypeReference(element).multiResolve(incompleteCode)
         if (typeResult.isNotEmpty()) return typeResult

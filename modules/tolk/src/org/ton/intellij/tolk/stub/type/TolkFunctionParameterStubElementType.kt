@@ -9,9 +9,8 @@ import org.ton.intellij.tolk.psi.TolkParameter
 import org.ton.intellij.tolk.psi.impl.TolkParameterImpl
 import org.ton.intellij.tolk.stub.TolkParameterStub
 
-class TolkParameterStubElementType(
-    debugName: String,
-) : TolkNamedStubElementType<TolkParameterStub, TolkParameter>(debugName) {
+class TolkParameterStubElementType(debugName: String) :
+    TolkNamedStubElementType<TolkParameterStub, TolkParameter>(debugName) {
     override fun serialize(stub: TolkParameterStub, dataStream: StubOutputStream) {
         dataStream.writeName(stub.name)
         dataStream.writeBoolean(stub.isMutable)
@@ -23,16 +22,10 @@ class TolkParameterStubElementType(
         return TolkParameterStub(parentStub, this, name, mutable)
     }
 
-    override fun createStub(
-        psi: TolkParameter,
-        parentStub: StubElement<out PsiElement>,
-    ): TolkParameterStub {
-        return TolkParameterStub(parentStub, this, psi.name, psi.mutateKeyword != null)
-    }
+    override fun createStub(psi: TolkParameter, parentStub: StubElement<out PsiElement>): TolkParameterStub =
+        TolkParameterStub(parentStub, this, psi.name, psi.mutateKeyword != null)
 
-    override fun createPsi(stub: TolkParameterStub): TolkParameter {
-        return TolkParameterImpl(stub, this)
-    }
+    override fun createPsi(stub: TolkParameterStub): TolkParameter = TolkParameterImpl(stub, this)
 
     companion object {
         val EMPTY_ARRAY = emptyArray<TolkParameter>()

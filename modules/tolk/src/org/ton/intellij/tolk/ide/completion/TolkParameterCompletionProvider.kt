@@ -18,7 +18,7 @@ object TolkParameterCompletionProvider : TolkCompletionProvider() {
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         val position = parameters.position
         val parameter = position.parent as? TolkParameter ?: return
@@ -32,7 +32,7 @@ object TolkParameterCompletionProvider : TolkCompletionProvider() {
                         if (documentText.length <= currentOffset || documentText[currentOffset] != ' ') {
                             EditorModificationUtil.insertStringAtCaret(editor, " ")
                         }
-                    }
+                    },
             )
         }
     }

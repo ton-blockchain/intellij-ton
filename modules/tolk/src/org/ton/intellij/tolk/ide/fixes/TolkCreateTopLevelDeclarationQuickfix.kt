@@ -12,20 +12,18 @@ import org.ton.intellij.tolk.psi.TolkGlobalVar
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.util.parentOfType
 
-abstract class TolkCreateTopLevelDeclarationQuickfix(identifier: PsiElement) : LocalQuickFixAndIntentionActionOnPsiElement(identifier) {
-    fun run(
-        template: String,
-        editor: Editor?,
-        startElement: PsiElement,
-        vararg variables: Pair<String, Expression>,
-    ) {
+abstract class TolkCreateTopLevelDeclarationQuickfix(identifier: PsiElement) :
+    LocalQuickFixAndIntentionActionOnPsiElement(identifier) {
+    fun run(template: String, editor: Editor?, startElement: PsiElement, vararg variables: Pair<String, Expression>) {
         val project = startElement.project
         val template = TemplateManager.getInstance(project).createTemplate(
-            "templateInsertHandler", "ton", """
+            "templateInsertHandler",
+            "ton",
+            """
                 $template
                 
                 
-            """.trimIndent()
+            """.trimIndent(),
         )
         template.isToReformat = true
 

@@ -14,39 +14,39 @@ import org.ton.intellij.func.psi.*
 enum class IfType { IF, IF_NOT }
 
 class FuncIfThrowInspection : FuncInspectionBase() {
-    override fun buildFuncVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): FuncVisitor = object : FuncVisitor() {
-        override fun visitIfStatement(ifStatement: FuncIfStatement) {
-            val ifType = getIfStatementType(ifStatement)
-            if (ifType == null || !isIfThrowPattern(ifStatement)) {
-                return
-            }
+    override fun buildFuncVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): FuncVisitor =
+        object : FuncVisitor() {
+            override fun visitIfStatement(ifStatement: FuncIfStatement) {
+                val ifType = getIfStatementType(ifStatement)
+                if (ifType == null || !isIfThrowPattern(ifStatement)) {
+                    return
+                }
 
-            val throwCall = extractThrowCall(ifStatement) ?: return
-            val condition = ifStatement.condition ?: return
+                val throwCall = extractThrowCall(ifStatement) ?: return
+                val condition = ifStatement.condition ?: return
 
-            val manager = SmartPointerManager.getInstance(throwCall.project)
-            val (description, fixText) = when (ifType) {
-                IfType.IF     -> FuncBundle.message("inspection.if.throw.description") to FuncBundle.message("inspection.if.throw.fix.text")
-                IfType.IF_NOT -> FuncBundle.message("inspection.ifnot.throw.description") to FuncBundle.message("inspection.ifnot.throw.fix.text")
-            }
-            
-            holder.registerProblem(
-                ifStatement.firstChild ?: ifStatement,
-                description,
-                ProblemHighlightType.WEAK_WARNING,
-                FuncIfThrowQuickFix(
-                    ifStatement,
-                    manager.createSmartPsiElementPointer(condition as PsiElement),
-                    manager.createSmartPsiElementPointer(throwCall as PsiElement),
-                    ifType,
-                    fixText
+                val manager = SmartPointerManager.getInstance(throwCall.project)
+                val (description, fixText) = when (ifType) {
+                    IfType.IF -> FuncBundle.message("inspection.if.throw.description") to
+                        FuncBundle.message("inspection.if.throw.fix.text")
+                    IfType.IF_NOT -> FuncBundle.message("inspection.ifnot.throw.description") to
+                        FuncBundle.message("inspection.ifnot.throw.fix.text")
+                }
+
+                holder.registerProblem(
+                    ifStatement.firstChild ?: ifStatement,
+                    description,
+                    ProblemHighlightType.WEAK_WARNING,
+                    FuncIfThrowQuickFix(
+                        ifStatement,
+                        manager.createSmartPsiElementPointer(condition as PsiElement),
+                        manager.createSmartPsiElementPointer(throwCall as PsiElement),
+                        ifType,
+                        fixText,
+                    ),
                 )
-            )
+            }
         }
-    }
 
     private fun getIfStatementType(ifStatement: FuncIfStatement): IfType? {
         val firstChild = ifStatement.firstChild
@@ -121,8 +121,9 @@ class FuncIfThrowQuickFix(
     private val condition: SmartPsiElementPointer<PsiElement>,
     private val throwCall: SmartPsiElementPointer<PsiElement>,
     private val ifType: IfType,
-    private val fixText: String
-) : LocalQuickFixAndIntentionActionOnPsiElement(element), LocalQuickFix {
+    private val fixText: String,
+) : LocalQuickFixAndIntentionActionOnPsiElement(element),
+    LocalQuickFix {
 
     override fun getFamilyName(): String = FuncBundle.message("inspection.if.throw.fix.family.name")
     override fun getText(): String = fixText
@@ -138,13 +139,13 @@ class FuncIfThrowQuickFix(
 
         val throwCallElement = throwCall.dereference() as? FuncApplyExpression ?: return
         val conditionElement = condition.dereference() as? FuncExpression ?: return
-        
+
         val throwArg = throwCallElement.right?.unwrapTensor() ?: return
         val condition = conditionElement.unwrapTensor() ?: return
 
         val psiFactory = FuncPsiFactory[project]
         val functionName = when (ifType) {
-            IfType.IF     -> "throw_if"
+            IfType.IF -> "throw_if"
             IfType.IF_NOT -> "throw_unless"
         }
 

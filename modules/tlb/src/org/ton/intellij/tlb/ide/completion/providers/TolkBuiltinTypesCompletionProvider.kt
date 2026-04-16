@@ -25,7 +25,7 @@ object TolkBuiltinTypesCompletionProvider : TlbCompletionProvider() {
             result.addElement(
                 LookupElementBuilder.create(type)
                     .withTailText(" $description", true)
-                    .withIcon(TlbIcons.TYPE)
+                    .withIcon(TlbIcons.TYPE),
             )
         }
     }

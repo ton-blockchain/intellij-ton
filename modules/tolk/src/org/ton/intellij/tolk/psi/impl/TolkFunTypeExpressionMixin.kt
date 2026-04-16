@@ -8,7 +8,9 @@ import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkTyFunction
 import org.ton.intellij.tolk.type.TolkTyTensor
 
-abstract class TolkFunTypeExpressionMixin : TolkTypeExpressionImpl, TolkFunTypeExpression {
+abstract class TolkFunTypeExpressionMixin :
+    TolkTypeExpressionImpl,
+    TolkFunTypeExpression {
     override val type: TolkTy?
         get() {
             val typeExpressions = typeExpressionList

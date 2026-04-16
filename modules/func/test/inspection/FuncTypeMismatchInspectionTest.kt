@@ -9,7 +9,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 int a = <error descr="Cannot assign 'slice' to variable of type 'int'">""</error>;
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -22,7 +22,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 foo(<error descr="Cannot pass 'slice' to parameter of type 'int'">"data"</error>);
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -35,7 +35,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 foo(1, <error descr="Cannot pass 'int' to parameter of type 'slice'">1</error>);
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -49,7 +49,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 begin_cell().end_cell();
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -64,7 +64,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 begin_cell().store_ref(begin_cell().end_cell());
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -78,7 +78,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 begin_cell().store_ref(<error descr="Cannot pass 'int' to parameter of type 'cell'">10</error>);
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -89,7 +89,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 return <error descr="Cannot return '(slice, int)' from function with return type '(slice, slice)'">("", 10)</error>;
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -104,7 +104,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 (slice a, slice b) = <error descr="Cannot destructure tensor of 3 elements into 2 variables">get_slice()</error>;
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -119,7 +119,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 (slice a, slice b, int c) = <error descr="Cannot destructure tensor of 2 elements into 3 variables">get_slice()</error>;
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -134,7 +134,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 (<error descr="Cannot assign 'slice' to variable of type 'int'">int a</error>, <error descr="Cannot assign 'slice' to variable of type 'int'">int b</error>) = get_slice();
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -149,7 +149,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                (<error descr="Cannot assign 'slice' to variable of type 'int'">int a</error>, <error descr="Cannot assign 'int' to variable of type 'slice'">slice b</error>) = get_slice();
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -160,7 +160,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 [var a, int b] = <error descr="Cannot destructure tuple of 3 elements into 2 variables">[1, "slice", 10]</error>;
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -171,7 +171,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 [var a, int b, int c] = <error descr="Cannot destructure tuple of 2 elements into 3 variables">[1, "slice"]</error>;
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -182,7 +182,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 [int a, <error descr="Cannot assign 'slice' to variable of type 'int'">int b</error>] = [1, "slice"];
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -197,7 +197,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 var (a, b, c) = <error descr="Cannot destructure tensor of 2 elements into 3 variables">get_slice()</error>;
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -212,7 +212,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 var (a, b) = <error descr="Cannot destructure tensor of 3 elements into 2 variables">get_slice()</error>;
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -223,7 +223,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 var b = cond ? 1 : 10;
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -234,7 +234,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 var b = <error descr="Incompatible types in ternary expression: 'int' and 'slice'">cond ? 1 : ""</error>;
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 
@@ -256,7 +256,7 @@ class FuncTypeMismatchInspectionTest : FuncInspectionTestBase() {
                 var correct = cond ? 1 : 2;
             }
             """.trimIndent(),
-            FuncTypeMismatchInspection()
+            FuncTypeMismatchInspection(),
         )
     }
 }

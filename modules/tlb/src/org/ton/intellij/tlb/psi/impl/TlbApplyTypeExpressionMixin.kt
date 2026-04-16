@@ -9,7 +9,9 @@ import org.ton.intellij.tlb.psi.naturalValue
 import org.ton.intellij.tlb.psi.unwrap
 import kotlin.math.min
 
-abstract class TlbApplyTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TlbApplyTypeExpression {
+abstract class TlbApplyTypeExpressionMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    TlbApplyTypeExpression {
     override val tlbSize: TlbSize?
         get() {
             val args = argumentList.typeExpressionList
@@ -17,11 +19,11 @@ abstract class TlbApplyTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement
             if (args.size == 1 && type is TlbParamTypeExpression) {
                 val value = args.first().naturalValue()
                 if (value != null) {
-                    val size = when(type.text) {
-                        "##", "int", "uint", "bits" ->  TlbSize.fixedSize(min(value, 2047))
-                        "#<=" ->  TlbSize.fixedSize(32 - value.countLeadingZeroBits())
-                        "#<" ->  TlbSize.fixedSize(
-                            if (value != 0) 32 - (value - 1).countLeadingZeroBits() else 2047
+                    val size = when (type.text) {
+                        "##", "int", "uint", "bits" -> TlbSize.fixedSize(min(value, 2047))
+                        "#<=" -> TlbSize.fixedSize(32 - value.countLeadingZeroBits())
+                        "#<" -> TlbSize.fixedSize(
+                            if (value != 0) 32 - (value - 1).countLeadingZeroBits() else 2047,
                         )
                         else -> null
                     }

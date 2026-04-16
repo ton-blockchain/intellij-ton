@@ -29,11 +29,9 @@ class FuncParserDefinition : ParserDefinition {
 
     override fun getStringLiteralElements(): TokenSet = STRING_LITERALS
 
-    override fun createElement(node: ASTNode?): PsiElement =
-        FuncElementTypes.Factory.createElement(node)
+    override fun createElement(node: ASTNode?): PsiElement = FuncElementTypes.Factory.createElement(node)
 
-    override fun createFile(viewProvider: FileViewProvider) =
-        FuncFile(viewProvider)
+    override fun createFile(viewProvider: FileViewProvider) = FuncFile(viewProvider)
 
     companion object {
         @JvmField
@@ -105,7 +103,7 @@ class FuncParserDefinition : ParserDefinition {
             FuncElementTypes.ANDLET,
             FuncElementTypes.ORLET,
             FuncElementTypes.XORLET,
-            FuncElementTypes.MAPSTO
+            FuncElementTypes.MAPSTO,
         )
     }
 }

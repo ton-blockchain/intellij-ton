@@ -12,7 +12,9 @@ import org.ton.intellij.tolk.type.TolkTyEnum
 import org.ton.intellij.util.childOfType
 import javax.swing.Icon
 
-abstract class TolkEnumMixin : TolkNamedElementImpl<TolkEnumStub>, TolkEnum {
+abstract class TolkEnumMixin :
+    TolkNamedElementImpl<TolkEnumStub>,
+    TolkEnum {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TolkEnumStub, stubType: IStubElementType<*, *>) : super(stub, stubType)

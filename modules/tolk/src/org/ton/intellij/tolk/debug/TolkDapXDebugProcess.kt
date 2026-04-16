@@ -31,7 +31,7 @@ internal class TolkDapXDebugProcess(
     executionEnvironment,
     backingExecutionResult,
     startRequestType,
-    startRequestArguments
+    startRequestArguments,
 ) {
     init {
         runCatching {
@@ -43,13 +43,9 @@ internal class TolkDapXDebugProcess(
         }
     }
 
-    override fun createConsole(): ExecutionConsole {
-        return backingExecutionResult.executionConsole ?: super.createConsole()
-    }
+    override fun createConsole(): ExecutionConsole = backingExecutionResult.executionConsole ?: super.createConsole()
 
-    override fun getEditorsProvider(): XDebuggerEditorsProvider {
-        return TolkDebuggerEditorsProvider
-    }
+    override fun getEditorsProvider(): XDebuggerEditorsProvider = TolkDebuggerEditorsProvider
 
     companion object {
         private val LOG = logger<TolkDapXDebugProcess>()

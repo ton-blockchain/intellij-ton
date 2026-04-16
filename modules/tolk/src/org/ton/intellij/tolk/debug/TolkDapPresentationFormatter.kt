@@ -1,9 +1,7 @@
 package org.ton.intellij.tolk.debug
 
 internal object TolkDapPresentationFormatter {
-    fun formatFrameName(rawName: String): String {
-        return rawName.ifBlank { "<frame>" }
-    }
+    fun formatFrameName(rawName: String): String = rawName.ifBlank { "<frame>" }
 
     fun formatFrameLocation(sourceName: String?, line: Int, column: Int): String? {
         val normalizedSource = sourceName?.takeIf { it.isNotBlank() } ?: return null
@@ -11,21 +9,14 @@ internal object TolkDapPresentationFormatter {
         return if (column > 0) "$normalizedSource:$line:$column" else "$normalizedSource:$line"
     }
 
-    fun formatVariableType(rawType: String?): String? {
-        return rawType?.trim()?.takeIf { it.isNotEmpty() }
-    }
+    fun formatVariableType(rawType: String?): String? = rawType?.trim()?.takeIf { it.isNotEmpty() }
 
-    fun isNumericValue(valueText: String): Boolean {
-        return valueText.matches(NUMERIC_VALUE_REGEX)
-    }
+    fun isNumericValue(valueText: String): Boolean = valueText.matches(NUMERIC_VALUE_REGEX)
 
-    fun isStringValue(valueText: String): Boolean {
-        return valueText.length >= 2 && valueText.first() == '"' && valueText.last() == '"'
-    }
+    fun isStringValue(valueText: String): Boolean =
+        valueText.length >= 2 && valueText.first() == '"' && valueText.last() == '"'
 
-    fun isKeywordValue(valueText: String): Boolean {
-        return valueText in KEYWORD_VALUES
-    }
+    fun isKeywordValue(valueText: String): Boolean = valueText in KEYWORD_VALUES
 
     fun shouldAutoExpandScope(name: String, index: Int, expensive: Boolean): Boolean {
         if (expensive) return false
@@ -38,16 +29,14 @@ internal object TolkDapPresentationFormatter {
         rawValue: String?,
         hasChildren: Boolean,
         namedChildren: Int? = null,
-        indexedChildren: Int? = null
-    ): String {
-        return formatVariableDisplay(rawValue, hasChildren, namedChildren, indexedChildren).valueText
-    }
+        indexedChildren: Int? = null,
+    ): String = formatVariableDisplay(rawValue, hasChildren, namedChildren, indexedChildren).valueText
 
     fun formatVariableDisplay(
         rawValue: String?,
         hasChildren: Boolean,
         namedChildren: Int? = null,
-        indexedChildren: Int? = null
+        indexedChildren: Int? = null,
     ): VariableDisplay {
         val normalized = rawValue.orEmpty()
             .replace("\r\n", "\n")
@@ -59,7 +48,7 @@ internal object TolkDapPresentationFormatter {
 
         if (normalized.isEmpty()) {
             return VariableDisplay(
-                valueText = if (hasChildren) formatStructuredPlaceholder(namedChildren, indexedChildren) else ""
+                valueText = if (hasChildren) formatStructuredPlaceholder(namedChildren, indexedChildren) else "",
             )
         }
 
@@ -70,7 +59,7 @@ internal object TolkDapPresentationFormatter {
         if (normalized.endsWith(LAST_SEEN_SUFFIX) && normalized.length > LAST_SEEN_SUFFIX.length) {
             return VariableDisplay(
                 valueText = normalized.removeSuffix(LAST_SEEN_SUFFIX),
-                commentSuffix = LAST_SEEN_SUFFIX
+                commentSuffix = LAST_SEEN_SUFFIX,
             )
         }
 
@@ -79,8 +68,8 @@ internal object TolkDapPresentationFormatter {
 
     private fun formatStructuredPlaceholder(namedChildren: Int?, indexedChildren: Int?): String {
         val parts = buildList {
-            if ((namedChildren ?: 0) > 0) add("${namedChildren} named")
-            if ((indexedChildren ?: 0) > 0) add("${indexedChildren} indexed")
+            if ((namedChildren ?: 0) > 0) add("$namedChildren named")
+            if ((indexedChildren ?: 0) > 0) add("$indexedChildren indexed")
         }
         return if (parts.isEmpty()) "{...}" else "{${parts.joinToString(", ")}}"
     }
@@ -88,7 +77,7 @@ internal object TolkDapPresentationFormatter {
     data class VariableDisplay(
         val valueText: String,
         val commentSuffix: String? = null,
-        val commentOnly: Boolean = false
+        val commentOnly: Boolean = false,
     )
 
     private val AUTO_EXPAND_SCOPE_NAMES = setOf(
@@ -99,12 +88,12 @@ internal object TolkDapPresentationFormatter {
         "storage",
         "state",
         "globals",
-        "context"
+        "context",
     )
 
     private val WHITESPACE_REGEX = Regex("\\s+")
     private val NUMERIC_VALUE_REGEX = Regex(
-        pattern = "[+-]?(?:\\d+(?:\\.\\d+)?|0[xX][0-9a-fA-F_]+|0[bB][01_]+)"
+        pattern = "[+-]?(?:\\d+(?:\\.\\d+)?|0[xX][0-9a-fA-F_]+|0[bB][01_]+)",
     )
     private val KEYWORD_VALUES = setOf("true", "false", "null")
     private const val LAST_SEEN_SUFFIX = " (last seen)"

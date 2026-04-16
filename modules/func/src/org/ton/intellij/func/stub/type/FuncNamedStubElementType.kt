@@ -6,9 +6,8 @@ import com.intellij.psi.stubs.StubIndexKey
 import org.ton.intellij.func.psi.FuncNamedElement
 import org.ton.intellij.func.stub.FuncNamedStub
 
-abstract class FuncNamedStubElementType<S : FuncNamedStub<T>, T : FuncNamedElement>(
-    debugName: String
-) : FuncStubElementType<S, T>(debugName) {
+abstract class FuncNamedStubElementType<S : FuncNamedStub<T>, T : FuncNamedElement>(debugName: String) :
+    FuncStubElementType<S, T>(debugName) {
     protected val extraIndexKeys: Collection<StubIndexKey<String, out FuncNamedElement>> = emptyList()
 
     override fun shouldCreateStub(node: ASTNode?): Boolean {

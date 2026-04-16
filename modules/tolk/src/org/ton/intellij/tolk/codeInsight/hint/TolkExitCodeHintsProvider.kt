@@ -31,7 +31,10 @@ class TolkExitCodeHintsProvider : InlayHintsProvider {
             sink.addPresentation(
                 InlineInlayPosition(code.textRange.endOffset, true),
                 listOf(),
-                null, HintFormat.default.withColorKind(HintColorKind.Parameter).withHorizontalMargin(HintMarginPadding.MarginAndSmallerPadding)
+                null,
+                HintFormat.default.withColorKind(
+                    HintColorKind.Parameter,
+                ).withHorizontalMargin(HintMarginPadding.MarginAndSmallerPadding),
             ) {
                 text(description)
             }

@@ -13,7 +13,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 add(1, 2, <error descr="Too many arguments in call to 'add', expected 2, have 3">3</error>);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -28,7 +28,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 add(1<error descr="Too few arguments in call to 'add', expected 2, have 1">)</error>;
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -43,7 +43,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 add(1, 2);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -58,7 +58,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 getValue(<error descr="Too many arguments in call to 'getValue', expected 0, have 1">1</error>);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -73,7 +73,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 getValue();
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -88,7 +88,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 greet("World", "Hi");
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -103,7 +103,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 greet("World");
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -118,7 +118,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 greet(<error descr="Too few arguments in call to 'greet', expected 2, have 0">)</error>;
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -133,7 +133,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 greet("World", "Hi", <error descr="Too many arguments in call to 'greet', expected 2, have 3">"Extra"</error>);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -150,7 +150,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 configure("localhost", 3000, true);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -165,7 +165,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 configure(<error descr="Too few arguments in call to 'configure', expected 3, have 0">)</error>;
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -180,7 +180,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 configure("localhost", 3000, true, <error descr="Too many arguments in call to 'configure', expected 3, have 4">"extra"</error>);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -200,7 +200,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 println(1, 2, 3);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -214,7 +214,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 foo(1<error descr="Too few arguments in call to 'foo', expected 3, have 1">)</error>;
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -236,7 +236,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 p1.distance(p2);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -258,7 +258,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 p1.distance(p2, <error descr="Too many arguments in call to 'distance', expected 1, have 2">p1</error>);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -279,7 +279,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 p1.distance(<error descr="Too few arguments in call to 'distance', expected 1, have 0">)</error>;
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -297,7 +297,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 Math.add(1, 2);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -315,7 +315,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 Math.add(1, 2, <error descr="Too many arguments in call to 'add', expected 2, have 3">3</error>);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -336,7 +336,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 logger.log("Error", 2);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -356,7 +356,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 logger.log("Info", 2, <error descr="Too many arguments in call to 'log', expected 2, have 3">"extra"</error>);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -375,7 +375,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 add(multiply(2, 3), multiply(4<error descr="Too few arguments in call to 'multiply', expected 2, have 1">)</error>);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -394,7 +394,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 calculate(1 + 2, getValue(), 5, <error descr="Too many arguments in call to 'calculate', expected 3, have 4">6</error>);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -413,7 +413,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 Iterator<int>.new();
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -432,7 +432,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 Iterator<int>.new(<error descr="Too many arguments in call to 'new', expected 0, have 2">1, 2</error>);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -456,7 +456,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 Iterator<int>.data(it);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -480,7 +480,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 Iterator<int>.getData(<error descr="Too few arguments in call to 'getData', expected 1, have 0">)</error>;
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 
@@ -504,7 +504,7 @@ class TolkCallArgumentsCountMismatchInspectionTest : TolkInspectionTestBase() {
                 Iterator<int>.getData(it, <error descr="Too many arguments in call to 'getData', expected 1, have 3">1, 2</error>);
             }
             """.trimIndent(),
-            TolkCallArgumentsCountMismatchInspection()
+            TolkCallArgumentsCountMismatchInspection(),
         )
     }
 }

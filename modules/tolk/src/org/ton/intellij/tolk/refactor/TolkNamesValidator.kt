@@ -8,9 +8,7 @@ import org.ton.intellij.tolk.psi.TolkTokenType
 class TolkNamesValidator : NamesValidator {
     private val KEYWORD_SET = TOLK_KEYWORDS.types.filterIsInstance<TolkTokenType>().map { it.name }.toSet()
 
-    override fun isKeyword(name: String, project: Project?): Boolean {
-        return KEYWORD_SET.contains(name)
-    }
+    override fun isKeyword(name: String, project: Project?): Boolean = KEYWORD_SET.contains(name)
 
     override fun isIdentifier(name: String, project: Project?): Boolean {
         if (name.isBlank()) return false

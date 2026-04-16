@@ -1,17 +1,14 @@
 package org.ton.intellij.util.asm
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.json.Json
 import com.intellij.psi.PsiElement
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import java.io.InputStream
 
 @Serializable
-data class FiftExample(
-    val fift: String,
-    val description: String,
-)
+data class FiftExample(val fift: String, val description: String)
 
 @Serializable
 data class AsmDoc(
@@ -49,10 +46,7 @@ data class AsmInstruction(
 )
 
 @Serializable
-data class AsmData(
-    val instructions: List<AsmInstruction>,
-    val aliases: List<AsmAlias>,
-)
+data class AsmData(val instructions: List<AsmInstruction>, val aliases: List<AsmAlias>)
 
 object AsmDataProvider {
     private const val RESOURCE_PATH = "asm/asm.json"
@@ -93,38 +87,38 @@ fun adjustName(name: String, args: List<PsiElement>): String {
             if (args.isEmpty()) return "PUSHINT_4"
             val num = args[0].text.toIntOrNull() ?: return "PUSHINT_4"
             when (num) {
-                in 0..15         -> "PUSHINT_4"
-                in -128..127     -> "PUSHINT_8"
+                in 0..15 -> "PUSHINT_4"
+                in -128..127 -> "PUSHINT_8"
                 in -32768..32767 -> "PUSHINT_16"
-                else             -> "PUSHINT_LONG"
+                else -> "PUSHINT_LONG"
             }
         }
 
-        "PUSH"           -> {
+        "PUSH" -> {
             if (args.size == 1 && args[0].text.startsWith("s")) return "PUSH"
             if (args.size == 2) return "PUSH2"
             if (args.size == 3) return "PUSH3"
             name
         }
 
-        "XCHG0"          -> "XCHG_0I"
-        "XCHG"           -> "XCHG_IJ"
-        "SKIPOPTREF"     -> "SKIPDICT"
-        "STOPTREF"       -> "STDICT"
-        "LDOPTREF"       -> "LDDICT"
-        "PLDOPTREF"      -> "PLDDICT"
-        "PUSHNULL"       -> "NULL"
-        "FALSE"          -> "PUSHINT_4"
-        "-ROT"           -> "ROTREV"
-        "-ROLL"          -> "BLKSWAP"
-        "2DROP"          -> "DROP2"
-        "2SWAP"          -> "SWAP2"
-        "2DUP"           -> "DUP2"
-        "2OVER"          -> "OVER2"
-        "LDVARUINT16"    -> "LDGRAMS"
-        "STVARUINT16"    -> "STGRAMS"
+        "XCHG0" -> "XCHG_0I"
+        "XCHG" -> "XCHG_IJ"
+        "SKIPOPTREF" -> "SKIPDICT"
+        "STOPTREF" -> "STDICT"
+        "LDOPTREF" -> "LDDICT"
+        "PLDOPTREF" -> "PLDDICT"
+        "PUSHNULL" -> "NULL"
+        "FALSE" -> "PUSHINT_4"
+        "-ROT" -> "ROTREV"
+        "-ROLL" -> "BLKSWAP"
+        "2DROP" -> "DROP2"
+        "2SWAP" -> "SWAP2"
+        "2DUP" -> "DUP2"
+        "2OVER" -> "OVER2"
+        "LDVARUINT16" -> "LDGRAMS"
+        "STVARUINT16" -> "STGRAMS"
         "INLINECALLDICT" -> "CALLDICT"
-        else             -> name
+        else -> name
     }
 }
 
@@ -135,4 +129,4 @@ fun getStackPresentation(rawStack: String?): String {
     val suffix = if (trimmed.endsWith("-")) " ∅" else ""
     val stack = prefix + rawStack.replace("-", "→") + suffix
     return "($stack)"
-} 
+}

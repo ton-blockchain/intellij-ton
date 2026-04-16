@@ -12,7 +12,9 @@ import org.ton.intellij.fift.psi.FiftTvmInstruction
 import org.ton.intellij.fift.psi.FiftTypes
 import org.ton.intellij.fift.psi.isNotInstruction
 
-class FiftDumbAnnotator : Annotator, DumbAware {
+class FiftDumbAnnotator :
+    Annotator,
+    DumbAware {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         val elementType = element.elementType ?: return
         val color = when (elementType) {
@@ -21,7 +23,7 @@ class FiftDumbAnnotator : Annotator, DumbAware {
                 identifierColor(parent) ?: return
             }
 
-            else                 -> return
+            else -> return
         }
         holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
             .textAttributes(color.textAttributesKey)
@@ -40,7 +42,7 @@ fun identifierColor(element: PsiElement): FiftColor? {
             return FiftColor.ASSEMBLY_INSTRUCTION
         }
 
-        else                  -> {
+        else -> {
             val grand = element.parent
             if (grand is FiftDefinitionName) {
                 return FiftColor.ASSEMBLY_DEFINITION

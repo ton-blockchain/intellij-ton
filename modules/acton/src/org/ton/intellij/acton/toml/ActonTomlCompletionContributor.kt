@@ -4,14 +4,14 @@ import com.intellij.codeInsight.AutoPopupController
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.PlatformPatterns.psiElement
-import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
-import org.toml.lang.psi.TomlLiteral
 import org.toml.lang.psi.TomlKeySegment
+import org.toml.lang.psi.TomlLiteral
 import org.toml.lang.psi.TomlTable
 import org.ton.intellij.acton.cli.ActonToml
 
@@ -33,7 +33,7 @@ class ActonTomlCompletionContributor : CompletionContributor() {
                 ) {
                     addKeyCompletions(parameters, result)
                 }
-            }
+            },
         )
 
         extend(
@@ -47,7 +47,7 @@ class ActonTomlCompletionContributor : CompletionContributor() {
                 ) {
                     addValueCompletions(parameters, result)
                 }
-            }
+            },
         )
     }
 
@@ -64,19 +64,20 @@ class ActonTomlCompletionContributor : CompletionContributor() {
             segments.size == 2 && segments[0].name == "lint" && segments[1].name == "rules" -> {
                 val rules = ActonLintRulesProvider.getLintRules(project)
                 for (rule in rules) {
-                    val description = rule.description.lineSequence().firstOrNull { it.isNotBlank() && !it.startsWith("#") } ?: ""
+                    val description =
+                        rule.description.lineSequence().firstOrNull { it.isNotBlank() && !it.startsWith("#") } ?: ""
                     result.addElement(
                         LookupElementBuilder.create(rule.name)
                             .withInsertHandler { insertionContext, _ ->
                                 insertionContext.document.insertString(insertionContext.selectionEndOffset, " = \"\"")
                                 insertionContext.editor.caretModel.moveToOffset(
-                                    insertionContext.editor.caretModel.offset + 4
+                                    insertionContext.editor.caretModel.offset + 4,
                                 )
                                 AutoPopupController.getInstance(insertionContext.project)
                                     .scheduleAutoPopup(insertionContext.editor)
                             }
                             .withTypeText("lint rule")
-                            .withTailText(" $description", true)
+                            .withTailText(" $description", true),
                     )
                 }
             }
@@ -90,12 +91,12 @@ class ActonTomlCompletionContributor : CompletionContributor() {
                             .withInsertHandler { insertionContext, _ ->
                                 insertionContext.document.insertString(insertionContext.selectionEndOffset, " = \"\"")
                                 insertionContext.editor.caretModel.moveToOffset(
-                                    insertionContext.editor.caretModel.offset + 4
+                                    insertionContext.editor.caretModel.offset + 4,
                                 )
                                 AutoPopupController.getInstance(insertionContext.project)
                                     .scheduleAutoPopup(insertionContext.editor)
                             }
-                            .withTypeText("contract override")
+                            .withTypeText("contract override"),
                     )
                 }
             }
@@ -116,25 +117,25 @@ class ActonTomlCompletionContributor : CompletionContributor() {
                     result.addElement(
                         LookupElementBuilder.create(wallet.name)
                             .withIcon(AllIcons.General.User)
-                            .withTailText(if (wallet.isLocal) " (local)" else " (global)", true)
+                            .withTailText(if (wallet.isLocal) " (local)" else " (global)", true),
                     )
                 }
             }
 
-            (valueContext.matches("contracts", null, "depends") && valueContext.isArrayItem)
-                || valueContext.matches("contracts", null, "depends", "name") -> {
+            (valueContext.matches("contracts", null, "depends") && valueContext.isArrayItem) ||
+                valueContext.matches("contracts", null, "depends", "name") -> {
                 val currentContractId = valueContext.path.getOrNull(1)
                 for (contractId in actonToml.getContractIds().distinct()) {
                     if (contractId == currentContractId) continue
                     result.addElement(
                         LookupElementBuilder.create(contractId)
-                            .withIcon(AllIcons.Nodes.Class)
+                            .withIcon(AllIcons.Nodes.Class),
                     )
                 }
             }
 
-            valueContext.matches("test", "fork-net", "custom")
-                || valueContext.matches("litenode", "fork-net", "custom") -> {
+            valueContext.matches("test", "fork-net", "custom") ||
+                valueContext.matches("litenode", "fork-net", "custom") -> {
                 for (networkName in actonToml.getCustomNetworkNames()) {
                     result.addElement(LookupElementBuilder.create(networkName).withTypeText("custom network"))
                 }
@@ -144,7 +145,7 @@ class ActonTomlCompletionContributor : CompletionContributor() {
                 for (ruleId in MUTATION_RULE_IDS) {
                     result.addElement(
                         LookupElementBuilder.create(ruleId)
-                            .withTypeText("mutation rule")
+                            .withTypeText("mutation rule"),
                     )
                 }
             }
@@ -153,7 +154,7 @@ class ActonTomlCompletionContributor : CompletionContributor() {
                 for (license in LICENSE_OPTIONS) {
                     result.addElement(
                         LookupElementBuilder.create(license)
-                            .withTypeText("license")
+                            .withTypeText("license"),
                     )
                 }
             }
@@ -188,8 +189,10 @@ class ActonTomlCompletionContributor : CompletionContributor() {
                         .withIcon(AllIcons.Nodes.Folder)
                         .withTypeText("directory")
                         .withInsertHandler { insertionContext, _ ->
-                            AutoPopupController.getInstance(insertionContext.project).scheduleAutoPopup(insertionContext.editor)
-                        }
+                            AutoPopupController.getInstance(
+                                insertionContext.project,
+                            ).scheduleAutoPopup(insertionContext.editor)
+                        },
                 )
                 result.addElement(
                     LookupElementBuilder.create("$relativePath/**")
@@ -197,14 +200,14 @@ class ActonTomlCompletionContributor : CompletionContributor() {
                         .withLookupString("${child.name}/**")
                         .withIcon(AllIcons.Nodes.Folder)
                         .withTypeText("glob")
-                        .withTailText(" recursive", true)
+                        .withTailText(" recursive", true),
                 )
             } else {
                 result.addElement(
                     LookupElementBuilder.create(relativePath)
                         .withLookupString(child.name)
                         .withIcon(child.fileType.icon ?: AllIcons.FileTypes.Any_type)
-                        .withTypeText("file")
+                        .withTypeText("file"),
                 )
             }
         }
@@ -227,10 +230,13 @@ class ActonTomlCompletionContributor : CompletionContributor() {
             .removeSuffix("IntellijIdeaRulezzz")
     }
 
-    private fun ActonTomlValueContext.isGlobField(): Boolean {
-        return (matches("fmt", "ignore") || matches("lint", "exclude") || matches("test", "include") || matches("test", "exclude"))
-            && isArrayItem
-    }
+    private fun ActonTomlValueContext.isGlobField(): Boolean = (
+        matches("fmt", "ignore") ||
+            matches("lint", "exclude") ||
+            matches("test", "include") ||
+            matches("test", "exclude")
+        ) &&
+        isArrayItem
 
     companion object {
         private val LICENSE_OPTIONS = listOf(
@@ -239,7 +245,7 @@ class ActonTomlCompletionContributor : CompletionContributor() {
             "GPL-3.0",
             "BSD-3-Clause",
             "ISC",
-            "Unlicense"
+            "Unlicense",
         )
 
         private val MUTATION_RULE_IDS = listOf(
@@ -291,7 +297,7 @@ class ActonTomlCompletionContributor : CompletionContributor() {
             "flip_rshift_assign",
             "flip_lshift",
             "flip_rshift",
-            "remove_bitwise_not"
+            "remove_bitwise_not",
         )
     }
 }

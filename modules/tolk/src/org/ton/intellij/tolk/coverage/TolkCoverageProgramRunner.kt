@@ -1,11 +1,11 @@
 package org.ton.intellij.tolk.coverage
 
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.configurations.RunProfile
 import com.intellij.execution.configurations.RunProfileState
 import com.intellij.execution.configurations.RunnerSettings
 import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
-import com.intellij.execution.ExecutionException
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.GenericProgramRunner
 import com.intellij.execution.runners.executeState
@@ -21,9 +21,9 @@ import java.io.File
 class TolkCoverageProgramRunner : GenericProgramRunner<RunnerSettings>() {
     override fun getRunnerId(): String = RUNNER_ID
 
-    override fun canRun(executorId: String, profile: RunProfile): Boolean {
-        return executorId == ACTON_COVERAGE_EXECUTOR_ID && profile is ActonCommandConfiguration && profile.command == "test"
-    }
+    override fun canRun(executorId: String, profile: RunProfile): Boolean = executorId == ACTON_COVERAGE_EXECUTOR_ID &&
+        profile is ActonCommandConfiguration &&
+        profile.command == "test"
 
     override fun doExecute(state: RunProfileState, environment: ExecutionEnvironment): RunContentDescriptor? {
         if (!isActonCoverageSupported()) {

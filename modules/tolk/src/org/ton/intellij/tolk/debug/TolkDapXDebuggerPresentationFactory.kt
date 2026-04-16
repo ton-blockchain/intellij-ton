@@ -17,8 +17,8 @@ import com.intellij.platform.dap.xdebugger.DapXDebuggerPresentationFactory
 import com.intellij.platform.dap.xdebugger.DapXSuspendContext
 import com.intellij.platform.dap.xdebugger.DefaultDapXExecutionStack
 import com.intellij.platform.dap.xdebugger.DefaultDapXScope
-import com.intellij.platform.dap.xdebugger.DefaultDapXSuspendContext
 import com.intellij.platform.dap.xdebugger.DefaultDapXStackFrame
+import com.intellij.platform.dap.xdebugger.DefaultDapXSuspendContext
 import com.intellij.ui.ColoredTextContainer
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.xdebugger.XSourcePosition
@@ -28,9 +28,9 @@ import com.intellij.xdebugger.frame.XExecutionStack
 import com.intellij.xdebugger.frame.XFullValueEvaluator
 import com.intellij.xdebugger.frame.XNamedValue
 import com.intellij.xdebugger.frame.XStackFrame
+import com.intellij.xdebugger.frame.XValueGroup
 import com.intellij.xdebugger.frame.XValueNode
 import com.intellij.xdebugger.frame.XValuePlace
-import com.intellij.xdebugger.frame.XValueGroup
 import com.intellij.xdebugger.frame.presentation.XRegularValuePresentation
 import com.intellij.xdebugger.frame.presentation.XValuePresentation
 import org.ton.intellij.tolk.TolkIcons
@@ -40,7 +40,7 @@ internal object TolkDapXDebuggerPresentationFactory : DapXDebuggerPresentationFa
     override fun createSuspendContext(
         commandProcessor: DapCommandProcessor,
         threads: List<DapThread>,
-        activeThread: DapThread?
+        activeThread: DapThread?,
     ): DapXSuspendContext {
         val resolvedActiveThread = activeThread ?: threads.firstOrNull()
             ?: error("Active DAP thread is not available")
@@ -50,41 +50,27 @@ internal object TolkDapXDebuggerPresentationFactory : DapXDebuggerPresentationFa
     override fun createExecutionStack(
         commandProcessor: DapCommandProcessor,
         thread: DapThread,
-        isActive: Boolean
-    ): XExecutionStack {
-        return DefaultDapXExecutionStack(this, commandProcessor, thread, isActive)
-    }
+        isActive: Boolean,
+    ): XExecutionStack = DefaultDapXExecutionStack(this, commandProcessor, thread, isActive)
 
     override fun createStackFrame(
         commandProcessor: DapCommandProcessor,
         thread: DapThread,
-        frame: DapStackFrame
-    ): XStackFrame {
-        return TolkDapXStackFrame(this, commandProcessor, thread, frame)
-    }
+        frame: DapStackFrame,
+    ): XStackFrame = TolkDapXStackFrame(this, commandProcessor, thread, frame)
 
-    override fun createScope(
-        commandProcessor: DapCommandProcessor,
-        scope: DapScope,
-        index: Int
-    ): XValueGroup {
-        return TolkDapXScope(this, commandProcessor, scope, index)
-    }
+    override fun createScope(commandProcessor: DapCommandProcessor, scope: DapScope, index: Int): XValueGroup =
+        TolkDapXScope(this, commandProcessor, scope, index)
 
-    override fun createValue(
-        commandProcessor: DapCommandProcessor,
-        variable: DapVariable,
-        icon: Icon?
-    ): XNamedValue {
-        return TolkDapXValue(this, commandProcessor, variable, icon)
-    }
+    override fun createValue(commandProcessor: DapCommandProcessor, variable: DapVariable, icon: Icon?): XNamedValue =
+        TolkDapXValue(this, commandProcessor, variable, icon)
 }
 
 private class TolkDapXScope(
     factory: DapXDebuggerPresentationFactory,
     commandProcessor: DapCommandProcessor,
     private val scope: DapScope,
-    private val index: Int
+    private val index: Int,
 ) : XValueGroup(scope.name) {
     private val delegate = DefaultDapXScope(factory, commandProcessor, scope, index)
 
@@ -92,26 +78,22 @@ private class TolkDapXScope(
         delegate.computeChildren(node)
     }
 
-    override fun isAutoExpand(): Boolean {
-        return TolkDapPresentationFormatter.shouldAutoExpandScope(
-            name = scope.name,
-            index = index,
-            expensive = scope.isExpensive
-        )
-    }
+    override fun isAutoExpand(): Boolean = TolkDapPresentationFormatter.shouldAutoExpandScope(
+        name = scope.name,
+        index = index,
+        expensive = scope.isExpensive,
+    )
 }
 
 internal class TolkDapXStackFrame(
     factory: DapXDebuggerPresentationFactory,
     private val commandProcessor: DapCommandProcessor,
     private val thread: DapThread,
-    private val frame: DapStackFrame
+    private val frame: DapStackFrame,
 ) : XStackFrame() {
     private val delegate = DefaultDapXStackFrame(factory, commandProcessor, thread, frame)
 
-    override fun getEvaluator(): XDebuggerEvaluator {
-        return delegate.evaluator
-    }
+    override fun getEvaluator(): XDebuggerEvaluator = delegate.evaluator
 
     override fun computeChildren(node: XCompositeNode) {
         delegate.computeChildren(node)
@@ -119,13 +101,19 @@ internal class TolkDapXStackFrame(
 
     override fun customizePresentation(component: ColoredTextContainer) {
         val nameAttributes =
-            if (frame.type == StackFrameType.Label) SimpleTextAttributes.GRAYED_ATTRIBUTES else SimpleTextAttributes.REGULAR_ATTRIBUTES
+            if (frame.type ==
+                StackFrameType.Label
+            ) {
+                SimpleTextAttributes.GRAYED_ATTRIBUTES
+            } else {
+                SimpleTextAttributes.REGULAR_ATTRIBUTES
+            }
         val locationAttributes = SimpleTextAttributes.GRAYED_ATTRIBUTES
         val frameName = TolkDapPresentationFormatter.formatFrameName(frame.name)
         val location = TolkDapPresentationFormatter.formatFrameLocation(
             sourceName = frame.source?.name,
             line = frame.startPosition.line,
-            column = frame.startPosition.column
+            column = frame.startPosition.column,
         )
 
         component.append(frameName, nameAttributes)
@@ -136,35 +124,31 @@ internal class TolkDapXStackFrame(
             when (frame.type) {
                 StackFrameType.Normal -> TolkIcons.FUNCTION
                 StackFrameType.Label -> AllIcons.Nodes.Tag
-            }
+            },
         )
     }
 
-    override fun getSourcePosition(): XSourcePosition? {
-        return delegate.sourcePosition
-    }
+    override fun getSourcePosition(): XSourcePosition? = delegate.sourcePosition
 
-    override fun getEqualityObject(): Any? {
-        return delegate.equalityObject
-    }
+    override fun getEqualityObject(): Any? = delegate.equalityObject
 }
 
 private class TolkDapXValue(
     factory: DapXDebuggerPresentationFactory,
     commandProcessor: DapCommandProcessor,
     variable: DapVariable,
-    icon: Icon?
+    icon: Icon?,
 ) : AbstractDapXValue(factory, commandProcessor, variable, icon) {
     override fun computePresentation(node: XValueNode, place: XValuePlace) {
         val dapVariable = variable
         val state = createPresentationState(
             variable = dapVariable,
-            hasChildren = dapVariable is DapStructuredVariable
+            hasChildren = dapVariable is DapStructuredVariable,
         )
         node.setPresentation(
             icon ?: resolveDefaultIcon(dapVariable),
             createValuePresentation(dapVariable, state.hasChildren, dapVariable is DapLazyVariable),
-            state.hasChildren
+            state.hasChildren,
         )
 
         if (dapVariable is DapLazyVariable) return
@@ -178,19 +162,23 @@ private class TolkDapXValue(
     override fun createValuePresentation(
         variable: DapVariable,
         hasChildren: Boolean,
-        canNavigateToSource: Boolean
+        canNavigateToSource: Boolean,
     ): XValuePresentation {
         val state = createPresentationState(variable, hasChildren)
 
         return when {
-            state.commentOnly || state.commentSuffix != null || state.numericValue || state.stringValue || state.keywordValue -> TolkStyledValuePresentation(
+            state.commentOnly ||
+                state.commentSuffix != null ||
+                state.numericValue ||
+                state.stringValue ||
+                state.keywordValue -> TolkStyledValuePresentation(
                 valueText = state.valueText,
                 typeText = state.typeText,
                 commentSuffix = state.commentSuffix,
                 commentOnly = state.commentOnly,
                 numericValue = state.numericValue,
                 stringValue = state.stringValue,
-                keywordValue = state.keywordValue
+                keywordValue = state.keywordValue,
             )
             state.typeText.isNullOrEmpty() -> XRegularValuePresentation(state.valueText, null)
             state.valueText.isEmpty() -> XRegularValuePresentation(state.typeText, null)
@@ -204,7 +192,7 @@ private class TolkDapXValue(
             rawValue = variable.value,
             hasChildren = hasChildren,
             namedChildren = structuredVariable?.namedVariables,
-            indexedChildren = structuredVariable?.indexedVariables
+            indexedChildren = structuredVariable?.indexedVariables,
         )
         val typeText = TolkDapPresentationFormatter.formatVariableType(variable.type)
         val stringValue = TolkDapPresentationFormatter.isStringValue(display.valueText)
@@ -234,7 +222,7 @@ private class TolkDapXValue(
             stringValue = stringValue,
             keywordValue = keywordValue,
             fullValueText = fullValueText,
-            hasChildren = hasChildren
+            hasChildren = hasChildren,
         )
     }
 
@@ -243,16 +231,14 @@ private class TolkDapXValue(
         return valueText.take(XValueNode.MAX_VALUE_LENGTH - INLINE_VALUE_SUFFIX.length) + INLINE_VALUE_SUFFIX
     }
 
-    private fun resolveDefaultIcon(variable: DapVariable): Icon {
-        return when (variable.kind) {
-            is ValueKind.Method -> AllIcons.Nodes.Lambda
-            is ValueKind.Class -> AllIcons.Nodes.Class
-            is ValueKind.Property -> AllIcons.Nodes.Field
-            else -> when {
-                variable is DapStructuredVariable && variable.indexedVariables > 0 -> AllIcons.Debugger.Db_array
-                variable is DapStructuredVariable -> AllIcons.Debugger.Value
-                else -> AllIcons.Debugger.Db_primitive
-            }
+    private fun resolveDefaultIcon(variable: DapVariable): Icon = when (variable.kind) {
+        is ValueKind.Method -> AllIcons.Nodes.Lambda
+        is ValueKind.Class -> AllIcons.Nodes.Class
+        is ValueKind.Property -> AllIcons.Nodes.Field
+        else -> when {
+            variable is DapStructuredVariable && variable.indexedVariables > 0 -> AllIcons.Debugger.Db_array
+            variable is DapStructuredVariable -> AllIcons.Debugger.Value
+            else -> AllIcons.Debugger.Db_primitive
         }
     }
 }
@@ -264,7 +250,7 @@ private class TolkStyledValuePresentation(
     private val commentOnly: Boolean,
     private val numericValue: Boolean,
     private val stringValue: Boolean,
-    private val keywordValue: Boolean
+    private val keywordValue: Boolean,
 ) : XValuePresentation() {
     override fun renderValue(renderer: XValueTextRenderer) {
         if (commentOnly) {
@@ -276,7 +262,7 @@ private class TolkStyledValuePresentation(
             renderer.renderStringValue(
                 valueText.substring(1, valueText.length - 1),
                 "\"\\",
-                XValueNode.MAX_VALUE_LENGTH
+                XValueNode.MAX_VALUE_LENGTH,
             )
         } else if (numericValue) {
             renderer.renderNumericValue(valueText)
@@ -290,14 +276,11 @@ private class TolkStyledValuePresentation(
         }
     }
 
-    override fun getType(): String? {
-        return typeText
-    }
+    override fun getType(): String? = typeText
 }
 
-private class TolkFullValueEvaluator(
-    private val fullValueText: String
-) : XFullValueEvaluator(XValueNode.MAX_VALUE_LENGTH) {
+private class TolkFullValueEvaluator(private val fullValueText: String) :
+    XFullValueEvaluator(XValueNode.MAX_VALUE_LENGTH) {
     override fun startEvaluation(callback: XFullValueEvaluationCallback) {
         callback.evaluated(fullValueText)
     }
@@ -312,7 +295,7 @@ private data class TolkValuePresentationState(
     val stringValue: Boolean,
     val keywordValue: Boolean,
     val fullValueText: String?,
-    val hasChildren: Boolean
+    val hasChildren: Boolean,
 )
 
 private const val INLINE_VALUE_SUFFIX = "..."

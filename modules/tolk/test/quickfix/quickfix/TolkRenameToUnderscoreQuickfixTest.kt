@@ -1,7 +1,6 @@
 package org.ton.intellij.tolk.quickfix.quickfix
 
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
-import org.ton.intellij.tolk.inspection.TolkUnresolvedReferenceInspection
 import org.ton.intellij.tolk.inspection.TolkUnusedVariableInspection
 import org.ton.intellij.tolk.quickfix.TolkQuickfixTestBase
 

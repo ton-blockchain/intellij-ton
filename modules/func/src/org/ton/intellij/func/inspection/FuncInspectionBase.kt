@@ -24,19 +24,19 @@ abstract class FuncInspectionBase : LocalInspectionTool() {
         val file = session.file as? FuncFile
         return if (file != null && FuncPsiUtil.allowed(file, null)) {
             buildFuncVisitor(holder, session)
-        } else DUMMY_VISITOR
-    }
-
-    protected open fun buildFuncVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): FuncVisitor = object : FuncVisitor() {
-        override fun visitFile(file: PsiFile) {
-            if (file is FuncFile) {
-                checkFile(file, holder)
-            }
+        } else {
+            DUMMY_VISITOR
         }
     }
+
+    protected open fun buildFuncVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): FuncVisitor =
+        object : FuncVisitor() {
+            override fun visitFile(file: PsiFile) {
+                if (file is FuncFile) {
+                    checkFile(file, holder)
+                }
+            }
+        }
 
     protected fun checkFile(file: FuncFile, problemsHolder: ProblemsHolder) {
     }

@@ -50,21 +50,21 @@ object ActonExternalLinterUtils {
     )
 
     private val CACHE_KEY =
-        Key.create<ConcurrentHashMap<CacheKey, Pair<Long, Lazy<ActonExternalLinterResult?>>>>("ActonExternalLinterCache")
+        Key.create<ConcurrentHashMap<CacheKey, Pair<Long, Lazy<ActonExternalLinterResult?>>>>(
+            "ActonExternalLinterCache",
+        )
 
-    fun checkLazily(
-        project: Project,
-        workingDirectory: Path,
-        document: Document?,
-    ): Lazy<ActonExternalLinterResult?> {
+    fun checkLazily(project: Project, workingDirectory: Path, document: Document?): Lazy<ActonExternalLinterResult?> {
         val modificationTracker = PsiModificationTracker.getInstance(project)
         val modificationCount = modificationTracker.modificationCount
         val settings = project.externalLinterSettings
         val key = CacheKey(workingDirectory, settings.additionalArguments, settings.envs, settings.isPassParentEnvs)
 
-        val cache = project.getUserData(CACHE_KEY) ?: ConcurrentHashMap<CacheKey, Pair<Long, Lazy<ActonExternalLinterResult?>>>().also {
-            project.putUserData(CACHE_KEY, it)
-        }
+        val cache =
+            project.getUserData(CACHE_KEY)
+                ?: ConcurrentHashMap<CacheKey, Pair<Long, Lazy<ActonExternalLinterResult?>>>().also {
+                    project.putUserData(CACHE_KEY, it)
+                }
 
         val cached = cache[key]
         if (cached != null && cached.first == modificationCount) {
@@ -110,10 +110,7 @@ object ActonExternalLinterUtils {
         }
     }
 
-    private fun check(
-        project: Project,
-        workingDirectory: Path,
-    ): ActonExternalLinterResult? {
+    private fun check(project: Project, workingDirectory: Path): ActonExternalLinterResult? {
         ProgressManager.checkCanceled()
         val started = Instant.now()
 
@@ -123,7 +120,7 @@ object ActonExternalLinterUtils {
             workingDirectory = workingDirectory,
             command = command.name,
             additionalArguments = command.getArguments() + ParametersListUtil.parse(settings.additionalArguments),
-            environmentVariables = EnvironmentVariablesData.create(settings.envs, settings.isPassParentEnvs)
+            environmentVariables = EnvironmentVariablesData.create(settings.envs, settings.isPassParentEnvs),
         ).toGeneralCommandLine(project) ?: return null
 
         val handler = CapturingProcessHandler(commandLine)
@@ -133,15 +130,12 @@ object ActonExternalLinterUtils {
 
         return ActonExternalLinterResult(
             commandOutput = output.stdout,
-            executionTime = executionTime
+            executionTime = executionTime,
         )
     }
 }
 
-data class ActonExternalLinterAdditionalAnnotation(
-    val textRange: TextRange,
-    @Nls val message: String,
-)
+data class ActonExternalLinterAdditionalAnnotation(val textRange: TextRange, @Nls val message: String)
 
 data class ActonExternalLinterFilteredMessage(
     val severity: HighlightSeverity,
@@ -155,11 +149,15 @@ data class ActonExternalLinterFilteredMessage(
 ) {
     companion object {
         @Suppress("DEPRECATION")
-        fun filterMessage(file: PsiFile, document: Document, diagnostic: ActonDiagnostic): ActonExternalLinterFilteredMessage? {
+        fun filterMessage(
+            file: PsiFile,
+            document: Document,
+            diagnostic: ActonDiagnostic,
+        ): ActonExternalLinterFilteredMessage? {
             val severity = when (diagnostic.severity) {
-                "error"   -> HighlightSeverity.ERROR
+                "error" -> HighlightSeverity.ERROR
                 "warning" -> HighlightSeverity.WEAK_WARNING
-                else      -> HighlightSeverity.INFORMATION
+                else -> HighlightSeverity.INFORMATION
             }
 
             if (diagnostic.file != file.virtualFile.path) {
@@ -214,7 +212,7 @@ data class ActonExternalLinterFilteredMessage(
                 tooltip,
                 additionalMessages,
                 quickFixes,
-                suppressionOptions
+                suppressionOptions,
             )
         }
     }
@@ -260,15 +258,12 @@ fun MessageBus.createDisposableOnAnyPsiChange(): Disposable {
                     Disposer.dispose(disposable)
                 }
             }
-        }
+        },
     )
     return disposable
 }
 
-fun MutableList<HighlightInfo>.addHighlightsForFile(
-    file: PsiFile,
-    annotationResult: ActonExternalLinterResult,
-) {
+fun MutableList<HighlightInfo>.addHighlightsForFile(file: PsiFile, annotationResult: ActonExternalLinterResult) {
     val doc = file.viewProvider.document
         ?: error("Can't find document for $file in external linter")
 
@@ -320,11 +315,11 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(
 }
 
 private fun convertSeverity(severity: HighlightSeverity): HighlightInfoType = when (severity) {
-    HighlightSeverity.ERROR                           -> HighlightInfoType.ERROR
-    HighlightSeverity.WARNING                         -> HighlightInfoType.WARNING
-    HighlightSeverity.WEAK_WARNING                    -> HighlightInfoType.WEAK_WARNING
+    HighlightSeverity.ERROR -> HighlightInfoType.ERROR
+    HighlightSeverity.WARNING -> HighlightInfoType.WARNING
+    HighlightSeverity.WEAK_WARNING -> HighlightInfoType.WEAK_WARNING
     HighlightSeverity.GENERIC_SERVER_ERROR_OR_WARNING -> HighlightInfoType.GENERIC_WARNINGS_OR_ERRORS_FROM_SERVER
-    else                                              -> HighlightInfoType.INFORMATION
+    else -> HighlightInfoType.INFORMATION
 }
 
 private const val ACTON_EXTERNAL_LINTER_ID: String = "ActonExternalLinterOptions"

@@ -56,7 +56,7 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
                     ctx.document.insertString(offset, "\"suppress\"")
                     ctx.editor.caretModel.moveToOffset(offset + "\"suppress\")".length)
                 }
-            } to forStructs
+            } to forStructs,
     ).map {
         it.first.withIcon(TolkIcons.ANNOTATION) to it.second
     }
@@ -69,9 +69,11 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
         val owner = parameters.position.parent.parent
         if (owner is TolkAnnotationHolder) {
             val currentAnnotations = owner.annotations.names().toSet()
-            result.addAllElements(lookupElements.filter { (element, isApplicable) ->
-                !currentAnnotations.contains(element.lookupString) && isApplicable(owner)
-            }.map { it.first })
+            result.addAllElements(
+                lookupElements.filter { (element, isApplicable) ->
+                    !currentAnnotations.contains(element.lookupString) && isApplicable(owner)
+                }.map { it.first },
+            )
             return
         }
 
@@ -79,10 +81,7 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
     }
 
     private object ParInsertHandler : InsertHandler<LookupElement> {
-        override fun handleInsert(
-            context: InsertionContext,
-            item: LookupElement,
-        ) {
+        override fun handleInsert(context: InsertionContext, item: LookupElement) {
             val offset = context.editor.caretModel.offset
             val chars = context.document.charsSequence
             val absoluteOpeningBracketOffset = chars.indexOfSkippingSpace('(', offset)
@@ -98,11 +97,12 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
     }
 
     private class StringArgumentInsertHandler(private val value: String) : InsertHandler<LookupElement> {
-        override fun handleInsert(
-            context: InsertionContext,
-            item: LookupElement,
-        ) {
-            TemplateStringInsertHandler("(\"\$value$\")", true, "value" to ConstantNode(value)).handleInsert(context, item)
+        override fun handleInsert(context: InsertionContext, item: LookupElement) {
+            TemplateStringInsertHandler(
+                "(\"\$value$\")",
+                true,
+                "value" to ConstantNode(value),
+            ).handleInsert(context, item)
         }
     }
 }

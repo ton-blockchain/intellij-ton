@@ -22,7 +22,7 @@ class FiftAssemblyFindUsagesProvider : FindUsagesProvider {
         FiftLexerAdapter(),
         TokenSet.create(FiftTypes.IDENTIFIER),
         FiftParserDefinition.COMMENTS,
-        tokenSetOf()
+        tokenSetOf(),
     )
 
     override fun canFindUsagesFor(psiElement: PsiElement): Boolean = true
@@ -32,10 +32,10 @@ class FiftAssemblyFindUsagesProvider : FindUsagesProvider {
     override fun getType(element: PsiElement): String {
         val grand = element.parent.parent
         return when (grand) {
-            is FiftGlobalVar                                   -> "global variable"
+            is FiftGlobalVar -> "global variable"
             is FiftProcDefinition, is FiftProcInlineDefinition -> "procedure"
-            is FiftMethodDefinition                            -> "method"
-            else                                               -> return ""
+            is FiftMethodDefinition -> "method"
+            else -> return ""
         }
     }
 

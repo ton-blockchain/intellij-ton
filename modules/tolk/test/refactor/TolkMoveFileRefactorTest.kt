@@ -12,7 +12,7 @@ class TolkMoveFileRefactorTest : TolkTestBase() {
             """
                 [import-mappings]
                 contracts = "contracts"
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         myFixture.addFileToProject("contracts/foo.tolk", "fun foo() {}")
@@ -25,7 +25,7 @@ class TolkMoveFileRefactorTest : TolkTestBase() {
                 fun main() {
                     foo();
                 }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         myFixture.configureFromExistingVirtualFile(mainFile.virtualFile)
@@ -45,7 +45,7 @@ class TolkMoveFileRefactorTest : TolkTestBase() {
                 fun main() {
                     foo();
                 }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 }

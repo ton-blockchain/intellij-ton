@@ -10,7 +10,7 @@ fun TolkTy.render(
     unknown = unknown,
     anonymous = anonymous,
     includeTypeArguments = includeTypeArguments,
-    useAliasNames = useAliasNames
+    useAliasNames = useAliasNames,
 ).render(this, level)
 
 private class TypeRenderer(
@@ -29,11 +29,13 @@ private class TypeRenderer(
         }
 
         return when (ty) {
-            is TolkTyAlias -> if (useAliasNames) buildString {
-                val psi = ty.psi
-                append(psi.name ?: return anonymous)
-                if (includeTypeArguments && ty.typeArguments.isNotEmpty()) {
-                    append(ty.typeArguments.joinToString(", ", "<", ">", transform = render))
+            is TolkTyAlias -> if (useAliasNames) {
+                buildString {
+                    val psi = ty.psi
+                    append(psi.name ?: return anonymous)
+                    if (includeTypeArguments && ty.typeArguments.isNotEmpty()) {
+                        append(ty.typeArguments.joinToString(", ", "<", ">", transform = render))
+                    }
                 }
             } else {
                 render(ty.underlyingType, level)

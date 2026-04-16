@@ -12,9 +12,8 @@ import org.ton.intellij.func.psi.FuncElement
 import org.ton.intellij.func.psi.FuncVisitor
 import org.ton.intellij.util.findExistingEditor
 
-abstract class FuncAbstractApplicabilityBasedInspection<TElement : FuncElement>(
-    val elementType: Class<TElement>,
-) : FuncInspectionBase() {
+abstract class FuncAbstractApplicabilityBasedInspection<TElement : FuncElement>(val elementType: Class<TElement>) :
+    FuncInspectionBase() {
     abstract val defaultFixText: String
 
     open val startFixInWriteAction = true
@@ -47,7 +46,7 @@ abstract class FuncAbstractApplicabilityBasedInspection<TElement : FuncElement>(
             isOnTheFly,
             inspectionHighlightType(element),
             inspectionHighlightRangeInElement(element),
-            LocalFix(this, fixText(element))
+            LocalFix(this, fixText(element)),
         )
     }
 

@@ -20,12 +20,12 @@ object TolkFunCompletionProvider : TolkCompletionProvider() {
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         val position = parameters.position
         if (position.prevVisibleOrNewLine.elementType == TolkElementTypes.GET_KEYWORD) {
             result.addElement(
-                LookupElementBuilder.create("fun").withBoldness(true)
+                LookupElementBuilder.create("fun").withBoldness(true),
             )
         }
     }

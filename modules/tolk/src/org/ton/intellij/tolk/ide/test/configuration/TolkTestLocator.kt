@@ -27,7 +27,8 @@ object TolkTestLocator : SMTestLocator {
         val file = VirtualFileManager.getInstance().findFileByNioPath(Path.of(filepath)) ?: return mutableListOf()
         val psiFile = PsiManager.getInstance(project).findFile(file) as? TolkFile ?: return mutableListOf()
 
-        val function = psiFile.functions.find { normalizeTestName(it.name ?: "") == functionName } ?: return mutableListOf()
+        val function =
+            psiFile.functions.find { normalizeTestName(it.name ?: "") == functionName } ?: return mutableListOf()
 
         return mutableListOf(PsiLocation(function))
     }

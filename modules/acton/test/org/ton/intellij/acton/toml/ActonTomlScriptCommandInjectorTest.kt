@@ -10,7 +10,7 @@ class ActonTomlScriptCommandInjectorTest : BasePlatformTestCase() {
             """
                 [scripts]
                 deploy = "acton script scripts/deploy.tolk --net testnet<caret>"
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertShellLanguage(injected.containingFile.language.id, injected.containingFile.language.displayName)
@@ -24,7 +24,7 @@ class ActonTomlScriptCommandInjectorTest : BasePlatformTestCase() {
                 acton build &&
                 acton test<caret>
                 ${"\"\"\""}
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertShellLanguage(injected.containingFile.language.id, injected.containingFile.language.displayName)
@@ -36,17 +36,18 @@ class ActonTomlScriptCommandInjectorTest : BasePlatformTestCase() {
             """
                 [package]
                 description = "acton script scripts/deploy.tolk<caret>"
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val injected = InjectedLanguageManager.getInstance(project).findInjectedElementAt(file, myFixture.caretOffset)
         assertNull(injected)
     }
 
-    private fun injectedElementAtCaret(code: String): PsiElement = myFixture.configureByText("Acton.toml", code).let { file ->
-        InjectedLanguageManager.getInstance(project).findInjectedElementAt(file, myFixture.caretOffset)
-            ?: throw AssertionError("Expected injected language at caret")
-    }
+    private fun injectedElementAtCaret(code: String): PsiElement =
+        myFixture.configureByText("Acton.toml", code).let { file ->
+            InjectedLanguageManager.getInstance(project).findInjectedElementAt(file, myFixture.caretOffset)
+                ?: throw AssertionError("Expected injected language at caret")
+        }
 
     private fun assertShellLanguage(languageId: String, displayName: String) {
         val matches = languageId in SHELL_LANGUAGE_IDS || displayName in SHELL_LANGUAGE_NAMES

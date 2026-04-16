@@ -9,7 +9,9 @@ import org.ton.intellij.func.psi.*
 import org.ton.intellij.func.stub.FuncNamedStub
 import javax.swing.Icon
 
-abstract class FuncNamedElementImpl<T : FuncNamedStub<*>> : FuncStubbedElementImpl<T>, FuncNamedElement {
+abstract class FuncNamedElementImpl<T : FuncNamedStub<*>> :
+    FuncStubbedElementImpl<T>,
+    FuncNamedElement {
     constructor(stub: T, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
     constructor(node: ASTNode) : super(node)
 

@@ -11,7 +11,9 @@ import org.ton.intellij.tlb.TlbFileType
 import org.ton.intellij.tlb.TlbLanguage
 import java.io.File
 
-class TlbFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TlbLanguage), TlbElement {
+class TlbFile(viewProvider: FileViewProvider) :
+    PsiFileBase(viewProvider, TlbLanguage),
+    TlbElement {
     override fun getFileType(): FileType = TlbFileType
     override fun toString(): String = "TLB"
 
@@ -33,9 +35,7 @@ class TlbFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TlbLan
         }
     }
 
-    fun constructors(): List<TlbConstructor> {
-        return findChildrenByClass(TlbConstructor::class.java).toList()
-    }
+    fun constructors(): List<TlbConstructor> = findChildrenByClass(TlbConstructor::class.java).toList()
 
     /**
      * Find all dependson declarations in comments like:

@@ -8,10 +8,13 @@ import com.intellij.psi.util.parentOfType
 import com.intellij.psi.util.startOffset
 import org.ton.intellij.tolk.psi.TolkExpressionStatement
 
-class TolkMatchPostfixTemplate : PostfixTemplate(
-    "tolk.postfix.match", "match",
-    "match (expr) {}", null
-) {
+class TolkMatchPostfixTemplate :
+    PostfixTemplate(
+        "tolk.postfix.match",
+        "match",
+        "match (expr) {}",
+        null,
+    ) {
     override fun isApplicable(context: PsiElement, copyDocument: Document, newOffset: Int) =
         TolkPostfixUtil.isExpression(context)
 
@@ -22,7 +25,9 @@ class TolkMatchPostfixTemplate : PostfixTemplate(
         document.insertString(element.startOffset, "match (")
 
         TolkPostfixUtil.startTemplate(
-            ") {\n\t\$END$\n}", context.project, editor,
+            ") {\n\t\$END$\n}",
+            context.project,
+            editor,
         )
     }
 }

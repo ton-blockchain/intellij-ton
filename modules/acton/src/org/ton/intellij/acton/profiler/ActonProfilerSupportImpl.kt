@@ -13,7 +13,10 @@ import com.intellij.profiler.clion.ProfilerExecutor
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 
 class ActonProfilerSupportImpl : ActonProfilerSupport {
-    override fun createTestSession(configuration: ActonCommandConfiguration, executor: Executor): ActonProfilerSession? {
+    override fun createTestSession(
+        configuration: ActonCommandConfiguration,
+        executor: Executor,
+    ): ActonProfilerSession? {
         if (executor.id != ProfilerExecutor.EXECUTOR_ID) return null
 
         val dumpManager = ProfilerDumpManager.getInstance(configuration.project)
@@ -30,7 +33,7 @@ class ActonProfilerSupportImpl : ActonProfilerSupport {
             "--profile-format",
             "collapsed",
             "--cpuprofile",
-            profilerDump.file.absolutePath
+            profilerDump.file.absolutePath,
         )
 
         override fun attachToProcess(handler: KillableColoredProcessHandler) {
@@ -38,7 +41,9 @@ class ActonProfilerSupportImpl : ActonProfilerSupport {
                 override fun processTerminated(event: ProcessEvent) {
                     val dumpFile = profilerDump.file
                     if (!dumpFile.exists() || dumpFile.length() == 0L) {
-                        LOG.warn("Acton CPU profile was not produced for '${configuration.name}' at ${dumpFile.absolutePath}")
+                        LOG.warn(
+                            "Acton CPU profile was not produced for '${configuration.name}' at ${dumpFile.absolutePath}",
+                        )
                         profilerDump.remove()
                         return
                     }
@@ -53,7 +58,7 @@ class ActonProfilerSupportImpl : ActonProfilerSupport {
                             configuration.project,
                             profilerDump,
                             null,
-                            null
+                            null,
                         )
                     }
                 }

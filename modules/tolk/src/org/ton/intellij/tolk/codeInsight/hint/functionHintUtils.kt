@@ -7,7 +7,7 @@ import org.ton.intellij.util.nextOrNull
 internal fun iterateOverParameters(
     callExpression: TolkCallExpression,
     referenceResolver: (TolkReferenceElement) -> PsiElement? = { it.reference?.resolve() },
-    processor: (TolkParameterElement, TolkArgument?) -> Unit
+    processor: (TolkParameterElement, TolkArgument?) -> Unit,
 ) {
     val calleeExpression = callExpression.expression
     val argumentIterator = callExpression.argumentList.argumentList.iterator()
@@ -23,11 +23,13 @@ internal fun iterateOverParameters(
             val receiver = calleeExpression.expression
             // empty references means its reference to primitive type
             val selfParameter = parameterList.selfParameter
-            if (selfParameter != null
-                && receiver is TolkReferenceExpression
-                && (referenceResolver(receiver).let {
-                   it is TolkTypeSymbolElement || it == null
-                })
+            if (selfParameter != null &&
+                receiver is TolkReferenceExpression &&
+                (
+                    referenceResolver(receiver).let {
+                        it is TolkTypeSymbolElement || it == null
+                    }
+                    )
             ) {
                 val selfArg = argumentIterator.nextOrNull()
                 if (selfArg != null) {

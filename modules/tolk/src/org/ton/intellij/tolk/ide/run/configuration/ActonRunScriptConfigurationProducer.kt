@@ -13,23 +13,22 @@ import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.util.parentOfType
 
 class ActonRunScriptConfigurationProducer : LazyRunConfigurationProducer<ActonCommandConfiguration>() {
-    override fun getConfigurationFactory(): ConfigurationFactory =
-        ActonCommandConfigurationType.getInstance().factory
+    override fun getConfigurationFactory(): ConfigurationFactory = ActonCommandConfigurationType.getInstance().factory
 
     override fun isConfigurationFromContext(
         configuration: ActonCommandConfiguration,
-        context: ConfigurationContext
+        context: ConfigurationContext,
     ): Boolean {
         val element = context.location?.psiElement ?: return false
         val containingFile = element.containingFile as? TolkFile ?: return false
         val function = element.parentOfType<TolkFunction>() ?: return false
-        
+
         if (function.name == "main") {
             val actonToml = ActonToml.find(configuration.project) ?: return false
             return configuration.command == "script" &&
-                   configuration.scriptPath == containingFile.virtualFile.path &&
-                   configuration.workingDirectory == actonToml.workingDir &&
-                   configuration.scriptBroadcastNet.isBlank()
+                configuration.scriptPath == containingFile.virtualFile.path &&
+                configuration.workingDirectory == actonToml.workingDir &&
+                configuration.scriptBroadcastNet.isBlank()
         }
         return false
     }
@@ -37,7 +36,7 @@ class ActonRunScriptConfigurationProducer : LazyRunConfigurationProducer<ActonCo
     override fun setupConfigurationFromContext(
         configuration: ActonCommandConfiguration,
         context: ConfigurationContext,
-        sourceElement: Ref<PsiElement>
+        sourceElement: Ref<PsiElement>,
     ): Boolean {
         val element = sourceElement.get() ?: return false
         val containingFile = element.containingFile as? TolkFile ?: return false

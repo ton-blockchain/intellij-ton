@@ -6,15 +6,21 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import org.ton.intellij.acton.ActonBundle
 
-class ActonSuppressLinterFix(
-    private val ruleName: String,
-) : SuppressQuickFix {
+class ActonSuppressLinterFix(private val ruleName: String) : SuppressQuickFix {
 
-    override fun getFamilyName(): String =
-        if (ruleName == "all") ActonBundle.message("intention.family.name.suppress.all.acton.fix") else ActonBundle.message("intention.family.name.suppress.acton.fix")
+    override fun getFamilyName(): String = if (ruleName ==
+        "all"
+    ) {
+        ActonBundle.message("intention.family.name.suppress.all.acton.fix")
+    } else {
+        ActonBundle.message("intention.family.name.suppress.acton.fix")
+    }
 
-    override fun getName(): String = if (ruleName == "all") ActonBundle.message("intention.name.suppress.all.fix")
-    else ActonBundle.message("intention.name.suppress.fix", ruleName)
+    override fun getName(): String = if (ruleName == "all") {
+        ActonBundle.message("intention.name.suppress.all.fix")
+    } else {
+        ActonBundle.message("intention.name.suppress.fix", ruleName)
+    }
 
     override fun isAvailable(project: Project, context: PsiElement): Boolean = context.isValid
 
@@ -35,7 +41,7 @@ class ActonSuppressLinterFix(
         }
         val indentation = text.subSequence(lineStartOffset, i).toString()
 
-        val suppressionComment = "${indentation}// check-disable-next-line $ruleName\n"
+        val suppressionComment = "$indentation// check-disable-next-line $ruleName\n"
         document.insertString(lineStartOffset, suppressionComment)
     }
 }

@@ -28,7 +28,7 @@ class ActonModuleBuilder : ModuleBuilder() {
             command = command.name,
             workingDirectory = Paths.get(root.path),
             additionalArguments = command.getArguments(),
-            environmentVariables = settings.env
+            environmentVariables = settings.env,
         ).toGeneralCommandLine(project) ?: return
 
         ProgressManager.getInstance().runProcessWithProgressSynchronously(
@@ -39,7 +39,7 @@ class ActonModuleBuilder : ModuleBuilder() {
             },
             "Generating Acton Project",
             true,
-            project
+            project,
         )
 
         root.refresh(false, true)

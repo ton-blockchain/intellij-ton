@@ -12,9 +12,8 @@ import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkVisitor
 import org.ton.intellij.util.findExistingEditor
 
-abstract class TolkAbstractApplicabilityBasedInspection<TElement : TolkElement>(
-    val elementType: Class<TElement>,
-) : TolkInspectionBase() {
+abstract class TolkAbstractApplicabilityBasedInspection<TElement : TolkElement>(val elementType: Class<TElement>) :
+    TolkInspectionBase() {
     abstract val defaultFixText: String
 
     open val startFixInWriteAction = true
@@ -47,7 +46,7 @@ abstract class TolkAbstractApplicabilityBasedInspection<TElement : TolkElement>(
             isOnTheFly,
             inspectionHighlightType(element),
             inspectionHighlightRangeInElement(element),
-            LocalFix(this, fixText(element))
+            LocalFix(this, fixText(element)),
         )
     }
 

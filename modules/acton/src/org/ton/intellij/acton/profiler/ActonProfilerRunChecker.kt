@@ -9,7 +9,6 @@ class ActonProfilerRunChecker : ProfilerRunChecker {
 
     override fun isDTraceProfilerCanBeUsed(): Boolean = false
 
-    override fun isProfilerCompatible(profile: RunProfile): Boolean {
-        return profile is ActonCommandConfiguration && profile.command == "test"
-    }
+    override fun isProfilerCompatible(profile: RunProfile): Boolean =
+        profile is ActonCommandConfiguration && profile.command == "test"
 }

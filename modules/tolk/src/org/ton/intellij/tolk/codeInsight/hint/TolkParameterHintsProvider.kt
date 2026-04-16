@@ -12,10 +12,7 @@ import org.ton.intellij.tolk.psi.unwrapParentheses
 import org.ton.intellij.util.printPsi
 
 class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
-    override fun collectFromElement(
-        element: PsiElement,
-        sink: InlayTreeSink,
-    ) {
+    override fun collectFromElement(element: PsiElement, sink: InlayTreeSink) {
         if (!element.isValid || element !is TolkCallExpression) return
 
         val function = element.functionSymbol
@@ -25,7 +22,7 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
         }
 
         iterateOverParameters(
-            element
+            element,
         ) { parameter, argument ->
             if (!parameter.isValid || argument?.isValid == false) return@iterateOverParameters
             val parameterName = parameter.name ?: return@iterateOverParameters
@@ -43,10 +40,7 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
         }
     }
 
-    private fun needParameterHint(
-        expression: TolkExpression,
-        parameterName: String,
-    ): Boolean {
+    private fun needParameterHint(expression: TolkExpression, parameterName: String): Boolean {
         if (parameterName.length == 1) {
             // no need to show a hint for single letter parameters as it does not add any information to the reader
             return false

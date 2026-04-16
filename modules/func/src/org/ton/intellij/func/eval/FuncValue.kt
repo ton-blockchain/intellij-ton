@@ -10,28 +10,20 @@ import java.util.zip.CRC32
 sealed interface FuncValue : FuncTyProvider
 
 object FuncUnknownValue : FuncValue {
-    override fun getFuncTy(): FuncTy {
-        return FuncTyUnknown
-    }
+    override fun getFuncTy(): FuncTy = FuncTyUnknown
 }
 
 data class FuncIntValue(val value: BigInteger) : FuncValue {
     override fun toString(): String = value.toString()
-    override fun getFuncTy(): FuncTy {
-        return FuncTyInt
-    }
+    override fun getFuncTy(): FuncTy = FuncTyInt
 }
 
 data class FuncTupleValue(val values: List<FuncValue?>) : FuncValue {
-    override fun getFuncTy(): FuncTy {
-        return FuncTyTuple(values.map { it?.getFuncTy() ?: FuncTyUnknown })
-    }
+    override fun getFuncTy(): FuncTy = FuncTyTuple(values.map { it?.getFuncTy() ?: FuncTyUnknown })
 }
 
 data class FuncTensorValue(val values: List<FuncValue?>) : FuncValue {
-    override fun getFuncTy(): FuncTy {
-        return FuncTyTensor(values.map { it?.getFuncTy() ?: FuncTyUnknown })
-    }
+    override fun getFuncTy(): FuncTy = FuncTyTensor(values.map { it?.getFuncTy() ?: FuncTyUnknown })
 }
 
 @OptIn(ExperimentalUnsignedTypes::class)
@@ -130,6 +122,6 @@ val FuncLiteralExpression.isIntegerString: Boolean
         }
         return when (tag) {
             'u', 'h', 'H', 'c' -> true
-            else               -> false
+            else -> false
         }
     }

@@ -32,7 +32,6 @@ class FuncAnnotator : Annotator {
                 val sha = element.node.firstChildNode
                 val macroName = sha.treeNext
 
-
                 highlight(macroName.textRange, holder, FuncColor.MACRO.textAttributesKey)
                 return
             }
@@ -41,7 +40,7 @@ class FuncAnnotator : Annotator {
                 highlight(
                     element.identifier ?: return,
                     holder,
-                    FuncColor.GLOBAL_VARIABLE.textAttributesKey
+                    FuncColor.GLOBAL_VARIABLE.textAttributesKey,
                 )
                 return
             }
@@ -50,7 +49,7 @@ class FuncAnnotator : Annotator {
                 highlight(
                     element.identifier,
                     holder,
-                    FuncColor.CONSTANT.textAttributesKey
+                    FuncColor.CONSTANT.textAttributesKey,
                 )
                 return
             }
@@ -59,7 +58,7 @@ class FuncAnnotator : Annotator {
                 highlight(
                     element.identifier ?: return,
                     holder,
-                    FuncColor.PARAMETER.textAttributesKey
+                    FuncColor.PARAMETER.textAttributesKey,
                 )
                 return
             }
@@ -70,7 +69,7 @@ class FuncAnnotator : Annotator {
                     highlight(
                         element.identifier,
                         holder,
-                        FuncColor.LOCAL_VARIABLE.textAttributesKey
+                        FuncColor.LOCAL_VARIABLE.textAttributesKey,
                     )
                 } else {
                     val resolved = reference.resolve() ?: return
@@ -82,7 +81,7 @@ class FuncAnnotator : Annotator {
                         highlight(
                             range,
                             holder,
-                            FuncColor.FUNCTION_CALL.textAttributesKey
+                            FuncColor.FUNCTION_CALL.textAttributesKey,
                         )
                         return
                     }
@@ -108,7 +107,7 @@ class FuncAnnotator : Annotator {
                 if (value is FuncIntValue && (value.value !in TVM_INT_MIN_VALUE..TVM_INT_MAX_VALUE)) {
                     holder.newAnnotation(
                         HighlightSeverity.ERROR,
-                        FuncBundle.message("inspection.int_literal_out_of_range")
+                        FuncBundle.message("inspection.int_literal_out_of_range"),
                     ).range(element).create()
                 }
             }

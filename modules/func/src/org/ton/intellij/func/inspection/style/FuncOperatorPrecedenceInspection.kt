@@ -10,14 +10,12 @@ import org.ton.intellij.func.inspection.FuncInspectionBase
 import org.ton.intellij.func.psi.*
 
 class FuncOperatorPrecedenceInspection : FuncInspectionBase() {
-    override fun buildFuncVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): FuncVisitor = object : FuncVisitor() {
-        override fun visitBinExpression(expression: FuncBinExpression) {
-            checkSuspiciousPrecedence(expression, holder)
+    override fun buildFuncVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): FuncVisitor =
+        object : FuncVisitor() {
+            override fun visitBinExpression(expression: FuncBinExpression) {
+                checkSuspiciousPrecedence(expression, holder)
+            }
         }
-    }
 
     private fun checkSuspiciousPrecedence(expression: FuncBinExpression, holder: ProblemsHolder) {
         if (isSuspiciousMixedPrecedence(expression)) {
@@ -25,7 +23,7 @@ class FuncOperatorPrecedenceInspection : FuncInspectionBase() {
                 expression,
                 FuncBundle.message("inspection.func.operator.precedence.message"),
                 ProblemHighlightType.WEAK_WARNING,
-                FuncAddParenthesesFix(expression)
+                FuncAddParenthesesFix(expression),
             )
         }
     }
@@ -54,9 +52,9 @@ class FuncOperatorPrecedenceInspection : FuncInspectionBase() {
     }
 }
 
-class FuncAddParenthesesFix(
-    element: PsiElement,
-) : LocalQuickFixAndIntentionActionOnPsiElement(element), LocalQuickFix {
+class FuncAddParenthesesFix(element: PsiElement) :
+    LocalQuickFixAndIntentionActionOnPsiElement(element),
+    LocalQuickFix {
 
     override fun getFamilyName(): String = FuncBundle.message("inspection.func.operator.precedence.fix.family.name")
     override fun getText(): String = FuncBundle.message("inspection.func.operator.precedence.fix.text")
@@ -97,7 +95,6 @@ class FuncAddParenthesesFix(
         }
     }
 }
-
 
 private fun hasComparisonAtTopLevel(expr: FuncExpression?): Boolean {
     if (expr !is FuncBinExpression) return false

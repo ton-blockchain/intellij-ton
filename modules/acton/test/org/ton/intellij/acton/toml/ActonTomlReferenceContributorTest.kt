@@ -1,11 +1,11 @@
 package org.ton.intellij.acton.toml
 
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiDirectory
+import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import org.toml.lang.psi.TomlLiteral
 import org.toml.lang.psi.TomlKeySegment
+import org.toml.lang.psi.TomlLiteral
 
 class ActonTomlReferenceContributorTest : BasePlatformTestCase() {
     fun testImportMappingsTableProvidesFileReferences() {
@@ -15,7 +15,7 @@ class ActonTomlReferenceContributorTest : BasePlatformTestCase() {
             """
                 [import-mappings]
                 contracts = "cont<caret>racts"
-            """.trimIndent()
+            """.trimIndent(),
         )
         val resolvedName = (resolved as? PsiDirectory)?.virtualFile?.name
             ?: (resolved as? PsiElement)?.containingFile?.virtualFile?.name
@@ -32,7 +32,7 @@ class ActonTomlReferenceContributorTest : BasePlatformTestCase() {
                 [contracts.app]
                 src = "contracts/app.tolk"
                 depends = ["cou<caret>nter"]
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertEquals("counter", (resolved as? TomlKeySegment)?.name)
@@ -48,7 +48,7 @@ class ActonTomlReferenceContributorTest : BasePlatformTestCase() {
                 [contracts.app]
                 src = "contracts/app.tolk"
                 depends = [{ name = "cou<caret>nter" }]
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertEquals("counter", (resolved as? TomlKeySegment)?.name)
@@ -61,14 +61,14 @@ class ActonTomlReferenceContributorTest : BasePlatformTestCase() {
             """
                 [wallets.alice]
                 mnemonic = "test test test"
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val resolved = resolveLiteralReference(
             """
                 [litenode]
                 accounts = ["ali<caret>ce"]
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertEquals("alice", (resolved as? TomlKeySegment)?.name)
@@ -82,7 +82,7 @@ class ActonTomlReferenceContributorTest : BasePlatformTestCase() {
 
                 [test]
                 fork-net = { custom = "dev<caret>net" }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertEquals("devnet", (resolved as? TomlKeySegment)?.name)
@@ -97,7 +97,7 @@ class ActonTomlReferenceContributorTest : BasePlatformTestCase() {
 
                 [lint.rules.no-inline]
                 cou<caret>nter = "warn"
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         assertEquals("counter", (resolved as? TomlKeySegment)?.name)
@@ -106,7 +106,11 @@ class ActonTomlReferenceContributorTest : BasePlatformTestCase() {
 
     private fun resolveLiteralReference(code: String): PsiElement {
         val file = myFixture.configureByText("Acton.toml", code)
-        val literal = PsiTreeUtil.getParentOfType(file.findElementAt(myFixture.caretOffset), TomlLiteral::class.java, false)
+        val literal = PsiTreeUtil.getParentOfType(
+            file.findElementAt(myFixture.caretOffset),
+            TomlLiteral::class.java,
+            false,
+        )
         assertNotNull(literal)
 
         val references = literal!!.references
@@ -119,7 +123,11 @@ class ActonTomlReferenceContributorTest : BasePlatformTestCase() {
 
     private fun resolveKeyReference(code: String): PsiElement {
         val file = myFixture.configureByText("Acton.toml", code)
-        val keySegment = PsiTreeUtil.getParentOfType(file.findElementAt(myFixture.caretOffset), TomlKeySegment::class.java, false)
+        val keySegment = PsiTreeUtil.getParentOfType(
+            file.findElementAt(myFixture.caretOffset),
+            TomlKeySegment::class.java,
+            false,
+        )
         assertNotNull(keySegment)
 
         val references = keySegment!!.references

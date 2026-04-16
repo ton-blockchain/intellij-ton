@@ -6,7 +6,9 @@ import org.ton.intellij.tolk.psi.TolkTensorTypeExpression
 import org.ton.intellij.tolk.stub.TolkTypeStub
 import org.ton.intellij.tolk.type.TolkTy
 
-abstract class TolkTensorTypeExpressionMixin : TolkTypeExpressionImpl, TolkTensorTypeExpression {
+abstract class TolkTensorTypeExpressionMixin :
+    TolkTypeExpressionImpl,
+    TolkTensorTypeExpression {
 
     constructor(node: ASTNode) : super(node)
     constructor(stub: TolkTypeStub<*>, stubType: IStubElementType<*, *>) : super(stub, stubType)

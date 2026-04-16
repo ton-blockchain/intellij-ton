@@ -10,9 +10,8 @@ import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.stub.TolkFunctionStub
 import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 
-class TolkFunctionStubElementType(
-    debugName: String,
-) : TolkNamedStubElementType<TolkFunctionStub, TolkFunction>(debugName) {
+class TolkFunctionStubElementType(debugName: String) :
+    TolkNamedStubElementType<TolkFunctionStub, TolkFunction>(debugName) {
     override val extraIndexKeys = listOf(TolkFunctionIndex.KEY)
 
     override fun serialize(stub: TolkFunctionStub, dataStream: StubOutputStream) {
@@ -53,8 +52,8 @@ class TolkFunctionStubElementType(
         )
     }
 
-    override fun createStub(psi: TolkFunction, parentStub: StubElement<out PsiElement>): TolkFunctionStub {
-        return TolkFunctionStub(
+    override fun createStub(psi: TolkFunction, parentStub: StubElement<out PsiElement>): TolkFunctionStub =
+        TolkFunctionStub(
             parentStub,
             this,
             name = psi.name,
@@ -66,11 +65,8 @@ class TolkFunctionStubElementType(
             hasSelf = psi.hasSelf,
             hasReceiver = psi.hasReceiver,
         )
-    }
 
-    override fun createPsi(stub: TolkFunctionStub): TolkFunction {
-        return TolkFunctionImpl(stub, this)
-    }
+    override fun createPsi(stub: TolkFunctionStub): TolkFunction = TolkFunctionImpl(stub, this)
 
     companion object {
         private const val IS_MUTABLE_FLAG = 1 shl 0

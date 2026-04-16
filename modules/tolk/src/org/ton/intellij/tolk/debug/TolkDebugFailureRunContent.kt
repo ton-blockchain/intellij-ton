@@ -12,7 +12,7 @@ internal object TolkDebugFailureRunContent {
         environment: ExecutionEnvironment,
         executionResult: ExecutionResult,
         error: Throwable,
-        title: String
+        title: String,
     ): Boolean {
         if (error !is ExecutionException) return false
         val processHandler = executionResult.processHandler ?: return false

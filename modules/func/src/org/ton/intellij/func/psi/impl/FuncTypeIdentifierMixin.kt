@@ -11,10 +11,14 @@ import com.intellij.psi.util.PsiTreeUtil
 import org.ton.intellij.func.psi.FuncFunction
 import org.ton.intellij.func.psi.FuncTypeIdentifier
 
-abstract class FuncTypeIdentifierMixin(node: ASTNode) : ASTWrapperPsiElement(node), FuncTypeIdentifier {
+abstract class FuncTypeIdentifierMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    FuncTypeIdentifier {
     override fun getReferences(): Array<PsiReference> = arrayOf(
         object : PsiReferenceBase.Poly<FuncTypeIdentifier>(
-            this, TextRange(0, textLength), false
+            this,
+            TextRange(0, textLength),
+            false,
         ) {
             override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
                 return buildList<ResolveResult> {
@@ -32,7 +36,7 @@ abstract class FuncTypeIdentifierMixin(node: ASTNode) : ASTWrapperPsiElement(nod
                     }
                 }.toTypedArray()
             }
-        }
+        },
     )
 
     override fun getReference(): PsiReference? = references.firstOrNull()

@@ -20,9 +20,7 @@ class ActonTomlScriptCommandInjector : MultiHostInjector {
             .doneInjecting()
     }
 
-    override fun elementsToInjectIn(): List<Class<out PsiElement>> {
-        return listOf(TomlLiteral::class.java)
-    }
+    override fun elementsToInjectIn(): List<Class<out PsiElement>> = listOf(TomlLiteral::class.java)
 
     private companion object {
         private val SHELL_LANGUAGE_IDS = listOf("Shell Script", "Bash", "sh")

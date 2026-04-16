@@ -42,8 +42,7 @@ val ASTNode.textRangeInParent: TextRange
 inline fun <reified T : PsiElement> PsiElement.ancestorStrict(): T? =
     PsiTreeUtil.getParentOfType(this, T::class.java, /* strict */ true)
 
-inline fun <reified T : PsiElement> PsiElement.childOfType(): T? =
-    PsiTreeUtil.getChildOfType(this, T::class.java)
+inline fun <reified T : PsiElement> PsiElement.childOfType(): T? = PsiTreeUtil.getChildOfType(this, T::class.java)
 
 inline fun <reified T : PsiElement> PsiElement.descendantOfTypeStrict(): T? =
     PsiTreeUtil.findChildOfType(this, T::class.java, /* strict */ true)
@@ -67,9 +66,7 @@ val PsiElement.contexts: Sequence<PsiElement>
         if (it is PsiFile) null else it.context
     }
 
-fun ASTNode?.isWhitespaceOrEmpty(): Boolean {
-    return this == null || textLength == 0 || elementType == TokenType.WHITE_SPACE
-}
+fun ASTNode?.isWhitespaceOrEmpty(): Boolean = this == null || textLength == 0 || elementType == TokenType.WHITE_SPACE
 
 @Suppress("UNCHECKED_CAST")
 inline val <T : StubElement<*>> StubBasedPsiElement<T>.greenStub: T?
@@ -86,16 +83,16 @@ fun checkCommitIsNotInProgress(project: Project) {
 
 inline fun <Key : Any, reified Psi : PsiElement> getElements(
     indexKey: StubIndexKey<Key, Psi>,
-    key: Key, project: Project,
-    scope: GlobalSearchScope? = null
-): Collection<Psi> =
-    StubIndex.getElements(indexKey, key, project, scope, Psi::class.java)
+    key: Key,
+    project: Project,
+    scope: GlobalSearchScope? = null,
+): Collection<Psi> = StubIndex.getElements(indexKey, key, project, scope, Psi::class.java)
 
 inline fun <Key : Any> processAllKeys(
     indexKey: StubIndexKey<Key, *>,
     project: Project,
     scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-    noinline processor: (Key) -> Boolean
+    noinline processor: (Key) -> Boolean,
 ) {
     StubIndex.getInstance().processAllKeys(indexKey, processor, scope)
 }
@@ -103,9 +100,8 @@ inline fun <Key : Any> processAllKeys(
 fun <T> recursionGuard(key: Any, memoize: Boolean = true, block: Computable<T>): T? =
     RecursionManager.doPreventingRecursion(key, memoize, block)
 
-inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> {
-    return PlatformPatterns.psiElement(I::class.java)
-}
+inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> =
+    PlatformPatterns.psiElement(I::class.java)
 
 val PsiElement.leftLeaves: Sequence<PsiElement>
     get() = generateSequence(this, PsiTreeUtil::prevLeaf).drop(1)
@@ -125,20 +121,17 @@ val PsiElement.prevVisibleOrNewLine: PsiElement?
         .filter { it !is PsiWhiteSpace || it.textContains('\n') }
         .firstOrNull()
 
-
 fun <E : PsiElement> getChildrenByType(
     stub: StubElement<out PsiElement>,
     elementType: IElementType,
     f: ArrayFactory<E?>,
-): List<E> {
-    return stub.getChildrenByType(elementType, f).toList() as List<E>
-}
+): List<E> = stub.getChildrenByType(elementType, f).toList() as List<E>
 
 fun ASTNode.shouldCreateStubIfParentIsStub(): Boolean {
     val parent = treeParent
     val parentType = parent.elementType
     return (parentType is IStubElementType<*, *> && parentType.shouldCreateStub(parent)) ||
-            parentType is IStubFileElementType<*>
+        parentType is IStubFileElementType<*>
 }
 
 val LookupElement.presentation: LookupElementPresentation

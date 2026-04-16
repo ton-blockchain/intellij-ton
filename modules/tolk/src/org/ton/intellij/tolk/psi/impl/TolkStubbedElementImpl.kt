@@ -6,7 +6,9 @@ import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.stubs.StubBase
 import org.ton.intellij.tolk.psi.TolkElement
 
-abstract class TolkStubbedElementImpl<T : StubBase<*>> : StubBasedPsiElementBase<T>, TolkElement {
+abstract class TolkStubbedElementImpl<T : StubBase<*>> :
+    StubBasedPsiElementBase<T>,
+    TolkElement {
     constructor(stub: T, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
     constructor(node: ASTNode) : super(node)
 

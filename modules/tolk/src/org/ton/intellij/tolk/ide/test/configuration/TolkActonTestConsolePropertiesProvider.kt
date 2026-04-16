@@ -8,7 +8,7 @@ import org.ton.intellij.acton.runconfig.ActonTestConsolePropertiesProvider
 class TolkActonTestConsolePropertiesProvider : ActonTestConsolePropertiesProvider {
     override fun createConsoleProperties(
         configuration: ActonCommandConfiguration,
-        executor: Executor
+        executor: Executor,
     ): SMTRunnerConsoleProperties? {
         if (configuration.command == "test") {
             return TolkTestConsoleProperties(configuration, executor)

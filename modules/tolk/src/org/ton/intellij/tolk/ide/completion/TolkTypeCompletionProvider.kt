@@ -66,7 +66,7 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         val project = parameters.originalFile.project
         val position = parameters.position
@@ -86,7 +86,7 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
 
         parameterListOwner?.typeParameterList?.typeParameterList?.forEach { type ->
             result.addElement(
-                LookupElementBuilder.createWithIcon(type)
+                LookupElementBuilder.createWithIcon(type),
             )
         }
         cachedPrimitiveElements.forEach { (_, lookup) ->
@@ -105,7 +105,7 @@ object TolkTypeCompletionProvider : TolkCompletionProvider() {
                 key,
                 project,
                 GlobalSearchScope.allScope(project),
-                TolkTypeSymbolElement::class.java
+                TolkTypeSymbolElement::class.java,
             ) {
                 сandidates.add(it)
                 true

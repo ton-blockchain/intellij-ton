@@ -19,17 +19,16 @@ class TolkBraceMatcher : PairedBraceMatcher {
 
     override fun getPairs(): Array<BracePair> = pairs
 
-    override fun isPairedBracesAllowedBeforeType(lbraceType: IElementType, contextType: IElementType?): Boolean {
-        return TolkParserDefinition.WHITE_SPACE_OR_COMMENT_BIT_SET.contains(contextType)
-                || contextType == TolkElementTypes.COLON
-                || contextType == TolkElementTypes.SEMICOLON
-                || contextType == TolkElementTypes.COMMA
-                || contextType == TolkElementTypes.DOT
-                || contextType == TolkElementTypes.RPAREN
-                || contextType == TolkElementTypes.RBRACK
-                || contextType == TolkElementTypes.RBRACE
-                || contextType == TolkElementTypes.LBRACE
-    }
+    override fun isPairedBracesAllowedBeforeType(lbraceType: IElementType, contextType: IElementType?): Boolean =
+        TolkParserDefinition.WHITE_SPACE_OR_COMMENT_BIT_SET.contains(contextType) ||
+            contextType == TolkElementTypes.COLON ||
+            contextType == TolkElementTypes.SEMICOLON ||
+            contextType == TolkElementTypes.COMMA ||
+            contextType == TolkElementTypes.DOT ||
+            contextType == TolkElementTypes.RPAREN ||
+            contextType == TolkElementTypes.RBRACK ||
+            contextType == TolkElementTypes.RBRACE ||
+            contextType == TolkElementTypes.LBRACE
 
     override fun getCodeConstructStart(file: PsiFile?, openingBraceOffset: Int): Int {
         val element = file?.findElementAt(openingBraceOffset)

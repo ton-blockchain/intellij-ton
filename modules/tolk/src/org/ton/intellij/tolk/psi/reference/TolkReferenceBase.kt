@@ -9,9 +9,7 @@ import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.psi.TolkReferenceElement
 
-abstract class TolkReferenceBase<T : TolkReferenceElement>(
-    element: T
-) : PsiPolyVariantReferenceBase<T>(element) {
+abstract class TolkReferenceBase<T : TolkReferenceElement>(element: T) : PsiPolyVariantReferenceBase<T>(element) {
     override fun resolve(): TolkElement? = super.resolve() as? TolkElement
 
     override fun multiResolve(incompleteCode: Boolean): Array<out ResolveResult?> {

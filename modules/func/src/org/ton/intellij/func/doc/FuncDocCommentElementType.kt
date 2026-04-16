@@ -40,7 +40,8 @@ class FuncDocCommentElementType(debugName: String) : ILazyParseableElementType(d
             MarkdownElementTypes.CODE_BLOCK -> DOC_CODE_BLOCK.createCompositeNode()
             MarkdownTokenTypes.FENCE_LANG -> DOC_CODE_FENCE_LANG.createCompositeNode()
             MarkdownTokenTypes.CODE_FENCE_START,
-            MarkdownTokenTypes.CODE_FENCE_END -> DOC_CODE_FENCE_START_END.createCompositeNode()
+            MarkdownTokenTypes.CODE_FENCE_END,
+            -> DOC_CODE_FENCE_START_END.createCompositeNode()
 
             MarkdownElementTypes.INLINE_LINK -> DOC_INLINE_LINK.createCompositeNode()
             MarkdownElementTypes.SHORT_REFERENCE_LINK -> DOC_SHORT_REFERENCE_LINK.createCompositeNode()
@@ -73,10 +74,9 @@ class FuncDocCommentElementType(debugName: String) : ILazyParseableElementType(d
             chameleon.chars,
             charTable,
             ";;;",
-            factory
+            factory,
         )
     }
 
-    override fun createNode(text: CharSequence?) =
-        FuncDocCommentImpl(this, text)
+    override fun createNode(text: CharSequence?) = FuncDocCommentImpl(this, text)
 }

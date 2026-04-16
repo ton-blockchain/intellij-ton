@@ -12,6 +12,7 @@ import com.intellij.psi.util.parentOfType
 import com.intellij.ui.JBColor
 import com.intellij.util.ProcessingContext
 import com.intellij.util.applyIf
+import org.ton.intellij.tolk.acton.isVisibleInCompletionFrom
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.psi.reference.collectMethodCandidates
@@ -129,6 +130,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
 
         val methodsForCompletion = mutableListOf<TolkFunction>()
         TolkFunctionIndex.processAllElements(project, processor = { function ->
+            if (!function.isVisibleInCompletionFrom(currentFile)) return@processAllElements true
             val name = function.name ?: return@processAllElements true
             if (isHiddenMethodFromCompletion(name)) return@processAllElements true
             if (!prefixMatcher.prefixMatches(name)) return@processAllElements true

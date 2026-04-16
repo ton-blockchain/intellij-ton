@@ -13,6 +13,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
 import com.intellij.util.applyIf
+import org.ton.intellij.tolk.acton.isVisibleInCompletionFrom
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
@@ -131,6 +132,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         }
         val prefixMatcher = result.prefixMatcher
         fun processNamedElement(element: TolkNamedElement): Boolean {
+            if (!element.isVisibleInCompletionFrom(currentFile)) return true
             val name = element.name ?: return true
             if (!prefixMatcher.prefixMatches(name)) return true
             if (element is TolkFunction && element.hasReceiver) return true

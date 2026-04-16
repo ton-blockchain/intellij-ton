@@ -74,6 +74,7 @@ sealed class ActonCommand(val name: String) {
         var functionName: String = "",
         var clearCache: Boolean = false,
         var useColors: Boolean = false,
+        var ui: Boolean = false,
         var debug: Boolean = false,
         var debugPort: String = "",
     ) : ActonCommand("test") {
@@ -87,6 +88,7 @@ sealed class ActonCommand(val name: String) {
                 add("--color")
                 add("always")
             }
+            if (ui) add("--ui")
             if (debug) {
                 add("--debug")
                 if (debugPort.isNotBlank()) {

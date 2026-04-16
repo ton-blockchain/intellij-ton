@@ -52,6 +52,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
     private val testTargetBrowseField = TextFieldWithBrowseButton()
     private val testFunctionNameField = JBTextField()
     private val testClearCacheCheckBox = JBCheckBox("Clear compilation cache before testing", false)
+    private val testUiCheckBox = JBCheckBox("Open browser UI", false)
     private var testMode: ActonCommand.Test.TestMode = ActonCommand.Test.TestMode.DIRECTORY
 
     // Run specific
@@ -191,6 +192,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         testTargetBrowseField.text = configuration.testTarget
         testFunctionNameField.text = configuration.testFunctionName
         testClearCacheCheckBox.isSelected = configuration.testClearCache
+        testUiCheckBox.isSelected = configuration.testUi
 
         runScriptNameField.text = configuration.runScriptName
 
@@ -225,6 +227,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         configuration.testTarget = testTargetBrowseField.text.trim()
         configuration.testFunctionName = testFunctionNameField.text.trim()
         configuration.testClearCache = testClearCacheCheckBox.isSelected
+        configuration.testUi = testUiCheckBox.isSelected
 
         configuration.runScriptName = runScriptNameField.text.trim()
 
@@ -295,6 +298,10 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
                 row {
                     cell(testClearCacheCheckBox)
                 }
+
+                row {
+                    cell(testUiCheckBox)
+                }.topGap(TopGap.NONE)
             }.topGap(TopGap.NONE)
 
             runGroup = group("Run arguments") {

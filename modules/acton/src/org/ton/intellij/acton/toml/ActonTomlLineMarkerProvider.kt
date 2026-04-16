@@ -38,7 +38,7 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
                 return when (segments[0].name) {
                     "test" -> Info(
                         AllIcons.RunConfigurations.TestState.Run,
-                        arrayOf(ActonRunTestsAction()),
+                        arrayOf(ActonRunTestsAction(), ActonRunTestsWithUiAction()),
                     ) { "Run tests" }
 
                     "lint" -> Info(
@@ -81,6 +81,17 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
                 command = "test"
                 testMode = ActonCommand.Test.TestMode.DIRECTORY
                 testTarget = "."
+            }
+        }
+    }
+
+    private class ActonRunTestsWithUiAction : AnAction("Run All Tests with UI", null, AllIcons.Actions.Execute) {
+        override fun actionPerformed(e: AnActionEvent) {
+            runConfiguration(e, "Run all tests with UI") {
+                command = "test"
+                testMode = ActonCommand.Test.TestMode.DIRECTORY
+                testTarget = "."
+                testUi = true
             }
         }
     }

@@ -46,9 +46,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
     private val scriptForkNetComboBox = ComboBox(arrayOf("", "testnet", "mainnet"))
     private val scriptForkBlockNumberField = JBTextField(null)
     private val scriptApiKeyField = JBTextField(null)
-
-    private val scriptBroadcastCheckBox = JBCheckBox("Broadcast", false)
-    private val scriptBroadcastNetComboBox = ComboBox(arrayOf("", "testnet", "mainnet"))
+    private val scriptBroadcastNetComboBox = ComboBox(arrayOf("", "testnet", "mainnet", "localnet"))
 
     // Test specific
     private val testTargetBrowseField = TextFieldWithBrowseButton()
@@ -96,9 +94,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
                 updateVisibility()
             }
         })
-
         scriptForkCheckBox.addActionListener { updateEnabledState() }
-        scriptBroadcastCheckBox.addActionListener { updateEnabledState() }
     }
 
     private fun updateVisibility() {
@@ -133,9 +129,6 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         scriptForkNetComboBox.isEnabled = forkEnabled
         scriptForkBlockNumberField.isEnabled = forkEnabled
         scriptApiKeyField.isEnabled = forkEnabled
-
-        val broadcastEnabled = scriptBroadcastCheckBox.isSelected
-        scriptBroadcastNetComboBox.isEnabled = broadcastEnabled
     }
 
     private fun createTextFieldWithCompletion(provider: TextFieldCompletionProvider?): TextFieldWithCompletion {
@@ -183,7 +176,6 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         scriptForkNetComboBox.selectedItem = configuration.scriptForkNet
         scriptForkBlockNumberField.setText(configuration.scriptForkBlockNumber)
         scriptApiKeyField.setText(configuration.scriptApiKey)
-        scriptBroadcastCheckBox.isSelected = configuration.scriptBroadcast
         scriptBroadcastNetComboBox.selectedItem = configuration.scriptBroadcastNet
 
         testMode = configuration.testMode
@@ -214,9 +206,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         configuration.scriptForkNet = if (scriptForkCheckBox.isSelected) (scriptForkNetComboBox.selectedItem as? String ?: "") else ""
         configuration.scriptForkBlockNumber = if (scriptForkCheckBox.isSelected) scriptForkBlockNumberField.text.trim() else ""
         configuration.scriptApiKey = if (scriptForkCheckBox.isSelected) scriptApiKeyField.text.trim() else ""
-        configuration.scriptBroadcast = scriptBroadcastCheckBox.isSelected
-        configuration.scriptBroadcastNet =
-            if (scriptBroadcastCheckBox.isSelected) (scriptBroadcastNetComboBox.selectedItem as? String ?: "") else ""
+        configuration.scriptBroadcastNet = scriptBroadcastNetComboBox.selectedItem as? String ?: ""
 
         configuration.testMode = testMode
         configuration.testTarget = testTargetBrowseField.text.trim()
@@ -258,13 +248,10 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
                     cell(scriptClearCacheCheckBox)
                 }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
 
-                group("Broadcasting") {
-                    row {
-                        cell(scriptBroadcastCheckBox).comment("Send transactions to the blockchain instead of emulating them")
-                    }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
-                    row("Network:") {
-                        cell(scriptBroadcastNetComboBox).align(AlignX.FILL)
-                    }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
+                row("Network:") {
+                    cell(scriptBroadcastNetComboBox)
+                        .align(AlignX.FILL)
+                        .comment("Leave empty to run in emulation mode, or pick a network to broadcast")
                 }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
             }.topGap(TopGap.NONE)
 

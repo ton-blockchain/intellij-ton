@@ -28,7 +28,6 @@ sealed class ActonCommand(val name: String) {
         var forkNet: String = "",
         var forkBlockNumber: String = "",
         var apiKey: String = "",
-        var broadcast: Boolean = false,
         var broadcastNet: String = "",
         var explorer: String = "",
         var debug: Boolean = false,
@@ -48,12 +47,9 @@ sealed class ActonCommand(val name: String) {
                 add("--api-key")
                 add(apiKey)
             }
-            if (broadcast) {
-                add("--broadcast")
-                if (broadcastNet.isNotBlank()) {
-                    add("--net")
-                    add(broadcastNet)
-                }
+            if (broadcastNet.isNotBlank()) {
+                add("--net")
+                add(broadcastNet)
                 if (explorer.isNotBlank()) {
                     add("--explorer")
                     add(explorer)
@@ -78,6 +74,8 @@ sealed class ActonCommand(val name: String) {
         var functionName: String = "",
         var clearCache: Boolean = false,
         var useColors: Boolean = false,
+        var debug: Boolean = false,
+        var debugPort: String = "",
     ) : ActonCommand("test") {
         enum class TestMode { FUNCTION, FILE, DIRECTORY }
 
@@ -88,6 +86,13 @@ sealed class ActonCommand(val name: String) {
             if (useColors) {
                 add("--color")
                 add("always")
+            }
+            if (debug) {
+                add("--debug")
+                if (debugPort.isNotBlank()) {
+                    add("--debug-port")
+                    add(debugPort)
+                }
             }
             when (mode) {
                 TestMode.FUNCTION -> {

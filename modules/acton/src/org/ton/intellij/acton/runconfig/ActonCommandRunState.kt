@@ -134,7 +134,7 @@ class ActonCommandRunState(
 
         var commandLine =
             actonCommandLine.toGeneralCommandLine(configuration.project) ?: throw IllegalStateException("Cannot find acton executable")
-        if (configuration.emulateTerminal && configuration.command != "test" && !isDebugCommand(actonCommand)) {
+        if (configuration.emulateTerminal) {
             commandLine = PtyCommandLine(commandLine)
                 .withInitialColumns(PtyCommandLine.MAX_COLUMNS)
                 .withConsoleMode(false)
@@ -248,10 +248,6 @@ class ActonCommandRunState(
     private fun isDebugRetrace(actonCommand: ActonCommand): Boolean {
         val retraceCommand = actonCommand as? ActonCommand.Retrace ?: return false
         return retraceCommand.debug
-    }
-
-    private fun isDebugCommand(actonCommand: ActonCommand): Boolean {
-        return isDebugScript(actonCommand) || isDebugTest(actonCommand) || isDebugRetrace(actonCommand)
     }
 
     private fun createProfilerSessionIfNeeded(executor: Executor): org.ton.intellij.acton.profiler.ActonProfilerSession? {

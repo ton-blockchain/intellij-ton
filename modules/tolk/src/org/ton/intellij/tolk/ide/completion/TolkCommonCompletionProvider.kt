@@ -92,21 +92,25 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             return true
         }
 
-        if (!collectLocalVariables(element) { localSymbol ->
-                if (!checkLimit()) return@collectLocalVariables false
-                if (!expectType.canAddElement(localSymbol.type)) return@collectLocalVariables true
-                result.addElement(
-                    localSymbol.toLookupElementBuilder(ctx)
-                        .toTolkLookupElement(
-                            TolkLookupElementData(
-                                isLocal = true,
-                                elementKind = TolkLookupElementData.ElementKind.VARIABLE,
-                            ),
-                        ),
-                )
-                true
+        var limitReached = false
+        collectLocalVariables(element) { localSymbol ->
+            if (!checkLimit()) {
+                limitReached = true
+                return@collectLocalVariables false
             }
-        ) {
+            if (!expectType.canAddElement(localSymbol.type)) return@collectLocalVariables true
+            result.addElement(
+                localSymbol.toLookupElementBuilder(ctx)
+                    .toTolkLookupElement(
+                        TolkLookupElementData(
+                            isLocal = true,
+                            elementKind = TolkLookupElementData.ElementKind.VARIABLE,
+                        ),
+                    ),
+            )
+            true
+        }
+        if (limitReached) {
             return
         }
 

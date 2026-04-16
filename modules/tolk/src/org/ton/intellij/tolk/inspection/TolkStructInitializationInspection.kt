@@ -61,7 +61,12 @@ class TolkStructInitializationInspection : TolkInspectionBase() {
             return true
         }
         if (fieldType is TolkTyParam) {
-            val defaultType = (fieldType.parameter as? TolkTyParam.NamedTypeParameter)?.psi?.defaultTypeParameter?.typeExpression?.type
+            val defaultType =
+                (fieldType.parameter as? TolkTyParam.NamedTypeParameter)
+                    ?.psi
+                    ?.defaultTypeParameter
+                    ?.typeExpression
+                    ?.type
             if (defaultType is TolkTyNever) {
                 return true
             }

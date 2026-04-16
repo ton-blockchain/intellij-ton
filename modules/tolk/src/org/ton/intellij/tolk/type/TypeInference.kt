@@ -1767,7 +1767,7 @@ class TolkInferenceWalker(
         return afterExpr
     }
 
-    private val INT_PREFIX_OPERATORS = tokenSetOf(
+    private val intPrefixOperators = tokenSetOf(
         MINUS,
         PLUS,
         TolkElementTypes.TILDE,
@@ -1796,7 +1796,7 @@ class TolkInferenceWalker(
                 afterExpr = TolkExpressionFlowContext(afterExpr.outFlow, afterExpr.falseFlow, afterExpr.trueFlow)
             }
 
-            in INT_PREFIX_OPERATORS -> {
+            in intPrefixOperators -> {
                 ctx.setType(element, TolkTy.Int)
             }
 

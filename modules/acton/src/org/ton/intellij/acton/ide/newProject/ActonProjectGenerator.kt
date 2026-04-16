@@ -135,23 +135,12 @@ class ActonProjectGeneratorPeer : GeneratorPeerImpl<ActonProjectSettings>() {
     }
 
     override fun getSettings(): ActonProjectSettings = settings.apply {
-        val advancedOptionsEnabled = this@ActonProjectGeneratorPeer.showAdvancedOptions.get()
         template = this@ActonProjectGeneratorPeer.template.get()
         addTypeScriptApp = this@ActonProjectGeneratorPeer.addTypeScriptApp.get()
-        description = if (advancedOptionsEnabled) {
-            this@ActonProjectGeneratorPeer.description.get()
-        } else {
-            ActonProjectSettings.DEFAULT_DESCRIPTION
-        }
-        license = if (advancedOptionsEnabled) {
-            this@ActonProjectGeneratorPeer.license.get()
-        } else {
-            ActonProjectSettings.DEFAULT_LICENSE
-        }
-        includeGitHooks = advancedOptionsEnabled &&
-            gitAvailable &&
-            this@ActonProjectGeneratorPeer.includeGitHooks.get()
-        includeAgentsMd = advancedOptionsEnabled && this@ActonProjectGeneratorPeer.includeAgentsMd.get()
+        description = this@ActonProjectGeneratorPeer.description.get()
+        license = this@ActonProjectGeneratorPeer.license.get()
+        includeGitHooks = gitAvailable && this@ActonProjectGeneratorPeer.includeGitHooks.get()
+        includeAgentsMd = this@ActonProjectGeneratorPeer.includeAgentsMd.get()
         env = environmentVariables.envData
     }
 

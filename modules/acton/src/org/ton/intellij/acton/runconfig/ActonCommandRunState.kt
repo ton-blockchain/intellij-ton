@@ -38,6 +38,10 @@ class ActonCommandRunState(
     private var scriptDebugPortOverride: Int? = null
     @Volatile
     private var testDebugPortOverride: Int? = null
+    @Volatile
+    private var retraceDebugPortOverride: Int? = null
+    @Volatile
+    private var retraceDebugContractIdOverride: String? = null
 
     fun enableScriptDebug(port: Int) {
         scriptDebugPortOverride = port
@@ -45,6 +49,11 @@ class ActonCommandRunState(
 
     fun enableTestDebug(port: Int) {
         testDebugPortOverride = port
+    }
+
+    fun enableRetraceDebug(port: Int, contractId: String) {
+        retraceDebugPortOverride = port
+        retraceDebugContractIdOverride = contractId
     }
 
     fun prepareForDebugLaunch(executor: Executor, runner: ProgramRunner<*>): PreparedActonDebugExecution {
@@ -123,7 +132,7 @@ class ActonCommandRunState(
 
         var commandLine =
             actonCommandLine.toGeneralCommandLine(configuration.project) ?: throw IllegalStateException("Cannot find acton executable")
-        if (configuration.emulateTerminal && configuration.command != "test" && !isDebugScript(actonCommand)) {
+        if (configuration.emulateTerminal && configuration.command != "test" && !isDebugCommand(actonCommand)) {
             commandLine = PtyCommandLine(commandLine)
                 .withInitialColumns(PtyCommandLine.MAX_COLUMNS)
                 .withConsoleMode(false)
@@ -147,6 +156,14 @@ class ActonCommandRunState(
             val debugPort = testDebugPortOverride?.toString() ?: command.debugPort
             command.copy(
                 debug = testDebugPortOverride != null || command.debug,
+                debugPort = debugPort
+            )
+        }
+        is ActonCommand.Retrace -> {
+            val debugPort = retraceDebugPortOverride?.toString() ?: command.debugPort
+            command.copy(
+                contractId = retraceDebugContractIdOverride ?: command.contractId,
+                debug = retraceDebugPortOverride != null || command.debug,
                 debugPort = debugPort
             )
         }
@@ -177,6 +194,17 @@ class ActonCommandRunState(
                     displayName = "acton test",
                     port = actonCommand.debugPort.toIntOrNull() ?: return,
                     readinessMarkers = listOf("Debugger server listening on 127.0.0.1:${actonCommand.debugPort}")
+                )
+            }
+            is ActonCommand.Retrace -> {
+                if (!isDebugRetrace(actonCommand)) return
+                DebugSessionInfo(
+                    displayName = "acton retrace",
+                    port = actonCommand.debugPort.toIntOrNull() ?: return,
+                    readinessMarkers = listOf(
+                        "Debugger listening on 127.0.0.1:${actonCommand.debugPort}",
+                        "Retrace DAP listening on 127.0.0.1:${actonCommand.debugPort}"
+                    )
                 )
             }
             else -> return
@@ -213,6 +241,15 @@ class ActonCommandRunState(
     private fun isDebugTest(actonCommand: ActonCommand): Boolean {
         val testCommand = actonCommand as? ActonCommand.Test ?: return false
         return testCommand.debug
+    }
+
+    private fun isDebugRetrace(actonCommand: ActonCommand): Boolean {
+        val retraceCommand = actonCommand as? ActonCommand.Retrace ?: return false
+        return retraceCommand.debug
+    }
+
+    private fun isDebugCommand(actonCommand: ActonCommand): Boolean {
+        return isDebugScript(actonCommand) || isDebugTest(actonCommand) || isDebugRetrace(actonCommand)
     }
 
     private fun createProfilerSessionIfNeeded(executor: Executor): org.ton.intellij.acton.profiler.ActonProfilerSession? {

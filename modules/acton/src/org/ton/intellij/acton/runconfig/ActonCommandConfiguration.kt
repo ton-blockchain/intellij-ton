@@ -48,6 +48,11 @@ class ActonCommandConfiguration(
     // Run command specific settings (Acton.toml scripts)
     var runScriptName: String = ""
 
+    // Retrace command specific settings
+    var retraceTransactionHash: String = ""
+    var retraceContractId: String = ""
+    var retraceNetwork: String = ""
+
     fun getActonCommand(): ActonCommand {
         return when (command) {
             "build"  -> ActonCommand.Build(buildContractId, buildClearCache, buildOutDir)
@@ -58,6 +63,7 @@ class ActonCommandConfiguration(
 
             "test"   -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache, true)
             "run"    -> ActonCommand.Run(runScriptName)
+            "retrace" -> ActonCommand.Retrace(retraceTransactionHash, retraceNetwork, retraceContractId)
             else     -> ActonCommand.Custom(command)
         }
     }
@@ -101,6 +107,11 @@ class ActonCommandConfiguration(
         // Run settings
         element.setAttribute("runScriptName", runScriptName)
 
+        // Retrace settings
+        element.setAttribute("retraceTransactionHash", retraceTransactionHash)
+        element.setAttribute("retraceContractId", retraceContractId)
+        element.setAttribute("retraceNetwork", retraceNetwork)
+
         env.writeExternal(element)
     }
 
@@ -135,6 +146,11 @@ class ActonCommandConfiguration(
 
         // Run settings
         runScriptName = element.getAttributeValue("runScriptName") ?: ""
+
+        // Retrace settings
+        retraceTransactionHash = element.getAttributeValue("retraceTransactionHash") ?: ""
+        retraceContractId = element.getAttributeValue("retraceContractId") ?: ""
+        retraceNetwork = element.getAttributeValue("retraceNetwork") ?: ""
 
         env = EnvironmentVariablesData.readExternal(element)
     }

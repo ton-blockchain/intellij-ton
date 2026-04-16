@@ -57,10 +57,16 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
     // Run specific
     private val runScriptNameField = createTextFieldWithCompletion(ActonScriptCompletionProvider(project))
 
+    // Retrace specific
+    private val retraceTransactionHashField = JBTextField()
+    private val retraceContractIdField = createTextFieldWithCompletion(ActonContractCompletionProvider(project))
+    private val retraceNetworkComboBox = ComboBox(arrayOf("", "testnet", "mainnet"))
+
     private var buildGroup: Row? = null
     private var scriptGroup: Row? = null
     private var testGroup: Row? = null
     private var runGroup: Row? = null
+    private var retraceGroup: Row? = null
     private var additionalArgumentsRow: Row? = null
 
     private var testTargetRow: Row? = null
@@ -88,6 +94,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         setupExpandableSupport(parametersField)
         setupExpandableSupport(buildContractIdField)
         setupExpandableSupport(runScriptNameField)
+        setupExpandableSupport(retraceContractIdField)
 
         commandField.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
@@ -103,11 +110,13 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         val isScript = command == "script"
         val isTest = command == "test"
         val isRun = command == "run"
+        val isRetrace = command == "retrace"
 
         buildGroup?.visible(isBuild)
         scriptGroup?.visible(isScript)
         testGroup?.visible(isTest)
         runGroup?.visible(isRun)
+        retraceGroup?.visible(isRetrace)
 
         if (isTest) {
             testTargetRow?.visible(true)
@@ -185,6 +194,10 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
 
         runScriptNameField.text = configuration.runScriptName
 
+        retraceTransactionHashField.text = configuration.retraceTransactionHash
+        retraceContractIdField.text = configuration.retraceContractId
+        retraceNetworkComboBox.selectedItem = configuration.retraceNetwork
+
         mainPanel.reset()
         updateVisibility()
         updateEnabledState()
@@ -214,6 +227,10 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         configuration.testClearCache = testClearCacheCheckBox.isSelected
 
         configuration.runScriptName = runScriptNameField.text.trim()
+
+        configuration.retraceTransactionHash = retraceTransactionHashField.text.trim()
+        configuration.retraceContractId = retraceContractIdField.text.trim()
+        configuration.retraceNetwork = retraceNetworkComboBox.selectedItem as? String ?: ""
     }
 
     override fun createEditor(): JComponent {
@@ -283,6 +300,20 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
             runGroup = group("Run arguments") {
                 row("Script name:") {
                     cell(runScriptNameField).align(AlignX.FILL)
+                }
+            }.topGap(TopGap.NONE)
+
+            retraceGroup = group("Retrace arguments") {
+                row("Transaction hash:") {
+                    cell(retraceTransactionHashField).align(AlignX.FILL)
+                }
+                row("Contract:") {
+                    cell(retraceContractIdField)
+                        .align(AlignX.FILL)
+                        .comment("Required for source-level debug; if empty, you'll be asked on debug launch")
+                }
+                row("Network:") {
+                    cell(retraceNetworkComboBox).align(AlignX.FILL)
                 }
             }.topGap(TopGap.NONE)
 

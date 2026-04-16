@@ -243,7 +243,6 @@
                              id="language.tolk"
                              bundle="messages.TolkBundle" key="tolk.name"/>
 
-        <configurationType implementation="org.ton.intellij.tolk.debug.retrace.TolkRetraceConfigurationType"/>
         <programRunner implementation="org.ton.intellij.tolk.debug.retrace.TolkRetraceProgramRunner"/>
         <programRunner implementation="org.ton.intellij.tolk.debug.script.TolkActonScriptProgramRunner"/>
         <programRunner implementation="org.ton.intellij.tolk.debug.test.TolkActonTestProgramRunner"/>

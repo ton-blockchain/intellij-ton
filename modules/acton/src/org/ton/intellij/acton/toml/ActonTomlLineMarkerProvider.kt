@@ -33,6 +33,27 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
                     arrayOf(TolkBuildContractAction(contractName)),
                 ) { "Build $contractName" }
             }
+
+            if (segments.size == 1 && segments[0] == element) {
+                return when (segments[0].name) {
+                    "test" -> Info(
+                        AllIcons.RunConfigurations.TestState.Run,
+                        arrayOf(ActonRunTestsAction()),
+                    ) { "Run tests" }
+
+                    "lint" -> Info(
+                        AllIcons.General.InspectionsOK,
+                        arrayOf(ActonRunLintAction()),
+                    ) { "Run linter" }
+
+                    "fmt" -> Info(
+                        AllIcons.Actions.Execute,
+                        arrayOf(ActonCheckFormattingAction(), ActonFormatProjectAction()),
+                    ) { "Run formatter" }
+
+                    else -> null
+                }
+            }
         }
 
         // Handle [scripts] key = "value"
@@ -51,82 +72,81 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
             }
         }
 
-        // Handle [test]
-        if (header != null) {
-            val segments = header.key?.segments ?: return null
-            if (segments.size == 1 && segments[0].name == "test" && segments[0] == element) {
-                return Info(
-                    AllIcons.RunConfigurations.TestState.Run,
-                    arrayOf(ActonRunTestsAction()),
-                ) { "Run tests" }
-            }
-        }
-
         return null
     }
 
     private class ActonRunTestsAction : AnAction("Run All Tests", null, AllIcons.Actions.Execute) {
         override fun actionPerformed(e: AnActionEvent) {
-            val project = e.project ?: return
-            val file = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
-            val workingDir = file.parent?.toNioPath() ?: return
+            runConfiguration(e, "Run all tests") {
+                command = "test"
+                testMode = ActonCommand.Test.TestMode.DIRECTORY
+                testTarget = "."
+            }
+        }
+    }
 
-            val runManager = RunManager.getInstance(project)
-            val configurationName = "Run all tests"
-            val settings = runManager.createConfiguration(configurationName, ActonCommandConfigurationType.getInstance().factory)
-            val configuration = settings.configuration as ActonCommandConfiguration
+    private class ActonRunLintAction : AnAction("Run Linter", null, AllIcons.General.InspectionsOK) {
+        override fun actionPerformed(e: AnActionEvent) {
+            runConfiguration(e, "Run linter") {
+                command = "check"
+            }
+        }
+    }
 
-            configuration.command = "test"
-            configuration.workingDirectory = workingDir
-            configuration.testMode = ActonCommand.Test.TestMode.DIRECTORY
-            configuration.testTarget = "."
+    private class ActonCheckFormattingAction : AnAction("Check Formatting", null, AllIcons.General.InspectionsOK) {
+        override fun actionPerformed(e: AnActionEvent) {
+            runConfiguration(e, "Check formatting") {
+                command = "fmt"
+                parameters = "--check"
+            }
+        }
+    }
 
-            runManager.addConfiguration(settings)
-            runManager.selectedConfiguration = settings
-
-            ExecutionUtil.runConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance())
+    private class ActonFormatProjectAction : AnAction("Format Project", null, AllIcons.Actions.Execute) {
+        override fun actionPerformed(e: AnActionEvent) {
+            runConfiguration(e, "Format project") {
+                command = "fmt"
+            }
         }
     }
 
     private class TolkBuildContractAction(private val contractName: String) :
         AnAction("Build $contractName", null, AllIcons.Actions.Compile) {
         override fun actionPerformed(e: AnActionEvent) {
-            val project = e.project ?: return
-            val file = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
-            val workingDir = file.parent?.toNioPath() ?: return
-
-            val runManager = RunManager.getInstance(project)
-            val configurationName = "Build $contractName"
-            val settings = runManager.createConfiguration(configurationName, ActonCommandConfigurationType.getInstance().factory)
-            val configuration = settings.configuration as ActonCommandConfiguration
-
-            configuration.command = "build"
-            configuration.workingDirectory = workingDir
-            configuration.buildContractId = contractName
-            configuration.parameters = "--info"
-
-            runManager.addConfiguration(settings)
-            runManager.selectedConfiguration = settings
-
-            ExecutionUtil.runConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance())
+            runConfiguration(e, "Build $contractName") {
+                command = "build"
+                buildContractId = contractName
+                parameters = "--info"
+            }
         }
     }
 
     private class TolkRunScriptAction(private val scriptName: String) :
         AnAction("Run $scriptName command", null, AllIcons.Actions.Execute) {
         override fun actionPerformed(e: AnActionEvent) {
+            runConfiguration(e, "Run $scriptName command") {
+                command = "run"
+                runScriptName = scriptName
+            }
+        }
+    }
+
+    private companion object {
+        fun runConfiguration(
+            e: AnActionEvent,
+            configurationName: String,
+            configure: ActonCommandConfiguration.() -> Unit,
+        ) {
             val project = e.project ?: return
             val file = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
             val workingDir = file.parent?.toNioPath() ?: return
 
             val runManager = RunManager.getInstance(project)
-            val configurationName = "Run $scriptName command"
             val settings = runManager.createConfiguration(configurationName, ActonCommandConfigurationType.getInstance().factory)
             val configuration = settings.configuration as ActonCommandConfiguration
 
-            configuration.command = "run"
             configuration.workingDirectory = workingDir
-            configuration.runScriptName = scriptName
+            configuration.configure()
 
             runManager.addConfiguration(settings)
             runManager.selectedConfiguration = settings

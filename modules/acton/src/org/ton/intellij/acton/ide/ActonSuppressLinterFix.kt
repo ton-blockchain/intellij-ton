@@ -35,7 +35,7 @@ class ActonSuppressLinterFix(
         }
         val indentation = text.subSequence(lineStartOffset, i).toString()
 
-        val suppressionComment = "${indentation}// acton-disable-next-line $ruleName\n"
+        val suppressionComment = "${indentation}// check-disable-next-line $ruleName\n"
         document.insertString(lineStartOffset, suppressionComment)
     }
 }

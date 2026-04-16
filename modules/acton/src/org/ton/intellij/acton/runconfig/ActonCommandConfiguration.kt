@@ -155,5 +155,37 @@ class ActonCommandConfiguration(
         env = EnvironmentVariablesData.readExternal(element)
     }
 
+    fun copyFrom(other: ActonCommandConfiguration) {
+        command = other.command
+        workingDirectory = other.workingDirectory
+        parameters = other.parameters
+        env = other.env
+        emulateTerminal = other.emulateTerminal
+
+        buildContractId = other.buildContractId
+        buildClearCache = other.buildClearCache
+        buildOutDir = other.buildOutDir
+
+        scriptPath = other.scriptPath
+        scriptClearCache = other.scriptClearCache
+        scriptForkNet = other.scriptForkNet
+        scriptForkBlockNumber = other.scriptForkBlockNumber
+        scriptApiKey = other.scriptApiKey
+        scriptBroadcastNet = other.scriptBroadcastNet
+        scriptDebug = other.scriptDebug
+        scriptDebugPort = other.scriptDebugPort
+
+        testMode = other.testMode
+        testTarget = other.testTarget
+        testFunctionName = other.testFunctionName
+        testClearCache = other.testClearCache
+
+        runScriptName = other.runScriptName
+
+        retraceTransactionHash = other.retraceTransactionHash
+        retraceContractId = other.retraceContractId
+        retraceNetwork = other.retraceNetwork
+    }
+
     fun isScriptBroadcast(): Boolean = scriptBroadcastNet.isNotBlank()
 }

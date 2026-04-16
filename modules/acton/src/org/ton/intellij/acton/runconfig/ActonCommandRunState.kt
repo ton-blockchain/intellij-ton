@@ -28,6 +28,7 @@ import com.intellij.terminal.TerminalExecutionConsole
 import com.intellij.util.execution.ParametersListUtil
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
+import org.ton.intellij.acton.ide.ActonBacktraceConsoleFilter
 import org.ton.intellij.acton.profiler.ActonProfilerSupport
 
 class ActonCommandRunState(
@@ -103,6 +104,7 @@ class ActonCommandRunState(
             }
             if (consoleProperties != null) {
                 val console = SMTestRunnerConnectionUtil.createConsole(consoleProperties.testFrameworkName, consoleProperties) as SMTRunnerConsoleView
+                console.addMessageFilter(ActonBacktraceConsoleFilter(configuration))
                 val handler = startProcess()
                 console.attachToProcess(handler)
 

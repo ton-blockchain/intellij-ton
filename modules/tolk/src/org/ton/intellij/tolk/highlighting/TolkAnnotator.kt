@@ -6,6 +6,7 @@ import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.ide.colors.TolkColor
@@ -58,6 +59,36 @@ class TolkAnnotator : Annotator {
                 }
                 holder.info(color)
             }
+            is TolkVar -> {
+                val color = if (resolved.isCapturedByLambda(element)) {
+                    TolkColor.CAPTURED_VARIABLE.textAttributesKey
+                } else {
+                    TolkDumbAnnotator.identifierColor(resolved)
+                }
+                if (color != null) {
+                    holder.info(color)
+                }
+            }
+            is TolkParameter -> {
+                val color = if (resolved.isCapturedByLambda(element)) {
+                    TolkColor.CAPTURED_VARIABLE.textAttributesKey
+                } else {
+                    TolkDumbAnnotator.identifierColor(resolved)
+                }
+                if (color != null) {
+                    holder.info(color)
+                }
+            }
+            is TolkCatchParameter -> {
+                val color = if (resolved.isCapturedByLambda(element)) {
+                    TolkColor.CAPTURED_VARIABLE.textAttributesKey
+                } else {
+                    TolkDumbAnnotator.identifierColor(resolved)
+                }
+                if (color != null) {
+                    holder.info(color)
+                }
+            }
             is TolkTypeDef -> {
                 if (resolved.builtinKeyword != null) {
                     // type void = builtin
@@ -103,6 +134,11 @@ class TolkAnnotator : Annotator {
     private fun AnnotationHolder.info(key: TextAttributesKey) = newSilentAnnotation(HighlightSeverity.INFORMATION)
         .textAttributes(key)
         .create()
+
+    private fun TolkNamedElement.isCapturedByLambda(context: PsiElement): Boolean {
+        val lambda = context.parentOfType<TolkLambdaFunExpression>() ?: return false
+        return !PsiTreeUtil.isAncestor(lambda, this, false)
+    }
 
     private fun AnnotationHolder.error(message: String, highlightType: ProblemHighlightType? = null) =
         newAnnotation(HighlightSeverity.ERROR, message)

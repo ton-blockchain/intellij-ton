@@ -1,5 +1,10 @@
 <?xml version='1.0'?>
 <list>
+    <option name="org.ton.tolk.CAPTURED_VARIABLE">
+        <value>
+            <option name="BACKGROUND" value="EEF7EA" />
+        </value>
+    </option>
     <option name="org.ton.tolk.MUT_PARAMETER">
         <value>
             <option name="FOREGROUND" value="1C5DFE" />

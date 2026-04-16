@@ -10,6 +10,7 @@ import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.platform.dap.DapStartRequest
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.concurrency.AsyncPromise
 import org.jetbrains.concurrency.Promise
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
@@ -52,6 +53,15 @@ class TolkActonTestProgramRunner : AsyncProgramRunner<RunnerSettings>() {
                 preparedExecution = checkNotNull(preparedExecutionHolder[0]) {
                     "Acton test debug preparation did not return an execution result"
                 }
+                LOG.info(
+                    "Waiting for acton test DAP readiness on port ${preparedExecution.debugSession.port} before opening XDebugger session for '${profile.name}'"
+                )
+                runBlocking {
+                    preparedExecution.debugSession.awaitReady()
+                }
+                LOG.info(
+                    "Acton test DAP became ready on port ${preparedExecution.debugSession.port} before session start for '${profile.name}'"
+                )
                 val descriptor = arrayOfNulls<RunContentDescriptor>(1)
                 ApplicationManager.getApplication().invokeAndWait {
                     descriptor[0] = TolkDapSessionStarter.start(
@@ -66,20 +76,20 @@ class TolkActonTestProgramRunner : AsyncProgramRunner<RunnerSettings>() {
                 }
                 promise.setResult(descriptor[0])
             } catch (t: Throwable) {
-                val fallbackDescriptor = preparedExecution?.executionResult?.let { executionResult ->
-                    val descriptor = arrayOfNulls<RunContentDescriptor>(1)
+                val failureShown = preparedExecution?.executionResult?.let { executionResult ->
+                    val handled = booleanArrayOf(false)
                     ApplicationManager.getApplication().invokeAndWait {
-                        descriptor[0] = TolkDebugFailureRunContent.showIfTerminatedBeforeDap(
+                        handled[0] = TolkDebugFailureRunContent.showIfTerminatedBeforeDap(
                             environment = environment,
                             executionResult = executionResult,
                             error = t,
                             title = profile.name
                         )
                     }
-                    descriptor[0]
-                }
-                if (fallbackDescriptor != null) {
-                    promise.setResult(fallbackDescriptor)
+                    handled[0]
+                } == true
+                if (failureShown) {
+                    promise.setResult(null)
                     return@executeOnPooledThread
                 }
                 preparedExecution?.processHandler

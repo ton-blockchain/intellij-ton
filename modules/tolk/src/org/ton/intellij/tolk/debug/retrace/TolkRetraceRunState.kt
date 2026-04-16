@@ -73,7 +73,10 @@ class TolkRetraceRunState(
         val retraceSession = ActonDebugSession(
             displayName = "acton retrace",
             port = port,
-            readinessMarkers = listOf("Retrace DAP listening on 127.0.0.1:$port")
+            readinessMarkers = listOf(
+                "Debugger listening on 127.0.0.1:$port",
+                "Retrace DAP listening on 127.0.0.1:$port"
+            )
         )
         retraceSession.recordStartup(
             commandLine.commandLineString,

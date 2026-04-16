@@ -6,7 +6,6 @@ import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementWeigher
 import com.intellij.patterns.PlatformPatterns.psiElement
 import org.ton.intellij.tolk.doc.psi.TolkDocComment
-import org.ton.intellij.tolk.debug.TolkDebugEvaluateCompletionProvider
 import org.ton.intellij.tolk.ide.completion.acton.TolkContractIdCompletionProvider
 import org.ton.intellij.tolk.ide.completion.acton.TolkGetMethodCompletionProvider
 import org.ton.intellij.tolk.ide.completion.acton.TolkWalletNameCompletionProvider
@@ -77,7 +76,6 @@ class TolkCompletionContributor : CompletionContributor() {
                 "while",
             )
         )
-        extend(CompletionType.BASIC, TolkDebugEvaluateCompletionProvider.elementPattern, TolkDebugEvaluateCompletionProvider)
         extend(TolkCommonCompletionProvider)
         extend(TolkDotExpressionCompletionProvider)
         extend(TolkExpressionFieldProvider)

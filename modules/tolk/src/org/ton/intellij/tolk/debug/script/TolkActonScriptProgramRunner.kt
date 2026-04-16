@@ -72,20 +72,20 @@ class TolkActonScriptProgramRunner : AsyncProgramRunner<RunnerSettings>() {
                 }
                 promise.setResult(descriptor[0])
             } catch (t: Throwable) {
-                val fallbackDescriptor = preparedExecution?.executionResult?.let { executionResult ->
-                    val descriptor = arrayOfNulls<RunContentDescriptor>(1)
+                val failureShown = preparedExecution?.executionResult?.let { executionResult ->
+                    val handled = booleanArrayOf(false)
                     ApplicationManager.getApplication().invokeAndWait {
-                        descriptor[0] = TolkDebugFailureRunContent.showIfTerminatedBeforeDap(
+                        handled[0] = TolkDebugFailureRunContent.showIfTerminatedBeforeDap(
                             environment = environment,
                             executionResult = executionResult,
                             error = t,
                             title = profile.name
                         )
                     }
-                    descriptor[0]
-                }
-                if (fallbackDescriptor != null) {
-                    promise.setResult(fallbackDescriptor)
+                    handled[0]
+                } == true
+                if (failureShown) {
+                    promise.setResult(null)
                     return@executeOnPooledThread
                 }
                 preparedExecution?.processHandler

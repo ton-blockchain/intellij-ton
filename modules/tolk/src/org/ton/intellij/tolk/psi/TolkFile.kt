@@ -19,7 +19,7 @@ import org.ton.intellij.tolk.stub.*
 import org.ton.intellij.tolk.stub.type.TolkFunctionStubElementType
 import org.ton.intellij.tolk.stub.type.TolkIncludeDefinitionStubElementType
 
-open class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkLanguage), TolkElement {
+class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkLanguage), TolkElement {
     override fun getFileType(): FileType = TolkFileType
 
     override fun getStub(): TolkFileStub? = super.getStub() as? TolkFileStub

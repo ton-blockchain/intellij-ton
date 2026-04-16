@@ -1,24 +1,19 @@
 package org.ton.intellij.tolk.parser
 
 import com.intellij.lang.ASTNode
-import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ParserDefinition
-import com.intellij.lang.PsiBuilder
 import com.intellij.lang.PsiParser
 import com.intellij.lexer.Lexer
 import com.intellij.openapi.project.Project
 import com.intellij.psi.FileViewProvider
 import com.intellij.psi.PsiElement
 import com.intellij.psi.TokenType
-import com.intellij.psi.tree.IElementType
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
 import org.ton.intellij.tolk.TolkFileElementType
 import org.ton.intellij.tolk.doc.TolkDocCommentElementType
 import org.ton.intellij.tolk.lexer.TolkLexer
 import org.ton.intellij.tolk.psi.TOLK_COMMENTS
-import org.ton.intellij.tolk.psi.TolkElement
-import org.ton.intellij.tolk.psi.TolkExpressionCodeFragmentElementType
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkTokenType
@@ -38,7 +33,7 @@ class TolkParserException(
 class TolkParserDefinition : ParserDefinition {
     override fun createLexer(project: Project?): Lexer = TolkLexer()
 
-    override fun createParser(project: Project?): PsiParser = TolkFragmentAwareParser()
+    override fun createParser(project: Project?): PsiParser = TolkParser()
 
     override fun getFileNodeType(): IFileElementType = TolkFileElementType
 
@@ -48,9 +43,6 @@ class TolkParserDefinition : ParserDefinition {
 
     override fun createElement(node: ASTNode): PsiElement {
         try {
-            if (node.elementType == TolkExpressionCodeFragmentElementType) {
-                return TolkExpressionCodeFragmentRoot(node)
-            }
             return TolkElementTypes.Factory.createElement(node)
         } catch (e: Throwable) {
             throw TolkParserException(node, e)
@@ -128,15 +120,3 @@ class TolkParserDefinition : ParserDefinition {
         )
     }
 }
-
-private class TolkFragmentAwareParser : TolkParser() {
-    override fun parse_root_(root_: IElementType, builder_: PsiBuilder): Boolean {
-        return if (root_ == TolkExpressionCodeFragmentElementType) {
-            TolkParser.Expression(builder_, 0, -1)
-        } else {
-            super.parse_root_(root_, builder_)
-        }
-    }
-}
-
-private class TolkExpressionCodeFragmentRoot(node: ASTNode) : ASTWrapperPsiElement(node), TolkElement

@@ -37,6 +37,8 @@ import java.nio.file.Path
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
+private val NON_SUPPRESSIBLE_ACTON_RULES = setOf("compiler-error", "parse-error")
+
 object ActonExternalLinterUtils {
     private val LOG = logger<ActonExternalLinterUtils>()
 
@@ -201,8 +203,7 @@ data class ActonExternalLinterFilteredMessage(
                 }
 
             val ruleName = diagnostic.name ?: "unknown"
-            val actions =
-                if (ruleName == "compiler-error") arrayOf() else arrayOf(ActonSuppressLinterFix(ruleName), ActonSuppressLinterFix("all"))
+            val actions = createActonSuppressionFixes(ruleName)
             val suppressionOptions = convertBatchToSuppressIntentionActions(actions).toList()
 
             return ActonExternalLinterFilteredMessage(
@@ -217,6 +218,14 @@ data class ActonExternalLinterFilteredMessage(
             )
         }
     }
+}
+
+internal fun createActonSuppressionFixes(ruleName: String): Array<ActonSuppressLinterFix> {
+    if (ruleName in NON_SUPPRESSIBLE_ACTON_RULES) {
+        return emptyArray()
+    }
+
+    return arrayOf(ActonSuppressLinterFix(ruleName), ActonSuppressLinterFix("all"))
 }
 
 private fun ActonRange.toTextRange(document: Document): TextRange? {

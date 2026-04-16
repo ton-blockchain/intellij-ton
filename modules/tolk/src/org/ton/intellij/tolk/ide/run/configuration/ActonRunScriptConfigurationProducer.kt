@@ -26,10 +26,10 @@ class ActonRunScriptConfigurationProducer : LazyRunConfigurationProducer<ActonCo
         
         if (function.name == "main") {
             val actonToml = ActonToml.find(configuration.project) ?: return false
-            return configuration.command == "script" && 
+            return configuration.command == "script" &&
                    configuration.scriptPath == containingFile.virtualFile.path &&
                    configuration.workingDirectory == actonToml.workingDir &&
-                   !configuration.scriptBroadcast
+                   configuration.scriptBroadcastNet.isBlank()
         }
         return false
     }
@@ -49,6 +49,7 @@ class ActonRunScriptConfigurationProducer : LazyRunConfigurationProducer<ActonCo
             configuration.command = "script"
             configuration.scriptPath = containingFile.virtualFile.path
             configuration.workingDirectory = actonToml.workingDir
+            configuration.scriptBroadcastNet = ""
             return true
         }
         return false

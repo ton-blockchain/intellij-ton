@@ -12,7 +12,9 @@ import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.util.parentOfType
 
-class ActonRunScriptBroadcastConfigurationProducer : LazyRunConfigurationProducer<ActonCommandConfiguration>() {
+class ActonRunScriptBroadcastConfigurationProducer(
+    private val broadcastNet: String,
+) : LazyRunConfigurationProducer<ActonCommandConfiguration>() {
     override fun getConfigurationFactory(): ConfigurationFactory =
         ActonCommandConfigurationType.getInstance().factory
 
@@ -26,10 +28,10 @@ class ActonRunScriptBroadcastConfigurationProducer : LazyRunConfigurationProduce
         
         if (function.name == "main") {
             val actonToml = ActonToml.find(configuration.project) ?: return false
-            return configuration.command == "script" && 
+            return configuration.command == "script" &&
                    configuration.scriptPath == containingFile.virtualFile.path &&
                    configuration.workingDirectory == actonToml.workingDir &&
-                   configuration.scriptBroadcast
+                   configuration.scriptBroadcastNet == broadcastNet
         }
         return false
     }
@@ -45,11 +47,11 @@ class ActonRunScriptBroadcastConfigurationProducer : LazyRunConfigurationProduce
 
         if (function.name == "main") {
             val actonToml = ActonToml.find(configuration.project) ?: return false
-            configuration.name = "Broadcast ${containingFile.name}"
+            configuration.name = "Broadcast ${containingFile.name} (${broadcastNet})"
             configuration.command = "script"
             configuration.scriptPath = containingFile.virtualFile.path
             configuration.workingDirectory = actonToml.workingDir
-            configuration.scriptBroadcast = true
+            configuration.scriptBroadcastNet = broadcastNet
             return true
         }
         return false

@@ -13,14 +13,18 @@ import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
+import com.intellij.execution.filters.TextConsoleBuilderImpl
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsAdapter
 import com.intellij.execution.testframework.sm.runner.SMTRunnerEventsListener
 import com.intellij.execution.testframework.sm.runner.SMTestProxy
 import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView
+import com.intellij.execution.ui.ConsoleView
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.Key
+import com.intellij.psi.search.ExecutionSearchScopes
+import com.intellij.terminal.TerminalExecutionConsole
 import com.intellij.util.execution.ParametersListUtil
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
@@ -41,6 +45,19 @@ class ActonCommandRunState(
     private var retraceDebugPortOverride: Int? = null
     @Volatile
     private var retraceDebugContractIdOverride: String? = null
+
+    init {
+        if (configuration.emulateTerminal) {
+            consoleBuilder = object : TextConsoleBuilderImpl(
+                environment.project,
+                ExecutionSearchScopes.executionScope(environment.project, configuration)
+            ) {
+                override fun createConsole(): ConsoleView {
+                    return TerminalExecutionConsole(project, null)
+                }
+            }
+        }
+    }
 
     fun enableScriptDebug(port: Int) {
         scriptDebugPortOverride = port

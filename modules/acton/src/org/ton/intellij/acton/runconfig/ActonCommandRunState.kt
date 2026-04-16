@@ -1,6 +1,5 @@
 package org.ton.intellij.acton.runconfig
 
-import com.intellij.coverage.CoverageExecutor
 import com.intellij.execution.DefaultExecutionResult
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.ExecutionResult
@@ -115,7 +114,10 @@ class ActonCommandRunState(
         val additionalArgs = ParametersListUtil.parse(configuration.parameters)
 
         val args = actonCommand.getArguments().toMutableList()
-        if (configuration.command == "test" && environment.executor is CoverageExecutor) {
+        if (configuration.command == "test" && environment.executor.isActonCoverageExecutor()) {
+            if (!isActonCoverageSupported()) {
+                throw ExecutionException(ACTON_COVERAGE_UNSUPPORTED_MESSAGE)
+            }
             args.add("--coverage")
             args.add("--coverage-format")
             args.add("lcov")

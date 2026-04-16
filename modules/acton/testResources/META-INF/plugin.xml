@@ -1,0 +1,6 @@
+<idea-plugin package="org.ton.intellij" xmlns:xi="http://www.w3.org/2001/XInclude">
+    <id>org.ton.intellij.acton.tests</id>
+    <name>Acton Tests</name>
+    <xi:include href="/META-INF/acton.xml" xpointer="xpointer(/idea-plugin/*)"/>
+    <xi:include href="/META-INF/acton-toml.xml" xpointer="xpointer(/idea-plugin/*)"/>
+</idea-plugin>

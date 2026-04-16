@@ -97,5 +97,4 @@ fun Editor.createLexer(offset: Int): HighlighterIterator? {
     return lexer
 }
 
-fun isValidOffset(offset: Int, text: CharSequence): Boolean =
-    0 <= offset && offset <= text.length
+fun isValidOffset(offset: Int, text: CharSequence): Boolean = 0 <= offset && offset <= text.length

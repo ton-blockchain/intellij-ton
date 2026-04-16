@@ -11,11 +11,13 @@ abstract class FuncNamedStub<T : FuncNamedElement>(
     elementType: IStubElementType<*, *>,
     name: StringRef?,
 ) : NamedStubBase<T>(
-    parent, elementType, name
+    parent,
+    elementType,
+    name,
 ) {
     constructor(parent: StubElement<*>, elementType: IStubElementType<*, *>, name: String?) : this(
         parent,
         elementType,
-        StringRef.fromString(name)
+        StringRef.fromString(name),
     )
 }

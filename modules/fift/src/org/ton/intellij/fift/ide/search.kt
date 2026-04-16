@@ -20,9 +20,10 @@ class FiftFindUsagesProvider : FindUsagesProvider {
     override fun getNodeText(element: PsiElement, useFullName: Boolean) = ""
 }
 
-class FiftWordScanner : DefaultWordsScanner(
-    FiftLexerAdapter(),
-    TokenSet.create(FiftTypes.IDENTIFIER),
-    FiftParserDefinition.COMMENTS,
-    TokenSet.create(FiftTypes.STRING_LITERAL)
-)
+class FiftWordScanner :
+    DefaultWordsScanner(
+        FiftLexerAdapter(),
+        TokenSet.create(FiftTypes.IDENTIFIER),
+        FiftParserDefinition.COMMENTS,
+        TokenSet.create(FiftTypes.STRING_LITERAL),
+    )

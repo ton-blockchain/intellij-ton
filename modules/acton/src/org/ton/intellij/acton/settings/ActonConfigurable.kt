@@ -9,8 +9,8 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.JBColor
 import com.intellij.ui.dsl.builder.AlignX
@@ -22,7 +22,9 @@ import org.ton.intellij.util.pathToExecutableTextField
 import javax.swing.JCheckBox
 import javax.swing.JLabel
 
-class ActonConfigurable(val project: Project) : BoundConfigurable("Acton"), Disposable {
+class ActonConfigurable(val project: Project) :
+    BoundConfigurable("Acton"),
+    Disposable {
     private val actonPathField = pathToExecutableTextField(this, "Choose Acton Executable")
     private val actonVersionLabel = JLabel()
     private val explorerComboBox = ComboBox(ActonExplorer.entries.toTypedArray())
@@ -68,7 +70,7 @@ class ActonConfigurable(val project: Project) : BoundConfigurable("Acton"), Disp
             explorerComboBox.selectedItem = settings.explorer
             environmentVariables.envData = settings.env
             useActonFmtForTolkFormattingCheckbox.isSelected = settings.useActonFmtForTolkFormatting
-            
+
             val cachedVersion = settings.actonVersion
             if (cachedVersion != null) {
                 actonVersionLabel.text = cachedVersion
@@ -80,9 +82,9 @@ class ActonConfigurable(val project: Project) : BoundConfigurable("Acton"), Disp
         }
         onIsModified {
             actonPathField.text != (settings.actonPath ?: "") ||
-            explorerComboBox.selectedItem != settings.explorer ||
-            environmentVariables.envData != settings.env ||
-            useActonFmtForTolkFormattingCheckbox.isSelected != settings.useActonFmtForTolkFormatting
+                explorerComboBox.selectedItem != settings.explorer ||
+                environmentVariables.envData != settings.env ||
+                useActonFmtForTolkFormattingCheckbox.isSelected != settings.useActonFmtForTolkFormatting
         }
 
         actonPathField.textField.addActionListener { updateVersion() }
@@ -93,9 +95,7 @@ class ActonConfigurable(val project: Project) : BoundConfigurable("Acton"), Disp
         })
     }
 
-    private fun findActonInPath(): String? {
-        return PathEnvironmentVariableUtil.findInPath("acton")?.absolutePath
-    }
+    private fun findActonInPath(): String? = PathEnvironmentVariableUtil.findInPath("acton")?.absolutePath
 
     private fun updateVersion() {
         val path = actonPathField.text.ifBlank { findActonInPath() ?: "acton" }

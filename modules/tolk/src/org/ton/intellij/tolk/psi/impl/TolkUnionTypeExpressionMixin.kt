@@ -6,10 +6,12 @@ import org.ton.intellij.tolk.psi.TolkUnionTypeExpression
 import org.ton.intellij.tolk.stub.TolkTypeStub
 import org.ton.intellij.tolk.type.TolkTy
 
-abstract class TolkUnionTypeExpressionMixin : TolkTypeExpressionImpl, TolkUnionTypeExpression {
+abstract class TolkUnionTypeExpressionMixin :
+    TolkTypeExpressionImpl,
+    TolkUnionTypeExpression {
     override val type: TolkTy
         get() {
-            val types = typeExpressionList.map { it.type ?: TolkTy.Unknown  }
+            val types = typeExpressionList.map { it.type ?: TolkTy.Unknown }
             val unionTypes = TolkTy.union(types)
             return unionTypes
         }

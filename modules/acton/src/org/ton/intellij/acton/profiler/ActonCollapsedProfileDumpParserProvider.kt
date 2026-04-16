@@ -7,8 +7,8 @@ import com.intellij.profiler.ValueCallStackElement
 import com.intellij.profiler.api.BaseCallStackElement
 import com.intellij.profiler.api.ProfilerDumpFileParser
 import com.intellij.profiler.api.ProfilerDumpParserProvider
-import com.intellij.profiler.ui.BaseCallStackElementRenderer
 import com.intellij.profiler.simpleCollapsedDumpParser
+import com.intellij.profiler.ui.BaseCallStackElementRenderer
 
 class ActonCollapsedProfileDumpParserProvider : ProfilerDumpParserProvider {
     override val id: String
@@ -30,10 +30,9 @@ class ActonCollapsedProfileDumpParserProvider : ProfilerDumpParserProvider {
 
 private class ActonCollapsedProfileDumpParser(project: Project) : CollapsedProfilerDumpFileParserBase(project) {
     @Suppress("UNCHECKED_CAST")
-    override fun createCollapsedParser(project: Project): CollapsedDumpParser<BaseCallStackElement> {
-        return simpleCollapsedDumpParser(::isActonThreadName)
+    override fun createCollapsedParser(project: Project): CollapsedDumpParser<BaseCallStackElement> =
+        simpleCollapsedDumpParser(::isActonThreadName)
             as CollapsedDumpParser<BaseCallStackElement>
-    }
 
     override fun createStackElementRenderer(): BaseCallStackElementRenderer = ActonCollapsedCallStackElementRenderer
 

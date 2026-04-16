@@ -32,10 +32,14 @@ class TolkContractDefinitionStub(
             return TolkContractDefinitionStub(parentStub, this, name, isDeprecated)
         }
 
-        override fun createStub(psi: TolkContractDefinition, parentStub: StubElement<out PsiElement>): TolkContractDefinitionStub =
+        override fun createStub(
+            psi: TolkContractDefinition,
+            parentStub: StubElement<out PsiElement>,
+        ): TolkContractDefinitionStub =
             TolkContractDefinitionStub(parentStub, this, StringRef.fromString(psi.name), false)
 
-        override fun createPsi(stub: TolkContractDefinitionStub): TolkContractDefinition = TolkContractDefinitionImpl(stub, this)
+        override fun createPsi(stub: TolkContractDefinitionStub): TolkContractDefinition =
+            TolkContractDefinitionImpl(stub, this)
     }
 
     companion object {

@@ -9,7 +9,9 @@ import org.ton.intellij.tolk.psi.TolkIncludeDefinition
 import org.ton.intellij.tolk.stub.TolkIncludeDefinitionStub
 import org.ton.intellij.util.greenStub
 
-abstract class TolkIncludeDefinitionMixin : StubBasedPsiElementBase<TolkIncludeDefinitionStub>, TolkIncludeDefinition {
+abstract class TolkIncludeDefinitionMixin :
+    StubBasedPsiElementBase<TolkIncludeDefinitionStub>,
+    TolkIncludeDefinition {
     constructor(stub: TolkIncludeDefinitionStub, type: IStubElementType<*, *>) : super(stub, type)
     constructor(node: ASTNode) : super(node)
     constructor(stub: TolkIncludeDefinitionStub?, type: IElementType?, node: ASTNode?) : super(stub, type, node)
@@ -17,16 +19,16 @@ abstract class TolkIncludeDefinitionMixin : StubBasedPsiElementBase<TolkIncludeD
     override fun getTextOffset(): Int {
         val stringLiteral = stringLiteral
         return if (stringLiteral != null) {
-            stringLiteral.startOffsetInParent + (stringLiteral.rawString?.startOffsetInParent
-                ?: return super.getTextOffset())
+            stringLiteral.startOffsetInParent + (
+                stringLiteral.rawString?.startOffsetInParent
+                    ?: return super.getTextOffset()
+                )
         } else {
             super.getTextOffset()
         }
     }
 
-    fun resolve(): PsiElement? {
-        return stringLiteral?.references?.lastOrNull()?.resolve()
-    }
+    fun resolve(): PsiElement? = stringLiteral?.references?.lastOrNull()?.resolve()
 }
 
 val TolkIncludeDefinition.path: String

@@ -23,20 +23,17 @@ class TolkFunctionReceiverStub : StubWithText<TolkFunctionReceiver> {
     ) : this(parent, elementType, StringRef.fromString(text))
 
     class Type(name: String) : TolkStubElementType<TolkFunctionReceiverStub, TolkFunctionReceiver>(name) {
-        override fun createPsi(stub: TolkFunctionReceiverStub): TolkFunctionReceiver {
-            return TolkFunctionReceiverImpl(stub, this)
-        }
+        override fun createPsi(stub: TolkFunctionReceiverStub): TolkFunctionReceiver =
+            TolkFunctionReceiverImpl(stub, this)
 
-        override fun createStub(psi: TolkFunctionReceiver, parentStub: StubElement<*>?): TolkFunctionReceiverStub {
-            return TolkFunctionReceiverStub(parentStub, this, psi.text)
-        }
+        override fun createStub(psi: TolkFunctionReceiver, parentStub: StubElement<*>?): TolkFunctionReceiverStub =
+            TolkFunctionReceiverStub(parentStub, this, psi.text)
 
         override fun serialize(stub: TolkFunctionReceiverStub, dataStream: StubOutputStream) {
             dataStream.writeName(stub.getText())
         }
 
-        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): TolkFunctionReceiverStub {
-            return TolkFunctionReceiverStub(parentStub, this, dataStream.readName())
-        }
+        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): TolkFunctionReceiverStub =
+            TolkFunctionReceiverStub(parentStub, this, dataStream.readName())
     }
 }

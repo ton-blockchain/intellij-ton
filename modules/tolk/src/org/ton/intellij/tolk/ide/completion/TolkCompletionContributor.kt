@@ -21,8 +21,8 @@ class TolkCompletionContributor : CompletionContributor() {
             TolkCompletionPatterns.inBlock(),
             TolkKeywordCompletionProvider(
                 KEYWORD_PRIORITY,
-                "lazy"
-            )
+                "lazy",
+            ),
         )
         extend(TolkFunCompletionProvider)
         extend(TolkParameterCompletionProvider)
@@ -33,10 +33,10 @@ class TolkCompletionContributor : CompletionContributor() {
                 .andNot(
                     psiElement().afterLeafSkipping(
                         psiElement().withText(""),
-                        psiElement().inside(TolkTopLevelElement::class.java)
-                    )
+                        psiElement().inside(TolkTopLevelElement::class.java),
+                    ),
                 ).andNot(
-                    psiElement().inside(TolkDocComment::class.java)
+                    psiElement().inside(TolkDocComment::class.java),
                 ),
             TolkKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
@@ -48,33 +48,33 @@ class TolkCompletionContributor : CompletionContributor() {
                 "type",
                 "struct",
                 "enum",
-            )
+            ),
         )
         extend(
             CompletionType.BASIC,
             psiElement().afterLeaf(
                 psiElement(TolkElementTypes.RBRACE).withAncestor(
                     2,
-                    psiElement(TolkElementTypes.IF_STATEMENT)
-                )
+                    psiElement(TolkElementTypes.IF_STATEMENT),
+                ),
             ),
             TolkKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
                 "else",
-            )
+            ),
         )
         extend(
             CompletionType.BASIC,
             psiElement().afterLeaf(
                 psiElement(TolkElementTypes.RBRACE).withAncestor(
                     2,
-                    psiElement(TolkElementTypes.DO_STATEMENT)
-                )
+                    psiElement(TolkElementTypes.DO_STATEMENT),
+                ),
             ),
             TolkKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
                 "while",
-            )
+            ),
         )
         extend(TolkCommonCompletionProvider)
         extend(TolkDotExpressionCompletionProvider)
@@ -116,10 +116,7 @@ class TolkCompletionContributor : CompletionContributor() {
         private val TOLK_COMPLETION_WEIGHERS_GROUPED: List<AnchoredWeigherGroup> =
             splitIntoGroups(TolkCompletionWeigher.WEIGHERS)
 
-        fun withTolkSorter(
-            parameters: CompletionParameters,
-            result: CompletionResultSet
-        ): CompletionResultSet {
+        fun withTolkSorter(parameters: CompletionParameters, result: CompletionResultSet): CompletionResultSet {
             var sorter = (CompletionSorter.defaultSorter(parameters, result.prefixMatcher) as CompletionSorterImpl)
                 .withoutClassifiers { it.id == "liftShorter" }
             for (weigher in TOLK_COMPLETION_WEIGHERS_GROUPED) {
@@ -132,7 +129,7 @@ class TolkCompletionContributor : CompletionContributor() {
             val firstEntry = weighersWithAnchors.firstOrNull() ?: return emptyList()
             check(firstEntry is String) {
                 "The first element in the weigher list must be a string placeholder like \"priority\"; " +
-                        "actually it is `${firstEntry}`"
+                    "actually it is `$firstEntry`"
             }
             val result = mutableListOf<AnchoredWeigherGroup>()
             val weigherIds = hashSetOf<String>()
@@ -153,7 +150,7 @@ class TolkCompletionContributor : CompletionContributor() {
                         if (!weigherIds.add(weigherOrAnchor.id)) {
                             error(
                                 "Found a ${TolkCompletionWeigher::class.simpleName}.id duplicate: " +
-                                        "`${weigherOrAnchor.id}`"
+                                    "`${weigherOrAnchor.id}`",
                             )
                         }
                         currentWeighers += RsCompletionWeigherAsLookupElementWeigher(weigherOrAnchor)
@@ -161,7 +158,7 @@ class TolkCompletionContributor : CompletionContributor() {
 
                     else -> error(
                         "The weigher list must consists of String placeholders and instances of " +
-                                "${TolkCompletionWeigher::class.simpleName}, got ${weigherOrAnchor.javaClass}"
+                            "${TolkCompletionWeigher::class.simpleName}, got ${weigherOrAnchor.javaClass}",
                     )
                 }
             }
@@ -170,9 +167,8 @@ class TolkCompletionContributor : CompletionContributor() {
 
         private class AnchoredWeigherGroup(val anchor: String, val weighers: Array<LookupElementWeigher>)
 
-        private class RsCompletionWeigherAsLookupElementWeigher(
-            private val weigher: TolkCompletionWeigher
-        ) : LookupElementWeigher(weigher.id, /* negated = */ false, /* dependsOnPrefix = */ false) {
+        private class RsCompletionWeigherAsLookupElementWeigher(private val weigher: TolkCompletionWeigher) :
+            LookupElementWeigher(weigher.id, /* negated = */ false, /* dependsOnPrefix = */ false) {
             override fun weigh(element: LookupElement): Comparable<*> {
                 val rsElement = element.`as`(TolkLookupElement::class.java)
                 return weigher.weigh(rsElement ?: element)

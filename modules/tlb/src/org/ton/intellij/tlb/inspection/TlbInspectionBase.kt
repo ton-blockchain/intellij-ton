@@ -23,19 +23,19 @@ abstract class TlbInspectionBase : LocalInspectionTool() {
         val file = session.file as? TlbFile
         return if (file != null) {
             buildTlbVisitor(holder, session)
-        } else DUMMY_VISITOR
-    }
-
-    protected open fun buildTlbVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): TlbVisitor = object : TlbVisitor() {
-        override fun visitFile(file: PsiFile) {
-            if (file is TlbFile) {
-                checkFile(file, holder)
-            }
+        } else {
+            DUMMY_VISITOR
         }
     }
+
+    protected open fun buildTlbVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TlbVisitor =
+        object : TlbVisitor() {
+            override fun visitFile(file: PsiFile) {
+                if (file is TlbFile) {
+                    checkFile(file, holder)
+                }
+            }
+        }
 
     protected fun checkFile(file: TlbFile, problemsHolder: ProblemsHolder) {
     }

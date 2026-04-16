@@ -17,7 +17,9 @@ import com.intellij.psi.util.PsiTreeUtil
 fun loadTextResource(ctx: Class<*>, resource: String): String {
     val classLoader = requireNotNull(ctx.classLoader) { "Can't load class loader for $ctx" }
     val stream =
-        requireNotNull(classLoader.getResourceAsStream(resource)) { "Can't find resource: `$resource` in context: $ctx" }
+        requireNotNull(classLoader.getResourceAsStream(resource)) {
+            "Can't find resource: `$resource` in context: $ctx"
+        }
     return stream.use {
         it.readAllBytes().decodeToString()
     }
@@ -53,12 +55,15 @@ inline fun <T> nullIfError(action: () -> T): T? = try {
 fun getAllFilesRecursively(filesOrDirs: Array<VirtualFile>): Collection<VirtualFile> {
     val result = ArrayList<VirtualFile>()
     for (file in filesOrDirs) {
-        VfsUtilCore.visitChildrenRecursively(file, object : VirtualFileVisitor<Unit>() {
-            override fun visitFile(file: VirtualFile): Boolean {
-                result.add(file)
-                return true
-            }
-        })
+        VfsUtilCore.visitChildrenRecursively(
+            file,
+            object : VirtualFileVisitor<Unit>() {
+                override fun visitFile(file: VirtualFile): Boolean {
+                    result.add(file)
+                    return true
+                }
+            },
+        )
     }
     return result
 }

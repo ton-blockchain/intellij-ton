@@ -13,23 +13,21 @@ import org.ton.intellij.tasm.psi.TasmTypes.*
 object TasmSyntaxHighlighter : SyntaxHighlighterBase() {
     override fun getHighlightingLexer(): Lexer = TasmLexerAdapter()
 
-    override fun getTokenHighlights(tokenType: IElementType?): Array<TextAttributesKey> {
-        return when (tokenType) {
-            IDENTIFIER       -> TasmColor.INSTRUCTION
-            INTEGER          -> TasmColor.NUMBER
-            HEX              -> TasmColor.HEX_LITERAL
-            BIN              -> TasmColor.BIN_LITERAL
-            BOC              -> TasmColor.BOC_LITERAL
-            STACK            -> TasmColor.STACK_REGISTER
-            CTRL             -> TasmColor.CONTROL_REGISTER
-            COMMENT          -> TasmColor.COMMENT
-            ARROW            -> TasmColor.ARROW
-            in TASM_KEYWORDS -> TasmColor.KEYWORD
-            in TASM_BRACES   -> TasmColor.BRACES
-            in TASM_BRACKETS -> TasmColor.BRACKETS
-            else             -> null
-        }.let {
-            pack(it?.textAttributesKey)
-        }
+    override fun getTokenHighlights(tokenType: IElementType?): Array<TextAttributesKey> = when (tokenType) {
+        IDENTIFIER -> TasmColor.INSTRUCTION
+        INTEGER -> TasmColor.NUMBER
+        HEX -> TasmColor.HEX_LITERAL
+        BIN -> TasmColor.BIN_LITERAL
+        BOC -> TasmColor.BOC_LITERAL
+        STACK -> TasmColor.STACK_REGISTER
+        CTRL -> TasmColor.CONTROL_REGISTER
+        COMMENT -> TasmColor.COMMENT
+        ARROW -> TasmColor.ARROW
+        in TASM_KEYWORDS -> TasmColor.KEYWORD
+        in TASM_BRACES -> TasmColor.BRACES
+        in TASM_BRACKETS -> TasmColor.BRACKETS
+        else -> null
+    }.let {
+        pack(it?.textAttributesKey)
     }
 }

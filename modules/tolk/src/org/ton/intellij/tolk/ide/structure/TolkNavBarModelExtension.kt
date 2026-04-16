@@ -25,11 +25,10 @@ class TolkNavBarModelExtension : StructureAwareNavBarModelExtension() {
     }
 
     override fun getLeafElement(dataContext: DataContext): PsiElement? {
-        val leaf =  super.getLeafElement(dataContext)
+        val leaf = super.getLeafElement(dataContext)
         return leaf
     }
 
-    override fun processChildren(`object`: Any, rootElement: Any?, processor: Processor<Any>): Boolean {
-        return super.processChildren(`object`, rootElement, processor)
-    }
+    override fun processChildren(`object`: Any, rootElement: Any?, processor: Processor<Any>): Boolean =
+        super.processChildren(`object`, rootElement, processor)
 }

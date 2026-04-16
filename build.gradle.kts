@@ -1,10 +1,10 @@
-
 import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import java.time.Clock
 import java.time.Instant
 
@@ -26,10 +26,20 @@ plugins {
     id("org.jetbrains.intellij.platform")
     id("org.jetbrains.grammarkit") version "2023.3.0.1"
     id("org.jetbrains.changelog") version "2.5.0"
+    id("org.jlleitschuh.gradle.ktlint") version "13.1.0" apply false
 }
 
 allprojects {
     apply(plugin = "kotlin")
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+
+    configure<KtlintExtension> {
+        ignoreFailures.set(true)
+        filter {
+            exclude("**/build/**")
+            exclude("**/gen/**")
+        }
+    }
 
     tasks.withType<KotlinCompile> {
         compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
@@ -97,7 +107,7 @@ intellijPlatform {
         changeNotes.set(
             provider {
                 changelog.renderItem(changelog.getLatest(), Changelog.OutputType.HTML)
-            }
+            },
         )
         ideaVersion {
             sinceBuild.set(prop("pluginSinceBuild"))
@@ -112,9 +122,7 @@ intellijPlatform {
     pluginVerification {
         ides {
             recommended()
-            select {
-
-            }
+            select {}
         }
     }
 
@@ -136,6 +144,16 @@ val mergePluginJarsTask = tasks.register<Jar>("mergePluginJars") {
             from(zipTree(file))
         }
     }
+}
+
+val fmt by tasks.registering {
+    group = "formatting"
+    description = "Formats Kotlin sources and Gradle Kotlin scripts in all projects with ktlint."
+    dependsOn(
+        rootProject.allprojects.map { project ->
+            if (project == rootProject) "ktlintFormat" else "${project.path}:ktlintFormat"
+        },
+    )
 }
 
 tasks {

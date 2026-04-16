@@ -16,11 +16,12 @@ object TolkStructFieldModifierCompletionProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> = psiElement()
         .inside(TolkStructBody::class.java)
         .andNot(psiElement().withParent(TolkStructField::class.java).afterLeaf(":"))
-        .and(psiElement().with(object : PatternCondition<PsiElement>("notAfterColon") {
-            override fun accepts(t: PsiElement, context: ProcessingContext?): Boolean {
-                return t.prevVisibleOrNewLine?.text != ":" && t !is PsiComment
-            }
-        }))
+        .and(
+            psiElement().with(object : PatternCondition<PsiElement>("notAfterColon") {
+                override fun accepts(t: PsiElement, context: ProcessingContext?): Boolean =
+                    t.prevVisibleOrNewLine?.text != ":" && t !is PsiComment
+            }),
+        )
 
     override fun addCompletions(
         parameters: CompletionParameters,
@@ -29,7 +30,7 @@ object TolkStructFieldModifierCompletionProvider : TolkCompletionProvider() {
     ) {
         val provider = TolkKeywordCompletionProvider(
             TolkCompletionContributor.CONTEXT_KEYWORD_PRIORITY,
-            listOf("private", "readonly")
+            listOf("private", "readonly"),
         )
         provider.addCompletions(parameters, context, result)
     }

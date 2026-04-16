@@ -22,9 +22,7 @@ import org.ton.intellij.tolk.psi.isTolkFile
 import java.util.function.Function
 import javax.swing.JComponent
 
-class TolkUnregisteredContractNotificationProvider(
-    private val project: Project,
-) : EditorNotificationProvider {
+class TolkUnregisteredContractNotificationProvider(private val project: Project) : EditorNotificationProvider {
 
     override fun collectNotificationData(
         project: Project,
@@ -66,7 +64,7 @@ class TolkUnregisteredContractNotificationProvider(
         val commandLine = ActonCommandLine(
             command = command.name,
             workingDirectory = actonToml.workingDir,
-            additionalArguments = command.getArguments()
+            additionalArguments = command.getArguments(),
         ).toGeneralCommandLine(project) ?: return
 
         ApplicationManager.getApplication().executeOnPooledThread {
@@ -92,13 +90,10 @@ class TolkUnregisteredContractNotificationProvider(
         PropertiesComponent.getInstance(project).setList(IGNORED_FILES_KEY, ignoredFiles.toList())
     }
 
-    private fun isIgnored(file: VirtualFile): Boolean {
-        return getIgnoredFiles().contains(file.path)
-    }
+    private fun isIgnored(file: VirtualFile): Boolean = getIgnoredFiles().contains(file.path)
 
-    private fun getIgnoredFiles(): List<String> {
-        return PropertiesComponent.getInstance(project).getList(IGNORED_FILES_KEY) ?: listOf()
-    }
+    private fun getIgnoredFiles(): List<String> =
+        PropertiesComponent.getInstance(project).getList(IGNORED_FILES_KEY) ?: listOf()
 
     private companion object {
         private const val IGNORED_FILES_KEY = "org.ton.tolk.unregisteredContracts.ignored"

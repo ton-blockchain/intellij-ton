@@ -10,11 +10,10 @@ import org.ton.intellij.func.psi.impl.FuncIncludeDefinitionImpl
 import org.ton.intellij.func.psi.impl.path
 import org.ton.intellij.func.stub.FuncIncludeDefinitionStub
 
-class FuncIncludeDefinitionStubElementType(
-    debugName: String,
-) : FuncStubElementType<FuncIncludeDefinitionStub, FuncIncludeDefinition>(
-    debugName
-) {
+class FuncIncludeDefinitionStubElementType(debugName: String) :
+    FuncStubElementType<FuncIncludeDefinitionStub, FuncIncludeDefinition>(
+        debugName,
+    ) {
     override fun serialize(stub: FuncIncludeDefinitionStub, dataStream: StubOutputStream) {
         dataStream.writeUTFFast(stub.path)
     }
@@ -27,13 +26,10 @@ class FuncIncludeDefinitionStubElementType(
     override fun createStub(
         psi: FuncIncludeDefinition,
         parentStub: StubElement<out PsiElement>,
-    ): FuncIncludeDefinitionStub {
-        return FuncIncludeDefinitionStub(parentStub, this, psi.path)
-    }
+    ): FuncIncludeDefinitionStub = FuncIncludeDefinitionStub(parentStub, this, psi.path)
 
-    override fun createPsi(stub: FuncIncludeDefinitionStub): FuncIncludeDefinition {
-        return FuncIncludeDefinitionImpl(stub, this)
-    }
+    override fun createPsi(stub: FuncIncludeDefinitionStub): FuncIncludeDefinition =
+        FuncIncludeDefinitionImpl(stub, this)
 
     companion object {
         val EMPTY_ARRAY = emptyArray<FuncIncludeDefinition>()

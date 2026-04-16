@@ -33,7 +33,7 @@ internal fun findActonTomlValueContext(element: PsiElement): ActonTomlValueConte
         literal = literal,
         keyValue = keyValue,
         path = path,
-        isArrayItem = keyValue.value != literal
+        isArrayItem = keyValue.value != literal,
     )
 }
 

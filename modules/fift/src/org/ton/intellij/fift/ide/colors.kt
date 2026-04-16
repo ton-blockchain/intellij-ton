@@ -12,10 +12,7 @@ import org.ton.intellij.util.loadTextResource
 import javax.swing.Icon
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
-enum class FiftColor(
-    displayName: String,
-    default: TextAttributesKey,
-) {
+enum class FiftColor(displayName: String, default: TextAttributesKey) {
     COMMENT("Comment", Defaults.LINE_COMMENT),
     DOCUMENTATION("Documentation", Defaults.DOC_COMMENT),
 
@@ -34,14 +31,13 @@ enum class FiftColor(
 
     ASSEMBLY_DEFINITION("Assembly definition", Defaults.FUNCTION_DECLARATION),
     ASSEMBLY_CALL("Assembly call", Defaults.FUNCTION_DECLARATION),
-    ASSEMBLY_INSTRUCTION("Assembly instruction", XmlHighlighterColors.HTML_TAG)
+    ASSEMBLY_INSTRUCTION("Assembly instruction", XmlHighlighterColors.HTML_TAG),
     ;
 
     val textAttributesKey =
         TextAttributesKey.createTextAttributesKey("org.ton.intellij.fift.$name", default)
     val attributesDescriptor = AttributesDescriptor(displayName, textAttributesKey)
 }
-
 
 class FiftColorSettingsPage : ColorSettingsPage {
     private val DEMO_TEXT by lazy {

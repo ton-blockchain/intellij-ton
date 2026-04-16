@@ -19,7 +19,9 @@ import org.ton.intellij.tolk.psi.TolkLiteralExpression
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import java.math.BigInteger
 
-class TolkConvertNumberLiteralIntention : PsiElementBaseIntentionAction(), LowPriorityAction {
+class TolkConvertNumberLiteralIntention :
+    PsiElementBaseIntentionAction(),
+    LowPriorityAction {
     override fun getFamilyName(): String = TolkBundle.message("intention.convert.number.literal.family.name")
     override fun getText(): String = TolkBundle.message("intention.convert.number.literal.text")
 
@@ -45,8 +47,8 @@ class TolkConvertNumberLiteralIntention : PsiElementBaseIntentionAction(), LowPr
                 add(
                     ConversionOption(
                         TolkBundle.message("intention.convert.number.to.binary.text", binaryText),
-                        binaryText
-                    )
+                        binaryText,
+                    ),
                 )
             }
 
@@ -56,20 +58,22 @@ class TolkConvertNumberLiteralIntention : PsiElementBaseIntentionAction(), LowPr
                 add(
                     ConversionOption(
                         TolkBundle.message("intention.convert.number.to.hex.text", hexText),
-                        hexText
-                    )
+                        hexText,
+                    ),
                 )
             }
 
-            if (originalText.startsWith("0x") || originalText.startsWith("0X") ||
-                originalText.startsWith("0b") || originalText.startsWith("0B")
+            if (originalText.startsWith("0x") ||
+                originalText.startsWith("0X") ||
+                originalText.startsWith("0b") ||
+                originalText.startsWith("0B")
             ) {
                 val decimalText = value.toString()
                 add(
                     ConversionOption(
                         TolkBundle.message("intention.convert.number.to.decimal.text", decimalText),
-                        decimalText
-                    )
+                        decimalText,
+                    ),
                 )
             }
         }
@@ -83,9 +87,8 @@ class TolkConvertNumberLiteralIntention : PsiElementBaseIntentionAction(), LowPr
         }
     }
 
-    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo {
-        return IntentionPreviewInfo.EMPTY
-    }
+    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo =
+        IntentionPreviewInfo.EMPTY
 
     private fun findLiteralExpression(element: PsiElement): TolkLiteralExpression? {
         var current: PsiElement? = element
@@ -98,24 +101,22 @@ class TolkConvertNumberLiteralIntention : PsiElementBaseIntentionAction(), LowPr
         return null
     }
 
-    private fun parseIntegerLiteral(text: String): BigInteger? {
-        return try {
-            var cleanText = text.replace("_", "")
-            val isNegative = cleanText.startsWith("-")
-            if (isNegative) {
-                cleanText = cleanText.substring(1)
-            }
-
-            val value = when {
-                cleanText.startsWith("0x") || cleanText.startsWith("0X") -> BigInteger(cleanText.substring(2), 16)
-                cleanText.startsWith("0b") || cleanText.startsWith("0B") -> BigInteger(cleanText.substring(2), 2)
-                else                                                     -> BigInteger(cleanText)
-            }
-
-            if (isNegative) value.negate() else value
-        } catch (_: NumberFormatException) {
-            null
+    private fun parseIntegerLiteral(text: String): BigInteger? = try {
+        var cleanText = text.replace("_", "")
+        val isNegative = cleanText.startsWith("-")
+        if (isNegative) {
+            cleanText = cleanText.substring(1)
         }
+
+        val value = when {
+            cleanText.startsWith("0x") || cleanText.startsWith("0X") -> BigInteger(cleanText.substring(2), 16)
+            cleanText.startsWith("0b") || cleanText.startsWith("0B") -> BigInteger(cleanText.substring(2), 2)
+            else -> BigInteger(cleanText)
+        }
+
+        if (isNegative) value.negate() else value
+    } catch (_: NumberFormatException) {
+        null
     }
 
     private fun showConversionPopup(
@@ -134,7 +135,7 @@ class TolkConvertNumberLiteralIntention : PsiElementBaseIntentionAction(), LowPr
                     }
                     return null
                 }
-            }
+            },
         )
 
         if (editor != null) {
@@ -150,13 +151,12 @@ class TolkConvertNumberLiteralIntention : PsiElementBaseIntentionAction(), LowPr
 
         WriteCommandAction.writeCommandAction(project)
             .withName("Convert ${literalExpression.text} to ${newLiteral.text}")
-            .run(ThrowableRunnable {
-                literalExpression.replace(newLiteral)
-            })
+            .run(
+                ThrowableRunnable {
+                    literalExpression.replace(newLiteral)
+                },
+            )
     }
 
-    private data class ConversionOption(
-        val description: String,
-        val text: String,
-    )
+    private data class ConversionOption(val description: String, val text: String)
 }

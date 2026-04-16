@@ -29,5 +29,4 @@ fun crc16(data: ByteArray): Int {
     return crc
 }
 
-fun crc16(text: String): Int =
-    crc16(text.toByteArray(Charsets.UTF_8))
+fun crc16(text: String): Int = crc16(text.toByteArray(Charsets.UTF_8))

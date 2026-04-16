@@ -29,7 +29,9 @@ class FuncColorSettingsPage : ColorSettingsPage {
     override fun getDisplayName(): @NlsContexts.ConfigurableName String = "FunC"
 
     companion object {
-        private val ATTRS: Array<AttributesDescriptor> = FuncColor.entries.map { it.attributesDescriptor }.toTypedArray()
+        private val ATTRS: Array<AttributesDescriptor> = FuncColor.entries.map {
+            it.attributesDescriptor
+        }.toTypedArray()
         private val ANNOTATOR_TAGS = FuncColor.entries.associateBy({ it.name }, { it.textAttributesKey })
 
         private val DEMO_TEXT: String by lazy {

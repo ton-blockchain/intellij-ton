@@ -47,10 +47,11 @@ object TolkTestFunctionCompletionProvider : TolkCompletionProvider() {
                     val start = context.startOffset
                     document.deleteString(start, start + "get fun test".length)
                     TemplateStringInsertHandler(
-                        "get fun `test \$name$`() {\n\$END$\n}", true,
+                        "get fun `test \$name$`() {\n\$END$\n}",
+                        true,
                         "name" to ConstantNode(""),
                     ).handleInsert(context, item)
-                }
+                },
         )
     }
 }

@@ -10,7 +10,7 @@ import com.intellij.util.messages.Topic
 private val FUNC_STRUCTURE_CHANGE_TOPIC: Topic<FuncStructureChangeListener> = Topic.create(
     "FUNC_STRUCTURE_CHANGE_TOPIC",
     FuncStructureChangeListener::class.java,
-    Topic.BroadcastDirection.TO_PARENT
+    Topic.BroadcastDirection.TO_PARENT,
 )
 
 interface FuncPsiManager {

@@ -25,7 +25,7 @@ class TolkUnusedImportInspection : TolkInspectionBase() {
                         import,
                         TolkBundle.message("inspection.tolk.unused.import.message", import.path),
                         ProblemHighlightType.LIKE_UNUSED_SYMBOL,
-                        OPTIMIZE_IMPORTS_QUICK_FIX
+                        OPTIMIZE_IMPORTS_QUICK_FIX,
                     )
                 }
             }

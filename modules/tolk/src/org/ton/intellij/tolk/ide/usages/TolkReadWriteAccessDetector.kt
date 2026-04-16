@@ -22,20 +22,16 @@ import org.ton.intellij.tolk.psi.impl.isMutable
 import org.ton.intellij.tolk.psi.impl.isSetAssignment
 
 class TolkReadWriteAccessDetector : ReadWriteAccessDetector() {
-    override fun isReadWriteAccessible(element: PsiElement): Boolean {
-        return element is TolkVar ||
-                element is TolkConstVar ||
-                element is TolkParameter ||
-                element is TolkStructField
-    }
+    override fun isReadWriteAccessible(element: PsiElement): Boolean = element is TolkVar ||
+        element is TolkConstVar ||
+        element is TolkParameter ||
+        element is TolkStructField
 
-    override fun isDeclarationWriteAccess(element: PsiElement): Boolean {
-        return element is TolkVar || element is TolkConstVar || element is TolkStructField
-    }
+    override fun isDeclarationWriteAccess(element: PsiElement): Boolean =
+        element is TolkVar || element is TolkConstVar || element is TolkStructField
 
-    override fun getReferenceAccess(referencedElement: PsiElement, reference: PsiReference): Access {
-        return getExpressionAccess(reference.element)
-    }
+    override fun getReferenceAccess(referencedElement: PsiElement, reference: PsiReference): Access =
+        getExpressionAccess(reference.element)
 
     override fun getExpressionAccess(expression: PsiElement): Access {
         val parent = expression.parent

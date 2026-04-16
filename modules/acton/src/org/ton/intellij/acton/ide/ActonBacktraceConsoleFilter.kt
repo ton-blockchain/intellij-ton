@@ -8,12 +8,10 @@ import com.intellij.execution.impl.InlayProvider
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorCustomElementRenderer
-import java.awt.Cursor
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
+import java.awt.Cursor
 
-class ActonBacktraceConsoleFilter(
-    private val sourceConfiguration: ActonCommandConfiguration,
-) : Filter {
+class ActonBacktraceConsoleFilter(private val sourceConfiguration: ActonCommandConfiguration) : Filter {
     private var currentTestTarget: String? = null
     private var lastFailedTestName: String? = null
 
@@ -34,8 +32,8 @@ class ActonBacktraceConsoleFilter(
         return Filter.Result(
             listOf(
                 ResultItem(lineStart, lineStart, null),
-                ActonBacktraceInlay(buttonOffset, sourceConfiguration, lastFailedTestName, currentTestTarget)
-            )
+                ActonBacktraceInlay(buttonOffset, sourceConfiguration, lastFailedTestName, currentTestTarget),
+            ),
         )
     }
 
@@ -45,25 +43,27 @@ class ActonBacktraceConsoleFilter(
         private val sourceConfiguration: ActonCommandConfiguration,
         private val failedTestName: String?,
         private val testTarget: String?,
-    ) : ResultItem(offset, offset, null), InlayProvider {
+    ) : ResultItem(offset, offset, null),
+        InlayProvider {
         override fun createInlayRenderer(editor: Editor): EditorCustomElementRenderer {
             val factory = PresentationFactory(editor)
             val items = arrayOf(
                 factory.smallScaledIcon(AllIcons.Actions.Execute),
-                factory.smallText(" Re-run this test with backtrace full")
+                factory.smallText(" Re-run this test with backtrace full"),
             )
             val basePresentation = factory.referenceOnHover(factory.roundWithBackground(factory.seq(*items))) { _, _ ->
                 ActonBacktraceRerunLauncher.launch(sourceConfiguration, failedTestName, testTarget)
             }
-            val presentation = factory.withCursorOnHover(basePresentation, Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
+            val presentation = factory.withCursorOnHover(
+                basePresentation,
+                Cursor.getPredefinedCursor(Cursor.HAND_CURSOR),
+            )
             return PresentationRenderer(presentation)
         }
     }
 }
 
-internal fun extractActonTestTarget(line: String): String? {
-    return TEST_SUITE_REGEX.find(line)?.groupValues?.get(1)
-}
+internal fun extractActonTestTarget(line: String): String? = TEST_SUITE_REGEX.find(line)?.groupValues?.get(1)
 
 internal fun extractActonFailedTestName(line: String): String? {
     val name = FAILED_TEST_REGEX.find(line)?.groupValues?.get(1)?.trim() ?: return null

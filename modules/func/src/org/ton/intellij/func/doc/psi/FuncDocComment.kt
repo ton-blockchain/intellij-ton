@@ -7,7 +7,9 @@ import com.intellij.psi.impl.source.tree.injected.InjectionBackgroundSuppressor
 import org.ton.intellij.func.psi.FuncDocOwner
 import org.ton.intellij.func.psi.FuncElement
 
-interface FuncDocComment : PsiDocCommentBase, FuncElement {
+interface FuncDocComment :
+    PsiDocCommentBase,
+    FuncElement {
     override fun getOwner(): FuncDocOwner?
 
     val codeFences: List<FuncDocCodeFence>
@@ -24,7 +26,10 @@ interface FuncDocElement : FuncElement {
 /**
  * A [markdown code fence](https://spec.commonmark.org/0.29/#fenced-code-blocks).
  */
-interface FuncDocCodeFence : FuncDocElement, PsiLanguageInjectionHost, InjectionBackgroundSuppressor {
+interface FuncDocCodeFence :
+    FuncDocElement,
+    PsiLanguageInjectionHost,
+    InjectionBackgroundSuppressor {
     val start: FuncDocCodeFenceStartEnd
     val lang: FuncDocCodeFenceLang?
     val end: FuncDocCodeFenceStartEnd?

@@ -10,21 +10,16 @@ import java.awt.event.MouseEvent
 class TolkVcsCodeVisionContext : VcsCodeVisionCurlyBracketLanguageContext() {
     override fun isRBrace(element: PsiElement): Boolean = element.elementType == TolkElementTypes.RBRACE
 
-    override fun isAccepted(element: PsiElement): Boolean {
-        return when (element) {
-            is TolkFunction,
-            is TolkStruct,
-            is TolkTypeDef,
-            is TolkGlobalVar,
-            is TolkConstVar -> true
-            else -> false
-        }
+    override fun isAccepted(element: PsiElement): Boolean = when (element) {
+        is TolkFunction,
+        is TolkStruct,
+        is TolkTypeDef,
+        is TolkGlobalVar,
+        is TolkConstVar,
+        -> true
+        else -> false
     }
 
-    override fun handleClick(
-        mouseEvent: MouseEvent,
-        editor: Editor,
-        element: PsiElement
-    ) {
+    override fun handleClick(mouseEvent: MouseEvent, editor: Editor, element: PsiElement) {
     }
 }

@@ -11,10 +11,7 @@ fun TolkPsiRenderer.renderTypeExpression(element: TolkTypeExpression) = buildStr
 }
 
 open class TolkPsiRenderer {
-    fun appendParameterList(
-        appendable: Appendable,
-        element: TolkParameterList
-    ) {
+    fun appendParameterList(appendable: Appendable, element: TolkParameterList) {
         appendable.append("(")
         val selfParameter = element.selfParameter
         val parameterList = element.parameterList
@@ -33,20 +30,14 @@ open class TolkPsiRenderer {
         appendable.append(")")
     }
 
-    fun appendSelfParameter(
-        appendable: Appendable,
-        element: TolkSelfParameter
-    ) {
+    fun appendSelfParameter(appendable: Appendable, element: TolkSelfParameter) {
         if (element.isMutable) {
             appendable.append("mutable ")
         }
         appendable.append("self")
     }
 
-    fun appendParameter(
-        appendable: Appendable,
-        element: TolkParameter
-    ) {
+    fun appendParameter(appendable: Appendable, element: TolkParameter) {
         if (element.isMutable) {
             appendable.append("mutable ")
         }
@@ -57,11 +48,8 @@ open class TolkPsiRenderer {
         }
     }
 
-    fun appendTypeExpression(
-        appendable: Appendable,
-        element: TolkTypeExpression
-    ) {
-        when(element) {
+    fun appendTypeExpression(appendable: Appendable, element: TolkTypeExpression) {
+        when (element) {
             is TolkFunTypeExpression -> {
                 val types = element.typeExpressionList
                 types.getOrNull(0)?.let {

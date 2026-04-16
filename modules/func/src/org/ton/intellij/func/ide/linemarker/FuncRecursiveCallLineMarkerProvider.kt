@@ -24,7 +24,7 @@ class FuncRecursiveCallLineMarkerProvider : LineMarkerProviderDescriptor() {
         elements: MutableList<out PsiElement>,
         result: MutableCollection<in LineMarkerInfo<*>>,
     ) {
-        val lines = HashSet<Int>()  // To prevent several markers on one line
+        val lines = HashSet<Int>() // To prevent several markers on one line
 
         for (element in elements) {
             if (element !is FuncReferenceExpression) continue
@@ -47,8 +47,8 @@ class FuncRecursiveCallLineMarkerProvider : LineMarkerProviderDescriptor() {
                         { name },
                         null,
                         GutterIconRenderer.Alignment.RIGHT,
-                        { name }
-                    )
+                        { name },
+                    ),
                 )
             }
         }

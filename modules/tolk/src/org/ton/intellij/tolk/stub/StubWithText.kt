@@ -10,7 +10,8 @@ abstract class StubWithText<T : PsiElement?>(
     parent: StubElement<*>?,
     elementType: IStubElementType<*, *>?,
     private val text: StringRef?,
-) : StubBase<T>(parent, elementType), TextHolder {
+) : StubBase<T>(parent, elementType),
+    TextHolder {
 
     override fun getText() = text?.string
 }

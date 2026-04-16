@@ -1,9 +1,9 @@
 package org.ton.intellij.func.inspection
 
-import org.ton.intellij.func.FuncTestBase
 import com.intellij.codeInspection.InspectionProfileEntry
 import com.intellij.codeInspection.LocalInspectionTool
 import org.intellij.lang.annotations.Language
+import org.ton.intellij.func.FuncTestBase
 
 abstract class FuncInspectionTestBase : FuncTestBase() {
     override fun getTestDataPath(): String = "testResources/"
@@ -13,7 +13,7 @@ abstract class FuncInspectionTestBase : FuncTestBase() {
         vararg inspections: InspectionProfileEntry,
         checkWarnings: Boolean = false,
         checkInfos: Boolean = false,
-        checkWeakWarnings: Boolean = false
+        checkWeakWarnings: Boolean = false,
     ) {
         myFixture.enableInspections(*inspections)
         myFixture.configureByText("test.fc", code)
@@ -25,7 +25,7 @@ abstract class FuncInspectionTestBase : FuncTestBase() {
         vararg inspections: InspectionProfileEntry,
         checkWarnings: Boolean = false,
         checkInfos: Boolean = false,
-        checkWeakWarnings: Boolean = false
+        checkWeakWarnings: Boolean = false,
     ) {
         myFixture.enableInspections(*inspections)
         myFixture.testHighlighting(checkWarnings, checkInfos, checkWeakWarnings, fileName)
@@ -36,17 +36,14 @@ abstract class FuncInspectionTestBase : FuncTestBase() {
         inspection: LocalInspectionTool,
         checkWarnings: Boolean = false,
         checkInfos: Boolean = false,
-        checkWeakWarnings: Boolean = false
+        checkWeakWarnings: Boolean = false,
     ) {
         myFixture.enableInspections(inspection)
         myFixture.configureByText("test.fc", code)
         myFixture.testHighlighting(checkWarnings, checkInfos, checkWeakWarnings)
     }
 
-    protected fun checkNoProblems(
-        @Language("FunC") code: String,
-        vararg inspections: InspectionProfileEntry
-    ) {
+    protected fun checkNoProblems(@Language("FunC") code: String, vararg inspections: InspectionProfileEntry) {
         myFixture.enableInspections(*inspections)
         myFixture.configureByText("test.fc", code)
 
@@ -56,8 +53,10 @@ abstract class FuncInspectionTestBase : FuncTestBase() {
         }
 
         assertTrue(
-            "Expected no problems, but found: ${problemHighlights.joinToString { "${it.severity}: ${it.description}" }}",
-            problemHighlights.isEmpty()
+            "Expected no problems, but found: ${problemHighlights.joinToString {
+                "${it.severity}: ${it.description}"
+            }}",
+            problemHighlights.isEmpty(),
         )
     }
 }

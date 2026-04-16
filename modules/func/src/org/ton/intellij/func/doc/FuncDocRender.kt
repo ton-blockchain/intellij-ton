@@ -16,7 +16,7 @@ fun FuncDocComment.renderHtml(): String {
 
     val markdownRoot =
         MarkdownParser(FuncDocMarkdownFlavourDescriptor()).buildMarkdownTreeFromString(
-            rawText
+            rawText,
         )
     val markdownNode = MarkdownNode(markdownRoot, null, rawText, this)
     return markdownNode.toHtml()

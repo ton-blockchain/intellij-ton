@@ -29,7 +29,7 @@ class TolkDeprecationInspection : TolkInspectionBase() {
                     holder.registerProblem(
                         identifier,
                         "$name is deprecated.$formattedText",
-                        ProblemHighlightType.LIKE_DEPRECATED
+                        ProblemHighlightType.LIKE_DEPRECATED,
                     )
                 }
             }

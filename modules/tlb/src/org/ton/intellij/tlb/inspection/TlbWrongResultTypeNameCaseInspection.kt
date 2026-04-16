@@ -14,52 +14,46 @@ import org.ton.intellij.tlb.psi.tlbPsiFactory
 import java.util.*
 
 class TlbWrongResultTypeNameCaseInspection : TlbInspectionBase() {
-    override fun buildTlbVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession
-    ): TlbVisitor = object : TlbVisitor() {
-        override fun visitResultType(o: TlbResultType) {
-            val symbolCase = determineSymbolCase(o.name ?: return)
-            if (symbolCase == SymbolCase.UPPERCASE) return
-            val identifier = o.identifier
-            holder.registerProblem(
-                identifier,
-                "Type name must begin with an uppercase letter",
-                TlbChangeCaseFix(identifier, true)
-            )
+    override fun buildTlbVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TlbVisitor =
+        object : TlbVisitor() {
+            override fun visitResultType(o: TlbResultType) {
+                val symbolCase = determineSymbolCase(o.name ?: return)
+                if (symbolCase == SymbolCase.UPPERCASE) return
+                val identifier = o.identifier
+                holder.registerProblem(
+                    identifier,
+                    "Type name must begin with an uppercase letter",
+                    TlbChangeCaseFix(identifier, true),
+                )
+            }
         }
-    }
 
     class TlbChangeCaseFix(private val identifier: PsiElement, private val toUppercase: Boolean) :
         LocalQuickFixOnPsiElement(identifier) {
-        override fun getText(): @IntentionName String {
-            return if (toUppercase) "Change to Uppercase"
-            else "Change to Lowercase"
+        override fun getText(): @IntentionName String = if (toUppercase) {
+            "Change to Uppercase"
+        } else {
+            "Change to Lowercase"
         }
 
-        override fun invoke(
-            project: Project,
-            file: PsiFile,
-            startElement: PsiElement,
-            endElement: PsiElement
-        ) {
+        override fun invoke(project: Project, file: PsiFile, startElement: PsiElement, endElement: PsiElement) {
             val name = identifier.text ?: return
-            val newName = if (toUppercase) name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-            else name.replaceFirstChar { if (it.isUpperCase()) it.lowercase(Locale.getDefault()) else it.toString() }
+            val newName = if (toUppercase) {
+                name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+            } else {
+                name.replaceFirstChar { if (it.isUpperCase()) it.lowercase(Locale.getDefault()) else it.toString() }
+            }
             identifier.replace(project.tlbPsiFactory.createIdentifier(newName))
         }
 
-        override fun getFamilyName(): @IntentionFamilyName String {
-            return "Change case"
-        }
+        override fun getFamilyName(): @IntentionFamilyName String = "Change case"
     }
-
 
     enum class SymbolCase {
         UNDEFINED,
         LOWERCASE,
         UPPERCASE,
-        BANG_LOWERCASE
+        BANG_LOWERCASE,
     }
 
     fun determineSymbolCase(input: String): SymbolCase {

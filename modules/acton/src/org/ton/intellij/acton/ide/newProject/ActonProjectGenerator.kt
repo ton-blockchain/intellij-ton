@@ -1,10 +1,10 @@
 package org.ton.intellij.acton.ide.newProject
 
-import com.intellij.icons.AllIcons
 import com.intellij.execution.configuration.EnvironmentVariablesComponent
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessTerminatedListener
+import com.intellij.icons.AllIcons
 import com.intellij.ide.util.PsiNavigationSupport
 import com.intellij.ide.util.projectWizard.SettingsStep
 import com.intellij.openapi.application.invokeLater
@@ -49,7 +49,7 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
             command = command.name,
             workingDirectory = Paths.get(baseDir.path),
             additionalArguments = command.getArguments(),
-            environmentVariables = settings.env
+            environmentVariables = settings.env,
         ).toGeneralCommandLine(project) ?: return
 
         ProgressManager.getInstance().runProcessWithProgressSynchronously(
@@ -60,7 +60,7 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
             },
             "Generating Acton Project",
             true,
-            project
+            project,
         )
 
         baseDir.refresh(false, true)
@@ -226,7 +226,7 @@ class ActonProjectGeneratorPeer : GeneratorPeerImpl<ActonProjectSettings>() {
             "GPL-3.0",
             "BSD-3-Clause",
             "ISC",
-            "Unlicense"
+            "Unlicense",
         )
     }
 }

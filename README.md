@@ -43,6 +43,11 @@ The plugin supports the following languages:
 - [`@tondev_eng` on Telegram](https://t.me/tondev_eng) — Main TON community chat and discussion group.
 - [`@tondev` on Telegram](https://t.me/tondev) — Main Russian TON community chat and discussion group.
 
+## Development
+
+- `./gradlew check` — runs tests and style checks, including `ktlint`
+- `./gradlew fmt` — formats Kotlin sources and Gradle Kotlin scripts with `ktlint`
+
 ## License
 
 GPL-3.0

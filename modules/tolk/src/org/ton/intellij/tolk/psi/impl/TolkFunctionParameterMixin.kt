@@ -9,7 +9,9 @@ import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.inference
 import javax.swing.Icon
 
-abstract class TolkParameterMixin : TolkNamedElementImpl<TolkParameterStub>, TolkParameter {
+abstract class TolkParameterMixin :
+    TolkNamedElementImpl<TolkParameterStub>,
+    TolkParameter {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TolkParameterStub, stubType: IStubElementType<*, *>) : super(stub, stubType)

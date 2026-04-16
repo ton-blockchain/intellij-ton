@@ -11,9 +11,8 @@ import org.ton.intellij.func.psi.impl.*
 import org.ton.intellij.func.stub.FuncFunctionStub
 import org.ton.intellij.func.stub.index.FuncNamedElementIndex
 
-class FuncFunctionStubElementType(
-    debugName: String,
-) : FuncNamedStubElementType<FuncFunctionStub, FuncFunction>(debugName) {
+class FuncFunctionStubElementType(debugName: String) :
+    FuncNamedStubElementType<FuncFunctionStub, FuncFunction>(debugName) {
     override fun serialize(stub: FuncFunctionStub, dataStream: StubOutputStream) {
         dataStream.writeName(stub.name)
         var flags = 0
@@ -34,13 +33,10 @@ class FuncFunctionStubElementType(
         return FuncFunctionStub(parentStub, this, name, isMutable, isImpure, hasMethodId, hasAsm)
     }
 
-    override fun createStub(psi: FuncFunction, parentStub: StubElement<out PsiElement>): FuncFunctionStub {
-        return FuncFunctionStub(parentStub, this, psi.name, psi.isMutable, psi.isImpure, psi.hasMethodId, psi.hasAsm)
-    }
+    override fun createStub(psi: FuncFunction, parentStub: StubElement<out PsiElement>): FuncFunctionStub =
+        FuncFunctionStub(parentStub, this, psi.name, psi.isMutable, psi.isImpure, psi.hasMethodId, psi.hasAsm)
 
-    override fun createPsi(stub: FuncFunctionStub): FuncFunction {
-        return FuncFunctionImpl(stub, this)
-    }
+    override fun createPsi(stub: FuncFunctionStub): FuncFunction = FuncFunctionImpl(stub, this)
 
     override fun indexStub(stub: FuncFunctionStub, sink: IndexSink) {
         val name = stub.name ?: return

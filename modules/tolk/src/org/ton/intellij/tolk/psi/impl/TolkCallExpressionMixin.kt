@@ -10,7 +10,9 @@ import org.ton.intellij.tolk.type.inference
 val TolkCallExpression.functionSymbol: TolkFunction?
     get() = inference?.getResolvedFunction(this)
 
-abstract class TolkCallExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkCallExpression {
+abstract class TolkCallExpressionMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    TolkCallExpression {
     override val type: TolkTy? get() = inference?.getType(this)
 
     override fun toString(): String = "TolkCallExpression:$text"

@@ -14,22 +14,23 @@ import org.ton.intellij.tolk.psi.isTolkFile
 import java.util.function.Function
 import javax.swing.JComponent
 
-class TolkSetupToolchainNotificationProvider(
-    private val project: Project
-) : EditorNotificationProvider {
+class TolkSetupToolchainNotificationProvider(private val project: Project) : EditorNotificationProvider {
     init {
         project.messageBus.connect().apply {
-            subscribe(TolkSettingsListener.TOPIC, object : TolkSettingsListener {
-                override fun tolkSettingsChanged() {
-                    updateAllNotifications()
-                }
-            })
+            subscribe(
+                TolkSettingsListener.TOPIC,
+                object : TolkSettingsListener {
+                    override fun tolkSettingsChanged() {
+                        updateAllNotifications()
+                    }
+                },
+            )
         }
     }
 
     override fun collectNotificationData(
         project: Project,
-        file: VirtualFile
+        file: VirtualFile,
     ): Function<in FileEditor, out JComponent?>? {
         if (!file.isTolkFile) return null
         if (isNotificationDisabled()) return null
@@ -42,20 +43,19 @@ class TolkSetupToolchainNotificationProvider(
         return null
     }
 
-    private fun createToolchainNotification(
-        project: Project,
-    ) : Function<in FileEditor, out JComponent?> = Function { fileEditor ->
-        EditorNotificationPanel(fileEditor, Status.Warning).apply {
-            text = TolkBundle.message("notification.no.toolchain.configured")
-            createActionLabel(TolkBundle.message("notification.action.set.up.toolchain.text")) {
-                project.tolkSettings.configureToolchain()
-            }
-            createActionLabel(TolkBundle.message("notification.action.do.not.show.again.text")) {
-                disableNotification()
-                updateAllNotifications()
+    private fun createToolchainNotification(project: Project): Function<in FileEditor, out JComponent?> =
+        Function { fileEditor ->
+            EditorNotificationPanel(fileEditor, Status.Warning).apply {
+                text = TolkBundle.message("notification.no.toolchain.configured")
+                createActionLabel(TolkBundle.message("notification.action.set.up.toolchain.text")) {
+                    project.tolkSettings.configureToolchain()
+                }
+                createActionLabel(TolkBundle.message("notification.action.do.not.show.again.text")) {
+                    disableNotification()
+                    updateAllNotifications()
+                }
             }
         }
-    }
 
     private fun disableNotification() {
         PropertiesComponent.getInstance(project).setValue(NOTIFICATION_STATUS_KEY, true)

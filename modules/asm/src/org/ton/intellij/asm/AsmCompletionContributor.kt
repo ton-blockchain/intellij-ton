@@ -15,24 +15,25 @@ class AsmCompletionContributor : CompletionContributor() {
                 override fun addCompletions(
                     parameters: CompletionParameters,
                     context: ProcessingContext,
-                    resultSet: CompletionResultSet
+                    resultSet: CompletionResultSet,
                 ) {
                     AsmInstructionsCsv.INSTRUCTIONS.forEach {
                         resultSet.addLookupElement(
                             it.name,
                             it.docDescription,
-                            if (it.docGas != "null") "Gas: ${it.docGas}" else null
+                            if (it.docGas != "null") "Gas: ${it.docGas}" else null,
                         )
                     }
                 }
-            })
+            },
+        )
     }
 
     private fun CompletionResultSet.addLookupElement(name: String, description: String, type: String?) {
         addElement(
             LookupElementBuilder.create(name)
                 .appendTailText(" $description", true)
-                .withTypeText(type, false)
+                .withTypeText(type, false),
         )
     }
 }

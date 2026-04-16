@@ -23,8 +23,10 @@ object DocumentationUtils {
         }
 
         HtmlSyntaxInfoUtil.appendStyledSpan(
-            this, attrs, text.escapeHTML(),
-            DocumentationSettings.getHighlightingSaturation(false)
+            this,
+            attrs,
+            text.escapeHTML(),
+            DocumentationSettings.getHighlightingSaturation(false),
         )
     }
 

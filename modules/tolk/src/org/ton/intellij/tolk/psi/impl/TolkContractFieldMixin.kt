@@ -6,7 +6,11 @@ import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.type.TolkTy
 
-abstract class TolkContractFieldMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkContractField, TolkTypedElement, TolkNamedElement {
+abstract class TolkContractFieldMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    TolkContractField,
+    TolkTypedElement,
+    TolkNamedElement {
     override fun getNameIdentifier(): PsiElement? = identifier
 
     override val rawName: String?

@@ -32,10 +32,10 @@ class TlbBreadcrumbsInfoProvider : BreadcrumbsProvider {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun handler(e: PsiElement): ElementHandler<in TlbElement>? {
-        return if (e is TlbElement)
-            handlers.firstOrNull { it.accepts(e) } as ElementHandler<in TlbElement>?
-        else null
+    private fun handler(e: PsiElement): ElementHandler<in TlbElement>? = if (e is TlbElement) {
+        handlers.firstOrNull { it.accepts(e) } as ElementHandler<in TlbElement>?
+    } else {
+        null
     }
 
     override fun getLanguages(): Array<Language> = arrayOf(TlbLanguage)

@@ -7,22 +7,19 @@ import com.intellij.xdebugger.breakpoints.XLineBreakpointType
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider
 import org.ton.intellij.tolk.TolkFileType
 
-class TolkLineBreakpointType : XLineBreakpointType<TolkLineBreakpointProperties>(
-    "tolk-line-breakpoint",
-    "Tolk"
-) {
-    override fun canPutAt(file: VirtualFile, line: Int, project: Project): Boolean {
-        return file.fileType == TolkFileType && line >= 0
-    }
+class TolkLineBreakpointType :
+    XLineBreakpointType<TolkLineBreakpointProperties>(
+        "tolk-line-breakpoint",
+        "Tolk",
+    ) {
+    override fun canPutAt(file: VirtualFile, line: Int, project: Project): Boolean =
+        file.fileType == TolkFileType && line >= 0
 
-    override fun createBreakpointProperties(file: VirtualFile, line: Int): TolkLineBreakpointProperties {
-        return TolkLineBreakpointProperties()
-    }
+    override fun createBreakpointProperties(file: VirtualFile, line: Int): TolkLineBreakpointProperties =
+        TolkLineBreakpointProperties()
 
     override fun getEditorsProvider(
         breakpoint: XLineBreakpoint<TolkLineBreakpointProperties>,
-        project: Project
-    ): XDebuggerEditorsProvider {
-        return TolkDebuggerEditorsProvider
-    }
+        project: Project,
+    ): XDebuggerEditorsProvider = TolkDebuggerEditorsProvider
 }

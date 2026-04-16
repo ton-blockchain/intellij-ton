@@ -11,13 +11,11 @@ import org.ton.intellij.tolk.psi.TolkEnumMember
 import org.ton.intellij.tolk.psi.impl.TolkEnumMemberImpl
 import org.ton.intellij.tolk.stub.type.TolkNamedStubElementType
 
-class TolkEnumMemberStub(
-    parent: StubElement<*>,
-    elementType: IStubElementType<*, *>,
-    name: StringRef?,
-) : TolkNamedStub<TolkEnumMember>(parent, elementType, name, false) {
+class TolkEnumMemberStub(parent: StubElement<*>, elementType: IStubElementType<*, *>, name: StringRef?) :
+    TolkNamedStub<TolkEnumMember>(parent, elementType, name, false) {
     constructor(
-        parent: StubElement<*>, elementType: IStubElementType<*, *>,
+        parent: StubElement<*>,
+        elementType: IStubElementType<*, *>,
         name: String?,
     ) : this(
         parent,
@@ -25,9 +23,7 @@ class TolkEnumMemberStub(
         StringRef.fromString(name),
     )
 
-    class Type(
-        debugName: String,
-    ) : TolkNamedStubElementType<TolkEnumMemberStub, TolkEnumMember>(debugName) {
+    class Type(debugName: String) : TolkNamedStubElementType<TolkEnumMemberStub, TolkEnumMember>(debugName) {
         override fun serialize(stub: TolkEnumMemberStub, dataStream: StubOutputStream) {
             dataStream.writeName(stub.name)
         }
@@ -37,16 +33,10 @@ class TolkEnumMemberStub(
             return TolkEnumMemberStub(parentStub, this, name)
         }
 
-        override fun createStub(
-            psi: TolkEnumMember,
-            parentStub: StubElement<out PsiElement>,
-        ): TolkEnumMemberStub {
-            return TolkEnumMemberStub(parentStub, this, psi.name)
-        }
+        override fun createStub(psi: TolkEnumMember, parentStub: StubElement<out PsiElement>): TolkEnumMemberStub =
+            TolkEnumMemberStub(parentStub, this, psi.name)
 
-        override fun createPsi(stub: TolkEnumMemberStub): TolkEnumMember {
-            return TolkEnumMemberImpl(stub, this)
-        }
+        override fun createPsi(stub: TolkEnumMemberStub): TolkEnumMember = TolkEnumMemberImpl(stub, this)
 
         companion object {
             val EMPTY_ARRAY = emptyArray<TolkEnumMember>()
@@ -55,5 +45,4 @@ class TolkEnumMemberStub(
             }
         }
     }
-
 }

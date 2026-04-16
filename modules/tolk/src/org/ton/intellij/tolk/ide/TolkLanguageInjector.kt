@@ -19,10 +19,7 @@ class TolkLanguageInjector : MultiHostInjector {
         return index == 1 && calleeRef.referenceName == "__expect_type" // inject only in the second argument
     }
 
-    override fun getLanguagesToInject(
-        registrar: MultiHostRegistrar,
-        context: PsiElement
-    ) {
+    override fun getLanguagesToInject(registrar: MultiHostRegistrar, context: PsiElement) {
         if (context !is TolkStringLiteral) return
         val rawStr = context.rawString ?: return
 
@@ -34,7 +31,5 @@ class TolkLanguageInjector : MultiHostInjector {
         }
     }
 
-    override fun elementsToInjectIn(): List<Class<out PsiElement?>?> {
-        return listOf(TolkStringLiteral::class.java)
-    }
+    override fun elementsToInjectIn(): List<Class<out PsiElement?>?> = listOf(TolkStringLiteral::class.java)
 }

@@ -15,8 +15,7 @@ import java.util.*
  * In essence, you don't have to add `@Test` annotation to each test method when using this runner.
  */
 class FuncJUnit4TestRunner(testClass: Class<*>) : BlockJUnit4ClassRunner(testClass) {
-    override fun computeTestMethods(): List<FrameworkMethod> =
-        addJUnit3Methods(super.computeTestMethods(), testClass)
+    override fun computeTestMethods(): List<FrameworkMethod> = addJUnit3Methods(super.computeTestMethods(), testClass)
 
     companion object {
         fun addJUnit3Methods(junit4Methods: List<FrameworkMethod>, testClass: TestClass): List<FrameworkMethod> {
@@ -50,13 +49,11 @@ class FuncJUnit4TestRunner(testClass: Class<*>) : BlockJUnit4ClassRunner(testCla
             return testMethods
         }
 
-        private fun isJUnit3TestMethod(m: Method): Boolean {
-            return m.parameterTypes.isEmpty()
-                    && m.name.startsWith("test")
-                    && m.returnType == Void.TYPE
-                    && Modifier.isPublic(m.modifiers)
-                    && m.getAnnotation(org.junit.Test::class.java) == null
-        }
+        private fun isJUnit3TestMethod(m: Method): Boolean = m.parameterTypes.isEmpty() &&
+            m.name.startsWith("test") &&
+            m.returnType == Void.TYPE &&
+            Modifier.isPublic(m.modifiers) &&
+            m.getAnnotation(org.junit.Test::class.java) == null
 
         private fun List<FrameworkMethod>.sortTests(): List<FrameworkMethod> {
 //            // Switching between project descriptors is expensive, so let's group tests by project descriptor

@@ -12,7 +12,7 @@ fun PresentationTreeBuilder.printPsi(element: PsiElement, name: String) {
         name,
         InlayActionData(
             PsiPointerInlayActionPayload(SmartPointerManager.createPointer(element)),
-            PsiPointerInlayActionNavigationHandler.HANDLER_ID
-        )
+            PsiPointerInlayActionNavigationHandler.HANDLER_ID,
+        ),
     )
 }

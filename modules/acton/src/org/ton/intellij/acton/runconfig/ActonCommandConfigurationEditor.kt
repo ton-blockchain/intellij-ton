@@ -9,22 +9,20 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.ExpandableEditorSupport
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.*
+import com.intellij.ui.layout.not
 import com.intellij.util.TextFieldCompletionProvider
 import com.intellij.util.textCompletion.TextFieldWithCompletion
 import com.intellij.util.ui.JBUI
 import org.ton.intellij.acton.cli.ActonCommand
-import com.intellij.ui.layout.ComponentPredicate
-import com.intellij.ui.layout.not
-import com.intellij.ui.layout.selected
 import java.nio.file.Paths
 import javax.swing.JComponent
-import com.intellij.openapi.ui.DialogPanel
 
 class ActonCommandConfigurationEditor(private val project: Project) : SettingsEditor<ActonCommandConfiguration>() {
     private lateinit var mainPanel: DialogPanel
@@ -76,19 +74,19 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
     init {
         workingDirectoryField.addBrowseFolderListener(
             project,
-            FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle("Select Working Directory")
+            FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle("Select Working Directory"),
         )
         buildOutDirField.addBrowseFolderListener(
             project,
-            FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle("Select Output Directory")
+            FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle("Select Output Directory"),
         )
         scriptPathField.addBrowseFolderListener(
             project,
-            FileChooserDescriptorFactory.createSingleFileDescriptor().withTitle("Select Script File")
+            FileChooserDescriptorFactory.createSingleFileDescriptor().withTitle("Select Script File"),
         )
         testTargetBrowseField.addBrowseFolderListener(
             project,
-            FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor().withTitle("Select Test Target")
+            FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor().withTitle("Select Test Target"),
         )
 
         setupExpandableSupport(commandField)
@@ -145,9 +143,21 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         val field = if (provider != null) {
             TextFieldWithCompletion(project, provider, "", true, true, true)
         } else {
-            TextFieldWithCompletion(project, object : TextFieldCompletionProvider() {
-                override fun addCompletionVariants(text: String, offset: Int, prefix: String, result: CompletionResultSet) {}
-            }, "", true, true, true)
+            TextFieldWithCompletion(
+                project,
+                object : TextFieldCompletionProvider() {
+                    override fun addCompletionVariants(
+                        text: String,
+                        offset: Int,
+                        prefix: String,
+                        result: CompletionResultSet,
+                    ) {}
+                },
+                "",
+                true,
+                true,
+                true,
+            )
         }
 
         field.addSettingsProvider { editor ->
@@ -182,7 +192,9 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         scriptPathField.text = configuration.scriptPath
         scriptClearCacheCheckBox.isSelected = configuration.scriptClearCache
         scriptForkCheckBox.isSelected =
-            configuration.scriptForkNet.isNotEmpty() || configuration.scriptForkBlockNumber.isNotEmpty() || configuration.scriptApiKey.isNotEmpty()
+            configuration.scriptForkNet.isNotEmpty() ||
+            configuration.scriptForkBlockNumber.isNotEmpty() ||
+            configuration.scriptApiKey.isNotEmpty()
         scriptForkNetComboBox.selectedItem = configuration.scriptForkNet
         scriptForkBlockNumberField.setText(configuration.scriptForkBlockNumber)
         scriptApiKeyField.setText(configuration.scriptApiKey)
@@ -218,8 +230,10 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
 
         configuration.scriptPath = scriptPathField.text.trim()
         configuration.scriptClearCache = scriptClearCacheCheckBox.isSelected
-        configuration.scriptForkNet = if (scriptForkCheckBox.isSelected) (scriptForkNetComboBox.selectedItem as? String ?: "") else ""
-        configuration.scriptForkBlockNumber = if (scriptForkCheckBox.isSelected) scriptForkBlockNumberField.text.trim() else ""
+        configuration.scriptForkNet =
+            if (scriptForkCheckBox.isSelected) (scriptForkNetComboBox.selectedItem as? String ?: "") else ""
+        configuration.scriptForkBlockNumber =
+            if (scriptForkCheckBox.isSelected) scriptForkBlockNumberField.text.trim() else ""
         configuration.scriptApiKey = if (scriptForkCheckBox.isSelected) scriptApiKeyField.text.trim() else ""
         configuration.scriptBroadcastNet = scriptBroadcastNetComboBox.selectedItem as? String ?: ""
 

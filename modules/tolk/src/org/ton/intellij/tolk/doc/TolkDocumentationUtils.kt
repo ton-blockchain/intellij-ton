@@ -85,19 +85,23 @@ fun resolveDocumentationReference(name: String, owner: PsiElement): PsiElement? 
 
         var foundElement: PsiElement? = null
 
-        TolkNamedElementIndex.processAllElements(owner.project, GlobalSearchScope.allScope(owner.project), Processor { element ->
-            if (element !is TolkFunction) return@Processor true
-            if (!element.hasReceiver) return@Processor true
-            if (element.name != methodOrFieldName) return@Processor true
+        TolkNamedElementIndex.processAllElements(
+            owner.project,
+            GlobalSearchScope.allScope(owner.project),
+            Processor { element ->
+                if (element !is TolkFunction) return@Processor true
+                if (!element.hasReceiver) return@Processor true
+                if (element.name != methodOrFieldName) return@Processor true
 
-            val receiverType = element.receiverTy
-            if (receiverType.isEquivalentTo(searchReceiverType)) {
-                foundElement = element
-                return@Processor false
-            }
+                val receiverType = element.receiverTy
+                if (receiverType.isEquivalentTo(searchReceiverType)) {
+                    foundElement = element
+                    return@Processor false
+                }
 
-            true
-        })
+                true
+            },
+        )
 
         return foundElement
     }
@@ -115,11 +119,7 @@ fun resolveDocumentationReference(name: String, owner: PsiElement): PsiElement? 
     return null
 }
 
-private fun resolveDocumentationReference(
-    owner: PsiElement,
-    name: String,
-    containingFile: TolkFile,
-): PsiElement? {
+private fun resolveDocumentationReference(owner: PsiElement, name: String, containingFile: TolkFile): PsiElement? {
     if (owner is TolkFunction) {
         val params = owner.parameterList?.parameterList ?: emptyList()
         for (param in params) {

@@ -30,19 +30,14 @@ object TolkParserUtil : GeneratedParserUtilBase() {
     }
 
     @JvmStatic
-    fun getKeyword(b: PsiBuilder, level: Int): Boolean {
-        return softKeyword(b, "get", TolkElementTypes.GET_KEYWORD)
-    }
+    fun getKeyword(b: PsiBuilder, level: Int): Boolean = softKeyword(b, "get", TolkElementTypes.GET_KEYWORD)
 
     @JvmStatic
-    fun lazyKeyword(b: PsiBuilder, level: Int): Boolean {
-        return softKeyword(b, "lazy", TolkElementTypes.LAZY_KEYWORD)
-    }
+    fun lazyKeyword(b: PsiBuilder, level: Int): Boolean = softKeyword(b, "lazy", TolkElementTypes.LAZY_KEYWORD)
 
     @JvmStatic
-    fun contractKeyword(b: PsiBuilder, level: Int): Boolean {
-        return softKeyword(b, "contract", TolkElementTypes.CONTRACT_KEYWORD)
-    }
+    fun contractKeyword(b: PsiBuilder, level: Int): Boolean =
+        softKeyword(b, "contract", TolkElementTypes.CONTRACT_KEYWORD)
 
     private fun softKeyword(b: PsiBuilder, keyword: String, elementType: IElementType): Boolean {
         val tokenType = b.tokenType
@@ -57,7 +52,6 @@ object TolkParserUtil : GeneratedParserUtilBase() {
         }
         return false
     }
-
 
     @JvmStatic
     fun parseGtGt(b: PsiBuilder, level: Int): Boolean {

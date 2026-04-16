@@ -25,7 +25,9 @@ import org.ton.intellij.util.crc16
 import org.ton.intellij.util.greenStub
 import javax.swing.Icon
 
-abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkFunction {
+abstract class TolkFunctionMixin :
+    TolkNamedElementImpl<TolkFunctionStub>,
+    TolkFunction {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TolkFunctionStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
@@ -47,8 +49,9 @@ abstract class TolkFunctionMixin : TolkNamedElementImpl<TolkFunctionStub>, TolkF
                 val parameterList = parameterList ?: return@getCachedValue CachedValueProvider.Result.create(
                     TolkTyFunction(
                         emptyList(),
-                        returnTy
-                    ), this
+                        returnTy,
+                    ),
+                    this,
                 )
                 val selfParameter = parameterList.selfParameter
                 val parameters = parameterList.parameterList
@@ -198,7 +201,8 @@ val TolkFunction.isEntryPoint: Boolean
             "onRunTickTock",
             "onSplitPrepare",
             "onBouncedMessage",
-            "onSplitInstall" -> true
+            "onSplitInstall",
+            -> true
 
             else -> false
         }

@@ -6,7 +6,9 @@ import org.ton.intellij.tolk.psi.TolkParenTypeExpression
 import org.ton.intellij.tolk.stub.TolkTypeStub
 import org.ton.intellij.tolk.type.TolkTy
 
-abstract class TolkParenTypeExpressionMixin : TolkTypeExpressionImpl, TolkParenTypeExpression {
+abstract class TolkParenTypeExpressionMixin :
+    TolkTypeExpressionImpl,
+    TolkParenTypeExpression {
     override val type: TolkTy? get() = typeExpression?.type
 
     constructor(node: ASTNode) : super(node)

@@ -13,14 +13,17 @@ import javax.swing.Icon
 interface TlbElement : PsiElement
 abstract class TlbElementImpl(node: ASTNode) : ASTWrapperPsiElement(node)
 
-interface TlbNamedElement : TlbElement, PsiNameIdentifierOwner {
+interface TlbNamedElement :
+    TlbElement,
+    PsiNameIdentifierOwner {
     val identifier: PsiElement?
 
     override fun getNameIdentifier(): PsiElement? = identifier
 }
 
-
-abstract class TlbNamedElementImpl(node: ASTNode) : TlbElementImpl(node), TlbNamedElement {
+abstract class TlbNamedElementImpl(node: ASTNode) :
+    TlbElementImpl(node),
+    TlbNamedElement {
     override fun getName(): String? = nameIdentifier?.text
 
     override fun setName(name: String): PsiElement = apply {
@@ -31,10 +34,10 @@ abstract class TlbNamedElementImpl(node: ASTNode) : TlbElementImpl(node), TlbNam
 
     override fun getIcon(flags: Int): Icon? {
         return when (this) {
-            is TlbResultType  -> TlbIcons.TYPE
-            is TlbField       -> TlbIcons.FIELD
+            is TlbResultType -> TlbIcons.TYPE
+            is TlbField -> TlbIcons.FIELD
             is TlbConstructor -> TlbIcons.CONSTRUCTOR
-            else              -> return super.getIcon(flags)
+            else -> return super.getIcon(flags)
         }
     }
 
@@ -68,8 +71,12 @@ abstract class TlbNamedElementImpl(node: ASTNode) : TlbElementImpl(node), TlbNam
 abstract class TlbItemPresentation<T : TlbNamedElement>(protected val element: T) : ItemPresentation {
     private var locationString: String? = null
 
-    override fun getLocationString(): String {
-        return if (locationString != null) locationString!! else getLocationStringInner().also { locationString = it }
+    override fun getLocationString(): String = if (locationString != null) {
+        locationString!!
+    } else {
+        getLocationStringInner().also {
+            locationString = it
+        }
     }
 
     private fun getLocationStringInner(): String {
@@ -78,18 +85,16 @@ abstract class TlbItemPresentation<T : TlbNamedElement>(protected val element: T
         return "in $fileName"
     }
 
-    override fun getIcon(b: Boolean): Icon =
-        element.getIcon(Iconable.ICON_FLAG_VISIBILITY)
+    override fun getIcon(b: Boolean): Icon = element.getIcon(Iconable.ICON_FLAG_VISIBILITY)
 }
-
 
 interface TlbFieldListOwner : TlbElement {
     val fieldList: TlbFieldList?
 }
 
-//interface TlbNaturalTypeExpression : TlbTypeExpression {
+// interface TlbNaturalTypeExpression : TlbTypeExpression {
 //
-//}
+// }
 
 fun TlbTypeExpression.unwrap(): TlbTypeExpression? {
     var current: TlbTypeExpression? = this
@@ -99,12 +104,10 @@ fun TlbTypeExpression.unwrap(): TlbTypeExpression? {
     return current
 }
 
-fun TlbTypeExpression.naturalValue(): Int? {
-    return when (this) {
-        is TlbIntTypeExpression -> naturalValue()
-        is TlbParenTypeExpression -> naturalValue()
-        else -> null
-    }
+fun TlbTypeExpression.naturalValue(): Int? = when (this) {
+    is TlbIntTypeExpression -> naturalValue()
+    is TlbParenTypeExpression -> naturalValue()
+    else -> null
 }
 
 fun TlbTypeExpression.isNatural(): Boolean {
@@ -122,29 +125,21 @@ fun TlbTypeExpression.isNatural(): Boolean {
     }
 }
 
-fun TlbApplyTypeExpression.isNatural(): Boolean {
-    return typeExpression.isNatural()
-}
+fun TlbApplyTypeExpression.isNatural(): Boolean = typeExpression.isNatural()
 
-fun TlbParamTypeExpression.isNatural(): Boolean {
-    return doubleTag != null ||
-            natLeq != null ||
-            natLess != null ||
-            tag != null ||
-            (reference?.resolve() as? TlbImplicitField)?.tag != null ||
-            (identifier?.text?.let {
-                it.startsWith("uint") || it.startsWith("int")
-            } == true)
-}
+fun TlbParamTypeExpression.isNatural(): Boolean = doubleTag != null ||
+    natLeq != null ||
+    natLess != null ||
+    tag != null ||
+    (reference?.resolve() as? TlbImplicitField)?.tag != null ||
+    (
+        identifier?.text?.let {
+            it.startsWith("uint") || it.startsWith("int")
+        } == true
+        )
 
-fun TlbParenTypeExpression.naturalValue(): Int? {
-    return unwrap()?.naturalValue()
-}
+fun TlbParenTypeExpression.naturalValue(): Int? = unwrap()?.naturalValue()
 
-fun TlbIntTypeExpression.naturalValue(): Int? {
-    return number.text.toIntOrNull()
-}
+fun TlbIntTypeExpression.naturalValue(): Int? = number.text.toIntOrNull()
 
-fun TlbTypeExpression.isNegated(): Boolean {
-    return unwrap() is TlbNegatedTypeExpression
-}
+fun TlbTypeExpression.isNegated(): Boolean = unwrap() is TlbNegatedTypeExpression

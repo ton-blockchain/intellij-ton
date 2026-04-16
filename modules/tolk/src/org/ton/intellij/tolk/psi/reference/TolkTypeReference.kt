@@ -9,19 +9,16 @@ import com.intellij.psi.ResolveResult
 import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.psi.*
 
-class TolkTypeReference(
-    element: TolkReferenceElement,
-) : PsiReferenceBase.Poly<TolkReferenceElement>(
-    element
-) {
+class TolkTypeReference(element: TolkReferenceElement) :
+    PsiReferenceBase.Poly<TolkReferenceElement>(
+        element,
+    ) {
     override fun calculateDefaultRangeInElement(): TextRange {
         val identifier = element.referenceNameElement ?: return TextRange.EMPTY_RANGE
         return TextRange(identifier.startOffsetInParent, identifier.textLength)
     }
 
-    override fun resolve(): TolkTypedElement? {
-        return super.resolve() as? TolkTypedElement?
-    }
+    override fun resolve(): TolkTypedElement? = super.resolve() as? TolkTypedElement?
 
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
         if (!element.isValid) return emptyArray()
@@ -37,7 +34,9 @@ class TolkTypeReference(
                     }
                 }
 
-                if ((myElement !is TolkReferenceTypeExpression || myElement.typeArgumentList == null) && myElement.parentOfType<TolkFunctionReceiver>() == null) {
+                if ((myElement !is TolkReferenceTypeExpression || myElement.typeArgumentList == null) &&
+                    myElement.parentOfType<TolkFunctionReceiver>() == null
+                ) {
                     val genericType = owner.resolveGenericType(typeParameterName)
                     if (genericType != null && genericType.parameter.psi != element) {
                         add(PsiElementResolveResult(genericType.parameter.psi))

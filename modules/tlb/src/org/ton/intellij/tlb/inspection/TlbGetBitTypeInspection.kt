@@ -6,27 +6,26 @@ import com.intellij.psi.PsiElement
 import org.ton.intellij.tlb.psi.*
 
 class TlbGetBitTypeInspection : TlbInspectionBase() {
-    override fun buildTlbVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession
-    ): TlbVisitor = object : TlbVisitor() {
-        override fun visitGetBitTypeExpression(o: TlbGetBitTypeExpression) {
-            val typeExpressionList = o.typeExpressionList
-            val left = typeExpressionList.firstOrNull()?.unwrap() ?: return
-            when (val resolvedParam = left.reference?.resolve()) {
-                is TlbImplicitField -> {
-                    if (resolvedParam.typeKeyword != null) {
+    override fun buildTlbVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TlbVisitor =
+        object : TlbVisitor() {
+            override fun visitGetBitTypeExpression(o: TlbGetBitTypeExpression) {
+                val typeExpressionList = o.typeExpressionList
+                val left = typeExpressionList.firstOrNull()?.unwrap() ?: return
+                when (val resolvedParam = left.reference?.resolve()) {
+                    is TlbImplicitField -> {
+                        if (resolvedParam.typeKeyword != null) {
+                            reportProblem(holder, left)
+                        }
+                    }
+
+                    is TlbConstructor,
+                    is TlbResultType,
+                    -> {
                         reportProblem(holder, left)
                     }
                 }
-
-                is TlbConstructor,
-                is TlbResultType -> {
-                    reportProblem(holder, left)
-                }
             }
         }
-    }
 
     private fun reportProblem(holder: ProblemsHolder, element: PsiElement) {
         holder.registerProblem(

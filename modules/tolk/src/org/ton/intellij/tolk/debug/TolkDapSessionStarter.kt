@@ -18,7 +18,7 @@ internal object TolkDapSessionStarter {
         adapterId: DebugAdapterId,
         request: DapStartRequest,
         arguments: Map<String, Any>,
-        logLabel: String
+        logLabel: String,
     ): RunContentDescriptor? {
         val starter = DapProcessStarter(
             environment,
@@ -26,7 +26,7 @@ internal object TolkDapSessionStarter {
             state,
             adapterId,
             request,
-            arguments
+            arguments,
         )
         val debuggerManager = XDebuggerManager.getInstance(environment.project)
         startWithSessionBuilder(debuggerManager, starter, environment, sessionName, logLabel)?.let { descriptor ->
@@ -39,7 +39,7 @@ internal object TolkDapSessionStarter {
         if (descriptor == null) {
             LOG.info(
                 "Run content descriptor is not initialized for $logLabel debug session '$sessionName'; " +
-                    "returning null descriptor"
+                    "returning null descriptor",
             )
         }
         return descriptor
@@ -50,7 +50,7 @@ internal object TolkDapSessionStarter {
         starter: XDebugProcessStarter,
         environment: ExecutionEnvironment,
         sessionName: String,
-        logLabel: String
+        logLabel: String,
     ): RunContentDescriptor? {
         val builder = runCatching {
             debuggerManager.javaClass
@@ -66,7 +66,9 @@ internal object TolkDapSessionStarter {
                 .getMethod("environment", ExecutionEnvironment::class.java)
                 .invoke(builder, environment)
         }
-            .onFailure { LOG.warn("Failed to bind ExecutionEnvironment to XDebugSessionBuilder for '$sessionName'", it) }
+            .onFailure {
+                LOG.warn("Failed to bind ExecutionEnvironment to XDebugSessionBuilder for '$sessionName'", it)
+            }
             .getOrNull()
             ?: return null
 
@@ -80,11 +82,17 @@ internal object TolkDapSessionStarter {
         return runCatching {
             startedResult.javaClass.getMethod("getRunContentDescriptor").invoke(startedResult) as? RunContentDescriptor
         }
-            .onFailure { LOG.warn("Failed to obtain RunContentDescriptor from XSessionStartedResult for '$sessionName'", it) }
+            .onFailure {
+                LOG.warn("Failed to obtain RunContentDescriptor from XSessionStartedResult for '$sessionName'", it)
+            }
             .getOrNull()
     }
 
-    private fun extractRunContentDescriptor(session: Any, sessionName: String, logLabel: String): RunContentDescriptor? {
+    private fun extractRunContentDescriptor(
+        session: Any,
+        sessionName: String,
+        logLabel: String,
+    ): RunContentDescriptor? {
         session.javaClass.methods
             .firstOrNull { it.name == "getRunContentDescriptorIfInitialized" && it.parameterCount == 0 }
             ?.let { method ->
@@ -111,7 +119,7 @@ internal object TolkDapSessionStarter {
 
         LOG.warn(
             "Run content descriptor is not initialized for $logLabel debug session '$sessionName'; " +
-                "deprecated XDebugSession.getRunContentDescriptor() fallback is disabled"
+                "deprecated XDebugSession.getRunContentDescriptor() fallback is disabled",
         )
         return null
     }

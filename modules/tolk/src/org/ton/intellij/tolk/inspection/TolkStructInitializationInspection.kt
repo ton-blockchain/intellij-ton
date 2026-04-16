@@ -11,15 +11,13 @@ import org.ton.intellij.tolk.type.TolkTyStruct
 import org.ton.intellij.tolk.type.TolkTyVoid
 
 class TolkStructInitializationInspection : TolkInspectionBase() {
-    override fun buildTolkVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): TolkVisitor = object : TolkVisitor() {
-        override fun visitStructExpression(expression: TolkStructExpression) {
-            super.visitStructExpression(expression)
-            checkStructInitialization(expression, holder)
+    override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor =
+        object : TolkVisitor() {
+            override fun visitStructExpression(expression: TolkStructExpression) {
+                super.visitStructExpression(expression)
+                checkStructInitialization(expression, holder)
+            }
         }
-    }
 
     private fun checkStructInitialization(expression: TolkStructExpression, holder: ProblemsHolder) {
         val structDecl = resolveStructDeclaration(expression) ?: return
@@ -86,13 +84,11 @@ class TolkStructInitializationInspection : TolkInspectionBase() {
         return fields
     }
 
-    private fun createErrorMessage(missingFields: List<TolkStructField>): String {
-        return when (missingFields.size) {
-            1    -> "Field '${missingFields[0].identifier.text}' missed in initialization"
-            else -> {
-                val fieldNames = missingFields.joinToString(", ") { "'${it.identifier.text}'" }
-                "Fields $fieldNames missed in initialization"
-            }
+    private fun createErrorMessage(missingFields: List<TolkStructField>): String = when (missingFields.size) {
+        1 -> "Field '${missingFields[0].identifier.text}' missed in initialization"
+        else -> {
+            val fieldNames = missingFields.joinToString(", ") { "'${it.identifier.text}'" }
+            "Fields $fieldNames missed in initialization"
         }
     }
 }

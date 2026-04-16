@@ -24,16 +24,15 @@ class TolkReferencesCodeVisionProvider : ReferencesCodeVisionProvider() {
 
     override fun acceptsFile(file: PsiFile): Boolean = file is TolkFile
 
-    override fun acceptsElement(element: PsiElement): Boolean {
-        return when (element) {
-            is TolkFunction -> !element.isGetMethod && !element.isEntryPoint
-            is TolkStruct,
-            is TolkTypeDef,
-            is TolkGlobalVar,
-            is TolkConstVar -> true
+    override fun acceptsElement(element: PsiElement): Boolean = when (element) {
+        is TolkFunction -> !element.isGetMethod && !element.isEntryPoint
+        is TolkStruct,
+        is TolkTypeDef,
+        is TolkGlobalVar,
+        is TolkConstVar,
+        -> true
 
-            else -> false
-        }
+        else -> false
     }
 
     override fun getHint(element: PsiElement, file: PsiFile): String? = getVisionInfo(element, file)?.text
@@ -50,23 +49,27 @@ class TolkReferencesCodeVisionProvider : ReferencesCodeVisionProvider() {
         val usagesCount = AtomicInteger()
         ReferencesSearch.search(ReferencesSearch.SearchParameters(element, scope, false))
             .allowParallelProcessing()
-            .forEach(Processor {
-                if (it == null) true
-                else if (element.reference == it) true
-                else {
-                    usagesCount.incrementAndGet() <= limit
-                }
-            })
+            .forEach(
+                Processor {
+                    if (it == null) {
+                        true
+                    } else if (element.reference == it) {
+                        true
+                    } else {
+                        usagesCount.incrementAndGet() <= limit
+                    }
+                },
+            )
 
         val usagesCountValue = usagesCount.get()
         return CodeVisionInfo(
             text = TolkBundle.message(
                 "inlay.hints.usages.text",
                 usagesCountValue,
-                if (usagesCountValue >= limit) 1 else 0
+                if (usagesCountValue >= limit) 1 else 0,
             ),
             count = usagesCountValue,
-            countIsExact = usagesCountValue < limit
+            countIsExact = usagesCountValue < limit,
         )
     }
 }

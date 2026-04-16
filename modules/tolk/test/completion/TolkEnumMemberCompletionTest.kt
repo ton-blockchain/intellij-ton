@@ -19,7 +19,7 @@ class TolkEnumMemberCompletionTest : TolkCompletionTestBase() {
             fun foo() {
                 Color.Red/*caret*/
             }
-        """.trimIndent()
+        """.trimIndent(),
     )
 
     fun `test enum member completion without qualifier in assignment`() = doFirstCompletion(
@@ -42,7 +42,7 @@ class TolkEnumMemberCompletionTest : TolkCompletionTestBase() {
                 val a = Color.Red;
                 a = Color.Red/*caret*/
             }
-        """.trimIndent()
+        """.trimIndent(),
     )
 
     fun `test enum member completion with qualifier`() = doFirstCompletion(
@@ -63,6 +63,6 @@ class TolkEnumMemberCompletionTest : TolkCompletionTestBase() {
             fun foo() {
                 Color.Red/*caret*/
             }
-        """.trimIndent()
+        """.trimIndent(),
     )
 }

@@ -62,7 +62,10 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
             val table = keyValue.parent as? TomlTable
             if (table != null) {
                 val headerSegments = table.header.key?.segments ?: return null
-                if (headerSegments.size == 1 && headerSegments[0].name == "scripts" && keyValue.key.segments.firstOrNull() == element) {
+                if (headerSegments.size == 1 &&
+                    headerSegments[0].name == "scripts" &&
+                    keyValue.key.segments.firstOrNull() == element
+                ) {
                     val scriptName = element.name ?: return null
                     return Info(
                         AllIcons.Actions.Execute,
@@ -153,7 +156,10 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
             val workingDir = file.parent?.toNioPath() ?: return
 
             val runManager = RunManager.getInstance(project)
-            val settings = runManager.createConfiguration(configurationName, ActonCommandConfigurationType.getInstance().factory)
+            val settings = runManager.createConfiguration(
+                configurationName,
+                ActonCommandConfigurationType.getInstance().factory,
+            )
             val configuration = settings.configuration as ActonCommandConfiguration
 
             configuration.workingDirectory = workingDir

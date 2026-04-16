@@ -10,10 +10,14 @@ import com.intellij.psi.util.endOffset
 import com.intellij.psi.util.startOffset
 import org.ton.intellij.tolk.psi.TolkExpression
 
-class TolkNotPostfixTemplate : PostfixTemplateWithExpressionSelector(
-    "tolk.postfix.not", "not",
-    "!expr", getBooleanExpressions(), null
-) {
+class TolkNotPostfixTemplate :
+    PostfixTemplateWithExpressionSelector(
+        "tolk.postfix.not",
+        "not",
+        "!expr",
+        getBooleanExpressions(),
+        null,
+    ) {
     override fun isApplicable(context: PsiElement, copyDocument: Document, newOffset: Int) =
         TolkPostfixUtil.isExpression(context)
 
@@ -31,8 +35,8 @@ class TolkNotPostfixTemplate : PostfixTemplateWithExpressionSelector(
     }
 
     companion object {
-        private fun getBooleanExpressions(): PostfixTemplateExpressionSelector {
-            return findAllExpressions { e -> e is TolkExpression }
+        private fun getBooleanExpressions(): PostfixTemplateExpressionSelector = findAllExpressions { e ->
+            e is TolkExpression
         }
     }
 }

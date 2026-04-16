@@ -19,7 +19,9 @@ import org.ton.intellij.tolk.stub.*
 import org.ton.intellij.tolk.stub.type.TolkFunctionStubElementType
 import org.ton.intellij.tolk.stub.type.TolkIncludeDefinitionStubElementType
 
-class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkLanguage), TolkElement {
+class TolkFile(viewProvider: FileViewProvider) :
+    PsiFileBase(viewProvider, TolkLanguage),
+    TolkElement {
     override fun getFileType(): FileType = TolkFileType
 
     override fun getStub(): TolkFileStub? = super.getStub() as? TolkFileStub
@@ -55,15 +57,15 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             { stub ->
                 stub.getChildrenByType(
                     TolkElementTypes.INCLUDE_DEFINITION,
-                    TolkIncludeDefinitionStubElementType.ARRAY_FACTORY
+                    TolkIncludeDefinitionStubElementType.ARRAY_FACTORY,
                 )
             },
             { ast ->
                 ast.getChildrenAsPsiElements(
                     TolkElementTypes.INCLUDE_DEFINITION,
-                    TolkIncludeDefinitionStubElementType.ARRAY_FACTORY
+                    TolkIncludeDefinitionStubElementType.ARRAY_FACTORY,
                 )
-            }
+            },
         )
 
     val functions
@@ -73,7 +75,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             },
             { ast ->
                 ast.getChildrenAsPsiElements(TolkElementTypes.FUNCTION, TolkFunctionStubElementType.ARRAY_FACTORY)
-            }
+            },
         )
 
     val constVars
@@ -83,7 +85,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             },
             { ast ->
                 ast.getChildrenAsPsiElements(TolkElementTypes.CONST_VAR, TolkConstVarStub.ARRAY_FACTORY)
-            }
+            },
         )
 
     val globalVars
@@ -93,7 +95,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             },
             { ast ->
                 ast.getChildrenAsPsiElements(TolkElementTypes.GLOBAL_VAR, TolkGlobalVarStub.ARRAY_FACTORY)
-            }
+            },
         )
 
     val typeDefs
@@ -103,7 +105,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             },
             { ast ->
                 ast.getChildrenAsPsiElements(TolkElementTypes.TYPE_DEF, TolkTypeDefStub.ARRAY_FACTORY)
-            }
+            },
         )
 
     val structs
@@ -113,7 +115,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             },
             { ast ->
                 ast.getChildrenAsPsiElements(TolkElementTypes.STRUCT, TolkStructStub.ARRAY_FACTORY)
-            }
+            },
         )
 
     val enums
@@ -123,7 +125,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             },
             { ast ->
                 ast.getChildrenAsPsiElements(TolkElementTypes.ENUM, TolkEnumStub.ARRAY_FACTORY)
-            }
+            },
         )
 
     fun resolveSymbols(name: String, skipTypes: Boolean = false): Sequence<TolkSymbolElement> {
@@ -159,7 +161,9 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
                 val filePath = file.virtualFile.path
                 for ((key, mappingDir) in mappings) {
                     if (filePath.startsWith(mappingDir)) {
-                        val subPath = filePath.substring(mappingDir.length).removePrefix("/").removePrefix("\\").replace('\\', '/')
+                        val subPath = filePath.substring(
+                            mappingDir.length,
+                        ).removePrefix("/").removePrefix("\\").replace('\\', '/')
                         path = "@$key/$subPath"
                         break
                     }
@@ -240,10 +244,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             }
         }
         val processor = object : PsiScopeProcessor {
-            override fun execute(
-                element: PsiElement,
-                state: ResolveState,
-            ): Boolean {
+            override fun execute(element: PsiElement, state: ResolveState): Boolean {
                 if (element is TolkSymbolElement) {
                     val name = element.name ?: return true
                     val declarations = result.getOrPut(name) { mutableListOf() }
@@ -258,7 +259,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
             processor,
             state = state,
             lastParent = null,
-            place = this
+            place = this,
         )
         visitedFiles.add(this)
         includeDefinitions.forEach { include ->
@@ -268,7 +269,7 @@ class TolkFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, TolkL
                 processor,
                 state = state,
                 lastParent = null,
-                place = this
+                place = this,
             )
         }
         return result
@@ -298,7 +299,7 @@ private val INCLUDE_COMPARE: Comparator<TolkIncludeDefinition> =
         },
         {
             it.stringLiteral?.rawString?.text?.lowercase()
-        }
+        },
     )
 
 val VirtualFile.isTolkFile: Boolean get() = fileType == TolkFileType

@@ -7,7 +7,9 @@ import org.ton.intellij.func.psi.FuncFunctionParameter
 import org.ton.intellij.func.stub.FuncFunctionParameterStub
 import javax.swing.Icon
 
-abstract class FuncFunctionParameterMixin : FuncNamedElementImpl<FuncFunctionParameterStub>, FuncFunctionParameter {
+abstract class FuncFunctionParameterMixin :
+    FuncNamedElementImpl<FuncFunctionParameterStub>,
+    FuncFunctionParameter {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: FuncFunctionParameterStub, stubType: IStubElementType<*, *>) : super(stub, stubType)

@@ -13,7 +13,9 @@ import org.ton.intellij.tolk.psi.TolkTypeArgumentList
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.inference
 
-abstract class TolkSelfExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkSelfExpression {
+abstract class TolkSelfExpressionMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    TolkSelfExpression {
     override fun getReference() = TolkSelfExpressionReference(this)
 
     override val type: TolkTy?
@@ -29,9 +31,10 @@ abstract class TolkSelfExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(nod
 
     override fun toString(): String = "TolkSelfExpression"
 
-    class TolkSelfExpressionReference(element: TolkSelfExpression) : PsiReferenceBase<TolkSelfExpression>(
-        element
-    ) {
+    class TolkSelfExpressionReference(element: TolkSelfExpression) :
+        PsiReferenceBase<TolkSelfExpression>(
+            element,
+        ) {
         override fun resolve(): TolkSelfParameter? {
             val function = element.parentOfType<TolkFunction>() ?: return null
             return function.parameterList?.selfParameter

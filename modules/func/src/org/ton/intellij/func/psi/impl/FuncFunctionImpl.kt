@@ -14,14 +14,14 @@ import org.ton.intellij.util.crc16
 import javax.swing.Icon
 import kotlin.text.toString
 
-abstract class FuncFunctionMixin : FuncNamedElementImpl<FuncFunctionStub>, FuncFunction {
+abstract class FuncFunctionMixin :
+    FuncNamedElementImpl<FuncFunctionStub>,
+    FuncFunction {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: FuncFunctionStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
 
-    override fun getIcon(flags: Int): Icon? {
-        return FuncIcons.FUNCTION
-    }
+    override fun getIcon(flags: Int): Icon? = FuncIcons.FUNCTION
 
     override fun toString(): String = "FuncFunction($containingFile - $name)"
 }
@@ -42,16 +42,17 @@ val FuncFunction.rawReturnType: FuncTy
     get() = typeReference.rawType
 
 val FuncFunction.rawParamType: FuncTy
-    get() = FuncTy(functionParameterList.map {
-        it.typeReference?.rawType ?: FuncTyUnknown
-    })
+    get() = FuncTy(
+        functionParameterList.map {
+            it.typeReference?.rawType ?: FuncTyUnknown
+        },
+    )
 
 val FuncFunction.rawType: FuncTyMap
     get() = FuncTyMap(
         rawParamType,
-        rawReturnType
+        rawReturnType,
     )
-
 
 fun FuncFunction.computeMethodId(): Pair<String, Boolean> {
     val methodId = methodIdDefinition

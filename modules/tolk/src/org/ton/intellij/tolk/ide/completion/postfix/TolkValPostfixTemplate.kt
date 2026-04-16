@@ -10,13 +10,16 @@ import com.intellij.psi.util.parentOfType
 import com.intellij.psi.util.startOffset
 import org.ton.intellij.tolk.psi.TolkExpressionStatement
 
-class TolkValPostfixTemplate : PostfixTemplate(
-    "tolk.postfix.val", "val",
-    "val name = value", null
-) {
+class TolkValPostfixTemplate :
+    PostfixTemplate(
+        "tolk.postfix.val",
+        "val",
+        "val name = value",
+        null,
+    ) {
     override fun isApplicable(context: PsiElement, copyDocument: Document, newOffset: Int) =
         TolkPostfixUtil.isExpression(context) &&
-                TolkPostfixUtil.notInsideVarDeclaration(context)
+            TolkPostfixUtil.notInsideVarDeclaration(context)
 
     override fun expand(context: PsiElement, editor: Editor) {
         val element = context.parentOfType<TolkExpressionStatement>() ?: return

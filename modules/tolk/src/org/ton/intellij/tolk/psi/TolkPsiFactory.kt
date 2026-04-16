@@ -12,8 +12,7 @@ import org.ton.intellij.util.descendantOfTypeStrict
 class TolkPsiFactory private constructor(val project: Project) {
     private val keywords = TOLK_KEYWORDS.types.filterIsInstance<TolkTokenType>().map { it.name }.toSet()
 
-    fun createFile(text: CharSequence) =
-        createFile(null, text)
+    fun createFile(text: CharSequence) = createFile(null, text)
 
     fun createFile(name: String?, text: CharSequence) =
         PsiFileFactory.getInstance(project).createFileFromText(name ?: "dummy.tolk", TolkLanguage, text) as TolkFile
@@ -21,8 +20,7 @@ class TolkPsiFactory private constructor(val project: Project) {
     fun createNewline(): PsiElement = createWhitespace("\n")
     fun createNewlines(): PsiElement = createWhitespace("\n\n")
 
-    fun createWhitespace(ws: String): PsiElement =
-        PsiParserFacade.getInstance(project).createWhiteSpaceFromText(ws)
+    fun createWhitespace(ws: String): PsiElement = PsiParserFacade.getInstance(project).createWhiteSpaceFromText(ws)
 
     fun createStringLiteral(text: String): TolkStringLiteral {
         if (text.contains("\n")) {
@@ -37,14 +35,12 @@ class TolkPsiFactory private constructor(val project: Project) {
         return file.functions.first().functionBody!!.blockStatement!!.statementList.first()
     }
 
-    fun createExpression(text: String): TolkExpression {
-        return (createStatement("$text;") as TolkExpressionStatement).expression
-    }
+    fun createExpression(text: String): TolkExpression =
+        (createStatement("$text;") as TolkExpressionStatement).expression
 
-    fun createVariableDeclaration(name: String, expr: String): TolkExpressionStatement {
-        return (createStatement("val $name = $expr;") as? TolkExpressionStatement)
+    fun createVariableDeclaration(name: String, expr: String): TolkExpressionStatement =
+        (createStatement("val $name = $expr;") as? TolkExpressionStatement)
             ?: error("Failed to create variable from name: `$name` and expr: `$expr`")
-    }
 
     fun isValidIdentifier(name: String): Boolean {
         if (keywords.contains(name)) return false
@@ -65,21 +61,17 @@ class TolkPsiFactory private constructor(val project: Project) {
             ?: error("Failed to create type parameter from name: `$name`")
     }
 
-    fun createIncludeDefinition(text: String): TolkIncludeDefinition =
-        createFromText("import \"$text\";")
-            ?: error("Failed to create include definition from text: `$text`")
+    fun createIncludeDefinition(text: String): TolkIncludeDefinition = createFromText("import \"$text\";")
+        ?: error("Failed to create include definition from text: `$text`")
 
-    fun createConstant(name: String, value: String): TolkConstVar =
-        createFromText("const $name = $value")
-            ?: error("Failed to create constant from name: `$name` and value: `$value`")
+    fun createConstant(name: String, value: String): TolkConstVar = createFromText("const $name = $value")
+        ?: error("Failed to create constant from name: `$name` and value: `$value`")
 
-    private inline fun <reified T : TolkElement> createFromText(
-        code: CharSequence,
-    ): T? = createFile(code).descendantOfTypeStrict()
+    private inline fun <reified T : TolkElement> createFromText(code: CharSequence): T? =
+        createFile(code).descendantOfTypeStrict()
 
     companion object {
-        operator fun get(project: Project) =
-            requireNotNull(project.getService(TolkPsiFactory::class.java))
+        operator fun get(project: Project) = requireNotNull(project.getService(TolkPsiFactory::class.java))
     }
 }
 

@@ -8,9 +8,8 @@ import org.ton.intellij.func.psi.FuncFunctionParameter
 import org.ton.intellij.func.psi.impl.FuncFunctionParameterImpl
 import org.ton.intellij.func.stub.FuncFunctionParameterStub
 
-class FuncFunctionParameterStubElementType(
-    debugName: String,
-) : FuncNamedStubElementType<FuncFunctionParameterStub, FuncFunctionParameter>(debugName) {
+class FuncFunctionParameterStubElementType(debugName: String) :
+    FuncNamedStubElementType<FuncFunctionParameterStub, FuncFunctionParameter>(debugName) {
     override fun serialize(stub: FuncFunctionParameterStub, dataStream: StubOutputStream) {
         dataStream.writeName(stub.name)
     }
@@ -23,11 +22,8 @@ class FuncFunctionParameterStubElementType(
     override fun createStub(
         psi: FuncFunctionParameter,
         parentStub: StubElement<out PsiElement>,
-    ): FuncFunctionParameterStub {
-        return FuncFunctionParameterStub(parentStub, this, psi.name)
-    }
+    ): FuncFunctionParameterStub = FuncFunctionParameterStub(parentStub, this, psi.name)
 
-    override fun createPsi(stub: FuncFunctionParameterStub): FuncFunctionParameter {
-        return FuncFunctionParameterImpl(stub, this)
-    }
+    override fun createPsi(stub: FuncFunctionParameterStub): FuncFunctionParameter =
+        FuncFunctionParameterImpl(stub, this)
 }

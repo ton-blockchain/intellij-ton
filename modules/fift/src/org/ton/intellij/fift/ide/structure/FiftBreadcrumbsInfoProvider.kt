@@ -65,10 +65,10 @@ class FiftBreadcrumbsInfoProvider : BreadcrumbsProvider {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun handler(e: PsiElement): ElementHandler<in FiftElement>? {
-        return if (e is FiftElement)
-            handlers.firstOrNull { it.accepts(e) } as ElementHandler<in FiftElement>?
-        else null
+    private fun handler(e: PsiElement): ElementHandler<in FiftElement>? = if (e is FiftElement) {
+        handlers.firstOrNull { it.accepts(e) } as ElementHandler<in FiftElement>?
+    } else {
+        null
     }
 
     override fun getLanguages(): Array<Language> = arrayOf(FiftLanguage)

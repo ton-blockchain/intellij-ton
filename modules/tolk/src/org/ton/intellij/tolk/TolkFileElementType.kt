@@ -16,13 +16,14 @@ object TolkFileElementType : IStubFileElementType<TolkFileStub>("TOLK_FILE", Tol
     override fun getStubVersion(): Int = STUB_VERSION
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
-        override fun createStubForFile(file: PsiFile): StubElement<*> =
-            if (file is TolkFile) TolkFileStub(file)
-            else super.createStubForFile(file)
-
-        override fun skipChildProcessingWhenBuildingStubs(parent: ASTNode, node: ASTNode): Boolean {
-            return node.elementType == TolkElementTypes.BLOCK_STATEMENT || node.elementType in TOLK_COMMENTS
+        override fun createStubForFile(file: PsiFile): StubElement<*> = if (file is TolkFile) {
+            TolkFileStub(file)
+        } else {
+            super.createStubForFile(file)
         }
+
+        override fun skipChildProcessingWhenBuildingStubs(parent: ASTNode, node: ASTNode): Boolean =
+            node.elementType == TolkElementTypes.BLOCK_STATEMENT || node.elementType in TOLK_COMMENTS
     }
 
     override fun indexStub(stub: PsiFileStub<*>, sink: IndexSink) {
@@ -31,9 +32,8 @@ object TolkFileElementType : IStubFileElementType<TolkFileStub>("TOLK_FILE", Tol
 
     override fun serialize(stub: TolkFileStub, dataStream: StubOutputStream) {}
 
-    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): TolkFileStub {
-        return TolkFileStub(null)
-    }
+    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): TolkFileStub =
+        TolkFileStub(null)
 
 //    Uncomment to find out what causes switch to the AST
 //    private val PARESED = com.intellij.util.containers.ContainerUtil.newConcurrentSet<String>()

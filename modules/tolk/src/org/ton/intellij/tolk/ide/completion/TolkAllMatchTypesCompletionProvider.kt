@@ -65,9 +65,7 @@ object TolkAllMatchTypesCompletionProvider : TolkCompletionProvider() {
         return firstArm.matchBody == null
     }
 
-    class MatchTypesInsertHandler(
-        private val types: Collection<TolkTy>,
-    ) : InsertHandler<LookupElement> {
+    class MatchTypesInsertHandler(private val types: Collection<TolkTy>) : InsertHandler<LookupElement> {
         override fun handleInsert(context: InsertionContext, item: LookupElement) {
             val project = context.project
 

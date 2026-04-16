@@ -30,10 +30,14 @@ class TolkGlobalVarStub(
         }
 
         override fun createStub(psi: TolkGlobalVar, parentStub: StubElement<out PsiElement>): TolkGlobalVarStub =
-            TolkGlobalVarStub(parentStub, this, StringRef.fromString(psi.name), psi.annotations.hasDeprecatedAnnotation())
+            TolkGlobalVarStub(
+                parentStub,
+                this,
+                StringRef.fromString(psi.name),
+                psi.annotations.hasDeprecatedAnnotation(),
+            )
 
-        override fun createPsi(stub: TolkGlobalVarStub): TolkGlobalVar =
-            TolkGlobalVarImpl(stub, this)
+        override fun createPsi(stub: TolkGlobalVarStub): TolkGlobalVar = TolkGlobalVarImpl(stub, this)
     }
 
     companion object {

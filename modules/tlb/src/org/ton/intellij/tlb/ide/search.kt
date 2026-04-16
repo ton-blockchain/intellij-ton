@@ -23,10 +23,10 @@ class TlbFindUsagesProvider : FindUsagesProvider {
     override fun getHelpId(element: PsiElement) = HelpID.FIND_OTHER_USAGES
 
     override fun getType(element: PsiElement) = when (element) {
-        is TlbResultType    -> "Type"
+        is TlbResultType -> "Type"
         is TlbImplicitField -> "Implicit Field"
-        is TlbField         -> "Field"
-        else                -> ""
+        is TlbField -> "Field"
+        else -> ""
     }
 
     override fun getDescriptiveName(element: PsiElement) =
@@ -36,9 +36,10 @@ class TlbFindUsagesProvider : FindUsagesProvider {
         ElementDescriptionUtil.getElementDescription(element, UsageViewShortNameLocation.INSTANCE)
 }
 
-class TlbWordScanner : DefaultWordsScanner(
-    TlbLexerAdapter(),
-    TokenSet.create(TlbTypes.IDENTIFIER),
-    TlbParserDefinition.COMMENTS,
-    TokenSet.EMPTY
-)
+class TlbWordScanner :
+    DefaultWordsScanner(
+        TlbLexerAdapter(),
+        TokenSet.create(TlbTypes.IDENTIFIER),
+        TlbParserDefinition.COMMENTS,
+        TokenSet.EMPTY,
+    )

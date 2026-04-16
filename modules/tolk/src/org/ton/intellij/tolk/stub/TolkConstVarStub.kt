@@ -15,7 +15,7 @@ class TolkConstVarStub(
     parent: StubElement<*>,
     elementType: IStubElementType<*, *>,
     name: StringRef?,
-    isDeprecated: Boolean
+    isDeprecated: Boolean,
 ) : TolkNamedStub<TolkConstVar>(parent, elementType, name, isDeprecated) {
     object Type : TolkNamedStubElementType<TolkConstVarStub, TolkConstVar>("CONST_VAR") {
         override fun serialize(stub: TolkConstVarStub, dataStream: StubOutputStream) {
@@ -29,11 +29,15 @@ class TolkConstVarStub(
             return TolkConstVarStub(parentStub, this, name, isDeprecated)
         }
 
-        override fun createStub(psi: TolkConstVar, parentStub: StubElement<out PsiElement>, ): TolkConstVarStub =
-            TolkConstVarStub(parentStub, this, StringRef.fromString(psi.name), psi.annotations.hasDeprecatedAnnotation())
+        override fun createStub(psi: TolkConstVar, parentStub: StubElement<out PsiElement>): TolkConstVarStub =
+            TolkConstVarStub(
+                parentStub,
+                this,
+                StringRef.fromString(psi.name),
+                psi.annotations.hasDeprecatedAnnotation(),
+            )
 
-        override fun createPsi(stub: TolkConstVarStub): TolkConstVar =
-            TolkConstVarImpl(stub, this)
+        override fun createPsi(stub: TolkConstVarStub): TolkConstVar = TolkConstVarImpl(stub, this)
     }
 
     companion object {

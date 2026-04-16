@@ -30,8 +30,7 @@ val InsertionContext.alreadyHasAngleBrackets: Boolean
 private val InsertionContext.alreadyHasStructBraces: Boolean
     get() = nextCharIs('{')
 
-fun InsertionContext.nextCharIs(c: Char): Boolean =
-    document.charsSequence.indexOfSkippingSpace(c, tailOffset) != null
+fun InsertionContext.nextCharIs(c: Char): Boolean = document.charsSequence.indexOfSkippingSpace(c, tailOffset) != null
 
 fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
     for (i in startIndex until this.length) {
@@ -42,18 +41,18 @@ fun CharSequence.indexOfSkippingSpace(c: Char, startIndex: Int): Int? {
     return null
 }
 
-data class TolkCompletionContext(
-    val context: TolkElement?
-)
+data class TolkCompletionContext(val context: TolkElement?)
 
 fun TolkNamedElement.toLookupElementBuilder(
     context: TolkCompletionContext,
-    substitution: Substitution = Substitution.empty()
+    substitution: Substitution = Substitution.empty(),
 ): LookupElementBuilder {
     val name = this.rawName ?: this.name ?: ""
     val file = this.containingFile.originalFile
     val contextFile = context.context?.containingFile?.originalFile
-    val includePath = if (file == contextFile || contextFile == null) "" else {
+    val includePath = if (file == contextFile || contextFile == null) {
+        ""
+    } else {
         val contextVirtualFile = contextFile.virtualFile
         val elementVirtualFile = file.virtualFile
         if (contextVirtualFile != null && elementVirtualFile != null) {
@@ -67,7 +66,9 @@ fun TolkNamedElement.toLookupElementBuilder(
                     val mappings = actonToml.getNormalizedMappings()
                     for ((key, mappingDir) in mappings) {
                         if (elementVirtualFile.path.startsWith(mappingDir)) {
-                            val subPath = elementVirtualFile.path.substring(mappingDir.length).removePrefix("/").removePrefix("\\").replace('\\', '/')
+                            val subPath = elementVirtualFile.path.substring(
+                                mappingDir.length,
+                            ).removePrefix("/").removePrefix("\\").replace('\\', '/')
                             mappedPath = "@$key/$subPath"
                             break
                         }
@@ -79,15 +80,20 @@ fun TolkNamedElement.toLookupElementBuilder(
             file.name
         }
     }.removeSuffix(".tolk")
-    val type = if (this is TolkTypedElement) type?.let {
-        if (it.hasGenerics()) it.substitute(substitution) else it
-    } else null
+    val type = if (this is TolkTypedElement) {
+        type?.let {
+            if (it.hasGenerics()) it.substitute(substitution) else it
+        }
+    } else {
+        null
+    }
 
     val base = LookupElementBuilder.createWithSmartPointer(name, this)
         .withIcon(this.getIcon(0))
         .withStrikeoutness(isDeprecated)
 
-    val hasTypeParameters = this is TolkTypeParameterListOwner && typeParameterList?.typeParameterList?.isNotEmpty() == true
+    val hasTypeParameters =
+        this is TolkTypeParameterListOwner && typeParameterList?.typeParameterList?.isNotEmpty() == true
 
     return when (this) {
         is TolkFunction -> {
@@ -99,10 +105,11 @@ fun TolkNamedElement.toLookupElementBuilder(
                         builder.appendTailText(
                             list.typeParameterList.joinToString(
                                 prefix = "<",
-                                postfix = ">"
+                                postfix = ">",
                             ) {
                                 it.name.toString()
-                            }, true
+                            },
+                            true,
                         )
                     } ?: builder
                 }
@@ -133,33 +140,37 @@ fun TolkNamedElement.toLookupElementBuilder(
                 }
         }
 
-        is TolkConstVar -> base
-            .withTypeText(type?.render())
-            .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
-            .withInsertHandler { context, item ->
-                context.commitDocument()
+        is TolkConstVar ->
+            base
+                .withTypeText(type?.render())
+                .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
+                .withInsertHandler { context, item ->
+                    context.commitDocument()
 
-                val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-                val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-                insertFile.import(includeCandidateFile)
-            }
+                    val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+                    val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
+                    insertFile.import(includeCandidateFile)
+                }
 
-        is TolkGlobalVar -> base
-            .withTypeText(type?.render())
-            .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
-            .withInsertHandler { context, item ->
-                context.commitDocument()
+        is TolkGlobalVar ->
+            base
+                .withTypeText(type?.render())
+                .withTailText(if (includePath.isEmpty()) "" else " ($includePath)")
+                .withInsertHandler { context, item ->
+                    context.commitDocument()
 
-                val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-                val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-                insertFile.import(includeCandidateFile)
-            }
+                    val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+                    val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
+                    insertFile.import(includeCandidateFile)
+                }
 
-        is TolkVar -> base
-            .withTypeText(type?.render())
+        is TolkVar ->
+            base
+                .withTypeText(type?.render())
 
-        is TolkParameter -> base
-            .withTypeText(type?.render())
+        is TolkParameter ->
+            base
+                .withTypeText(type?.render())
 
         is TolkStructField -> base.bold()
             .withTypeText(type?.render())
@@ -167,40 +178,44 @@ fun TolkNamedElement.toLookupElementBuilder(
 
         is TolkSelfParameter -> base.bold()
 
-        is TolkCatchParameter -> base
-            .withTypeText(type?.render())
+        is TolkCatchParameter ->
+            base
+                .withTypeText(type?.render())
 
-        is TolkVarDefinition -> base
-            .withTypeText(type?.render())
+        is TolkVarDefinition ->
+            base
+                .withTypeText(type?.render())
 
-        is TolkStruct -> base
-            .let { builder ->
-                typeParameterList.appendTypeParametersIfAny(builder)
-            }
-            .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
-            .withInsertHandler { context, _ ->
-                if (hasTypeParameters && !context.alreadyHasAngleBrackets) {
-                    context.document.insertString(context.selectionEndOffset, "<>")
-                    EditorModificationUtil.moveCaretRelatively(context.editor, 1)
-                    AutoPopupController.getInstance(context.project)?.autoPopupParameterInfo(context.editor, this)
+        is TolkStruct ->
+            base
+                .let { builder ->
+                    typeParameterList.appendTypeParametersIfAny(builder)
+                }
+                .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
+                .withInsertHandler { context, _ ->
+                    if (hasTypeParameters && !context.alreadyHasAngleBrackets) {
+                        context.document.insertString(context.selectionEndOffset, "<>")
+                        EditorModificationUtil.moveCaretRelatively(context.editor, 1)
+                        AutoPopupController.getInstance(context.project)?.autoPopupParameterInfo(context.editor, this)
+                    }
+
+                    context.commitDocument()
+
+                    val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+                    val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
+                    insertFile.import(includeCandidateFile)
                 }
 
-                context.commitDocument()
+        is TolkEnum ->
+            base
+                .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
+                .withInsertHandler { context, item ->
+                    context.commitDocument()
 
-                val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-                val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-                insertFile.import(includeCandidateFile)
-            }
-
-        is TolkEnum -> base
-            .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
-            .withInsertHandler { context, item ->
-                context.commitDocument()
-
-                val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-                val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-                insertFile.import(includeCandidateFile)
-            }
+                    val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+                    val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
+                    insertFile.import(includeCandidateFile)
+                }
 
         is TolkEnumMember -> {
             if (context.context?.parent !is TolkDotExpression) {
@@ -222,24 +237,25 @@ fun TolkNamedElement.toLookupElementBuilder(
                 .bold()
         }
 
-        is TolkTypeDef -> base
-            .let { builder ->
-                typeParameterList.appendTypeParametersIfAny(builder)
-            }
-            .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
-            .withInsertHandler { context, _ ->
-                if (hasTypeParameters && !context.alreadyHasAngleBrackets) {
-                    context.document.insertString(context.selectionEndOffset, "<>")
-                    EditorModificationUtil.moveCaretRelatively(context.editor, 1)
-                    AutoPopupController.getInstance(context.project)?.autoPopupParameterInfo(context.editor, this)
+        is TolkTypeDef ->
+            base
+                .let { builder ->
+                    typeParameterList.appendTypeParametersIfAny(builder)
                 }
+                .appendTailText(if (includePath.isEmpty()) "" else " ($includePath)", false)
+                .withInsertHandler { context, _ ->
+                    if (hasTypeParameters && !context.alreadyHasAngleBrackets) {
+                        context.document.insertString(context.selectionEndOffset, "<>")
+                        EditorModificationUtil.moveCaretRelatively(context.editor, 1)
+                        AutoPopupController.getInstance(context.project)?.autoPopupParameterInfo(context.editor, this)
+                    }
 
-                context.commitDocument()
+                    context.commitDocument()
 
-                val insertFile = context.file as? TolkFile ?: return@withInsertHandler
-                val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
-                insertFile.import(includeCandidateFile)
-            }
+                    val insertFile = context.file as? TolkFile ?: return@withInsertHandler
+                    val includeCandidateFile = file as? TolkFile ?: return@withInsertHandler
+                    insertFile.import(includeCandidateFile)
+                }
 
         else -> base
     }
@@ -254,9 +270,8 @@ private fun TolkTypeParameterList?.appendTypeParametersIfAny(builder: LookupElem
     return builder.appendTailText(list, true)
 }
 
-fun TolkPrimitiveTy.toLookupElement(): LookupElementBuilder {
-    return LookupElementBuilder.create(this.render()).withBoldness(true)
-}
+fun TolkPrimitiveTy.toLookupElement(): LookupElementBuilder =
+    LookupElementBuilder.create(this.render()).withBoldness(true)
 
 private fun TolkFunction.getTailText(): String {
     val parameterList = parameterList ?: return "()"

@@ -25,7 +25,8 @@ class TolkRecursiveCallLineMarkerProvider : LineMarkerProvider {
             if (!function.isValid) continue
 
             if (isRecursiveCall(element, function)) {
-                val document = PsiDocumentManager.getInstance(element.project).getDocument(element.containingFile) ?: continue
+                val document =
+                    PsiDocumentManager.getInstance(element.project).getDocument(element.containingFile) ?: continue
                 val lineNumber = document.getLineNumber(element.textOffset)
                 if (!lines.contains(lineNumber)) {
                     result.add(RecursiveMethodCallMarkerInfo(element.argumentList.lparen))
@@ -51,17 +52,17 @@ class TolkRecursiveCallLineMarkerProvider : LineMarkerProvider {
         return null
     }
 
-    private class RecursiveMethodCallMarkerInfo(methodCall: PsiElement) : LineMarkerInfo<PsiElement?>(
-        methodCall,
-        methodCall.textRange,
-        AllIcons.Gutter.RecursiveMethod,
-        FunctionUtil.constant("Recursive call"),
-        null,
-        GutterIconRenderer.Alignment.RIGHT,
-        { "Recursive call" }
-    )
+    private class RecursiveMethodCallMarkerInfo(methodCall: PsiElement) :
+        LineMarkerInfo<PsiElement?>(
+            methodCall,
+            methodCall.textRange,
+            AllIcons.Gutter.RecursiveMethod,
+            FunctionUtil.constant("Recursive call"),
+            null,
+            GutterIconRenderer.Alignment.RIGHT,
+            { "Recursive call" },
+        )
 
-    private fun isRecursiveCall(element: PsiElement, function: TolkFunction): Boolean {
-        return element.parentOfType<TolkFunction>() == function
-    }
+    private fun isRecursiveCall(element: PsiElement, function: TolkFunction): Boolean =
+        element.parentOfType<TolkFunction>() == function
 }

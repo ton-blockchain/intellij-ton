@@ -40,7 +40,9 @@ open class TolkIntroduceVariableBase {
 
         if (expression == null) {
             val message =
-                RefactoringBundle.message(if (hasSelection) "selected.block.should.represent.an.expression" else "refactoring.introduce.selection.error")
+                RefactoringBundle.message(
+                    if (hasSelection) "selected.block.should.represent.an.expression" else "refactoring.introduce.selection.error",
+                )
             showCannotPerform(operation, message)
             return
         }
@@ -58,21 +60,27 @@ open class TolkIntroduceVariableBase {
             return
         }
 
-        IntroduceTargetChooser.showChooser(operation.editor, extractableExpressions, object : Pass<TolkExpression>() {
-            override fun pass(expression: TolkExpression) {
-                if (!expression.isValid) return
-                operation.expression = expression
-                performOnElement(operation)
+        IntroduceTargetChooser.showChooser(
+            operation.editor,
+            extractableExpressions,
+            object : Pass<TolkExpression>() {
+                override fun pass(expression: TolkExpression) {
+                    if (!expression.isValid) return
+                    operation.expression = expression
+                    performOnElement(operation)
+                }
+            },
+        ) {
+            if (it.isValid) {
+                it.text
+            } else {
+                "<invalid expression>"
             }
-        }) {
-            if (it.isValid) it.text
-            else "<invalid expression>"
         }
     }
 
-    private fun findExpressionInSelection(file: PsiFile, start: Int, end: Int): TolkExpression? {
-        return PsiTreeUtil.findElementOfClassAtRange(file, start, end, TolkExpression::class.java)
-    }
+    private fun findExpressionInSelection(file: PsiFile, start: Int, end: Int): TolkExpression? =
+        PsiTreeUtil.findElementOfClassAtRange(file, start, end, TolkExpression::class.java)
 
     private fun findExpressionAtOffset(operation: TolkIntroduceOperation): TolkExpression? {
         val file = operation.file
@@ -90,8 +98,8 @@ open class TolkIntroduceVariableBase {
 
         return SyntaxTraverser.psiApi().parents(expression).takeWhile(
             Conditions.notInstanceOf(
-                TolkFile::class.java
-            )
+                TolkFile::class.java,
+            ),
         )
             .filter(TolkExpression::class.java)
             .filter(Conditions.notInstanceOf(TolkParenExpression::class.java))
@@ -99,9 +107,8 @@ open class TolkIntroduceVariableBase {
             .toList()
     }
 
-    private fun getLocalOccurrences(element: PsiElement): List<PsiElement?> {
-        return getOccurrences(element, PsiTreeUtil.getTopmostParentOfType(element, TolkBlockStatement::class.java))
-    }
+    private fun getLocalOccurrences(element: PsiElement): List<PsiElement?> =
+        getOccurrences(element, PsiTreeUtil.getTopmostParentOfType(element, TolkBlockStatement::class.java))
 
     private fun getOccurrences(pattern: PsiElement, context: PsiElement?): List<PsiElement> {
         if (context == null) return emptyList()
@@ -132,12 +139,16 @@ open class TolkIntroduceVariableBase {
             }
 
             OccurrencesChooser.simpleChooser<PsiElement>(editor)
-                .showChooser(expression, operation.occurrences, object : Pass<OccurrencesChooser.ReplaceChoice>() {
-                    override fun pass(choice: OccurrencesChooser.ReplaceChoice) {
-                        operation.replaceAll = choice == OccurrencesChooser.ReplaceChoice.ALL
-                        performInplaceIntroduce(operation)
-                    }
-                })
+                .showChooser(
+                    expression,
+                    operation.occurrences,
+                    object : Pass<OccurrencesChooser.ReplaceChoice>() {
+                        override fun pass(choice: OccurrencesChooser.ReplaceChoice) {
+                            operation.replaceAll = choice == OccurrencesChooser.ReplaceChoice.ALL
+                            performInplaceIntroduce(operation)
+                        }
+                    },
+                )
 
             return
         }
@@ -180,7 +191,10 @@ open class TolkIntroduceVariableBase {
             context.addAfter(newLine, statement)
             val varDefinition = PsiTreeUtil.findChildOfType(statement, TolkVar::class.java)!!
 
-            assert(varDefinition.isValid) { "invalid var `" + varDefinition.text + "` definition in `" + statement.text + "`" }
+            assert(varDefinition.isValid) {
+                "invalid var `" + varDefinition.text + "` definition in `" + statement.text +
+                    "`"
+            }
 
             operation.variable = varDefinition
 
@@ -195,12 +209,13 @@ open class TolkIntroduceVariableBase {
         PsiDocumentManager.getInstance(project).doPostponedOperationsAndUnblockDocument(operation.editor.document)
     }
 
-    private fun findLocalAnchor(occurrences: List<PsiElement?>): PsiElement? {
-        return findAnchor(
-            occurrences,
-            PsiTreeUtil.getNonStrictParentOfType(PsiTreeUtil.findCommonParent(occurrences), TolkBlockStatement::class.java)
-        )
-    }
+    private fun findLocalAnchor(occurrences: List<PsiElement?>): PsiElement? = findAnchor(
+        occurrences,
+        PsiTreeUtil.getNonStrictParentOfType(
+            PsiTreeUtil.findCommonParent(occurrences),
+            TolkBlockStatement::class.java,
+        ),
+    )
 
     private fun findAnchor(occurrences: List<PsiElement?>, context: PsiElement?): PsiElement? {
         val first = occurrences.firstOrNull()
@@ -215,17 +230,23 @@ open class TolkIntroduceVariableBase {
         val msg = RefactoringBundle.getCannotRefactorMessage(message)
         @Suppress("DialogTitleCapitalization")
         CommonRefactoringUtil.showErrorHint(
-            operation.project, operation.editor, msg,
-            RefactoringBundle.getCannotRefactorMessage(null), "refactoring.extractVariable"
+            operation.project,
+            operation.editor,
+            msg,
+            RefactoringBundle.getCannotRefactorMessage(null),
+            "refactoring.extractVariable",
         )
     }
 
     private class TolkInplaceVariableIntroducer(operation: TolkIntroduceOperation) :
         InplaceVariableIntroducer<PsiElement?>(
-            operation.variable, operation.editor, operation.project, "Introduce Variable",
-            ArrayUtil.toObjectArray(operation.occurrences, PsiElement::class.java), null
+            operation.variable,
+            operation.editor,
+            operation.project,
+            "Introduce Variable",
+            ArrayUtil.toObjectArray(operation.occurrences, PsiElement::class.java),
+            null,
         )
-
 
     fun PsiElement.unwrapPsiParentheses(): PsiElement? {
         var current: PsiElement? = this

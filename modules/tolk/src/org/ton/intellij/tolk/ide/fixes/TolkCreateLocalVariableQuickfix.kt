@@ -13,7 +13,8 @@ import org.ton.intellij.tolk.psi.TolkStatement
 import org.ton.intellij.util.parentOfType
 
 class TolkCreateLocalVariableQuickfix(identifier: PsiElement) :
-    LocalQuickFixAndIntentionActionOnPsiElement(identifier), HighPriorityAction {
+    LocalQuickFixAndIntentionActionOnPsiElement(identifier),
+    HighPriorityAction {
 
     val actualName = identifier.text ?: ""
 
@@ -28,10 +29,12 @@ class TolkCreateLocalVariableQuickfix(identifier: PsiElement) :
         endElement: PsiElement,
     ) {
         val template = TemplateManager.getInstance(project).createTemplate(
-            "templateInsertHandler", "ton", """
+            "templateInsertHandler",
+            "ton",
+            """
                 val $actualName = ${"$"}value$${"$"}END$;
                 
-            """.trimIndent()
+            """.trimIndent(),
         )
         template.isToReformat = true
 

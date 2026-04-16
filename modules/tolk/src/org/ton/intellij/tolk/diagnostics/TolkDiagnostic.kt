@@ -5,10 +5,7 @@ import com.intellij.psi.PsiElement
 import org.ton.intellij.tolk.inspection.TolkInspectionBase
 import org.ton.intellij.util.PreparedAnnotation
 
-abstract class TolkDiagnostic(
-    val element: PsiElement,
-    val endElement: PsiElement = element
-) {
+abstract class TolkDiagnostic(val element: PsiElement, val endElement: PsiElement = element) {
     abstract fun prepare(): PreparedAnnotation
 
     abstract fun canApply(inspection: TolkInspectionBase): Boolean
@@ -21,7 +18,7 @@ abstract class TolkDiagnostic(
                 element,
                 prepared.fullDescription,
                 prepared.severity,
-                *fixes
+                *fixes,
             )
         } else {
             val descriptor = holder.manager.createProblemDescriptor(
@@ -30,7 +27,7 @@ abstract class TolkDiagnostic(
                 prepared.fullDescription,
                 prepared.severity,
                 holder.isOnTheFly,
-                *fixes
+                *fixes,
             )
             holder.registerProblem(descriptor)
         }

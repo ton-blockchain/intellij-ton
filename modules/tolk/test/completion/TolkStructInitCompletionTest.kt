@@ -161,6 +161,6 @@ class TolkStructInitCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "foo"
+        "foo",
     )
 }

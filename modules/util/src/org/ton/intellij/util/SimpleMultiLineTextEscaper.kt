@@ -11,9 +11,8 @@ class SimpleMultiLineTextEscaper<T : PsiLanguageInjectionHost>(host: T) : Litera
         return true
     }
 
-    override fun getOffsetInHost(offsetInDecoded: Int, rangeInsideHost: TextRange): Int {
-        return rangeInsideHost.startOffset + offsetInDecoded
-    }
+    override fun getOffsetInHost(offsetInDecoded: Int, rangeInsideHost: TextRange): Int =
+        rangeInsideHost.startOffset + offsetInDecoded
 
     override fun isOneLine(): Boolean = false
 }

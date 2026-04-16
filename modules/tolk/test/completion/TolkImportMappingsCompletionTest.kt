@@ -7,11 +7,14 @@ class TolkImportMappingsCompletionTest : TolkCompletionTestBase() {
             """
                 [import-mappings]
                 contracts = "contracts"
-            """.trimIndent()
+            """.trimIndent(),
         )
 
-        checkContainsCompletion("@contracts", """
+        checkContainsCompletion(
+            "@contracts",
+            """
             import "/*caret*/"
-        """.trimIndent())
+            """.trimIndent(),
+        )
     }
 }

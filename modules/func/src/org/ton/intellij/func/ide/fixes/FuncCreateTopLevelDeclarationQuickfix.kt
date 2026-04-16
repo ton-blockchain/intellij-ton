@@ -11,7 +11,8 @@ import org.ton.intellij.func.psi.FuncFunction
 import org.ton.intellij.func.psi.FuncGlobalVar
 import org.ton.intellij.util.parentOfType
 
-abstract class FuncCreateTopLevelDeclarationQuickfix(identifier: PsiElement) : LocalQuickFixAndIntentionActionOnPsiElement(identifier) {
+abstract class FuncCreateTopLevelDeclarationQuickfix(identifier: PsiElement) :
+    LocalQuickFixAndIntentionActionOnPsiElement(identifier) {
     fun run(
         templateText: String,
         editor: Editor?,
@@ -20,11 +21,13 @@ abstract class FuncCreateTopLevelDeclarationQuickfix(identifier: PsiElement) : L
     ) {
         val project = startElement.project
         val template = TemplateManager.getInstance(project).createTemplate(
-            "templateInsertHandler", "ton", """
+            "templateInsertHandler",
+            "ton",
+            """
                 $templateText
                 
                 
-            """.trimIndent()
+            """.trimIndent(),
         )
         template.isToReformat = true
 

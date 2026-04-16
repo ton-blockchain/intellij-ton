@@ -18,16 +18,15 @@ class FuncBraceMatcher : PairedBraceMatcher {
 
     override fun getPairs(): Array<BracePair> = pairs
 
-    override fun isPairedBracesAllowedBeforeType(lbraceType: IElementType, contextType: IElementType?): Boolean {
-        return FuncParserDefinition.WHITE_SPACE_OR_COMMENT_BIT_SET.contains(contextType)
-                || contextType == FuncElementTypes.COLON
-                || contextType == FuncElementTypes.SEMICOLON
-                || contextType == FuncElementTypes.COMMA
-                || contextType == FuncElementTypes.RPAREN
-                || contextType == FuncElementTypes.RBRACK
-                || contextType == FuncElementTypes.RBRACE
-                || contextType == FuncElementTypes.LBRACE
-    }
+    override fun isPairedBracesAllowedBeforeType(lbraceType: IElementType, contextType: IElementType?): Boolean =
+        FuncParserDefinition.WHITE_SPACE_OR_COMMENT_BIT_SET.contains(contextType) ||
+            contextType == FuncElementTypes.COLON ||
+            contextType == FuncElementTypes.SEMICOLON ||
+            contextType == FuncElementTypes.COMMA ||
+            contextType == FuncElementTypes.RPAREN ||
+            contextType == FuncElementTypes.RBRACK ||
+            contextType == FuncElementTypes.RBRACE ||
+            contextType == FuncElementTypes.LBRACE
 
     override fun getCodeConstructStart(file: PsiFile?, openingBraceOffset: Int): Int {
         val element = file?.findElementAt(openingBraceOffset)

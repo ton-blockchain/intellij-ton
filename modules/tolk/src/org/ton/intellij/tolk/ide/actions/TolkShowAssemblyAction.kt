@@ -14,19 +14,19 @@ import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
-import javax.swing.SwingConstants
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.testFramework.LightVirtualFile
-import org.ton.intellij.tasm.TasmFileType
-import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
+import org.ton.intellij.tasm.TasmFileType
+import org.ton.intellij.tolk.TolkFileType
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
+import javax.swing.SwingConstants
 
 class TolkShowAssemblyAction : AnAction("Show Assembly") {
     private val log = logger<TolkShowAssemblyAction>()
@@ -83,7 +83,7 @@ class TolkShowAssemblyAction : AnAction("Show Assembly") {
         val compileCommandLine = ActonCommandLine(
             command = compileCommand.name,
             workingDirectory = workingDir,
-            additionalArguments = compileCommand.getArguments()
+            additionalArguments = compileCommand.getArguments(),
         ).toGeneralCommandLine(project) ?: return Result.failure(IllegalStateException("Cannot find acton executable"))
 
         val compileResult = runExternal(compileCommandLine)
@@ -100,7 +100,7 @@ class TolkShowAssemblyAction : AnAction("Show Assembly") {
         val disasmCommandLine = ActonCommandLine(
             command = disasmCommand.name,
             workingDirectory = workingDir,
-            additionalArguments = disasmCommand.getArguments()
+            additionalArguments = disasmCommand.getArguments(),
         ).toGeneralCommandLine(project) ?: return Result.failure(IllegalStateException("Cannot find acton executable"))
 
         val disasmResult = runExternal(disasmCommandLine)
@@ -140,9 +140,9 @@ class TolkShowAssemblyAction : AnAction("Show Assembly") {
                 val stderrTrimmed = stripAnsiCodes(stderrMsg.trim())
                 val errorMsg = when {
                     stderrTrimmed.isNotEmpty() && stdoutTrimmed.isNotEmpty() -> "$stderrTrimmed\n\n$stdoutTrimmed"
-                    stderrTrimmed.isNotEmpty()                               -> stderrTrimmed
-                    stdoutTrimmed.isNotEmpty()                               -> stdoutTrimmed
-                    else                                                     -> "Exit code $exitCode"
+                    stderrTrimmed.isNotEmpty() -> stderrTrimmed
+                    stdoutTrimmed.isNotEmpty() -> stdoutTrimmed
+                    else -> "Exit code $exitCode"
                 }
                 val message = "Exit code $exitCode\n\n$errorMsg"
                 log.warn("Command failed: ${cmd.commandLineString}\n$message")

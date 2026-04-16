@@ -69,7 +69,6 @@ class MarkdownDocAstBuilder private constructor(
         node.insertLeaves(markdownNode.endOffset)
     }
 
-
     private fun CompositeElement.insertLeaves(startOffset: Int, endOffset: Int) {
         textMap.processPiecesInRange(startOffset, endOffset) { piece ->
             val internedText = charTable.intern(piece.str)
@@ -91,23 +90,14 @@ class MarkdownDocAstBuilder private constructor(
     }
 
     companion object {
-        fun renderHtml(
-            text: CharSequence,
-            prefix: String,
-            flavour: MarkdownFlavourDescriptor,
-        ): String {
+        fun renderHtml(text: CharSequence, prefix: String, flavour: MarkdownFlavourDescriptor): String {
             val textMap = MarkdownDocTextMap(text, prefix)
             val markdownRoot =
                 MarkdownParser(flavour).buildMarkdownTreeFromString(textMap.mappedText)
             return HtmlGenerator(textMap.mappedText, markdownRoot, flavour).generateHtml()
         }
 
-        fun build(
-            text: CharSequence,
-            charTable: CharTable,
-            prefix: String,
-            psiFactory: MarkdownPsiFactory,
-        ): ASTNode {
+        fun build(text: CharSequence, charTable: CharTable, prefix: String, psiFactory: MarkdownPsiFactory): ASTNode {
             val textMap = MarkdownDocTextMap(text, prefix)
             val root = psiFactory.createRoot()
             val markdownRoot =
@@ -128,7 +118,7 @@ private class MarkdownDocTextMap private constructor(
 
     private fun mapTextRangeFromMarkdownToRust(range: TextRange): TextRange = TextRange(
         mapOffsetFromMarkdown(range.startOffset),
-        mapOffsetFromMarkdown(range.endOffset)
+        mapOffsetFromMarkdown(range.endOffset),
     )
 
     inline fun processPiecesInRange(startOffset: Int, endOffset: Int, processor: (Piece) -> Unit) {

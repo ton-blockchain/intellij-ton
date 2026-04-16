@@ -16,14 +16,15 @@ import org.ton.intellij.func.stub.type.FuncIncludeDefinitionStubElementType
 import org.ton.intellij.util.getChildrenByType
 import org.ton.intellij.util.recursionGuard
 
-class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncLanguage), FuncElement {
+class FuncFile(viewProvider: FileViewProvider) :
+    PsiFileBase(viewProvider, FuncLanguage),
+    FuncElement {
     override fun getFileType(): FileType = FuncFileType
 
     override fun getStub(): FuncFileStub? = super.getStub() as? FuncFileStub
 
-    fun collectIncludedFiles(includeSelf: Boolean = true): Set<FuncFile> {
-        return collectIncludedFiles(LinkedHashSet(), includeSelf)
-    }
+    fun collectIncludedFiles(includeSelf: Boolean = true): Set<FuncFile> =
+        collectIncludedFiles(LinkedHashSet(), includeSelf)
 
     private fun collectIncludedFiles(collection: MutableSet<FuncFile>, includeSelf: Boolean): MutableSet<FuncFile> {
         recursionGuard(this, false) {
@@ -42,11 +43,13 @@ class FuncFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, FuncL
     val includeDefinitions: List<FuncIncludeDefinition>
         get() = CachedValuesManager.getCachedValue(this) {
             val stub = stub
-            val children = if (stub != null) getChildrenByType(
-                stub,
-                FuncElementTypes.INCLUDE_DEFINITION,
-                FuncIncludeDefinitionStubElementType.ARRAY_FACTORY
-            ) else {
+            val children = if (stub != null) {
+                getChildrenByType(
+                    stub,
+                    FuncElementTypes.INCLUDE_DEFINITION,
+                    FuncIncludeDefinitionStubElementType.ARRAY_FACTORY,
+                )
+            } else {
                 findChildrenByClass(FuncIncludeDefinition::class.java).toList()
             }
             CachedValueProvider.Result.create(children, this)
@@ -138,5 +141,5 @@ private val INCLUDE_COMPARE: Comparator<FuncIncludeDefinition> =
         },
         {
             it.stringLiteral?.rawString?.text?.lowercase()
-        }
+        },
     )

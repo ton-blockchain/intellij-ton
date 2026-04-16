@@ -11,10 +11,8 @@ import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandRunState
 
-class TolkRerunFailedTestsAction(
-    consoleView: ConsoleView,
-    consoleProperties: TestConsoleProperties
-) : AbstractRerunFailedTestsAction(consoleView) {
+class TolkRerunFailedTestsAction(consoleView: ConsoleView, consoleProperties: TestConsoleProperties) :
+    AbstractRerunFailedTestsAction(consoleView) {
 
     init {
         init(consoleProperties)
@@ -36,10 +34,8 @@ class TolkRerunFailedTestsAction(
         return result.toList()
     }
 
-    private class TolkRerunProfile(
-        private val conf: ActonCommandConfiguration,
-        private val failed: List<String>
-    ) : MyRunProfile(conf) {
+    private class TolkRerunProfile(private val conf: ActonCommandConfiguration, private val failed: List<String>) :
+        MyRunProfile(conf) {
 
         override fun getState(exec: Executor, env: ExecutionEnvironment): RunProfileState? {
             conf.testTarget = failed.joinToString("|")

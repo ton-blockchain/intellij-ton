@@ -12,10 +12,7 @@ import java.util.ArrayDeque
 import java.util.HashMap
 import kotlin.collections.last
 
-class FuncTypeInferenceWalker(
-    val ctx: FuncInferenceContext,
-    private val returnTy: FuncTy,
-) {
+class FuncTypeInferenceWalker(val ctx: FuncInferenceContext, private val returnTy: FuncTy) {
     private val globalLookup = FuncGlobalLookup(ctx.project)
     private val currentScope = LocalSymbolsScopes()
     private var nextReferenceExpressionIsVariable = false
@@ -29,13 +26,9 @@ class FuncTypeInferenceWalker(
         return inferFunctionBody(body)
     }
 
-    fun inferFunctionBody(block: FuncBlockStatement): FuncTy {
-        return block.inferType(Expectation.ExpectHasTy(returnTy))
-    }
+    fun inferFunctionBody(block: FuncBlockStatement): FuncTy = block.inferType(Expectation.ExpectHasTy(returnTy))
 
-    private fun FuncBlockStatement.inferType(
-        expected: Expectation = Expectation.NoExpectation,
-    ): FuncTy {
+    private fun FuncBlockStatement.inferType(expected: Expectation = Expectation.NoExpectation): FuncTy {
         currentScope.useScope {
             for (statement in statementList) {
                 statement.inferType()
@@ -51,50 +44,45 @@ class FuncTypeInferenceWalker(
 
     private fun FuncStatement.inferType() {
         when (this) {
-            is FuncReturnStatement     -> inferType()
-            is FuncBlockStatement      -> inferType()
-            is FuncRepeatStatement     -> inferType()
-            is FuncIfStatement         -> inferType()
-            is FuncDoStatement         -> inferType()
-            is FuncWhileStatement      -> inferType()
-            is FuncTryStatement        -> inferType()
+            is FuncReturnStatement -> inferType()
+            is FuncBlockStatement -> inferType()
+            is FuncRepeatStatement -> inferType()
+            is FuncIfStatement -> inferType()
+            is FuncDoStatement -> inferType()
+            is FuncWhileStatement -> inferType()
+            is FuncTryStatement -> inferType()
             is FuncExpressionStatement -> expression.inferType()
-            else                       -> {}
+            else -> {}
         }
     }
 
-    private fun FuncExpression.inferTypeCoercibleTo(
-        expected: FuncTy,
-    ): FuncTy {
+    private fun FuncExpression.inferTypeCoercibleTo(expected: FuncTy): FuncTy {
         val inferred = inferType(expected.maybeHasType())
         // TODO: coerce to expected
         return inferred
     }
 
-    private fun FuncExpression.inferType(expected: FuncTy?) =
-        inferType(expected.maybeHasType())
+    private fun FuncExpression.inferType(expected: FuncTy?) = inferType(expected.maybeHasType())
 
-    private fun FuncExpression.inferType(
-        expected: Expectation = Expectation.NoExpectation,
-    ): FuncTy {
+    private fun FuncExpression.inferType(expected: Expectation = Expectation.NoExpectation): FuncTy {
         if (ctx.isTypeInferred(this)) {
             return ctx.getExprTy(this)
         }
         val ty = when (this) {
-            is FuncLiteralExpression       -> inferLiteral(this)
-            is FuncParenExpression         -> inferType(expected)
-            is FuncTensorExpression        -> inferType(expected)
-            is FuncUnitExpression          -> FuncTyUnit
-            is FuncTupleExpression         -> inferType(expected)
-            is FuncBinExpression           -> inferType(expected)
-            is FuncApplyExpression         -> inferType(expected)
-            is FuncSpecialApplyExpression  -> inferType(expected)
-            is FuncReferenceExpression     -> inferType(expected)
-            is FuncInvExpression           -> inferType(expected)
-            is FuncTernaryExpression       -> inferType(expected)
-            is FuncUnaryMinusExpression    -> inferType(expected)
+            is FuncLiteralExpression -> inferLiteral(this)
+            is FuncParenExpression -> inferType(expected)
+            is FuncTensorExpression -> inferType(expected)
+            is FuncUnitExpression -> FuncTyUnit
+            is FuncTupleExpression -> inferType(expected)
+            is FuncBinExpression -> inferType(expected)
+            is FuncApplyExpression -> inferType(expected)
+            is FuncSpecialApplyExpression -> inferType(expected)
+            is FuncReferenceExpression -> inferType(expected)
+            is FuncInvExpression -> inferType(expected)
+            is FuncTernaryExpression -> inferType(expected)
+            is FuncUnaryMinusExpression -> inferType(expected)
             is FuncPrimitiveTypeExpression -> rawType
-            else                           -> FuncTyUnknown
+            else -> FuncTyUnknown
         }?.getFuncTy() ?: FuncTyUnknown
 
         ctx.setExprTy(this, ty)
@@ -115,9 +103,7 @@ class FuncTypeInferenceWalker(
         return null
     }
 
-    private fun FuncReturnStatement.inferType(): FuncTy {
-        return expression?.inferTypeCoercibleTo(returnTy) ?: FuncTyUnknown
-    }
+    private fun FuncReturnStatement.inferType(): FuncTy = expression?.inferTypeCoercibleTo(returnTy) ?: FuncTyUnknown
 
     private fun FuncRepeatStatement.inferType(): FuncTy {
         expression?.inferType(FuncTyInt)
@@ -165,16 +151,14 @@ class FuncTypeInferenceWalker(
         catch?.expression?.inferType(
             FuncTyTensor(
                 FuncTyVar(),
-                FuncTyInt
-            )
+                FuncTyInt,
+            ),
         )
         catch?.blockStatement?.inferType()
         return FuncTyUnit
     }
 
-    private fun FuncTensorExpression.inferType(
-        expected: Expectation,
-    ): FuncTy {
+    private fun FuncTensorExpression.inferType(expected: Expectation): FuncTy {
         val expressions = expressionList
         if (expressions.isEmpty()) {
             return FuncTyUnit
@@ -186,21 +170,13 @@ class FuncTypeInferenceWalker(
         return FuncTyTensor(types)
     }
 
-    private fun FuncTupleExpression.inferType(
-        expected: Expectation,
-    ): FuncTy {
-        return FuncTyTuple(expressionList.inferType(null))
-    }
+    private fun FuncTupleExpression.inferType(expected: Expectation): FuncTy =
+        FuncTyTuple(expressionList.inferType(null))
 
-    private fun FuncParenExpression.inferType(
-        expected: Expectation,
-    ): FuncTy {
-        return expression?.inferType(expected) ?: FuncTyUnknown
-    }
+    private fun FuncParenExpression.inferType(expected: Expectation): FuncTy =
+        expression?.inferType(expected) ?: FuncTyUnknown
 
-    private fun FuncBinExpression.inferType(
-        expected: Expectation,
-    ): FuncTy {
+    private fun FuncBinExpression.inferType(expected: Expectation): FuncTy {
         val left = left
         val leftTy = left.inferType()
         val rightTy = right?.inferTypeCoercibleTo(leftTy)
@@ -215,12 +191,14 @@ class FuncTypeInferenceWalker(
                 ctx.setExprTy(left.right, rightTy)
             }
 
-            val variables = (left as? FuncApplyExpression)?.right as? FuncTensorExpression ?: left as? FuncTensorExpression
+            val variables =
+                (left as? FuncApplyExpression)?.right as? FuncTensorExpression ?: left as? FuncTensorExpression
             if (variables != null && rightTy is FuncTyTensor) {
                 processVariables(variables.expressionList, rightTy.types)
             }
 
-            val tupleVariables = (left as? FuncApplyExpression)?.right as? FuncTupleExpression ?: left as? FuncTupleExpression
+            val tupleVariables =
+                (left as? FuncApplyExpression)?.right as? FuncTupleExpression ?: left as? FuncTupleExpression
             if (tupleVariables != null && rightTy is FuncTyTuple) {
                 processVariables(tupleVariables.expressionList, rightTy.types)
             }
@@ -246,23 +224,19 @@ class FuncTypeInferenceWalker(
         }
     }
 
-    private fun FuncApplyExpression.inferType(
-        expected: Expectation,
-    ): FuncTy {
+    private fun FuncApplyExpression.inferType(expected: Expectation): FuncTy {
         val expressions = expressionList
         val lhs = expressions[0]
         val rhs = expressions.getOrNull(1)
 
-        fun FuncExpression.isTypeExpression(): Boolean {
-            return when (this) {
-                is FuncPrimitiveTypeExpression,
-                is FuncHoleTypeExpression,
-                                        -> true
+        fun FuncExpression.isTypeExpression(): Boolean = when (this) {
+            is FuncPrimitiveTypeExpression,
+            is FuncHoleTypeExpression,
+            -> true
 
-                is FuncTupleExpression  -> expressionList.all { it.isTypeExpression() }
-                is FuncTensorExpression -> expressionList.all { it.isTypeExpression() }
-                else                    -> false
-            }
+            is FuncTupleExpression -> expressionList.all { it.isTypeExpression() }
+            is FuncTensorExpression -> expressionList.all { it.isTypeExpression() }
+            else -> false
         }
 
         if (lhs.isTypeExpression()) {
@@ -284,13 +258,11 @@ class FuncTypeInferenceWalker(
                 funcTy.to
             }
 
-            else         -> FuncTyUnknown
+            else -> FuncTyUnknown
         }
     }
 
-    private fun FuncSpecialApplyExpression.inferType(
-        expected: Expectation,
-    ): FuncTy {
+    private fun FuncSpecialApplyExpression.inferType(expected: Expectation): FuncTy {
         val expressions = expressionList
         val lhs = expressions.getOrNull(0)
         val rhs = expressions.getOrNull(1)
@@ -307,9 +279,7 @@ class FuncTypeInferenceWalker(
         return rhsTy ?: FuncTyUnknown
     }
 
-    private fun FuncReferenceExpression.inferType(
-        expected: Expectation,
-    ): FuncTy {
+    private fun FuncReferenceExpression.inferType(expected: Expectation): FuncTy {
         if (nextReferenceExpressionIsVariable) {
             currentScope.addLocalSymbol(this)
             return FuncTyUnknown
@@ -317,20 +287,21 @@ class FuncTypeInferenceWalker(
 
         val resolved = resolve()?.firstOrNull() ?: return FuncTyUnknown
         return when (resolved) {
-            is FuncFunction            -> resolved.rawType
-            is FuncFunctionParameter   -> resolved.typeReference?.rawType ?: FuncTyUnknown
-            is FuncGlobalVar           -> resolved.typeReference.rawType
-            is FuncConstVar            -> {
-                if (resolved.intKeyword != null)
+            is FuncFunction -> resolved.rawType
+            is FuncFunctionParameter -> resolved.typeReference?.rawType ?: FuncTyUnknown
+            is FuncGlobalVar -> resolved.typeReference.rawType
+            is FuncConstVar -> {
+                if (resolved.intKeyword != null) {
                     FuncTyInt
-                else if (resolved.sliceKeyword != null)
+                } else if (resolved.sliceKeyword != null) {
                     FuncTySlice
-                else
+                } else {
                     resolved.expression?.inferType() ?: FuncTyUnknown
+                }
             }
 
             is FuncReferenceExpression -> ctx.getExprTy(resolved)
-            else                       -> FuncTyUnknown
+            else -> FuncTyUnknown
         }
     }
 
@@ -357,34 +328,26 @@ class FuncTypeInferenceWalker(
         return null
     }
 
-    private fun FuncInvExpression.inferType(
-        expected: Expectation,
-    ): FuncTy {
+    private fun FuncInvExpression.inferType(expected: Expectation): FuncTy {
         val expression = expression
         val ty = expression?.inferType(expected)
         return ty ?: FuncTyUnknown
     }
 
-    private fun FuncTernaryExpression.inferType(
-        expected: Expectation,
-    ): FuncTy {
+    private fun FuncTernaryExpression.inferType(expected: Expectation): FuncTy {
         condition.inferType(FuncTyInt)
         val thenTy = thenBranch?.inferType(expected)
         val elseTy = elseBranch?.inferType(expected)
         return thenTy ?: elseTy ?: FuncTyUnknown
     }
 
-    private fun FuncUnaryMinusExpression.inferType(
-        expected: Expectation,
-    ): FuncTy {
+    private fun FuncUnaryMinusExpression.inferType(expected: Expectation): FuncTy {
         val expression = expression
         val ty = expression?.inferType(expected)
         return ty ?: FuncTyUnknown
     }
 
-    private fun List<FuncExpression>.inferType(
-        expected: List<FuncTy>?,
-    ): List<FuncTy> {
+    private fun List<FuncExpression>.inferType(expected: List<FuncTy>?): List<FuncTy> {
         val extended = expected.orEmpty().asSequence().infiniteWith(FuncTyUnknown)
         return asSequence().zip(extended).map { (expr, ty) ->
             expr.inferTypeCoercibleTo(ty)

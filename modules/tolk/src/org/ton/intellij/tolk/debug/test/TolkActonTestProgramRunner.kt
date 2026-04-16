@@ -16,24 +16,20 @@ import org.jetbrains.concurrency.Promise
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandRunState
 import org.ton.intellij.acton.runconfig.PreparedActonDebugExecution
-import org.ton.intellij.tolk.debug.TolkDebugFailureRunContent
 import org.ton.intellij.tolk.debug.TolkDapSessionStarter
+import org.ton.intellij.tolk.debug.TolkDebugFailureRunContent
 import org.ton.intellij.tolk.debug.TolkRetraceDebugAdapter
 import java.net.ServerSocket
 
 class TolkActonTestProgramRunner : AsyncProgramRunner<RunnerSettings>() {
     override fun getRunnerId(): String = RUNNER_ID
 
-    override fun canRun(executorId: String, profile: RunProfile): Boolean {
-        return executorId == DefaultDebugExecutor.EXECUTOR_ID &&
+    override fun canRun(executorId: String, profile: RunProfile): Boolean =
+        executorId == DefaultDebugExecutor.EXECUTOR_ID &&
             profile is ActonCommandConfiguration &&
             profile.command == "test"
-    }
 
-    override fun execute(
-        environment: ExecutionEnvironment,
-        state: RunProfileState
-    ): Promise<RunContentDescriptor?> {
+    override fun execute(environment: ExecutionEnvironment, state: RunProfileState): Promise<RunContentDescriptor?> {
         val profile = environment.runProfile as? ActonCommandConfiguration
             ?: throw IllegalArgumentException("TolkActonTestProgramRunner can only execute ActonCommandConfiguration")
         val testState = state as? ActonCommandRunState
@@ -45,7 +41,9 @@ class TolkActonTestProgramRunner : AsyncProgramRunner<RunnerSettings>() {
             try {
                 val port = findFreePort()
                 testState.enableTestDebug(port)
-                LOG.info("Starting acton test debug session via TolkActonTestProgramRunner on port $port for '${profile.name}'")
+                LOG.info(
+                    "Starting acton test debug session via TolkActonTestProgramRunner on port $port for '${profile.name}'",
+                )
                 val preparedExecutionHolder = arrayOfNulls<PreparedActonDebugExecution>(1)
                 ApplicationManager.getApplication().invokeAndWait {
                     preparedExecutionHolder[0] = testState.prepareForDebugLaunch(environment.executor, this)
@@ -54,13 +52,13 @@ class TolkActonTestProgramRunner : AsyncProgramRunner<RunnerSettings>() {
                     "Acton test debug preparation did not return an execution result"
                 }
                 LOG.info(
-                    "Waiting for acton test DAP readiness on port ${preparedExecution.debugSession.port} before opening XDebugger session for '${profile.name}'"
+                    "Waiting for acton test DAP readiness on port ${preparedExecution.debugSession.port} before opening XDebugger session for '${profile.name}'",
                 )
                 runBlocking {
                     preparedExecution.debugSession.awaitReady()
                 }
                 LOG.info(
-                    "Acton test DAP became ready on port ${preparedExecution.debugSession.port} before session start for '${profile.name}'"
+                    "Acton test DAP became ready on port ${preparedExecution.debugSession.port} before session start for '${profile.name}'",
                 )
                 val descriptor = arrayOfNulls<RunContentDescriptor>(1)
                 ApplicationManager.getApplication().invokeAndWait {
@@ -71,7 +69,7 @@ class TolkActonTestProgramRunner : AsyncProgramRunner<RunnerSettings>() {
                         adapterId = TolkRetraceDebugAdapter,
                         request = DapStartRequest.Launch,
                         arguments = emptyMap(),
-                        logLabel = "acton test"
+                        logLabel = "acton test",
                     )
                 }
                 promise.setResult(descriptor[0])
@@ -83,7 +81,7 @@ class TolkActonTestProgramRunner : AsyncProgramRunner<RunnerSettings>() {
                             environment = environment,
                             executionResult = executionResult,
                             error = t,
-                            title = profile.name
+                            title = profile.name,
                         )
                     }
                     handled[0]

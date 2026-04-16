@@ -16,12 +16,11 @@ import org.ton.intellij.tolk.psi.impl.isTestFunction
 import org.ton.intellij.util.parentOfType
 
 class ActonTestConfigurationProducer : LazyRunConfigurationProducer<ActonCommandConfiguration>() {
-    override fun getConfigurationFactory(): ConfigurationFactory =
-        ActonCommandConfigurationType.getInstance().factory
+    override fun getConfigurationFactory(): ConfigurationFactory = ActonCommandConfigurationType.getInstance().factory
 
     override fun isConfigurationFromContext(
         configuration: ActonCommandConfiguration,
-        context: ConfigurationContext
+        context: ConfigurationContext,
     ): Boolean {
         if (configuration.command != "test") return false
         val element = context.location?.psiElement ?: return false
@@ -29,7 +28,7 @@ class ActonTestConfigurationProducer : LazyRunConfigurationProducer<ActonCommand
 
         if (element is PsiDirectory) {
             return configuration.testMode == ActonCommand.Test.TestMode.DIRECTORY &&
-                    configuration.testTarget == element.virtualFile.path
+                configuration.testTarget == element.virtualFile.path
         }
 
         val containingFile = element.containingFile as? TolkFile ?: return false
@@ -37,18 +36,18 @@ class ActonTestConfigurationProducer : LazyRunConfigurationProducer<ActonCommand
 
         if (function != null && function.isTestFunction()) {
             return configuration.testMode == ActonCommand.Test.TestMode.FUNCTION &&
-                    configuration.testTarget == containingFile.virtualFile.path &&
-                    configuration.testFunctionName == function.name
+                configuration.testTarget == containingFile.virtualFile.path &&
+                configuration.testFunctionName == function.name
         }
 
         return configuration.testMode == ActonCommand.Test.TestMode.FILE &&
-                configuration.testTarget == containingFile.virtualFile.path
+            configuration.testTarget == containingFile.virtualFile.path
     }
 
     override fun setupConfigurationFromContext(
         configuration: ActonCommandConfiguration,
         context: ConfigurationContext,
-        sourceElement: Ref<PsiElement>
+        sourceElement: Ref<PsiElement>,
     ): Boolean {
         val element = sourceElement.get() ?: return false
         val actonToml = ActonToml.find(configuration.project) ?: return false

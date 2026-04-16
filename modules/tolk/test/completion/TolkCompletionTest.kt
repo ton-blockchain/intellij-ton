@@ -1,180 +1,237 @@
 package org.ton.intellij.tolk.completion
 
 class TolkCompletionTest : TolkCompletionTestBase() {
-    fun `test local variable`() = doSingleCompletion("""
+    fun `test local variable`() = doSingleCompletion(
+        """
         fun foo(quux: int) { qu/*caret*/ }
-    """, """
+    """,
+        """
         fun foo(quux: int) { quux/*caret*/ }
-    """)
+    """,
+    )
 
-    fun `test function call zero args`() = doSingleCompletion("""
+    fun `test function call zero args`() = doSingleCompletion(
+        """
         fun foo() {}
         fun main() { fo/*caret*/ }
-    """, """
+    """,
+        """
         fun foo() {}
         fun main() { foo()/*caret*/ }
-    """)
+    """,
+    )
 
-    fun `test function call one arg`() = doSingleCompletion("""
+    fun `test function call one arg`() = doSingleCompletion(
+        """
         fun foo(x: int) {}
         fun main() { fo/*caret*/ }
-    """, """
+    """,
+        """
         fun foo(x: int) {}
         fun main() { foo(/*caret*/) }
-    """)
+    """,
+    )
 
-    fun `test function call with parens`() = doSingleCompletion("""
+    fun `test function call with parens`() = doSingleCompletion(
+        """
         fun foo() {}
         fun main() { fo/*caret*/() }
-    """, """
+    """,
+        """
         fun foo() {}
         fun main() { foo()/*caret*/ }
-    """)
+    """,
+    )
 
-    fun `test function call with parens with arg`() = doSingleCompletion("""
+    fun `test function call with parens with arg`() = doSingleCompletion(
+        """
         fun foo(x: int) {}
         fun main() { fo/*caret*/() }
-    """, """
+    """,
+        """
         fun foo(x: int) {}
         fun main() { foo(/*caret*/) }
-    """)
+    """,
+    )
 
-    fun `test function call with parens overwrite`() = doSingleCompletion("""
+    fun `test function call with parens overwrite`() = doSingleCompletion(
+        """
         fun foo(x: int) {}
         fun main() { fo/*caret*/transmog() }
-    """, """
+    """,
+        """
         fun foo(x: int) {}
         fun main() { foo(/*caret*/)transmog() }
-    """)
+    """,
+    )
 
     fun `test hidden builtin helper completion is absent`() = checkNotContainsCompletion(
         "__expect_type",
         """
             fun main() { __exp/*caret*/ }
-        """
+        """,
     )
 
-    fun `test local scope`() = checkNoCompletion("""
+    fun `test local scope`() = checkNoCompletion(
+        """
         fun main() {
             val x = spam/*caret*/;
             val spamlot = 42;
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test tuple field completion`() = checkContainsCompletion("1", """
+    fun `test tuple field completion`() = checkContainsCompletion(
+        "1",
+        """
         fun main() {
             val x = (0, 1);
             x./*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test completion after tuple field expr`() = doFirstCompletion("""
+    fun `test completion after tuple field expr`() = doFirstCompletion(
+        """
         struct S { field: int }
         fun main() {
             val x = (0, S { field: 0 });
             x.1./*caret*/
         }
-    """, """
+    """,
+        """
         struct S { field: int }
         fun main() {
             val x = (0, S { field: 0 });
             x.1.field/*caret*/
         }
-    """)
+    """,
+    )
 
-    fun `test lazy keyword`() = doSingleCompletion("""
+    fun `test lazy keyword`() = doSingleCompletion(
+        """
         fun main() { laz/*caret*/ }
-    """, """
+    """,
+        """
         fun main() { lazy /*caret*/ }
-    """)
+    """,
+    )
 
-    fun `test builtin keyword, plain function`() = doSingleCompletion("""
+    fun `test builtin keyword, plain function`() = doSingleCompletion(
+        """
         fun main() buil/*caret*/
-    """, """
+    """,
+        """
         fun main() builtin/*caret*/
-    """)
+    """,
+    )
 
-    fun `test builtin keyword, method`() = doSingleCompletion("""
+    fun `test builtin keyword, method`() = doSingleCompletion(
+        """
         fun int.foo() buil/*caret*/
-    """, """
+    """,
+        """
         fun int.foo() builtin/*caret*/
-    """)
+    """,
+    )
 
-    fun `test builtin keyword, get method`() = checkNoCompletion("""
+    fun `test builtin keyword, get method`() = checkNoCompletion(
+        """
         get fun foo() buil/*caret*/
-    """)
+    """,
+    )
 
-    fun `test do-while loop, while keyword`() = doFirstCompletion("""
+    fun `test do-while loop, while keyword`() = doFirstCompletion(
+        """
         fun foo() {
             do {
                 
             } whi/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             do {
                 
             } while /*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test val snippet`() = doFirstCompletion("""
+    fun `test val snippet`() = doFirstCompletion(
+        """
         fun foo() {
             val/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             val name = 0;/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test valt snippet`() = doFirstCompletion("""
+    fun `test valt snippet`() = doFirstCompletion(
+        """
         fun foo() {
             valt/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             val name: int = 0;/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test var snippet`() = doFirstCompletion("""
+    fun `test var snippet`() = doFirstCompletion(
+        """
         fun foo() {
             var/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             var name = 0;/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test vart snippet`() = doFirstCompletion("""
+    fun `test vart snippet`() = doFirstCompletion(
+        """
         fun foo() {
             vart/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             var name: int = 0;/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test if snippet`() = doFirstCompletion("""
+    fun `test if snippet`() = doFirstCompletion(
+        """
         fun foo() {
             if/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             if (true) {
                 /*caret*/
             }
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test ife snippet`() = doFirstCompletion("""
+    fun `test ife snippet`() = doFirstCompletion(
+        """
         fun foo() {
             ife/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             if (true) {
                 
@@ -182,61 +239,76 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 /*caret*/
             }
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test while snippet`() = doFirstCompletion("""
+    fun `test while snippet`() = doFirstCompletion(
+        """
         fun foo() {
             while/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             while (true) {
                 /*caret*/
             }
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test do snippet`() = doFirstCompletion("""
+    fun `test do snippet`() = doFirstCompletion(
+        """
         fun foo() {
             do/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             do {
                 /*caret*/
             } while (true);
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test repeat snippet`() = doFirstCompletion("""
+    fun `test repeat snippet`() = doFirstCompletion(
+        """
         fun foo() {
             repeat/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             repeat (10) {
                 /*caret*/
             }
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test try snippet`() = doFirstCompletion("""
+    fun `test try snippet`() = doFirstCompletion(
+        """
         fun foo() {
             try/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             try {
                 /*caret*/
             }
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test tryc snippet`() = doFirstCompletion("""
+    fun `test tryc snippet`() = doFirstCompletion(
+        """
         fun foo() {
             tryc/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             try {
                 
@@ -244,59 +316,75 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 /*caret*/
             }
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test match snippet`() = doFirstCompletion("""
+    fun `test match snippet`() = doFirstCompletion(
+        """
         fun foo() {
             match/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             match (true) {
                 /*caret*/
             }
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test assert snippet`() = doFirstCompletion("""
+    fun `test assert snippet`() = doFirstCompletion(
+        """
         fun foo() {
             assert/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             assert (false) throw 5;/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test throw snippet`() = doFirstCompletion("""
+    fun `test throw snippet`() = doFirstCompletion(
+        """
         fun foo() {
             throw/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             throw 5;/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test throw snippet after assert`() = doFirstCompletion("""
+    fun `test throw snippet after assert`() = doFirstCompletion(
+        """
         fun foo() {
             assert (false) throw/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             assert (false) throw 5;/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test return, void type`() = doFirstCompletion("""
+    fun `test return, void type`() = doFirstCompletion(
+        """
         fun foo() {
             return/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             return ;/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
     fun `test return, no explicit return type`() = checkEquals(
         """
@@ -309,148 +397,193 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         "return;",
     )
 
-    fun `test return, int type`() = doFirstCompletion("""
+    fun `test return, int type`() = doFirstCompletion(
+        """
         fun foo(): int {
             return/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo(): int {
             return ;/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test return, bool type`() = doFirstCompletion("""
+    fun `test return, bool type`() = doFirstCompletion(
+        """
         fun foo(): bool {
             return/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo(): bool {
             return ;/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test return, nullable type`() = doFirstCompletion("""
+    fun `test return, nullable type`() = doFirstCompletion(
+        """
         fun foo(): slice? {
             return/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo(): slice? {
             return ;/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test deprecated annotation`() = doFirstCompletion("""
+    fun `test deprecated annotation`() = doFirstCompletion(
+        """
         @de/*caret*/
         fun foo() {}
-    """, """
+    """,
+        """
         @deprecated("")/*caret*/
         fun foo() {}
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test on_bounced_policy annotation`() = doFirstCompletion("""
+    fun `test on_bounced_policy annotation`() = doFirstCompletion(
+        """
         @on_bounced_polic/*caret*/
         fun main() {}
-    """, """
+    """,
+        """
         @on_bounced_policy("manual")/*caret*/
         fun main() {}
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test no inline annotation for struct`() = checkNoCompletion("""
+    fun `test no inline annotation for struct`() = checkNoCompletion(
+        """
         @inl/*caret*/
         struct Foo {}
-    """)
+    """,
+    )
 
-    fun `test no overflow1023_policy annotation for functions`() = checkNoCompletion("""
+    fun `test no overflow1023_policy annotation for functions`() = checkNoCompletion(
+        """
         @overflow1023_po/*caret*/
         fun foo() {}
-    """)
+    """,
+    )
 
-    fun `test no on_bounced_policy annotation for non entry functions`() = checkNoCompletion("""
+    fun `test no on_bounced_policy annotation for non entry functions`() = checkNoCompletion(
+        """
         @on_bounced_poli/*caret*/
         fun foo() {}
-    """)
+    """,
+    )
 
-    fun `test no inline annotation for function with inline annotation`() = checkNoCompletion("""
+    fun `test no inline annotation for function with inline annotation`() = checkNoCompletion(
+        """
         @inline
         @inl/*caret*/
         struct Foo {}
-    """)
+    """,
+    )
 
-    fun `test postfix completion, arg`() = doFirstCompletion("""
+    fun `test postfix completion, arg`() = doFirstCompletion(
+        """
         fun foo() {
             true.arg/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             /*caret*/(true)
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test postfix completion, if`() = doFirstCompletion("""
+    fun `test postfix completion, if`() = doFirstCompletion(
+        """
         fun foo() {
             true.if/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             if (true) {
                 /*caret*/
             }
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test postfix completion, match`() = doFirstCompletion("""
+    fun `test postfix completion, match`() = doFirstCompletion(
+        """
         fun foo() {
             true.match/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             match (true) {
                 /*caret*/
             }
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test postfix completion, not`() = doFirstCompletion("""
+    fun `test postfix completion, not`() = doFirstCompletion(
+        """
         fun foo() {
             true.not/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             !true/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test postfix completion, par`() = doFirstCompletion("""
+    fun `test postfix completion, par`() = doFirstCompletion(
+        """
         fun foo() {
             true.par/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             (true)/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test postfix completion, val`() = doFirstCompletion("""
+    fun `test postfix completion, val`() = doFirstCompletion(
+        """
         fun foo() {
             true.val/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             val name/*caret*/ = true;
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test postfix completion, var`() = doFirstCompletion("""
+    fun `test postfix completion, var`() = doFirstCompletion(
+        """
         fun foo() {
             true.var/*caret*/
         }
-    """, """
+    """,
+        """
         fun foo() {
             var name/*caret*/ = true;
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test type match arm completion, else`() = doFirstCompletion("""
+    fun `test type match arm completion, else`() = doFirstCompletion(
+        """
         struct (0x7e8764ef) IncreaseCounter {
             queryId: uint64
             increaseBy: uint32
@@ -469,7 +602,8 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 /*caret*/
             }
         }
-    """, """
+    """,
+        """
         struct (0x7e8764ef) IncreaseCounter {
             queryId: uint64
             increaseBy: uint32
@@ -490,9 +624,11 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 }
             }
         }
-    """)
+    """,
+    )
 
-    fun `test type match arm completion, no completion items`() = checkNoCompletion("""
+    fun `test type match arm completion, no completion items`() = checkNoCompletion(
+        """
         struct (0x7e8764ef) IncreaseCounter {
             queryId: uint64
             increaseBy: uint32
@@ -512,9 +648,11 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 /*caret*/
             }
         }
-    """)
+    """,
+    )
 
-    fun `test type match arm completion, single item`() = doFirstCompletion("""
+    fun `test type match arm completion, single item`() = doFirstCompletion(
+        """
         struct (0x7e8764ef) IncreaseCounter {
             queryId: uint64
             increaseBy: uint32
@@ -532,7 +670,8 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 /*caret*/
             }
         }
-    """, """
+    """,
+        """
         struct (0x7e8764ef) IncreaseCounter {
             queryId: uint64
             increaseBy: uint32
@@ -552,9 +691,11 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 }
             }
         }
-    """)
+    """,
+    )
 
-    fun `test type match arm completion, fill all`() = doFirstCompletion("""
+    fun `test type match arm completion, fill all`() = doFirstCompletion(
+        """
         struct (0x7e8764ef) IncreaseCounter {
             queryId: uint64
             increaseBy: uint32
@@ -571,7 +712,8 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 /*caret*/
             }
         }
-    """, """
+    """,
+        """
         struct (0x7e8764ef) IncreaseCounter {
             queryId: uint64
             increaseBy: uint32
@@ -596,9 +738,11 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 }
             }
         }
-    """)
+    """,
+    )
 
-    fun `test value match arm completion, single item`() = doSingleCompletion("""
+    fun `test value match arm completion, single item`() = doSingleCompletion(
+        """
         const FOO = 100
 
         fun foo() {
@@ -606,7 +750,8 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 FO/*caret*/
             }
         }
-    """, """
+    """,
+        """
         const FOO = 100
 
         fun foo() {
@@ -614,9 +759,11 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 FOO/*caret*/
             }
         }
-    """)
+    """,
+    )
 
-    fun `test fill all fields completion`() = doFirstCompletion("""
+    fun `test fill all fields completion`() = doFirstCompletion(
+        """
         struct Foo {
             a: int
             b: uint32
@@ -629,7 +776,8 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 /*caret*/
             }
         }
-    """, """
+    """,
+        """
         struct Foo {
             a: int
             b: uint32
@@ -645,26 +793,38 @@ class TolkCompletionTest : TolkCompletionTestBase() {
                 d: createEmptySlice(),/*caret*/
             }
         }
-    """)
+    """,
+    )
 
-    fun `test @stdlib completion in empty import`() = doFirstCompletion("""
+    fun `test @stdlib completion in empty import`() = doFirstCompletion(
+        """
         import "/*caret*/"
-    """, """
+    """,
+        """
         import "@stdlib//*caret*/"
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test @stdlib completion in non-empty import`() = checkNotContainsCompletion("@stdlib", """
+    fun `test @stdlib completion in non-empty import`() = checkNotContainsCompletion(
+        "@stdlib",
+        """
         import "@stdlib//*caret*/"
-    """)
+    """,
+    )
 
-    fun `test @stdlib completion in non-empty import2`() = checkNotContainsCompletion("@stdlib", """
+    fun `test @stdlib completion in non-empty import2`() = checkNotContainsCompletion(
+        "@stdlib",
+        """
         import "foo/*caret*/"
-    """)
+    """,
+    )
 
-    fun `test storage snippet completion`() = doFirstCompletion("""
+    fun `test storage snippet completion`() = doFirstCompletion(
+        """
 
         storage/*caret*/
-    """, """
+    """,
+        """
         struct Storage {
             /*caret*/
         }
@@ -676,159 +836,208 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         fun Storage.save(self) {
             contract.setData(self.toCell());
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test no storage snippet completion in block`() = checkNotContainsCompletion("storage", """"
+    fun `test no storage snippet completion in block`() = checkNotContainsCompletion(
+        "storage",
+        """"
         fun foo() {
             storage/*caret*/
         }
-    """)
+    """,
+    )
 
-    fun `test no storage snippet completion after fun`() = checkNotContainsCompletion("storage", """"
+    fun `test no storage snippet completion after fun`() = checkNotContainsCompletion(
+        "storage",
+        """"
         fun storage/*caret*/
-    """)
+    """,
+    )
 
-    fun `test onInternalMessage completion after fun keyword`() = doFirstCompletion("""
+    fun `test onInternalMessage completion after fun keyword`() = doFirstCompletion(
+        """
         fun onInternal/*caret*/
-    """, """
+    """,
+        """
         fun onInternalMessage(in: InMessage) {
             /*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test onExternalMessage completion after fun keyword`() = doFirstCompletion("""
+    fun `test onExternalMessage completion after fun keyword`() = doFirstCompletion(
+        """
         fun onExternal/*caret*/
-    """, """
+    """,
+        """
         fun onExternalMessage(inMsg: slice) {
             /*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test onInternalMessage completion after fun keyword with full declaration`() = doFirstCompletion("""
+    fun `test onInternalMessage completion after fun keyword with full declaration`() = doFirstCompletion(
+        """
         fun onInternal/*caret*/(in: InMessage) {
         }
-    """, """
+    """,
+        """
         fun onInternalMessage/*caret*/(in: InMessage) {
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test no onInternalMessage completion in file with onInternalMessage`() = checkNotContainsCompletion("onInternalMessage", """"
+    fun `test no onInternalMessage completion in file with onInternalMessage`() = checkNotContainsCompletion(
+        "onInternalMessage",
+        """"
         fun onInternalMessage(in: InMessage) {}        
 
         fun /*caret*/
-    """)
+    """,
+    )
 
-    fun `test packToBuilder completion`() = doFirstCompletion("""
+    fun `test packToBuilder completion`() = doFirstCompletion(
+        """
         type SnakeString = slice
         
         fun SnakeString.packT/*caret*/
-    """, """
+    """,
+        """
         type SnakeString = slice
 
         fun SnakeString.packToBuilder(self, mutate b: builder) {
             /*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test unpackFromSlice completion`() = doFirstCompletion("""
+    fun `test unpackFromSlice completion`() = doFirstCompletion(
+        """
         type SnakeString = slice
 
         fun SnakeString.unpack/*caret*/
-    """, """
+    """,
+        """
         type SnakeString = slice
 
         fun SnakeString.unpackFromSlice(mutate s: slice) {
             /*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test unpackFromSlice completion with full declaration`() = doFirstCompletion("""
+    fun `test unpackFromSlice completion with full declaration`() = doFirstCompletion(
+        """
         type SnakeString = slice
 
         fun SnakeString.pack/*caret*/(self, mutate b: builder) {}
-    """, """
+    """,
+        """
         type SnakeString = slice
 
         fun SnakeString.packToBuilder/*caret*/(self, mutate b: builder) {}
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test no unpackFromSlice completion for non alias type`() = checkNotContainsCompletion("unpackFromSlice", """
+    fun `test no unpackFromSlice completion for non alias type`() = checkNotContainsCompletion(
+        "unpackFromSlice",
+        """
         struct Foo {}
 
         fun Foo.pack/*caret*/(self, mutate b: builder) {}
-    """)
+    """,
+    )
 
-    fun `test no unpackFromSlice completion for builtin alias type`() = checkNotContainsCompletion("unpackFromSlice", """
+    fun `test no unpackFromSlice completion for builtin alias type`() = checkNotContainsCompletion(
+        "unpackFromSlice",
+        """
         fun int.pack/*caret*/(self, mutate b: builder) {}
-    """)
+    """,
+    )
 
-    fun `test backticked constant`() = doFirstCompletion("""
+    fun `test backticked constant`() = doFirstCompletion(
+        """
         const `aaaaaa` = 10
 
         fun main() {
             aaaaaa/*caret*/
         }
-    """, """
+    """,
+        """
         const `aaaaaa` = 10
 
         fun main() {
             `aaaaaa`/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test backticked global variable`() = doFirstCompletion("""
+    fun `test backticked global variable`() = doFirstCompletion(
+        """
         global `aaaaaa`: int
 
         fun main() {
             aaaaaa/*caret*/
         }
-    """, """
+    """,
+        """
         global `aaaaaa`: int
 
         fun main() {
             `aaaaaa`/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test backticked type alias`() = doFirstCompletion("""
+    fun `test backticked type alias`() = doFirstCompletion(
+        """
         type `aaaaaa` = int
 
         fun main() {
             val a: aaaaaa/*caret*/
         }
-    """, """
+    """,
+        """
         type `aaaaaa` = int
 
         fun main() {
             val a: `aaaaaa`/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test backticked function`() = doFirstCompletion("""
+    fun `test backticked function`() = doFirstCompletion(
+        """
         fun `aaaaaa`() {}
 
         fun main() {
             aaaaaa/*caret*/
         }
-    """, """
+    """,
+        """
         fun `aaaaaa`() {}
 
         fun main() {
             `aaaaaa`()/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test backticked variable`() = doFirstCompletion("""
+    fun `test backticked variable`() = doFirstCompletion(
+        """
         fun main() {
             val `aaaaaa` = 10;
             aaaaaa/*caret*/
         }
-    """, """
+    """,
+        """
         fun main() {
             val `aaaaaa` = 10;
             `aaaaaa`/*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
     fun `test enum serialization type`() = checkContainsCompletion(
         "uint8",
@@ -839,39 +1048,48 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         """,
     )
 
-    fun `test method snippet`() = doFirstCompletion("""
+    fun `test method snippet`() = doFirstCompletion(
+        """
         struct Name {}
 
         method/*caret*/
-    """, """
+    """,
+        """
         struct Name {}
         
         fun Name.name(self) {
             /*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test static method snippet`() = doFirstCompletion("""
+    fun `test static method snippet`() = doFirstCompletion(
+        """
         type A = int
 
         static/*caret*/
-    """, """
+    """,
+        """
         type A = int
         
         fun A.name() {
             /*caret*/
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test enum type completion`() = doFirstCompletion("""
+    fun `test enum type completion`() = doFirstCompletion(
+        """
         enum Color {}
 
         fun foo(): /*caret*/ {}
-    """, """
+    """,
+        """
         enum Color {}
 
         fun foo(): Color/*caret*/ {}
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
 //    fun `test caret navigation in self method`() = doSingleCompletion("""
 //        struct Foo;

@@ -26,7 +26,7 @@ object TolkTypesCompletionProvider : TlbCompletionProvider() {
         file.resultTypes().forEach { type ->
             result.addElement(
                 LookupElementBuilder.create(type)
-                    .withIcon(TlbIcons.TYPE)
+                    .withIcon(TlbIcons.TYPE),
             )
         }
     }

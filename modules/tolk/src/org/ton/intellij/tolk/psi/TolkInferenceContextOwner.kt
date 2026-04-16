@@ -41,10 +41,14 @@ fun <T> TolkInferenceContextOwner.createCachedResult(value: T): CachedValueProvi
     }
     else -> {
         val structureModificationTracker = project.tolkPsiManager.tolkStructureModificationCount
-        val modificationTracker = PsiTreeUtil.getContextOfType(this, TolkModificationTrackerOwner::class.java, false)?.modificationTracker
+        val modificationTracker = PsiTreeUtil.getContextOfType(
+            this,
+            TolkModificationTrackerOwner::class.java,
+            false,
+        )?.modificationTracker
         CachedValueProvider.Result.create(
             value,
-            listOfNotNull(structureModificationTracker, modificationTracker)
+            listOfNotNull(structureModificationTracker, modificationTracker),
         )
     }
 }

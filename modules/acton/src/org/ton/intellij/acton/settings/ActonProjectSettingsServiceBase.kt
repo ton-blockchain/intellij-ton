@@ -1,20 +1,17 @@
 package org.ton.intellij.acton.settings
 
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
-import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.components.SimplePersistentStateComponent
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Disposer
 import com.intellij.util.messages.Topic
-import org.jetbrains.annotations.TestOnly
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 
 abstract class ActonProjectSettingsServiceBase<T : ActonProjectSettingsServiceBase.ActonProjectSettingsBase<T>>(
     val project: Project,
-    state: T
+    state: T,
 ) : SimplePersistentStateComponent<T>(state) {
 
     abstract class ActonProjectSettingsBase<T : ActonProjectSettingsBase<T>> : BaseState() {
@@ -36,7 +33,7 @@ abstract class ActonProjectSettingsServiceBase<T : ActonProjectSettingsServiceBa
         val ACTON_SETTINGS_TOPIC: Topic<ActonSettingsListener> = Topic.create(
             "acton settings changes",
             ActonSettingsListener::class.java,
-            Topic.BroadcastDirection.TO_PARENT
+            Topic.BroadcastDirection.TO_PARENT,
         )
     }
 

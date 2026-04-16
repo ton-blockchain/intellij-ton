@@ -17,7 +17,7 @@ abstract class TolkStringArgumentCompletionProvider : TolkCompletionProvider() {
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         val stringLiteral = PsiTreeUtil.getParentOfType(parameters.position, TolkStringLiteral::class.java) ?: return
         val literalExpression = stringLiteral.parent as? TolkLiteralExpression ?: return
@@ -62,6 +62,6 @@ abstract class TolkStringArgumentCompletionProvider : TolkCompletionProvider() {
         result: CompletionResultSet,
         functionName: String,
         qualifierName: String?,
-        argumentIndex: Int
+        argumentIndex: Int,
     )
 }

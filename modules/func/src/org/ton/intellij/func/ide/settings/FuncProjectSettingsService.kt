@@ -11,13 +11,13 @@ private const val SERVICE_NAME: String = "FuncProjectSettings"
 
 @Service(Service.Level.PROJECT)
 @State(
-    name = SERVICE_NAME, storages = [
-        Storage(StoragePathMacros.WORKSPACE_FILE)
-    ]
+    name = SERVICE_NAME,
+    storages = [
+        Storage(StoragePathMacros.WORKSPACE_FILE),
+    ],
 )
-class FuncProjectSettingsService(
-    val project: Project
-) : SimplePersistentStateComponent<FuncProjectSettings>(FuncProjectSettings())
+class FuncProjectSettingsService(val project: Project) :
+    SimplePersistentStateComponent<FuncProjectSettings>(FuncProjectSettings())
 
 class FuncProjectSettings : BaseState() {
     var languageLevel by enum(FuncLanguageLevel.FUNC_0_4_0)

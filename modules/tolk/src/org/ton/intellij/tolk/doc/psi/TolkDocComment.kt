@@ -7,7 +7,9 @@ import com.intellij.psi.impl.source.tree.injected.InjectionBackgroundSuppressor
 import org.ton.intellij.tolk.psi.TolkDocOwner
 import org.ton.intellij.tolk.psi.TolkElement
 
-interface TolkDocComment : PsiDocCommentBase, TolkElement {
+interface TolkDocComment :
+    PsiDocCommentBase,
+    TolkElement {
     override fun getOwner(): TolkDocOwner?
 
     val codeFences: List<TolkDocCodeFence>
@@ -24,7 +26,10 @@ interface TolkDocElement : TolkElement {
 /**
  * A [markdown code fence](https://spec.commonmark.org/0.29/#fenced-code-blocks).
  */
-interface TolkDocCodeFence : TolkDocElement, PsiLanguageInjectionHost, InjectionBackgroundSuppressor {
+interface TolkDocCodeFence :
+    TolkDocElement,
+    PsiLanguageInjectionHost,
+    InjectionBackgroundSuppressor {
     val start: TolkDocCodeFenceStartEnd
     val lang: TolkDocCodeFenceLang?
     val end: TolkDocCodeFenceStartEnd?

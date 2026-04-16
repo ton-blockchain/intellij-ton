@@ -20,5 +20,6 @@ class TlbConfigureGlobalBlockTlbFix : LocalQuickFix {
 
     override fun availableInBatchMode(): Boolean = false
     override fun startInWriteAction(): Boolean = false
-    override fun generatePreview(project: Project, previewDescriptor: ProblemDescriptor): IntentionPreviewInfo = IntentionPreviewInfo.EMPTY
+    override fun generatePreview(project: Project, previewDescriptor: ProblemDescriptor): IntentionPreviewInfo =
+        IntentionPreviewInfo.EMPTY
 }

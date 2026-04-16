@@ -17,10 +17,7 @@ class TolkConsoleFilterProvider : ConsoleFilterProviderEx {
     override fun getDefaultFilters(project: Project): Array<out Filter?> =
         getDefaultFilters(project, GlobalSearchScope.allScope(project))
 
-    override fun getDefaultFilters(
-        project: Project,
-        scope: GlobalSearchScope,
-    ): Array<out Filter?> =
+    override fun getDefaultFilters(project: Project, scope: GlobalSearchScope): Array<out Filter?> =
         arrayOf(TolkConsoleFilter(project, scope))
 }
 
@@ -45,7 +42,7 @@ class TolkConsoleFilter(val project: Project, val scope: GlobalSearchScope) : Fi
             offset + pathStart,
             offset + columnEnd + 1,
             TolkFileHyperlinkInfo(fullPath, lineNumber, column),
-            attrs
+            attrs,
         )
     }
 

@@ -10,9 +10,9 @@ import org.ton.intellij.tolk.doc.psi.TolkDocCodeFence
 import org.ton.intellij.tolk.doc.psi.TolkDocComment
 import org.ton.intellij.tolk.psi.TolkDocOwner
 
-class TolkDocCommentImpl(
-    type: IElementType, text: CharSequence?,
-) : LazyParseablePsiElement(type, text), TolkDocComment {
+class TolkDocCommentImpl(type: IElementType, text: CharSequence?) :
+    LazyParseablePsiElement(type, text),
+    TolkDocComment {
 
     override fun getTokenType(): IElementType = elementType
 
@@ -28,5 +28,4 @@ class TolkDocCommentImpl(
 
     override val codeFences: List<TolkDocCodeFence>
         get() = PsiTreeUtil.getChildrenOfTypeAsList(this, TolkDocCodeFence::class.java)
-
 }

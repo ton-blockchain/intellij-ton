@@ -10,7 +10,9 @@ import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.util.childOfType
 import javax.swing.Icon
 
-abstract class TolkGlobalVarMixin : TolkNamedElementImpl<TolkGlobalVarStub>, TolkGlobalVar {
+abstract class TolkGlobalVarMixin :
+    TolkNamedElementImpl<TolkGlobalVarStub>,
+    TolkGlobalVar {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TolkGlobalVarStub, stubType: IStubElementType<*, *>) : super(stub, stubType)

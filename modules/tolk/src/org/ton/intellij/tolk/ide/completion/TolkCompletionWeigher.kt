@@ -26,22 +26,17 @@ interface TolkCompletionWeigher {
     }
 }
 
-private fun preferTrue(
-    property: (P) -> Boolean,
-    id: String
-): TolkCompletionWeigher = object : TolkCompletionWeigher {
+private fun preferTrue(property: (P) -> Boolean, id: String): TolkCompletionWeigher = object : TolkCompletionWeigher {
     override fun weigh(element: LookupElement): Boolean =
         if (element is TolkLookupElement) !property(element.data) else true
 
     override val id: String get() = id
 }
 
-private fun preferUpperVariant(
-    property: (P) -> Enum<*>,
-    id: String
-): TolkCompletionWeigher = object : TolkCompletionWeigher {
-    override fun weigh(element: LookupElement): Int =
-        if (element is TolkLookupElement) property(element.data).ordinal else Int.MAX_VALUE
+private fun preferUpperVariant(property: (P) -> Enum<*>, id: String): TolkCompletionWeigher =
+    object : TolkCompletionWeigher {
+        override fun weigh(element: LookupElement): Int =
+            if (element is TolkLookupElement) property(element.data).ordinal else Int.MAX_VALUE
 
-    override val id: String get() = id
-}
+        override val id: String get() = id
+    }

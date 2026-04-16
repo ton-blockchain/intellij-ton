@@ -6,14 +6,12 @@ import com.intellij.dev.psiViewer.properties.tree.nodes.psiViewerApiClassesExten
 import com.intellij.dev.psiViewer.properties.tree.nodes.psiViewerPsiTypeAttributes
 import org.ton.intellij.tolk.type.TolkTy
 
-class PsiViewerTolkTypeNode(
-    private val type: TolkTy,
-    private val nodeContext: PsiViewerPropertyNode.Context
-) : PsiViewerPropertyNode {
+class PsiViewerTolkTypeNode(private val type: TolkTy, private val nodeContext: PsiViewerPropertyNode.Context) :
+    PsiViewerPropertyNode {
     class Factory : PsiViewerPropertyNode.Factory {
         override suspend fun createNode(
             nodeContext: PsiViewerPropertyNode.Context,
-            returnedValue: Any
+            returnedValue: Any,
         ): PsiViewerPropertyNode? {
             val type = returnedValue as? TolkTy ?: return null
             return PsiViewerTolkTypeNode(type, nodeContext)

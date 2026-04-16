@@ -18,10 +18,11 @@ object TolkRetraceLauncher {
         transactionHash: String,
         network: String = "",
         contractId: String? = null,
-        workingDirectory: Path? = null
+        workingDirectory: Path? = null,
     ): Boolean {
         val actonToml = ActonToml.find(project)
-        val resolvedWorkingDirectory = workingDirectory ?: actonToml?.workingDir ?: project.guessProjectDir()?.toNioPath()
+        val resolvedWorkingDirectory =
+            workingDirectory ?: actonToml?.workingDir ?: project.guessProjectDir()?.toNioPath()
         if (resolvedWorkingDirectory == null) {
             Messages.showErrorDialog(project, "Cannot determine Acton working directory", "Tolk Retrace")
             return false
@@ -30,7 +31,7 @@ object TolkRetraceLauncher {
         val runManager = RunManager.getInstance(project)
         val settings = runManager.createConfiguration(
             "Retrace ${transactionHash.take(12)}",
-            ActonCommandConfigurationType.getInstance().factory
+            ActonCommandConfigurationType.getInstance().factory,
         )
         val configuration = settings.configuration as ActonCommandConfiguration
         configuration.command = "retrace"
@@ -57,7 +58,7 @@ object TolkRetraceLauncher {
                 "Tolk Retrace",
                 null,
                 contractIds.toTypedArray(),
-                contractIds.first()
+                contractIds.first(),
             )
             return contractIds.getOrNull(selectedIndex)
         }
@@ -72,7 +73,7 @@ object TolkRetraceLauncher {
                 override fun checkInput(inputString: String?): Boolean = !inputString.isNullOrBlank()
 
                 override fun canClose(inputString: String?): Boolean = checkInput(inputString)
-            }
+            },
         )?.trim()
     }
 

@@ -11,7 +11,9 @@ import org.ton.intellij.tolk.type.inference
 import org.ton.intellij.util.childOfType
 import javax.swing.Icon
 
-abstract class TolkConstVarMixin : TolkNamedElementImpl<TolkConstVarStub>, TolkConstVar {
+abstract class TolkConstVarMixin :
+    TolkNamedElementImpl<TolkConstVarStub>,
+    TolkConstVar {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TolkConstVarStub, stubType: IStubElementType<*, *>) : super(stub, stubType)

@@ -32,7 +32,10 @@ class TolkMethodIdHintsProvider : InlayHintsProvider {
                 sink.addPresentation(
                     InlineInlayPosition(anchor.textRange.endOffset, true),
                     listOf(),
-                    null, HintFormat.default.withColorKind(HintColorKind.Parameter).withHorizontalMargin(HintMarginPadding.OnlyPadding)
+                    null,
+                    HintFormat.default.withColorKind(
+                        HintColorKind.Parameter,
+                    ).withHorizontalMargin(HintMarginPadding.OnlyPadding),
                 ) {
                     text("(")
                     text(id)

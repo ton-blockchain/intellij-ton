@@ -11,9 +11,8 @@ import org.ton.intellij.func.psi.impl.FuncGlobalVarImpl
 import org.ton.intellij.func.stub.FuncGlobalVarStub
 import org.ton.intellij.func.stub.index.FuncNamedElementIndex
 
-class FuncGlobalVarStubElementType(
-    debugName: String,
-) : FuncNamedStubElementType<FuncGlobalVarStub, FuncGlobalVar>(debugName) {
+class FuncGlobalVarStubElementType(debugName: String) :
+    FuncNamedStubElementType<FuncGlobalVarStub, FuncGlobalVar>(debugName) {
     override fun serialize(stub: FuncGlobalVarStub, dataStream: StubOutputStream) {
         dataStream.writeName(stub.name)
     }
@@ -23,16 +22,10 @@ class FuncGlobalVarStubElementType(
         return FuncGlobalVarStub(parentStub, this, name)
     }
 
-    override fun createStub(
-        psi: FuncGlobalVar,
-        parentStub: StubElement<out PsiElement>,
-    ): FuncGlobalVarStub {
-        return FuncGlobalVarStub(parentStub, this, psi.name)
-    }
+    override fun createStub(psi: FuncGlobalVar, parentStub: StubElement<out PsiElement>): FuncGlobalVarStub =
+        FuncGlobalVarStub(parentStub, this, psi.name)
 
-    override fun createPsi(stub: FuncGlobalVarStub): FuncGlobalVar {
-        return FuncGlobalVarImpl(stub, this)
-    }
+    override fun createPsi(stub: FuncGlobalVarStub): FuncGlobalVar = FuncGlobalVarImpl(stub, this)
 
     override fun indexStub(stub: FuncGlobalVarStub, sink: IndexSink) {
         val name = stub.name ?: return

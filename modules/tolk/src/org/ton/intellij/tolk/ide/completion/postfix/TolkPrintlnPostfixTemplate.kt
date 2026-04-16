@@ -13,10 +13,13 @@ import org.ton.intellij.tolk.psi.TolkExpressionStatement
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 
-class TolkPrintlnPostfixTemplate : PostfixTemplate(
-    "tolk.postfix.println", "println",
-    "println(expr);", null
-) {
+class TolkPrintlnPostfixTemplate :
+    PostfixTemplate(
+        "tolk.postfix.println",
+        "println",
+        "println(expr);",
+        null,
+    ) {
     override fun isApplicable(context: PsiElement, copyDocument: Document, newOffset: Int): Boolean {
         val file = context.containingFile.originalFile as? TolkFile ?: return false
         if (!file.isTestFile() && !file.isInScriptsFolder()) return false

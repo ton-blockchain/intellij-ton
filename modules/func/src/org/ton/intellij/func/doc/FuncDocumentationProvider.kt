@@ -46,9 +46,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
         psiManager: PsiManager?,
         link: String?,
         context: PsiElement?,
-    ): PsiElement? {
-        return resolve(link, context)
-    }
+    ): PsiElement? = resolve(link, context)
 
     override fun collectDocComments(file: PsiFile, sink: Consumer<in PsiDocCommentBase>) {
         if (file !is FuncFile) return
@@ -59,36 +57,26 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
         }
     }
 
-    override fun generateRenderedDoc(comment: PsiDocCommentBase): String? {
-        return (comment as? FuncDocComment)?.renderHtml()
-    }
+    override fun generateRenderedDoc(comment: PsiDocCommentBase): String? = (comment as? FuncDocComment)?.renderHtml()
 
-    private fun getComments(element: PsiElement?): PsiComment? {
-        return (element as? FuncFunction)?.firstChild as? PsiComment
-    }
+    private fun getComments(element: PsiElement?): PsiComment? = (element as? FuncFunction)?.firstChild as? PsiComment
 
-    private fun getCommentText(comment: PsiComment): String {
-        return (comment as? FuncDocComment)?.renderHtml()
-            ?: MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;", FuncDocMarkdownFlavourDescriptor())
-    }
+    private fun getCommentText(comment: PsiComment): String = (comment as? FuncDocComment)?.renderHtml()
+        ?: MarkdownDocAstBuilder.renderHtml(comment.node.chars, ";;;", FuncDocMarkdownFlavourDescriptor())
 
-    fun renderElement(element: PsiElement?, context: PsiElement?): String? {
-        return when (element) {
-            null -> null
-            is FuncFunction -> buildString {
-                renderFunction(element)
-            }
-            is FuncFunctionParameter -> buildString {
-                renderFunctionParameter(element)
-            }
-
-            else -> null
+    fun renderElement(element: PsiElement?, context: PsiElement?): String? = when (element) {
+        null -> null
+        is FuncFunction -> buildString {
+            renderFunction(element)
         }
+        is FuncFunctionParameter -> buildString {
+            renderFunctionParameter(element)
+        }
+
+        else -> null
     }
 
-    fun StringBuilder.renderFunction(
-        function: FuncFunction,
-    ) {
+    fun StringBuilder.renderFunction(function: FuncFunction) {
         val typeParameterList = function.typeParameterList
         if (typeParameterList.isNotEmpty()) {
             appendStyledSpan(FuncColor.KEYWORD.attributes, "forall")
@@ -139,9 +127,7 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
         appendStyledSpan(FuncColor.STRING.attributes, literals.firstOrNull()?.text)
     }
 
-    private fun StringBuilder.renderFunctionParameter(
-        param: FuncFunctionParameter,
-    ) {
+    private fun StringBuilder.renderFunctionParameter(param: FuncFunctionParameter) {
         val type = param.typeReference
         if (type != null) {
             renderType(type)
@@ -155,15 +141,11 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
         }
     }
 
-    private fun StringBuilder.renderTypeParameter(
-        typeParameter: FuncTypeParameter,
-    ) {
+    private fun StringBuilder.renderTypeParameter(typeParameter: FuncTypeParameter) {
         appendStyledSpan(FuncColor.TYPE_PARAMETER.attributes, typeParameter.name)
     }
 
-    private fun StringBuilder.renderType(
-        type: FuncTypeReference,
-    ) {
+    private fun StringBuilder.renderType(type: FuncTypeReference) {
         when (type) {
             is FuncTypeIdentifier ->
                 appendStyledSpan(FuncColor.TYPE_PARAMETER.attributes, type.identifier.text)
@@ -179,7 +161,6 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
                     }
                 }
                 appendStyledSpan(FuncColor.BRACKETS.attributes, "]")
-
             }
 
             is FuncTensorType -> {
@@ -256,9 +237,6 @@ class FuncDocumentationProvider : AbstractDocumentationProvider() {
 
 private const val NBSP = "&nbsp;"
 
-private fun StringBuilder.appendStyledSpan(
-    attributes: TextAttributes,
-    value: String?,
-) {
+private fun StringBuilder.appendStyledSpan(attributes: TextAttributes, value: String?) {
     HtmlSyntaxInfoUtil.appendStyledSpan(this, attributes, value, 1.0f)
 }

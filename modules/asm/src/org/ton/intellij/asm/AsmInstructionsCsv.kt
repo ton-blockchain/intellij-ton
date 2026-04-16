@@ -12,7 +12,7 @@ object AsmInstructionsCsv {
             split[5],
             split[6],
             split[7],
-            split[8]
+            split[8],
         )
     }
 
@@ -25,7 +25,7 @@ object AsmInstructionsCsv {
         val docFift: String,
         val docStack: String,
         val docGas: String,
-        val docDescription: String
+        val docDescription: String,
     )
 }
 

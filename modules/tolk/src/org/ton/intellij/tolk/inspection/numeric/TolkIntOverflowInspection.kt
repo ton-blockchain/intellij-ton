@@ -14,17 +14,12 @@ import org.ton.intellij.util.exception.ConstantEvaluationOverflowException
 private val HAS_OVERFLOW_IN_CHILD = Key.create<Unit>("HAS_OVERFLOW_IN_CHILD")
 
 class TolkIntOverflowInspection : TolkInspectionBase() {
-    override fun getGroupDisplayName(): String {
-        return InspectionBundle.message("group.numeric.name")
-    }
+    override fun getGroupDisplayName(): String = InspectionBundle.message("group.numeric.name")
 
-    override fun getDisplayName(): String {
-        return InspectionBundle.message("inspection.numeric.integer_overflow.name")
-    }
+    override fun getDisplayName(): String = InspectionBundle.message("inspection.numeric.integer_overflow.name")
 
-    override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor {
-        return IntOverflowInspectionVisitor(holder)
-    }
+    override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor =
+        IntOverflowInspectionVisitor(holder)
 
     private inner class IntOverflowInspectionVisitor(val holder: ProblemsHolder) : TolkVisitor() {
         override fun visitExpression(o: TolkExpression) {

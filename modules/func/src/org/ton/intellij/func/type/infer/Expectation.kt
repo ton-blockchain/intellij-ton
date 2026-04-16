@@ -9,7 +9,6 @@ import org.ton.intellij.func.type.ty.FuncTyUnknown
  */
 sealed class Expectation {
 
-
     /** We know nothing about what type this expression should have */
     object NoExpectation : Expectation()
 
@@ -24,9 +23,8 @@ sealed class Expectation {
     }
 }
 
-fun FuncTy?.maybeHasType(): Expectation =
-    if (this == null || this is FuncTyUnknown) {
-        Expectation.NoExpectation
-    } else {
-        Expectation.ExpectHasTy(this)
-    }
+fun FuncTy?.maybeHasType(): Expectation = if (this == null || this is FuncTyUnknown) {
+    Expectation.NoExpectation
+} else {
+    Expectation.ExpectHasTy(this)
+}

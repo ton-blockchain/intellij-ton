@@ -3,16 +3,14 @@ package org.ton.intellij.tlb
 import kotlin.math.max
 import kotlin.math.min
 
-class TlbSize private constructor(
-    val value: Long
-) {
+class TlbSize private constructor(val value: Long) {
     constructor(
         minRefs: Int,
         minBits: Int,
         maxRefs: Int,
-        maxBits: Int
+        maxBits: Int,
     ) : this(
-        ((minBits.toLong() * 0x100 + minRefs.toLong()) shl 32) + (maxBits.toLong() * 0x100 + maxRefs.toLong())
+        ((minBits.toLong() * 0x100 + minRefs.toLong()) shl 32) + (maxBits.toLong() * 0x100 + maxRefs.toLong()),
     )
 
     val minSize: Int get() = (value ushr 32).toInt()
@@ -26,42 +24,32 @@ class TlbSize private constructor(
 
     val isFixed: Boolean get() = minSize == maxSize
 
-    fun fitsIntoCell(): Boolean =
-        isPossible(MAX_SIZE_CELL, minSize)
+    fun fitsIntoCell(): Boolean = isPossible(MAX_SIZE_CELL, minSize)
 
-    fun isPossible(): Boolean =
-        isPossible(maxSize, minSize)
+    fun isPossible(): Boolean = isPossible(maxSize, minSize)
 
-    fun normalize(): TlbSize {
-        return TlbSize(normalize(value))
-    }
+    fun normalize(): TlbSize = TlbSize(normalize(value))
 
     fun withoutMin(): TlbSize = TlbSize(value and ((1L shl 32) - 1))
 
-    operator fun plus(other: TlbSize): TlbSize {
-        return TlbSize(normalize(value + other.value))
-    }
+    operator fun plus(other: TlbSize): TlbSize = TlbSize(normalize(value + other.value))
 
-    infix fun or(other: TlbSize): TlbSize {
-        return TlbSize(
-            minRefs = min(minRefs, other.minRefs),
-            minBits = min(minBits, other.minBits),
-            maxRefs = max(maxRefs, other.maxRefs),
-            maxBits = max(maxBits, other.maxBits)
+    infix fun or(other: TlbSize): TlbSize = TlbSize(
+        minRefs = min(minRefs, other.minRefs),
+        minBits = min(minBits, other.minBits),
+        maxRefs = max(maxRefs, other.maxRefs),
+        maxBits = max(maxBits, other.maxBits),
+    )
+
+    operator fun times(count: Int): TlbSize = when (count) {
+        0 -> TlbSize(0)
+        1 -> this
+        else -> TlbSize(
+            min(minRefs * count, MAX_REFS_MASK.toInt()),
+            min(minBits * count, BITS_MASK.toInt()),
+            min(maxRefs * count, MAX_REFS_MASK.toInt()),
+            min(maxBits * count, BITS_MASK.toInt()),
         )
-    }
-
-    operator fun times(count: Int): TlbSize {
-        return when (count) {
-            0 -> TlbSize(0)
-            1 -> this
-            else -> TlbSize(
-                min(minRefs * count, MAX_REFS_MASK.toInt()),
-                min(minBits * count, BITS_MASK.toInt()),
-                min(maxRefs * count, MAX_REFS_MASK.toInt()),
-                min(maxBits * count, BITS_MASK.toInt())
-            )
-        }
     }
 
     fun timesAtLeast(count: Int): TlbSize {
@@ -70,7 +58,7 @@ class TlbSize private constructor(
             minRefs = min(minRefs * clampedCount, MAX_REFS_MASK.toInt()),
             minBits = min(minBits * clampedCount, BITS_MASK.toInt()),
             maxRefs = if (maxRefs != 0) MAX_REFS_MASK.toInt() else 0,
-            maxBits = if (maxBits != 0) BITS_MASK.toInt() else 0
+            maxBits = if (maxBits != 0) BITS_MASK.toInt() else 0,
         )
     }
 
@@ -119,10 +107,7 @@ class TlbSize private constructor(
 
         fun convertSize(z: Int): Int = ((z and 0xFF) shl 16) or (z ushr 8)
 
-        private fun isPossible(
-            maxSize: Int,
-            minSize: Int
-        ): Boolean = (maxSize - minSize).toLong() and 0x80000080 == 0L
+        private fun isPossible(maxSize: Int, minSize: Int): Boolean = (maxSize - minSize).toLong() and 0x80000080 == 0L
 
         private fun normalize(value: Long): Long {
             var v = value
@@ -142,7 +127,6 @@ class TlbSize private constructor(
 
         fun fixedSize(size: Int): TlbSize = TlbSize(size.toLong() * 0x10000000100)
 
-        fun range(minSize: Int, maxSize: Int): TlbSize =
-            TlbSize(((minSize.toLong() shl 32) + maxSize) shl 8)
+        fun range(minSize: Int, maxSize: Int): TlbSize = TlbSize(((minSize.toLong() shl 32) + maxSize) shl 8)
     }
 }

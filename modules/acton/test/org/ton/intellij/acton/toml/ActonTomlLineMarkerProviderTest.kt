@@ -11,7 +11,7 @@ class ActonTomlLineMarkerProviderTest : BasePlatformTestCase() {
             """
                 [lin<caret>t]
                 output-format = "sarif"
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val actionTexts = info.actions.mapNotNull { it.templateText }
@@ -23,7 +23,7 @@ class ActonTomlLineMarkerProviderTest : BasePlatformTestCase() {
             """
                 [fm<caret>t]
                 width = 100
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val actionTexts = info.actions.mapNotNull { it.templateText }
@@ -35,7 +35,7 @@ class ActonTomlLineMarkerProviderTest : BasePlatformTestCase() {
             """
                 [tes<caret>t]
                 fail-fast = true
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val actionTexts = info.actions.mapNotNull { it.templateText }

@@ -9,11 +9,12 @@ import org.ton.intellij.fift.psi.FiftWordDefStatement
 class FiftAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
         when (element) {
-            is FiftWordDefStatement -> holder
-                .newSilentAnnotation(HighlightSeverity.INFORMATION)
-                .range(element.wordDef)
-                .textAttributes(FiftColor.WORD_DECLARATION.textAttributesKey)
-                .create()
+            is FiftWordDefStatement ->
+                holder
+                    .newSilentAnnotation(HighlightSeverity.INFORMATION)
+                    .range(element.wordDef)
+                    .textAttributes(FiftColor.WORD_DECLARATION.textAttributesKey)
+                    .create()
         }
     }
 }

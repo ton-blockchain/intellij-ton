@@ -11,9 +11,7 @@ import org.ton.intellij.func.psi.FuncLiteralExpression
 import org.ton.intellij.util.exception.ConstantEvaluationOverflowException
 
 class FuncConstantHintsProvider : InlayHintsProvider {
-    override fun createCollector(file: PsiFile, editor: Editor): InlayHintsCollector {
-        return Collector()
-    }
+    override fun createCollector(file: PsiFile, editor: Editor): InlayHintsCollector = Collector()
 
     private class Collector : OwnBypassCollector {
         override fun collectHintsForFile(file: PsiFile, sink: InlayTreeSink) {

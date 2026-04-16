@@ -7,9 +7,8 @@ import org.ton.intellij.func.psi.FuncTokenType
 
 class FuncDocTokenType(debugName: String) : FuncTokenType(debugName)
 
-class FuncDocCompositeTokenType(
-    debugName: String,
-    private val astFactory: (IElementType) -> CompositeElement,
-) : FuncTokenType(debugName), ICompositeElementType {
+class FuncDocCompositeTokenType(debugName: String, private val astFactory: (IElementType) -> CompositeElement) :
+    FuncTokenType(debugName),
+    ICompositeElementType {
     override fun createCompositeNode(): CompositeElement = astFactory(this)
 }

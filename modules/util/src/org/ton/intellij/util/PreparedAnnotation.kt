@@ -18,10 +18,7 @@ class PreparedAnnotation(
     val fullDescription: String get() = "<html>${escapeString(header)}<br>${escapeString(description)}</html>"
 }
 
-data class QuickFixWithRange(
-    val fix: LocalQuickFix,
-    val availabilityRange: TextRange?,
-)
+data class QuickFixWithRange(val fix: LocalQuickFix, val availabilityRange: TextRange?)
 
 private fun listOfFixes(vararg fixes: LocalQuickFix?): List<QuickFixWithRange> =
     fixes.mapNotNull { if (it == null) null else QuickFixWithRange(it, null) }

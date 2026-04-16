@@ -60,10 +60,13 @@ data class ActonAnnotation(
     private val _message: String? = null,
     @SerializedName("is_primary")
     private val _isPrimary: Boolean? = null,
+    @SerializedName("tags")
+    private val _tags: List<String>? = null,
 ) {
     val range: ActonRange get() = _range!!
     val message: String? get() = _message
     val isPrimary: Boolean get() = _isPrimary ?: true
+    val tags: List<String> get() = _tags ?: emptyList()
     val isValid: Boolean get() = _range != null
 }
 

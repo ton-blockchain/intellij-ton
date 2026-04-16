@@ -1,4 +1,4 @@
-package org.ton.intellij.tolk.debug.retrace
+package org.ton.intellij.tolk.debug.test
 
 import com.intellij.execution.configurations.RunProfile
 import com.intellij.execution.configurations.RunProfileState
@@ -9,56 +9,69 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.platform.dap.DapStartRequest
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.concurrency.AsyncPromise
 import org.jetbrains.concurrency.Promise
+import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
+import org.ton.intellij.acton.runconfig.ActonCommandRunState
+import org.ton.intellij.acton.runconfig.PreparedActonDebugExecution
 import org.ton.intellij.tolk.debug.TolkDebugFailureRunContent
 import org.ton.intellij.tolk.debug.TolkDapSessionStarter
+import org.ton.intellij.tolk.debug.TolkRetraceDebugAdapter
+import java.net.ServerSocket
 
-class TolkRetraceProgramRunner : AsyncProgramRunner<RunnerSettings>() {
+class TolkActonTestProgramRunner : AsyncProgramRunner<RunnerSettings>() {
     override fun getRunnerId(): String = RUNNER_ID
 
     override fun canRun(executorId: String, profile: RunProfile): Boolean {
         return executorId == DefaultDebugExecutor.EXECUTOR_ID &&
-            profile is TolkRetraceConfiguration
+            profile is ActonCommandConfiguration &&
+            profile.command == "test"
     }
 
     override fun execute(
         environment: ExecutionEnvironment,
         state: RunProfileState
     ): Promise<RunContentDescriptor?> {
-        val profile = environment.runProfile as? TolkRetraceConfiguration
-            ?: throw IllegalArgumentException("TolkRetraceProgramRunner can only execute TolkRetraceConfiguration")
-        val retraceState = state as? TolkRetraceRunState
-            ?: throw IllegalArgumentException("TolkRetraceProgramRunner can only execute TolkRetraceRunState")
+        val profile = environment.runProfile as? ActonCommandConfiguration
+            ?: throw IllegalArgumentException("TolkActonTestProgramRunner can only execute ActonCommandConfiguration")
+        val testState = state as? ActonCommandRunState
+            ?: throw IllegalArgumentException("TolkActonTestProgramRunner can only execute ActonCommandRunState")
         val promise = AsyncPromise<RunContentDescriptor?>()
 
-        LOG.info("Starting retrace debug session via local TolkRetraceProgramRunner for '${profile.name}'")
         ApplicationManager.getApplication().executeOnPooledThread {
-            var preparedExecution: PreparedRetraceExecution? = null
+            var preparedExecution: PreparedActonDebugExecution? = null
             try {
-                LOG.info("Pre-starting retrace process for '${profile.name}' before opening XDebugger session")
-                preparedExecution = retraceState.prepareForDebugLaunch(environment.executor, this)
-                LOG.info(
-                    "Waiting for retrace DAP readiness on port ${preparedExecution.retraceSession.port} before opening XDebugger session for '${profile.name}'"
-                )
-                runBlocking {
-                    preparedExecution.retraceSession.awaitReady()
+                val port = findFreePort()
+                testState.enableTestDebug(port)
+                LOG.info("Starting acton test debug session via TolkActonTestProgramRunner on port $port for '${profile.name}'")
+                val preparedExecutionHolder = arrayOfNulls<PreparedActonDebugExecution>(1)
+                ApplicationManager.getApplication().invokeAndWait {
+                    preparedExecutionHolder[0] = testState.prepareForDebugLaunch(environment.executor, this)
+                }
+                preparedExecution = checkNotNull(preparedExecutionHolder[0]) {
+                    "Acton test debug preparation did not return an execution result"
                 }
                 LOG.info(
-                    "Retrace DAP became ready on port ${preparedExecution.retraceSession.port} before session start for '${profile.name}'"
+                    "Waiting for acton test DAP readiness on port ${preparedExecution.debugSession.port} before opening XDebugger session for '${profile.name}'"
                 )
-
+                runBlocking {
+                    preparedExecution.debugSession.awaitReady()
+                }
+                LOG.info(
+                    "Acton test DAP became ready on port ${preparedExecution.debugSession.port} before session start for '${profile.name}'"
+                )
                 val descriptor = arrayOfNulls<RunContentDescriptor>(1)
                 ApplicationManager.getApplication().invokeAndWait {
                     descriptor[0] = TolkDapSessionStarter.start(
                         environment = environment,
-                        state = retraceState,
+                        state = testState,
                         sessionName = profile.name,
-                        adapterId = TolkRetraceConfiguration.ADAPTER_ID,
-                        request = TolkRetraceConfiguration.REQUEST,
-                        arguments = TolkRetraceConfiguration.arguments(),
-                        logLabel = "retrace"
+                        adapterId = TolkRetraceDebugAdapter,
+                        request = DapStartRequest.Launch,
+                        arguments = emptyMap(),
+                        logLabel = "acton test"
                     )
                 }
                 promise.setResult(descriptor[0])
@@ -88,8 +101,15 @@ class TolkRetraceProgramRunner : AsyncProgramRunner<RunnerSettings>() {
         return promise
     }
 
+    private fun findFreePort(): Int {
+        ServerSocket(0).use { socket ->
+            socket.reuseAddress = true
+            return socket.localPort
+        }
+    }
+
     companion object {
-        private const val RUNNER_ID = "TolkRetraceProgramRunner"
-        private val LOG = logger<TolkRetraceProgramRunner>()
+        private const val RUNNER_ID = "TolkActonTestProgramRunner"
+        private val LOG = logger<TolkActonTestProgramRunner>()
     }
 }

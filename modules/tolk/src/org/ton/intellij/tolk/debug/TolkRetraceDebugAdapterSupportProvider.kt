@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 package org.ton.intellij.tolk.debug
 
 import com.intellij.execution.ExecutionException
@@ -5,13 +7,20 @@ import com.intellij.execution.ExecutionResult
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
+import com.intellij.platform.dap.DapDebugSession
 import com.intellij.platform.dap.DapBreakpointsDescription
+import com.intellij.platform.dap.DapStartRequest
 import com.intellij.platform.dap.DebugAdapterDescriptor
 import com.intellij.platform.dap.DebugAdapterSupportProvider
+import com.intellij.platform.dap.connection.DebugAdapterSocketConnection
 import com.intellij.platform.dap.connection.DebugAdapterHandle
+import com.intellij.platform.dap.xdebugger.DapXDebugProcess
+import com.intellij.xdebugger.XDebugSession
+import org.ton.intellij.acton.runconfig.ACTON_DEBUG_SESSION_KEY
 import kotlinx.coroutines.TimeoutCancellationException
-import org.ton.intellij.tolk.debug.retrace.TolkRetraceRunState
+import kotlinx.coroutines.CoroutineScope
 import java.util.concurrent.CancellationException
+import kotlin.time.Duration.Companion.milliseconds
 
 class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkRetraceDebugAdapter> {
     override val adapterId: TolkRetraceDebugAdapter = TolkRetraceDebugAdapter
@@ -25,24 +34,60 @@ class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkR
                 TolkExceptionBreakpointType::class.java
             )
 
+            override fun createXDebugProcess(
+                session: XDebugSession,
+                dapDebugSession: DapDebugSession,
+                xDebugProcessScope: CoroutineScope,
+                globalScope: CoroutineScope,
+                debugAdapterDescriptor: DebugAdapterDescriptor<*>,
+                executionEnvironment: ExecutionEnvironment,
+                executionResult: ExecutionResult?,
+                startRequestType: DapStartRequest,
+                startRequestArguments: Map<String, Any?>
+            ): DapXDebugProcess {
+                val preparedExecutionResult = executionResult
+                    ?: return super.createXDebugProcess(
+                        session,
+                        dapDebugSession,
+                        xDebugProcessScope,
+                        globalScope,
+                        debugAdapterDescriptor,
+                        executionEnvironment,
+                        executionResult,
+                        startRequestType,
+                        startRequestArguments
+                    )
+                return TolkDapXDebugProcess(
+                    session = session,
+                    dapDebugSession = dapDebugSession,
+                    xDebugProcessScope = xDebugProcessScope,
+                    globalScope = globalScope,
+                    debugAdapterDescriptor = debugAdapterDescriptor,
+                    executionEnvironment = executionEnvironment,
+                    backingExecutionResult = preparedExecutionResult,
+                    startRequestType = startRequestType,
+                    startRequestArguments = startRequestArguments
+                )
+            }
+
             override suspend fun launchDebugAdapter(
                 environment: ExecutionEnvironment,
                 executionResult: ExecutionResult?,
-                sessionId: String
+                sessionId: String,
             ): DebugAdapterHandle {
                 val processHandler = executionResult?.processHandler
-                    ?: throw ExecutionException("Retrace process handler is not available")
-                val retraceSession = processHandler.getUserData(TolkRetraceRunState.RETRACE_SESSION_KEY)
-                    ?: throw ExecutionException("Retrace session metadata is not available")
-                LOG.info("Waiting for retrace DAP readiness on port ${retraceSession.port} for session $sessionId")
+                    ?: throw ExecutionException("Acton debug process handler is not available")
+                val debugSession = processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)
+                    ?: throw ExecutionException("Acton debug session metadata is not available")
+                LOG.info("Waiting for ${debugSession.displayName} DAP readiness on port ${debugSession.port} for session $sessionId")
 
                 try {
-                    retraceSession.awaitReady()
-                    LOG.info("Retrace DAP reported ready on port ${retraceSession.port} for session $sessionId")
+                    debugSession.awaitReady()
+                    LOG.info("${debugSession.displayName} DAP reported ready on port ${debugSession.port} for session $sessionId")
                 } catch (e: TimeoutCancellationException) {
                     stopProcess(processHandler)
                     throw ExecutionException(
-                        "Timed out waiting for acton retrace to listen on port ${retraceSession.port}\n\n${retraceSession.transcript()}",
+                        "Timed out waiting for ${debugSession.displayName} to listen on port ${debugSession.port}\n\n${debugSession.transcript()}",
                         e
                     )
                 } catch (e: CancellationException) {
@@ -53,19 +98,27 @@ class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkR
                     throw e
                 } catch (e: Throwable) {
                     stopProcess(processHandler)
-                    throw ExecutionException("Failed to start retrace DAP session", e)
+                    throw ExecutionException("Failed to start Acton DAP session", e)
                 }
 
                 try {
-                    LOG.info("Opening retrace DAP socket on 127.0.0.1:${retraceSession.port} for session $sessionId")
-                    return connectTolkRetraceDebugAdapterSocket("127.0.0.1", retraceSession.port) {
-                        LOG.info("Stopping retrace process for session $sessionId")
+                    LOG.info("Opening Acton DAP socket on 127.0.0.1:${debugSession.port} for session $sessionId")
+                    return DebugAdapterSocketConnection(
+                        host = "127.0.0.1",
+                        port = debugSession.port,
+                        connectionAttempts = 3,
+                        intervalBetweenAttempts = 300.milliseconds
+                    ) {
+                        LOG.info("Stopping Acton debug process for session $sessionId")
                         stopProcess(processHandler)
                     }
-                } catch (e: ExecutionException) {
+                } catch (e: CancellationException) {
+                    stopProcess(processHandler)
+                    throw e
+                } catch (e: Throwable) {
                     stopProcess(processHandler)
                     throw ExecutionException(
-                        "Failed to connect to retrace DAP on port ${retraceSession.port}\n\n${retraceSession.transcript()}",
+                        "Failed to connect to ${debugSession.displayName} DAP on port ${debugSession.port}\n\n${debugSession.transcript()}",
                         e
                     )
                 }

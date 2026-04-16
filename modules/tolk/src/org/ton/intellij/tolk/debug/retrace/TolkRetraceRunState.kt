@@ -14,12 +14,9 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.openapi.util.Key
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withTimeout
 import org.ton.intellij.acton.cli.ActonCommandLine
-import java.net.BindException
-import java.net.InetAddress
+import org.ton.intellij.acton.runconfig.ACTON_DEBUG_SESSION_KEY
+import org.ton.intellij.acton.runconfig.ActonDebugSession
 import java.net.ServerSocket
 
 class TolkRetraceRunState(
@@ -44,9 +41,9 @@ class TolkRetraceRunState(
             ?: throw ExecutionException("Retrace process handler is not available")
         if (!processHandler.isStartNotified) {
             processHandler.startNotify()
-            LOG.info("Started process notifications for retrace DAP session on port ${processHandler.getUserData(RETRACE_SESSION_KEY)?.port}")
+            LOG.info("Started process notifications for retrace DAP session on port ${processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)?.port}")
         }
-        val retraceSession = processHandler.getUserData(RETRACE_SESSION_KEY)
+        val retraceSession = processHandler.getUserData(ACTON_DEBUG_SESSION_KEY)
             ?: throw ExecutionException("Retrace session metadata is not available")
         return PreparedRetraceExecution(executionResult, processHandler, retraceSession)
     }
@@ -62,7 +59,8 @@ class TolkRetraceRunState(
             }
             add("--contract")
             add(configuration.contractId)
-            add("--dap-port")
+            add("--debug")
+            add("--debug-port")
             add(port.toString())
         }
         val commandLine = ActonCommandLine(
@@ -72,10 +70,21 @@ class TolkRetraceRunState(
         ).toGeneralCommandLine(configuration.project) ?: throw IllegalStateException("Cannot find acton executable")
 
         val processHandler = KillableColoredProcessHandler(commandLine)
-        val retraceSession = TolkRetraceSession(port)
-        retraceSession.recordStartup(commandLine.commandLineString, workingDir)
+        val retraceSession = ActonDebugSession(
+            displayName = "acton retrace",
+            port = port,
+            readinessMarkers = listOf(
+                "Debugger listening on 127.0.0.1:$port",
+                "Retrace DAP listening on 127.0.0.1:$port"
+            )
+        )
+        retraceSession.recordStartup(
+            commandLine.commandLineString,
+            workingDir,
+            "DAP server is started only after retrace preparation completes."
+        )
         LOG.info("Starting retrace DAP session on 127.0.0.1:$port with command: ${commandLine.commandLineString}")
-        processHandler.putUserData(RETRACE_SESSION_KEY, retraceSession)
+        processHandler.putUserData(ACTON_DEBUG_SESSION_KEY, retraceSession)
         processHandler.addProcessListener(object : ProcessAdapter() {
             override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
                 retraceSession.append(event.text)
@@ -106,68 +115,11 @@ class TolkRetraceRunState(
 
     companion object {
         private val LOG = logger<TolkRetraceRunState>()
-        val RETRACE_SESSION_KEY: Key<TolkRetraceSession> = Key.create("tolk.retrace.session")
     }
 }
 
 data class PreparedRetraceExecution(
     val executionResult: ExecutionResult,
     val processHandler: ProcessHandler,
-    val retraceSession: TolkRetraceSession
+    val retraceSession: ActonDebugSession
 )
-
-class TolkRetraceSession(val port: Int) {
-    private val readySignal = CompletableDeferred<Unit>()
-    private val transcript = StringBuilder()
-    private val log = logger<TolkRetraceSession>()
-
-    fun append(text: String) {
-        synchronized(this) {
-            transcript.append(text)
-            if (!readySignal.isCompleted && transcript.contains("Retrace DAP listening on 127.0.0.1:$port")) {
-                readySignal.complete(Unit)
-            }
-        }
-    }
-
-    fun recordStartup(commandLine: String, workingDirectory: java.nio.file.Path) {
-        append(
-            "Starting acton retrace in $workingDirectory\n" +
-                "Command: $commandLine\n" +
-                "Waiting for DAP on 127.0.0.1:$port\n" +
-                "DAP server is started only after retrace preparation completes.\n"
-        )
-    }
-
-    fun processTerminated(exitCode: Int) {
-        if (!readySignal.isCompleted) {
-            readySignal.completeExceptionally(
-                ExecutionException("acton retrace exited before DAP startup (code=$exitCode)\n\n${transcript()}")
-            )
-        }
-    }
-
-    suspend fun awaitReady() {
-        withTimeout(120_000) {
-            while (!readySignal.isCompleted) {
-                if (isPortReservedByProcess()) {
-                    log.info("Detected retrace DAP listener on port $port by socket bind check")
-                    readySignal.complete(Unit)
-                    break
-                }
-                delay(200)
-            }
-            readySignal.await()
-        }
-    }
-
-    fun transcript(): String = synchronized(this) { transcript.toString() }
-
-    private fun isPortReservedByProcess(): Boolean {
-        return try {
-            ServerSocket(port, 0, InetAddress.getByName("127.0.0.1")).use { false }
-        } catch (_: BindException) {
-            true
-        }
-    }
-}

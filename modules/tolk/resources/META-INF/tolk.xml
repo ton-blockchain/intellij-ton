@@ -245,6 +245,8 @@
 
         <configurationType implementation="org.ton.intellij.tolk.debug.retrace.TolkRetraceConfigurationType"/>
         <programRunner implementation="org.ton.intellij.tolk.debug.retrace.TolkRetraceProgramRunner"/>
+        <programRunner implementation="org.ton.intellij.tolk.debug.script.TolkActonScriptProgramRunner"/>
+        <programRunner implementation="org.ton.intellij.tolk.debug.test.TolkActonTestProgramRunner"/>
         <platform.dap.debugAdapterSupportProvider implementation="org.ton.intellij.tolk.debug.TolkRetraceDebugAdapterSupportProvider"/>
         <xdebugger.breakpointType implementation="org.ton.intellij.tolk.debug.TolkLineBreakpointType"/>
         <xdebugger.breakpointType implementation="org.ton.intellij.tolk.debug.TolkExceptionBreakpointType"/>
@@ -262,8 +264,6 @@
         <!-- Script -->
         <runConfigurationProducer
                 implementation="org.ton.intellij.tolk.ide.run.configuration.ActonRunScriptConfigurationProducer"/>
-        <runConfigurationProducer
-                implementation="org.ton.intellij.tolk.ide.run.configuration.ActonRunScriptBroadcastConfigurationProducer"/>
         <runLineMarkerContributor id="TolkTestRunLineMarkerProvider" language="Tolk"
                                   implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkTestLineMarkerProvider"/>
 

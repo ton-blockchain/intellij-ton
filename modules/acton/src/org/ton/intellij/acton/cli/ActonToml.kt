@@ -38,10 +38,10 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
     fun getMappings(): Map<String, String> {
         return CachedValuesManager.getCachedValue(psiFile ?: return emptyMap()) {
             val mappingsTable = PsiTreeUtil.getChildrenOfType(psiFile, TomlTable::class.java)
-                ?.find { it.header.key?.segments?.firstOrNull()?.name == "mappings" }
+                ?.find { it.header.key?.segments?.firstOrNull()?.name == "import-mappings" }
             
             val result = mappingsTable?.entries?.associate { entry ->
-                val key = entry.key.segments.firstOrNull()?.name ?: entry.key.text
+                val key = entry.key.segments.firstOrNull()?.name?.removePrefix("@") ?: entry.key.text
                 val value = entry.value?.text?.removeSurrounding("\"")?.removeSurrounding("'") ?: ""
                 key to value
             } ?: emptyMap()

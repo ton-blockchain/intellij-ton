@@ -130,6 +130,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         val methodsForCompletion = mutableListOf<TolkFunction>()
         TolkFunctionIndex.processAllElements(project, processor = { function ->
             val name = function.name ?: return@processAllElements true
+            if (isHiddenMethodFromCompletion(name)) return@processAllElements true
             if (!prefixMatcher.prefixMatches(name)) return@processAllElements true
             methodsForCompletion.add(function)
             true
@@ -151,19 +152,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
             // when call instance method as static
             val methodCallTypeMismatch = isStaticReceiver && !isStatic
 
-            val isLowLevelMethod = when (name) {
-                "getDeclaredPackPrefix",
-                "getDeclaredPackPrefixLen",
-                "forceLoadLazyObject",
-                "stackMoveToTop",
-                "typeName",
-                "typeNameOfObject",
-                "fromTuple",
-                "toTuple",
-                     -> true
-
-                else -> false
-            }
+            val isLowLevelMethod = isLowLevelMethodName(name)
             val lookupElement = function.toLookupElementBuilder(ctx)
                 .withBoldness(receiverType == calledType)
                 .applyIf(methodCallTypeMismatch || isLowLevelMethod) {

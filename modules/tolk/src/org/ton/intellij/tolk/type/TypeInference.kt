@@ -1604,7 +1604,11 @@ class TolkInferenceWalker(
                 val argExpr = argument.expression
                 nextFlow = inferExpression(argExpr, nextFlow, false, parameters.getOrNull(index)).outFlow
             }
-            ctx.setType(element, callableFunction.returnType)
+            val returnType = callableFunction.returnType
+            ctx.setType(element, returnType)
+            if (returnType == TolkTy.Never) {
+                nextFlow.unreachable = TolkUnreachableKind.CantHappen
+            }
             return TolkExpressionFlowContext(nextFlow, usedAsCondition)
         }
         ctx.setResolvedFunctions(element, functionSymbol)
@@ -1652,6 +1656,9 @@ class TolkInferenceWalker(
 
         ctx.setType(callee, functionSubType)
         ctx.setType(element, returnType)
+        if (returnType == TolkTy.Never) {
+            nextFlow.unreachable = TolkUnreachableKind.CantHappen
+        }
 
         return TolkExpressionFlowContext(nextFlow, usedAsCondition)
     }

@@ -47,6 +47,13 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         fun main() { foo(/*caret*/)transmog() }
     """)
 
+    fun `test hidden builtin helper completion is absent`() = checkNotContainsCompletion(
+        "__expect_type",
+        """
+            fun main() { __exp/*caret*/ }
+        """
+    )
+
     fun `test local scope`() = checkNoCompletion("""
         fun main() {
             val x = spam/*caret*/;

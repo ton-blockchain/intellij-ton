@@ -11,7 +11,11 @@ abstract class TolkAsExpressionMixin(node: ASTNode) :
     TolkAsExpression {
     override val type: TolkTy?
         get() = typeExpression?.type?.let {
-            ((it as? TolkTyParam)?.parameter as? TolkTyParam.NamedTypeParameter)?.psi?.defaultTypeParameter?.typeExpression?.type
+            ((it as? TolkTyParam)?.parameter as? TolkTyParam.NamedTypeParameter)
+                ?.psi
+                ?.defaultTypeParameter
+                ?.typeExpression
+                ?.type
                 ?: it
         }
 

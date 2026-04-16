@@ -106,7 +106,7 @@ class FuncFormattingBlock(
         return null
     }
 
-    private val BRACES_TOKEN_SET = TokenSet.create(
+    private val bracesTokenSet = TokenSet.create(
         LBRACE,
         RBRACE,
         LBRACK,
@@ -115,7 +115,7 @@ class FuncFormattingBlock(
         RPAREN,
     )
 
-    private fun indentIfNotBrace(child: ASTNode): Indent = if (BRACES_TOKEN_SET.contains(child.elementType)) {
+    private fun indentIfNotBrace(child: ASTNode): Indent = if (bracesTokenSet.contains(child.elementType)) {
         Indent.getNoneIndent()
     } else {
         Indent.getNormalIndent()

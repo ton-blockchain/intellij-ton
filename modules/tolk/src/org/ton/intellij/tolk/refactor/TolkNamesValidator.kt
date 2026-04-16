@@ -6,14 +6,14 @@ import org.ton.intellij.tolk.psi.TOLK_KEYWORDS
 import org.ton.intellij.tolk.psi.TolkTokenType
 
 class TolkNamesValidator : NamesValidator {
-    private val KEYWORD_SET = TOLK_KEYWORDS.types.filterIsInstance<TolkTokenType>().map { it.name }.toSet()
+    private val keywordSet = TOLK_KEYWORDS.types.filterIsInstance<TolkTokenType>().map { it.name }.toSet()
 
-    override fun isKeyword(name: String, project: Project?): Boolean = KEYWORD_SET.contains(name)
+    override fun isKeyword(name: String, project: Project?): Boolean = keywordSet.contains(name)
 
     override fun isIdentifier(name: String, project: Project?): Boolean {
         if (name.isBlank()) return false
 
-        if (KEYWORD_SET.contains(name)) return false
+        if (keywordSet.contains(name)) return false
 
         if (name.first() == '\"') return false
         if (name.first() == '`' && name.last() == '`') {

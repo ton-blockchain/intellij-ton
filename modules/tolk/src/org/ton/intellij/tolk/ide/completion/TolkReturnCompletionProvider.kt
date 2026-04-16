@@ -66,7 +66,8 @@ object TolkReturnCompletionProvider : TolkCompletionProvider(), DumbAware {
                         "expr" to ConstantNode(""),
                     ),
                 )
-                .toTolkLookupElement(TolkLookupElementData(keywordKind = KEYWORD)), // lower priority than CONTEXT_RETURN_KEYWORD
+                // Lower priority than CONTEXT_RETURN_KEYWORD.
+                .toTolkLookupElement(TolkLookupElementData(keywordKind = KEYWORD)),
         )
 
         if (returnTy is TolkTyBool) {

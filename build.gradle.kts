@@ -41,6 +41,19 @@ allprojects {
         }
     }
 
+    val grammarKitGenerators =
+        tasks.matching { task ->
+            task.name.startsWith("generate") &&
+                task.name !in setOf("generateLexer", "generateParser") &&
+                (task.name.endsWith("Lexer") || task.name.endsWith("Parser"))
+        }
+
+    tasks.matching { task ->
+        task.name == "runKtlintCheckOverMainSourceSet" || task.name == "runKtlintFormatOverMainSourceSet"
+    }.configureEach {
+        dependsOn(grammarKitGenerators)
+    }
+
     tasks.withType<KotlinCompile> {
         compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
         compilerOptions.freeCompilerArgs.add("-Xjvm-default=all")

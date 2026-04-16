@@ -40,7 +40,7 @@ enum class FiftColor(displayName: String, default: TextAttributesKey) {
 }
 
 class FiftColorSettingsPage : ColorSettingsPage {
-    private val DEMO_TEXT by lazy {
+    private val demoSampleText by lazy {
         loadTextResource(FiftColorSettingsPage::class.java, "colors/highlighter_example.fif")
     }
 
@@ -49,7 +49,7 @@ class FiftColorSettingsPage : ColorSettingsPage {
     override fun getDisplayName(): String = FiftLanguage.displayName
     override fun getIcon(): Icon = FiftIcons.FILE
     override fun getHighlighter(): SyntaxHighlighter = FiftSyntaxHighlighter
-    override fun getDemoText(): String = DEMO_TEXT
+    override fun getDemoText(): String = demoSampleText
 
     override fun getAdditionalHighlightingTagToDescriptorMap(): MutableMap<String, TextAttributesKey>? = null
 

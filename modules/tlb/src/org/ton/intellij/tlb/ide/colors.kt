@@ -40,7 +40,7 @@ enum class TlbColor(displayName: String, default: TextAttributesKey) {
 }
 
 class TlbColorSettingsPage : ColorSettingsPage {
-    private val DEMO_TEXT by lazy {
+    private val demoSampleText by lazy {
         loadTextResource(TlbColorSettingsPage::class.java, "colors/highlighter_example.tlb")
     }
 
@@ -55,5 +55,5 @@ class TlbColorSettingsPage : ColorSettingsPage {
     override fun getDisplayName(): String = TlbLanguage.displayName
     override fun getIcon(): Icon = TlbIcons.FILE
     override fun getHighlighter(): SyntaxHighlighter = TlbSyntaxHighlighter
-    override fun getDemoText(): String = DEMO_TEXT
+    override fun getDemoText(): String = demoSampleText
 }

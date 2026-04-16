@@ -41,7 +41,11 @@ open class TolkIntroduceVariableBase {
         if (expression == null) {
             val message =
                 RefactoringBundle.message(
-                    if (hasSelection) "selected.block.should.represent.an.expression" else "refactoring.introduce.selection.error",
+                    if (hasSelection) {
+                        "selected.block.should.represent.an.expression"
+                    } else {
+                        "refactoring.introduce.selection.error"
+                    },
                 )
             showCannotPerform(operation, message)
             return

@@ -31,7 +31,7 @@ class ActonTonAddressConsoleFilter : Filter {
                     offset + match.range.first,
                     offset + match.range.last + 1,
                     TonAddressHyperlinkInfo(address, false),
-                    getAttrs(), // most lines won't contain addresses, so getting the attributes for each link should be faster.
+                    getAttrs(), // Most lines will not contain addresses, so avoid fetching attrs until needed.
                 ),
             )
         }

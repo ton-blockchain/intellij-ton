@@ -106,8 +106,10 @@ class MarkdownNode(val node: ASTNode, val parent: MarkdownNode?, val content: St
                     val contents = StringBuilder()
                     node.children.forEach { child ->
                         when (child.type) {
-                            MarkdownTokenTypes.CODE_LINE, MarkdownTokenTypes.CODE_FENCE_CONTENT, MarkdownTokenTypes.EOL ->
-                                contents.append(child.text)
+                            MarkdownTokenTypes.CODE_LINE,
+                            MarkdownTokenTypes.CODE_FENCE_CONTENT,
+                            MarkdownTokenTypes.EOL,
+                            -> contents.append(child.text)
 
                             MarkdownTokenTypes.FENCE_LANG -> {
                                 language = guessLanguage(child.text.trim().split(' ')[0]) ?: language
@@ -310,7 +312,10 @@ private fun StringBuilder.appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet(
     codeSnippet: String,
 ): StringBuilder {
     val codeSnippetBuilder = StringBuilder()
-    if (highlightingMode == DocumentationSettings.InlineCodeHighlightingMode.SEMANTIC_HIGHLIGHTING) { // highlight code by lexer
+    val useSemanticHighlighting =
+        highlightingMode == DocumentationSettings.InlineCodeHighlightingMode.SEMANTIC_HIGHLIGHTING
+    if (useSemanticHighlighting) {
+        // Highlight code by lexer.
         HtmlSyntaxInfoUtil.appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet(
             codeSnippetBuilder,
             project,

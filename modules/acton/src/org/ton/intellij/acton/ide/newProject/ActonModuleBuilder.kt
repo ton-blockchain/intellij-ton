@@ -9,7 +9,6 @@ import com.intellij.openapi.module.ModuleType
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.roots.ModifiableRootModel
 import com.intellij.openapi.vfs.VfsUtil
-import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
 import java.nio.file.Paths
 
@@ -24,14 +23,7 @@ class ActonModuleBuilder : ModuleBuilder() {
 
         val project = modifiableRootModel.project
         val projectName = root.name
-        val command = ActonCommand.New(
-            path = ".",
-            projectName = projectName,
-            description = "A TON blockchain project",
-            template = settings.template,
-            app = settings.template == "counter" && settings.addTypeScriptApp,
-            license = settings.license
-        )
+        val command = createActonNewCommand(projectName, settings)
         val commandLine = ActonCommandLine(
             command = command.name,
             workingDirectory = Paths.get(root.path),
@@ -53,12 +45,7 @@ class ActonModuleBuilder : ModuleBuilder() {
         root.refresh(false, true)
         VfsUtil.markDirtyAndRefresh(false, true, true, root)
 
-        val fileToOpen = when (settings.template) {
-            "empty" -> "contracts/contract.tolk"
-            "counter" -> "contracts/counter.tolk"
-            "jetton" -> "contracts/jetton-minter-contract.tolk"
-            else -> null
-        }
+        val fileToOpen = starterFilePathForTemplate(settings.template)
 
         if (fileToOpen != null) {
             invokeLater {

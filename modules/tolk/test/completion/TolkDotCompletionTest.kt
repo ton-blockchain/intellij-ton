@@ -1,5 +1,7 @@
 package org.ton.intellij.tolk.completion
 
+import org.ton.intellij.tolk.ide.completion.isLowLevelMethodName
+
 class TolkDotCompletionTest : TolkCompletionTestBase() {
     fun `test enum completion`() = checkEquals(
         """
@@ -251,6 +253,20 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
         "method1",
     )
 
+    fun `test methods with double underscore prefix are hidden`() = checkNotContainsCompletion(
+        "__internal",
+        """
+            struct Foo {}
+
+            fun Foo.__internal(self) {}
+            fun Foo.visible(self) {}
+
+            fun main(foo: Foo) {
+                foo./*caret*/
+            }
+        """
+    )
+
     fun `test private field completion, in function`() = checkOrderedEquals(
         """
             struct Foo {
@@ -319,6 +335,21 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
         1,
         "foo",
         "some",
+    )
+
+    fun `test private field completion in generic struct method with specialized qualifier`() = checkOrderedEquals(
+        """
+            struct Box<T> {
+                private value: T
+            }
+
+            fun Box<T>.readInt(self, other: Box<int>) {
+                other./*caret*/
+            }
+        """,
+        1,
+        "value",
+        "readInt",
     )
 
     fun `test private field completion, in instance struct method via argument`() = checkOrderedEquals(

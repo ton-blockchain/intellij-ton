@@ -136,6 +136,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             if (element is TolkFunction && element.hasReceiver) return true
             when (element) {
                 is TolkFunction -> {
+                    if (isHiddenMethodFromCompletion(name)) return true
                     if (element.isEntryPoint) return true
                     if (element.isTestFunction()) return true
                     if (!expectType.canAddElement(element.declaredType.returnType)) return true
@@ -217,19 +218,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         val builder = toLookupElementBuilder(ctx)
         return when (this) {
             is TolkFunction -> {
-                val isLowLevelMethod = when (name) {
-                    "getDeclaredPackPrefix",
-                    "getDeclaredPackPrefixLen",
-                    "forceLoadLazyObject",
-                    "stackMoveToTop",
-                    "typeName",
-                    "typeNameOfObject",
-                    "fromTuple",
-                    "toTuple",
-                         -> true
-
-                    else -> false
-                }
+                val isLowLevelMethod = isLowLevelMethodName(name ?: "")
                 builder.toTolkLookupElement(
                     TolkLookupElementData(
                         elementKind = when {

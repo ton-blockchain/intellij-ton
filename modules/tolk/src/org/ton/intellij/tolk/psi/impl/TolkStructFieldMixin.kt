@@ -51,13 +51,16 @@ fun TolkStructField.canUse(qualifierType: TolkTyStruct, context: PsiElement): Bo
     }
 
     val selfType = outerMethod.receiverTy
-    if (selfType !is TolkTyStruct) return false
-
-    if (!selfType.isEquivalentTo(this.parentStruct.declaredType)) {
+    if (!selfType.hasSameStructDeclaration(this.parentStruct)) {
         // cannot use private fields of other structs
         return false
     }
 
     // can access private fields only in methods of this struct and with qualifier with this struct type
-    return qualifierType.isEquivalentTo(this.parentStruct.declaredType)
+    return qualifierType.hasSameStructDeclaration(this.parentStruct)
+}
+
+private fun TolkTy.hasSameStructDeclaration(struct: TolkStruct): Boolean {
+    val structType = unwrapTypeAlias() as? TolkTyStruct ?: return false
+    return structType.psi.manager.areElementsEquivalent(structType.psi, struct)
 }

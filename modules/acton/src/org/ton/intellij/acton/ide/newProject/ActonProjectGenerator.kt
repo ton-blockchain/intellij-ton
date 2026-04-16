@@ -1,6 +1,8 @@
 package org.ton.intellij.acton.ide.newProject
 
+import com.intellij.icons.AllIcons
 import com.intellij.execution.configuration.EnvironmentVariablesComponent
+import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.ProcessTerminatedListener
 import com.intellij.ide.util.PsiNavigationSupport
@@ -16,12 +18,17 @@ import com.intellij.platform.DirectoryProjectGeneratorBase
 import com.intellij.platform.GeneratorPeerImpl
 import com.intellij.platform.ProjectGeneratorPeer
 import com.intellij.ui.dsl.builder.*
+import com.intellij.util.ui.JBUI
 import org.ton.intellij.acton.ActonIcons
-import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
+import java.awt.BorderLayout
+import java.awt.Cursor
 import java.nio.file.Paths
 import javax.swing.Icon
+import javax.swing.JButton
 import javax.swing.JComponent
+import javax.swing.JPanel
+import javax.swing.SwingConstants
 
 class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings>() {
     override fun getName(): String = "Acton"
@@ -37,13 +44,7 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
         module: com.intellij.openapi.module.Module,
     ) {
         val projectName = baseDir.name
-        val command = ActonCommand.New(
-            path = ".",
-            projectName = projectName,
-            description = "A TON blockchain project",
-            template = settings.template,
-            license = settings.license
-        )
+        val command = createActonNewCommand(projectName, settings)
         val commandLine = ActonCommandLine(
             command = command.name,
             workingDirectory = Paths.get(baseDir.path),
@@ -65,12 +66,7 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
         baseDir.refresh(false, true)
         VfsUtil.markDirtyAndRefresh(false, true, true, baseDir)
 
-        val fileToOpen = when (settings.template) {
-            "empty" -> "contracts/contract.tolk"
-            "counter" -> "contracts/counter.tolk"
-            "jetton" -> "contracts/jetton-minter-contract.tolk"
-            else -> null
-        }
+        val fileToOpen = starterFilePathForTemplate(settings.template)
 
         if (fileToOpen != null) {
             invokeLater {
@@ -89,16 +85,26 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
 
 class ActonProjectGeneratorPeer : GeneratorPeerImpl<ActonProjectSettings>() {
     private val propertyGraph = PropertyGraph()
-    private val template = propertyGraph.property("counter")
-    private val license = propertyGraph.property("MIT")
+    private val template = propertyGraph.property(ActonProjectSettings.DEFAULT_TEMPLATE)
+    private val addTypeScriptApp = propertyGraph.property(false)
+    private val showAdvancedOptions = propertyGraph.property(false)
+    private val description = propertyGraph.property(ActonProjectSettings.DEFAULT_DESCRIPTION)
+    private val license = propertyGraph.property(ActonProjectSettings.DEFAULT_LICENSE)
+    private val includeGitHooks = propertyGraph.property(false)
+    private val includeAgentsMd = propertyGraph.property(false)
+    private val gitAvailable = PathEnvironmentVariableUtil.findInPath("git") != null
     private val environmentVariables = EnvironmentVariablesComponent()
+    private var addTypeScriptAppRow: Row? = null
 
     private var checkValid: Runnable? = null
 
     private val settings = ActonProjectSettings()
 
     init {
-        template.afterChange { checkValid?.run() }
+        template.afterChange {
+            updateAddTypeScriptAppVisibility()
+            checkValid?.run()
+        }
         license.afterChange { checkValid?.run() }
     }
 
@@ -110,27 +116,128 @@ class ActonProjectGeneratorPeer : GeneratorPeerImpl<ActonProjectSettings>() {
                     .bindItem(template)
                     .align(AlignX.FILL)
             }.bottomGap(BottomGap.NONE)
-            row("License:") {
-                comboBox(listOf("MIT", "Apache-2.0", "GPL-3.0", "BSD-3-Clause", "ISC", "Unlicense"))
-                    .bindItem(license)
-                    .align(AlignX.FILL)
-            }.bottomGap(BottomGap.NONE)
+            addTypeScriptAppRow = row {
+                checkBox("Add TypeScript app")
+                    .bindSelected(addTypeScriptApp)
+                    .comment("Include the template's TypeScript app scaffold")
+            }
             row(environmentVariables.label) {
                 cell(environmentVariables)
                     .align(AlignX.FILL)
-            }
+            }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
+            row {
+                cell(createAdvancedOptionsPanel())
+                    .align(AlignX.FILL)
+            }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
+        }.also {
+            updateAddTypeScriptAppVisibility()
         }
     }
 
     override fun getSettings(): ActonProjectSettings = settings.apply {
+        val advancedOptionsEnabled = this@ActonProjectGeneratorPeer.showAdvancedOptions.get()
         template = this@ActonProjectGeneratorPeer.template.get()
-        license = this@ActonProjectGeneratorPeer.license.get()
+        addTypeScriptApp = this@ActonProjectGeneratorPeer.addTypeScriptApp.get()
+        description = if (advancedOptionsEnabled) {
+            this@ActonProjectGeneratorPeer.description.get()
+        } else {
+            ActonProjectSettings.DEFAULT_DESCRIPTION
+        }
+        license = if (advancedOptionsEnabled) {
+            this@ActonProjectGeneratorPeer.license.get()
+        } else {
+            ActonProjectSettings.DEFAULT_LICENSE
+        }
+        includeGitHooks = advancedOptionsEnabled &&
+            gitAvailable &&
+            this@ActonProjectGeneratorPeer.includeGitHooks.get()
+        includeAgentsMd = advancedOptionsEnabled && this@ActonProjectGeneratorPeer.includeAgentsMd.get()
         env = environmentVariables.envData
+    }
+
+    private fun updateAddTypeScriptAppVisibility() {
+        addTypeScriptAppRow?.visible(template.get() == "counter")
+    }
+
+    private fun createAdvancedOptionsPanel(): JComponent {
+        val content = panel {
+            row("Description:") {
+                textField()
+                    .bindText(description)
+                    .align(AlignX.FILL)
+            }
+            row("License:") {
+                comboBox(LICENSE_OPTIONS)
+                    .bindItem(license)
+                    .align(AlignX.FILL)
+            }
+            row {
+                val gitHooksCell = checkBox("Install Git hooks")
+                    .bindSelected(includeGitHooks)
+                if (gitAvailable) {
+                    gitHooksCell.comment("Create and install the default project-local hooks")
+                } else {
+                    gitHooksCell.enabled(false)
+                        .comment("Requires `git` in PATH")
+                }
+            }
+            row {
+                checkBox("Include AGENTS.md")
+                    .bindSelected(includeAgentsMd)
+                    .comment("Add coding-agent guidance to the scaffold")
+            }
+        }
+
+        val contentWrapper = JPanel(BorderLayout()).apply {
+            isOpaque = false
+            border = JBUI.Borders.emptyLeft(20)
+            add(content, BorderLayout.CENTER)
+        }
+        val disclosureButton = JButton("Advanced options").apply {
+            isBorderPainted = false
+            isContentAreaFilled = false
+            isFocusPainted = false
+            horizontalAlignment = SwingConstants.LEFT
+            cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+            margin = JBUI.emptyInsets()
+        }
+
+        fun updateDisclosureState() {
+            val expanded = showAdvancedOptions.get()
+            disclosureButton.icon = if (expanded) AllIcons.General.ArrowDown else AllIcons.General.ArrowRight
+            contentWrapper.isVisible = expanded
+            contentWrapper.revalidate()
+            contentWrapper.repaint()
+        }
+
+        disclosureButton.addActionListener {
+            showAdvancedOptions.set(!showAdvancedOptions.get())
+            updateDisclosureState()
+            checkValid?.run()
+        }
+
+        return JPanel(BorderLayout(0, JBUI.scale(6))).apply {
+            isOpaque = false
+            add(disclosureButton, BorderLayout.NORTH)
+            add(contentWrapper, BorderLayout.CENTER)
+            updateDisclosureState()
+        }
     }
 
     override fun validate(): com.intellij.openapi.ui.ValidationInfo? = null
 
     override fun buildUI(settingsStep: SettingsStep) {
         settingsStep.addSettingsComponent(component)
+    }
+
+    companion object {
+        private val LICENSE_OPTIONS = listOf(
+            "MIT",
+            "Apache-2.0",
+            "GPL-3.0",
+            "BSD-3-Clause",
+            "ISC",
+            "Unlicense"
+        )
     }
 }

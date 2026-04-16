@@ -138,6 +138,7 @@ object ActonExternalLinterUtils {
 data class ActonExternalLinterAdditionalAnnotation(val textRange: TextRange, @Nls val message: String)
 
 data class ActonExternalLinterFilteredMessage(
+    val highlightType: HighlightInfoType,
     val severity: HighlightSeverity,
     val textRange: TextRange,
     @Nls val message: String,
@@ -159,6 +160,7 @@ data class ActonExternalLinterFilteredMessage(
                 "warning" -> HighlightSeverity.WEAK_WARNING
                 else -> HighlightSeverity.INFORMATION
             }
+            val highlightType = externalLinterHighlightType(diagnostic, severity)
 
             if (diagnostic.file != file.virtualFile.path) {
                 return null
@@ -205,6 +207,7 @@ data class ActonExternalLinterFilteredMessage(
             val suppressionOptions = convertBatchToSuppressIntentionActions(actions).toList()
 
             return ActonExternalLinterFilteredMessage(
+                highlightType,
                 severity,
                 textRange,
                 diagnostic.message,
@@ -224,6 +227,15 @@ internal fun createActonSuppressionFixes(ruleName: String): Array<ActonSuppressL
     }
 
     return arrayOf(ActonSuppressLinterFix(ruleName), ActonSuppressLinterFix("all"))
+}
+
+internal fun externalLinterHighlightType(diagnostic: ActonDiagnostic, severity: HighlightSeverity): HighlightInfoType {
+    val primaryTags = diagnostic.primaryAnnotationTags()
+    return when {
+        "deprecated" in primaryTags -> HighlightInfoType.DEPRECATED
+        "unnecessary" in primaryTags -> HighlightInfoType.UNUSED_SYMBOL
+        else -> convertSeverity(severity)
+    }
 }
 
 private fun ActonRange.toTextRange(document: Document): TextRange? {
@@ -283,7 +295,7 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(file: PsiFile, annotationRes
     val key = HighlightDisplayKey.findOrRegister(ACTON_EXTERNAL_LINTER_ID, displayName)
 
     for (message in filteredMessages) {
-        val highlightBuilder = HighlightInfo.newHighlightInfo(convertSeverity(message.severity))
+        val highlightBuilder = HighlightInfo.newHighlightInfo(message.highlightType)
             .severity(message.severity)
             .description(message.message)
             .escapedToolTip(message.htmlTooltip.replace("\n", "<br>"))
@@ -303,8 +315,8 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(file: PsiFile, annotationRes
         highlightBuilder.create()?.let(::add)
 
         for (annotation in message.additional) {
-            val highlightBuilder = HighlightInfo.newHighlightInfo(HighlightInfoType.WEAK_WARNING)
-                .severity(HighlightSeverity.WEAK_WARNING)
+            val highlightBuilder = HighlightInfo.newHighlightInfo(message.highlightType)
+                .severity(message.severity)
                 .description(annotation.message)
                 .escapedToolTip(annotation.message.replace("\n", "<br>"))
                 .range(annotation.textRange)
@@ -323,3 +335,11 @@ private fun convertSeverity(severity: HighlightSeverity): HighlightInfoType = wh
 }
 
 private const val ACTON_EXTERNAL_LINTER_ID: String = "ActonExternalLinterOptions"
+
+private fun ActonDiagnostic.primaryAnnotationTags(): Set<String> {
+    val annotations = annotations.filter { it.isPrimary }.ifEmpty { annotations }
+    return annotations
+        .flatMap { it.tags }
+        .map { it.lowercase() }
+        .toSet()
+}

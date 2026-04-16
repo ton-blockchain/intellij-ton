@@ -194,6 +194,10 @@
                 implementation="org.ton.intellij.tolk.ide.configurable.TolkSetupToolchainNotificationProvider"/>
         <editorNotificationProvider
                 implementation="org.ton.intellij.tolk.ide.notification.TolkUnregisteredContractNotificationProvider"/>
+        <statementUpDownMover implementation="org.ton.intellij.tolk.codeInsight.editorActions.TolkStatementUpDownMover"
+                              id="tolk.statement"/>
+        <statementUpDownMover implementation="org.ton.intellij.tolk.codeInsight.editorActions.TolkItemUpDownMover"
+                              id="tolk.item"/>
 
         <postStartupActivity implementation="org.ton.intellij.tolk.ide.TolkAttachTestConsoleFiltersAtStartup"/>
         <postStartupActivity implementation="org.ton.intellij.tolk.psi.impl.TolkBuiltins$RegisterActivity"/>

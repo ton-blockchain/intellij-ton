@@ -120,6 +120,35 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
+    data class Retrace(
+        var transactionHash: String = "",
+        var network: String = "",
+        var contractId: String = "",
+        var debug: Boolean = false,
+        var debugPort: String = "",
+    ) : ActonCommand("retrace") {
+        override fun getArguments(): List<String> = buildList {
+            if (transactionHash.isNotBlank()) {
+                add(transactionHash)
+            }
+            if (network.isNotBlank()) {
+                add("--net")
+                add(network)
+            }
+            if (contractId.isNotBlank()) {
+                add("--contract")
+                add(contractId)
+            }
+            if (debug) {
+                add("--debug")
+                if (debugPort.isNotBlank()) {
+                    add("--debug-port")
+                    add(debugPort)
+                }
+            }
+        }
+    }
+
     data class New(
         var path: String = ".",
         var projectName: String? = null,

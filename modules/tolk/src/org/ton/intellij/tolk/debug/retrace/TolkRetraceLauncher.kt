@@ -8,6 +8,8 @@ import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.InputValidator
 import com.intellij.openapi.ui.Messages
 import org.ton.intellij.acton.cli.ActonToml
+import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
+import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
 import java.nio.file.Path
 
 object TolkRetraceLauncher {
@@ -25,16 +27,16 @@ object TolkRetraceLauncher {
             return false
         }
 
-        val resolvedContractId = contractId?.takeIf { it.isNotBlank() } ?: chooseContractId(project, actonToml) ?: return false
         val runManager = RunManager.getInstance(project)
         val settings = runManager.createConfiguration(
             "Retrace ${transactionHash.take(12)}",
-            TolkRetraceConfigurationType.getInstance().factory
+            ActonCommandConfigurationType.getInstance().factory
         )
-        val configuration = settings.configuration as TolkRetraceConfiguration
-        configuration.transactionHash = transactionHash.trim()
-        configuration.contractId = resolvedContractId
-        configuration.network = network.takeIf { it.isNotBlank() } ?: inferDefaultNetwork(actonToml)
+        val configuration = settings.configuration as ActonCommandConfiguration
+        configuration.command = "retrace"
+        configuration.retraceTransactionHash = transactionHash.trim()
+        configuration.retraceContractId = contractId?.trim().orEmpty()
+        configuration.retraceNetwork = network.takeIf { it.isNotBlank() } ?: inferDefaultNetwork(actonToml)
         configuration.workingDirectory = resolvedWorkingDirectory
 
         runManager.addConfiguration(settings)

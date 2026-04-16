@@ -7,7 +7,7 @@ import com.intellij.execution.ProgramRunnerUtil
 import com.intellij.execution.RunnerAndConfigurationSettings
 import com.intellij.execution.TestStateStorage
 import com.intellij.execution.actions.ConfigurationContext
-import com.intellij.execution.executors.DefaultRunExecutor
+import com.intellij.execution.executors.DefaultDebugExecutor
 import com.intellij.execution.runners.ExecutionUtil
 import com.intellij.execution.testframework.TestIconMapper
 import com.intellij.execution.testframework.sm.runner.states.TestStateInfo
@@ -41,7 +41,7 @@ class TolkTestFailedLineInspection : TolkInspectionBase() {
                 val failedElement = findFailedElement(function, state)
 
                 val quickFixes = mutableListOf<LocalQuickFix>()
-                quickFixes.add(RunActionFix(function))
+                quickFixes.add(DebugActionFix(function))
 
                 val descriptor = InspectionManager.getInstance(holder.project).createProblemDescriptor(
                     failedElement,
@@ -84,10 +84,10 @@ class TolkTestFailedLineInspection : TolkInspectionBase() {
             }
         }
 
-    private class RunActionFix(element: PsiElement) :
+    private class DebugActionFix(element: PsiElement) :
         LocalQuickFix,
         Iconable {
-        private val executor: Executor = DefaultRunExecutor.getRunExecutorInstance()
+        private val executor: Executor = DefaultDebugExecutor.getDebugExecutorInstance()
         private val configuration: RunnerAndConfigurationSettings? = ConfigurationContext(element).configuration
 
         override fun getFamilyName(): String = UIUtil.removeMnemonic(
@@ -105,7 +105,7 @@ class TolkTestFailedLineInspection : TolkInspectionBase() {
         }
 
         override fun generatePreview(project: Project, previewDescriptor: ProblemDescriptor): IntentionPreviewInfo =
-            IntentionPreviewInfo.Html("Restarts this failed test")
+            IntentionPreviewInfo.Html("Starts a debug session for this failed test")
 
         override fun availableInBatchMode(): Boolean = false
 

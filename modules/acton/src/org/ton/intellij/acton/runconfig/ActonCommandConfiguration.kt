@@ -44,6 +44,7 @@ class ActonCommandConfiguration(
     var testTarget: String = ""
     var testFunctionName: String = ""
     var testClearCache: Boolean = false
+    var testUi: Boolean = false
 
     // Run command specific settings (Acton.toml scripts)
     var runScriptName: String = ""
@@ -61,7 +62,7 @@ class ActonCommandConfiguration(
                 scriptBroadcastNet, project.actonSettings.explorer.id, scriptDebug, scriptDebugPort
             )
 
-            "test"   -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache, true)
+            "test"   -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache, true, testUi)
             "run"    -> ActonCommand.Run(runScriptName)
             "retrace" -> ActonCommand.Retrace(retraceTransactionHash, retraceNetwork, retraceContractId)
             else     -> ActonCommand.Custom(command)
@@ -103,6 +104,7 @@ class ActonCommandConfiguration(
         element.setAttribute("testTarget", testTarget)
         element.setAttribute("testFunctionName", testFunctionName)
         element.setAttribute("testClearCache", testClearCache.toString())
+        element.setAttribute("testUi", testUi.toString())
 
         // Run settings
         element.setAttribute("runScriptName", runScriptName)
@@ -143,6 +145,7 @@ class ActonCommandConfiguration(
         testTarget = element.getAttributeValue("testTarget") ?: ""
         testFunctionName = element.getAttributeValue("testFunctionName") ?: ""
         testClearCache = element.getAttributeValue("testClearCache")?.toBoolean() ?: false
+        testUi = element.getAttributeValue("testUi")?.toBoolean() ?: false
 
         // Run settings
         runScriptName = element.getAttributeValue("runScriptName") ?: ""
@@ -179,6 +182,7 @@ class ActonCommandConfiguration(
         testTarget = other.testTarget
         testFunctionName = other.testFunctionName
         testClearCache = other.testClearCache
+        testUi = other.testUi
 
         runScriptName = other.runScriptName
 

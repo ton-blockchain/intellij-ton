@@ -30,6 +30,18 @@ class ActonTomlLineMarkerProviderTest : BasePlatformTestCase() {
         assertContainsElements(actionTexts, "Check Formatting", "Format Project")
     }
 
+    fun testTestSectionProvidesRunActionsWithAndWithoutUi() {
+        val info = lineMarkerInfoFor(
+            """
+                [tes<caret>t]
+                fail-fast = true
+            """.trimIndent()
+        )
+
+        val actionTexts = info.actions.mapNotNull { it.templateText }
+        assertContainsElements(actionTexts, "Run All Tests", "Run All Tests with UI")
+    }
+
     private fun lineMarkerInfoFor(code: String): com.intellij.execution.lineMarker.RunLineMarkerContributor.Info {
         val file = myFixture.configureByText("Acton.toml", code)
         val element = file.findElementAt(myFixture.caretOffset)?.parent as? TomlKeySegment

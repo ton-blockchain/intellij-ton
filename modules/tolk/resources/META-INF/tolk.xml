@@ -258,6 +258,8 @@
         <runConfigurationProducer
                 implementation="org.ton.intellij.tolk.ide.test.configuration.ActonTestConfigurationProducer"/>
         <testSourcesFilter implementation="org.ton.intellij.tolk.ide.test.TolkTestSourcesFilter"/>
+        <runLineMarkerContributor id="TolkBuildContractLineMarkerProvider" language="Tolk"
+                                  implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkBuildContractLineMarkerProvider"/>
         <runLineMarkerContributor id="TolkScriptRunLineMarkerProvider" language="Tolk"
                                   implementationClass="org.ton.intellij.tolk.ide.linemarker.TolkRunScriptLineMarkerProvider"/>
 

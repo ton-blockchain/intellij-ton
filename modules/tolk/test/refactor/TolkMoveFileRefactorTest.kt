@@ -6,11 +6,11 @@ import org.ton.intellij.tolk.TolkTestBase
 import org.ton.intellij.tolk.psi.TolkFile
 
 class TolkMoveFileRefactorTest : TolkTestBase() {
-    fun `test bind to moved file keeps acton mapping path`() {
+    fun `test bind to moved file keeps acton import mapping path`() {
         myFixture.addFileToProject(
             "Acton.toml",
             """
-                [mappings]
+                [import-mappings]
                 contracts = "contracts"
             """.trimIndent()
         )

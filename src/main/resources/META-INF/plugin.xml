@@ -14,6 +14,9 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends optional="true" config-file="org.ton.intellij-ton.profiler.xml">intellij.profiler.clion</depends>
+    <dependencies>
+        <module name="intellij.platform.dap"/>
+    </dependencies>
 
     <xi:include href="/META-INF/asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/tolk.xml" xpointer="xpointer(/idea-plugin/*)"/>

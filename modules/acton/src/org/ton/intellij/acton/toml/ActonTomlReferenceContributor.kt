@@ -4,9 +4,7 @@ import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.resolve.reference.impl.providers.FileReferenceSet
 import com.intellij.util.ProcessingContext
-import org.toml.lang.psi.TomlKeyValue
 import org.toml.lang.psi.TomlLiteral
-import org.toml.lang.psi.TomlTable
 
 class ActonTomlReferenceContributor : PsiReferenceContributor() {
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
@@ -19,23 +17,9 @@ class ActonTomlReferenceContributor : PsiReferenceContributor() {
 
 class ActonTomlValueReferenceProvider : PsiReferenceProvider() {
     override fun getReferencesByElement(element: PsiElement, context: ProcessingContext): Array<PsiReference> {
-        val literal = element as? TomlLiteral ?: return PsiReference.EMPTY_ARRAY
-        if (literal.containingFile.name != "Acton.toml") return PsiReference.EMPTY_ARRAY
-
-        val keyValue = literal.parent as? TomlKeyValue ?: return PsiReference.EMPTY_ARRAY
-        val key = keyValue.key.text
-        val table = keyValue.parent as? TomlTable ?: return PsiReference.EMPTY_ARRAY
-        val header = table.header
-        val segments = header.key?.segments ?: return PsiReference.EMPTY_ARRAY
-
-        if (key == "src" || key == "output") {
-            if (segments.size == 2 && segments[0].name == "contracts") {
-                return createFileReferences(literal)
-            }
-        }
-
-        if (segments.size == 1 && segments[0].name == "mappings") {
-            return createFileReferences(literal)
+        val valueContext = findActonTomlValueContext(element) ?: return PsiReference.EMPTY_ARRAY
+        if (valueContext.isPathField()) {
+            return createFileReferences(valueContext.literal)
         }
 
         return PsiReference.EMPTY_ARRAY
@@ -50,5 +34,21 @@ class ActonTomlValueReferenceProvider : PsiReferenceProvider() {
                 .toTypedArray()
         }
         return PsiReference.EMPTY_ARRAY
+    }
+
+    private fun ActonTomlValueContext.isPathField(): Boolean {
+        return matches("build", "gen-dir")
+            || matches("build", "out-dir")
+            || matches("build", "output-fift")
+            || matches("import-mappings", null)
+            || matches("contracts", null, "src")
+            || matches("contracts", null, "output")
+            || matches("contracts", null, "depends", "path")
+            || matches("test", "coverage", "output-file")
+            || matches("test", "junit-path")
+            || matches("test", "mutation", "rules-file")
+            || matches("wrappers", "tolk", "output-dir")
+            || matches("wrappers", "tolk", "test-output-dir")
+            || matches("wrappers", "typescript", "output-dir")
     }
 }

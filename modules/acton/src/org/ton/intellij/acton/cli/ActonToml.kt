@@ -112,6 +112,22 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
         return result.distinctBy { it.name }
     }
 
+    fun getCustomNetworkNames(): List<String> {
+        val file = psiFile ?: return emptyList()
+
+        return PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
+            ?.mapNotNull { table ->
+                val segments = table.header.key?.segments ?: return@mapNotNull null
+                if (segments.size == 2 && segments[0].name == "networks") {
+                    segments[1].name
+                } else {
+                    null
+                }
+            }
+            ?.distinct()
+            ?: emptyList()
+    }
+
     private fun getWalletElementsFromPsi(file: TomlFile?): List<TomlKeySegment> {
         if (file == null) return emptyList()
         return PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)

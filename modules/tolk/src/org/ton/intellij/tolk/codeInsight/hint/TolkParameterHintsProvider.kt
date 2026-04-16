@@ -19,8 +19,8 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
         if (!element.isValid || element !is TolkCallExpression) return
 
         val function = element.functionSymbol
-        if (function?.name == "ton" || function?.name == "address") {
-            // the parameters for these functions are obvious
+        if (function?.name in FUNCTIONS_WITHOUT_PARAMETER_HINTS) {
+            // the parameters for these functions are obvious or too noisy for inline hints
             return
         }
 
@@ -68,5 +68,9 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
         }
 
         return true
+    }
+
+    companion object {
+        private val FUNCTIONS_WITHOUT_PARAMETER_HINTS = setOf("ton", "address", "println", "format")
     }
 }

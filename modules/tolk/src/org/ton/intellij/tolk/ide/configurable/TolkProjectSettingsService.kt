@@ -45,8 +45,8 @@ class TolkProjectSettingsService(
         val projectDir = project.guessProjectDir() ?: return null
         val candidates = listOf(
             ".acton/tolk-stdlib", // Acton
-            "node_modules/@ton/tolk-js/tolk-stdlib", // Blueprint
-            "node_modules/@ton/tolk-js/dist/tolk-stdlib", // Blueprint
+            "node_modules/@ton/tolk-js/tolk-stdlib", // npm package layout
+            "node_modules/@ton/tolk-js/dist/tolk-stdlib", // npm package layout
             "crypto/smartcont/tolk-stdlib", // TON monorepo
         )
         for (candidate in candidates) {

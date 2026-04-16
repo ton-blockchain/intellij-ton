@@ -7,6 +7,9 @@
         <extensionPoint qualifiedName="org.ton.intellij.acton.testConsolePropertiesProvider"
                         interface="org.ton.intellij.acton.runconfig.ActonTestConsolePropertiesProvider"
                         dynamic="true"/>
+        <extensionPoint qualifiedName="org.ton.intellij.acton.profilerSupport"
+                        interface="org.ton.intellij.acton.profiler.ActonProfilerSupport"
+                        dynamic="true"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">

@@ -11,6 +11,8 @@ dependencies {
         bundledPlugin("org.toml.lang")
         bundledPlugin("com.intellij.modules.json")
         bundledModule("intellij.platform.coverage")
+        bundledModule("intellij.profiler.common")
+        bundledModule("intellij.profiler.clion")
         testFramework(TestFrameworkType.Platform)
     }
 

@@ -173,7 +173,7 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
 
         if (type is TolkTyStruct) {
             if (type.psi.name == "map") {
-                return "createEmptyMap()"
+                return "[]"
             }
             if (type.typeArguments.isNotEmpty() && type.psi.name == "Cell") {
                 // `Cell<T>` -> `T {}.toCell()` or `defaultOf(T).toCell()`

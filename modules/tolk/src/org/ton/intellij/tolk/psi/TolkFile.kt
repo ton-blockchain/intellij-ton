@@ -37,18 +37,36 @@ class TolkFile(viewProvider: FileViewProvider) :
     private val cachedDeclarations = CachedValuesManager.getManager(manager.project).createCachedValue({
         val declarations = findDeclarations(skipTypes = false)
         if (!isPhysical) {
-            Result.create(declarations, containingFile, PsiModificationTracker.MODIFICATION_COUNT)
+            Result.create(
+                declarations,
+                containingFile,
+                manager.project.tolkPsiManager.tolkStructureModificationCount,
+                PsiModificationTracker.MODIFICATION_COUNT,
+            )
         } else {
-            Result.create(declarations, PsiModificationTracker.MODIFICATION_COUNT)
+            Result.create(
+                declarations,
+                manager.project.tolkPsiManager.tolkStructureModificationCount,
+                PsiModificationTracker.MODIFICATION_COUNT,
+            )
         }
     }, false)
 
     private val cachedDeclarationsWithoutTypes = CachedValuesManager.getManager(manager.project).createCachedValue({
         val declarations = findDeclarations(skipTypes = true)
         if (!isPhysical) {
-            Result.create(declarations, containingFile, PsiModificationTracker.MODIFICATION_COUNT)
+            Result.create(
+                declarations,
+                containingFile,
+                manager.project.tolkPsiManager.tolkStructureModificationCount,
+                PsiModificationTracker.MODIFICATION_COUNT,
+            )
         } else {
-            Result.create(declarations, PsiModificationTracker.MODIFICATION_COUNT)
+            Result.create(
+                declarations,
+                manager.project.tolkPsiManager.tolkStructureModificationCount,
+                PsiModificationTracker.MODIFICATION_COUNT,
+            )
         }
     }, false)
 

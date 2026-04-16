@@ -133,6 +133,26 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         """.trimIndent(),
     )
 
+    fun `test completion in parameter default value`() = checkContainsCompletion(
+        "DEFAULT_VALUE",
+        """
+        const DEFAULT_VALUE = 42
+
+        fun foo(value: int = DEF/*caret*/) {}
+        """.trimIndent(),
+    )
+
+    fun `test completion in struct field default value`() = checkContainsCompletion(
+        "DEFAULT_VALUE",
+        """
+        const DEFAULT_VALUE = 42
+
+        struct Foo {
+            value: int = DEF/*caret*/
+        }
+        """.trimIndent(),
+    )
+
     fun `test hidden builtin helper completion is absent`() = checkNotContainsCompletion(
         "__expect_type",
         """

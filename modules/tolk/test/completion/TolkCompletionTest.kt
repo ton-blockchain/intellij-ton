@@ -65,6 +65,74 @@ class TolkCompletionTest : TolkCompletionTestBase() {
     """,
     )
 
+    fun `test lambda completion in callback argument`() = checkCompletion(
+        "fun",
+        """
+        fun map(value: int, cb: (int) -> int): int {
+            return cb(value);
+        }
+
+        fun main() {
+            map(10, fu/*caret*/)
+        }
+        """,
+        """
+        fun map(value: int, cb: (int) -> int): int {
+            return cb(value);
+        }
+
+        fun main() {
+            map(10, fun () {
+
+            }/*caret*/)
+        }
+        """.trimIndent(),
+    )
+
+    fun `test lambda completion in typed variable initializer`() = checkCompletion(
+        "fun",
+        """
+        fun main() {
+            val cb: (int, int) -> int = fu/*caret*/
+        }
+        """,
+        """
+        fun main() {
+            val cb: (int, int) -> int = fun () {
+
+            }/*caret*/
+        }
+        """.trimIndent(),
+    )
+
+    fun `test lambda completion in struct field initializer`() = checkCompletion(
+        "fun",
+        """
+        struct WithCb {
+            cb: (int, int) -> int
+        }
+
+        fun main() {
+            val withCb = WithCb {
+                cb: fu/*caret*/
+            }
+        }
+        """,
+        """
+        struct WithCb {
+            cb: (int, int) -> int
+        }
+
+        fun main() {
+            val withCb = WithCb {
+                cb: fun () {
+
+                }/*caret*/
+            }
+        }
+        """.trimIndent(),
+    )
+
     fun `test hidden builtin helper completion is absent`() = checkNotContainsCompletion(
         "__expect_type",
         """

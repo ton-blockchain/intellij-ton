@@ -6,6 +6,7 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.codeInsight.template.impl.ConstantNode
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.patterns.StandardPatterns
@@ -132,6 +133,14 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             )
         }
         val prefixMatcher = result.prefixMatcher
+
+        if (prefixMatcher.prefixMatches("fun") && element.parent !is TolkMatchPattern) {
+            result.addElement(
+                createLambdaLookupElement()
+                    .withPriority(TolkCompletionPriorities.KEYWORD),
+            )
+        }
+
         fun processNamedElement(element: TolkNamedElement): Boolean {
             if (!element.isVisibleInCompletionFrom(currentFile)) return true
             val name = element.name ?: return true
@@ -254,6 +263,22 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         }
     }
 }
+
+private fun createLambdaLookupElement(): LookupElement = LookupElementBuilder.create("fun")
+    .bold()
+    .withTailText("(params) { ... }", true)
+    .withInsertHandler(
+        TemplateStringInsertHandler(
+            "(\$params$) {\n\t\n}",
+            true,
+            "params" to ConstantNode(""),
+        ),
+    )
+    .toTolkLookupElement(
+        TolkLookupElementData(
+            keywordKind = TolkLookupElementData.KeywordKind.KEYWORD,
+        ),
+    )
 
 fun collectLocalVariables(startFrom: PsiElement, processor: (TolkLocalSymbolElement) -> Boolean): Boolean {
     var exitFromFunction = false

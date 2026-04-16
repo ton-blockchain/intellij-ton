@@ -59,13 +59,21 @@ class TolkCoverageRunner : CoverageRunner() {
         private fun readProjectData(dataFile: File, coverageSuite: TolkCoverageSuite): ProjectData? {
             val projectData = ProjectData()
             val report = readLcov(dataFile, coverageSuite.contextFilePath)
-            for ((filePath, lineHitsList) in report.records) {
+            for ((filePath, fileReport) in report.records) {
                 val classData = projectData.getOrCreateClassData(filePath)
-                val max = lineHitsList.lastOrNull()?.lineNumber ?: 0
+                val max = fileReport.lineHits.lastOrNull()?.lineNumber ?: 0
                 val lines = arrayOfNulls<LineData>(max + 1)
-                for (lineHits in lineHitsList) {
+                for (lineHits in fileReport.lineHits) {
                     val lineData = LineData(lineHits.lineNumber, null)
                     lineData.hits = lineHits.hits
+                    val branches = fileReport.branchHits[lineHits.lineNumber]
+                    if (branches != null) {
+                        for ((jumpIdx, branch) in branches.withIndex()) {
+                            val jump = lineData.addJump(jumpIdx)
+                            jump.trueHits = branch.trueHits
+                            jump.falseHits = branch.falseHits
+                        }
+                    }
                     lines[lineHits.lineNumber] = lineData
                 }
                 classData.setLines(lines)

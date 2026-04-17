@@ -2,7 +2,9 @@ package org.ton.intellij.tolk.type
 
 import com.intellij.codeInsight.completion.CompletionUtil
 import org.ton.intellij.tolk.psi.TolkEnum
+import kotlin.ConsistentCopyVisibility
 
+@ConsistentCopyVisibility
 data class TolkTyEnum private constructor(override val psi: TolkEnum) :
     TolkTy,
     TolkTyPsiHolder {

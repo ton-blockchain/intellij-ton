@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.ton.intellij.acton.ide.newProject
 
 import com.intellij.ide.wizard.AbstractNewProjectWizardStep

@@ -3,7 +3,9 @@ package org.ton.intellij.tolk.type
 import com.intellij.codeInsight.completion.CompletionUtil
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkTypeExpression
+import kotlin.ConsistentCopyVisibility
 
+@ConsistentCopyVisibility
 data class TolkTyStruct private constructor(
     override val psi: TolkStruct,
     val typeArguments: List<TolkTy> = emptyList(),

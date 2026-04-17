@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.ton.intellij.acton.ide
 
 import com.intellij.codeHighlighting.DirtyScopeTrackingHighlightingPassFactory

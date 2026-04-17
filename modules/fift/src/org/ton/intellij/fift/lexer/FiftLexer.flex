@@ -70,9 +70,6 @@ import static org.ton.intellij.fift.psi.FiftTypes.*;
     return;
 %eof}
 
-EOL=\R
-WHITE_SPACE_CHAR=\s
-
 CHAR="char"\s\S
 ABORT=(abort\"([^\"\r\n\\]|\\.)*\")
 PRINT=(\.\"([^\"\r\n\\]|\\.)*\")

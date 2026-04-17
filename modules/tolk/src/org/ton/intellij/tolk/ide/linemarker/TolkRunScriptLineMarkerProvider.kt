@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.ton.intellij.tolk.ide.linemarker
 
 import com.intellij.execution.actions.ConfigurationContext

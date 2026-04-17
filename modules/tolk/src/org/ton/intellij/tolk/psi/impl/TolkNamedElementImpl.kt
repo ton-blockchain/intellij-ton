@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.ton.intellij.tolk.psi.impl
 
 import com.intellij.lang.ASTNode
@@ -41,7 +43,7 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> :
 
     override fun getIcon(flags: Int): Icon? = super.getIcon(flags) ?: super.getBaseIcon()
 
-    override fun toString(): String = "$elementType:$name"
+    override fun toString(): String = "${greenStub?.stubType ?: node.elementType}:$name"
 
     override fun getPresentation(): ItemPresentation? = object : ItemPresentation {
         override fun getLocationString(): String = containingFile.name

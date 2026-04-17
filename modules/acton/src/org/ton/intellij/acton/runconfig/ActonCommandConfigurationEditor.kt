@@ -82,7 +82,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         )
         scriptPathField.addBrowseFolderListener(
             project,
-            FileChooserDescriptorFactory.createSingleFileDescriptor().withTitle("Select Script File"),
+            FileChooserDescriptorFactory.createSingleFileOrExecutableAppDescriptor().withTitle("Select Script File"),
         )
         testTargetBrowseField.addBrowseFolderListener(
             project,

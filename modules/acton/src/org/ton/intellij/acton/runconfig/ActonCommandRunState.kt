@@ -9,9 +9,9 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PtyCommandLine
 import com.intellij.execution.filters.TextConsoleBuilderImpl
 import com.intellij.execution.process.KillableColoredProcessHandler
-import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessHandler
+import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
@@ -256,7 +256,7 @@ class ActonCommandRunState(environment: ExecutionEnvironment, private val config
         )
         debugSession.recordStartup(commandLine.commandLineString, workingDir)
         handler.putUserData(ACTON_DEBUG_SESSION_KEY, debugSession)
-        handler.addProcessListener(object : ProcessAdapter() {
+        handler.addProcessListener(object : ProcessListener {
             override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
                 debugSession.append(event.text)
                 event.text

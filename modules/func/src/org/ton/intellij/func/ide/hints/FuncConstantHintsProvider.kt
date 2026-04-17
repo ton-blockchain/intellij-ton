@@ -1,9 +1,10 @@
+@file:Suppress("DEPRECATION")
+
 package org.ton.intellij.func.ide.hints
 
 import com.intellij.codeInsight.hints.declarative.*
 import com.intellij.openapi.editor.Editor
 import com.intellij.psi.PsiFile
-import com.intellij.refactoring.suggested.endOffset
 import org.ton.intellij.func.eval.FuncConstantExpressionEvaluator
 import org.ton.intellij.func.eval.FuncIntValue
 import org.ton.intellij.func.psi.FuncFile
@@ -29,7 +30,10 @@ class FuncConstantHintsProvider : InlayHintsProvider {
                         return@forEach
                     }
                 } ?: return@forEach
-                sink.addPresentation(InlineInlayPosition(const.identifier.endOffset, true), hasBackground = true) {
+                sink.addPresentation(
+                    InlineInlayPosition(const.identifier.textRange.endOffset, true),
+                    hasBackground = true,
+                ) {
                     val text = buildString {
                         append("= ")
                         if (value is FuncIntValue &&

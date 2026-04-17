@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.ton.intellij.func.ide.quickdoc
 
 import com.intellij.codeInsight.documentation.DocumentationManagerUtil

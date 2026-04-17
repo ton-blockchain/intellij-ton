@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+
 package org.ton.intellij.tolk.coverage
 
 import com.intellij.codeEditor.printing.ExportToHTMLSettings

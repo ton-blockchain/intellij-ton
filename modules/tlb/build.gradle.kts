@@ -12,7 +12,7 @@ plugins {
 dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
-        webstorm(version)
+        rustRover(version)
         testFramework(TestFrameworkType.Platform)
         bundledPlugin("com.intellij.dev")
     }

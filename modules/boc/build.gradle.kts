@@ -6,7 +6,7 @@ plugins {
 dependencies {
     intellijPlatform {
         val version = providers.gradleProperty("platformVersion")
-        webstorm(version)
+        rustRover(version)
     }
     implementation(project(":acton"))
     implementation(project(":util"))

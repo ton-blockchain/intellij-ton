@@ -8,14 +8,15 @@ import org.ton.intellij.tolk.TolkFileType
 
 class TolkTestSourcesFilter : TestSourcesFilter() {
     override fun isTestSource(file: VirtualFile, project: Project): Boolean {
-        if (file.fileType != TolkFileType) {
+        val fileIndex = ProjectFileIndex.getInstance(project)
+        if (!fileIndex.isInContent(file)) {
             return false
         }
 
-        if (!ProjectFileIndex.getInstance(project).isInContent(file)) {
-            return false
+        if (file.isUnderTestsRoot(project)) {
+            return file.isDirectory || file.fileType == TolkFileType
         }
 
-        return file.name.endsWith(".test.tolk")
+        return file.fileType == TolkFileType && file.name.endsWith(".test.tolk")
     }
 }

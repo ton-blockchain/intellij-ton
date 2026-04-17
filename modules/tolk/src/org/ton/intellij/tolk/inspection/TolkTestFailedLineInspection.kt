@@ -16,8 +16,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Iconable
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiWhiteSpace
+import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ui.UIUtil
 import com.intellij.xml.util.XmlStringUtil.escapeString
+import org.ton.intellij.acton.runconfig.ActonTestFailureStateService
 import org.ton.intellij.acton.runconfig.ComparisonFailure
 import org.ton.intellij.acton.runconfig.actonTestFailureState
 import org.ton.intellij.tolk.ide.linemarker.TolkTestLineMarkerProvider
@@ -45,8 +48,8 @@ class TolkTestFailedLineInspection : TolkInspectionBase() {
                     return
                 }
 
-                val failedElement = findFailedElement(function, state)
                 val locationUrl = TolkTestLocator.getTestUrl(function)
+                val failedElement = findFailedElement(function, state, locationUrl, testFailureState)
                 val comparisonFailure = testFailureState.getComparisonFailure(locationUrl)
 
                 val descriptor = InspectionManager.getInstance(holder.project).createProblemDescriptor(
@@ -60,38 +63,28 @@ class TolkTestFailedLineInspection : TolkInspectionBase() {
                 descriptor.setTextAttributes(CodeInsightColors.RUNTIME_ERROR)
                 holder.registerProblem(descriptor)
             }
-
-            private fun findFailedElement(function: TolkFunction, state: TestStateStorage.Record): PsiElement {
-                val stacktrace = state.topStacktraceLine ?: return function
-
-                val pattern = Regex("([^:]+):(\\d+):(\\d+)")
-                val match = pattern.find(stacktrace) ?: return function.nameIdentifier ?: function
-
-                val filePath = match.groupValues[1]
-                val lineNumber = match.groupValues[2].toIntOrNull() ?: return function.nameIdentifier ?: function
-                val lineColumn = match.groupValues[3].toIntOrNull() ?: 0
-
-                val functionFile = function.containingFile.virtualFile
-                if (!filePath.endsWith(functionFile.name)) {
-                    return function.nameIdentifier ?: function
-                }
-
-                val document = PsiDocumentManager.getInstance(function.project).getDocument(function.containingFile)
-                    ?: return function.nameIdentifier ?: function
-
-                if (lineNumber - 1 >= document.lineCount) {
-                    return function.nameIdentifier ?: function
-                }
-
-                val lineStartOffset = document.getLineStartOffset(lineNumber - 1)
-                val element = function.containingFile.findElementAt(lineStartOffset + lineColumn)
-
-                return element ?: function.nameIdentifier ?: function
-            }
         }
 
     companion object {
+        private val stacktracePattern = Regex("([^:]+):(\\d+):(\\d+)")
         private val actualExpectedPattern = Regex("""(?s)\bActual:\s*(.*?)\n\s*Expected:\s*(.*)\z""")
+
+        internal fun findFailedElement(
+            function: TolkFunction,
+            state: TestStateStorage.Record,
+            locationUrl: String,
+            testFailureState: ActonTestFailureStateService,
+        ): PsiElement {
+            testFailureState.getFailedElement(locationUrl)?.let { return it }
+
+            val failedElement = findFailedElementByStacktrace(function, state)
+            if (failedElement != null) {
+                testFailureState.rememberFailedElement(locationUrl, failedElement)
+                return failedElement
+            }
+
+            return function.nameIdentifier ?: function
+        }
 
         internal fun buildProblemMessage(
             state: TestStateStorage.Record,
@@ -125,6 +118,40 @@ class TolkTestFailedLineInspection : TolkInspectionBase() {
             if (actual.isBlank() || expected.isBlank()) return null
 
             return formatActualExpected(actual, expected)
+        }
+
+        private fun findFailedElementByStacktrace(function: TolkFunction, state: TestStateStorage.Record): PsiElement? {
+            val stacktrace = state.topStacktraceLine ?: return null
+            val match = stacktracePattern.find(stacktrace) ?: return null
+
+            val filePath = match.groupValues[1]
+            val lineNumber = match.groupValues[2].toIntOrNull() ?: return null
+            val lineColumn = match.groupValues[3].toIntOrNull() ?: return null
+
+            val functionFile = function.containingFile.virtualFile
+            if (!filePath.endsWith(functionFile.name)) {
+                return null
+            }
+
+            val document = PsiDocumentManager.getInstance(function.project).getDocument(function.containingFile)
+                ?: return null
+            if (lineNumber <= 0 || lineNumber > document.lineCount) {
+                return null
+            }
+
+            val lineStartOffset = document.getLineStartOffset(lineNumber - 1)
+            val targetOffset = lineStartOffset + (lineColumn - 1).coerceAtLeast(0)
+            val lineEndOffset = document.getLineEndOffset(lineNumber - 1)
+            if (targetOffset > lineEndOffset) {
+                return null
+            }
+
+            val elementAtOffset = function.containingFile.findElementAt(targetOffset) ?: return null
+            return if (elementAtOffset is PsiWhiteSpace) {
+                PsiTreeUtil.nextLeaf(elementAtOffset) ?: PsiTreeUtil.prevLeaf(elementAtOffset) ?: elementAtOffset
+            } else {
+                elementAtOffset
+            }
         }
 
         private fun sanitizeFailureOutput(output: String, stacktraceLine: String?): String {

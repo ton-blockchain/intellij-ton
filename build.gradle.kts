@@ -134,8 +134,9 @@ intellijPlatform {
     }
     pluginVerification {
         ides {
-            recommended()
-            select {}
+            select {
+                types = listOf(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.WebStorm)
+            }
         }
     }
 

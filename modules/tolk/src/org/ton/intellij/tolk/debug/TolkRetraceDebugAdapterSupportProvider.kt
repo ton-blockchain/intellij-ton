@@ -113,8 +113,8 @@ class TolkRetraceDebugAdapterSupportProvider : DebugAdapterSupportProvider<TolkR
                         connectionAttempts = 3,
                         intervalBetweenAttempts = 300.milliseconds,
                     ) {
-                        LOG.info("Stopping Acton debug process for session $sessionId")
-                        stopProcess(processHandler)
+                        LOG.info("DAP socket closed for session $sessionId")
+                        ActonDebugProcessTermination.stopWhenSocketCloses(processHandler, sessionId, LOG)
                     }
                 } catch (e: CancellationException) {
                     stopProcess(processHandler)

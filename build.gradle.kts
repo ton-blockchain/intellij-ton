@@ -174,14 +174,20 @@ tasks {
         finalizedBy(mergePluginJarsTask)
         enabled = true
     }
+
     withType<RunIdeTask> {
         // Force `mergePluginJarTask` be executed before any task based on `RunIdeBase` (for example, `runIde` or `buildSearchableOptions`).
         // Otherwise, these tasks fail because of implicit dependency.
         // Should be dropped when jar merging is implemented in `gradle-intellij-plugin` itself
         dependsOn(mergePluginJarsTask)
     }
+
     verifyPlugin {
         dependsOn(mergePluginJarsTask)
+    }
+
+    wrapper {
+        gradleVersion = providers.gradleProperty("gradleVersion").get()
     }
 }
 

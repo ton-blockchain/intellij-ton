@@ -258,7 +258,7 @@ fun test14() {
     var s1 = Storage { Wrapper: wrap(999), backup: null };
     var s2 = Storage { Wrapper: wrap(makePair(1, "")), backup: makePair(2, "") };
     __expect_type(s1, "Storage<int>");
-    __expect_type(s2, "Storage<Pair<int, slice>>");
+    __expect_type(s2, "Storage<Pair<int, string>>");
     return (s1, s2.backup!.first);
 }
 

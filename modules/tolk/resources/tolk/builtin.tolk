@@ -109,7 +109,7 @@ fun T.estimatePackSize(): (int, int, int, int)
 // used in tolk-tester to check/expose internal compiler state
 // each of them is handled in a special way, search by its name
 @pure
-fun __expect_type<T>(actual: T, expect: slice) builtin;
+fun __expect_type<T>(actual: T, expect: string) builtin;
 
 @pure
 fun T.__toTuple(self): tuple builtin;

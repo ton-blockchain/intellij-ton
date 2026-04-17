@@ -85,7 +85,7 @@ fun test2() {
     __expect_type(i1.value, "int");
     __expect_type(i1.value + i2.value + i3.value, "int");
     __expect_type(i3, "JustIntAlias2");
-    __expect_type([i2, i3], "[JustInt, JustIntAlias2]");
+    __expect_type([i2, i3], "array<JustInt>");
     __expect_type([i2] as [JustIntAlias], "[JustIntAlias]");
     return (i1, i2, i3, [i1, JustIntAlias{value:5}]);
 }

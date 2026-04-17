@@ -70,7 +70,7 @@ fun int.unionMix(self): bool { return true }
 
 fun test4() {
     __expect_type((5 as int).unionMix(), "bool");
-    __expect_type(("".unionMix()), "slice");
+    __expect_type((("" as slice).unionMix()), "slice");
     __expect_type(((5 as int|slice).unionMix()), "slice");
 }
 
@@ -186,7 +186,7 @@ fun T.p(self): int3 { return 0 }
 fun test11() {
     __expect_type((5, "").p(), "int1");
     __expect_type((5 as int8, "").p(), "int8");
-    __expect_type(("", "").p(), "slice");
+    __expect_type(("", "").p(), "string");
     __expect_type((1, 2, 3).p(), "int3");
 }
 

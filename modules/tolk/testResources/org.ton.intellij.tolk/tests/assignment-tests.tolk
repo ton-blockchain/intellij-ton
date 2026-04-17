@@ -199,14 +199,14 @@ fun test116() {
     var (a,b,c,d) = (0,0,0,0);
     var rhs = [1, 2, 3, 4];
     var rhs2 = ([a,b,c,d] = rhs);
-    __expect_type(rhs2, "[int, int, int, int]");
+    __expect_type(rhs2, "array<int>");
     return (a, b, c, d, rhs2);
 }
 
 @method_id(117)
 fun test117() {
     var c = [((1, ), ), ];
-    __expect_type(c, "[int]");
+    __expect_type(c, "array<int>");
     c.0 = 10;
     c.0 = (20, );
     return c;

@@ -52,7 +52,7 @@ class TolkCreateFunctionQuickfix : TolkQuickfixTestBase() {
             }
         """.trimIndent(),
         """
-            fun logMessage(param0: slice) {
+            fun logMessage(param0: string) {
                 
             }
 
@@ -87,7 +87,7 @@ class TolkCreateFunctionQuickfix : TolkQuickfixTestBase() {
             }
         """.trimIndent(),
         """
-            fun mixedCall(count: int, param1: slice, param2: int) {
+            fun mixedCall(count: int, param1: string, param2: int) {
                 
             }
 
@@ -208,7 +208,7 @@ class TolkCreateFunctionQuickfix : TolkQuickfixTestBase() {
             }
         """.trimIndent(),
         """
-            fun logMessage(param0: slice) {
+            fun logMessage(param0: string) {
                 
             }
 

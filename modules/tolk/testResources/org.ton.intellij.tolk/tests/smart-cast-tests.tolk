@@ -307,7 +307,7 @@ fun test28() {
 fun test29() {
     var x = (getNullableInt(), getNullableInt(), getNullableInt(), getNullableInt());
     __expect_type([x.0 = rand(), ((x.0 += (x.1 = rand()) as int)), !(x.1 <=> (x.2 = rand() + x.0)) == null, (x.3 = rand()) ? x.3 : (!x.3) as int],
-                  "[int, int, bool, int]");
+                  "array<int | bool>");
 }
 
 @method_id(130)

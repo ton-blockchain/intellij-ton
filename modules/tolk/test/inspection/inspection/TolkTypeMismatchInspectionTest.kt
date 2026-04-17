@@ -30,7 +30,7 @@ class TolkTypeMismatchInspectionTest : TolkInspectionTestBase() {
         doInspectionTest(
             """
             fun main() {
-                val a: int = <error descr="Cannot assign 'slice' to variable of type 'int'">"hello"</error>;
+                val a: int = <error descr="Cannot assign 'string' to variable of type 'int'">"hello"</error>;
             }
             """.trimIndent(),
             TolkTypeMismatchInspection(),
@@ -56,7 +56,7 @@ class TolkTypeMismatchInspectionTest : TolkInspectionTestBase() {
                     10 => 10 as int8,
                     else => 20 as int16,
                 };
-                __expect_type(a, "int");
+                var b: int = a;
             }
             """.trimIndent(),
             TolkTypeMismatchInspection(),

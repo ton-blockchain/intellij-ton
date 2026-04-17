@@ -166,6 +166,10 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 is TolkStruct,
                 is TolkEnum,
                 -> {
+                    if (inMatchPattern && expectType is TolkTyEnum && element is TolkEnum) {
+                        return true
+                    }
+
                     fun canAddAsUnionMatchVariant(): Boolean {
                         if (!inMatchPattern) return false
                         if (declaredMatchArms.contains(name)) return false

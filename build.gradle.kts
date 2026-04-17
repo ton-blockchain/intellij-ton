@@ -1,5 +1,6 @@
 import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -134,8 +135,9 @@ intellijPlatform {
     }
     pluginVerification {
         ides {
-            recommended()
-            select {}
+            select {
+                types = listOf(IntelliJPlatformType.WebStorm)
+            }
         }
     }
 

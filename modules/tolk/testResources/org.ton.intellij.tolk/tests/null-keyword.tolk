@@ -66,7 +66,7 @@ fun test7() {
 
 fun test8() {
     __expect_type(null, "null");
-    __expect_type([[null]], "[[null]]");
+    __expect_type([[null]], "array<array<null>>");
     __expect_type(null as tuple?, "tuple?");
     __expect_type(null as [int]?, "[int]?");
     __expect_type(((null)) as (int, int)?, "(int, int)?");

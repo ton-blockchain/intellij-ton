@@ -87,7 +87,6 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
         is TolkTypeParameter -> element.generateDoc()
         is TolkCatchParameter -> element.generateDoc()
         is TolkAnnotation -> element.generateDoc()
-        is TolkAnnotationName -> element.parentOfType<TolkAnnotation>(strict = true)?.generateDoc()
         is TolkContractDefinition -> element.generateDoc()
         is TolkContractField -> element.generateDoc()
         else -> null

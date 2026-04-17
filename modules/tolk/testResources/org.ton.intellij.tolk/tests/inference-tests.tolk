@@ -25,8 +25,10 @@ fun test1(x: int, y: int) {
     __expect_type(x!, "int");
     __expect_type(x!!!, "int");
     {
-        var x: slice = beginCell().endCell().beginParse();
-        __expect_type(x, "slice");
+        var x = "";
+        __expect_type(x, "string");
+        var s: slice = beginCell().endCell().beginParse();
+        __expect_type(s, "slice");
         __expect_type(beginCell(), "builder");
         __expect_type(beginCell().endCell(), "cell");
     }
@@ -34,11 +36,11 @@ fun test1(x: int, y: int) {
     __expect_type((1, 2, ), "(int, int)");
     __expect_type((1, ), "int");
     __expect_type((((1,)),), "int");
-    __expect_type([1, 2], "[int, int]");
-    __expect_type([1, 2, ], "[int, int]");
-    __expect_type([1, ], "[int]");
-    __expect_type([((1, ), ), ], "[int]");
-    __expect_type([[[1, ], ], ], "[[[int]]]");
+    __expect_type([1, 2], "array<int>");
+    __expect_type([1, 2, ], "array<int>");
+    __expect_type([1, ], "array<int>");
+    __expect_type([((1, ), ), ], "array<int>");
+    __expect_type([[[1, ], ], ], "array<array<array<int>>>");
 }
 
 fun test2(x: int, y: bool) {
@@ -70,11 +72,11 @@ fun test4(x: int) {
 }
 
 fun test5(x: int) {
-    __expect_type([], "[]");
-    __expect_type([x], "[int]");
-    __expect_type([x, x >= 1], "[int, bool]");
-    __expect_type([x, x >= 1, null as slice?], "[int, bool, slice?]");
-    __expect_type((x, [x], [[x], x]), "(int, [int], [[int], int])");
+    __expect_type([], "array<unknown>");
+    __expect_type([x], "array<int>");
+    __expect_type([x, x >= 1], "array<int | bool>");
+    __expect_type([x, x >= 1, null as slice?], "array<int | bool | slice | null>");
+    __expect_type((x, [x], [[x], x]), "(int, array<int>, array<array<int> | int>)");
     __expect_type(contract.getOriginalBalanceWithExtraCurrencies(), "[coins, ExtraCurrenciesMap]");
 }
 

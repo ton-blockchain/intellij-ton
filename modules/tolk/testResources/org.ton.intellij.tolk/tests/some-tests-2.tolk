@@ -58,7 +58,7 @@ fun testDumpDontPolluteStack() {
     var f = get10();
     debug.print(f);
     debug.print(10);
-    var s = "asdf";
+    var s = "asdf" as slice;
     debug.printString(s);
     debug.dumpStack();
     debug.printString("my");

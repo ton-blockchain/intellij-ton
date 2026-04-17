@@ -18,21 +18,18 @@ class LcovCoverageReport {
         val result = if (oldReport == null) {
             FileReport(
                 normalizeLineHitsList(report.lineHits),
-                report.branchHits.toMutableMap()
+                report.branchHits.toMutableMap(),
             )
         } else {
             FileReport(
                 doMerge(oldReport.lineHits, report.lineHits),
-                mergeBranchHits(oldReport.branchHits, report.branchHits)
+                mergeBranchHits(oldReport.branchHits, report.branchHits),
             )
         }
         info[normalizedFilePath] = result
     }
 
-    class FileReport(
-        val lineHits: List<LineHits>,
-        val branchHits: Map<Int, List<BranchHits>>,
-    )
+    class FileReport(val lineHits: List<LineHits>, val branchHits: Map<Int, List<BranchHits>>)
 
     class LineHits(val lineNumber: Int, hits: Int) {
         var hits: Int
@@ -105,7 +102,7 @@ class LcovCoverageReport {
                         report.mergeFileReport(
                             localBaseDir,
                             checkNotNull(currentFileName),
-                            FileReport(checkNotNull(lineDataList), branchHits)
+                            FileReport(checkNotNull(lineDataList), branchHits),
                         )
                         currentFileName = null
                         lineDataList = null
@@ -117,9 +114,7 @@ class LcovCoverageReport {
             return report
         }
 
-        private fun buildBranchHits(
-            raw: Map<Int, Map<Int, Map<Int, Int>>>
-        ): Map<Int, List<BranchHits>> {
+        private fun buildBranchHits(raw: Map<Int, Map<Int, Map<Int, Int>>>): Map<Int, List<BranchHits>> {
             val result = mutableMapOf<Int, MutableList<BranchHits>>()
             for ((lineNum, blocks) in raw) {
                 for ((blockIdx, branches) in blocks) {
@@ -137,11 +132,31 @@ class LcovCoverageReport {
                 for ((filePath, fileReport) in report.info) {
                     out.print(SOURCE_FILE_PREFIX)
                     out.println(filePath)
-                    for (lineHits in fileReport.lineHits) {
+                    val lineHits = fileReport.lineHits.sortedBy { it.lineNumber }
+                    for (lineHit in lineHits) {
                         out.print(LINE_HIT_PREFIX)
-                        out.print(lineHits.lineNumber)
+                        out.print(lineHit.lineNumber)
                         out.print(',')
-                        out.println(lineHits.hits)
+                        out.println(lineHit.hits)
+                    }
+                    out.println("LF:${lineHits.size}")
+                    out.println("LH:${lineHits.count { it.hits > 0 }}")
+
+                    val branchHits = fileReport.branchHits.toSortedMap()
+                    if (branchHits.isNotEmpty()) {
+                        var branchesFound = 0
+                        var branchesHit = 0
+                        for ((lineNumber, branches) in branchHits) {
+                            for (branch in branches.sortedBy { it.blockIndex }) {
+                                out.println("$BRANCH_DATA_PREFIX$lineNumber,${branch.blockIndex},0,${branch.trueHits}")
+                                out.println("$BRANCH_DATA_PREFIX$lineNumber,${branch.blockIndex},1,${branch.falseHits}")
+                                branchesFound += 2
+                                branchesHit += if (branch.trueHits > 0) 1 else 0
+                                branchesHit += if (branch.falseHits > 0) 1 else 0
+                            }
+                        }
+                        out.println("BRF:$branchesFound")
+                        out.println("BRH:$branchesHit")
                     }
                     out.println(END_OF_RECORD)
                 }

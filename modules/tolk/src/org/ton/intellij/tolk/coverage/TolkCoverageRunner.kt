@@ -10,6 +10,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NlsContexts.ProgressTitle
+import com.intellij.rt.coverage.data.JumpData
 import com.intellij.rt.coverage.data.LineData
 import com.intellij.rt.coverage.data.ProjectData
 import org.ton.intellij.tolk.TolkBundle
@@ -66,16 +67,7 @@ class TolkCoverageRunner : CoverageRunner() {
                 val max = fileReport.lineHits.lastOrNull()?.lineNumber ?: 0
                 val lines = arrayOfNulls<LineData>(max + 1)
                 for (lineHits in fileReport.lineHits) {
-                    val lineData = LineData(lineHits.lineNumber, null)
-                    lineData.hits = lineHits.hits
-                    val branches = fileReport.branchHits[lineHits.lineNumber]
-                    if (branches != null) {
-                        for ((jumpIdx, branch) in branches.withIndex()) {
-                            val jump = lineData.addJump(jumpIdx)
-                            jump.trueHits = branch.trueHits
-                            jump.falseHits = branch.falseHits
-                        }
-                    }
+                    val lineData = createLineData(lineHits, fileReport.branchHits[lineHits.lineNumber])
                     lines[lineHits.lineNumber] = lineData
                 }
                 classData.setLines(lines)
@@ -84,3 +76,26 @@ class TolkCoverageRunner : CoverageRunner() {
         }
     }
 }
+
+internal fun createLineData(
+    lineHits: LcovCoverageReport.LineHits,
+    branches: List<LcovCoverageReport.BranchHits>?,
+): LineData {
+    val lineData = LineData(lineHits.lineNumber, null)
+    lineData.hits = lineHits.hits
+    if (branches != null) {
+        for ((jumpIdx, branch) in branches.withIndex()) {
+            val jump: JumpData = lineData.addJump(jumpIdx)
+            jump.trueHits = branch.trueHits
+            jump.falseHits = branch.falseHits
+        }
+        // LineData.getStatus() only looks at the array-backed branch storage.
+        lineData.fillArrays()
+    }
+    return lineData
+}
+
+internal fun createLineStatus(
+    lineHits: LcovCoverageReport.LineHits,
+    branches: List<LcovCoverageReport.BranchHits>?,
+): Int = createLineData(lineHits, branches).status

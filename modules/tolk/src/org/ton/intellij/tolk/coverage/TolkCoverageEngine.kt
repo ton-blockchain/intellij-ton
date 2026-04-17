@@ -126,8 +126,8 @@ class TolkCoverageEngine : CoverageEngine() {
             val projectData = suite.getCoverageData(dataManager) ?: continue
             val classDataMap = projectData.classes
             for ((filePath, classData) in classDataMap) {
-                val lineHitsList = convertClassDataToLineHits(classData)
-                coverageReport.mergeFileReport(null, filePath, lineHitsList)
+                val fileReport = convertClassDataToFileReport(classData)
+                coverageReport.mergeFileReport(null, filePath, fileReport)
             }
         }
 
@@ -178,17 +178,24 @@ class TolkCoverageEngine : CoverageEngine() {
         append(".lcov")
     }
 
-    private fun convertClassDataToLineHits(classData: ClassData): List<LcovCoverageReport.LineHits> {
+    private fun convertClassDataToFileReport(classData: ClassData): LcovCoverageReport.FileReport {
         val lineCount = classData.lines.size
         val lineHitsList = ArrayList<LcovCoverageReport.LineHits>(lineCount)
+        val branchHits = mutableMapOf<Int, MutableList<LcovCoverageReport.BranchHits>>()
         for (lineInd in 0 until lineCount) {
             val lineData = classData.getLineData(lineInd)
             if (lineData != null) {
-                val lineHits = LcovCoverageReport.LineHits(lineData.lineNumber, lineData.hits)
-                lineHitsList.add(lineHits)
+                lineHitsList.add(LcovCoverageReport.LineHits(lineData.lineNumber, lineData.hits))
+                val jumps = lineData.jumps
+                if (jumps != null) {
+                    val list = branchHits.getOrPut(lineData.lineNumber) { mutableListOf() }
+                    for ((idx, jump) in jumps.withIndex()) {
+                        list.add(LcovCoverageReport.BranchHits(idx, jump.trueHits, jump.falseHits))
+                    }
+                }
             }
         }
-        return lineHitsList
+        return LcovCoverageReport.FileReport(lineHitsList, branchHits)
     }
 
     override fun collectSrcLinesForUntouchedFile(classFile: File, suite: CoverageSuitesBundle): List<Int>? = null

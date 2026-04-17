@@ -20,7 +20,7 @@ class TolkCoverageSuite : BaseCoverageSuite {
         fileProvider: CoverageFileProvider,
         coverageRunner: CoverageRunner,
         contextFilePath: String?,
-    ) : super(name, fileProvider, System.currentTimeMillis(), false, false, false, coverageRunner, project) {
+    ) : super(name, fileProvider, System.currentTimeMillis(), false, true, false, coverageRunner, project) {
         this.contextFilePath = contextFilePath
     }
 

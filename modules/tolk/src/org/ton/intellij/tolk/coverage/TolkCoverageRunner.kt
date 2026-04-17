@@ -1,8 +1,12 @@
 package org.ton.intellij.tolk.coverage
 
 import com.intellij.coverage.CoverageEngine
+import com.intellij.coverage.CoverageLoadErrorReporter
+import com.intellij.coverage.CoverageLoadingResult
 import com.intellij.coverage.CoverageRunner
 import com.intellij.coverage.CoverageSuite
+import com.intellij.coverage.FailedCoverageLoadingResult
+import com.intellij.coverage.SuccessCoverageLoadingResult
 import com.intellij.ide.plugins.PluginManagerCore.isUnitTestMode
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
@@ -37,8 +41,16 @@ class TolkCoverageRunner : CoverageRunner() {
 
     override fun acceptsCoverageEngine(engine: CoverageEngine): Boolean = engine is TolkCoverageEngine
 
-    override fun loadCoverageData(sessionDataFile: File, baseCoverageSuite: CoverageSuite?): ProjectData? {
-        if (baseCoverageSuite !is TolkCoverageSuite) return null
+    override fun loadCoverageData(
+        sessionDataFile: File,
+        baseCoverageSuite: CoverageSuite?,
+        reporter: CoverageLoadErrorReporter,
+    ): CoverageLoadingResult {
+        if (baseCoverageSuite !is TolkCoverageSuite) {
+            return FailedCoverageLoadingResult(
+                "Unsupported coverage suite: ${baseCoverageSuite?.javaClass?.name ?: "null"}",
+            )
+        }
         return try {
             if (ApplicationManager.getApplication().isDispatchThread) {
                 baseCoverageSuite.project.computeWithCancelableProgress(
@@ -49,9 +61,12 @@ class TolkCoverageRunner : CoverageRunner() {
             } else {
                 readProjectData(sessionDataFile, baseCoverageSuite)
             }
+                ?.let(::SuccessCoverageLoadingResult)
+                ?: FailedCoverageLoadingResult("Couldn't read coverage data from ${sessionDataFile.path}")
         } catch (e: IOException) {
+            reporter.reportError(e)
             LOG.warn("Can't read coverage data", e)
-            null
+            FailedCoverageLoadingResult(e, false)
         }
     }
 

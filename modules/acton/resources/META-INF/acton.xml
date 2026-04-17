@@ -17,7 +17,7 @@
         <moduleBuilder builderClass="org.ton.intellij.acton.ide.newProject.ActonModuleBuilder"/>
 
         <directoryProjectGenerator implementation="org.ton.intellij.acton.ide.newProject.ActonProjectGenerator"/>
-        <newProjectWizard.language implementation="org.ton.intellij.acton.ide.newProject.ActonNewProjectWizard"/>
+        <newProjectWizard.languageGenerator implementation="org.ton.intellij.acton.ide.newProject.ActonNewProjectWizard"/>
 
         <configurationType implementation="org.ton.intellij.acton.runconfig.ActonCommandConfigurationType"/>
         <projectConfigurable instance="org.ton.intellij.acton.settings.ActonConfigurable"

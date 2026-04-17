@@ -12,5 +12,5 @@ abstract class FuncStubbedElementImpl<T : StubBase<*>> :
     constructor(stub: T, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
     constructor(node: ASTNode) : super(node)
 
-    override fun toString(): String = elementType.toString()
+    override fun toString(): String = elementTypeImpl.toString()
 }

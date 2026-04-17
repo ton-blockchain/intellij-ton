@@ -7,6 +7,8 @@ import com.intellij.execution.process.ProcessTerminatedListener
 import com.intellij.icons.AllIcons
 import com.intellij.ide.util.PsiNavigationSupport
 import com.intellij.ide.util.projectWizard.SettingsStep
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.progress.ProgressManager
@@ -15,7 +17,6 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.DirectoryProjectGeneratorBase
-import com.intellij.platform.GeneratorPeerImpl
 import com.intellij.platform.ProjectGeneratorPeer
 import com.intellij.ui.dsl.builder.*
 import com.intellij.util.ui.JBUI
@@ -24,6 +25,7 @@ import org.ton.intellij.acton.cli.ActonCommandLine
 import java.awt.BorderLayout
 import java.awt.Cursor
 import java.nio.file.Paths
+import javax.swing.DefaultComboBoxModel
 import javax.swing.Icon
 import javax.swing.JButton
 import javax.swing.JComponent
@@ -66,10 +68,7 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
         baseDir.refresh(false, true)
         VfsUtil.markDirtyAndRefresh(false, true, true, baseDir)
 
-        val fileToOpen = starterFilePathForTemplate(
-            template = settings.template,
-            includeTypeScriptApp = settings.addTypeScriptApp,
-        )
+        val fileToOpen = settings.starterFilePath
 
         if (fileToOpen != null) {
             invokeLater {
@@ -87,9 +86,10 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
 }
 
 internal class ActonProjectGeneratorPeer(
-    private val templateCatalog: ActonTemplateCatalog = ActonTemplateCatalogProvider.getTemplateCatalog(),
-) : GeneratorPeerImpl<ActonProjectSettings>() {
-    private val templateOptions = templateCatalog.templateIds()
+    initialTemplateCatalog: ActonTemplateCatalog = ActonTemplateCatalogProvider.getCachedTemplateCatalog(),
+) : ProjectGeneratorPeer<ActonProjectSettings> {
+    private var templateCatalog: ActonTemplateCatalog = initialTemplateCatalog
+    private val templateOptionsModel = DefaultComboBoxModel<String>()
     private val propertyGraph = PropertyGraph()
     private val template = propertyGraph.property(templateCatalog.normalizedDefaultTemplate())
     private val addTypeScriptApp = propertyGraph.property(false)
@@ -105,8 +105,14 @@ internal class ActonProjectGeneratorPeer(
     private var checkValid: Runnable? = null
 
     private val settings = ActonProjectSettings()
+    val uiComponent: JComponent by lazy(::createComponent)
+
+    @Volatile
+    private var templateCatalogLoading: Boolean = false
 
     init {
+        replaceTemplateOptions(templateCatalog, template.get())
+        refreshTemplateCatalogAsync()
         template.afterChange {
             updateAddTypeScriptAppVisibility()
             checkValid?.run()
@@ -116,34 +122,37 @@ internal class ActonProjectGeneratorPeer(
 
     override fun getComponent(myLocationField: TextFieldWithBrowseButton, checkValid: Runnable): JComponent {
         this.checkValid = checkValid
-        return panel {
-            row("Template:") {
-                comboBox(templateOptions)
-                    .bindItem(template)
-                    .align(AlignX.FILL)
-            }.bottomGap(BottomGap.NONE)
-            addTypeScriptAppRow = row {
-                checkBox("Add TypeScript app")
-                    .bindSelected(addTypeScriptApp)
-                    .comment("Include the template's TypeScript app scaffold")
-            }
-            row(environmentVariables.label) {
-                cell(environmentVariables)
-                    .align(AlignX.FILL)
-            }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
-            row {
-                cell(createAdvancedOptionsPanel())
-                    .align(AlignX.FILL)
-            }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
-        }.also {
-            updateAddTypeScriptAppVisibility()
+        return uiComponent
+    }
+
+    private fun createComponent(): JComponent = panel {
+        row("Template:") {
+            comboBox(templateOptionsModel)
+                .bindItem(template)
+                .align(AlignX.FILL)
+        }.bottomGap(BottomGap.NONE)
+        addTypeScriptAppRow = row {
+            checkBox("Add TypeScript app")
+                .bindSelected(addTypeScriptApp)
+                .comment("Include the template's TypeScript app scaffold")
         }
+        row(environmentVariables.label) {
+            cell(environmentVariables)
+                .align(AlignX.FILL)
+        }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
+        row {
+            cell(createAdvancedOptionsPanel())
+                .align(AlignX.FILL)
+        }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
+    }.also {
+        updateAddTypeScriptAppVisibility()
     }
 
     override fun getSettings(): ActonProjectSettings = settings.apply {
         template = this@ActonProjectGeneratorPeer.template.get()
-        addTypeScriptApp = templateCatalog.supportsTypeScriptApp(template) &&
-            this@ActonProjectGeneratorPeer.addTypeScriptApp.get()
+        templateSupportsTypeScriptApp = templateCatalog.supportsTypeScriptApp(template)
+        addTypeScriptApp = templateSupportsTypeScriptApp && this@ActonProjectGeneratorPeer.addTypeScriptApp.get()
+        starterFilePath = templateCatalog.starterFilePath(template, addTypeScriptApp)
         description = this@ActonProjectGeneratorPeer.description.get()
         license = this@ActonProjectGeneratorPeer.license.get()
         includeGitHooks = gitAvailable && this@ActonProjectGeneratorPeer.includeGitHooks.get()
@@ -152,7 +161,45 @@ internal class ActonProjectGeneratorPeer(
     }
 
     private fun updateAddTypeScriptAppVisibility() {
-        addTypeScriptAppRow?.visible(templateCatalog.supportsTypeScriptApp(template.get()))
+        val supportsTypeScriptApp = templateCatalog.supportsTypeScriptApp(template.get())
+        if (!supportsTypeScriptApp) {
+            addTypeScriptApp.set(false)
+        }
+        addTypeScriptAppRow?.visible(supportsTypeScriptApp)
+    }
+
+    private fun refreshTemplateCatalogAsync() {
+        if (ActonTemplateCatalogProvider.hasCachedTemplateCatalog()) return
+        templateCatalogLoading = true
+        ApplicationManager.getApplication().executeOnPooledThread {
+            val loadedCatalog = ActonTemplateCatalogProvider.getTemplateCatalog()
+            invokeLater(ModalityState.any()) {
+                applyTemplateCatalog(loadedCatalog)
+            }
+        }
+    }
+
+    private fun applyTemplateCatalog(catalog: ActonTemplateCatalog) {
+        templateCatalogLoading = false
+        if (catalog == templateCatalog) return
+
+        templateCatalog = catalog
+        replaceTemplateOptions(catalog, template.get())
+        updateAddTypeScriptAppVisibility()
+        checkValid?.run()
+    }
+
+    private fun replaceTemplateOptions(catalog: ActonTemplateCatalog, preferredTemplate: String) {
+        val templateIds = catalog.templateIds()
+        val selectedTemplate = preferredTemplate.takeIf { it in templateIds } ?: catalog.normalizedDefaultTemplate()
+
+        templateOptionsModel.removeAllElements()
+        templateIds.forEach(templateOptionsModel::addElement)
+        templateOptionsModel.selectedItem = selectedTemplate
+
+        if (template.get() != selectedTemplate) {
+            template.set(selectedTemplate)
+        }
     }
 
     private fun createAdvancedOptionsPanel(): JComponent {
@@ -223,8 +270,10 @@ internal class ActonProjectGeneratorPeer(
     override fun validate(): com.intellij.openapi.ui.ValidationInfo? = null
 
     override fun buildUI(settingsStep: SettingsStep) {
-        settingsStep.addSettingsComponent(component)
+        settingsStep.addSettingsComponent(uiComponent)
     }
+
+    override fun isBackgroundJobRunning(): Boolean = templateCatalogLoading
 
     companion object {
         private val LICENSE_OPTIONS = listOf(

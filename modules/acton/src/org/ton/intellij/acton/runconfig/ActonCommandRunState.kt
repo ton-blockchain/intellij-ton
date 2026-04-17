@@ -9,9 +9,9 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PtyCommandLine
 import com.intellij.execution.filters.TextConsoleBuilderImpl
 import com.intellij.execution.process.KillableColoredProcessHandler
-import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessHandler
+import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
@@ -21,10 +21,10 @@ import com.intellij.execution.testframework.sm.runner.SMTestProxy
 import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView
 import com.intellij.execution.ui.ConsoleView
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.Key
 import com.intellij.psi.search.ExecutionSearchScopes
-import com.intellij.terminal.TerminalExecutionConsole
 import com.intellij.util.execution.ParametersListUtil
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
@@ -56,9 +56,28 @@ class ActonCommandRunState(environment: ExecutionEnvironment, private val config
                 environment.project,
                 ExecutionSearchScopes.executionScope(environment.project, configuration),
             ) {
-                override fun createConsole(): ConsoleView = TerminalExecutionConsole(project, null)
+                override fun createConsole(): ConsoleView = createEmulatedConsole(project) ?: super.createConsole()
             }
         }
+    }
+
+    private fun createEmulatedConsole(project: Project): ConsoleView? = runCatching {
+        createTerminalConsoleWithBuilder(project) ?: createTerminalConsoleWithLegacyConstructor(project)
+    }.onFailure {
+        LOG.warn("Failed to create terminal console reflectively", it)
+    }.getOrNull()
+
+    private fun createTerminalConsoleWithBuilder(project: Project): ConsoleView? = runCatching {
+        val builderClass = Class.forName("com.intellij.terminal.TerminalExecutionConsoleBuilder")
+        val builder = builderClass.getConstructor(Project::class.java).newInstance(project)
+        builderClass.getMethod("build").invoke(builder) as? ConsoleView
+    }.getOrNull()
+
+    private fun createTerminalConsoleWithLegacyConstructor(project: Project): ConsoleView {
+        val consoleClass = Class.forName("com.intellij.terminal.TerminalExecutionConsole")
+        return consoleClass
+            .getConstructor(Project::class.java, ProcessHandler::class.java)
+            .newInstance(project, null) as ConsoleView
     }
 
     fun enableScriptDebug(port: Int) {
@@ -256,7 +275,7 @@ class ActonCommandRunState(environment: ExecutionEnvironment, private val config
         )
         debugSession.recordStartup(commandLine.commandLineString, workingDir)
         handler.putUserData(ACTON_DEBUG_SESSION_KEY, debugSession)
-        handler.addProcessListener(object : ProcessAdapter() {
+        handler.addProcessListener(object : ProcessListener {
             override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
                 debugSession.append(event.text)
                 event.text

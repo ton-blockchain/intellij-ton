@@ -52,13 +52,14 @@ object TolkRetraceLauncher {
             return contractIds.single()
         }
         if (contractIds.isNotEmpty()) {
-            val selectedIndex = Messages.showChooseDialog(
+            val options = contractIds.toTypedArray()
+            val selectedIndex = Messages.showDialog(
                 project,
                 "Select contract from Acton.toml",
                 "Tolk Retrace",
+                options,
+                0,
                 null,
-                contractIds.toTypedArray(),
-                contractIds.first(),
             )
             return contractIds.getOrNull(selectedIndex)
         }

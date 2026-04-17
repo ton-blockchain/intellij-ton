@@ -47,7 +47,16 @@ abstract class ActonProjectSettingsServiceBase<T : ActonProjectSettingsServiceBa
         project.messageBus.syncPublisher(ACTON_SETTINGS_TOPIC).settingsChanged(event)
 
         if (event.affectsHighlighting) {
-            DaemonCodeAnalyzer.getInstance(project).restart()
+            val daemonCodeAnalyzer = DaemonCodeAnalyzer.getInstance(project)
+            runCatching {
+                daemonCodeAnalyzer.javaClass
+                    .getMethod("restart", Any::class.java)
+                    .invoke(daemonCodeAnalyzer, event)
+            }.recoverCatching {
+                daemonCodeAnalyzer.javaClass
+                    .getMethod("restart")
+                    .invoke(daemonCodeAnalyzer)
+            }
         }
     }
 

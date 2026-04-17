@@ -34,7 +34,8 @@ internal object TolkDapSessionStarter {
             return descriptor
         }
 
-        val session = debuggerManager.startSession(environment, starter)
+        val session =
+            startWithLegacySessionApi(debuggerManager, starter, environment, sessionName, logLabel) ?: return null
         val descriptor = extractRunContentDescriptor(session, sessionName, logLabel)
         if (descriptor == null) {
             LOG.info(
@@ -86,6 +87,23 @@ internal object TolkDapSessionStarter {
                 LOG.warn("Failed to obtain RunContentDescriptor from XSessionStartedResult for '$sessionName'", it)
             }
             .getOrNull()
+    }
+
+    private fun startWithLegacySessionApi(
+        debuggerManager: XDebuggerManager,
+        starter: XDebugProcessStarter,
+        environment: ExecutionEnvironment,
+        sessionName: String,
+        logLabel: String,
+    ): Any? = try {
+        debuggerManager.javaClass
+            .getMethod("startSession", ExecutionEnvironment::class.java, XDebugProcessStarter::class.java)
+            .invoke(debuggerManager, environment, starter)
+    } catch (e: java.lang.reflect.InvocationTargetException) {
+        throw e.targetException
+    } catch (e: ReflectiveOperationException) {
+        LOG.warn("Failed to start $logLabel session via reflective startSession for '$sessionName'", e)
+        null
     }
 
     private fun extractRunContentDescriptor(

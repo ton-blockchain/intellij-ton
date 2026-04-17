@@ -18,11 +18,11 @@ class TolkTypedHandler : TypedHandlerDelegate() {
         if (file !is TolkFile) return Result.CONTINUE
         if (charTyped == '@') {
             // Trigger auto-popup for annotations
-            AutoPopupController.getInstance(project).autoPopupMemberLookup(editor, null)
+            AutoPopupController.getInstance(project).scheduleAutoPopup(editor)
             return Result.STOP
         }
         if (charTyped == '.' && isAfterTestAnnotationPrefix(editor)) {
-            AutoPopupController.getInstance(project).autoPopupMemberLookup(editor, null)
+            AutoPopupController.getInstance(project).scheduleAutoPopup(editor)
             return Result.STOP
         }
         return Result.CONTINUE

@@ -1,5 +1,6 @@
 package org.ton.intellij.tolk.codeInsight.hint
 
+import com.intellij.codeInsight.hints.declarative.HintFormat
 import com.intellij.codeInsight.hints.declarative.InlayTreeSink
 import com.intellij.codeInsight.hints.declarative.InlineInlayPosition
 import com.intellij.psi.PsiElement
@@ -35,9 +36,10 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         if (type == TolkTy.Unknown) return
 
         sink.addPresentation(
-            position = InlineInlayPosition(element.textRange.endOffset, true),
-//            hintFormat = HintFormat.default
-            hasBackground = true,
+            InlineInlayPosition(element.textRange.endOffset, true),
+            null,
+            null,
+            HintFormat.default,
         ) {
             text(": ")
             printTolkType(type)
@@ -49,9 +51,10 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         if (element.name == "_") return
         val type = element.type ?: return
         sink.addPresentation(
-            position = InlineInlayPosition(element.textRange.endOffset, true),
-//            hintFormat = HintFormat.default,
-            hasBackground = true,
+            InlineInlayPosition(element.textRange.endOffset, true),
+            null,
+            null,
+            HintFormat.default,
         ) {
             text(": ")
             printTolkType(type)
@@ -64,9 +67,10 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
         val identifier = element.identifier ?: return
         val type = element.type ?: return
         sink.addPresentation(
-            position = InlineInlayPosition(identifier.textRange.endOffset, true),
-//            hintFormat = HintFormat.default,
-            hasBackground = true,
+            InlineInlayPosition(identifier.textRange.endOffset, true),
+            null,
+            null,
+            HintFormat.default,
         ) {
             text(": ")
             printTolkType(type)
@@ -84,9 +88,10 @@ class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
             else -> {}
         }
         sink.addPresentation(
-            position = InlineInlayPosition(parameters.textRange.endOffset, true),
-//            hintFormat = HintFormat.default,
-            hasBackground = true,
+            InlineInlayPosition(parameters.textRange.endOffset, true),
+            null,
+            null,
+            HintFormat.default,
         ) {
             text(": ")
             printTolkType(returnType)

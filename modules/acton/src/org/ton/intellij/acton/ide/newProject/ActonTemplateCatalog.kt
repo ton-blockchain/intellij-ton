@@ -64,6 +64,10 @@ internal object ActonTemplateCatalogProvider {
     @Volatile
     private var cachedCatalog: ActonTemplateCatalog? = null
 
+    fun hasCachedTemplateCatalog(): Boolean = cachedCatalog != null
+
+    fun getCachedTemplateCatalog(): ActonTemplateCatalog = cachedCatalog ?: fallbackCatalog()
+
     fun getTemplateCatalog(): ActonTemplateCatalog {
         cachedCatalog?.let { return it }
         return synchronized(this) {
@@ -174,29 +178,6 @@ internal object ActonTemplateCatalogProvider {
                                 id = "JettonWallet",
                                 name = "JettonWallet",
                                 src = "contracts/JettonWallet.tolk",
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-            ActonTemplateDefinition(
-                id = "nft",
-                description = "NFT collection and item contracts",
-                supportsApp = false,
-                scaffolds = listOf(
-                    ActonTemplateScaffold(
-                        kind = "standard",
-                        includesTypeScriptApp = false,
-                        contracts = listOf(
-                            ActonTemplateContract(
-                                id = "NftCollection",
-                                name = "NftCollection",
-                                src = "contracts/NftCollection.tolk",
-                            ),
-                            ActonTemplateContract(
-                                id = "NftItem",
-                                name = "NftItem",
-                                src = "contracts/NftItem.tolk",
                             ),
                         ),
                     ),

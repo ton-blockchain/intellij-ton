@@ -40,7 +40,7 @@ class TolkRunScriptLineMarkerProvider : RunLineMarkerContributor() {
 
     private class RunActonScriptAction : AnAction("Emulate", null, AllIcons.Ide.LocalScope) {
         override fun actionPerformed(e: AnActionEvent) {
-            val context = ConfigurationContext.getFromContext(e.dataContext)
+            val context = ConfigurationContext.getFromEvent(e)
             val producer = ActonRunScriptConfigurationProducer()
             val configurationFromContext = producer.findOrCreateConfigurationFromContext(context) ?: return
             ExecutionUtil.runConfiguration(
@@ -57,7 +57,7 @@ class TolkRunScriptLineMarkerProvider : RunLineMarkerContributor() {
             AllIcons.General.Export,
         ) {
         override fun actionPerformed(e: AnActionEvent) {
-            val context = ConfigurationContext.getFromContext(e.dataContext)
+            val context = ConfigurationContext.getFromEvent(e)
             val producer = ActonRunScriptBroadcastConfigurationProducer(network)
             val configurationFromContext = producer.findOrCreateConfigurationFromContext(context) ?: return
             ExecutionUtil.runConfiguration(

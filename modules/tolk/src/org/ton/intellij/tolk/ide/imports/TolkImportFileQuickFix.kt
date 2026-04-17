@@ -7,12 +7,12 @@ import com.intellij.codeInsight.intention.HighPriorityAction
 import com.intellij.codeInspection.HintAction
 import com.intellij.codeInspection.LocalQuickFixAndIntentionActionOnPsiElement
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.util.Computable
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiReference
@@ -172,7 +172,7 @@ class TolkImportFileQuickFix :
 
         if (filesToImport.size > 1 && editor != null) {
             val renderer = SelectionAwareListCellRenderer<SmartPsiElementPointer<TolkFile>> { file ->
-                val name = runReadAction { startElement.text }
+                val name = ApplicationManager.getApplication().runReadAction(Computable<String?> { startElement.text })
                 val relativePath = file.relativePath(containingFile, actonToml)
 
                 SimpleColoredComponent().apply {
@@ -308,7 +308,11 @@ fun SmartPsiElementPointer<TolkFile>.relativePath(file: PsiFile, actonToml: Acto
     }
 
     if (actonToml != null) {
-        val mappings = runReadAction { actonToml.getMappings() }
+        val mappings = ApplicationManager.getApplication().runReadAction(
+            Computable<Map<String, String>> {
+                actonToml.getMappings()
+            },
+        )
         for ((key, value) in mappings) {
             val mappingDir = actonToml.workingDir.resolve(value).normalize().toString()
             if (path.startsWith(mappingDir)) {

@@ -3,12 +3,8 @@ package org.ton.intellij.func.ide.quickdoc
 import com.intellij.codeInsight.documentation.DocumentationManagerUtil
 import com.intellij.lang.Language
 import com.intellij.lang.documentation.DocumentationSettings
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.openapi.editor.HighlighterColors
-import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
-import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.editor.richcopy.HtmlSyntaxInfoUtil
 import com.intellij.openapi.fileTypes.FileTypeManager
@@ -89,16 +85,7 @@ class MarkdownNode(
                     val startDelimiter = node.child(MarkdownTokenTypes.BACKTICK)?.text
                     if (startDelimiter != null) {
                         val text = node.text.substring(startDelimiter.length).removeSuffix(startDelimiter)
-                        sb.append(
-                            "<code style='font-size:${DocumentationSettings.getMonospaceFontSizeCorrection(true)}%;'>",
-                        )
-                        sb.appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet(
-                            DocumentationSettings.getInlineCodeHighlightingMode(),
-                            owner.project,
-                            FuncLanguage,
-                            text,
-                        )
-                        sb.append("</code>")
+                        sb.appendStyledInlineCode(owner.project, FuncLanguage, text)
                     }
                 }
 
@@ -156,7 +143,6 @@ class MarkdownNode(
                                         label,
                                         linkText,
                                         false,
-                                        true,
                                     )
                                 }
                                 sb.append(hyperlink)
@@ -310,6 +296,24 @@ private fun getTableAlignment(node: MarkdownNode): List<String> {
     }
 }
 
+private const val INLINE_CODE_FONT_SIZE_CORRECTION_PERCENT = 96
+
+private fun StringBuilder.appendStyledInlineCode(
+    project: Project,
+    language: Language,
+    codeSnippet: String,
+): StringBuilder {
+    append("<code style='font-size:${INLINE_CODE_FONT_SIZE_CORRECTION_PERCENT}%;'>")
+    appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet(
+        DocumentationSettings.getInlineCodeHighlightingMode(),
+        project,
+        language,
+        codeSnippet,
+    )
+    append("</code>")
+    return this
+}
+
 private fun StringBuilder.appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet(
     highlightingMode: DocumentationSettings.InlineCodeHighlightingMode,
     project: Project,
@@ -360,31 +364,6 @@ private fun StringBuilder.appendStyledSpan(
         append(value)
     }
     return this
-}
-
-private fun getTargetLinkElementAttributes(key: TextAttributesKey): TextAttributes =
-    tuneAttributesForLink(EditorColorsManager.getInstance().globalScheme.getAttributes(key))
-
-private fun getTargetLinkElementAttributes(element: PsiElement?): TextAttributes = TextAttributes().apply {
-    foregroundColor =
-        EditorColorsManager.getInstance().globalScheme.getColor(DefaultLanguageHighlighterColors.DOC_COMMENT_LINK)
-}
-
-private fun tuneAttributesForLink(attributes: TextAttributes): TextAttributes {
-    val globalScheme = EditorColorsManager.getInstance().globalScheme
-    if (attributes.foregroundColor == globalScheme.getAttributes(HighlighterColors.TEXT).foregroundColor ||
-        attributes.foregroundColor ==
-        globalScheme.getAttributes(DefaultLanguageHighlighterColors.IDENTIFIER).foregroundColor
-    ) {
-        val tuned = attributes.clone()
-        if (ApplicationManager.getApplication().isUnitTestMode) {
-            tuned.foregroundColor = globalScheme.getAttributes(CodeInsightColors.HYPERLINK_ATTRIBUTES).foregroundColor
-        } else {
-            tuned.foregroundColor = globalScheme.getColor(DefaultLanguageHighlighterColors.DOC_COMMENT_LINK)
-        }
-        return tuned
-    }
-    return attributes
 }
 
 private fun guessLanguage(language: String?): Language? = if (language == null) {

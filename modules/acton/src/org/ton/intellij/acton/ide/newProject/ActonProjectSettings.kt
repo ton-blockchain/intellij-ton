@@ -11,6 +11,8 @@ class ActonProjectSettings {
 
     var template: String = DEFAULT_TEMPLATE
     var addTypeScriptApp: Boolean = false
+    var templateSupportsTypeScriptApp: Boolean = false
+    var starterFilePath: String? = null
     var description: String = DEFAULT_DESCRIPTION
     var license: String = DEFAULT_LICENSE
     var includeGitHooks: Boolean = false

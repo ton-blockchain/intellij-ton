@@ -8,29 +8,17 @@ import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
 import java.nio.file.Paths
 
-internal fun createActonNewCommand(
-    projectName: String,
-    settings: ActonProjectSettings,
-    templateCatalog: ActonTemplateCatalog = ActonTemplateCatalogProvider.getTemplateCatalog(),
-): ActonCommand.New = ActonCommand.New(
-    path = ".",
-    projectName = projectName,
-    description = settings.description.trim().ifBlank { ActonProjectSettings.DEFAULT_DESCRIPTION },
-    template = settings.template,
-    app = settings.shouldIncludeTypeScriptApp(templateCatalog),
-    license = settings.license.trim().ifBlank { ActonProjectSettings.DEFAULT_LICENSE },
-    hooks = settings.includeGitHooks,
-    agents = settings.includeAgentsMd,
-)
-
-internal fun starterFilePathForTemplate(
-    template: String,
-    includeTypeScriptApp: Boolean = false,
-    templateCatalog: ActonTemplateCatalog = ActonTemplateCatalogProvider.getTemplateCatalog(),
-): String? = templateCatalog.starterFilePath(template, includeTypeScriptApp)
-
-private fun ActonProjectSettings.shouldIncludeTypeScriptApp(templateCatalog: ActonTemplateCatalog): Boolean =
-    templateCatalog.supportsTypeScriptApp(template) && addTypeScriptApp
+internal fun createActonNewCommand(projectName: String, settings: ActonProjectSettings): ActonCommand.New =
+    ActonCommand.New(
+        path = ".",
+        projectName = projectName,
+        description = settings.description.trim().ifBlank { ActonProjectSettings.DEFAULT_DESCRIPTION },
+        template = settings.template,
+        app = settings.templateSupportsTypeScriptApp && settings.addTypeScriptApp,
+        license = settings.license.trim().ifBlank { ActonProjectSettings.DEFAULT_LICENSE },
+        hooks = settings.includeGitHooks,
+        agents = settings.includeAgentsMd,
+    )
 
 fun createDefaultRunConfigurations(project: Project, baseDir: VirtualFile) {
     val runManager = RunManager.getInstance(project)

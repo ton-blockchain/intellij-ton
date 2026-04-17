@@ -3,7 +3,8 @@ package org.ton.intellij.tlb.psi
 import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.lang.ASTNode
 import com.intellij.navigation.ItemPresentation
-import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.Iconable
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
@@ -60,9 +61,11 @@ abstract class TlbNamedElementImpl(node: ASTNode) :
                     return declarationText + "... = " + element.name
                 }
 
-                return runReadAction {
-                    element.name
-                }
+                return ApplicationManager.getApplication().runReadAction(
+                    Computable<String?> {
+                        element.name
+                    },
+                )
             }
         }
     }

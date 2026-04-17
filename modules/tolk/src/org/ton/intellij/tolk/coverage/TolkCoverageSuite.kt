@@ -19,8 +19,10 @@ class TolkCoverageSuite : BaseCoverageSuite {
         name: String,
         fileProvider: CoverageFileProvider,
         coverageRunner: CoverageRunner,
+        timestamp: Long,
         contextFilePath: String?,
-    ) : super(name, fileProvider, System.currentTimeMillis(), false, true, false, coverageRunner, project) {
+    ) : super(name, project, coverageRunner, fileProvider, timestamp) {
+        myBranchCoverage = true
         this.contextFilePath = contextFilePath
     }
 

@@ -3,7 +3,6 @@ package org.ton.intellij.tolk.coverage
 import com.intellij.codeEditor.printing.ExportToHTMLSettings
 import com.intellij.coverage.*
 import com.intellij.coverage.view.CoverageViewExtension
-import com.intellij.coverage.view.CoverageViewManager
 import com.intellij.coverage.view.DirectoryCoverageViewExtension
 import com.intellij.coverage.view.PercentageCoverageColumnInfo
 import com.intellij.execution.configurations.RunConfigurationBase
@@ -101,9 +100,8 @@ class TolkCoverageEngine : CoverageEngine() {
     override fun createCoverageViewExtension(
         project: Project,
         suiteBundle: CoverageSuitesBundle,
-        stateBean: CoverageViewManager.StateBean,
     ): CoverageViewExtension =
-        object : DirectoryCoverageViewExtension(project, getCoverageAnnotator(project), suiteBundle, stateBean) {
+        object : DirectoryCoverageViewExtension(project, getCoverageAnnotator(project), suiteBundle) {
             override fun createColumnInfos(): Array<ColumnInfo<NodeDescriptor<*>, String>> {
                 val percentage = PercentageCoverageColumnInfo(
                     1,
@@ -112,7 +110,7 @@ class TolkCoverageEngine : CoverageEngine() {
                 )
                 val files = object : ColumnInfo<NodeDescriptor<*>, String>(TolkBundle.message("column.name.file")) {
                     override fun valueOf(item: NodeDescriptor<*>?): String = item.toString()
-                    override fun getComparator(): Comparator<NodeDescriptor<*>>? = AlphaComparator.INSTANCE
+                    override fun getComparator(): Comparator<NodeDescriptor<*>>? = AlphaComparator.getInstance()
                 }
                 return arrayOf(files, percentage)
             }
@@ -231,26 +229,30 @@ class TolkCoverageEngine : CoverageEngine() {
         covRunner: CoverageRunner,
         coverageDataFileProvider: CoverageFileProvider,
         timestamp: Long,
-    ): CoverageSuite =
-        TolkCoverageSuite(project, name, coverageDataFileProvider, covRunner, project.guessProjectDir()?.path)
+    ): CoverageSuite = TolkCoverageSuite(
+        project,
+        name,
+        coverageDataFileProvider,
+        covRunner,
+        timestamp,
+        project.guessProjectDir()?.path,
+    )
 
-    @Deprecated("deprecated in Java")
     override fun createCoverageSuite(
-        covRunner: CoverageRunner,
         name: String,
+        project: Project,
+        covRunner: CoverageRunner,
         coverageDataFileProvider: CoverageFileProvider,
+        timestamp: Long,
         config: CoverageEnabledConfiguration,
-    ): CoverageSuite? {
-        if (config !is TolkCoverageEnabledConfiguration) return null
-        val configuration = config.configuration as? ActonCommandConfiguration ?: return null
-        return TolkCoverageSuite(
-            configuration.project,
-            name,
-            coverageDataFileProvider,
-            covRunner,
-            null,
-        )
-    }
+    ): CoverageSuite = TolkCoverageSuite(
+        project,
+        name,
+        coverageDataFileProvider,
+        covRunner,
+        timestamp,
+        project.guessProjectDir()?.path,
+    )
 
     companion object {
         private val LOG: Logger = logger<TolkCoverageEngine>()

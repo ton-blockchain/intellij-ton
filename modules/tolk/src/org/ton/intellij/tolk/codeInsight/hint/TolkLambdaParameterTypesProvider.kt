@@ -1,5 +1,6 @@
 package org.ton.intellij.tolk.codeInsight.hint
 
+import com.intellij.codeInsight.hints.declarative.HintFormat
 import com.intellij.codeInsight.hints.declarative.InlayTreeSink
 import com.intellij.codeInsight.hints.declarative.InlineInlayPosition
 import com.intellij.psi.PsiElement
@@ -18,8 +19,10 @@ class TolkLambdaParameterTypesProvider : AbstractTolkInlayHintProvider() {
             if (parameterType is TolkTyUnknown) continue // the unknown type doesn't add any information
 
             sink.addPresentation(
-                position = InlineInlayPosition(parameter.textRange.endOffset, false),
-                hasBackground = true,
+                InlineInlayPosition(parameter.textRange.endOffset, false),
+                null,
+                null,
+                HintFormat.default,
             ) {
                 text(": ")
                 printPsi(parameter, parameterType.render())

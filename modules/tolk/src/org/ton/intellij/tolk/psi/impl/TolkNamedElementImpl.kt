@@ -41,7 +41,7 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> :
 
     override fun getIcon(flags: Int): Icon? = super.getIcon(flags) ?: super.getBaseIcon()
 
-    override fun toString(): String = "$elementType:$name"
+    override fun toString(): String = "$elementTypeImpl:$name"
 
     override fun getPresentation(): ItemPresentation? = object : ItemPresentation {
         override fun getLocationString(): String = containingFile.name

@@ -177,6 +177,10 @@ tasks {
         enabled = true
     }
 
+    named("prepareTestSandbox") {
+        dependsOn(mergePluginJarsTask)
+    }
+
     withType<RunIdeTask> {
         // Force `mergePluginJarTask` be executed before any task based on `RunIdeBase` (for example, `runIde` or `buildSearchableOptions`).
         // Otherwise, these tasks fail because of implicit dependency.

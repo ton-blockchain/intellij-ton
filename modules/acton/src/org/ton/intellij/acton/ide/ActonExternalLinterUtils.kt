@@ -20,13 +20,13 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.AnyPsiChangeListener
 import com.intellij.psi.impl.PsiManagerImpl
 import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.util.execution.ParametersListUtil
 import com.intellij.util.messages.MessageBus
-import org.apache.commons.lang3.StringEscapeUtils
 import org.jetbrains.annotations.Nls
 import org.ton.intellij.acton.ActonBundle
 import org.ton.intellij.acton.cli.ActonCommand
@@ -179,11 +179,11 @@ data class ActonExternalLinterFilteredMessage(
             }
 
             @NlsSafe val tooltip = buildString {
-                append(StringEscapeUtils.escapeHtml4(diagnostic.message))
+                append(StringUtil.escapeXmlEntities(diagnostic.message))
 
                 val primaryAnnotations = diagnostic.annotations
                     .filter { it.isPrimary && it.message != null }
-                    .map { StringEscapeUtils.escapeHtml4(it.message!!) }
+                    .map { StringUtil.escapeXmlEntities(it.message!!) }
 
                 if (primaryAnnotations.isNotEmpty()) {
                     append(primaryAnnotations.joinToString(prefix = "<br>", separator = "<br>"))
@@ -300,7 +300,6 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(file: PsiFile, annotationRes
             .description(message.message)
             .escapedToolTip(message.htmlTooltip.replace("\n", "<br>"))
             .range(message.textRange)
-            .needsUpdateOnTyping(true)
 
         if (message.quickFixes.isEmpty()) {
             for (suppressionFix in message.suppressionFixes) {
@@ -320,7 +319,6 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(file: PsiFile, annotationRes
                 .description(annotation.message)
                 .escapedToolTip(annotation.message.replace("\n", "<br>"))
                 .range(annotation.textRange)
-                .needsUpdateOnTyping(true)
             highlightBuilder.create()?.let(::add)
         }
     }

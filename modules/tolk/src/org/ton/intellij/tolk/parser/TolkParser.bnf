@@ -403,7 +403,11 @@ SelfReturnType ::= 'self' {
 
 private ReturnType_recovery ::= !(FunctionBody_first|TopLevelDefinition_first)
 
-Annotation ::= '@' IDENTIFIER AnnotationArgumentList? {
+Annotation ::= '@' AnnotationName AnnotationArgumentList? {
+    pin = 1
+}
+
+AnnotationName ::= IDENTIFIER ('.' IDENTIFIER)* {
     pin = 1
 }
 

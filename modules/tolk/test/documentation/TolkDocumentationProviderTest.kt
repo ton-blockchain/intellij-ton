@@ -82,7 +82,7 @@ class TolkDocumentationProviderTest : TolkTestBase() {
         is TolkVar -> "Variable: ${element.name}"
         is TolkTypeParameter -> "Type param: ${element.name}"
         is TolkCatchParameter -> "Catch param: ${element.name}"
-        is TolkAnnotation -> "Annotation: ${element.identifier?.text ?: "unknown"}"
+        is TolkAnnotation -> "Annotation: ${element.name ?: "unknown"}"
         is TolkSelfParameter -> "Self param: ${if (element.isMutable) "mutate " else ""}self"
         is TolkSelfTypeExpression -> "Self type"
         else -> element.javaClass.simpleName

@@ -29,6 +29,7 @@ class TolkFormatter : FormattingModelBuilder {
             .after(TokenSet.create(LPAREN, LBRACK)).none()
             .around(EQ).spaces(1)
             .aroundInside(IDENTIFIER, ANNOTATION).none()
+            .aroundInside(TokenSet.create(IDENTIFIER, DOT), ANNOTATION_NAME).none()
             .after(TokenSet.create(ANNOTATION, GET_KEYWORD, FUN_KEYWORD, RETURN_TYPE)).spaces(1)
             .beforeInside(RETURN_TYPE, FUNCTION).none()
             .afterInside(COLON, RETURN_TYPE).spaces(1)

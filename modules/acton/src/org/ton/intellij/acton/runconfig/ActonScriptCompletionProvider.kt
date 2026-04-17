@@ -16,7 +16,7 @@ class ActonScriptCompletionProvider(private val project: Project) : TextFieldCom
             result.addElement(
                 LookupElementBuilder.create(name)
                     .withIcon(AllIcons.Actions.Execute)
-                    .withTailText("  $definition", true)
+                    .withTailText("  $definition", true),
             )
         }
     }

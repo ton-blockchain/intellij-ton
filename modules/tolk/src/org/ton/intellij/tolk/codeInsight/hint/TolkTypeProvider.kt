@@ -11,13 +11,10 @@ import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.render
 
 class TolkTypeProvider : ExpressionTypeProvider<TolkTypedElement>() {
-    override fun getInformationHint(elementAt: TolkTypedElement): @NlsContexts.HintText String {
-        return StringUtil.escapeXmlEntities(typePresentation(elementAt))
-    }
+    override fun getInformationHint(elementAt: TolkTypedElement): @NlsContexts.HintText String =
+        StringUtil.escapeXmlEntities(typePresentation(elementAt))
 
-    private fun typePresentation(element: TolkTypedElement): String {
-        return (element.type ?: TolkTy.Unknown).render()
-    }
+    private fun typePresentation(element: TolkTypedElement): String = (element.type ?: TolkTy.Unknown).render()
 
     override fun getErrorHint(): @NlsContexts.HintText String = TolkBundle.message("codeInsight.hint.error.hint")
 
@@ -33,12 +30,12 @@ class TolkTypeProvider : ExpressionTypeProvider<TolkTypedElement>() {
             // remove `bar()` from `foo.bar()`
             it !is TolkCallExpression || parent !is TolkDotExpression || (parent.fieldLookup != it)
         }
-            .filter { // remove __expect_type call result
+            .filter {
+                // remove __expect_type call result
                 val callExpr = it as? TolkCallExpression ?: return@filter true
                 val refExpr = callExpr.expression as? TolkReferenceExpression ?: return@filter true
                 refExpr.referenceName != "__expect_type"
             }
-
             .toList()
     }
 }

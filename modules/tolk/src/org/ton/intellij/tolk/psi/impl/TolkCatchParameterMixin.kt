@@ -8,7 +8,9 @@ import org.ton.intellij.tolk.psi.TolkCatchParameter
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.type.TolkTy
 
-abstract class TolkCatchParameterMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkCatchParameter {
+abstract class TolkCatchParameterMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    TolkCatchParameter {
     override val type: TolkTy
         get() = if ((parent as? TolkCatch)?.catchParameterList?.indexOf(this) == 0) {
             TolkTy.Int

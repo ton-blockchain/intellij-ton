@@ -71,25 +71,25 @@ object TolkFunctionNameCompletionProvider : TolkCompletionProvider() {
                     result.addElement(
                         LookupElementBuilder.create("unpackFromSlice")
                             .withIcon(TolkIcons.FUNCTION)
-                            .withTailText("(mutate s: slice)")
+                            .withTailText("(mutate s: slice)"),
                     )
                     result.addElement(
                         LookupElementBuilder.create("packToBuilder")
                             .withIcon(TolkIcons.FUNCTION)
-                            .withTailText("(self, mutate b: builder)")
+                            .withTailText("(self, mutate b: builder)"),
                     )
                 } else {
                     result.addElement(
                         LookupElementBuilder.create("unpackFromSlice")
                             .withIcon(TolkIcons.FUNCTION)
                             .withTailText("(mutate s: slice)")
-                            .withInsertHandler(TemplateStringInsertHandler("(mutate s: slice) {\n\$END$\n}"))
+                            .withInsertHandler(TemplateStringInsertHandler("(mutate s: slice) {\n\$END$\n}")),
                     )
                     result.addElement(
                         LookupElementBuilder.create("packToBuilder")
                             .withIcon(TolkIcons.FUNCTION)
                             .withTailText("(self, mutate b: builder)")
-                            .withInsertHandler(TemplateStringInsertHandler("(self, mutate b: builder) {\n\$END$\n}"))
+                            .withInsertHandler(TemplateStringInsertHandler("(self, mutate b: builder) {\n\$END$\n}")),
                     )
                 }
             }
@@ -101,14 +101,14 @@ object TolkFunctionNameCompletionProvider : TolkCompletionProvider() {
                     result.addElement(
                         LookupElementBuilder.create(name)
                             .withIcon(TolkIcons.FUNCTION)
-                            .withTailText("(${signature})")
+                            .withTailText("($signature)"),
                     )
                 } else {
                     result.addElement(
                         LookupElementBuilder.create(name)
                             .withIcon(TolkIcons.FUNCTION)
-                            .withTailText("(${signature})")
-                            .withInsertHandler(TemplateStringInsertHandler("(${signature}) {\n\$END$\n}"))
+                            .withTailText("($signature)")
+                            .withInsertHandler(TemplateStringInsertHandler("($signature) {\n\$END$\n}")),
                     )
                 }
             }
@@ -131,7 +131,7 @@ object TolkFunctionNameCompletionProvider : TolkCompletionProvider() {
                 key,
                 project,
                 GlobalSearchScope.allScope(project),
-                TolkTypeSymbolElement::class.java
+                TolkTypeSymbolElement::class.java,
             ) {
                 candidates.add(it)
                 true

@@ -11,19 +11,13 @@ import org.intellij.markdown.html.URI
 import org.intellij.markdown.html.entities.EntityConverter
 import org.intellij.markdown.parser.LinkMap
 
-private fun linkIsProbablyValidFuncPath(link: CharSequence): Boolean {
-    return link.none { it in "/.#" || it.isWhitespace() }
-}
+private fun linkIsProbablyValidFuncPath(link: CharSequence): Boolean = link.none { it in "/.#" || it.isWhitespace() }
 
-private fun markLinkAsLanguageItemIfItIsFuncPath(link: CharSequence): CharSequence {
-    return if (linkIsProbablyValidFuncPath(link)) "${DocumentationManagerProtocol.PSI_ELEMENT_PROTOCOL}$link" else link
-}
+private fun markLinkAsLanguageItemIfItIsFuncPath(link: CharSequence): CharSequence =
+    if (linkIsProbablyValidFuncPath(link)) "${DocumentationManagerProtocol.PSI_ELEMENT_PROTOCOL}$link" else link
 
-class FuncReferenceLinksGeneratingProvider(
-    private val linkMap: LinkMap,
-    baseURI: URI?,
-    resolveAnchors: Boolean,
-) : ReferenceLinksGeneratingProvider(linkMap, baseURI, resolveAnchors) {
+class FuncReferenceLinksGeneratingProvider(private val linkMap: LinkMap, baseURI: URI?, resolveAnchors: Boolean) :
+    ReferenceLinksGeneratingProvider(linkMap, baseURI, resolveAnchors) {
     override fun renderLink(
         visitor: HtmlGenerator.HtmlGeneratingVisitor,
         text: String,
@@ -34,7 +28,7 @@ class FuncReferenceLinksGeneratingProvider(
             visitor,
             text,
             node,
-            info.copy(destination = markLinkAsLanguageItemIfItIsFuncPath(info.destination))
+            info.copy(destination = markLinkAsLanguageItemIfItIsFuncPath(info.destination)),
         )
     }
 
@@ -57,7 +51,7 @@ class FuncReferenceLinksGeneratingProvider(
         return RenderInfo(
             linkTextNode ?: label,
             EntityConverter.replaceEntities(linkDestination, processEntities = true, processEscapes = true),
-            linkTitle?.let { EntityConverter.replaceEntities(it, processEntities = true, processEscapes = true) }
+            linkTitle?.let { EntityConverter.replaceEntities(it, processEntities = true, processEscapes = true) },
         )
     }
 }
@@ -74,7 +68,7 @@ open class FuncInlineLinkGeneratingProvider(baseURI: java.net.URI?, resolveAncho
             visitor,
             text,
             node,
-            info.copy(destination = markLinkAsLanguageItemIfItIsFuncPath(info.destination))
+            info.copy(destination = markLinkAsLanguageItemIfItIsFuncPath(info.destination)),
         )
     }
 }

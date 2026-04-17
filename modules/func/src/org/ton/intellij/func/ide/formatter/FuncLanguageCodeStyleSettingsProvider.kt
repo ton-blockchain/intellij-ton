@@ -11,8 +11,8 @@ class FuncLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider(
 
     override fun getCodeSample(settingsType: SettingsType): String = when (settingsType) {
         SettingsType.SPACING_SETTINGS, SettingsType.WRAPPING_AND_BRACES_SETTINGS -> SPACING_SAMPLE
-        SettingsType.INDENT_SETTINGS                                             -> INDENT_SAMPLE
-        else                                                                     -> GENERAL_SAMPLE
+        SettingsType.INDENT_SETTINGS -> INDENT_SAMPLE
+        else -> GENERAL_SAMPLE
     }
 
     override fun getIndentOptionsEditor() = SmartIndentOptionsEditor()

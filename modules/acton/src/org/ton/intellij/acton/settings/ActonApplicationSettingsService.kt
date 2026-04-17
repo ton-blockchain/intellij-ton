@@ -6,10 +6,13 @@ val actonApplicationSettings: ActonApplicationSettingsService get() = service()
 
 @State(
     name = "ActonApplicationSettings",
-    storages = [Storage("acton.xml")]
+    storages = [Storage("acton.xml")],
 )
 @Service(Service.Level.APP)
-class ActonApplicationSettingsService : SimplePersistentStateComponent<ActonApplicationSettingsService.ActonApplicationSettingsState>(ActonApplicationSettingsState()) {
+class ActonApplicationSettingsService :
+    SimplePersistentStateComponent<ActonApplicationSettingsService.ActonApplicationSettingsState>(
+        ActonApplicationSettingsState(),
+    ) {
 
     var disableUpdateChecks: Boolean
         get() = state.disableUpdateChecks

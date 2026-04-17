@@ -15,7 +15,8 @@ class FuncFunctionStub(
     val hasAsm: Boolean,
 ) : FuncNamedStub<FuncFunction>(parent, elementType, name) {
     constructor(
-        parent: StubElement<*>, elementType: IStubElementType<*, *>,
+        parent: StubElement<*>,
+        elementType: IStubElementType<*, *>,
         name: String?,
         isMutable: Boolean,
         isImpure: Boolean,
@@ -28,7 +29,7 @@ class FuncFunctionStub(
         isMutable,
         isImpure,
         hasMethodId,
-        hasAsm
+        hasAsm,
     )
 
     override fun toString(): String = buildString {

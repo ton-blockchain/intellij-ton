@@ -9,7 +9,7 @@ import org.ton.intellij.tlb.psi.*
 
 class TlbAnnotator : Annotator {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
-        when(element) {
+        when (element) {
             is TlbConstructor -> {
                 holder.annotateInfo(element.identifier, TlbColor.CONSTRUCTOR_NAME)
             }
@@ -34,7 +34,7 @@ class TlbAnnotator : Annotator {
                 holder.annotateInfo(element.identifier, TlbColor.RESULT_TYPE_NAME)
             }
             is TlbParamTypeExpression -> {
-                when(val resolved = element.reference?.resolve()) {
+                when (val resolved = element.reference?.resolve()) {
                     is TlbImplicitField -> {
                         if (resolved.typeKeyword != null) {
                             holder.annotateInfo(element, TlbColor.TYPE_PARAMETER)

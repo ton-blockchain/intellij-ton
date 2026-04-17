@@ -18,17 +18,15 @@ class TolkPsiStructureViewFactory : PsiStructureViewFactory {
     override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder? {
         val tolkFile = psiFile as? TolkFile ?: return null
         return object : TreeBasedStructureViewBuilder() {
-            override fun createStructureViewModel(editor: Editor?): StructureViewModel {
-                return TolkStructureViewModel(tolkFile, editor)
-            }
+            override fun createStructureViewModel(editor: Editor?): StructureViewModel =
+                TolkStructureViewModel(tolkFile, editor)
         }
     }
 }
 
-class TolkStructureViewModel(
-    psiFile: TolkFile,
-    editor: Editor?
-) : StructureViewModelBase(psiFile, editor, TolkStructureViewElement(psiFile)), StructureViewModel.ElementInfoProvider {
+class TolkStructureViewModel(psiFile: TolkFile, editor: Editor?) :
+    StructureViewModelBase(psiFile, editor, TolkStructureViewElement(psiFile)),
+    StructureViewModel.ElementInfoProvider {
     init {
         withSuitableClasses(
             TolkFunction::class.java,
@@ -42,25 +40,21 @@ class TolkStructureViewModel(
         )
     }
 
-    override fun isAlwaysShowsPlus(element: StructureViewTreeElement): Boolean =
-        element.value is TolkFile
+    override fun isAlwaysShowsPlus(element: StructureViewTreeElement): Boolean = element.value is TolkFile
 
-    override fun isAlwaysLeaf(element: StructureViewTreeElement): Boolean {
-        return when (element.value) {
-            is TolkStructField,
-            is TolkConstVar,
-            is TolkGlobalVar,
-            is TolkEnumMember,
-            is TolkTypeDef -> true
+    override fun isAlwaysLeaf(element: StructureViewTreeElement): Boolean = when (element.value) {
+        is TolkStructField,
+        is TolkConstVar,
+        is TolkGlobalVar,
+        is TolkEnumMember,
+        is TolkTypeDef,
+        -> true
 
-            else -> false
-        }
+        else -> false
     }
 }
 
-class TolkStructureViewElement(
-    psiElement: TolkElement
-) : StructureViewTreeElement {
+class TolkStructureViewElement(psiElement: TolkElement) : StructureViewTreeElement {
     private val psiAnchor = TreeAnchorizer.getService().createAnchor(psiElement)
     private val psi: TolkElement? get() = TreeAnchorizer.getService().retrieveElement(psiAnchor) as? TolkElement
 

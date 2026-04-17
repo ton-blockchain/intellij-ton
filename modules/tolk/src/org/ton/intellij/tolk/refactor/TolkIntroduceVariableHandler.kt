@@ -8,7 +8,9 @@ import com.intellij.psi.PsiFile
 import com.intellij.refactoring.RefactoringActionHandler
 import com.intellij.refactoring.util.CommonRefactoringUtil
 
-class TolkIntroduceVariableHandler : TolkIntroduceVariableBase(), RefactoringActionHandler {
+class TolkIntroduceVariableHandler :
+    TolkIntroduceVariableBase(),
+    RefactoringActionHandler {
     override fun invoke(project: Project, editor: Editor, file: PsiFile, dataContext: DataContext) {
         if (!CommonRefactoringUtil.checkReadOnlyStatus(file)) return
         performAction(TolkIntroduceOperation(project, editor, file))

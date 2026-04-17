@@ -8,14 +8,12 @@ import com.intellij.psi.PsiLanguageInjectionHost
 import org.ton.intellij.func.psi.FuncAsmBody
 import org.ton.intellij.func.psi.FuncStringLiteral
 
-abstract class FuncStringLiteralMixin(node: ASTNode) : ASTWrapperPsiElement(node), FuncStringLiteral {
-    override fun isValidHost(): Boolean {
-        return parent is FuncAsmBody
-    }
+abstract class FuncStringLiteralMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    FuncStringLiteral {
+    override fun isValidHost(): Boolean = parent is FuncAsmBody
 
-    override fun updateText(text: String): PsiLanguageInjectionHost {
-        return this
-    }
+    override fun updateText(text: String): PsiLanguageInjectionHost = this
 
     override fun createLiteralTextEscaper() = object : LiteralTextEscaper<FuncStringLiteralMixin>(this) {
         override fun decode(rangeInsideHost: TextRange, outChars: StringBuilder): Boolean {
@@ -23,12 +21,9 @@ abstract class FuncStringLiteralMixin(node: ASTNode) : ASTWrapperPsiElement(node
             return true
         }
 
-        override fun getOffsetInHost(offsetInDecoded: Int, rangeInsideHost: TextRange): Int {
-            return rangeInsideHost.startOffset + offsetInDecoded
-        }
+        override fun getOffsetInHost(offsetInDecoded: Int, rangeInsideHost: TextRange): Int =
+            rangeInsideHost.startOffset + offsetInDecoded
 
-        override fun isOneLine(): Boolean {
-            return true
-        }
+        override fun isOneLine(): Boolean = true
     }
 }

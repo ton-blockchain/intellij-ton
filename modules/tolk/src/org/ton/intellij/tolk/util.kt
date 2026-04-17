@@ -8,7 +8,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.measureTimedValue
 
-
 @OptIn(ExperimentalContracts::class)
 inline fun <T> perf(string: String, moreThan: Duration = 50.milliseconds, block: () -> T): T {
     contract {

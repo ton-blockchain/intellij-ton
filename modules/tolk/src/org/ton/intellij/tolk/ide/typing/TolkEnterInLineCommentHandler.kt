@@ -24,7 +24,7 @@ class TolkEnterInLineCommentHandler : EnterHandlerDelegateAdapter() {
         caretOffsetRef: Ref<Int>,
         caretAdvanceRef: Ref<Int>,
         dataContext: DataContext,
-        originalHandler: EditorActionHandler?
+        originalHandler: EditorActionHandler?,
     ): Result {
         if (file !is TolkFile) return Result.Continue
 
@@ -55,7 +55,7 @@ class TolkEnterInLineCommentHandler : EnterHandlerDelegateAdapter() {
 
         // check if the element at the caret is a line comment
         // and extract the comment token (//, /// or //!) from the comment text
-        val prefix = when(elementAtCaret.elementType) {
+        val prefix = when (elementAtCaret.elementType) {
             TolkParserDefinition.DOC_EOL_COMMENT -> "///"
             TolkParserDefinition.EOL_COMMENT -> {
                 // return if caret is at end of line for a non-documentation comment

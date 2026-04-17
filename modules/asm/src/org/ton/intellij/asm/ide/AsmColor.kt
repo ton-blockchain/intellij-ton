@@ -6,17 +6,14 @@ import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
-enum class AsmColor(
-    displayName: String,
-    default: TextAttributesKey,
-) {
+enum class AsmColor(displayName: String, default: TextAttributesKey) {
     BAD_CHARACTER("Bad character", HighlighterColors.BAD_CHARACTER),
     COMMENT("Comment", Defaults.LINE_COMMENT),
 
     NUMBER("Number", Defaults.NUMBER),
     STACK_REGISTER("Stack register", Defaults.CONSTANT),
     CONTROL_REGISTER("Control register", Defaults.CONSTANT),
-    INSTRUCTION("Assembly instruction", XmlHighlighterColors.HTML_TAG)
+    INSTRUCTION("Assembly instruction", XmlHighlighterColors.HTML_TAG),
     ;
 
     val textAttributesKey =

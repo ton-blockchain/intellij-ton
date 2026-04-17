@@ -16,12 +16,7 @@ class TlbSetConstructorTagFix(constructor: TlbConstructor, private val tag: Cons
 
     override fun getFamilyName(): @IntentionFamilyName String = "Set constructor tag"
 
-    override fun invoke(
-        project: Project,
-        file: PsiFile,
-        startElement: PsiElement,
-        endElement: PsiElement
-    ) {
+    override fun invoke(project: Project, file: PsiFile, startElement: PsiElement, endElement: PsiElement) {
         startElement as? TlbConstructor ?: return
         val constructorTag = project.tlbPsiFactory.createFromText<TlbConstructorTag>("foo$tag = Foo;")
         if (constructorTag == null) {

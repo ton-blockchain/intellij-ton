@@ -29,10 +29,12 @@ object ActonLintRulesProvider {
         ).toGeneralCommandLine(project) ?: return emptyList()
 
         return try {
-            val output = ApplicationManager.getApplication().executeOnPooledThread(Callable {
-                val handler = CapturingProcessHandler(commandLine)
-                handler.runProcess(5000)
-            }).get()
+            val output = ApplicationManager.getApplication().executeOnPooledThread(
+                Callable {
+                    val handler = CapturingProcessHandler(commandLine)
+                    handler.runProcess(5000)
+                },
+            ).get()
 
             if (output.exitCode != 0) return emptyList()
 
@@ -46,13 +48,7 @@ object ActonLintRulesProvider {
         }
     }
 
-    data class CachedRules(
-        val rules: List<LintRule>,
-        val timestamp: Long,
-    )
+    data class CachedRules(val rules: List<LintRule>, val timestamp: Long)
 
-    data class LintRule(
-        val name: String,
-        val description: String,
-    )
+    data class LintRule(val name: String, val description: String)
 }

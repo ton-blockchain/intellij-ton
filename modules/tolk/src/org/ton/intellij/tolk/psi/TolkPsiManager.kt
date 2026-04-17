@@ -18,13 +18,13 @@ import org.ton.intellij.tolk.TolkFileType
 private val TOLK_SIGNATURE_CHANGE_TOPIC = Topic.create(
     "TOLK_SIGNATURE_CHANGE_TOPIC",
     TolkSignatureChangeListener::class.java,
-    Topic.BroadcastDirection.TO_PARENT
+    Topic.BroadcastDirection.TO_PARENT,
 )
 
 private val TOLK_PSI_CHANGE_TOPIC = Topic.create(
     "TOLK_PSI_CHANGE_TOPIC",
     TolkPsiChangeListener::class.java,
-    Topic.BroadcastDirection.TO_PARENT
+    Topic.BroadcastDirection.TO_PARENT,
 )
 
 fun interface TolkSignatureChangeListener {
@@ -36,9 +36,7 @@ fun interface TolkPsiChangeListener {
 }
 
 @Service(Service.Level.PROJECT)
-class TolkPsiManager(
-    val project: Project
-) : Disposable {
+class TolkPsiManager(val project: Project) : Disposable {
     val tolkStructureModificationCount = SimpleModificationTracker()
     private val tolkCacheInvalidator = TolkCacheInvalidator()
     private val tolkModuleRootListener = TolkModuleRootListener()
@@ -50,17 +48,11 @@ class TolkPsiManager(
 
     override fun dispose() {}
 
-    fun subscribeTolkSignatureChange(
-        connectionManager: MessageBusConnection,
-        listener: TolkSignatureChangeListener,
-    ) {
+    fun subscribeTolkSignatureChange(connectionManager: MessageBusConnection, listener: TolkSignatureChangeListener) {
         connectionManager.subscribe(TOLK_SIGNATURE_CHANGE_TOPIC, listener)
     }
 
-    fun subscribeTolkPsiChange(
-        connectionManager: MessageBusConnection,
-        listener: TolkPsiChangeListener,
-    ) {
+    fun subscribeTolkPsiChange(connectionManager: MessageBusConnection, listener: TolkPsiChangeListener) {
         connectionManager.subscribe(TOLK_PSI_CHANGE_TOPIC, listener)
     }
 
@@ -122,11 +114,7 @@ class TolkPsiManager(
         project.messageBus.syncPublisher(TOLK_SIGNATURE_CHANGE_TOPIC).tolkSignatureChanged(file, psi)
     }
 
-    private fun updateModificationCount(
-        file: PsiFile,
-        psi: PsiElement,
-        isChildrenChange: Boolean,
-    ) {
+    private fun updateModificationCount(file: PsiFile, psi: PsiElement, isChildrenChange: Boolean) {
         val owner = if (DumbService.isDumb(project)) null else psi.findTolkModificationTrackerOwner(!isChildrenChange)
         val isStructureModification = owner == null || !owner.incModificationCount(psi)
         if (isStructureModification) {

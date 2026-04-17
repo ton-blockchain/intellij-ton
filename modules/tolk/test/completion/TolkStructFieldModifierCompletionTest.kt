@@ -1,34 +1,34 @@
 package org.ton.intellij.tolk.completion
 
 class TolkStructFieldModifierCompletionTest : TolkCompletionTestBase() {
-    
+
     fun `test private modifier completion in struct body`() = checkContainsCompletion(
         "private",
         """
             struct MyStruct {
                 priv/*caret*/
             }
-        """.trimIndent()
+        """.trimIndent(),
     )
-    
+
     fun `test readonly modifier completion in struct body`() = checkContainsCompletion(
         "readonly",
         """
             struct MyStruct {
                 read/*caret*/
             }
-        """.trimIndent()
+        """.trimIndent(),
     )
-    
+
     fun `test both modifiers available in struct body`() = checkContainsCompletion(
         listOf("private", "readonly"),
         """
             struct MyStruct {
                 /*caret*/
             }
-        """.trimIndent()
+        """.trimIndent(),
     )
-    
+
     fun `test private modifier completion after typing pr`() = doSingleCompletion(
         """
             struct MyStruct {
@@ -39,9 +39,9 @@ class TolkStructFieldModifierCompletionTest : TolkCompletionTestBase() {
             struct MyStruct {
                 private /*caret*/
             }
-        """
+        """,
     )
-    
+
     fun `test readonly modifier completion after typing re`() = doSingleCompletion(
         """
             struct MyStruct {
@@ -52,9 +52,9 @@ class TolkStructFieldModifierCompletionTest : TolkCompletionTestBase() {
             struct MyStruct {
                 readonly /*caret*/
             }
-        """
+        """,
     )
-    
+
     fun `test private completion and field definition`() = doFirstCompletion(
         """
             struct MyStruct {
@@ -65,9 +65,9 @@ class TolkStructFieldModifierCompletionTest : TolkCompletionTestBase() {
             struct MyStruct {
                 private /*caret*/ field: int;
             }
-        """
+        """,
     )
-    
+
     fun `test readonly completion and field definition`() = doFirstCompletion(
         """
             struct MyStruct {
@@ -78,27 +78,27 @@ class TolkStructFieldModifierCompletionTest : TolkCompletionTestBase() {
             struct MyStruct {
                 readonly /*caret*/ field: int;
             }
-        """
+        """,
     )
-    
+
     fun `test modifiers not available after field name`() = checkNotContainsCompletion(
         listOf("private", "readonly"),
         """
             struct MyStruct {
                 field: /*caret*/
             }
-        """.trimIndent()
+        """.trimIndent(),
     )
-    
+
     fun `test modifiers not available after colon`() = checkNotContainsCompletion(
         listOf("private", "readonly"),
         """
             struct MyStruct {
                 field: int/*caret*/
             }
-        """.trimIndent()
+        """.trimIndent(),
     )
-    
+
     fun `test modifiers not available outside struct`() = checkNotContainsCompletion(
         listOf("private", "readonly"),
         """
@@ -106,18 +106,18 @@ class TolkStructFieldModifierCompletionTest : TolkCompletionTestBase() {
             struct MyStruct {
                 field: int;
             }
-        """.trimIndent()
+        """.trimIndent(),
     )
-    
+
     fun `test modifiers not available in function`() = checkNotContainsCompletion(
         listOf("private", "readonly"),
         """
             fun test() {
                 priv/*caret*/
             }
-        """.trimIndent()
+        """.trimIndent(),
     )
-    
+
     fun `test multiple modifiers completion`() = doFirstCompletion(
         """
             struct MyStruct {
@@ -128,9 +128,9 @@ class TolkStructFieldModifierCompletionTest : TolkCompletionTestBase() {
             struct MyStruct {
                 private readonly /*caret*/
             }
-        """
+        """,
     )
-    
+
     fun `test private after readonly completion`() = doFirstCompletion(
         """
             struct MyStruct {
@@ -141,7 +141,7 @@ class TolkStructFieldModifierCompletionTest : TolkCompletionTestBase() {
             struct MyStruct {
                 readonly private /*caret*/
             }
-        """
+        """,
     )
 
     fun `test modifiers in nested struct`() = checkContainsCompletion(
@@ -154,9 +154,9 @@ class TolkStructFieldModifierCompletionTest : TolkCompletionTestBase() {
             struct Inner {
                 /*caret*/
             }
-        """.trimIndent()
+        """.trimIndent(),
     )
-    
+
     fun `test modifiers with multiple fields`() = checkContainsCompletion(
         listOf("private", "readonly"),
         """
@@ -165,7 +165,7 @@ class TolkStructFieldModifierCompletionTest : TolkCompletionTestBase() {
                 private field2: string;
                 /*caret*/
             }
-        """.trimIndent()
+        """.trimIndent(),
     )
 
     fun `test readonly modifier completion priority`() = checkOrderedEquals(

@@ -7,19 +7,24 @@ import org.ton.intellij.tolk.type.TolkTy.Companion.Slice
 import org.ton.intellij.tolk.type.render
 
 class TolkPrimitiveTypeCompletionTest : TolkCompletionTestBase() {
-    fun `test return type`() = doTest("""
+    fun `test return type`() = doTest(
+        """
         fun foo(): /*caret*/
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
-    fun `test type parameter`() = doTest("""
+    fun `test type parameter`() = doTest(
+        """
         struct Wrapper<T> { value: T }
         fun main() {
             val v: Wrapper</*caret*/> = 
         }
-    """.trimIndent())
+        """.trimIndent(),
+    )
 
     private fun doTest(@Language("Tolk") text: String) {
-        val primitiveTypes = TolkIntNTy.VALUES + TolkTy.Int + Cell + Slice + TolkTy.String + TolkTy.Builder + TolkTy.Coins
+        val primitiveTypes =
+            TolkIntNTy.VALUES + TolkTy.Int + Cell + Slice + TolkTy.String + TolkTy.Builder + TolkTy.Coins
         val primitiveTypeNames = primitiveTypes.map { it.render() }
         checkContainsCompletion(primitiveTypeNames, text)
     }

@@ -5,11 +5,8 @@ import com.intellij.util.execution.ParametersListUtil
 sealed class ActonCommand(val name: String) {
     abstract fun getArguments(): List<String>
 
-    data class Build(
-        var contractId: String = "",
-        var clearCache: Boolean = false,
-        var outDir: String = "",
-    ) : ActonCommand("build") {
+    data class Build(var contractId: String = "", var clearCache: Boolean = false, var outDir: String = "") :
+        ActonCommand("build") {
         override fun getArguments(): List<String> = buildList {
             if (clearCache) add("--clear-cache")
             if (outDir.isNotBlank()) {
@@ -28,11 +25,10 @@ sealed class ActonCommand(val name: String) {
         var forkNet: String = "",
         var forkBlockNumber: String = "",
         var apiKey: String = "",
-        var broadcast: Boolean = false,
         var broadcastNet: String = "",
         var explorer: String = "",
         var debug: Boolean = false,
-        var debugPort: String = ""
+        var debugPort: String = "",
     ) : ActonCommand("script") {
         override fun getArguments(): List<String> = buildList {
             if (clearCache) add("--clear-cache")
@@ -48,12 +44,9 @@ sealed class ActonCommand(val name: String) {
                 add("--api-key")
                 add(apiKey)
             }
-            if (broadcast) {
-                add("--broadcast")
-                if (broadcastNet.isNotBlank()) {
-                    add("--net")
-                    add(broadcastNet)
-                }
+            if (broadcastNet.isNotBlank()) {
+                add("--net")
+                add(broadcastNet)
                 if (explorer.isNotBlank()) {
                     add("--explorer")
                     add(explorer)
@@ -78,6 +71,9 @@ sealed class ActonCommand(val name: String) {
         var functionName: String = "",
         var clearCache: Boolean = false,
         var useColors: Boolean = false,
+        var ui: Boolean = false,
+        var debug: Boolean = false,
+        var debugPort: String = "",
     ) : ActonCommand("test") {
         enum class TestMode { FUNCTION, FILE, DIRECTORY }
 
@@ -88,6 +84,14 @@ sealed class ActonCommand(val name: String) {
             if (useColors) {
                 add("--color")
                 add("always")
+            }
+            if (ui) add("--ui")
+            if (debug) {
+                add("--debug")
+                if (debugPort.isNotBlank()) {
+                    add("--debug-port")
+                    add(debugPort)
+                }
             }
             when (mode) {
                 TestMode.FUNCTION -> {
@@ -105,12 +109,39 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
-    data class Run(
-        var scriptName: String = "",
-    ) : ActonCommand("run") {
+    data class Run(var scriptName: String = "") : ActonCommand("run") {
         override fun getArguments(): List<String> = buildList {
             if (scriptName.isNotBlank()) {
                 add(scriptName)
+            }
+        }
+    }
+
+    data class Retrace(
+        var transactionHash: String = "",
+        var network: String = "",
+        var contractId: String = "",
+        var debug: Boolean = false,
+        var debugPort: String = "",
+    ) : ActonCommand("retrace") {
+        override fun getArguments(): List<String> = buildList {
+            if (transactionHash.isNotBlank()) {
+                add(transactionHash)
+            }
+            if (network.isNotBlank()) {
+                add("--net")
+                add(network)
+            }
+            if (contractId.isNotBlank()) {
+                add("--contract")
+                add(contractId)
+            }
+            if (debug) {
+                add("--debug")
+                if (debugPort.isNotBlank()) {
+                    add("--debug-port")
+                    add(debugPort)
+                }
             }
         }
     }
@@ -122,6 +153,8 @@ sealed class ActonCommand(val name: String) {
         var template: String? = null,
         var app: Boolean = false,
         var license: String? = null,
+        var hooks: Boolean = false,
+        var agents: Boolean = false,
     ) : ActonCommand("new") {
         override fun getArguments(): List<String> = buildList {
             add(path)
@@ -143,6 +176,12 @@ sealed class ActonCommand(val name: String) {
             license?.let {
                 add("--license")
                 add(it)
+            }
+            if (hooks) {
+                add("--hooks")
+            }
+            if (agents) {
+                add("--agents")
             }
         }
     }
@@ -219,10 +258,7 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
-    data class Check(
-        var fix: Boolean = false,
-        var json: Boolean = false,
-    ) : ActonCommand("check") {
+    data class Check(var fix: Boolean = false, var json: Boolean = false) : ActonCommand("check") {
         override fun getArguments(): List<String> = buildList {
             if (fix) add("--fix")
             if (json) {
@@ -232,10 +268,8 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
-    data class InternalRegisterContract(
-        var path: String = "",
-        var id: String? = null,
-    ) : ActonCommand("internal-register-contract") {
+    data class InternalRegisterContract(var path: String = "", var id: String? = null) :
+        ActonCommand("internal-register-contract") {
         override fun getArguments(): List<String> = buildList {
             id?.let {
                 add("--id")
@@ -251,11 +285,8 @@ sealed class ActonCommand(val name: String) {
         override fun getArguments(): List<String> = listOf(subcommand) + getSubcommandArguments()
         abstract fun getSubcommandArguments(): List<String>
 
-        data class ListCmd(
-            val balance: Boolean = false,
-            val apiKey: String? = null,
-            val json: Boolean = true
-        ) : Wallet("list") {
+        data class ListCmd(val balance: Boolean = false, val apiKey: String? = null, val json: Boolean = true) :
+            Wallet("list") {
             override fun getSubcommandArguments(): List<String> = buildList {
                 if (balance) add("--balance")
                 apiKey?.let {
@@ -272,7 +303,7 @@ sealed class ActonCommand(val name: String) {
             val global: Boolean = false,
             val local: Boolean = false,
             val secure: Boolean? = null,
-            val json: Boolean = true
+            val json: Boolean = true,
         ) : Wallet("new") {
             override fun getSubcommandArguments(): List<String> = buildList {
                 walletName?.let {
@@ -300,7 +331,7 @@ sealed class ActonCommand(val name: String) {
             val global: Boolean = false,
             val local: Boolean = false,
             val secure: Boolean? = null,
-            val json: Boolean = true
+            val json: Boolean = true,
         ) : Wallet("import") {
             override fun getSubcommandArguments(): List<String> = buildList {
                 walletName?.let {
@@ -322,11 +353,8 @@ sealed class ActonCommand(val name: String) {
             }
         }
 
-        data class Airdrop(
-            val walletName: String? = null,
-            val faucetUrl: String? = null,
-            val json: Boolean = true
-        ) : Wallet("airdrop") {
+        data class Airdrop(val walletName: String? = null, val faucetUrl: String? = null, val json: Boolean = true) :
+            Wallet("airdrop") {
             override fun getSubcommandArguments(): List<String> = buildList {
                 walletName?.let {
                     add(it)
@@ -340,9 +368,7 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
-    data class Custom(
-        var command: String = "",
-    ) : ActonCommand(command) {
+    data class Custom(var command: String = "") : ActonCommand(command) {
         override fun getArguments(): List<String> = emptyList()
     }
 
@@ -355,8 +381,8 @@ sealed class ActonCommand(val name: String) {
                 while (i < args.size) {
                     when (val arg = args[i]) {
                         "--clear-cache" -> build.clearCache = true
-                        "--out-dir"     -> if (i + 1 < args.size) build.outDir = args[++i]
-                        else            -> if (!arg.startsWith("-")) build.contractId = arg
+                        "--out-dir" -> if (i + 1 < args.size) build.outDir = args[++i]
+                        else -> if (!arg.startsWith("-")) build.contractId = arg
                     }
                     i++
                 }
@@ -369,15 +395,15 @@ sealed class ActonCommand(val name: String) {
                 var i = 0
                 while (i < args.size) {
                     when (val arg = args[i]) {
-                        "--show-hashes"     -> disasm.showHashes = true
-                        "--show-offsets"    -> disasm.showOffsets = true
-                        "--string", "-s"    -> if (i + 1 < args.size) disasm.string = args[++i]
-                        "--output", "-o"    -> if (i + 1 < args.size) disasm.output = args[++i]
-                        "--address"         -> if (i + 1 < args.size) disasm.address = args[++i]
-                        "--api-key"         -> if (i + 1 < args.size) disasm.apiKey = args[++i]
-                        "--net"             -> if (i + 1 < args.size) disasm.net = args[++i]
+                        "--show-hashes" -> disasm.showHashes = true
+                        "--show-offsets" -> disasm.showOffsets = true
+                        "--string", "-s" -> if (i + 1 < args.size) disasm.string = args[++i]
+                        "--output", "-o" -> if (i + 1 < args.size) disasm.output = args[++i]
+                        "--address" -> if (i + 1 < args.size) disasm.address = args[++i]
+                        "--api-key" -> if (i + 1 < args.size) disasm.apiKey = args[++i]
+                        "--net" -> if (i + 1 < args.size) disasm.net = args[++i]
                         "--follow-libraries" -> disasm.followLibraries = true
-                        else                -> if (!arg.startsWith("-")) disasm.bocFile = arg
+                        else -> if (!arg.startsWith("-")) disasm.bocFile = arg
                     }
                     i++
                 }
@@ -390,13 +416,13 @@ sealed class ActonCommand(val name: String) {
                 var i = 0
                 while (i < args.size) {
                     when (val arg = args[i]) {
-                        "--json"        -> compile.json = true
+                        "--json" -> compile.json = true
                         "--base64-only" -> compile.base64Only = true
-                        "--boc"         -> if (i + 1 < args.size) compile.boc = args[++i]
-                        "--fift"        -> if (i + 1 < args.size) compile.fift = args[++i]
-                        "--source-map"  -> if (i + 1 < args.size) compile.sourceMap = args[++i]
+                        "--boc" -> if (i + 1 < args.size) compile.boc = args[++i]
+                        "--fift" -> if (i + 1 < args.size) compile.fift = args[++i]
+                        "--source-map" -> if (i + 1 < args.size) compile.sourceMap = args[++i]
                         "--clear-cache" -> compile.clearCache = true
-                        else            -> if (!arg.startsWith("-")) compile.path = arg
+                        else -> if (!arg.startsWith("-")) compile.path = arg
                     }
                     i++
                 }
@@ -411,14 +437,14 @@ sealed class ActonCommand(val name: String) {
                     when (args[i]) {
                         "--fix" -> check.fix = true
                         "--json" -> check.json = true
-                        else     -> {} // ignore unknown arguments
+                        else -> {} // ignore unknown arguments
                     }
                     i++
                 }
                 check
             }
 
-            else    -> Custom("$name $parameters")
+            else -> Custom("$name $parameters")
         }
     }
 }

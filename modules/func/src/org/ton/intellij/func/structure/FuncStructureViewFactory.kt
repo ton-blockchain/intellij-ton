@@ -18,14 +18,15 @@ import org.ton.intellij.func.psi.FuncNamedElement
 import javax.swing.Icon
 
 class FuncStructureViewFactory : PsiStructureViewFactory {
-    override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder {
-        return object : TreeBasedStructureViewBuilder() {
+    override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder =
+        object : TreeBasedStructureViewBuilder() {
             override fun createStructureViewModel(editor: Editor?): StructureViewModel = Model(psiFile, editor)
             override fun isRootNodeShown() = false
         }
-    }
 
-    class Model(file: PsiFile, editor: Editor?) : StructureViewModelBase(file, editor, Element(file)), ElementInfoProvider {
+    class Model(file: PsiFile, editor: Editor?) :
+        StructureViewModelBase(file, editor, Element(file)),
+        ElementInfoProvider {
         init {
             withSuitableClasses(FuncFile::class.java, FuncNamedElement::class.java)
         }
@@ -65,7 +66,8 @@ class FuncStructureViewFactory : PsiStructureViewFactory {
                 val name = element.name
                 val parameterList = element.functionParameterList
                 val returnType = element.typeReference.text
-                val signature = parameterList.joinToString(", ", prefix = "(", postfix = ")") { it.text } + " -> " + returnType
+                val signature =
+                    parameterList.joinToString(", ", prefix = "(", postfix = ")") { it.text } + " -> " + returnType
                 return name + signature
             }
 

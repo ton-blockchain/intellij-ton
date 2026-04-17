@@ -29,7 +29,7 @@ object FuncReturnCompletionProvider : FuncCompletionProvider(), DumbAware {
         if (returnTy is FuncTyUnit) {
             result.addElement(
                 LookupElementBuilder.create("return ();")
-                    .bold()
+                    .bold(),
             )
             return
         }
@@ -40,15 +40,17 @@ object FuncReturnCompletionProvider : FuncCompletionProvider(), DumbAware {
                 .withTailText(" expr;", true)
                 .withInsertHandler(
                     TemplateStringInsertHandler(
-                        " \$expr$;", true, "expr" to ConstantNode("")
-                    )
-                )
+                        " \$expr$;",
+                        true,
+                        "expr" to ConstantNode(""),
+                    ),
+                ),
         )
 
         if (returnTy is FuncTyInt) {
             result.addElement(
                 LookupElementBuilder.create("return 0;")
-                    .bold()
+                    .bold(),
             )
         }
     }

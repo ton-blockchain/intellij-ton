@@ -34,7 +34,10 @@ class TlbParserDefinition : ParserDefinition {
         val PARENTHESES = TokenSet.create(LPAREN, RPAREN)
         val BRACKETS = TokenSet.create(LBRACKET, RBRACKET)
         val BUILTIN_TYPES = TokenSet.create(
-            TAG, DOUBLE_TAG, NAT_LESS, NAT_LEQ
+            TAG,
+            DOUBLE_TAG,
+            NAT_LESS,
+            NAT_LEQ,
         )
     }
 }

@@ -51,9 +51,9 @@ class ActonExternalLinterConfigurable(val project: Project) :
         }
         onIsModified {
             enabledCheckBox.isSelected != settings.enabled ||
-                    additionalArgumentsField.text != settings.additionalArguments ||
-                    environmentVariables.envs != settings.envs ||
-                    environmentVariables.isPassParentEnvs != settings.isPassParentEnvs
+                additionalArgumentsField.text != settings.additionalArguments ||
+                environmentVariables.envs != settings.envs ||
+                environmentVariables.isPassParentEnvs != settings.isPassParentEnvs
         }
     }
 }

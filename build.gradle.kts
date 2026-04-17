@@ -1,10 +1,10 @@
-
 import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import java.time.Clock
 import java.time.Instant
 
@@ -26,10 +26,33 @@ plugins {
     id("org.jetbrains.intellij.platform")
     id("org.jetbrains.grammarkit") version "2023.3.0.1"
     id("org.jetbrains.changelog") version "2.5.0"
+    id("org.jlleitschuh.gradle.ktlint") version "13.1.0" apply false
 }
 
 allprojects {
     apply(plugin = "kotlin")
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+
+    configure<KtlintExtension> {
+        ignoreFailures.set(true)
+        filter {
+            exclude("**/build/**")
+            exclude("**/gen/**")
+        }
+    }
+
+    val grammarKitGenerators =
+        tasks.matching { task ->
+            task.name.startsWith("generate") &&
+                task.name !in setOf("generateLexer", "generateParser") &&
+                (task.name.endsWith("Lexer") || task.name.endsWith("Parser"))
+        }
+
+    tasks.matching { task ->
+        task.name == "runKtlintCheckOverMainSourceSet" || task.name == "runKtlintFormatOverMainSourceSet"
+    }.configureEach {
+        dependsOn(grammarKitGenerators)
+    }
 
     tasks.withType<KotlinCompile> {
         compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
@@ -67,7 +90,6 @@ dependencies {
         testFramework(TestFrameworkType.Platform)
     }
     implementation(project(":util"))
-    implementation(project(":blueprint"))
     implementation(project(":asm"))
     implementation(project(":boc"))
     implementation(project(":acton"))
@@ -90,7 +112,7 @@ intellijPlatform {
         TON Blockchain Development Plugin — a JetBrains plugin that brings first-class TON blockchain support to IntelliJ-based IDEs.
 
         - Syntax highlighting, code completion, navigation and inspections for Tolk, FunC, Fift (including assembly), TL-B schemas and TASM (TON Assembly)
-        - Integration with Blueprint
+        - Acton-based project scaffolding, build, test, script and debug workflows
         - Works in IntelliJ IDEA, WebStorm, PyCharm, GoLand and other JetBrains IDEs
 
         Everything you need to develop, test and ship TON smart contracts—right from your editor.
@@ -98,7 +120,7 @@ intellijPlatform {
         changeNotes.set(
             provider {
                 changelog.renderItem(changelog.getLatest(), Changelog.OutputType.HTML)
-            }
+            },
         )
         ideaVersion {
             sinceBuild.set(prop("pluginSinceBuild"))
@@ -113,9 +135,7 @@ intellijPlatform {
     pluginVerification {
         ides {
             recommended()
-            select {
-
-            }
+            select {}
         }
     }
 
@@ -137,6 +157,16 @@ val mergePluginJarsTask = tasks.register<Jar>("mergePluginJars") {
             from(zipTree(file))
         }
     }
+}
+
+val fmt by tasks.registering {
+    group = "formatting"
+    description = "Formats Kotlin sources and Gradle Kotlin scripts in all projects with ktlint."
+    dependsOn(
+        rootProject.allprojects.map { project ->
+            if (project == rootProject) "ktlintFormat" else "${project.path}:ktlintFormat"
+        },
+    )
 }
 
 tasks {

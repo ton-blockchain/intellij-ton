@@ -12,31 +12,29 @@ import org.ton.intellij.tolk.psi.TolkParameter
 import org.ton.intellij.tolk.psi.TolkVisitor
 
 class TolkUnusedFunctionParameterInspection : TolkInspectionBase() {
-    override fun buildTolkVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): TolkVisitor = object : TolkVisitor() {
-        override fun visitFunction(o: TolkFunction) {
-            o.functionBody?.blockStatement ?: return
-            val parameters = o.parameterList?.parameterList ?: return
-            val searchScope = LocalSearchScope(o)
-            for (parameter in parameters) {
-                ProgressIndicatorProvider.checkCanceled()
-                processParameter(parameter, searchScope)
+    override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor =
+        object : TolkVisitor() {
+            override fun visitFunction(o: TolkFunction) {
+                o.functionBody?.blockStatement ?: return
+                val parameters = o.parameterList?.parameterList ?: return
+                val searchScope = LocalSearchScope(o)
+                for (parameter in parameters) {
+                    ProgressIndicatorProvider.checkCanceled()
+                    processParameter(parameter, searchScope)
+                }
             }
-        }
 
-        private fun processParameter(parameter: TolkParameter, searchScope: SearchScope) {
-            val id = parameter.identifier ?: return
-            if (id.textMatches("_")) return
-            if (ReferencesSearch.search(parameter, searchScope).none()) {
-                holder.registerProblem(
-                    parameter,
-                    "Unused parameter <code>#ref</code> #loc",
-                    ProblemHighlightType.LIKE_UNUSED_SYMBOL,
-                    id.textRangeInParent
-                )
+            private fun processParameter(parameter: TolkParameter, searchScope: SearchScope) {
+                val id = parameter.identifier
+                if (id.text.startsWith("_")) return
+                if (ReferencesSearch.search(parameter, searchScope).none()) {
+                    holder.registerProblem(
+                        parameter,
+                        "Unused parameter <code>#ref</code> #loc",
+                        ProblemHighlightType.LIKE_UNUSED_SYMBOL,
+                        id.textRangeInParent,
+                    )
+                }
             }
         }
-    }
 }

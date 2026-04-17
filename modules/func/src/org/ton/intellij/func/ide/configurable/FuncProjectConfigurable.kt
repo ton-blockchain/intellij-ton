@@ -10,17 +10,18 @@ import org.ton.intellij.func.FuncBundle
 import org.ton.intellij.func.FuncLanguageLevel
 import org.ton.intellij.func.ide.settings.funcSettings
 
-class FuncProjectConfigurable(
-    val project: Project,
-) : BoundConfigurable(FuncBundle.message("func.name")) {
+class FuncProjectConfigurable(val project: Project) : BoundConfigurable(FuncBundle.message("func.name")) {
     override fun createPanel(): DialogPanel = panel {
         val settings = project.funcSettings
         val state = settings.state.copy()
 
         row {
-            comboBox(EnumComboBoxModel(FuncLanguageLevel::class.java).apply {
-                this.setSelectedItem(state.languageLevel)
-            }, SimpleListCellRenderer.create("") { it.displayName })
+            comboBox(
+                EnumComboBoxModel(FuncLanguageLevel::class.java).apply {
+                    this.setSelectedItem(state.languageLevel)
+                },
+                SimpleListCellRenderer.create("") { it.displayName },
+            )
         }
 
         onApply {

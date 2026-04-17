@@ -34,16 +34,17 @@ class TolkAddPackPrefixIntention : PsiElementBaseIntentionAction() {
 
         WriteCommandAction.writeCommandAction(project)
             .withName("Add pack prefix to struct $structName")
-            .run(ThrowableRunnable {
-                val structKeyword = struct.structKeyword
-                val document = struct.containingFile.viewProvider.document ?: return@ThrowableRunnable
+            .run(
+                ThrowableRunnable {
+                    val structKeyword = struct.structKeyword
+                    val document = struct.containingFile.viewProvider.document ?: return@ThrowableRunnable
 
-                val insertOffset = structKeyword.textRange.endOffset
-                document.insertString(insertOffset, " ($hexValue)")
-            })
+                    val insertOffset = structKeyword.textRange.endOffset
+                    document.insertString(insertOffset, " ($hexValue)")
+                },
+            )
     }
 
-    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo {
-        return IntentionPreviewInfo.EMPTY
-    }
+    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo =
+        IntentionPreviewInfo.EMPTY
 }

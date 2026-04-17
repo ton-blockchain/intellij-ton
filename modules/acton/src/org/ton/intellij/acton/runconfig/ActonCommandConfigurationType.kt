@@ -7,12 +7,13 @@ import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.openapi.project.Project
 import org.ton.intellij.acton.ActonIcons
 
-class ActonCommandConfigurationType : ConfigurationTypeBase(
-    "ActonCommandRunConfiguration",
-    "Acton",
-    "Acton command run configuration",
-    ActonIcons.ACTON,
-) {
+class ActonCommandConfigurationType :
+    ConfigurationTypeBase(
+        "ActonCommandRunConfiguration",
+        "Acton",
+        "Acton command run configuration",
+        ActonIcons.ACTON,
+    ) {
     init {
         addFactory(ActonConfigurationFactory(this))
     }
@@ -28,7 +29,6 @@ class ActonCommandConfigurationType : ConfigurationTypeBase(
 class ActonConfigurationFactory(type: ActonCommandConfigurationType) : ConfigurationFactory(type) {
     override fun getId(): String = "Acton Command"
 
-    override fun createTemplateConfiguration(project: Project): RunConfiguration {
-        return ActonCommandConfiguration(project, this, "Acton")
-    }
+    override fun createTemplateConfiguration(project: Project): RunConfiguration =
+        ActonCommandConfiguration(project, this, "Acton")
 }

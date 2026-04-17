@@ -27,7 +27,7 @@ class TolkTypedHandler : TypedHandlerDelegate() {
     override fun charTyped(c: Char, project: Project, editor: Editor, file: PsiFile): Result {
         if (file !is TolkFile) return Result.CONTINUE
 
-        when(c) {
+        when (c) {
             '.' -> {
                 if (autoIndentCase(editor, project, file, TolkDotExpression::class.java)) return Result.STOP
             }
@@ -61,7 +61,9 @@ class TolkTypedHandler : TypedHandlerDelegate() {
                 } else {
                     val document = PsiDocumentManager.getInstance(project).getDocument(file)
                     if (document != null) {
-                        CodeStyleManager.getInstance(project).adjustLineIndent(document, DocumentUtil.getLineStartOffset(offset, document))
+                        CodeStyleManager.getInstance(
+                            project,
+                        ).adjustLineIndent(document, DocumentUtil.getLineStartOffset(offset, document))
                     }
                 }
 

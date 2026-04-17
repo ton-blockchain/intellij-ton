@@ -27,13 +27,12 @@ data class DocLine(
 
     val contentLength: Int get() = contentEndOffset - contentStartOffset
 
-    fun removePrefix(prefix: String): DocLine {
-        return if (CharArrayUtil.regionMatches(text, contentStartOffset, contentEndOffset, prefix)) {
+    fun removePrefix(prefix: String): DocLine =
+        if (CharArrayUtil.regionMatches(text, contentStartOffset, contentEndOffset, prefix)) {
             copy(contentStartOffset = contentStartOffset + prefix.length, contentEndOffset = contentEndOffset)
         } else {
             this
         }
-    }
 
     fun removeSuffix(suffix: String): DocLine {
         if (contentLength < suffix.length) return this
@@ -44,18 +43,14 @@ data class DocLine(
         }
     }
 
-    fun markRemoved(): DocLine {
-        return copy(contentEndOffset = contentStartOffset, isRemoved = true)
-    }
+    fun markRemoved(): DocLine = copy(contentEndOffset = contentStartOffset, isRemoved = true)
 
     fun trimStart(): DocLine {
         val newOffset = shiftForwardWhitespace()
         return copy(contentStartOffset = newOffset, contentEndOffset = contentEndOffset)
     }
 
-    fun countStartWhitespace(): Int {
-        return shiftForwardWhitespace() - contentStartOffset
-    }
+    fun countStartWhitespace(): Int = shiftForwardWhitespace() - contentStartOffset
 
     private fun shiftForwardWhitespace(): Int =
         CharArrayUtil.shiftForward(text, contentStartOffset, contentEndOffset, " \t")

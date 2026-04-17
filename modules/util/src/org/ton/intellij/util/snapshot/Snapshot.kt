@@ -28,10 +28,8 @@ class UndoLog {
     private fun inSnapshot(): Boolean = undoLog.isNotEmpty()
 }
 
-private class LogBasedSnapshot private constructor(
-    private val undoLog: MutableList<Undoable>,
-    val position: Int
-) : Snapshot {
+private class LogBasedSnapshot private constructor(private val undoLog: MutableList<Undoable>, val position: Int) :
+    Snapshot {
     override fun commit() {
         assertOpenSnapshot()
         if (position == 0) {

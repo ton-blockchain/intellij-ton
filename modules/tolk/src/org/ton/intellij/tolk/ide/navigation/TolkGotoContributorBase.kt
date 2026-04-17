@@ -19,7 +19,8 @@ import org.ton.intellij.tolk.type.render
 open class TolkGotoContributorBase<T : TolkNamedElement>(
     private val clazz: Class<T>,
     private vararg val indexKeys: StubIndexKey<String, T>,
-) : GotoClassContributor, ChooseByNameContributorEx {
+) : GotoClassContributor,
+    ChooseByNameContributorEx {
 
     override fun processNames(processor: Processor<in String>, scope: GlobalSearchScope, filter: IdFilter?) {
         for (key in indexKeys) {
@@ -28,12 +29,21 @@ open class TolkGotoContributorBase<T : TolkNamedElement>(
         }
     }
 
-    override fun processElementsWithName(name: String, processor: Processor<in NavigationItem>, parameters: FindSymbolParameters) {
+    override fun processElementsWithName(
+        name: String,
+        processor: Processor<in NavigationItem>,
+        parameters: FindSymbolParameters,
+    ) {
         for (key in indexKeys) {
             ProgressManager.checkCanceled()
             StubIndex.getInstance().processElements(
-                key, name, parameters.project, parameters.searchScope, parameters.idFilter,
-                clazz, processor
+                key,
+                name,
+                parameters.project,
+                parameters.searchScope,
+                parameters.idFilter,
+                clazz,
+                processor,
             )
         }
     }

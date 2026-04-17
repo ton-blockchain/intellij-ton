@@ -9,16 +9,13 @@ import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.printPsi
 
 class TolkLambdaParameterTypesProvider : AbstractTolkInlayHintProvider() {
-    override fun collectFromElement(
-        element: PsiElement,
-        sink: InlayTreeSink,
-    ) {
+    override fun collectFromElement(element: PsiElement, sink: InlayTreeSink) {
         if (element !is TolkLambdaFunExpression) return
 
         for (parameter in element.parameterList.parameterList) {
             if (parameter.typeExpression != null) continue // already has explicit type
             val parameterType = parameter.type ?: continue // no data information
-            if (parameterType is TolkTyUnknown) continue   // the unknown type doesn't add any information
+            if (parameterType is TolkTyUnknown) continue // the unknown type doesn't add any information
 
             sink.addPresentation(
                 position = InlineInlayPosition(parameter.textRange.endOffset, false),

@@ -19,16 +19,13 @@ class TolkSdkSyntheticLibraryProvider : AdditionalLibraryRootsProvider() {
         return listOf(library)
     }
 
-    override fun getRootsToWatch(project: Project) =
-        getAdditionalProjectLibraries(project).flatMap { it.sourceRoots }
+    override fun getRootsToWatch(project: Project) = getAdditionalProjectLibraries(project).flatMap { it.sourceRoots }
 
-    data class TolkLibrary(
-        private val name: String,
-        private val sourceRoot: VirtualFile?,
-    ) : SyntheticLibrary(), ItemPresentation {
+    data class TolkLibrary(private val name: String, private val sourceRoot: VirtualFile?) :
+        SyntheticLibrary(),
+        ItemPresentation {
 
-        override fun getSourceRoots() =
-            if (sourceRoot == null) emptyList() else listOf(sourceRoot)
+        override fun getSourceRoots() = if (sourceRoot == null) emptyList() else listOf(sourceRoot)
 
         override fun getPresentableText(): String = name
 

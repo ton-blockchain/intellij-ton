@@ -8,6 +8,26 @@ import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
 import java.nio.file.Paths
 
+fun createActonNewCommand(projectName: String, settings: ActonProjectSettings): ActonCommand.New = ActonCommand.New(
+    path = ".",
+    projectName = projectName,
+    description = settings.description.trim().ifBlank { ActonProjectSettings.DEFAULT_DESCRIPTION },
+    template = settings.template,
+    app = settings.shouldIncludeTypeScriptApp(),
+    license = settings.license.trim().ifBlank { ActonProjectSettings.DEFAULT_LICENSE },
+    hooks = settings.includeGitHooks,
+    agents = settings.includeAgentsMd,
+)
+
+fun starterFilePathForTemplate(template: String): String? = when (template) {
+    "empty" -> "contracts/contract.tolk"
+    "counter" -> "contracts/counter.tolk"
+    "jetton" -> "contracts/jetton-minter-contract.tolk"
+    else -> null
+}
+
+private fun ActonProjectSettings.shouldIncludeTypeScriptApp(): Boolean = template == "counter" && addTypeScriptApp
+
 fun createDefaultRunConfigurations(project: Project, baseDir: VirtualFile) {
     val runManager = RunManager.getInstance(project)
     val factory = ActonCommandConfigurationType.getInstance().factory

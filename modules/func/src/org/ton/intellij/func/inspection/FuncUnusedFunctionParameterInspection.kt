@@ -12,30 +12,28 @@ import org.ton.intellij.func.psi.FuncVisitor
 import org.ton.intellij.func.psi.impl.hasAsm
 
 class FuncUnusedFunctionParameterInspection : FuncInspectionBase() {
-    override fun buildFuncVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): FuncVisitor = object : FuncVisitor() {
-        override fun visitFunction(o: FuncFunction) {
-            if (o.hasAsm) return
-            val parameters = o.functionParameterList
-            for (parameter in parameters) {
-                ProgressIndicatorProvider.checkCanceled()
-                processParameter(parameter)
+    override fun buildFuncVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): FuncVisitor =
+        object : FuncVisitor() {
+            override fun visitFunction(o: FuncFunction) {
+                if (o.hasAsm) return
+                val parameters = o.functionParameterList
+                for (parameter in parameters) {
+                    ProgressIndicatorProvider.checkCanceled()
+                    processParameter(parameter)
+                }
             }
-        }
 
-        private fun processParameter(parameter: FuncFunctionParameter) {
-            val id = parameter.identifier ?: return
-            if (ReferencesSearch.search(parameter, parameter.useScope).findFirst() == null) {
-                val range = TextRange.from(id.startOffsetInParent, id.textLength)
-                holder.registerProblem(
-                    parameter,
-                    "Unused parameter <code>#ref</code> #loc",
-                    ProblemHighlightType.LIKE_UNUSED_SYMBOL,
-                    range
-                )
+            private fun processParameter(parameter: FuncFunctionParameter) {
+                val id = parameter.identifier ?: return
+                if (ReferencesSearch.search(parameter, parameter.useScope).findFirst() == null) {
+                    val range = TextRange.from(id.startOffsetInParent, id.textLength)
+                    holder.registerProblem(
+                        parameter,
+                        "Unused parameter <code>#ref</code> #loc",
+                        ProblemHighlightType.LIKE_UNUSED_SYMBOL,
+                        range,
+                    )
+                }
             }
         }
-    }
 }

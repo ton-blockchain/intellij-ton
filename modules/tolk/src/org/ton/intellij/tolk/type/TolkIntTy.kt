@@ -44,9 +44,10 @@ interface TolkIntTy : TolkPrimitiveTy {
     }
 }
 
-data class TolkConstantIntTy(
-    override val value: BigInteger
-) : TolkIntTy, TolkConstantTy<BigInteger>, TolkIntTyFamily {
+data class TolkConstantIntTy(override val value: BigInteger) :
+    TolkIntTy,
+    TolkConstantTy<BigInteger>,
+    TolkIntTyFamily {
     constructor(value: Long) : this(value.toBigInteger())
 
     override val range: TvmIntRangeSet get() = TvmIntRangeSet.point(value)
@@ -58,27 +59,22 @@ data class TolkConstantIntTy(
         return other == this || other == TolkTyNever
     }
 
-    override fun canRhsBeAssigned(other: TolkTy): Boolean {
-        return super<TolkIntTy>.canRhsBeAssigned(other)
-    }
+    override fun canRhsBeAssigned(other: TolkTy): Boolean = super<TolkIntTy>.canRhsBeAssigned(other)
 
     override fun toString(): String {
         val bitLength = value.bitLength()
         if (bitLength <= 16) return value.toString()
         return "0x${value.toString(16)}"
     }
-
 }
 
-data class TolkIntRangeTy(
-    override val range: TvmIntRangeSet
-) : TolkIntTy, TolkIntTyFamily {
+data class TolkIntRangeTy(override val range: TvmIntRangeSet) :
+    TolkIntTy,
+    TolkIntTyFamily {
 
     override fun negate(): TolkIntTy = TolkIntRangeTy(range.unaryMinus())
 
     override fun toString(): String = range.toString()
 
-    override fun canRhsBeAssigned(other: TolkTy): Boolean {
-        return super<TolkIntTy>.canRhsBeAssigned(other)
-    }
+    override fun canRhsBeAssigned(other: TolkTy): Boolean = super<TolkIntTy>.canRhsBeAssigned(other)
 }

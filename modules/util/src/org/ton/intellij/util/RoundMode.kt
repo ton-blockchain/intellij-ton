@@ -9,7 +9,8 @@ enum class RoundMode {
     Floor,
     Round,
     Ceil,
-    FloorToZero;
+    FloorToZero,
+    ;
 
     fun divMod(a: BigInteger, b: BigInteger): Pair<BigInteger, BigInteger> = when (this) {
         Floor -> a.divModFloor(b)

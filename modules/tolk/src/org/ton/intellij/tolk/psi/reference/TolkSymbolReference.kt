@@ -10,9 +10,7 @@ import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkPsiFactory
 import org.ton.intellij.tolk.type.inference
 
-class TolkSymbolReference(
-    element: TolkElement,
-) : PsiReferenceBase.Poly<TolkElement>(element) {
+class TolkSymbolReference(element: TolkElement) : PsiReferenceBase.Poly<TolkElement>(element) {
     val identifier: PsiElement get() = element.node.findChildByType(TolkElementTypes.IDENTIFIER)!!.psi
 
     override fun calculateDefaultRangeInElement(): TextRange {

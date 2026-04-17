@@ -23,11 +23,14 @@ object TolkTestLocator : SMTestLocator {
             return mutableListOf()
         }
 
-        val (filepath, functionName) = path.split(":")
+        val location = parseLocationPath(path) ?: return mutableListOf()
+        val filepath = location.filePath
+        val functionName = location.functionName
         val file = VirtualFileManager.getInstance().findFileByNioPath(Path.of(filepath)) ?: return mutableListOf()
         val psiFile = PsiManager.getInstance(project).findFile(file) as? TolkFile ?: return mutableListOf()
 
-        val function = psiFile.functions.find { normalizeTestName(it.name ?: "") == functionName } ?: return mutableListOf()
+        val function =
+            psiFile.functions.find { normalizeTestName(it.name ?: "") == functionName } ?: return mutableListOf()
 
         return mutableListOf(PsiLocation(function))
     }
@@ -37,6 +40,23 @@ object TolkTestLocator : SMTestLocator {
         val name = element.name ?: return ""
         val normalized = normalizeTestName(name)
         return "$PROTOCOL_ID://${containingFile.virtualFile.path}:$normalized"
+    }
+
+    internal fun parseLocationUrl(locationUrl: String?): TestLocation? {
+        val path = locationUrl?.removePrefix("$PROTOCOL_ID://") ?: return null
+        if (path == locationUrl) return null
+        return parseLocationPath(path)
+    }
+
+    internal data class TestLocation(val filePath: String, val functionName: String)
+
+    private fun parseLocationPath(path: String): TestLocation? {
+        val separatorIndex = path.lastIndexOf(':')
+        if (separatorIndex <= 0 || separatorIndex == path.lastIndex) return null
+
+        val filePath = path.substring(0, separatorIndex)
+        val functionName = path.substring(separatorIndex + 1)
+        return TestLocation(filePath, functionName)
     }
 
     private fun normalizeTestName(name: String): String = name

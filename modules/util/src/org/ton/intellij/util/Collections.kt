@@ -1,10 +1,8 @@
 package org.ton.intellij.util
 
-fun <T> Sequence<T>.infiniteWith(with: T): Sequence<T> =
-    this + generateSequence { with }
+fun <T> Sequence<T>.infiniteWith(with: T): Sequence<T> = this + generateSequence { with }
 
-fun <T : Any> Iterator<T>.nextOrNull(): T? =
-    if (hasNext()) next() else null
+fun <T : Any> Iterator<T>.nextOrNull(): T? = if (hasNext()) next() else null
 
 typealias WithNextValue<T> = Pair<T, T?>
 
@@ -32,18 +30,16 @@ private class WithNextIterator<T : Any>(private val iterator: Iterator<T>) : Ite
     }
 }
 
-fun <K, V> mergeMaps(map1: Map<K, V>, map2: Map<K, V>): Map<K, V> =
-    when {
-        map1.isEmpty() -> map2
-        map2.isEmpty() -> map1
-        else -> newHashMapWithExpectedSize<K, V>(map1.size + map2.size).apply {
-            putAll(map1)
-            putAll(map2)
-        }
+fun <K, V> mergeMaps(map1: Map<K, V>, map2: Map<K, V>): Map<K, V> = when {
+    map1.isEmpty() -> map2
+    map2.isEmpty() -> map1
+    else -> newHashMapWithExpectedSize<K, V>(map1.size + map2.size).apply {
+        putAll(map1)
+        putAll(map2)
     }
+}
 
-private fun <K, V> newHashMapWithExpectedSize(size: Int): java.util.HashMap<K, V> =
-    HashMap<K, V>(mapCapacity(size))
+private fun <K, V> newHashMapWithExpectedSize(size: Int): java.util.HashMap<K, V> = HashMap<K, V>(mapCapacity(size))
 
 private const val INT_MAX_POWER_OF_TWO: Int = Int.MAX_VALUE / 2 + 1
 

@@ -9,14 +9,16 @@ import com.intellij.psi.util.parentOfType
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.reference.TolkTypeReference
 import org.ton.intellij.tolk.stub.TolkTypeStub
-import org.ton.intellij.tolk.type.TolkTyStruct
 import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.tolk.type.TolkTyAlias
 import org.ton.intellij.tolk.type.TolkTyArray
 import org.ton.intellij.tolk.type.TolkTyParam
+import org.ton.intellij.tolk.type.TolkTyStruct
 import org.ton.intellij.tolk.type.TolkTyUnknown
 
-abstract class TolkReferenceTypeExpressionMixin : TolkTypeExpressionImpl, TolkReferenceTypeExpression {
+abstract class TolkReferenceTypeExpressionMixin :
+    TolkTypeExpressionImpl,
+    TolkReferenceTypeExpression {
     constructor(node: ASTNode) : super(node)
     constructor(stub: TolkTypeStub<*>, stubType: IStubElementType<*, *>) : super(stub, stubType)
 
@@ -73,11 +75,16 @@ abstract class TolkReferenceTypeExpressionMixin : TolkTypeExpressionImpl, TolkRe
         return when {
             resolved is TolkStruct -> {
                 if (resolved.name == "array") {
-                    return TolkTyArray.create(typeArgumentList?.typeExpressionList?.firstOrNull()?.type ?: TolkTyUnknown)
+                    return TolkTyArray.create(
+                        typeArgumentList?.typeExpressionList?.firstOrNull()?.type ?: TolkTyUnknown,
+                    )
                 }
                 TolkTyStruct.create(resolved, typeArgumentList?.typeExpressionList)
             }
-            resolved is TolkTypeDef && primitiveType == null -> TolkTyAlias.create(resolved, typeArgumentList?.typeExpressionList)
+            resolved is TolkTypeDef && primitiveType == null -> TolkTyAlias.create(
+                resolved,
+                typeArgumentList?.typeExpressionList,
+            )
             resolved is TolkTypeParameter -> resolved.type
             resolved is TolkTypedElement && primitiveType == null -> resolved.type
             parentOfType<TolkFunctionReceiver>() != null && typeArgumentList == null -> {

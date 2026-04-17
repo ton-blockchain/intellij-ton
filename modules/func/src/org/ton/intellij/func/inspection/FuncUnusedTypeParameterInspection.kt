@@ -11,29 +11,27 @@ import org.ton.intellij.func.psi.FuncTypeParameter
 import org.ton.intellij.func.psi.FuncVisitor
 
 class FuncUnusedTypeParameterInspection : FuncInspectionBase() {
-    override fun buildFuncVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): FuncVisitor = object : FuncVisitor() {
-        override fun visitFunction(o: FuncFunction) {
-            val parameters = o.typeParameterList
-            for (parameter in parameters) {
-                ProgressIndicatorProvider.checkCanceled()
-                processParameter(parameter)
+    override fun buildFuncVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): FuncVisitor =
+        object : FuncVisitor() {
+            override fun visitFunction(o: FuncFunction) {
+                val parameters = o.typeParameterList
+                for (parameter in parameters) {
+                    ProgressIndicatorProvider.checkCanceled()
+                    processParameter(parameter)
+                }
             }
-        }
 
-        private fun processParameter(parameter: FuncTypeParameter) {
-            if (ReferencesSearch.search(parameter, parameter.useScope).findFirst() == null) {
-                val id = parameter.identifier
-                val range = TextRange.from(id.startOffsetInParent, id.textLength)
-                holder.registerProblem(
-                    parameter,
-                    "Unused type parameter <code>#ref</code> #loc",
-                    ProblemHighlightType.LIKE_UNUSED_SYMBOL,
-                    range
-                )
+            private fun processParameter(parameter: FuncTypeParameter) {
+                if (ReferencesSearch.search(parameter, parameter.useScope).findFirst() == null) {
+                    val id = parameter.identifier
+                    val range = TextRange.from(id.startOffsetInParent, id.textLength)
+                    holder.registerProblem(
+                        parameter,
+                        "Unused type parameter <code>#ref</code> #loc",
+                        ProblemHighlightType.LIKE_UNUSED_SYMBOL,
+                        range,
+                    )
+                }
             }
         }
-    }
 }

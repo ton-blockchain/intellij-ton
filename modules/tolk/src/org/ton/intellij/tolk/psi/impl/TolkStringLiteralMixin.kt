@@ -11,7 +11,9 @@ import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.reference.TolkLiteralFileReferenceSet
 import org.ton.intellij.tolk.stub.TolkStringLiteralStub
 
-abstract class TolkStringLiteralMixin : TolkStubbedElementImpl<TolkStringLiteralStub>, TolkStringLiteral,
+abstract class TolkStringLiteralMixin :
+    TolkStubbedElementImpl<TolkStringLiteralStub>,
+    TolkStringLiteral,
     PsiLanguageInjectionHost {
 
     constructor(stub: TolkStringLiteralStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
@@ -27,9 +29,7 @@ abstract class TolkStringLiteralMixin : TolkStubbedElementImpl<TolkStringLiteral
         return ReferenceProvidersRegistry.getReferencesFromProviders(this)
     }
 
-    override fun isValidHost(): Boolean {
-        return node.findChildByType(TolkElementTypes.RAW_STRING) != null
-    }
+    override fun isValidHost(): Boolean = node.findChildByType(TolkElementTypes.RAW_STRING) != null
 
     override fun updateText(text: String): PsiLanguageInjectionHost? {
         val newStringLiteral = (TolkPsiFactory[project].createExpression(text) as TolkLiteralExpression).stringLiteral!!
@@ -37,9 +37,8 @@ abstract class TolkStringLiteralMixin : TolkStubbedElementImpl<TolkStringLiteral
         return this
     }
 
-    override fun createLiteralTextEscaper(): LiteralTextEscaper<out PsiLanguageInjectionHost?> {
-        return SimpleMultiLineTextEscaper(this)
-    }
+    override fun createLiteralTextEscaper(): LiteralTextEscaper<out PsiLanguageInjectionHost?> =
+        SimpleMultiLineTextEscaper(this)
 
     private class SimpleMultiLineTextEscaper<T : PsiLanguageInjectionHost>(host: T) : LiteralTextEscaper<T>(host) {
         override fun decode(rangeInsideHost: TextRange, outChars: java.lang.StringBuilder): Boolean {
@@ -47,9 +46,8 @@ abstract class TolkStringLiteralMixin : TolkStubbedElementImpl<TolkStringLiteral
             return true
         }
 
-        override fun getOffsetInHost(offsetInDecoded: Int, rangeInsideHost: TextRange): Int {
-            return rangeInsideHost.startOffset + offsetInDecoded
-        }
+        override fun getOffsetInHost(offsetInDecoded: Int, rangeInsideHost: TextRange): Int =
+            rangeInsideHost.startOffset + offsetInDecoded
 
         override fun isOneLine(): Boolean = false
     }

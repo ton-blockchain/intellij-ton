@@ -8,43 +8,39 @@ import org.ton.intellij.func.ide.fixes.FuncCreateFunctionQuickfix
 import org.ton.intellij.func.psi.*
 
 class FuncUnresolvedReferenceInspection : FuncInspectionBase() {
-    override fun buildFuncVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): FuncVisitor = object : FuncVisitor() {
-        override fun visitReferenceExpression(o: FuncReferenceExpression) {
-            super.visitReferenceExpression(o)
-            val reference = o.reference ?: return
-            val resolved = reference.resolve()
-            if (resolved != null) return
+    override fun buildFuncVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): FuncVisitor =
+        object : FuncVisitor() {
+            override fun visitReferenceExpression(o: FuncReferenceExpression) {
+                super.visitReferenceExpression(o)
+                val reference = o.reference ?: return
+                val resolved = reference.resolve()
+                if (resolved != null) return
 
-            val id = o.identifier
-            val range = TextRange.from(id.startOffsetInParent, id.textLength)
+                val id = o.identifier
+                val range = TextRange.from(id.startOffsetInParent, id.textLength)
 
-            val fixes = mutableListOf<FuncCreateFunctionQuickfix>()
-            if (isFunctionCall(o)) {
-                fixes.add(FuncCreateFunctionQuickfix(id))
+                val fixes = mutableListOf<FuncCreateFunctionQuickfix>()
+                if (isFunctionCall(o)) {
+                    fixes.add(FuncCreateFunctionQuickfix(id))
+                }
+
+                holder.registerProblem(
+                    o,
+                    "Unresolved reference <code>#ref</code>",
+                    ProblemHighlightType.LIKE_UNKNOWN_SYMBOL,
+                    range,
+                    *fixes.toTypedArray(),
+                )
             }
 
-            holder.registerProblem(
-                o,
-                "Unresolved reference <code>#ref</code>",
-                ProblemHighlightType.LIKE_UNKNOWN_SYMBOL,
-                range,
-                *fixes.toTypedArray()
-            )
-        }
-
-        private fun isFunctionCall(ref: FuncReferenceExpression): Boolean {
-            return when (val parent = ref.parent) {
-                is FuncApplyExpression        -> parent.left == ref
+            private fun isFunctionCall(ref: FuncReferenceExpression): Boolean = when (val parent = ref.parent) {
+                is FuncApplyExpression -> parent.left == ref
                 is FuncSpecialApplyExpression -> {
                     val applyExpr = parent.left as? FuncApplyExpression
                     applyExpr?.left == ref
                 }
 
-                else                          -> false
+                else -> false
             }
         }
-    }
 }

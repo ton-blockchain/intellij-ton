@@ -17,10 +17,8 @@ import java.math.BigInteger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-class FuncConstantExpressionEvaluator(
-    val project: Project,
-    throwOverflowException: Boolean = false
-) : FuncRecursiveElementWalkingVisitor() {
+class FuncConstantExpressionEvaluator(val project: Project, throwOverflowException: Boolean = false) :
+    FuncRecursiveElementWalkingVisitor() {
     private val key = if (throwOverflowException) WITH_OVERFLOW_KEY else NO_OVERFLOW_KEY
     private val visitor = FuncConstantExpressionVisitor(project, throwOverflowException)
     private val cache get() = CachedValuesManager.getManager(project).getCachedValue(project, key, PROVIDER, false)
@@ -56,17 +54,13 @@ class FuncConstantExpressionEvaluator(
             CachedValueProvider.Result.create(ConcurrentHashMap(), PsiModificationTracker.MODIFICATION_COUNT)
         }
         private val NO_OVERFLOW_KEY = Key.create<CachedValue<ConcurrentMap<PsiElement, FuncValue>>>(
-            "func.constant_value.no_overflow"
+            "func.constant_value.no_overflow",
         )
         private val WITH_OVERFLOW_KEY = Key.create<CachedValue<ConcurrentMap<PsiElement, FuncValue>>>(
-            "func.constant_value.with_overflow"
+            "func.constant_value.with_overflow",
         )
 
-        fun compute(
-            project: Project,
-            expression: FuncExpression,
-            throwOverflowException: Boolean = false
-        ): FuncValue? {
+        fun compute(project: Project, expression: FuncExpression, throwOverflowException: Boolean = false): FuncValue? {
             val evaluator = FuncConstantExpressionEvaluator(project, throwOverflowException)
             expression.accept(evaluator)
             return evaluator.cache[expression]
@@ -74,10 +68,8 @@ class FuncConstantExpressionEvaluator(
     }
 }
 
-class FuncConstantExpressionVisitor(
-    private val project: Project,
-    private val throwOverflowException: Boolean = false
-) : FuncVisitor() {
+class FuncConstantExpressionVisitor(private val project: Project, private val throwOverflowException: Boolean = false) :
+    FuncVisitor() {
     private val cachedValues = mutableMapOf<FuncElement, FuncValue>()
     var result: FuncValue? = null
 
@@ -94,9 +86,7 @@ class FuncConstantExpressionVisitor(
         return value
     }
 
-    operator fun get(element: FuncElement?): FuncValue? {
-        return cachedValues.remove(element)
-    }
+    operator fun get(element: FuncElement?): FuncValue? = cachedValues.remove(element)
 
     override fun visitParenExpression(o: FuncParenExpression) {
         result = get(o.expression)
@@ -156,20 +146,20 @@ class FuncConstantExpressionVisitor(
             right: FuncIntValue,
             op: FuncBinaryOp,
             element: FuncElement,
-            throwOverflowException: Boolean = false
+            throwOverflowException: Boolean = false,
         ): FuncValue? {
             return try {
                 when {
                     op.plus != null || op.pluslet != null -> FuncIntValue(
-                        left.value.add(right.value)
+                        left.value.add(right.value),
                     ).checkOverflow(element, throwOverflowException)
 
                     op.minus != null || op.minuslet != null -> FuncIntValue(
-                        left.value.subtract(right.value)
+                        left.value.subtract(right.value),
                     ).checkOverflow(element, throwOverflowException)
 
                     op.times != null || op.timeslet != null -> FuncIntValue(
-                        left.value.multiply(right.value)
+                        left.value.multiply(right.value),
                     ).checkOverflow(element, throwOverflowException)
 
                     op.div != null || op.divlet != null -> {
@@ -177,7 +167,7 @@ class FuncConstantExpressionVisitor(
                             return null
                         }
                         FuncIntValue(
-                            left.value.divModFloor(right.value).first
+                            left.value.divModFloor(right.value).first,
                         ).checkOverflow(element, throwOverflowException)
                     }
 
@@ -186,7 +176,7 @@ class FuncConstantExpressionVisitor(
                             return null
                         }
                         FuncIntValue(
-                            left.value.divModCeil(right.value).first
+                            left.value.divModCeil(right.value).first,
                         ).checkOverflow(element, throwOverflowException)
                     }
 
@@ -195,7 +185,7 @@ class FuncConstantExpressionVisitor(
                             return null
                         }
                         FuncIntValue(
-                            left.value.divModRound(right.value).first
+                            left.value.divModRound(right.value).first,
                         ).checkOverflow(element, throwOverflowException)
                     }
 
@@ -204,7 +194,7 @@ class FuncConstantExpressionVisitor(
                             return null
                         }
                         FuncIntValue(
-                            left.value.divModFloor(right.value).second
+                            left.value.divModFloor(right.value).second,
                         ).checkOverflow(element, throwOverflowException)
                     }
 
@@ -213,7 +203,7 @@ class FuncConstantExpressionVisitor(
                             return null
                         }
                         FuncIntValue(
-                            left.value.divModCeil(right.value).second
+                            left.value.divModCeil(right.value).second,
                         ).checkOverflow(element, throwOverflowException)
                     }
 
@@ -222,7 +212,7 @@ class FuncConstantExpressionVisitor(
                             return null
                         }
                         FuncIntValue(
-                            left.value.divModRound(right.value).second
+                            left.value.divModRound(right.value).second,
                         ).checkOverflow(element, throwOverflowException)
                     }
 
@@ -230,29 +220,29 @@ class FuncConstantExpressionVisitor(
                     op.or != null -> FuncIntValue(left.value.or(right.value))
                     op.xor != null -> FuncIntValue(left.value.xor(right.value))
                     op.lshift != null -> FuncIntValue(
-                        left.value.shiftLeft(right.value.toInt())
+                        left.value.shiftLeft(right.value.toInt()),
                     ).checkOverflow(element, throwOverflowException)
 
                     op.rshift != null -> FuncIntValue(
-                        left.value.shiftRight(right.value.toInt())
+                        left.value.shiftRight(right.value.toInt()),
                     )
 
                     op.gt != null -> FuncIntValue(if (left.value > right.value) -BigInteger.ONE else BigInteger.ZERO)
 
                     op.lt != null -> FuncIntValue(
-                        if (left.value < right.value) -BigInteger.ONE else BigInteger.ZERO
+                        if (left.value < right.value) -BigInteger.ONE else BigInteger.ZERO,
                     )
 
                     op.geq != null -> FuncIntValue(
-                        if (left.value >= right.value) -BigInteger.ONE else BigInteger.ZERO
+                        if (left.value >= right.value) -BigInteger.ONE else BigInteger.ZERO,
                     )
 
                     op.leq != null -> FuncIntValue(
-                        if (left.value <= right.value) -BigInteger.ONE else BigInteger.ZERO
+                        if (left.value <= right.value) -BigInteger.ONE else BigInteger.ZERO,
                     )
 
                     op.eq != null -> FuncIntValue(
-                        if (left.value == right.value) -BigInteger.ONE else BigInteger.ZERO
+                        if (left.value == right.value) -BigInteger.ONE else BigInteger.ZERO,
                     )
 
                     else -> null

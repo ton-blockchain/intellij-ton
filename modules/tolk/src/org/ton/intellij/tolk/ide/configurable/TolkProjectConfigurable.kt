@@ -11,21 +11,21 @@ import com.intellij.ui.dsl.builder.panel
 import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.util.pathToDirectoryTextField
 
-class TolkProjectConfigurable(
-    val project: Project,
-) : BoundConfigurable("Tolk"), Configurable.NoScroll, Disposable {
+class TolkProjectConfigurable(val project: Project) :
+    BoundConfigurable("Tolk"),
+    Configurable.NoScroll,
+    Disposable {
 
-    data class Data(
-        val stdlibPath: String?,
-    )
+    data class Data(val stdlibPath: String?)
 
-    private val pathToStdlibField = pathToDirectoryTextField(this, TolkBundle["settings.tolk.toolchain.stdlib.dialog.title"])
+    private val pathToStdlibField =
+        pathToDirectoryTextField(this, TolkBundle["settings.tolk.toolchain.stdlib.dialog.title"])
 
     var data: Data
         get() {
             val stdlibPath = pathToStdlibField.text.ifBlank { null }
             return Data(
-                stdlibPath = stdlibPath
+                stdlibPath = stdlibPath,
             )
         }
         set(value) {
@@ -44,7 +44,7 @@ class TolkProjectConfigurable(
         onReset {
             val currentData = data
             val newData = Data(
-                stdlibPath = setting.stdlibPath
+                stdlibPath = setting.stdlibPath,
             )
             if (currentData != newData) {
                 data = newData

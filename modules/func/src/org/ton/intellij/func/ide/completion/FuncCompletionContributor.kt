@@ -22,16 +22,16 @@ class FuncCompletionContributor : CompletionContributor() {
                 "repeat",
                 "do",
                 "while",
-                "try"
-            )
+                "try",
+            ),
         )
         extend(
             CompletionType.BASIC,
             psiElement().withParent(FuncFunctionParameter::class.java),
             FuncKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
-                keywords = funcPrimitiveTypes
-            )
+                keywords = funcPrimitiveTypes,
+            ),
         )
         extend(
             CompletionType.BASIC,
@@ -39,21 +39,22 @@ class FuncCompletionContributor : CompletionContributor() {
                 psiElement().inside(FuncTupleType::class.java),
                 psiElement().inside(FuncTensorType::class.java),
                 psiElement().inside(FuncParenType::class.java),
-            ), FuncKeywordCompletionProvider(
+            ),
+            FuncKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
                 keywords = funcPrimitiveTypes,
-                insertSpace = false
-            )
+                insertSpace = false,
+            ),
         )
         extend(
             CompletionType.BASIC,
             baseFunctionAttributePattern(
-                psiElement(FuncElementTypes.RPAREN)
+                psiElement(FuncElementTypes.RPAREN),
             ),
             FuncKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
                 "impure",
-            )
+            ),
         )
         extend(
             CompletionType.BASIC,
@@ -65,7 +66,7 @@ class FuncCompletionContributor : CompletionContributor() {
                 CONTEXT_KEYWORD_PRIORITY,
                 "inline",
                 "inline_ref",
-            )
+            ),
         )
         extend(
             CompletionType.BASIC,
@@ -78,22 +79,22 @@ class FuncCompletionContributor : CompletionContributor() {
             FuncKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
                 "method_id",
-            )
+            ),
         )
         extend(
             CompletionType.BASIC,
             psiElement().afterLeaf(
                 psiElement(FuncElementTypes.RBRACE).withAncestor(
                     2,
-                    psiElement(FuncElementTypes.IF_STATEMENT)
-                )
+                    psiElement(FuncElementTypes.IF_STATEMENT),
+                ),
             ),
             FuncKeywordCompletionProvider(
                 CONTEXT_KEYWORD_PRIORITY,
                 "else",
                 "elseif",
-                "elseifnot"
-            )
+                "elseifnot",
+            ),
         )
         extend(FuncCommonCompletionProvider)
         extend(FuncReturnCompletionProvider)
@@ -103,16 +104,14 @@ class FuncCompletionContributor : CompletionContributor() {
         extend(CompletionType.BASIC, provider.elementPattern, provider)
     }
 
-    private fun baseFunctionAttributePattern(
-        vararg afterLeafs: ElementPattern<out PsiElement>,
-    ) = psiElement()
+    private fun baseFunctionAttributePattern(vararg afterLeafs: ElementPattern<out PsiElement>) = psiElement()
         .withAncestor(2, psiElement(FuncFunction::class.java))
         .afterLeaf(
             or(
-                *afterLeafs
-            )
+                *afterLeafs,
+            ),
         ).andNot(
-            psiElement().beforeLeaf(psiElement(FuncElementTypes.IDENTIFIER))
+            psiElement().beforeLeaf(psiElement(FuncElementTypes.IDENTIFIER)),
         )
 
     companion object {
@@ -130,7 +129,7 @@ class FuncCompletionContributor : CompletionContributor() {
                 "slice",
                 "int",
                 "tuple",
-                "cont"
+                "cont",
             )
     }
 }

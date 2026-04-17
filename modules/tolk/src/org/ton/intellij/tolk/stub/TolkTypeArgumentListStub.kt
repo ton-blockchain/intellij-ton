@@ -18,24 +18,22 @@ class TolkTypeArgumentListStub : StubWithText<TolkTypeArgumentList> {
 
     constructor(
         parent: StubElement<*>?,
-        elementType: IStubElementType<*, *>?, text: String?,
+        elementType: IStubElementType<*, *>?,
+        text: String?,
     ) : this(parent, elementType, StringRef.fromString(text))
 
     class Type(name: String) : TolkStubElementType<TolkTypeArgumentListStub, TolkTypeArgumentList>(name) {
-        override fun createPsi(stub: TolkTypeArgumentListStub): TolkTypeArgumentList {
-            return TolkTypeArgumentListImpl(stub, this)
-        }
+        override fun createPsi(stub: TolkTypeArgumentListStub): TolkTypeArgumentList =
+            TolkTypeArgumentListImpl(stub, this)
 
-        override fun createStub(psi: TolkTypeArgumentList, parentStub: StubElement<*>?): TolkTypeArgumentListStub {
-            return TolkTypeArgumentListStub(parentStub, this, psi.text)
-        }
+        override fun createStub(psi: TolkTypeArgumentList, parentStub: StubElement<*>?): TolkTypeArgumentListStub =
+            TolkTypeArgumentListStub(parentStub, this, psi.text)
 
         override fun serialize(stub: TolkTypeArgumentListStub, dataStream: StubOutputStream) {
             dataStream.writeName(stub.getText())
         }
 
-        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): TolkTypeArgumentListStub {
-            return TolkTypeArgumentListStub(parentStub, this, dataStream.readName())
-        }
+        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): TolkTypeArgumentListStub =
+            TolkTypeArgumentListStub(parentStub, this, dataStream.readName())
     }
 }

@@ -13,14 +13,15 @@ import org.ton.intellij.tlb.psi.TlbFile
 import org.ton.intellij.tlb.psi.TlbNamedElement
 
 class TlbStructureViewFactory : PsiStructureViewFactory {
-    override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder {
-        return object : TreeBasedStructureViewBuilder() {
+    override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder =
+        object : TreeBasedStructureViewBuilder() {
             override fun createStructureViewModel(editor: Editor?): StructureViewModel = Model(psiFile, editor)
             override fun isRootNodeShown() = false
         }
-    }
 
-    class Model(file: PsiFile, editor: Editor?) : StructureViewModelBase(file, editor, Element(file)), ElementInfoProvider {
+    class Model(file: PsiFile, editor: Editor?) :
+        StructureViewModelBase(file, editor, Element(file)),
+        ElementInfoProvider {
         init {
             withSuitableClasses(TlbFile::class.java, TlbNamedElement::class.java)
         }

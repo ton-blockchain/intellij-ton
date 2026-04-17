@@ -61,7 +61,7 @@ class TolkImportOptimizer : ImportOptimizer {
     }
 
     companion object {
-        fun collectUnusedImports(file: TolkFile):  MutableSet<TolkIncludeDefinition> {
+        fun collectUnusedImports(file: TolkFile): MutableSet<TolkIncludeDefinition> {
             val imports = file.includeDefinitions.toMutableList()
             val importsToDelete = mutableSetOf<TolkIncludeDefinition>()
 

@@ -1,0 +1,16 @@
+<idea-plugin>
+    <depends>intellij.profiler.common</depends>
+    <depends>intellij.profiler.clion</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <profiler.api.ProfilerDumpParserProvider
+                implementation="org.ton.intellij.acton.profiler.ActonCollapsedProfileDumpParserProvider"/>
+        <profiler.clion.profilerRunChecker
+                implementation="org.ton.intellij.acton.profiler.ActonProfilerRunChecker"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="org.ton.intellij.acton">
+        <profilerSupport
+                implementation="org.ton.intellij.acton.profiler.ActonProfilerSupportImpl"/>
+    </extensions>
+</idea-plugin>

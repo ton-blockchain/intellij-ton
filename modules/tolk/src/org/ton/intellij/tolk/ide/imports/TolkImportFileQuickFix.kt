@@ -44,7 +44,10 @@ import kotlin.io.path.Path
 import kotlin.io.path.pathString
 import kotlin.io.path.relativeTo
 
-class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, HintAction, HighPriorityAction {
+class TolkImportFileQuickFix :
+    LocalQuickFixAndIntentionActionOnPsiElement,
+    HintAction,
+    HighPriorityAction {
     private val symbolToResolve: String
     private var filesToImport: List<SmartPsiElementPointer<TolkFile>>? = null
     private var actonToml: ActonToml? = null
@@ -70,8 +73,11 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
     override fun getFamilyName() = "Import file"
 
     override operator fun invoke(
-        project: Project, file: PsiFile, editor: Editor?,
-        startElement: PsiElement, endElement: PsiElement,
+        project: Project,
+        file: PsiFile,
+        editor: Editor?,
+        startElement: PsiElement,
+        endElement: PsiElement,
     ) {
         if (!FileModificationService.getInstance().prepareFileForWrite(file)) return
         perform(findImportVariants(startElement), file, editor)
@@ -85,11 +91,11 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
     ): Boolean {
         val reference = getReference(startElement)
         return file is TolkFile &&
-                file.manager.isInProject(file) &&
-                reference != null &&
-                reference.resolve() == null &&
-                findImportVariants(startElement).isNotEmpty() &&
-                notQualified(startElement)
+            file.manager.isInProject(file) &&
+            reference != null &&
+            reference.resolve() == null &&
+            findImportVariants(startElement).isNotEmpty() &&
+            notQualified(startElement)
     }
 
     private fun findImportVariants(element: PsiElement): List<SmartPsiElementPointer<TolkFile>> {
@@ -135,7 +141,7 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
             editor,
             ShowAutoImportPass.getMessage(filesToImport.size > 1, filesToImport.first().relativePath(file, actonToml)),
             referenceRange.startOffset,
-            referenceRange.endOffset
+            referenceRange.endOffset,
         ) {
             if (file.isValid && !editor.isDisposed) {
                 perform(filesToImport, file, editor)
@@ -145,10 +151,14 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
         return true
     }
 
-    private fun perform(filesToImport: List<SmartPsiElementPointer<TolkFile>>, containingFile: PsiFile, editor: Editor?) {
+    private fun perform(
+        filesToImport: List<SmartPsiElementPointer<TolkFile>>,
+        containingFile: PsiFile,
+        editor: Editor?,
+    ) {
         LOG.assertTrue(
             editor != null || filesToImport.size == 1,
-            "Cannot invoke fix with ambiguous imports on null editor"
+            "Cannot invoke fix with ambiguous imports on null editor",
         )
 
         if (ApplicationManager.getApplication().isUnitTestMode) {
@@ -220,17 +230,23 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
             val path = file.virtualFile.path
             val normalizedPath = path.replace(File.separatorChar, '/')
             return !normalizedPath.contains("test/") &&
-                    !normalizedPath.contains("test-failed/") &&
-                    !file.isTestFile()
+                !normalizedPath.contains("test-failed/") &&
+                !file.isTestFile()
         }
 
-        private fun isSupportedReference(reference: PsiReference?) = reference is TolkSymbolReference || reference is TolkTypeReference
+        private fun isSupportedReference(reference: PsiReference?) =
+            reference is TolkSymbolReference || reference is TolkTypeReference
 
-        private fun getText(element: PsiElement, filesToImport: List<SmartPsiElementPointer<TolkFile>>, actonToml: ActonToml?): String {
+        private fun getText(
+            element: PsiElement,
+            filesToImport: List<SmartPsiElementPointer<TolkFile>>,
+            actonToml: ActonToml?,
+        ): String {
             if (filesToImport.isEmpty()) return ""
             val containingFile = element.containingFile ?: return ""
             return "'" + filesToImport.first()
-                .relativePath(containingFile, actonToml) + "'? " + if (filesToImport.size > 1) "(multiple choices...) " else ""
+                .relativePath(containingFile, actonToml) + "'? " +
+                if (filesToImport.size > 1) "(multiple choices...) " else ""
         }
 
         private fun notQualified(startElement: PsiElement?): Boolean {
@@ -265,7 +281,12 @@ class TolkImportFileQuickFix : LocalQuickFixAndIntentionActionOnPsiElement, Hint
 
         fun findImportVariants(symbolToImport: String, context: PsiElement): List<TolkFile> {
             val candidates = TolkNamedElementIndex.find(symbolToImport, context.project, null).filter {
-                it is TolkFunction || it is TolkStruct || it is TolkTypeDef || it is TolkConstVar || it is TolkGlobalVar || it is TolkEnum
+                it is TolkFunction ||
+                    it is TolkStruct ||
+                    it is TolkTypeDef ||
+                    it is TolkConstVar ||
+                    it is TolkGlobalVar ||
+                    it is TolkEnum
             }
             val files = candidates.mapNotNull { it.containingFile }
             return files

@@ -7,13 +7,16 @@ import org.ton.intellij.tolk.TolkBundle
 import java.util.function.Supplier
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default
 
-
-enum class TolkColor(
-    displayName: Supplier<String>,
-    default: TextAttributesKey,
-) {
+enum class TolkColor(displayName: Supplier<String>, default: TextAttributesKey) {
     VARIABLE(TolkBundle.messagePointer("settings.tolk.color.variable"), Default.LOCAL_VARIABLE),
-    MUTABLE_VARIABLE(TolkBundle.messagePointer("settings.tolk.color.variable.mutable"), Default.REASSIGNED_LOCAL_VARIABLE),
+    MUTABLE_VARIABLE(
+        TolkBundle.messagePointer("settings.tolk.color.variable.mutable"),
+        Default.REASSIGNED_LOCAL_VARIABLE,
+    ),
+    CAPTURED_VARIABLE(
+        TolkBundle.messagePointer("settings.tolk.color.variable.captured"),
+        Default.LOCAL_VARIABLE,
+    ),
     FIELD(TolkBundle.messagePointer("settings.tolk.color.field"), Default.INSTANCE_FIELD),
     ENUM_MEMBER(TolkBundle.messagePointer("settings.tolk.color.enum.member"), Default.STATIC_FIELD),
     CONSTANT(TolkBundle.messagePointer("settings.tolk.color.constant"), Default.CONSTANT),
@@ -21,7 +24,10 @@ enum class TolkColor(
 
     FUNCTION(TolkBundle.messagePointer("settings.tolk.color.function.declaration"), Default.FUNCTION_DECLARATION),
     METHOD(TolkBundle.messagePointer("settings.tolk.color.method.declaration"), Default.INSTANCE_METHOD),
-    STATIC_FUNCTION(TolkBundle.messagePointer("settings.tolk.color.static_function.declaration"), Default.STATIC_METHOD),
+    STATIC_FUNCTION(
+        TolkBundle.messagePointer("settings.tolk.color.static_function.declaration"),
+        Default.STATIC_METHOD,
+    ),
     FUNCTION_CALL(TolkBundle.messagePointer("settings.tolk.color.function.call"), Default.FUNCTION_DECLARATION),
     METHOD_CALL(TolkBundle.messagePointer("settings.tolk.color.method.call"), Default.INSTANCE_METHOD),
     STATIC_FUNCTION_CALL(TolkBundle.messagePointer("settings.tolk.color.static_function.call"), Default.STATIC_METHOD),
@@ -32,7 +38,7 @@ enum class TolkColor(
     MUT_SELF_PARAMETER(TolkBundle.messagePointer("settings.tolk.color.mutable_self_parameter"), Default.KEYWORD),
     TYPE_PARAMETER(
         TolkBundle.messagePointer("settings.tolk.color.type_parameter"),
-        TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES")
+        TextAttributesKey.find("TYPE_PARAMETER_NAME_ATTRIBUTES"),
     ),
 
     PRIMITIVE(TolkBundle.messagePointer("settings.tolk.color.primitive"), Default.KEYWORD),
@@ -45,7 +51,10 @@ enum class TolkColor(
     NUMBER(TolkBundle.messagePointer("settings.tolk.color.number"), Default.NUMBER),
     STRING(TolkBundle.messagePointer("settings.tolk.color.string"), Default.STRING),
     VALID_STRING_ESCAPE(TolkBundle.messagePointer("settings.tolk.color.valid_escape"), Default.VALID_STRING_ESCAPE),
-    INVALID_STRING_ESCAPE(TolkBundle.messagePointer("settings.tolk.color.invalid_escape"), Default.INVALID_STRING_ESCAPE),
+    INVALID_STRING_ESCAPE(
+        TolkBundle.messagePointer("settings.tolk.color.invalid_escape"),
+        Default.INVALID_STRING_ESCAPE,
+    ),
 
     LINE_COMMENT(TolkBundle.messagePointer("settings.tolk.color.line_comment"), Default.LINE_COMMENT),
     BLOCK_COMMENT(TolkBundle.messagePointer("settings.tolk.color.block_comment"), Default.BLOCK_COMMENT),
@@ -60,7 +69,7 @@ enum class TolkColor(
     COMMA(TolkBundle.messagePointer("settings.tolk.color.comma"), Default.COMMA),
     DOT(TolkBundle.messagePointer("settings.tolk.color.dot"), Default.DOT),
     OPERATION_SIGN(TolkBundle.messagePointer("settings.tolk.color.operation_sign"), Default.OPERATION_SIGN),
-    
+
     ANNOTATION(TolkBundle.messagePointer("settings.tolk.color.annotation"), Default.METADATA),
     ;
 

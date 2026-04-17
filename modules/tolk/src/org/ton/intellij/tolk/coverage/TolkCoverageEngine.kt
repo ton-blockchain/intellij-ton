@@ -27,10 +27,10 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.rt.coverage.data.ClassData
 import com.intellij.util.ui.ColumnInfo
+import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.coverage.LcovCoverageReport.Serialization.writeLcov
-import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.tolk.psi.TolkFile
 import java.io.File
 import java.io.IOException
@@ -147,16 +147,18 @@ class TolkCoverageEngine : CoverageEngine() {
                     "dialog.message.html.coverage.report.has.been.successfully.saved.as.file.br.use.instruction.in.href.to.generate.html.output.html",
                     outputFileName,
                     url,
-                    url
+                    url,
                 ),
-                title
+                title,
             )
         } catch (e: IOException) {
             LOG.warn("Can not export coverage data", e)
             Messages.showErrorDialog(
                 TolkBundle.message(
-                    "dialog.message.can.not.generate.coverage.report", e.message ?: ""
-                ), title
+                    "dialog.message.can.not.generate.coverage.report",
+                    e.message ?: "",
+                ),
+                title,
             )
         }
     }
@@ -204,7 +206,8 @@ class TolkCoverageEngine : CoverageEngine() {
         covRunner: CoverageRunner,
         coverageDataFileProvider: CoverageFileProvider,
         timestamp: Long,
-    ): CoverageSuite = TolkCoverageSuite(project, name, coverageDataFileProvider, covRunner, project.guessProjectDir()?.path)
+    ): CoverageSuite =
+        TolkCoverageSuite(project, name, coverageDataFileProvider, covRunner, project.guessProjectDir()?.path)
 
     @Deprecated("deprecated in Java")
     override fun createCoverageSuite(

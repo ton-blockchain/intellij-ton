@@ -6,13 +6,18 @@
     <description>TON Blockchain Development Plugin — a JetBrains plugin that brings first-class TON blockchain support to IntelliJ-based IDEs.
 
         - Syntax highlighting, code completion, navigation and inspections for Tolk, FunC, Fift (including assembly), TL-B schemas and TASM (TON Assembly)
-        - Integration with Blueprint
+        - Acton-based project scaffolding, build, test, script and debug workflows
         - Works in IntelliJ IDEA, WebStorm, PyCharm, GoLand and other JetBrains IDEs
 
         Everything you need to develop, test and ship TON smart contracts—right from your editor.
     </description>
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
+    <depends optional="true" config-file="org.ton.intellij-ton.profiler.xml">intellij.profiler.clion</depends>
+    <dependencies>
+        <module name="intellij.platform.coverage"/>
+        <module name="intellij.platform.dap"/>
+    </dependencies>
 
     <xi:include href="/META-INF/asm.xml" xpointer="xpointer(/idea-plugin/*)"/>
     <xi:include href="/META-INF/tolk.xml" xpointer="xpointer(/idea-plugin/*)"/>
@@ -25,8 +30,6 @@
     <depends optional="true" config-file="acton-toml.xml">org.toml.lang</depends>
     <depends optional="true" config-file="org.ton.intellij-ton.spellchecker.xml">com.intellij.modules.spellchecker</depends>
     <depends optional="true" config-file="org.ton.intellij-ton.dev.xml">com.intellij.dev</depends>
-    <depends optional="true" config-file="org.ton.intellij-ton.javascript.xml">JavaScript</depends>
-
     <extensions defaultExtensionNs="com.intellij">
         <errorHandler implementation="com.intellij.diagnostic.JetBrainsMarketplaceErrorReportSubmitter"/>
     </extensions>

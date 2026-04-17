@@ -15,9 +15,8 @@ private const val SERVICE_NAME: String = "ActonExternalLinterSettings"
 
 @Service(Service.Level.PROJECT)
 @State(name = SERVICE_NAME, storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
-class ActonExternalLinterSettingsService(
-    project: Project
-) : ActonProjectSettingsServiceBase<ActonExternalLinterSettings>(project, ActonExternalLinterSettings()) {
+class ActonExternalLinterSettingsService(project: Project) :
+    ActonProjectSettingsServiceBase<ActonExternalLinterSettings>(project, ActonExternalLinterSettings()) {
 
     val enabled: Boolean get() = state.enabled
     val additionalArguments: String get() = state.additionalArguments
@@ -46,11 +45,9 @@ class ActonExternalLinterSettingsService(
 
     override fun createSettingsChangedEvent(
         oldEvent: ActonExternalLinterSettings,
-        newEvent: ActonExternalLinterSettings
+        newEvent: ActonExternalLinterSettings,
     ): SettingsChangedEvent = SettingsChangedEvent(oldEvent, newEvent)
 
-    class SettingsChangedEvent(
-        oldState: ActonExternalLinterSettings,
-        newState: ActonExternalLinterSettings
-    ) : SettingsChangedEventBase<ActonExternalLinterSettings>(oldState, newState)
+    class SettingsChangedEvent(oldState: ActonExternalLinterSettings, newState: ActonExternalLinterSettings) :
+        SettingsChangedEventBase<ActonExternalLinterSettings>(oldState, newState)
 }

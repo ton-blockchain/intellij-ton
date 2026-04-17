@@ -13,10 +13,8 @@ import org.ton.intellij.tolk.type.TolkTy
 import org.ton.intellij.util.addSuffix
 import org.ton.intellij.util.ancestorStrict
 
-class TolkKeywordCompletionProvider(
-    val priority: Double,
-    val keywords: List<String> = emptyList(),
-) : CompletionProvider<CompletionParameters>() {
+class TolkKeywordCompletionProvider(val priority: Double, val keywords: List<String> = emptyList()) :
+    CompletionProvider<CompletionParameters>() {
     constructor(priority: Double, vararg keywords: String) : this(priority, keywords.toList())
 
     public override fun addCompletions(
@@ -29,19 +27,18 @@ class TolkKeywordCompletionProvider(
         }
     }
 
-    private fun createKeywordLookupElement(
-        keyword: String,
-        parameters: CompletionParameters,
-    ): LookupElement {
+    private fun createKeywordLookupElement(keyword: String, parameters: CompletionParameters): LookupElement {
         var builder = LookupElementBuilder.create(keyword).bold()
         builder = addInsertionHandler(keyword, builder, parameters)
         return builder.toTolkLookupElement(
-            TolkLookupElementData(keywordKind = KEYWORD)
+            TolkLookupElementData(keywordKind = KEYWORD),
         )
     }
 
     private fun addInsertionHandler(
-        keyword: String, builder: LookupElementBuilder, parameters: CompletionParameters
+        keyword: String,
+        builder: LookupElementBuilder,
+        parameters: CompletionParameters,
     ): LookupElementBuilder {
         val suffix = when (keyword) {
             "return" -> {

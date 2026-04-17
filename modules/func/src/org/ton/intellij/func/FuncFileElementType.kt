@@ -13,9 +13,11 @@ object FuncFileElementType : IStubFileElementType<FuncFileStub>("FUNC_FILE", Fun
     override fun getStubVersion(): Int = STUB_VERSION
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
-        override fun createStubForFile(file: PsiFile): StubElement<*> =
-            if (file is FuncFile) FuncFileStub(file)
-            else super.createStubForFile(file)
+        override fun createStubForFile(file: PsiFile): StubElement<*> = if (file is FuncFile) {
+            FuncFileStub(file)
+        } else {
+            super.createStubForFile(file)
+        }
     }
 
     override fun indexStub(stub: PsiFileStub<*>, sink: IndexSink) {
@@ -23,12 +25,10 @@ object FuncFileElementType : IStubFileElementType<FuncFileStub>("FUNC_FILE", Fun
     }
 
     override fun serialize(stub: FuncFileStub, dataStream: StubOutputStream) {
-
     }
 
-    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): FuncFileStub {
-        return FuncFileStub(null)
-    }
+    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): FuncFileStub =
+        FuncFileStub(null)
 
     override fun getExternalId(): String = "func.FILE"
 }

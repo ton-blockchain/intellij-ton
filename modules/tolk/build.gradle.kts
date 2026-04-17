@@ -16,6 +16,7 @@ dependencies {
         bundledPlugin("org.toml.lang")
         bundledPlugin("com.intellij.dev")
         bundledModule("intellij.platform.coverage")
+        bundledModule("intellij.platform.dap")
         testFramework(TestFrameworkType.Platform)
     }
 

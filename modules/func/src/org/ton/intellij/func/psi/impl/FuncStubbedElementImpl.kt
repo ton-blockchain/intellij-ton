@@ -6,7 +6,9 @@ import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.stubs.StubBase
 import org.ton.intellij.func.psi.FuncElement
 
-abstract class FuncStubbedElementImpl<T : StubBase<*>> : StubBasedPsiElementBase<T>, FuncElement {
+abstract class FuncStubbedElementImpl<T : StubBase<*>> :
+    StubBasedPsiElementBase<T>,
+    FuncElement {
     constructor(stub: T, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
     constructor(node: ASTNode) : super(node)
 

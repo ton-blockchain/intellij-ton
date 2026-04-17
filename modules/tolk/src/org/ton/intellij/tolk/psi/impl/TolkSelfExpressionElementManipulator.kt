@@ -9,7 +9,5 @@ class TolkSelfExpressionElementManipulator : AbstractElementManipulator<TolkSelf
         element: TolkSelfExpression,
         range: TextRange,
         newContent: String,
-    ): TolkSelfExpression {
-        return element
-    }
+    ): TolkSelfExpression = element
 }

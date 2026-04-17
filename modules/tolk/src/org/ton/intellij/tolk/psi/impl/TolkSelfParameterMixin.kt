@@ -10,7 +10,9 @@ import org.ton.intellij.tolk.psi.TolkSelfParameter
 import org.ton.intellij.tolk.stub.TolkSelfParameterStub
 import org.ton.intellij.tolk.type.TolkTy
 
-abstract class TolkSelfParameterMixin : StubBasedPsiElementBase<TolkSelfParameterStub>, TolkSelfParameter {
+abstract class TolkSelfParameterMixin :
+    StubBasedPsiElementBase<TolkSelfParameterStub>,
+    TolkSelfParameter {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TolkSelfParameterStub, stubType: IStubElementType<*, *>) : super(stub, stubType)

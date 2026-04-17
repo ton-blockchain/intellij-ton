@@ -5,9 +5,9 @@ import org.ton.intellij.tolk.psi.TolkElement
 import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
 import org.ton.intellij.tolk.psi.TolkTypeParameter
 
-class TolkTyParam private constructor(
-    val parameter: TypeParameter,
-) : TolkTy, TolkTyPsiHolder {
+class TolkTyParam private constructor(val parameter: TypeParameter) :
+    TolkTy,
+    TolkTyPsiHolder {
     val name: String? get() = parameter.name
 
     override val hasTypeAlias: Boolean get() = false
@@ -36,9 +36,7 @@ class TolkTyParam private constructor(
         abstract val name: String?
     }
 
-    data class ReceiverTypeParameter(
-        override val psi: TolkReferenceTypeExpression
-    ) : TypeParameter() {
+    data class ReceiverTypeParameter(override val psi: TolkReferenceTypeExpression) : TypeParameter() {
         override val name: String get() = psi.referenceName ?: psi.identifier.text.removeSurrounding("`")
 
         override fun equals(other: Any?): Boolean {
@@ -51,9 +49,7 @@ class TolkTyParam private constructor(
         override fun hashCode(): Int = psi.hashCode()
     }
 
-    data class NamedTypeParameter(
-        override val psi: TolkTypeParameter
-    ) : TypeParameter() {
+    data class NamedTypeParameter(override val psi: TolkTypeParameter) : TypeParameter() {
         override val name: String? get() = psi.name
 
         override fun equals(other: Any?): Boolean {
@@ -70,14 +66,14 @@ class TolkTyParam private constructor(
         fun create(psi: TolkTypeParameter): TolkTyParam {
             val original = CompletionUtil.getOriginalOrSelf(psi)
             return TolkTyParam(
-                NamedTypeParameter(original)
+                NamedTypeParameter(original),
             )
         }
 
         fun create(psi: TolkReferenceTypeExpression): TolkTyParam {
             val original = CompletionUtil.getOriginalOrSelf(psi)
             return TolkTyParam(
-                ReceiverTypeParameter(original)
+                ReceiverTypeParameter(original),
             )
         }
     }

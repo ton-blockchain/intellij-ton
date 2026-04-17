@@ -6,8 +6,8 @@ import com.intellij.openapi.util.TextRange
 import org.ton.intellij.tlb.psi.TlbParamTypeExpression
 import org.ton.intellij.tlb.psi.TlbReference
 
-abstract class TlbParamTypeExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TlbParamTypeExpression {
-    override fun getReference(): TlbReference? {
-        return TlbReference(project,this, TextRange.create(0, textLength))
-    }
+abstract class TlbParamTypeExpressionMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    TlbParamTypeExpression {
+    override fun getReference(): TlbReference? = TlbReference(project, this, TextRange.create(0, textLength))
 }

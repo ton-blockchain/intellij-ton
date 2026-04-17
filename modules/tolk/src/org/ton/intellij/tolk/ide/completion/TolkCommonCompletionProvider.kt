@@ -6,6 +6,7 @@ import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.codeInsight.template.impl.ConstantNode
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns
 import com.intellij.patterns.StandardPatterns
@@ -13,6 +14,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.ProcessingContext
 import com.intellij.util.applyIf
+import org.ton.intellij.tolk.acton.isVisibleInCompletionFrom
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
@@ -30,15 +32,14 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             .withParent(psiElement<TolkReferenceExpression>())
             .andNot(
                 PlatformPatterns.psiElement().afterLeaf(
-                    PlatformPatterns.psiElement().withText(StandardPatterns.string().matches("\\d+"))
-                )
+                    PlatformPatterns.psiElement().withText(StandardPatterns.string().matches("\\d+")),
+                ),
             )
-
 
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         val position = parameters.position
         val element = position.parent as TolkReferenceExpression
@@ -59,7 +60,9 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 expectType = matchExpr.expression?.type?.unwrapTypeAlias()
             }
         }
-        if (elementParent is TolkBinExpression && (elementParent.binaryOp.eq != null || elementParent.isSetAssignment)) {
+        if (elementParent is TolkBinExpression &&
+            (elementParent.binaryOp.eq != null || elementParent.isSetAssignment)
+        ) {
             val left = elementParent.left
             val leftType = left.type
             if (leftType is TolkTyEnum) {
@@ -89,21 +92,25 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             return true
         }
 
-        if (!collectLocalVariables(element) { localSymbol ->
-                if (!checkLimit()) return@collectLocalVariables false
-                if (!expectType.canAddElement(localSymbol.type)) return@collectLocalVariables true
-                result.addElement(
-                    localSymbol.toLookupElementBuilder(ctx)
-                        .toTolkLookupElement(
-                            TolkLookupElementData(
-                                isLocal = true,
-                                elementKind = TolkLookupElementData.ElementKind.VARIABLE
-                            )
-                        )
-                )
-                true
+        var limitReached = false
+        collectLocalVariables(element) { localSymbol ->
+            if (!checkLimit()) {
+                limitReached = true
+                return@collectLocalVariables false
             }
-        ) {
+            if (!expectType.canAddElement(localSymbol.type)) return@collectLocalVariables true
+            result.addElement(
+                localSymbol.toLookupElementBuilder(ctx)
+                    .toTolkLookupElement(
+                        TolkLookupElementData(
+                            isLocal = true,
+                            elementKind = TolkLookupElementData.ElementKind.VARIABLE,
+                        ),
+                    ),
+            )
+            true
+        }
+        if (limitReached) {
             return
         }
 
@@ -111,31 +118,41 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             result.addElement(
                 PrioritizedLookupElement.withPriority(
                     LookupElementBuilder.create("null").bold(),
-                    TolkCompletionPriorities.KEYWORD
-                )
+                    TolkCompletionPriorities.KEYWORD,
+                ),
             )
         }
         if (expectType.canAddElement(TolkTy.Bool)) {
             result.addElement(
                 PrioritizedLookupElement.withPriority(
                     LookupElementBuilder.create("true").bold(),
-                    TolkCompletionPriorities.KEYWORD
-                )
+                    TolkCompletionPriorities.KEYWORD,
+                ),
             )
             result.addElement(
                 PrioritizedLookupElement.withPriority(
                     LookupElementBuilder.create("false").bold(),
-                    TolkCompletionPriorities.KEYWORD
-                )
+                    TolkCompletionPriorities.KEYWORD,
+                ),
             )
         }
         val prefixMatcher = result.prefixMatcher
+
+        if (prefixMatcher.prefixMatches("fun") && element.parent !is TolkMatchPattern) {
+            result.addElement(
+                createLambdaLookupElement()
+                    .withPriority(TolkCompletionPriorities.KEYWORD),
+            )
+        }
+
         fun processNamedElement(element: TolkNamedElement): Boolean {
+            if (!element.isVisibleInCompletionFrom(currentFile)) return true
             val name = element.name ?: return true
             if (!prefixMatcher.prefixMatches(name)) return true
             if (element is TolkFunction && element.hasReceiver) return true
             when (element) {
                 is TolkFunction -> {
+                    if (isHiddenMethodFromCompletion(name)) return true
                     if (element.isEntryPoint) return true
                     if (element.isTestFunction()) return true
                     if (!expectType.canAddElement(element.declaredType.returnType)) return true
@@ -148,7 +165,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                 is TolkTypeDef,
                 is TolkStruct,
                 is TolkEnum,
-                    -> {
+                -> {
                     fun canAddAsUnionMatchVariant(): Boolean {
                         if (!inMatchPattern) return false
                         if (declaredMatchArms.contains(name)) return false
@@ -188,7 +205,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                             .toLookupElement(currentFile, ctx)
                             .applyIf(sameType) {
                                 withPriority(TolkCompletionPriorities.KEYWORD)
-                            }
+                            },
                     )
                 }
             }
@@ -209,27 +226,12 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
         if (!TolkNamedElementIndex.processAllElements(project, processor = ::processNamedElement)) return
     }
 
-    private fun TolkNamedElement.toLookupElement(
-        currentFile: TolkFile,
-        ctx: TolkCompletionContext
-    ): LookupElement {
+    private fun TolkNamedElement.toLookupElement(currentFile: TolkFile, ctx: TolkCompletionContext): LookupElement {
         val isResolved = currentFile.resolveSymbols(name ?: "").contains(this)
         val builder = toLookupElementBuilder(ctx)
         return when (this) {
             is TolkFunction -> {
-                val isLowLevelMethod = when (name) {
-                    "getDeclaredPackPrefix",
-                    "getDeclaredPackPrefixLen",
-                    "forceLoadLazyObject",
-                    "stackMoveToTop",
-                    "typeName",
-                    "typeNameOfObject",
-                    "fromTuple",
-                    "toTuple",
-                         -> true
-
-                    else -> false
-                }
+                val isLowLevelMethod = isLowLevelMethodName(name ?: "")
                 builder.toTolkLookupElement(
                     TolkLookupElementData(
                         elementKind = when {
@@ -240,7 +242,7 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
                             isLowLevelMethod -> TolkLookupElementData.ElementKind.LOW_LEVEL_METHOD
                             else -> TolkLookupElementData.ElementKind.DEFAULT
                         },
-                    )
+                    ),
                 )
             }
 
@@ -248,15 +250,16 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
             is TolkGlobalVar,
             is TolkTypeDef,
             is TolkEnum,
-            is TolkStruct -> {
+            is TolkStruct,
+            -> {
                 builder.toTolkLookupElement(
                     TolkLookupElementData(
                         elementKind = when {
                             !isResolved -> TolkLookupElementData.ElementKind.FROM_UNRESOLVED_IMPORT
                             annotations.hasDeprecatedAnnotation() -> TolkLookupElementData.ElementKind.DEPRECATED
                             else -> TolkLookupElementData.ElementKind.DEFAULT
-                        }
-                    )
+                        },
+                    ),
                 )
             }
 
@@ -265,10 +268,23 @@ object TolkCommonCompletionProvider : TolkCompletionProvider() {
     }
 }
 
-fun collectLocalVariables(
-    startFrom: PsiElement,
-    processor: (TolkLocalSymbolElement) -> Boolean
-): Boolean {
+private fun createLambdaLookupElement(): LookupElement = LookupElementBuilder.create("fun")
+    .bold()
+    .withTailText("(params) { ... }", true)
+    .withInsertHandler(
+        TemplateStringInsertHandler(
+            "(\$params$) {\n\t\n}",
+            true,
+            "params" to ConstantNode(""),
+        ),
+    )
+    .toTolkLookupElement(
+        TolkLookupElementData(
+            keywordKind = TolkLookupElementData.KeywordKind.KEYWORD,
+        ),
+    )
+
+fun collectLocalVariables(startFrom: PsiElement, processor: (TolkLocalSymbolElement) -> Boolean): Boolean {
     var exitFromFunction = false
     val result = PsiTreeUtil.treeWalkUp(startFrom, null) { scope, lastParent ->
         if (scope is TolkFunction) {

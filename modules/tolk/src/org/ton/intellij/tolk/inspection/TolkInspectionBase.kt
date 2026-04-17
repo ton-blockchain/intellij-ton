@@ -31,16 +31,14 @@ abstract class TolkInspectionBase : LocalInspectionTool() {
         return buildTolkVisitor(holder, session)
     }
 
-    protected open fun buildTolkVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): TolkVisitor = object : TolkVisitor() {
-        override fun visitFile(file: PsiFile) {
-            if (file is TolkFile) {
-                checkFile(file, holder)
+    protected open fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor =
+        object : TolkVisitor() {
+            override fun visitFile(file: PsiFile) {
+                if (file is TolkFile) {
+                    checkFile(file, holder)
+                }
             }
         }
-    }
 
     protected fun checkFile(file: TolkFile, problemsHolder: ProblemsHolder) {
     }

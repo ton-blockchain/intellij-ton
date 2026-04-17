@@ -18,17 +18,16 @@ import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.TolkTokenType
 
-class TolkParserException(
-    val node: ASTNode,
-    cause: Throwable? = null,
-) : RuntimeException(
-    """Failed to parse TOLK file
+class TolkParserException(val node: ASTNode, cause: Throwable? = null) :
+    RuntimeException(
+        """Failed to parse TOLK file
     |node: $node, text: '${node.text}'
     |0 Previous node: ${node.treePrev}, text: '${node.treePrev?.text}'
     |1 Previous node: ${node.treePrev?.treePrev}, text: '${node.treePrev?.treePrev?.text}'
     |2 Previous node: ${node.treePrev?.treePrev?.treePrev}, text: '${node.treePrev?.treePrev?.treePrev?.text}'
-""".trimMargin(), cause
-)
+        """.trimMargin(),
+        cause,
+    )
 
 class TolkParserDefinition : ParserDefinition {
     override fun createLexer(project: Project?): Lexer = TolkLexer()
@@ -49,8 +48,7 @@ class TolkParserDefinition : ParserDefinition {
         }
     }
 
-    override fun createFile(viewProvider: FileViewProvider) =
-        TolkFile(viewProvider)
+    override fun createFile(viewProvider: FileViewProvider) = TolkFile(viewProvider)
 
     companion object {
         @JvmField
@@ -116,7 +114,7 @@ class TolkParserDefinition : ParserDefinition {
             TolkElementTypes.ORLET,
             TolkElementTypes.XORLET,
             TolkElementTypes.MAPSTO,
-            TolkElementTypes.QUESTQUEST
+            TolkElementTypes.QUESTQUEST,
         )
     }
 }

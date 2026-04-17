@@ -13,17 +13,12 @@ import org.ton.intellij.util.InspectionBundle
 import java.math.BigInteger
 
 class TolkDivideByZeroInspection : TolkInspectionBase() {
-    override fun getGroupDisplayName(): String {
-        return InspectionBundle.message("group.numeric.name")
-    }
+    override fun getGroupDisplayName(): String = InspectionBundle.message("group.numeric.name")
 
-    override fun getDisplayName(): String {
-        return InspectionBundle.message("inspection.numeric.divide_by_zero.name")
-    }
+    override fun getDisplayName(): String = InspectionBundle.message("inspection.numeric.divide_by_zero.name")
 
-    override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor {
-        return DivideByZeroVisitor(holder)
-    }
+    override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor =
+        DivideByZeroVisitor(holder)
 
     private inner class DivideByZeroVisitor(val holder: ProblemsHolder) : TolkVisitor() {
         override fun visitBinExpression(o: TolkBinExpression) {

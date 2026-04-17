@@ -15,9 +15,12 @@ import org.ton.intellij.acton.cli.ActonCommandLine
 import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.tolk.TolkIcons
 
-class TolkCreateFileAction : CreateFileFromTemplateAction(
-    FILE_TEMPLATE, "", TolkIcons.FILE
-) {
+class TolkCreateFileAction :
+    CreateFileFromTemplateAction(
+        FILE_TEMPLATE,
+        "",
+        TolkIcons.FILE,
+    ) {
     override fun buildDialog(project: Project, directory: PsiDirectory, builder: CreateFileFromTemplateDialog.Builder) {
         builder
             .setTitle(TOLK_FILE)
@@ -25,9 +28,8 @@ class TolkCreateFileAction : CreateFileFromTemplateAction(
             .addKind("Contract", TolkIcons.FILE, CONTRACT_TEMPLATE)
     }
 
-    override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?): String {
-        return templateName ?: FILE_TEMPLATE
-    }
+    override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?): String =
+        templateName ?: FILE_TEMPLATE
 
     override fun postProcess(createdElement: PsiFile, templateName: String?, settings: Map<String, String>?) {
         super.postProcess(createdElement, templateName, settings)
@@ -41,7 +43,7 @@ class TolkCreateFileAction : CreateFileFromTemplateAction(
             val commandLine = ActonCommandLine(
                 command = command.name,
                 workingDirectory = actonToml.workingDir,
-                additionalArguments = command.getArguments()
+                additionalArguments = command.getArguments(),
             ).toGeneralCommandLine(project) ?: return
 
             ApplicationManager.getApplication().executeOnPooledThread {

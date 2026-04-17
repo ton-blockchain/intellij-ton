@@ -19,7 +19,10 @@ data class CommentHolder(val file: PsiFile) : CommenterDataHolder() {
     fun useSpaceAfterLineComment(): Boolean = CodeStyle.getLanguageSettings(file, FuncLanguage).LINE_COMMENT_ADD_SPACE
 }
 
-class FuncCommenter : Commenter, CodeDocumentationAwareCommenter, SelfManagingCommenter<CommentHolder> {
+class FuncCommenter :
+    Commenter,
+    CodeDocumentationAwareCommenter,
+    SelfManagingCommenter<CommentHolder> {
     override fun isDocumentationComment(element: PsiComment?) = false
     override fun getDocumentationCommentTokenType(): IElementType? = null
     override fun getDocumentationCommentLinePrefix(): String? = null
@@ -38,17 +41,11 @@ class FuncCommenter : Commenter, CodeDocumentationAwareCommenter, SelfManagingCo
     override fun getCommentedBlockCommentPrefix(): String = "*//*"
     override fun getCommentedBlockCommentSuffix(): String = "*//*"
 
-    override fun getBlockCommentPrefix(
-        selectionStart: Int,
-        document: Document,
-        data: CommentHolder,
-    ): String = blockCommentPrefix
+    override fun getBlockCommentPrefix(selectionStart: Int, document: Document, data: CommentHolder): String =
+        blockCommentPrefix
 
-    override fun getBlockCommentSuffix(
-        selectionEnd: Int,
-        document: Document,
-        data: CommentHolder,
-    ): String = blockCommentSuffix
+    override fun getBlockCommentSuffix(selectionEnd: Int, document: Document, data: CommentHolder): String =
+        blockCommentSuffix
 
     override fun getBlockCommentRange(
         selectionStart: Int,
@@ -60,7 +57,7 @@ class FuncCommenter : Commenter, CodeDocumentationAwareCommenter, SelfManagingCo
         selectionEnd,
         document,
         blockCommentPrefix,
-        blockCommentSuffix
+        blockCommentSuffix,
     )
 
     override fun insertBlockComment(
@@ -68,32 +65,27 @@ class FuncCommenter : Commenter, CodeDocumentationAwareCommenter, SelfManagingCo
         endOffset: Int,
         document: Document,
         data: CommentHolder?,
-    ): TextRange {
-        return SelfManagingCommenterUtil.insertBlockComment(
-            startOffset,
-            endOffset,
-            document,
-            blockCommentPrefix,
-            blockCommentSuffix
-        )
-    }
-
-    override fun uncommentBlockComment(
-        startOffset: Int,
-        endOffset: Int,
-        document: Document,
-        data: CommentHolder?,
-    ) = SelfManagingCommenterUtil.uncommentBlockComment(
+    ): TextRange = SelfManagingCommenterUtil.insertBlockComment(
         startOffset,
         endOffset,
         document,
         blockCommentPrefix,
-        blockCommentSuffix
+        blockCommentSuffix,
     )
 
-    override fun isLineCommented(line: Int, offset: Int, document: Document, data: CommentHolder): Boolean {
-        return LINE_PREFIXES.any { CharArrayUtil.regionMatches(document.charsSequence, offset, it) }
-    }
+    override fun uncommentBlockComment(startOffset: Int, endOffset: Int, document: Document, data: CommentHolder?) =
+        SelfManagingCommenterUtil.uncommentBlockComment(
+            startOffset,
+            endOffset,
+            document,
+            blockCommentPrefix,
+            blockCommentSuffix,
+        )
+
+    override fun isLineCommented(line: Int, offset: Int, document: Document, data: CommentHolder): Boolean =
+        LINE_PREFIXES.any {
+            CharArrayUtil.regionMatches(document.charsSequence, offset, it)
+        }
 
     override fun commentLine(line: Int, offset: Int, document: Document, data: CommentHolder) {
         val addSpace = data.useSpaceAfterLineComment()
@@ -104,7 +96,7 @@ class FuncCommenter : Commenter, CodeDocumentationAwareCommenter, SelfManagingCo
         val prefixLen = LINE_PREFIXES.find { CharArrayUtil.regionMatches(document.charsSequence, offset, it) }?.length
             ?: return
         val hasSpace = data.useSpaceAfterLineComment() &&
-                CharArrayUtil.regionMatches(document.charsSequence, offset + prefixLen, " ")
+            CharArrayUtil.regionMatches(document.charsSequence, offset + prefixLen, " ")
         document.deleteString(offset, offset + prefixLen + if (hasSpace) 1 else 0)
     }
 

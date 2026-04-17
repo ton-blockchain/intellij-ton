@@ -5,7 +5,6 @@ import com.intellij.psi.stubs.IStubElementType
 import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.doc.psi.TolkDocComment
 import org.ton.intellij.tolk.psi.TolkEnum
-import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkEnumMember
 import org.ton.intellij.tolk.stub.TolkEnumMemberStub
 import org.ton.intellij.tolk.type.TolkTy
@@ -13,7 +12,9 @@ import org.ton.intellij.util.childOfType
 import org.ton.intellij.util.parentOfType
 import javax.swing.Icon
 
-abstract class TolkEnumMemberMixin : TolkNamedElementImpl<TolkEnumMemberStub>, TolkEnumMember {
+abstract class TolkEnumMemberMixin :
+    TolkNamedElementImpl<TolkEnumMemberStub>,
+    TolkEnumMember {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TolkEnumMemberStub, stubType: IStubElementType<*, *>) : super(stub, stubType)

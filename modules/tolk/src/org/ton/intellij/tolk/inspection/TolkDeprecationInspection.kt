@@ -18,8 +18,17 @@ class TolkDeprecationInspection : TolkInspectionBase() {
 
                 if (original is TolkAnnotationHolder && original.annotations.hasDeprecatedAnnotation()) {
                     val deprecatedAnnotation = original.annotations.deprecatedAnnotation()
+                    val firstArgumentExpression =
+                        deprecatedAnnotation
+                            ?.argumentList
+                            ?.argumentList
+                            ?.firstOrNull()
+                            ?.expression
                     val text =
-                        (deprecatedAnnotation?.argumentList?.argumentList?.firstOrNull()?.expression as? TolkLiteralExpression)?.stringLiteral?.rawString?.text
+                        (firstArgumentExpression as? TolkLiteralExpression)
+                            ?.stringLiteral
+                            ?.rawString
+                            ?.text
                             ?: ""
                     val formattedText = if (text.isNotBlank()) {
                         " $text."
@@ -29,7 +38,7 @@ class TolkDeprecationInspection : TolkInspectionBase() {
                     holder.registerProblem(
                         identifier,
                         "$name is deprecated.$formattedText",
-                        ProblemHighlightType.LIKE_DEPRECATED
+                        ProblemHighlightType.LIKE_DEPRECATED,
                     )
                 }
             }

@@ -19,7 +19,7 @@ import java.io.IOException
 
 fun <T> Project.computeWithCancelableProgress(
     @Suppress("UnstableApiUsage") @ProgressTitle title: String,
-    supplier: () -> T
+    supplier: () -> T,
 ): T {
     if (isUnitTestMode) {
         return supplier()
@@ -40,7 +40,9 @@ class TolkCoverageRunner : CoverageRunner() {
         if (baseCoverageSuite !is TolkCoverageSuite) return null
         return try {
             if (ApplicationManager.getApplication().isDispatchThread) {
-                baseCoverageSuite.project.computeWithCancelableProgress(TolkBundle.message("progress.title.loading.coverage.data")) {
+                baseCoverageSuite.project.computeWithCancelableProgress(
+                    TolkBundle.message("progress.title.loading.coverage.data"),
+                ) {
                     readProjectData(sessionDataFile, baseCoverageSuite)
                 }
             } else {

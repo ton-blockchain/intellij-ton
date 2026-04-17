@@ -12,6 +12,7 @@ import com.intellij.psi.util.parentOfType
 import com.intellij.ui.JBColor
 import com.intellij.util.ProcessingContext
 import com.intellij.util.applyIf
+import org.ton.intellij.tolk.acton.isVisibleInCompletionFrom
 import org.ton.intellij.tolk.psi.*
 import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.psi.reference.collectMethodCandidates
@@ -26,8 +27,8 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
             .withSuperParent(2, TolkDotExpression::class.java)
             .andNot(
                 PlatformPatterns.psiElement().afterLeaf(
-                    PlatformPatterns.psiElement().withText(StandardPatterns.string().matches("\\d+"))
-                )
+                    PlatformPatterns.psiElement().withText(StandardPatterns.string().matches("\\d+")),
+                ),
             )
 
     override fun addCompletions(
@@ -70,7 +71,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
 
         if (!isStaticReceiver && !isBeforeParenthesis) {
             when (calledType) {
-                is TolkTyStruct                      -> {
+                is TolkTyStruct -> {
                     val sub = Substitution.instantiate(calledType.psi.declaredType, calledType)
                     for (field in calledType.psi.structBody?.structFieldList.orEmpty()) {
                         if (!checkLimit()) return
@@ -79,9 +80,9 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                             result.addElement(
                                 lookupElement.toTolkLookupElement(
                                     TolkLookupElementData(
-                                        elementKind = TolkLookupElementData.ElementKind.FIELD
-                                    )
-                                )
+                                        elementKind = TolkLookupElementData.ElementKind.FIELD,
+                                    ),
+                                ),
                             )
                         }
                     }
@@ -90,8 +91,8 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                 is TolkTyTypedTuple, is TolkTyTensor -> {
                     val elements = when (calledType) {
                         is TolkTyTypedTuple -> calledType.elements
-                        is TolkTyTensor     -> calledType.elements
-                        else                -> emptyList()
+                        is TolkTyTensor -> calledType.elements
+                        else -> emptyList()
                     }
                     for ((index, element) in elements.withIndex()) {
                         if (!checkLimit()) return
@@ -116,9 +117,9 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                     result.addElement(
                         lookupElement.toTolkLookupElement(
                             TolkLookupElementData(
-                                elementKind = TolkLookupElementData.ElementKind.FIELD
-                            )
-                        )
+                                elementKind = TolkLookupElementData.ElementKind.FIELD,
+                            ),
+                        ),
                     )
                 }
             }
@@ -129,7 +130,9 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
 
         val methodsForCompletion = mutableListOf<TolkFunction>()
         TolkFunctionIndex.processAllElements(project, processor = { function ->
+            if (!function.isVisibleInCompletionFrom(currentFile)) return@processAllElements true
             val name = function.name ?: return@processAllElements true
+            if (isHiddenMethodFromCompletion(name)) return@processAllElements true
             if (!prefixMatcher.prefixMatches(name)) return@processAllElements true
             methodsForCompletion.add(function)
             true
@@ -151,19 +154,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
             // when call instance method as static
             val methodCallTypeMismatch = isStaticReceiver && !isStatic
 
-            val isLowLevelMethod = when (name) {
-                "getDeclaredPackPrefix",
-                "getDeclaredPackPrefixLen",
-                "forceLoadLazyObject",
-                "stackMoveToTop",
-                "typeName",
-                "typeNameOfObject",
-                "fromTuple",
-                "toTuple",
-                     -> true
-
-                else -> false
-            }
+            val isLowLevelMethod = isLowLevelMethodName(name)
             val lookupElement = function.toLookupElementBuilder(ctx)
                 .withBoldness(receiverType == calledType)
                 .applyIf(methodCallTypeMismatch || isLowLevelMethod) {
@@ -176,14 +167,14 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                         isInherentUnionMember = receiverType is TolkTyUnion,
                         isGeneric = receiverType is TolkTyParam,
                         elementKind = when {
-                            !isResolved                      -> TolkLookupElementData.ElementKind.FROM_UNRESOLVED_IMPORT
-                            function.isEntryPoint            -> TolkLookupElementData.ElementKind.ENTRY_POINT_FUNCTION
+                            !isResolved -> TolkLookupElementData.ElementKind.FROM_UNRESOLVED_IMPORT
+                            function.isEntryPoint -> TolkLookupElementData.ElementKind.ENTRY_POINT_FUNCTION
                             function.hasDeprecatedAnnotation -> TolkLookupElementData.ElementKind.DEPRECATED
-                            isStatic && !isLowLevelMethod    -> TolkLookupElementData.ElementKind.STATIC_FUNCTION
-                            isLowLevelMethod                 -> TolkLookupElementData.ElementKind.LOW_LEVEL_METHOD
-                            else                             -> TolkLookupElementData.ElementKind.DEFAULT
+                            isStatic && !isLowLevelMethod -> TolkLookupElementData.ElementKind.STATIC_FUNCTION
+                            isLowLevelMethod -> TolkLookupElementData.ElementKind.LOW_LEVEL_METHOD
+                            else -> TolkLookupElementData.ElementKind.DEFAULT
                         },
-                    )
+                    ),
                 )
 
             result.addElement(lookupElement)

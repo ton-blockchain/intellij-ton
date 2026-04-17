@@ -8,8 +8,6 @@ import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.util.Key
-import javax.swing.Timer
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
@@ -17,10 +15,12 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.ide.CopyPasteManager
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.wm.ToolWindow
@@ -32,7 +32,6 @@ import com.intellij.ui.dsl.builder.*
 import com.intellij.util.ui.JBUI
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
-import com.intellij.openapi.options.ShowSettingsUtil
 import org.ton.intellij.acton.settings.ActonConfigurable
 import org.ton.intellij.acton.settings.actonSettings
 import java.awt.BorderLayout
@@ -42,6 +41,7 @@ import java.awt.Graphics2D
 import java.awt.RenderingHints
 import java.awt.datatransfer.StringSelection
 import javax.swing.*
+import javax.swing.Timer
 
 class ActonWalletToolWindowFactory : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
@@ -68,7 +68,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
     companion object {
         val WALLET_VERSIONS = listOf(
             "v5r1", "v4r2", "v4r1", "v3r2", "v3r1", "v2r2", "v2r1", "v1r3", "v1r2", "v1r1",
-            "highloadv2r2", "highloadv2r1", "highloadv2", "highloadv1r2", "highloadv1r1"
+            "highloadv2r2", "highloadv2r1", "highloadv2", "highloadv1r2", "highloadv1r1",
         )
     }
 
@@ -125,7 +125,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                 command = walletCommand.name,
                 workingDirectory = projectDir.toNioPath(),
                 additionalArguments = walletCommand.getArguments(),
-                environmentVariables = EnvironmentVariablesData.DEFAULT
+                environmentVariables = EnvironmentVariablesData.DEFAULT,
             ).toGeneralCommandLine(project)
 
             if (commandLine == null) {
@@ -207,7 +207,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
         Messages.showWarningDialog(
             project,
             "Wallet was created, but the wallet card was not found to start airdrop automatically.",
-            "Airdrop Not Started"
+            "Airdrop Not Started",
         )
     }
 
@@ -286,7 +286,9 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                     row {
                         val truncatedAddr = if (info.address.length > 20) {
                             info.address.take(8) + "…" + info.address.takeLast(8)
-                        } else info.address
+                        } else {
+                            info.address
+                        }
 
                         link(truncatedAddr) {
                             val explorerUrl = project.actonSettings.explorer.addressUrl(info.address, isTestnet = true)
@@ -345,7 +347,9 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                         }
 
                         val helpLabel =
-                            ContextHelpLabel.create("Request testnet TONs from faucet by solving a small Proof-of-Work challenge")
+                            ContextHelpLabel.create(
+                                "Request testnet TONs from faucet by solving a small Proof-of-Work challenge",
+                            )
 
                         panel {
                             row {
@@ -394,7 +398,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                     command = airdropCommand.name,
                     workingDirectory = projectDir.toNioPath(),
                     additionalArguments = airdropCommand.getArguments(),
-                    environmentVariables = EnvironmentVariablesData.DEFAULT
+                    environmentVariables = EnvironmentVariablesData.DEFAULT,
                 ).toGeneralCommandLine(project) ?: return@executeOnPooledThread
 
                 val handler = OSProcessHandler(commandLine)
@@ -439,9 +443,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
             }
         }
 
-        override fun getMaximumSize(): java.awt.Dimension {
-            return java.awt.Dimension(Int.MAX_VALUE, preferredSize.height)
-        }
+        override fun getMaximumSize(): java.awt.Dimension = java.awt.Dimension(Int.MAX_VALUE, preferredSize.height)
     }
 
     private fun createNewWallet(initialWalletName: String? = null) {
@@ -460,13 +462,13 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                     global = global,
                     local = !global,
                     secure = secure,
-                    json = true
+                    json = true,
                 )
                 val commandLine = ActonCommandLine(
                     command = walletCommand.name,
                     workingDirectory = project.guessProjectDir()?.toNioPath() ?: return@executeOnPooledThread,
                     additionalArguments = walletCommand.getArguments(),
-                    environmentVariables = EnvironmentVariablesData.DEFAULT
+                    environmentVariables = EnvironmentVariablesData.DEFAULT,
                 ).toGeneralCommandLine(project) ?: return@executeOnPooledThread
 
                 val handler = CapturingProcessHandler(commandLine)
@@ -507,13 +509,13 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                     global = global,
                     local = !global,
                     secure = secure,
-                    json = true
+                    json = true,
                 )
                 val commandLine = ActonCommandLine(
                     command = walletCommand.name,
                     workingDirectory = project.guessProjectDir()?.toNioPath() ?: return@executeOnPooledThread,
                     additionalArguments = walletCommand.getArguments(),
-                    environmentVariables = EnvironmentVariablesData.DEFAULT
+                    environmentVariables = EnvironmentVariablesData.DEFAULT,
                 ).toGeneralCommandLine(project) ?: return@executeOnPooledThread
 
                 val handler = CapturingProcessHandler(commandLine)
@@ -540,9 +542,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
         val balance: String?,
     )
 
-    private fun stripAnsiColors(text: String): String {
-        return org.ton.intellij.acton.ActonUtils.stripAnsiColors(text)
-    }
+    private fun stripAnsiColors(text: String): String = org.ton.intellij.acton.ActonUtils.stripAnsiColors(text)
 
     private fun refreshVfs() {
         val projectDir = project.guessProjectDir()

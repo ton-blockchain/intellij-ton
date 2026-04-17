@@ -21,7 +21,7 @@ object TolkContractFieldCompletionProvider : TolkCompletionProvider() {
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         val contract = parameters.position.parentOfType<TolkContractDefinition>() ?: return
         val existingFields = contract.contractDefinitionBody?.contractFieldList?.mapNotNull {
@@ -37,17 +37,17 @@ object TolkContractFieldCompletionProvider : TolkCompletionProvider() {
             "incomingExternal" to "Allowed incoming external messages type",
             "storage" to "Persistent storage structure",
             "storageAtDeployment" to "Storage structure at deployment",
-            "forceAbiExport" to "List of symbols to additionally export to ABI"
+            "forceAbiExport" to "List of symbols to additionally export to ABI",
         )
-        
+
         val typeFields = setOf(
             "incomingMessages",
             "incomingExternal",
             "storage",
             "storageAtDeployment",
-            "forceAbiExport"
+            "forceAbiExport",
         )
-        
+
         for ((field, description) in fields) {
             if (field in existingFields) continue
 
@@ -61,7 +61,7 @@ object TolkContractFieldCompletionProvider : TolkCompletionProvider() {
                         val offset = context.tailOffset
                         document.insertString(offset, ": ")
                         context.editor.caretModel.moveToOffset(offset + 2)
-                        
+
                         val templateManager = TemplateManager.getInstance(context.project)
                         val template = templateManager.createTemplate("", "", "${'$'}VALUE$,")
                         template.addVariable("VALUE", ConstantNode(""), true)
@@ -70,7 +70,7 @@ object TolkContractFieldCompletionProvider : TolkCompletionProvider() {
                         if (field in typeFields) {
                             AutoPopupController.getInstance(context.project)?.scheduleAutoPopup(context.editor)
                         }
-                    }
+                    },
             )
         }
     }

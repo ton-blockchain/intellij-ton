@@ -8,7 +8,7 @@ package org.ton.intellij.tolk.type
 class TolkTyTypedTuple private constructor(
     val elements: List<TolkTy>,
     private val hasGenerics: Boolean = elements.any { it.hasGenerics() },
-    override val hasTypeAlias: Boolean = elements.any { it.hasTypeAlias }
+    override val hasTypeAlias: Boolean = elements.any { it.hasTypeAlias },
 ) : TolkTy {
     private var hashCode: Int = 0
 
@@ -16,14 +16,12 @@ class TolkTyTypedTuple private constructor(
 
     override fun actualType(): TolkTyTypedTuple = TolkTyTypedTuple(
         elements.map { it.actualType() },
-        hasGenerics
+        hasGenerics,
     )
 
-    override fun superFoldWith(folder: TypeFolder): TolkTy {
-        return create(
-            elements.map { it.foldWith(folder) },
-        )
-    }
+    override fun superFoldWith(folder: TypeFolder): TolkTy = create(
+        elements.map { it.foldWith(folder) },
+    )
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (this == other) return true
@@ -76,12 +74,8 @@ class TolkTyTypedTuple private constructor(
     }
 
     companion object {
-        fun create(vararg elements: TolkTy): TolkTy {
-            return create(elements.toList())
-        }
+        fun create(vararg elements: TolkTy): TolkTy = create(elements.toList())
 
-        fun create(elements: List<TolkTy>): TolkTy {
-            return TolkTyTypedTuple(elements)
-        }
+        fun create(elements: List<TolkTy>): TolkTy = TolkTyTypedTuple(elements)
     }
 }

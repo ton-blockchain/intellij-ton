@@ -22,25 +22,48 @@ class TolkRunScriptLineMarkerProvider : RunLineMarkerContributor() {
         val parent = element.parent
         if (parent is TolkFunction && parent.name == "main") {
             val actions = listOf(
-                RunActonScriptAction(false),
-                RunActonScriptAction(true)
+                RunActonScriptAction(),
+                RunActonScriptBroadcastAction("testnet"),
+                RunActonScriptBroadcastAction("mainnet"),
+                RunActonScriptBroadcastAction("localnet"),
             )
-            return Info(AllIcons.RunConfigurations.TestState.Run, (actions + ExecutorAction.getActions(0)).toTypedArray()) { "Run Script" }
+            return Info(
+                AllIcons.RunConfigurations.TestState.Run,
+                (actions + ExecutorAction.getActions(0)).toTypedArray(),
+            ) {
+                "Run Script"
+            }
         }
 
         return null
     }
 
-    private class RunActonScriptAction(private val broadcast: Boolean) : AnAction(
-        if (broadcast) "Broadcast" else "Emulate",
-        null,
-        if (broadcast) AllIcons.General.Export else AllIcons.Ide.LocalScope
-    ) {
+    private class RunActonScriptAction : AnAction("Emulate", null, AllIcons.Ide.LocalScope) {
         override fun actionPerformed(e: AnActionEvent) {
             val context = ConfigurationContext.getFromContext(e.dataContext)
-            val producer = if (broadcast) ActonRunScriptBroadcastConfigurationProducer() else ActonRunScriptConfigurationProducer()
+            val producer = ActonRunScriptConfigurationProducer()
             val configurationFromContext = producer.findOrCreateConfigurationFromContext(context) ?: return
-            ExecutionUtil.runConfiguration(configurationFromContext.configurationSettings, DefaultRunExecutor.getRunExecutorInstance())
+            ExecutionUtil.runConfiguration(
+                configurationFromContext.configurationSettings,
+                DefaultRunExecutor.getRunExecutorInstance(),
+            )
+        }
+    }
+
+    private class RunActonScriptBroadcastAction(private val network: String) :
+        AnAction(
+            "Broadcast to ${network.replaceFirstChar(Char::titlecase)}",
+            null,
+            AllIcons.General.Export,
+        ) {
+        override fun actionPerformed(e: AnActionEvent) {
+            val context = ConfigurationContext.getFromContext(e.dataContext)
+            val producer = ActonRunScriptBroadcastConfigurationProducer(network)
+            val configurationFromContext = producer.findOrCreateConfigurationFromContext(context) ?: return
+            ExecutionUtil.runConfiguration(
+                configurationFromContext.configurationSettings,
+                DefaultRunExecutor.getRunExecutorInstance(),
+            )
         }
     }
 }

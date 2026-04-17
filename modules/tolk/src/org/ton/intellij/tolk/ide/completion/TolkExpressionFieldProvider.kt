@@ -58,7 +58,8 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
 
         val structExpr = parent.parentOfType<TolkStructExpression>() ?: return
         val initedFields = structExpr.structExpressionBody.structExpressionFieldList
-        val isEmptyStructExpression = initedFields.isEmpty() || initedFields.size == 1 && initedFields[0].text == "IntellijIdeaRulezzz"
+        val isEmptyStructExpression =
+            initedFields.isEmpty() || initedFields.size == 1 && initedFields[0].text == "IntellijIdeaRulezzz"
 
         val originalStructExpr = parameters.originalPosition?.parentOfType<TolkStructExpression>() ?: return
         val document = parameters.editor.document
@@ -88,12 +89,14 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
                             TemplateStringInsertHandler(
                                 ": \$value$$comma",
                                 true,
-                                "value" to ConstantNode(typeDefaultValue(field.type))
-                            )
+                                "value" to ConstantNode(typeDefaultValue(field.type)),
+                            ),
                         )
-                        .toTolkLookupElement(TolkLookupElementData(elementKind = TolkLookupElementData.ElementKind.FIELD)),
-                    index.toDouble() * 0.001 + 1.0
-                )
+                        .toTolkLookupElement(
+                            TolkLookupElementData(elementKind = TolkLookupElementData.ElementKind.FIELD),
+                        ),
+                    index.toDouble() * 0.001 + 1.0,
+                ),
             )
         }
 
@@ -106,7 +109,7 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
                     .withPresentableText("Fill all fields…")
                     .withIcon(AllIcons.Actions.RealIntentionBulb)
                     .withInsertHandler(FillFieldsInsertHandler(allFields))
-                    .withPriority(TolkCompletionPriorities.KEYWORD)
+                    .withPriority(TolkCompletionPriorities.KEYWORD),
             )
 
             // no need to show this variant if it works like `Fill all fields` and there are some required fields to fill
@@ -116,7 +119,7 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
                         .withPresentableText("Fill required fields…")
                         .withIcon(AllIcons.Actions.RealIntentionBulb)
                         .withInsertHandler(FillFieldsInsertHandler(requiredFields))
-                        .withPriority(TolkCompletionPriorities.KEYWORD)
+                        .withPriority(TolkCompletionPriorities.KEYWORD),
                 )
             }
         }
@@ -173,7 +176,7 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
 
         if (type is TolkTyStruct) {
             if (type.psi.name == "map") {
-                return "createEmptyMap()"
+                return "[]"
             }
             if (type.typeArguments.isNotEmpty() && type.psi.name == "Cell") {
                 // `Cell<T>` -> `T {}.toCell()` or `defaultOf(T).toCell()`
@@ -215,7 +218,10 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
             document.deleteString(start, start + 1)
 
             val lines = fields.mapIndexed { index, it -> "${it.name}: \$field$index$," }
-            val defaultValues = fields.mapIndexed { index, it -> "field$index" to ConstantNode(typeDefaultValue(it.type)) }
+            val defaultValues = fields.mapIndexed { index, it ->
+                "field$index" to
+                    ConstantNode(typeDefaultValue(it.type))
+            }
 
             val snippet = lines.joinToString("\n")
 

@@ -9,23 +9,19 @@ import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.TolkStringLiteral
-import kotlin.io.path.absolutePathString
 
 private val SUITABLE_FILE_TYPES = arrayOf(TolkFileType)
 
-class TolkLiteralFileReferenceSet(
-    str: String,
-    element: TolkStringLiteral,
-    startOffset: Int
-) : FileReferenceSet(
-    str,
-    element,
-    startOffset,
-    null,
-    element.containingFile.originalFile.virtualFile.fileSystem.isCaseSensitive,
-    false,
-    SUITABLE_FILE_TYPES
-) {
+class TolkLiteralFileReferenceSet(str: String, element: TolkStringLiteral, startOffset: Int) :
+    FileReferenceSet(
+        str,
+        element,
+        startOffset,
+        null,
+        element.containingFile.originalFile.virtualFile.fileSystem.isCaseSensitive,
+        false,
+        SUITABLE_FILE_TYPES,
+    ) {
     override fun computeDefaultContexts(): Collection<PsiFileSystemItem> {
         val contexts = super.computeDefaultContexts()
         val project = element.project
@@ -42,7 +38,8 @@ class TolkLiteralFileReferenceSet(
         if (!firstSegment.startsWith("@")) return contexts
 
         val mappingPath = mappings[firstSegment.substring(1)] ?: return contexts
-        val virtualFile = element.containingFile.originalFile.virtualFile.fileSystem.findFileByPath(mappingPath) ?: return contexts
+        val virtualFile =
+            element.containingFile.originalFile.virtualFile.fileSystem.findFileByPath(mappingPath) ?: return contexts
         val psiDirectory = PsiManager.getInstance(project).findDirectory(virtualFile) ?: return contexts
         return listOf(psiDirectory as PsiFileSystemItem)
     }

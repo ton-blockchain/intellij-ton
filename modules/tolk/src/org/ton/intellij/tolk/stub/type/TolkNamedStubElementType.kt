@@ -7,9 +7,8 @@ import org.ton.intellij.tolk.psi.TolkNamedElement
 import org.ton.intellij.tolk.stub.TolkNamedStub
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
 
-abstract class TolkNamedStubElementType<S : TolkNamedStub<T>, T : TolkNamedElement>(
-    debugName: String
-) : TolkStubElementType<S, T>(debugName) {
+abstract class TolkNamedStubElementType<S : TolkNamedStub<T>, T : TolkNamedElement>(debugName: String) :
+    TolkStubElementType<S, T>(debugName) {
     protected open val extraIndexKeys: Collection<StubIndexKey<String, out TolkNamedElement>> = emptyList()
 
     override fun shouldCreateStub(node: ASTNode?): Boolean {

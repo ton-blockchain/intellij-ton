@@ -11,7 +11,7 @@ class TolkTypeMismatchInspectionTest : TolkInspectionTestBase() {
                 val a: int = 10;
             }
             """.trimIndent(),
-            TolkTypeMismatchInspection()
+            TolkTypeMismatchInspection(),
         )
     }
 
@@ -22,7 +22,7 @@ class TolkTypeMismatchInspectionTest : TolkInspectionTestBase() {
                 val a = 10;
             }
             """.trimIndent(),
-            TolkTypeMismatchInspection()
+            TolkTypeMismatchInspection(),
         )
     }
 
@@ -33,7 +33,7 @@ class TolkTypeMismatchInspectionTest : TolkInspectionTestBase() {
                 val a: int = <error descr="Cannot assign 'slice' to variable of type 'int'">"hello"</error>;
             }
             """.trimIndent(),
-            TolkTypeMismatchInspection()
+            TolkTypeMismatchInspection(),
         )
     }
 
@@ -44,7 +44,7 @@ class TolkTypeMismatchInspectionTest : TolkInspectionTestBase() {
                 var a: int8 = <error descr="Cannot assign 'int32' to variable of type 'int8'">10 as int32</error>;
             }
             """.trimIndent(),
-            TolkTypeMismatchInspection()
+            TolkTypeMismatchInspection(),
         )
     }
 
@@ -59,7 +59,7 @@ class TolkTypeMismatchInspectionTest : TolkInspectionTestBase() {
                 __expect_type(a, "int");
             }
             """.trimIndent(),
-            TolkTypeMismatchInspection()
+            TolkTypeMismatchInspection(),
         )
     }
 }

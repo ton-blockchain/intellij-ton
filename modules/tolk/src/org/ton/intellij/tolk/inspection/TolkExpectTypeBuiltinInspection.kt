@@ -10,25 +10,27 @@ import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.TolkVisitor
 import org.ton.intellij.tolk.type.render
 
-class TolkExpectTypeBuiltinInspection  : TolkInspectionBase() {
-    override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor = object  : TolkVisitor() {
-        override fun visitCallExpression(o: TolkCallExpression) {
-            val referenceExpr = o.expression as? TolkReferenceExpression ?: return
-            val name = referenceExpr.referenceName ?: return
-            if (name != "__expect_type") return
-            val argumentList = o.argumentList.argumentList
-            val left = argumentList.firstOrNull() ?: return
-            val right = argumentList.getOrNull(1) ?: return
-            val expectTypeText = ((right.expression as? TolkLiteralExpression)?.value as? TolkStringValue)?.value ?: return
-            val actualType = left.expression.type ?: return
+class TolkExpectTypeBuiltinInspection : TolkInspectionBase() {
+    override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor =
+        object : TolkVisitor() {
+            override fun visitCallExpression(o: TolkCallExpression) {
+                val referenceExpr = o.expression as? TolkReferenceExpression ?: return
+                val name = referenceExpr.referenceName ?: return
+                if (name != "__expect_type") return
+                val argumentList = o.argumentList.argumentList
+                val left = argumentList.firstOrNull() ?: return
+                val right = argumentList.getOrNull(1) ?: return
+                val expectTypeText =
+                    ((right.expression as? TolkLiteralExpression)?.value as? TolkStringValue)?.value ?: return
+                val actualType = left.expression.type ?: return
 
-            val actualTypeText = actualType.render(unknown = "unknown")
-            if (expectTypeText != actualTypeText) {
-                holder.registerProblem(
-                    left,
-                    "Type mismatch\nexpected: `$expectTypeText`, but found: `$actualTypeText`",
-                )
+                val actualTypeText = actualType.render(unknown = "unknown")
+                if (expectTypeText != actualTypeText) {
+                    holder.registerProblem(
+                        left,
+                        "Type mismatch\nexpected: `$expectTypeText`, but found: `$actualTypeText`",
+                    )
+                }
             }
         }
-    }
 }

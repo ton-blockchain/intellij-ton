@@ -9,9 +9,8 @@ import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.psi.impl.TolkStructFieldImpl
 import org.ton.intellij.tolk.stub.TolkStructFieldStub
 
-class TolkStructFieldStubElementType(
-    debugName: String,
-) : TolkNamedStubElementType<TolkStructFieldStub, TolkStructField>(debugName) {
+class TolkStructFieldStubElementType(debugName: String) :
+    TolkNamedStubElementType<TolkStructFieldStub, TolkStructField>(debugName) {
     override fun serialize(stub: TolkStructFieldStub, dataStream: StubOutputStream) {
         dataStream.writeName(stub.name)
     }
@@ -21,16 +20,10 @@ class TolkStructFieldStubElementType(
         return TolkStructFieldStub(parentStub, this, name)
     }
 
-    override fun createStub(
-        psi: TolkStructField,
-        parentStub: StubElement<out PsiElement>,
-    ): TolkStructFieldStub {
-        return TolkStructFieldStub(parentStub, this, psi.name)
-    }
+    override fun createStub(psi: TolkStructField, parentStub: StubElement<out PsiElement>): TolkStructFieldStub =
+        TolkStructFieldStub(parentStub, this, psi.name)
 
-    override fun createPsi(stub: TolkStructFieldStub): TolkStructField {
-        return TolkStructFieldImpl(stub, this)
-    }
+    override fun createPsi(stub: TolkStructFieldStub): TolkStructField = TolkStructFieldImpl(stub, this)
 
     companion object {
         val EMPTY_ARRAY = emptyArray<TolkStructField>()

@@ -7,10 +7,11 @@ import com.jetbrains.jsonSchema.extension.JsonSchemaFileProvider
 import com.jetbrains.jsonSchema.extension.JsonSchemaProviderFactory
 import com.jetbrains.jsonSchema.extension.SchemaType
 
-class ActonTomlJsonSchemaProviderFactory : JsonSchemaProviderFactory, DumbAware {
-    override fun getProviders(project: Project): List<JsonSchemaFileProvider> {
-        return listOf(ActonTomlJsonSchemaFileProvider())
-    }
+class ActonTomlJsonSchemaProviderFactory :
+    JsonSchemaProviderFactory,
+    DumbAware {
+    override fun getProviders(project: Project): List<JsonSchemaFileProvider> =
+        listOf(ActonTomlJsonSchemaFileProvider())
 }
 
 class ActonTomlJsonSchemaFileProvider : JsonSchemaFileProvider {
@@ -18,9 +19,8 @@ class ActonTomlJsonSchemaFileProvider : JsonSchemaFileProvider {
     override fun getName(): String = "Acton.toml"
     override fun getSchemaType(): SchemaType = SchemaType.userSchema
     override fun isUserVisible(): Boolean = true
-    override fun getSchemaFile(): VirtualFile? {
-        return JsonSchemaProviderFactory.getResourceFile(ActonTomlJsonSchemaFileProvider::class.java, SCHEMA_PATH)
-    }
+    override fun getSchemaFile(): VirtualFile? =
+        JsonSchemaProviderFactory.getResourceFile(ActonTomlJsonSchemaFileProvider::class.java, SCHEMA_PATH)
 
     companion object {
         private const val SCHEMA_PATH: String = "/jsonSchema/acton-toml-schema.json"

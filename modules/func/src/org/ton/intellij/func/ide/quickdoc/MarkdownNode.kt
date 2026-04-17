@@ -50,7 +50,7 @@ class MarkdownNode(
 
     fun toHtml(): String {
         if (node.type == MarkdownTokenTypes.WHITE_SPACE) {
-            return text   // do not trim trailing whitespace
+            return text // do not trim trailing whitespace
         }
 
         var currentCodeFenceLang = "func"
@@ -89,12 +89,14 @@ class MarkdownNode(
                     val startDelimiter = node.child(MarkdownTokenTypes.BACKTICK)?.text
                     if (startDelimiter != null) {
                         val text = node.text.substring(startDelimiter.length).removeSuffix(startDelimiter)
-                        sb.append("<code style='font-size:${DocumentationSettings.getMonospaceFontSizeCorrection(true)}%;'>")
+                        sb.append(
+                            "<code style='font-size:${DocumentationSettings.getMonospaceFontSizeCorrection(true)}%;'>",
+                        )
                         sb.appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet(
                             DocumentationSettings.getInlineCodeHighlightingMode(),
                             owner.project,
                             FuncLanguage,
-                            text
+                            text,
                         )
                         sb.append("</code>")
                     }
@@ -102,14 +104,16 @@ class MarkdownNode(
 
                 MarkdownElementTypes.CODE_BLOCK,
                 MarkdownElementTypes.CODE_FENCE,
-                    -> {
+                -> {
                     sb.trimEnd()
                     var language: Language = FuncLanguage
                     val contents = StringBuilder()
                     node.children.forEach { child ->
                         when (child.type) {
-                            MarkdownTokenTypes.CODE_LINE, MarkdownTokenTypes.CODE_FENCE_CONTENT, MarkdownTokenTypes.EOL ->
-                                contents.append(child.text)
+                            MarkdownTokenTypes.CODE_LINE,
+                            MarkdownTokenTypes.CODE_FENCE_CONTENT,
+                            MarkdownTokenTypes.EOL,
+                            -> contents.append(child.text)
 
                             MarkdownTokenTypes.FENCE_LANG -> {
                                 language = guessLanguage(child.text.trim().split(' ')[0]) ?: language
@@ -124,7 +128,7 @@ class MarkdownNode(
                         DocumentationSettings.isHighlightingOfCodeBlocksEnabled(),
                         contents,
                         isForRenderedDoc = true,
-                        trim = true
+                        trim = true,
                     )
                     sb.append("</code></pre>")
                 }
@@ -135,7 +139,7 @@ class MarkdownNode(
 
                 MarkdownElementTypes.SHORT_REFERENCE_LINK,
                 MarkdownElementTypes.FULL_REFERENCE_LINK,
-                    -> {
+                -> {
                     val linkLabelNode = node.child(MarkdownElementTypes.LINK_LABEL)
                     val linkLabelContent = linkLabelNode?.children
                         ?.dropWhile { it.type == MarkdownTokenTypes.LBRACKET }
@@ -152,7 +156,7 @@ class MarkdownNode(
                                         label,
                                         linkText,
                                         false,
-                                        true
+                                        true,
                                     )
                                 }
                                 sb.append(hyperlink)
@@ -187,13 +191,13 @@ class MarkdownNode(
                 MarkdownTokenTypes.EXCLAMATION_MARK,
                 GFMTokenTypes.CHECK_BOX,
                 GFMTokenTypes.GFM_AUTOLINK,
-                    -> {
+                -> {
                     sb.append(nodeText)
                 }
 
                 MarkdownTokenTypes.CODE_LINE,
                 MarkdownTokenTypes.CODE_FENCE_CONTENT,
-                    -> {
+                -> {
                     sb.appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet(
                         when (DocumentationSettings.isHighlightingOfCodeBlocksEnabled()) {
                             true -> DocumentationSettings.InlineCodeHighlightingMode.SEMANTIC_HIGHLIGHTING
@@ -201,13 +205,15 @@ class MarkdownNode(
                         },
                         owner.project,
                         guessLanguage(currentCodeFenceLang) ?: FuncLanguage,
-                        nodeText
+                        nodeText,
                     )
                 }
 
                 MarkdownTokenTypes.EOL -> {
                     val parentType = node.parent?.type
-                    if (parentType == MarkdownElementTypes.CODE_BLOCK || parentType == MarkdownElementTypes.CODE_FENCE) {
+                    if (parentType == MarkdownElementTypes.CODE_BLOCK ||
+                        parentType == MarkdownElementTypes.CODE_FENCE
+                    ) {
                         sb.append("\n")
                     } else {
                         sb.append(" ")
@@ -292,10 +298,15 @@ private fun getTableAlignment(node: MarkdownNode): List<String> {
         val trimmed = it.trim()
         val left = trimmed.startsWith(':')
         val right = trimmed.endsWith(':')
-        if (left && right) "center"
-        else if (right) "right"
-        else if (left) "left"
-        else ""
+        if (left && right) {
+            "center"
+        } else if (right) {
+            "right"
+        } else if (left) {
+            "left"
+        } else {
+            ""
+        }
     }
 }
 
@@ -306,14 +317,17 @@ private fun StringBuilder.appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet(
     codeSnippet: String,
 ): StringBuilder {
     val codeSnippetBuilder = StringBuilder()
-    if (highlightingMode == DocumentationSettings.InlineCodeHighlightingMode.SEMANTIC_HIGHLIGHTING) { // highlight code by lexer
+    val useSemanticHighlighting =
+        highlightingMode == DocumentationSettings.InlineCodeHighlightingMode.SEMANTIC_HIGHLIGHTING
+    if (useSemanticHighlighting) {
+        // Highlight code by lexer.
         HtmlSyntaxInfoUtil.appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet(
             codeSnippetBuilder,
             project,
             language,
             codeSnippet,
             false,
-            DocumentationSettings.getHighlightingSaturation(true)
+            DocumentationSettings.getHighlightingSaturation(true),
         )
     } else {
         codeSnippetBuilder.append(StringUtil.escapeXmlEntities(codeSnippet))
@@ -340,7 +354,7 @@ private fun StringBuilder.appendStyledSpan(
             this,
             attributes,
             value,
-            DocumentationSettings.getHighlightingSaturation(true)
+            DocumentationSettings.getHighlightingSaturation(true),
         )
     } else {
         append(value)
@@ -348,21 +362,19 @@ private fun StringBuilder.appendStyledSpan(
     return this
 }
 
-private fun getTargetLinkElementAttributes(key: TextAttributesKey): TextAttributes {
-    return tuneAttributesForLink(EditorColorsManager.getInstance().globalScheme.getAttributes(key))
-}
+private fun getTargetLinkElementAttributes(key: TextAttributesKey): TextAttributes =
+    tuneAttributesForLink(EditorColorsManager.getInstance().globalScheme.getAttributes(key))
 
-private fun getTargetLinkElementAttributes(element: PsiElement?): TextAttributes {
-    return TextAttributes().apply {
-        foregroundColor =
-            EditorColorsManager.getInstance().globalScheme.getColor(DefaultLanguageHighlighterColors.DOC_COMMENT_LINK)
-    }
+private fun getTargetLinkElementAttributes(element: PsiElement?): TextAttributes = TextAttributes().apply {
+    foregroundColor =
+        EditorColorsManager.getInstance().globalScheme.getColor(DefaultLanguageHighlighterColors.DOC_COMMENT_LINK)
 }
 
 private fun tuneAttributesForLink(attributes: TextAttributes): TextAttributes {
     val globalScheme = EditorColorsManager.getInstance().globalScheme
-    if (attributes.foregroundColor == globalScheme.getAttributes(HighlighterColors.TEXT).foregroundColor
-        || attributes.foregroundColor == globalScheme.getAttributes(DefaultLanguageHighlighterColors.IDENTIFIER).foregroundColor
+    if (attributes.foregroundColor == globalScheme.getAttributes(HighlighterColors.TEXT).foregroundColor ||
+        attributes.foregroundColor ==
+        globalScheme.getAttributes(DefaultLanguageHighlighterColors.IDENTIFIER).foregroundColor
     ) {
         val tuned = attributes.clone()
         if (ApplicationManager.getApplication().isUnitTestMode) {
@@ -375,35 +387,43 @@ private fun tuneAttributesForLink(attributes: TextAttributes): TextAttributes {
     return attributes
 }
 
-private fun guessLanguage(language: String?): Language? =
-    if (language == null)
-        null
-    else
-        Language
-            .findInstancesByMimeType(language)
-            .asSequence()
-            .plus(Language.findInstancesByMimeType("text/$language"))
-            .plus(
-                Language.getRegisteredLanguages()
-                    .asSequence()
-                    .filter { languageMatches(language, it) }
-            )
-            .firstOrNull()
+private fun guessLanguage(language: String?): Language? = if (language == null) {
+    null
+} else {
+    Language
+        .findInstancesByMimeType(language)
+        .asSequence()
+        .plus(Language.findInstancesByMimeType("text/$language"))
+        .plus(
+            Language.getRegisteredLanguages()
+                .asSequence()
+                .filter { languageMatches(language, it) },
+        )
+        .firstOrNull()
+}
 
 private fun languageMatches(langType: String, language: Language): Boolean =
-    langType.equals(language.id, ignoreCase = true)
-            || FileTypeManager.getInstance().getFileTypeByExtension(langType) === language.associatedFileType
+    langType.equals(language.id, ignoreCase = true) ||
+        FileTypeManager.getInstance().getFileTypeByExtension(langType) === language.associatedFileType
 
 private fun StringBuilder.appendHighlightedCode(
-    project: Project, language: Language?, doHighlighting: Boolean,
-    code: CharSequence, isForRenderedDoc: Boolean, trim: Boolean
+    project: Project,
+    language: Language?,
+    doHighlighting: Boolean,
+    code: CharSequence,
+    isForRenderedDoc: Boolean,
+    trim: Boolean,
 ): StringBuilder {
     val processedCode = code.toString().trim('\n', '\r').replace(' ', ' ')
         .applyIf(trim) { trimEnd() }
     if (language != null && doHighlighting) {
         HtmlSyntaxInfoUtil.appendHighlightedByLexerAndEncodedAsHtmlCodeSnippet(
-            this, project, language, processedCode,
-            trim, DocumentationSettings.getHighlightingSaturation(isForRenderedDoc)
+            this,
+            project,
+            language,
+            processedCode,
+            trim,
+            DocumentationSettings.getHighlightingSaturation(isForRenderedDoc),
         )
     } else {
         append(XmlStringUtil.escapeString(processedCode.applyIf(trim) { trimIndent() }))

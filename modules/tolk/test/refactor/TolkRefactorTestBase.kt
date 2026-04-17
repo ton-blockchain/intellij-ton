@@ -21,13 +21,13 @@ abstract class TolkRefactorTestBase : TolkTestBase() {
     protected fun doRefactorTest(
         @Language("Tolk") before: String,
         @Language("Tolk") after: String,
-        handler: RefactoringActionHandler
+        handler: RefactoringActionHandler,
     ) {
         myFixture.configureByText("test.tolk", replaceCaretMarker(before))
-        
+
         val dataContext = createDataContext()
         handler.invoke(project, myFixture.editor, myFixture.file, dataContext)
-        
+
         myFixture.checkResult(after)
     }
 
@@ -36,26 +36,24 @@ abstract class TolkRefactorTestBase : TolkTestBase() {
         @Language("Tolk") after: String,
         handler: RefactoringActionHandler,
         selectionStart: String = "/*selection*/",
-        selectionEnd: String = "/*selection-end*/"
+        selectionEnd: String = "/*selection-end*/",
     ) {
         val beforeWithoutMarkers = before.replace(selectionStart, "").replace(selectionEnd, "")
         val startOffset = before.indexOf(selectionStart)
         val endOffset = before.indexOf(selectionEnd) - selectionStart.length
-        
+
         myFixture.configureByText("test.tolk", beforeWithoutMarkers)
         myFixture.editor.selectionModel.setSelection(startOffset, endOffset)
-        
+
         val dataContext = createDataContext()
         handler.invoke(project, myFixture.editor, myFixture.file, dataContext)
-        
+
         myFixture.checkResult(after)
     }
 
-    private fun createDataContext(): DataContext {
-        return SimpleDataContext.builder()
-            .add(CommonDataKeys.PROJECT, project)
-            .add(CommonDataKeys.EDITOR, myFixture.editor)
-            .add(CommonDataKeys.PSI_FILE, myFixture.file)
-            .build()
-    }
+    private fun createDataContext(): DataContext = SimpleDataContext.builder()
+        .add(CommonDataKeys.PROJECT, project)
+        .add(CommonDataKeys.EDITOR, myFixture.editor)
+        .add(CommonDataKeys.PSI_FILE, myFixture.file)
+        .build()
 }

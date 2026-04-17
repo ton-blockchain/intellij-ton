@@ -8,7 +8,8 @@ import javax.swing.JLabel
 import javax.swing.JList
 import javax.swing.ListCellRenderer
 
-class SelectionAwareListCellRenderer<T>(private val myFun: NotNullFunction<in T, out JComponent>) : ListCellRenderer<T> {
+class SelectionAwareListCellRenderer<T>(private val myFun: NotNullFunction<in T, out JComponent>) :
+    ListCellRenderer<T> {
     override fun getListCellRendererComponent(
         list: JList<out T>,
         value: T,

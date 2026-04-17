@@ -24,7 +24,7 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
         return CachedValuesManager.getCachedValue(psiFile ?: return emptyMap()) {
             val scriptsTable = PsiTreeUtil.getChildrenOfType(psiFile, TomlTable::class.java)
                 ?.find { it.header.key?.segments?.firstOrNull()?.name == "scripts" }
-            
+
             val result = scriptsTable?.entries?.associate { entry ->
                 val key = entry.key.segments.firstOrNull()?.name ?: entry.key.text
                 val value = entry.value?.text?.removeSurrounding("\"")?.removeSurrounding("'") ?: ""
@@ -38,10 +38,10 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
     fun getMappings(): Map<String, String> {
         return CachedValuesManager.getCachedValue(psiFile ?: return emptyMap()) {
             val mappingsTable = PsiTreeUtil.getChildrenOfType(psiFile, TomlTable::class.java)
-                ?.find { it.header.key?.segments?.firstOrNull()?.name == "mappings" }
-            
+                ?.find { it.header.key?.segments?.firstOrNull()?.name == "import-mappings" }
+
             val result = mappingsTable?.entries?.associate { entry ->
-                val key = entry.key.segments.firstOrNull()?.name ?: entry.key.text
+                val key = entry.key.segments.firstOrNull()?.name?.removePrefix("@") ?: entry.key.text
                 val value = entry.value?.text?.removeSurrounding("\"")?.removeSurrounding("'") ?: ""
                 key to value
             } ?: emptyMap()
@@ -60,36 +60,46 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
         }
     }
 
-    fun getContractIds(): List<String> {
-        return getContractElements().map { it.name ?: "" }
+    fun getContractIds(): List<String> = getContracts().map { it.id }
+
+    fun getContractSources(): List<String> = getContracts().mapNotNull { it.sourcePath }
+
+    fun getContractElements(): List<TomlKeySegment> = getContracts().map { it.element }
+
+    data class ContractInfo(val id: String, val sourcePath: String?, val element: TomlKeySegment)
+
+    fun getContracts(): List<ContractInfo> {
+        return CachedValuesManager.getCachedValue(psiFile ?: return emptyList()) {
+            val file = psiFile ?: return@getCachedValue create(emptyList(), PsiModificationTracker.MODIFICATION_COUNT)
+            val result = PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
+                ?.mapNotNull { table ->
+                    val segments = table.header.key?.segments ?: return@mapNotNull null
+                    if (segments.size != 2 || segments[0].name != "contracts") return@mapNotNull null
+
+                    val id = segments[1].name ?: return@mapNotNull null
+                    val sourcePath = table.entries
+                        .find { it.key.text == "src" }
+                        ?.value
+                        ?.text
+                        ?.removeSurrounding("\"")
+                        ?.removeSurrounding("'")
+
+                    ContractInfo(id, sourcePath, segments[1])
+                }
+                ?: emptyList()
+
+            create(result, file)
+        }
     }
 
-    fun getContractSources(): List<String> {
-        val file = psiFile ?: return emptyList()
-
-        return PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
-            ?.mapNotNull { table ->
-                val segments = table.header.key?.segments ?: return@mapNotNull null
-                if (segments.size == 2 && segments[0].name == "contracts") {
-                    table.entries.find { it.key.text == "src" }?.value?.text?.removeSurrounding("\"")?.removeSurrounding("'")
-                } else {
-                    null
-                }
-            } ?: emptyList()
-    }
-
-    fun getContractElements(): List<TomlKeySegment> {
-        val file = psiFile ?: return emptyList()
-
-        return PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
-            ?.mapNotNull { table ->
-                val segments = table.header.key?.segments ?: return@mapNotNull null
-                if (segments.size == 2 && segments[0].name == "contracts") {
-                    segments[1]
-                } else {
-                    null
-                }
-            } ?: emptyList()
+    fun findContractIdBySource(file: VirtualFile): String? {
+        val filePath = normalizePath(file.path)
+        return getContracts()
+            .firstOrNull { contract ->
+                val sourcePath = contract.sourcePath ?: return@firstOrNull false
+                resolveConfiguredPath(sourcePath) == filePath
+            }
+            ?.id
     }
 
     data class WalletInfo(val name: String, val isLocal: Boolean, val element: TomlKeySegment? = null)
@@ -112,6 +122,23 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
         return result.distinctBy { it.name }
     }
 
+    fun getCustomNetworkNames(): List<String> = getCustomNetworkElements().mapNotNull { it.name }.distinct()
+
+    fun getCustomNetworkElements(): List<TomlKeySegment> {
+        val file = psiFile ?: return emptyList()
+
+        return PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
+            ?.mapNotNull { table ->
+                val segments = table.header.key?.segments ?: return@mapNotNull null
+                if (segments.size == 2 && segments[0].name == "networks") {
+                    segments[1]
+                } else {
+                    null
+                }
+            }
+            ?: emptyList()
+    }
+
     private fun getWalletElementsFromPsi(file: TomlFile?): List<TomlKeySegment> {
         if (file == null) return emptyList()
         return PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
@@ -125,16 +152,31 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
             } ?: emptyList()
     }
 
+    private fun resolveConfiguredPath(path: String): String {
+        val normalized = Path.of(path)
+        val resolved = if (normalized.isAbsolute) normalized else workingDir.resolve(normalized)
+        return normalizePath(resolved.normalize().toString())
+    }
+
+    private fun normalizePath(path: String): String = path.replace('\\', '/')
+
     companion object {
-        fun find(project: Project): ActonToml? {
-            return CachedValuesManager.getManager(project).getCachedValue(project) {
-                val projectDir = project.guessProjectDir()
-                val actonTomlFile = projectDir?.findChild("Acton.toml")
-                val virtualFile = actonTomlFile ?: FilenameIndex.getVirtualFilesByName("Acton.toml", GlobalSearchScope.projectScope(project)).firstOrNull()
-                
-                val actonToml = virtualFile?.let { ActonToml(it, project) }
-                create(actonToml, com.intellij.openapi.vfs.VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS, PsiModificationTracker.MODIFICATION_COUNT)
-            }
+        fun find(project: Project): ActonToml? = CachedValuesManager.getManager(project).getCachedValue(project) {
+            val projectDir = project.guessProjectDir()
+            val actonTomlFile = projectDir?.findChild("Acton.toml")
+            val virtualFile =
+                actonTomlFile
+                    ?: FilenameIndex.getVirtualFilesByName(
+                        "Acton.toml",
+                        GlobalSearchScope.projectScope(project),
+                    ).firstOrNull()
+
+            val actonToml = virtualFile?.let { ActonToml(it, project) }
+            create(
+                actonToml,
+                com.intellij.openapi.vfs.VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS,
+                PsiModificationTracker.MODIFICATION_COUNT,
+            )
         }
     }
 }

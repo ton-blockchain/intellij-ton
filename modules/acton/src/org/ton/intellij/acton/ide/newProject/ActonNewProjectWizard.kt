@@ -10,7 +10,7 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 
 class ActonNewProjectWizard : LanguageNewProjectWizard {
-    override val name: String = "Acton"
+    override val name: String = "TON"
 
     override val ordinal: Int = 900
 

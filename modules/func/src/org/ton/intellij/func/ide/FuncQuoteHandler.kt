@@ -6,17 +6,12 @@ import com.intellij.openapi.editor.highlighter.HighlighterIterator
 import org.ton.intellij.func.psi.FuncElementTypes.*
 
 class FuncQuoteHandler : QuoteHandler {
-    override fun isClosingQuote(iterator: HighlighterIterator, offset: Int): Boolean {
-        return iterator.tokenType == CLOSING_QUOTE
-    }
+    override fun isClosingQuote(iterator: HighlighterIterator, offset: Int): Boolean =
+        iterator.tokenType == CLOSING_QUOTE
 
-    override fun isOpeningQuote(iterator: HighlighterIterator, offset: Int): Boolean {
-        return iterator.tokenType == OPEN_QUOTE
-    }
+    override fun isOpeningQuote(iterator: HighlighterIterator, offset: Int): Boolean = iterator.tokenType == OPEN_QUOTE
 
-    override fun hasNonClosedLiteral(editor: Editor?, iterator: HighlighterIterator?, offset: Int): Boolean {
-        return true
-    }
+    override fun hasNonClosedLiteral(editor: Editor?, iterator: HighlighterIterator?, offset: Int): Boolean = true
 
     override fun isInsideLiteral(iterator: HighlighterIterator): Boolean {
         val tokenType = iterator.tokenType

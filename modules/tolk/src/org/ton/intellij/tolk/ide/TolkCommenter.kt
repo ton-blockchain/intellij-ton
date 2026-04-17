@@ -8,7 +8,9 @@ import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.BLOCK_COMMENT
 import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.DOC_BLOCK_COMMENT
 import org.ton.intellij.tolk.parser.TolkParserDefinition.Companion.EOL_COMMENT
 
-class TolkCommenter : Commenter, CodeDocumentationAwareCommenter {
+class TolkCommenter :
+    Commenter,
+    CodeDocumentationAwareCommenter {
     override fun isDocumentationComment(element: PsiComment?) = element?.tokenType == DOC_BLOCK_COMMENT
     override fun getDocumentationCommentTokenType(): IElementType = DOC_BLOCK_COMMENT
     override fun getDocumentationCommentLinePrefix(): String = "*"

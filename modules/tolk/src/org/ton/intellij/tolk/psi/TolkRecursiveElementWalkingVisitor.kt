@@ -4,7 +4,9 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiRecursiveVisitor
 import com.intellij.psi.PsiWalkingState
 
-abstract class TolkRecursiveElementWalkingVisitor : TolkVisitor(), PsiRecursiveVisitor {
+abstract class TolkRecursiveElementWalkingVisitor :
+    TolkVisitor(),
+    PsiRecursiveVisitor {
     private val state = object : PsiWalkingState(this) {
         override fun elementFinished(element: PsiElement) {
             this@TolkRecursiveElementWalkingVisitor.elementFinished(element)

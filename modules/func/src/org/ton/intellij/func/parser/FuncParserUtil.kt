@@ -30,18 +30,16 @@ object FuncParserUtil : GeneratedParserUtilBase() {
     }
 
     @JvmStatic
-    fun isSpecialIdentifier(b: PsiBuilder, level: Int): Boolean {
-        return b.tokenType == FuncElementTypes.IDENTIFIER && when (b.tokenText?.firstOrNull()) {
+    fun isSpecialIdentifier(b: PsiBuilder, level: Int): Boolean = b.tokenType == FuncElementTypes.IDENTIFIER &&
+        when (b.tokenText?.firstOrNull()) {
             '~', '.' -> true
             else -> false
         }
-    }
 
     @JvmStatic
-    fun isRegularIdentifier(b: PsiBuilder, level: Int): Boolean {
-        return b.tokenType == FuncElementTypes.IDENTIFIER && when (b.tokenText?.firstOrNull()) {
+    fun isRegularIdentifier(b: PsiBuilder, level: Int): Boolean = b.tokenType == FuncElementTypes.IDENTIFIER &&
+        when (b.tokenText?.firstOrNull()) {
             '~', '.' -> false
             else -> true
         }
-    }
 }

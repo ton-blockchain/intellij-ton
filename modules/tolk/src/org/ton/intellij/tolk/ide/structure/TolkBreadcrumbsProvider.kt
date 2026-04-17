@@ -90,10 +90,10 @@ class TolkBreadcrumbsProvider : BreadcrumbsProvider {
             {
                 when (it) {
                     is TolkLocalSymbolElement -> null
-                    is TolkSymbolElement      -> it
-                    else                      -> null
+                    is TolkSymbolElement -> it
+                    else -> null
                 }
-            }
+            },
         ) { append(it.name) },
     )
 
@@ -114,29 +114,32 @@ class TolkBreadcrumbsProvider : BreadcrumbsProvider {
             getHandler(element)?.elementInfo(element)
         } ?: ""
 
-    override fun getElementTooltip(element: PsiElement): @NlsSafe String {
-        return ElementDescriptionUtil.getElementDescription(element, RefactoringDescriptionLocation.WITH_PARENT)
-    }
+    override fun getElementTooltip(element: PsiElement): @NlsSafe String =
+        ElementDescriptionUtil.getElementDescription(element, RefactoringDescriptionLocation.WITH_PARENT)
 
     @Suppress("UNCHECKED_CAST")
-    private fun getHandler(e: PsiElement) =
-        if (e is TolkElement) handlers.firstOrNull { it.accepts(e) } as? TolkElementHandler<TolkElement>
-        else null
+    private fun getHandler(e: PsiElement) = if (e is TolkElement) {
+        handlers.firstOrNull { it.accepts(e) } as? TolkElementHandler<TolkElement>
+    } else {
+        null
+    }
 
     companion object {
         @Suppress("unused")
         private enum class TextKind(val maxTextLength: Int) {
             INFO(16),
-            TOOLTIP(100)
+            TOOLTIP(100),
         }
 
         private const val ELLIPSIS = "${Typography.ellipsis}"
 
         private fun String.truncate(kind: TextKind): String {
             val maxLength = kind.maxTextLength
-            return if (length > maxLength)
+            return if (length > maxLength) {
                 "${substring(0, maxLength - ELLIPSIS.length)}$ELLIPSIS"
-            else this
+            } else {
+                this
+            }
         }
     }
 }

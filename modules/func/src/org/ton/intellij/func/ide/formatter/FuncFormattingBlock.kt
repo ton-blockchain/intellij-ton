@@ -31,12 +31,9 @@ abstract class AbstractFuncBlock(
             wrap: Wrap? = null,
             indent: Indent? = null,
             buildChildren: () -> List<Block> = { emptyList() },
-        ) =
-            object : AbstractFuncBlock(node, spacingBuilder, wrap = wrap, indent = indent) {
-                override fun buildChildren(): List<Block> {
-                    return buildChildren.invoke()
-                }
-            }
+        ) = object : AbstractFuncBlock(node, spacingBuilder, wrap = wrap, indent = indent) {
+            override fun buildChildren(): List<Block> = buildChildren.invoke()
+        }
     }
 }
 
@@ -77,7 +74,7 @@ class FuncFormattingBlock(
             wrap,
             null,
             indent,
-            childIndent
+            childIndent,
         )
     }
 
@@ -88,7 +85,11 @@ class FuncFormattingBlock(
         when (parentType) {
             BLOCK_STATEMENT -> return indentIfNotBrace(child)
             SPECIAL_APPLY_EXPRESSION -> if (parent.lastChildNode == child) return Indent.getNormalIndent()
-            TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE, PAREN_TYPE -> if (type != LPAREN && type != RPAREN) return Indent.getNormalIndent()
+            TENSOR_EXPRESSION, PAREN_EXPRESSION, TENSOR_TYPE, PAREN_TYPE -> if (type != LPAREN &&
+                type != RPAREN
+            ) {
+                return Indent.getNormalIndent()
+            }
             TUPLE_TYPE, TUPLE_EXPRESSION -> if (type != LBRACK && type != RBRACK) return Indent.getNormalIndent()
         }
         if (type == PRIMITIVE_TYPE_EXPRESSION || type == HOLE_TYPE_EXPRESSION) return Indent.getNoneIndent()
@@ -105,16 +106,18 @@ class FuncFormattingBlock(
         return null
     }
 
-    private val BRACES_TOKEN_SET = TokenSet.create(
+    private val bracesTokenSet = TokenSet.create(
         LBRACE,
         RBRACE,
         LBRACK,
         RBRACK,
         LPAREN,
-        RPAREN
+        RPAREN,
     )
 
-    private fun indentIfNotBrace(child: ASTNode): Indent =
-        if (BRACES_TOKEN_SET.contains(child.elementType)) Indent.getNoneIndent()
-        else Indent.getNormalIndent()
+    private fun indentIfNotBrace(child: ASTNode): Indent = if (bracesTokenSet.contains(child.elementType)) {
+        Indent.getNoneIndent()
+    } else {
+        Indent.getNormalIndent()
+    }
 }

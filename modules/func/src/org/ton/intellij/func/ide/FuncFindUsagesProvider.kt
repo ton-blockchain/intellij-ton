@@ -18,12 +18,10 @@ class FuncFindUsagesProvider : FindUsagesProvider {
         FuncLexer(),
         TokenSet.create(FuncElementTypes.IDENTIFIER),
         FUNC_COMMENTS,
-        FuncParserDefinition.STRING_LITERALS
+        FuncParserDefinition.STRING_LITERALS,
     )
 
-    override fun canFindUsagesFor(psiElement: PsiElement): Boolean {
-        return true
-    }
+    override fun canFindUsagesFor(psiElement: PsiElement): Boolean = true
 
     override fun getHelpId(psiElement: PsiElement): String = HelpID.FIND_OTHER_USAGES
 

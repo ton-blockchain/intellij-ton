@@ -29,7 +29,9 @@ class TlbSettingsConfigurable(private val project: Project) : Configurable {
         return panel {
             row {
                 label(TlbBundle.message("tlb.settings.global.block.tlb.label"))
-                cell(globalBlockTlbField).align(Align.FILL).comment(TlbBundle.message("tlb.settings.global.block.tlb.comment"))
+                cell(
+                    globalBlockTlbField,
+                ).align(Align.FILL).comment(TlbBundle.message("tlb.settings.global.block.tlb.comment"))
             }
         }
     }

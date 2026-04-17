@@ -66,7 +66,10 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
         baseDir.refresh(false, true)
         VfsUtil.markDirtyAndRefresh(false, true, true, baseDir)
 
-        val fileToOpen = starterFilePathForTemplate(settings.template)
+        val fileToOpen = starterFilePathForTemplate(
+            template = settings.template,
+            includeTypeScriptApp = settings.addTypeScriptApp,
+        )
 
         if (fileToOpen != null) {
             invokeLater {
@@ -83,9 +86,12 @@ class ActonProjectGenerator : DirectoryProjectGeneratorBase<ActonProjectSettings
     override fun createPeer(): ProjectGeneratorPeer<ActonProjectSettings> = ActonProjectGeneratorPeer()
 }
 
-class ActonProjectGeneratorPeer : GeneratorPeerImpl<ActonProjectSettings>() {
+internal class ActonProjectGeneratorPeer(
+    private val templateCatalog: ActonTemplateCatalog = ActonTemplateCatalogProvider.getTemplateCatalog(),
+) : GeneratorPeerImpl<ActonProjectSettings>() {
+    private val templateOptions = templateCatalog.templateIds()
     private val propertyGraph = PropertyGraph()
-    private val template = propertyGraph.property(ActonProjectSettings.DEFAULT_TEMPLATE)
+    private val template = propertyGraph.property(templateCatalog.normalizedDefaultTemplate())
     private val addTypeScriptApp = propertyGraph.property(false)
     private val showAdvancedOptions = propertyGraph.property(false)
     private val description = propertyGraph.property(ActonProjectSettings.DEFAULT_DESCRIPTION)
@@ -112,7 +118,7 @@ class ActonProjectGeneratorPeer : GeneratorPeerImpl<ActonProjectSettings>() {
         this.checkValid = checkValid
         return panel {
             row("Template:") {
-                comboBox(listOf("empty", "counter", "jetton"))
+                comboBox(templateOptions)
                     .bindItem(template)
                     .align(AlignX.FILL)
             }.bottomGap(BottomGap.NONE)
@@ -136,7 +142,8 @@ class ActonProjectGeneratorPeer : GeneratorPeerImpl<ActonProjectSettings>() {
 
     override fun getSettings(): ActonProjectSettings = settings.apply {
         template = this@ActonProjectGeneratorPeer.template.get()
-        addTypeScriptApp = this@ActonProjectGeneratorPeer.addTypeScriptApp.get()
+        addTypeScriptApp = templateCatalog.supportsTypeScriptApp(template) &&
+            this@ActonProjectGeneratorPeer.addTypeScriptApp.get()
         description = this@ActonProjectGeneratorPeer.description.get()
         license = this@ActonProjectGeneratorPeer.license.get()
         includeGitHooks = gitAvailable && this@ActonProjectGeneratorPeer.includeGitHooks.get()
@@ -145,7 +152,7 @@ class ActonProjectGeneratorPeer : GeneratorPeerImpl<ActonProjectSettings>() {
     }
 
     private fun updateAddTypeScriptAppVisibility() {
-        addTypeScriptAppRow?.visible(template.get() == "counter")
+        addTypeScriptAppRow?.visible(templateCatalog.supportsTypeScriptApp(template.get()))
     }
 
     private fun createAdvancedOptionsPanel(): JComponent {

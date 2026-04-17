@@ -45,7 +45,10 @@ class ActonModuleBuilder : ModuleBuilder() {
         root.refresh(false, true)
         VfsUtil.markDirtyAndRefresh(false, true, true, root)
 
-        val fileToOpen = starterFilePathForTemplate(settings.template)
+        val fileToOpen = starterFilePathForTemplate(
+            template = settings.template,
+            includeTypeScriptApp = settings.addTypeScriptApp,
+        )
 
         if (fileToOpen != null) {
             invokeLater {

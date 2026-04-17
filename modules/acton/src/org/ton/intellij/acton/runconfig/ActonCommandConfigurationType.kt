@@ -12,7 +12,7 @@ class ActonCommandConfigurationType :
         "ActonCommandRunConfiguration",
         "Acton",
         "Acton command run configuration",
-        ActonIcons.ACTON,
+        ActonIcons.TON,
     ) {
     init {
         addFactory(ActonConfigurationFactory(this))

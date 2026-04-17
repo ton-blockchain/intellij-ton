@@ -26,7 +26,7 @@ enum class ActonExplorer(val id: String, private val displayName: String) {
     }
 
     companion object {
-        val DEFAULT = TONVIEWER
+        val DEFAULT = TONSCAN
 
         fun fromId(id: String?): ActonExplorer = entries.firstOrNull { it.id == id } ?: DEFAULT
     }

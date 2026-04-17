@@ -241,6 +241,7 @@
 
         <consoleFilterProvider implementation="org.ton.intellij.tolk.ide.TolkConsoleFilterProvider"/>
         <readWriteAccessDetector implementation="org.ton.intellij.tolk.ide.usages.TolkReadWriteAccessDetector"/>
+        <projectViewNodeDecorator implementation="org.ton.intellij.tolk.ide.test.TolkTestsProjectViewNodeDecorator"/>
 
         <projectConfigurable instance="org.ton.intellij.tolk.ide.configurable.TolkProjectConfigurable"
                              groupId="language"

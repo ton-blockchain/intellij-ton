@@ -2,9 +2,9 @@ package org.ton.intellij.tolk.ide
 
 import com.intellij.execution.ExecutionListener
 import com.intellij.execution.ExecutionManager
-import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessHandler
+import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.testframework.sm.runner.ui.SMTRunnerConsoleView
 import com.intellij.execution.ui.ConsoleView
@@ -29,7 +29,7 @@ class TolkAttachTestConsoleFiltersAtStartup : ProjectActivity {
             ExecutionManager.EXECUTION_TOPIC,
             object : ExecutionListener {
                 override fun processStarted(executorId: String, env: ExecutionEnvironment, handler: ProcessHandler) {
-                    handler.addProcessListener(object : ProcessAdapter() {
+                    handler.addProcessListener(object : ProcessListener {
                         override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
                             val descriptor =
                                 RunContentManager.getInstance(project).allDescriptors.lastOrNull() ?: return

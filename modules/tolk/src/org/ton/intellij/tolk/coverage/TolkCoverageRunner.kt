@@ -1,3 +1,5 @@
+@file:Suppress("OVERRIDE_DEPRECATION")
+
 package org.ton.intellij.tolk.coverage
 
 import com.intellij.coverage.CoverageEngine

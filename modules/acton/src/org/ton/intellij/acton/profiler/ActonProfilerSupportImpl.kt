@@ -2,8 +2,8 @@ package org.ton.intellij.acton.profiler
 
 import com.intellij.execution.Executor
 import com.intellij.execution.process.KillableColoredProcessHandler
-import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
+import com.intellij.execution.process.ProcessListener
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.profiler.actions.ImportProfilerResultAction
@@ -37,7 +37,7 @@ class ActonProfilerSupportImpl : ActonProfilerSupport {
         )
 
         override fun attachToProcess(handler: KillableColoredProcessHandler) {
-            handler.addProcessListener(object : ProcessAdapter() {
+            handler.addProcessListener(object : ProcessListener {
                 override fun processTerminated(event: ProcessEvent) {
                     val dumpFile = profilerDump.file
                     if (!dumpFile.exists() || dumpFile.length() == 0L) {

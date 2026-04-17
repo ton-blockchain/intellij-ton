@@ -1,3 +1,5 @@
+@file:Suppress("OVERRIDE_DEPRECATION")
+
 package org.ton.intellij.func.ide.completion
 
 import com.intellij.codeInsight.completion.CompletionConfidence

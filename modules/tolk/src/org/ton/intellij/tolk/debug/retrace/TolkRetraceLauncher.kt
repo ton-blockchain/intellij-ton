@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.ton.intellij.tolk.debug.retrace
 
 import com.intellij.execution.RunManager

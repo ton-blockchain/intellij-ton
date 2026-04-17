@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.ton.intellij.tolk.coverage
 
 import com.intellij.coverage.BaseCoverageSuite

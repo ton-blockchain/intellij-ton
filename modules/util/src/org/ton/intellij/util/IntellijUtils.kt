@@ -88,11 +88,11 @@ inline fun <Key : Any, reified Psi : PsiElement> getElements(
     scope: GlobalSearchScope? = null,
 ): Collection<Psi> = StubIndex.getElements(indexKey, key, project, scope, Psi::class.java)
 
-inline fun <Key : Any> processAllKeys(
+fun <Key : Any> processAllKeys(
     indexKey: StubIndexKey<Key, *>,
     project: Project,
     scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-    noinline processor: (Key) -> Boolean,
+    processor: (Key) -> Boolean,
 ) {
     StubIndex.getInstance().processAllKeys(indexKey, processor, scope)
 }
@@ -125,7 +125,7 @@ fun <E : PsiElement> getChildrenByType(
     stub: StubElement<out PsiElement>,
     elementType: IElementType,
     f: ArrayFactory<E?>,
-): List<E> = stub.getChildrenByType(elementType, f).toList() as List<E>
+): List<E> = stub.getChildrenByType(elementType, f).filterNotNull()
 
 fun ASTNode.shouldCreateStubIfParentIsStub(): Boolean {
     val parent = treeParent

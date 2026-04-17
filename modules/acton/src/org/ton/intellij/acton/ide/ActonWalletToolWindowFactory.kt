@@ -5,8 +5,8 @@ import com.google.gson.annotations.SerializedName
 import com.intellij.execution.configuration.EnvironmentVariablesData
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.OSProcessHandler
-import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
+import com.intellij.execution.process.ProcessListener
 import com.intellij.icons.AllIcons
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.actionSystem.ActionManager
@@ -402,7 +402,7 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                 ).toGeneralCommandLine(project) ?: return@executeOnPooledThread
 
                 val handler = OSProcessHandler(commandLine)
-                handler.addProcessListener(object : ProcessAdapter() {
+                handler.addProcessListener(object : ProcessListener {
                     override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
                         val text = event.text.trim()
                         if (text.startsWith("{")) {

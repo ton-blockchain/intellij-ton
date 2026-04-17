@@ -3,7 +3,6 @@ package org.ton.intellij.util
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.ui.TextComponentAccessor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.NlsContexts.DialogTitle
 import com.intellij.ui.DocumentAdapter
@@ -39,13 +38,7 @@ fun pathTextField(
     onTextChanged: () -> Unit = {},
 ): TextFieldWithBrowseButton {
     val component = TextFieldWithBrowseButton(null, disposable)
-    component.addBrowseFolderListener(
-        title,
-        null,
-        null,
-        fileChooserDescriptor,
-        TextComponentAccessor.TEXT_FIELD_WHOLE_TEXT,
-    )
+    component.addBrowseFolderListener(null, fileChooserDescriptor.withTitle(title))
     component.childComponent.addTextChangeListener { onTextChanged() }
     return component
 }

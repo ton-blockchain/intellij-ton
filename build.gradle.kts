@@ -1,5 +1,7 @@
 import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
+import org.jetbrains.grammarkit.tasks.GenerateLexerTask
+import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
@@ -53,6 +55,45 @@ allprojects {
         task.name == "runKtlintCheckOverMainSourceSet" || task.name == "runKtlintFormatOverMainSourceSet"
     }.configureEach {
         dependsOn(grammarKitGenerators)
+    }
+
+    tasks.withType<GenerateLexerTask>().configureEach {
+        if (name != "generateLexer") return@configureEach
+
+        val flexFiles = fileTree("src").matching { include("**/*Lexer.flex") }.files.toList()
+        if (flexFiles.size != 1) {
+            enabled = false
+            return@configureEach
+        }
+
+        val flexFile = flexFiles.single()
+        val relativeOutputDir = flexFile.parentFile.relativeTo(projectDir.resolve("src"))
+        sourceFile.set(flexFile)
+        targetOutputDir.set(projectDir.resolve("gen").resolve(relativeOutputDir.path))
+        purgeOldFiles.set(true)
+    }
+
+    tasks.withType<GenerateParserTask>().configureEach {
+        if (name != "generateParser") return@configureEach
+
+        val bnfFiles = fileTree("src").matching { include("**/*Parser.bnf") }.files.toList()
+        if (bnfFiles.size != 1) {
+            enabled = false
+            return@configureEach
+        }
+
+        val bnfFile = bnfFiles.single()
+        val relativeParserDir = bnfFile.parentFile.relativeTo(projectDir.resolve("src")).invariantSeparatorsPath
+        val parserName = bnfFile.nameWithoutExtension
+        val psiRoot = bnfFile.parentFile.parentFile.resolve(
+            "psi",
+        ).relativeTo(projectDir.resolve("src")).invariantSeparatorsPath
+
+        sourceFile.set(bnfFile)
+        targetRootOutputDir.set(projectDir.resolve("gen"))
+        pathToParser.set("/$relativeParserDir/$parserName.java")
+        pathToPsiRoot.set("/$psiRoot")
+        purgeOldFiles.set(true)
     }
 
     tasks.withType<KotlinCompile> {
@@ -175,6 +216,10 @@ tasks {
     prepareSandbox {
         finalizedBy(mergePluginJarsTask)
         enabled = true
+    }
+
+    prepareTestSandbox {
+        dependsOn(mergePluginJarsTask)
     }
 
     withType<RunIdeTask> {

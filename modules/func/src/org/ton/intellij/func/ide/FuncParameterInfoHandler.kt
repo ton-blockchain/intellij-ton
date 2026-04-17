@@ -3,7 +3,6 @@ package org.ton.intellij.func.ide
 import com.intellij.lang.parameterInfo.*
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
-import com.intellij.refactoring.suggested.startOffset
 import org.ton.intellij.func.psi.FuncApplyExpression
 import org.ton.intellij.func.psi.FuncElementTypes
 import org.ton.intellij.func.psi.FuncFunction
@@ -37,7 +36,7 @@ class FuncParameterInfoHandler : ParameterInfoHandler<FuncApplyExpression, List<
             context.removeHint()
             return
         }
-        val currentParameterIndex = if (parameterOwner.startOffset == context.offset) {
+        val currentParameterIndex = if (parameterOwner.textRange.startOffset == context.offset) {
             -1
         } else {
             val right = parameterOwner.right

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.ton.intellij.tolk.codeInsight.hint
 
 import com.intellij.codeInsight.hints.declarative.InlayTreeSink

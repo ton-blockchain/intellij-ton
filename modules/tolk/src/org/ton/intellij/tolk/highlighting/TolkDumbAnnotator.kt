@@ -19,6 +19,13 @@ class TolkDumbAnnotator :
     Annotator,
     DumbAware {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
+        if (element is TolkAnnotationName) {
+            holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+                .textAttributes(TolkColor.ANNOTATION.textAttributesKey)
+                .create()
+            return
+        }
+
         val elementType = element.elementType ?: return
         val color = when (elementType) {
             TolkElementTypes.IDENTIFIER -> {

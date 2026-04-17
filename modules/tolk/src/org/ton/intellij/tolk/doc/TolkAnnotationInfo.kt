@@ -35,11 +35,39 @@ object TolkAnnotationInfo {
             "Describes ABI metadata for declaration.",
         ),
         "test" to AnnotationInfo(
-            "Describes additional metadata for test function.",
+            """
+                Describes additional metadata for test function.
+                <ul>
+                <li><code>@test.skip</code> skips the test.</li>
+                <li><code>@test.todo</code> marks the test as TODO.</li>
+                <li><code>@test.todo("...")</code> marks the test as TODO with a description.</li>
+                <li><code>@test.fail_with(42)</code> declares the expected exit code.</li>
+                <li><code>@test.gas_limit(1000)</code> overrides the per-test gas limit.</li>
+                <li><code>@test.fuzz</code> enables fuzzing with default settings.</li>
+                <li><code>@test.fuzz(64)</code> enables fuzzing with 64 runs.</li>
+                <li><code>@test.fuzz({ ... })</code> enables fuzzing with explicit config.</li>
+                </ul>
+            """.trimIndent(),
+        ),
+        "test.skip" to AnnotationInfo(
+            "Marks the test as skipped.",
+        ),
+        "test.todo" to AnnotationInfo(
+            "Marks the test as TODO. Use <code>@test.todo(\"...\")</code> to attach a description.",
+        ),
+        "test.fail_with" to AnnotationInfo(
+            "Declares the expected exit code for the test.",
+        ),
+        "test.gas_limit" to AnnotationInfo(
+            "Overrides the per-test gas limit.",
+        ),
+        "test.fuzz" to AnnotationInfo(
+            "Enables fuzzing for parameterized tests. Supports <code>@test.fuzz</code>, <code>@test.fuzz(64)</code>, and <code>@test.fuzz({ ... })</code>.",
         ),
     )
 
-    fun getAnnotationInfo(name: String): AnnotationInfo? = ANNOTATIONS_INFO[name]
+    fun getAnnotationInfo(name: String): AnnotationInfo? =
+        ANNOTATIONS_INFO[name] ?: ANNOTATIONS_INFO[name.substringBefore('.')]
 
     data class AnnotationInfo(val description: String)
 }

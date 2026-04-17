@@ -37,6 +37,7 @@ import org.ton.intellij.tolk.psi.TOLK_KEYWORDS
 import org.ton.intellij.tolk.psi.TOLK_NUMBERS
 import org.ton.intellij.tolk.psi.TOLK_STRING_LITERALS
 import org.ton.intellij.tolk.psi.TolkAnnotation
+import org.ton.intellij.tolk.psi.TolkAnnotationName
 import org.ton.intellij.tolk.psi.TolkCatchParameter
 import org.ton.intellij.tolk.psi.TolkConstVar
 import org.ton.intellij.tolk.psi.TolkContractDefinition
@@ -63,6 +64,7 @@ import org.ton.intellij.tolk.psi.impl.isPrivate
 import org.ton.intellij.tolk.psi.impl.isReadonly
 import org.ton.intellij.tolk.psi.impl.receiverTy
 import org.ton.intellij.tolk.psi.impl.returnTy
+import org.ton.intellij.tolk.psi.name
 import org.ton.intellij.tolk.type.*
 import org.ton.intellij.util.parentOfType
 import java.util.function.Consumer
@@ -85,6 +87,7 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
         is TolkTypeParameter -> element.generateDoc()
         is TolkCatchParameter -> element.generateDoc()
         is TolkAnnotation -> element.generateDoc()
+        is TolkAnnotationName -> element.parentOfType<TolkAnnotation>(strict = true)?.generateDoc()
         is TolkContractDefinition -> element.generateDoc()
         is TolkContractField -> element.generateDoc()
         else -> null
@@ -99,6 +102,9 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
         val parent = contextElement?.parent
         if (parent is TolkAnnotation) {
             return parent
+        }
+        if (parent is TolkAnnotationName) {
+            return parent.parent as? TolkAnnotation
         }
 
         return super.getCustomDocumentationElement(editor, file, contextElement, targetOffset)
@@ -488,7 +494,7 @@ fun Sequence<TolkAnnotation>.generateDoc(): String = joinToString("\n") { attr -
 }
 
 fun TolkAnnotation.generateDoc(): String {
-    val name = identifier?.text ?: ""
+    val name = name ?: ""
 
     return buildString {
         append(DocumentationMarkup.DEFINITION_START)
@@ -505,7 +511,7 @@ fun TolkAnnotation.generateDoc(): String {
 }
 
 fun TolkAnnotation.generateShortDoc(): String {
-    val name = identifier?.text ?: ""
+    val name = name ?: ""
     val arguments = argumentList?.argumentList ?: emptyList()
 
     return buildString {

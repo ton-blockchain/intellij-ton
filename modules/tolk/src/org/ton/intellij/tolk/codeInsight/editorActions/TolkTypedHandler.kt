@@ -21,6 +21,10 @@ class TolkTypedHandler : TypedHandlerDelegate() {
             AutoPopupController.getInstance(project).autoPopupMemberLookup(editor, null)
             return Result.STOP
         }
+        if (charTyped == '.' && isAfterTestAnnotationPrefix(editor)) {
+            AutoPopupController.getInstance(project).autoPopupMemberLookup(editor, null)
+            return Result.STOP
+        }
         return Result.CONTINUE
     }
 
@@ -72,5 +76,12 @@ class TolkTypedHandler : TypedHandlerDelegate() {
         }
 
         return false
+    }
+
+    private fun isAfterTestAnnotationPrefix(editor: Editor): Boolean {
+        val offset = editor.caretModel.offset
+        val prefix = "@test"
+        if (offset < prefix.length) return false
+        return editor.document.charsSequence.subSequence(offset - prefix.length, offset).toString() == prefix
     }
 }

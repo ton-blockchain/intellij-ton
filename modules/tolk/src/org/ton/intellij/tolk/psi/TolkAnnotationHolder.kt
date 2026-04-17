@@ -6,6 +6,9 @@ interface TolkAnnotationHolder : TolkNamedElement {
     val annotations get() = TolkAnnotationQuery(this)
 }
 
+val TolkAnnotation.name: String?
+    get() = annotationName?.text
+
 class TolkAnnotationQuery(private val rawAnnotations: Sequence<TolkAnnotation>) {
     constructor(holder: TolkAnnotationHolder) : this(
         holder.firstChild?.siblings()?.filterIsInstance<TolkAnnotation>() ?: emptySequence(),
@@ -20,7 +23,7 @@ class TolkAnnotationQuery(private val rawAnnotations: Sequence<TolkAnnotation>) 
         return annotation.any()
     }
 
-    fun annotationByName(name: String) = rawAnnotations.filter { it.identifier?.text == name }
+    fun annotationByName(name: String) = rawAnnotations.filter { it.name == name }
     fun annotations() = rawAnnotations
-    fun names() = rawAnnotations.mapNotNull { it.identifier?.text }
+    fun names() = rawAnnotations.mapNotNull { it.name }
 }

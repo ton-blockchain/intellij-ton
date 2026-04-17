@@ -127,7 +127,12 @@ class ActonCommandRunState(environment: ExecutionEnvironment, private val config
                 val smTestProxy = console.resultsViewer.root as SMTestProxy.SMRootTestProxy
                 smTestProxy.setTestsReporterAttached()
 
-                return DefaultExecutionResult(console, handler)
+                val executionResult = DefaultExecutionResult(console, handler)
+                consoleProperties.createRerunFailedTestsAction(console)?.let { rerunFailedTestsAction ->
+                    rerunFailedTestsAction.setModelProvider { console.resultsViewer }
+                    executionResult.setRestartActions(rerunFailedTestsAction)
+                }
+                return executionResult
             }
         }
         return super.execute(executor, runner)
@@ -183,13 +188,7 @@ class ActonCommandRunState(environment: ExecutionEnvironment, private val config
                 debugPort = debugPort,
             )
         }
-        is ActonCommand.Test -> {
-            val debugPort = testDebugPortOverride?.toString() ?: command.debugPort
-            command.copy(
-                debug = testDebugPortOverride != null || command.debug,
-                debugPort = debugPort,
-            )
-        }
+        is ActonCommand.Test -> createTestCommand(command, environment, testDebugPortOverride)
         is ActonCommand.Retrace -> {
             val debugPort = retraceDebugPortOverride?.toString() ?: command.debugPort
             command.copy(
@@ -289,9 +288,40 @@ class ActonCommandRunState(environment: ExecutionEnvironment, private val config
     }
 
     companion object {
+        val TEST_COMMAND_OVERRIDE_KEY = Key.create<TestCommandOverride>("org.ton.intellij.acton.testCommandOverride")
+
+        internal fun createTestCommand(
+            command: ActonCommand.Test,
+            environment: ExecutionEnvironment,
+            debugPortOverride: Int?,
+        ): ActonCommand.Test {
+            val override = environment.getUserData(TEST_COMMAND_OVERRIDE_KEY)
+            if (override != null) {
+                environment.putUserData(TEST_COMMAND_OVERRIDE_KEY, null)
+            }
+
+            val overriddenCommand = if (override != null) {
+                command.copy(
+                    mode = override.mode,
+                    target = override.target,
+                    functionName = override.functionName,
+                )
+            } else {
+                command
+            }
+
+            val debugPort = debugPortOverride?.toString() ?: overriddenCommand.debugPort
+            return overriddenCommand.copy(
+                debug = debugPortOverride != null || overriddenCommand.debug,
+                debugPort = debugPort,
+            )
+        }
+
         private val LOG = logger<ActonCommandRunState>()
     }
 }
+
+data class TestCommandOverride(val mode: ActonCommand.Test.TestMode, val target: String, val functionName: String)
 
 private data class DebugSessionInfo(val displayName: String, val port: Int, val readinessMarkers: List<String>)
 

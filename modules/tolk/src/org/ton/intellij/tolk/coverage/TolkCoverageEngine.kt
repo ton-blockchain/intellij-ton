@@ -16,16 +16,19 @@ import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.rt.coverage.data.ClassData
+import com.intellij.rt.coverage.data.LineData
 import com.intellij.util.ui.ColumnInfo
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.tolk.TolkBundle
@@ -46,6 +49,28 @@ class TolkCoverageEngine : CoverageEngine() {
     override fun acceptedByFilters(psiFile: PsiFile, suite: CoverageSuitesBundle): Boolean = psiFile is TolkFile
 
     override fun coverageEditorHighlightingApplicableTo(psiFile: PsiFile): Boolean = psiFile is TolkFile
+
+    override fun generateBriefReport(
+        bundle: CoverageSuitesBundle,
+        editor: Editor,
+        psiFile: PsiFile,
+        range: TextRange,
+        lineData: LineData?,
+    ): String {
+        if (lineData == null) return ""
+        val buf = StringBuilder()
+        buf.append("Hits: ").append(lineData.hits)
+        val jumps = lineData.jumps
+        if (jumps != null) {
+            for ((i, jump) in jumps.withIndex()) {
+                if (jump == null) continue
+                buf.append("\nCondition ").append(i + 1).append(":")
+                buf.append("\n  true: ").append(jump.trueHits)
+                buf.append("\n  false: ").append(jump.falseHits)
+            }
+        }
+        return buf.toString()
+    }
 
     override fun createCoverageEnabledConfiguration(conf: RunConfigurationBase<*>): CoverageEnabledConfiguration =
         TolkCoverageEnabledConfiguration(conf)

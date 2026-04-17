@@ -8,25 +8,29 @@ import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
 import java.nio.file.Paths
 
-fun createActonNewCommand(projectName: String, settings: ActonProjectSettings): ActonCommand.New = ActonCommand.New(
+internal fun createActonNewCommand(
+    projectName: String,
+    settings: ActonProjectSettings,
+    templateCatalog: ActonTemplateCatalog = ActonTemplateCatalogProvider.getTemplateCatalog(),
+): ActonCommand.New = ActonCommand.New(
     path = ".",
     projectName = projectName,
     description = settings.description.trim().ifBlank { ActonProjectSettings.DEFAULT_DESCRIPTION },
     template = settings.template,
-    app = settings.shouldIncludeTypeScriptApp(),
+    app = settings.shouldIncludeTypeScriptApp(templateCatalog),
     license = settings.license.trim().ifBlank { ActonProjectSettings.DEFAULT_LICENSE },
     hooks = settings.includeGitHooks,
     agents = settings.includeAgentsMd,
 )
 
-fun starterFilePathForTemplate(template: String): String? = when (template) {
-    "empty" -> "contracts/contract.tolk"
-    "counter" -> "contracts/counter.tolk"
-    "jetton" -> "contracts/jetton-minter-contract.tolk"
-    else -> null
-}
+internal fun starterFilePathForTemplate(
+    template: String,
+    includeTypeScriptApp: Boolean = false,
+    templateCatalog: ActonTemplateCatalog = ActonTemplateCatalogProvider.getTemplateCatalog(),
+): String? = templateCatalog.starterFilePath(template, includeTypeScriptApp)
 
-private fun ActonProjectSettings.shouldIncludeTypeScriptApp(): Boolean = template == "counter" && addTypeScriptApp
+private fun ActonProjectSettings.shouldIncludeTypeScriptApp(templateCatalog: ActonTemplateCatalog): Boolean =
+    templateCatalog.supportsTypeScriptApp(template) && addTypeScriptApp
 
 fun createDefaultRunConfigurations(project: Project, baseDir: VirtualFile) {
     val runManager = RunManager.getInstance(project)

@@ -113,11 +113,20 @@ class ActonCommandRunState(environment: ExecutionEnvironment, private val config
                 console.addMessageFilter(ActonBacktraceConsoleFilter(configuration))
                 val handler = startProcess()
                 console.attachToProcess(handler)
+                val testFailureState = configuration.project.actonTestFailureState
 
-                val connection = configuration.project.messageBus.connect()
+                val connection = configuration.project.messageBus.connect(console)
                 connection.subscribe(
                     SMTRunnerEventsListener.TEST_STATUS,
                     object : SMTRunnerEventsAdapter() {
+                        override fun onTestStarted(test: SMTestProxy) {
+                            testFailureState.clear(test.locationUrl)
+                        }
+
+                        override fun onTestFailed(test: SMTestProxy) {
+                            testFailureState.update(test)
+                        }
+
                         override fun onBeforeTestingFinished(testsRoot: SMTestProxy.SMRootTestProxy) {
                             testsRoot.setFinished()
                         }

@@ -35,7 +35,7 @@ class TolkStringArgumentReferenceProvider : PsiReferenceProvider() {
         val rawString = stringLiteral.rawString ?: return PsiReference.EMPTY_ARRAY
         val range = TextRange(1, rawString.textLength + 1)
 
-        if (functionName == "wallet" && qualifierName == "net" && argumentIndex == 0) {
+        if (functionName == "wallet" && qualifierName == "scripts" && argumentIndex == 0) {
             return arrayOf(TolkWalletReference(stringLiteral, range))
         }
 

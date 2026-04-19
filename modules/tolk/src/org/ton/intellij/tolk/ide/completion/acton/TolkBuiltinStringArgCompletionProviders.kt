@@ -14,7 +14,7 @@ import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 
 object TolkWalletNameCompletionProvider : TolkStringArgumentCompletionProvider() {
     override fun shouldAddCompletions(functionName: String, qualifierName: String?, argumentIndex: Int): Boolean =
-        functionName == "wallet" && qualifierName == "net" && argumentIndex == 0
+        functionName == "wallet" && qualifierName == "scripts" && argumentIndex == 0
 
     override fun addStringCompletions(
         parameters: CompletionParameters,

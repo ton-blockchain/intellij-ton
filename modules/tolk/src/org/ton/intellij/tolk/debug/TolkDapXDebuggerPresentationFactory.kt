@@ -92,8 +92,9 @@ internal class TolkDapXStackFrame(
     private val frame: DapStackFrame,
 ) : XStackFrame() {
     private val delegate = DefaultDapXStackFrame(factory, commandProcessor, thread, frame)
+    private val evaluator = TolkDebuggerEvaluator(delegate.evaluator)
 
-    override fun getEvaluator(): XDebuggerEvaluator = delegate.evaluator
+    override fun getEvaluator(): XDebuggerEvaluator = evaluator
 
     override fun computeChildren(node: XCompositeNode) {
         delegate.computeChildren(node)

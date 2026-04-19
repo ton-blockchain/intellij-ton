@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 
 internal data class ActonTemplateCatalog(
@@ -64,11 +65,62 @@ internal object ActonTemplateCatalogProvider {
     @Volatile
     private var cachedCatalog: ActonTemplateCatalog? = null
 
-    fun getTemplateCatalog(): ActonTemplateCatalog {
+    @Volatile
+    private var refreshScheduled: Boolean = false
+
+    fun getTemplateCatalog(): ActonTemplateCatalog = getTemplateCatalog(
+        isDispatchThread = ApplicationManager.getApplication()?.isDispatchThread == true,
+        loader = ::loadTemplateCatalog,
+        scheduleBackgroundRefresh = { refresh ->
+            ApplicationManager.getApplication()?.executeOnPooledThread(refresh) ?: refresh.run()
+        },
+    )
+
+    internal fun getTemplateCatalog(
+        isDispatchThread: Boolean,
+        loader: () -> ActonTemplateCatalog,
+        scheduleBackgroundRefresh: (Runnable) -> Unit,
+    ): ActonTemplateCatalog {
         cachedCatalog?.let { return it }
-        return synchronized(this) {
-            cachedCatalog ?: loadTemplateCatalog().also { cachedCatalog = it }
+        if (isDispatchThread) {
+            scheduleBackgroundRefreshIfNeeded(loader, scheduleBackgroundRefresh)
+            return fallbackCatalog()
         }
+        return synchronized(this) {
+            cachedCatalog ?: loader().also { cachedCatalog = it }
+        }
+    }
+
+    private fun scheduleBackgroundRefreshIfNeeded(
+        loader: () -> ActonTemplateCatalog,
+        scheduleBackgroundRefresh: (Runnable) -> Unit,
+    ) {
+        if (cachedCatalog != null || refreshScheduled) return
+
+        val shouldSchedule = synchronized(this) {
+            if (cachedCatalog != null || refreshScheduled) {
+                false
+            } else {
+                refreshScheduled = true
+                true
+            }
+        }
+        if (!shouldSchedule) return
+
+        scheduleBackgroundRefresh(
+            Runnable {
+                try {
+                    val catalog = cachedCatalog ?: loader()
+                    synchronized(this) {
+                        if (cachedCatalog == null) {
+                            cachedCatalog = catalog
+                        }
+                    }
+                } finally {
+                    refreshScheduled = false
+                }
+            },
+        )
     }
 
     internal fun loadTemplateCatalog(

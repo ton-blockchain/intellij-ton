@@ -10,12 +10,14 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
+import org.ton.intellij.acton.ActonIcons
 import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
 import org.ton.intellij.tolk.psi.TolkContractDefinition
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFile
+import javax.swing.Icon
 
 class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
     override fun getInfo(element: PsiElement): Info? {
@@ -36,7 +38,11 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
 
         return Info(
             AllIcons.Actions.Rebuild,
-            arrayOf(BuildActonContractAction(contractId)),
+            arrayOf(
+                BuildActonContractAction(contractId),
+                PlaceholderContractAction("Disassemble $contractId", ActonIcons.DISASSEMBLE),
+                PlaceholderContractAction("Generate TypeScript Wrapper", ActonIcons.TS_WRAPPER),
+            ),
         ) { "Build $contractId" }
     }
 
@@ -63,5 +69,9 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
 
             ExecutionUtil.runConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance())
         }
+    }
+
+    private class PlaceholderContractAction(text: String, icon: Icon) : AnAction(text, null, icon) {
+        override fun actionPerformed(e: AnActionEvent) = Unit
     }
 }

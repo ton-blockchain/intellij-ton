@@ -7,4 +7,5 @@ object ActonIcons {
     val TON: Icon = IconLoader.getIcon("/icons/ton_symbol.svg", ActonIcons::class.java)
     val TS_WRAPPER: Icon = IconLoader.getIcon("/icons/typeScript.svg", ActonIcons::class.java)
     val DISASSEMBLE: Icon = IconLoader.getIcon("/icons/asm.svg", ActonIcons::class.java)
+    val D_APP: Icon = IconLoader.getIcon("/icons/webArtifact.svg", ActonIcons::class.java)
 }

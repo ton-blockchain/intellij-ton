@@ -56,4 +56,14 @@
     <extensions defaultExtensionNs="JavaScript">
         <JsonSchema.ProviderFactory implementation="org.ton.intellij.acton.toml.ActonTomlJsonSchemaProviderFactory"/>
     </extensions>
+
+    <actions>
+        <action id="ActonGenerateDApp"
+                class="org.ton.intellij.acton.ide.actions.ActonGenerateDAppAction"
+                text="Generate dApp"
+                description="Mock action for Acton.toml">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>

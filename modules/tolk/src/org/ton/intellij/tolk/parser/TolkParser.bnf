@@ -1035,7 +1035,7 @@ TensorOrParenTypeExpression ::= '(' (TensorEmpty | (TypeExpression (TensorType_u
     elementType = ParenTypeExpression
 }
 upper TensorEmpty ::= ')' {elementType = TensorTypeExpression}
-upper TensorType_upper ::= ',' [ TypeExpression (',' TypeExpression)* ] ')' {
+upper TensorType_upper ::= ',' [ <<comma_separated_list TypeExpression>> ] ')' {
     pin=1
     elementType = TensorTypeExpression
 }

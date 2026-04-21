@@ -222,7 +222,7 @@ internal class ActonProjectGeneratorPeer(
         }
     }
 
-    override fun validate(): com.intellij.openapi.ui.ValidationInfo? = null
+    override fun validate(): com.intellij.openapi.ui.ValidationInfo? = validateActonExecutable()
 
     override fun buildUI(settingsStep: SettingsStep) {
         settingsStep.addSettingsComponent(component)

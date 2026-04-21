@@ -26,6 +26,9 @@ class ActonNewProjectWizard : LanguageNewProjectWizard {
                 row {
                     cell(peer.component)
                         .align(AlignX.FILL)
+                        .validationOnApply { _ ->
+                            validateActonExecutable()
+                        }
                 }
             }
         }

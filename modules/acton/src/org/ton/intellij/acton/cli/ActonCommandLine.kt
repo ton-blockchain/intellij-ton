@@ -8,6 +8,15 @@ import com.intellij.util.execution.ParametersListUtil
 import org.ton.intellij.acton.settings.actonSettings
 import java.nio.file.Path
 
+const val ACTON_EXECUTABLE_NAME: String = "acton"
+
+fun findActonExecutableInPath(): String? = PathEnvironmentVariableUtil.findInPath(ACTON_EXECUTABLE_NAME)?.absolutePath
+
+fun resolveActonExecutable(project: Project): String? {
+    val configuredPath = project.actonSettings.actonPath?.trim().orEmpty()
+    return configuredPath.ifBlank { findActonExecutableInPath() }
+}
+
 data class ActonCommandLine(
     val command: String,
     val workingDirectory: Path,
@@ -15,9 +24,7 @@ data class ActonCommandLine(
     val environmentVariables: EnvironmentVariablesData = EnvironmentVariablesData.DEFAULT,
 ) {
     fun toGeneralCommandLine(project: Project): GeneralCommandLine? {
-        val actonPath = project.actonSettings.actonPath
-            ?: PathEnvironmentVariableUtil.findInPath("acton")?.absolutePath
-            ?: return null
+        val actonPath = resolveActonExecutable(project) ?: return null
 
         val globalEnvs = project.actonSettings.env
         val mergedEnvs = globalEnvs.envs.toMutableMap().apply {

@@ -1,7 +1,6 @@
 package org.ton.intellij.boc
 
 import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessAdapter
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessEvent
@@ -12,7 +11,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
-import org.ton.intellij.acton.settings.actonSettings
+import org.ton.intellij.acton.cli.resolveActonExecutable
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.Base64
@@ -23,8 +22,7 @@ object BocActonService {
     private val LOG = logger<BocActonService>()
 
     fun isAvailable(project: Project): Boolean {
-        val path = project.actonSettings.actonPath ?: PathEnvironmentVariableUtil.findInPath("acton")?.absolutePath
-        return path != null
+        return resolveActonExecutable(project) != null
     }
 
     fun disassemble(project: Project, bocFilePath: String) =

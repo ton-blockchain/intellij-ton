@@ -2,7 +2,6 @@ package org.ton.intellij.acton.settings
 
 import com.intellij.execution.configuration.EnvironmentVariablesComponent
 import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ModalityState
@@ -16,6 +15,8 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.Alarm
+import org.ton.intellij.acton.cli.ACTON_EXECUTABLE_NAME
+import org.ton.intellij.acton.cli.findActonExecutableInPath
 import org.ton.intellij.acton.ActonBundle
 import org.ton.intellij.acton.ActonUtils.stripAnsiColors
 import org.ton.intellij.util.pathToExecutableTextField
@@ -95,10 +96,10 @@ class ActonConfigurable(val project: Project) :
         })
     }
 
-    private fun findActonInPath(): String? = PathEnvironmentVariableUtil.findInPath("acton")?.absolutePath
+    private fun findActonInPath(): String? = findActonExecutableInPath()
 
     private fun updateVersion() {
-        val path = actonPathField.text.ifBlank { findActonInPath() ?: "acton" }
+        val path = actonPathField.text.ifBlank { findActonInPath() ?: ACTON_EXECUTABLE_NAME }
         alarm.cancelAllRequests()
         alarm.addRequest({
             val version = try {

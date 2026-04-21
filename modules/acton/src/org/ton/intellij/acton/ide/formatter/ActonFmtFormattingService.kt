@@ -15,6 +15,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.formatter.FormatterUtil
 import org.ton.intellij.acton.ActonBundle
 import org.ton.intellij.acton.cli.ActonCommandLine
+import org.ton.intellij.acton.cli.findActonExecutableInPath
 import org.ton.intellij.acton.settings.actonSettings
 import java.io.File
 import java.nio.charset.Charset
@@ -155,7 +156,7 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
         if (configuredPath.isNotEmpty()) {
             return isExecutable(configuredPath)
         }
-        return PathEnvironmentVariableUtil.findInPath("acton") != null
+        return findActonExecutableInPath() != null
     }
 
     private fun isExecutable(pathOrCommand: String): Boolean {

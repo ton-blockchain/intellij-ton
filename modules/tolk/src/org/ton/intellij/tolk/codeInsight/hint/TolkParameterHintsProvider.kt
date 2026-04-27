@@ -13,12 +13,23 @@ import org.ton.intellij.tolk.psi.impl.functionSymbol
 import org.ton.intellij.tolk.psi.unwrapParentheses
 import org.ton.intellij.util.printPsi
 
+private val FUNCTIONS_WITHOUT_PARAMETER_HINTS = setOf("ton", "address", "println", "format")
+
+private val PARAMETERS_WITHOUT_PARAMETER_HINTS = mapOf(
+    "expect" to setOf("value"),
+    "send" to setOf("sendMode"),
+)
+
+internal fun isSuppressedParameterHint(functionName: String?, parameterName: String): Boolean =
+    parameterName in PARAMETERS_WITHOUT_PARAMETER_HINTS[functionName].orEmpty()
+
 class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
     override fun collectFromElement(element: PsiElement, sink: InlayTreeSink) {
         if (!element.isValid || element !is TolkCallExpression) return
 
         val function = element.functionSymbol
-        if (function?.name in FUNCTIONS_WITHOUT_PARAMETER_HINTS) {
+        val functionName = function?.name
+        if (functionName in FUNCTIONS_WITHOUT_PARAMETER_HINTS) {
             // the parameters for these functions are obvious or too noisy for inline hints
             return
         }
@@ -28,6 +39,8 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
         ) { parameter, argument ->
             if (!parameter.isValid || argument?.isValid == false) return@iterateOverParameters
             val parameterName = parameter.name ?: return@iterateOverParameters
+            if (isSuppressedParameterHint(functionName, parameterName)) return@iterateOverParameters
+
             val expression = argument?.expression?.unwrapParentheses() ?: return@iterateOverParameters
 
             if (needParameterHint(expression, parameterName)) {
@@ -64,9 +77,5 @@ class TolkParameterHintsProvider : AbstractTolkInlayHintProvider() {
         }
 
         return true
-    }
-
-    companion object {
-        private val FUNCTIONS_WITHOUT_PARAMETER_HINTS = setOf("ton", "address", "println", "format")
     }
 }

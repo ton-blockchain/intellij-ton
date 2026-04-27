@@ -242,6 +242,7 @@ sealed class ActonCommand(val name: String) {
         var fift: String? = null,
         var sourceMap: String? = null,
         var clearCache: Boolean = false,
+        var allowNoEntrypoint: Boolean = false,
     ) : ActonCommand("compile") {
         override fun getArguments(): List<String> = buildList {
             if (json) add("--json")
@@ -259,6 +260,7 @@ sealed class ActonCommand(val name: String) {
                 add(it)
             }
             if (clearCache) add("--clear-cache")
+            if (allowNoEntrypoint) add("--allow-no-entrypoint")
             if (path.isNotBlank()) {
                 add(path)
             }
@@ -429,6 +431,7 @@ sealed class ActonCommand(val name: String) {
                         "--fift" -> if (i + 1 < args.size) compile.fift = args[++i]
                         "--source-map" -> if (i + 1 < args.size) compile.sourceMap = args[++i]
                         "--clear-cache" -> compile.clearCache = true
+                        "--allow-no-entrypoint" -> compile.allowNoEntrypoint = true
                         else -> if (!arg.startsWith("-")) compile.path = arg
                     }
                     i++

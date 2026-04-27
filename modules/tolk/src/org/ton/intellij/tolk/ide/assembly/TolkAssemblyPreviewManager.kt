@@ -104,6 +104,7 @@ object TolkAssemblyPreviewManager {
                 path = sourceFile.path,
                 json = true,
                 sourceMap = sourceMapPath.toString(),
+                allowNoEntrypoint = true,
             )
             val compileCommandLine = ActonCommandLine(
                 command = compileCommand.name,

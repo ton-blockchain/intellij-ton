@@ -37,6 +37,7 @@ import org.ton.intellij.tolk.psi.TOLK_KEYWORDS
 import org.ton.intellij.tolk.psi.TOLK_NUMBERS
 import org.ton.intellij.tolk.psi.TOLK_STRING_LITERALS
 import org.ton.intellij.tolk.psi.TolkAnnotation
+import org.ton.intellij.tolk.psi.TolkAnnotationArgument
 import org.ton.intellij.tolk.psi.TolkAnnotationName
 import org.ton.intellij.tolk.psi.TolkCatchParameter
 import org.ton.intellij.tolk.psi.TolkConstVar
@@ -59,6 +60,7 @@ import org.ton.intellij.tolk.psi.TolkTypeParameter
 import org.ton.intellij.tolk.psi.TolkTypeParameterList
 import org.ton.intellij.tolk.psi.TolkVar
 import org.ton.intellij.tolk.psi.TolkVarExpression
+import org.ton.intellij.tolk.psi.arguments
 import org.ton.intellij.tolk.psi.impl.hasReceiver
 import org.ton.intellij.tolk.psi.impl.isPrivate
 import org.ton.intellij.tolk.psi.impl.isReadonly
@@ -374,6 +376,11 @@ fun TolkStruct.generateDoc(): String = buildString {
 fun TolkStructField.generateDoc(): String = buildString {
     append(DocumentationMarkup.DEFINITION_START)
 
+    val annotationDoc = annotations.annotations().generateDoc()
+    if (annotationDoc.isNotEmpty()) {
+        line(annotationDoc)
+    }
+
     val owner = parentOfType<TolkStruct>()
     if (owner != null && owner.name != null) {
         colorize("struct", asKeyword)
@@ -511,16 +518,16 @@ fun TolkAnnotation.generateDoc(): String {
 
 fun TolkAnnotation.generateShortDoc(): String {
     val name = name ?: ""
-    val arguments = argumentList?.argumentList ?: emptyList()
+    val annotationArguments = arguments
 
     return buildString {
         colorize("@", asAnnotation)
         colorize(name, asAnnotation)
-        if (arguments.isNotEmpty()) {
+        if (annotationArguments.isNotEmpty()) {
             colorize("(", asParen)
-            arguments.forEachIndexed { index, argument ->
-                append(argument.expression.generateDoc())
-                if (index != arguments.size - 1) {
+            annotationArguments.forEachIndexed { index, argument ->
+                append(argument.generateDoc())
+                if (index != annotationArguments.size - 1) {
                     append(", ")
                 }
             }
@@ -528,6 +535,9 @@ fun TolkAnnotation.generateShortDoc(): String {
         }
     }
 }
+
+private fun TolkAnnotationArgument.generateDoc(): String =
+    expression?.generateDoc() ?: typeExpression?.type?.generateDoc() ?: text
 
 private fun List<TolkParameter>.generateDoc(selfParameter: TolkSelfParameter?): String {
     val params = this

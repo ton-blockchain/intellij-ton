@@ -21,9 +21,7 @@ import java.util.concurrent.TimeUnit
 object BocActonService {
     private val LOG = logger<BocActonService>()
 
-    fun isAvailable(project: Project): Boolean {
-        return resolveActonExecutable(project) != null
-    }
+    fun isAvailable(project: Project): Boolean = resolveActonExecutable(project) != null
 
     fun disassemble(project: Project, bocFilePath: String) =
         executeActonCommand(project, ActonCommand.Disasm(bocFile = bocFilePath))

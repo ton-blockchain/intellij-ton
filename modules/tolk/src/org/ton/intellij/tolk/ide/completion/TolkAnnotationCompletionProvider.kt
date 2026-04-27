@@ -19,6 +19,7 @@ import org.ton.intellij.tolk.psi.TolkAnnotation
 import org.ton.intellij.tolk.psi.TolkAnnotationHolder
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkStruct
+import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.psi.impl.isEntryPoint
 import org.ton.intellij.tolk.psi.impl.isGetMethod
 
@@ -34,6 +35,7 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
     val forFunctions: Applicability = { it is TolkFunction }
     val forGetMethods: Applicability = { it is TolkFunction && it.isGetMethod }
     val forStructs: Applicability = { it is TolkStruct }
+    val forStructFields: Applicability = { it is TolkStructField }
     val forEntryPoints: Applicability = { it is TolkFunction && it.isEntryPoint }
 
     private data class AnnotationLookupElement(
@@ -49,7 +51,9 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
         annotationLookup("inline_ref", forFunctions),
         annotationLookup("test", forGetMethods),
         annotationLookup("method_id", forFunctions, RequiredParInsertHandler),
-        annotationLookup("abi", forAny, RequiredParInsertHandler),
+        annotationLookup("abi.minimalMsgValue", forStructs, RequiredParInsertHandler, tailText = "(...)"),
+        annotationLookup("abi.preferredSendMode", forStructs, RequiredParInsertHandler, tailText = "(...)"),
+        annotationLookup("abi.clientType", forStructFields, RequiredParInsertHandler, tailText = "(...)"),
         annotationLookup(
             "deprecated",
             forAny,
@@ -118,6 +122,30 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
         ),
     )
 
+    private val abiLookupElements = listOf(
+        annotationLookup(
+            "minimalMsgValue",
+            forStructs,
+            RequiredParInsertHandler,
+            tailText = "(...)",
+            fullName = "abi.minimalMsgValue",
+        ),
+        annotationLookup(
+            "preferredSendMode",
+            forStructs,
+            RequiredParInsertHandler,
+            tailText = "(...)",
+            fullName = "abi.preferredSendMode",
+        ),
+        annotationLookup(
+            "clientType",
+            forStructFields,
+            RequiredParInsertHandler,
+            tailText = "(...)",
+            fullName = "abi.clientType",
+        ),
+    )
+
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
@@ -128,6 +156,7 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
             ?: parameters.position.parentOfType<TolkAnnotationHolder>()
         val lookupElements = when (pathPrefix.substringBefore('.')) {
             "test" -> if ('.' in pathPrefix) testLookupElements else rootLookupElements
+            "abi" -> if ('.' in pathPrefix) abiLookupElements else rootLookupElements
             else -> if ('.' in pathPrefix) return else rootLookupElements
         }
         val segmentPrefix = pathPrefix.substringAfterLast('.', pathPrefix)

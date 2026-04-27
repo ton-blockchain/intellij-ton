@@ -9,6 +9,12 @@ interface TolkAnnotationHolder : TolkNamedElement {
 val TolkAnnotation.name: String?
     get() = annotationName?.text
 
+val TolkAnnotation.arguments: List<TolkAnnotationArgument>
+    get() = annotationArgumentList?.annotationArgumentList ?: emptyList()
+
+val TolkAnnotationArgument.value: TolkElement?
+    get() = typeExpression ?: expression
+
 class TolkAnnotationQuery(private val rawAnnotations: Sequence<TolkAnnotation>) {
     constructor(holder: TolkAnnotationHolder) : this(
         holder.firstChild?.siblings()?.filterIsInstance<TolkAnnotation>() ?: emptySequence(),

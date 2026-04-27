@@ -20,8 +20,7 @@ class TolkDeprecationInspection : TolkInspectionBase() {
                     val deprecatedAnnotation = original.annotations.deprecatedAnnotation()
                     val firstArgumentExpression =
                         deprecatedAnnotation
-                            ?.argumentList
-                            ?.argumentList
+                            ?.arguments
                             ?.firstOrNull()
                             ?.expression
                     val text =

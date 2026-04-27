@@ -1,8 +1,8 @@
 package org.ton.intellij.acton.ide.newProject
 
 import com.intellij.execution.RunManager
-import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.openapi.vfs.VirtualFile
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.findActonExecutableInPath

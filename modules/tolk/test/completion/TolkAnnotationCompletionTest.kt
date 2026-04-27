@@ -30,11 +30,71 @@ class TolkAnnotationCompletionTest : TolkCompletionTestBase() {
         """.trimIndent(),
     )
 
-    fun `test no nested completion for unsupported dotted annotation`() = checkNoCompletion(
+    fun `test no nested abi completion for function annotation`() = checkNoCompletion(
         """
             @abi./*caret*/
             get fun `test sample`() {}
         """.trimIndent(),
+    )
+
+    fun `test struct abi dotted annotation completion variants`() = checkContainsCompletion(
+        listOf("minimalMsgValue", "preferredSendMode"),
+        """
+            @abi./*caret*/
+            struct Message {}
+        """.trimIndent(),
+    )
+
+    fun `test struct root annotation completion uses dotted abi variants`() {
+        val code =
+            """
+                @/*caret*/
+                struct Message {}
+            """.trimIndent()
+
+        checkContainsCompletion(listOf("abi.minimalMsgValue", "abi.preferredSendMode"), code)
+        checkNotContainsCompletion("abi", code)
+    }
+
+    fun `test field annotation completion does not include struct field modifiers`() {
+        val code =
+            """
+                struct Message {
+                    @/*caret*/
+                    body: int
+                }
+            """.trimIndent()
+
+        checkContainsCompletion(listOf("abi.clientType", "deprecated", "custom"), code)
+        checkNotContainsCompletion(setOf("abi", "private", "readonly"), code)
+    }
+
+    fun `test field abi dotted annotation completion variants`() = checkContainsCompletion(
+        listOf("clientType"),
+        """
+            struct Message {
+                @abi./*caret*/
+                body: int
+            }
+        """.trimIndent(),
+    )
+
+    fun `test abi clientType annotation completion inserts dotted variant`() = checkCompletion(
+        "abi.clientType",
+        "(...)",
+        """
+            struct Message {
+                @ab/*caret*/
+                body: int
+            }
+        """.trimIndent(),
+        """
+            struct Message {
+                @abi.clientType(/*caret*/)
+                body: int
+            }
+        """.trimIndent(),
+        '\t',
     )
 
     fun `test no annotation completion inside string literal`() = checkNoCompletion(

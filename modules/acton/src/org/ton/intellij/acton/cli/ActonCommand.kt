@@ -190,16 +190,23 @@ sealed class ActonCommand(val name: String) {
         var bocFile: String = "",
         var string: String = "",
         var output: String = "",
+        var json: Boolean = false,
         var showHashes: Boolean = false,
         var showOffsets: Boolean = false,
+        var sourceMap: String? = null,
         var address: String = "",
         var apiKey: String = "",
         var net: String = "",
         var followLibraries: Boolean = false,
     ) : ActonCommand("disasm") {
         override fun getArguments(): List<String> = buildList {
+            if (json) add("--json")
             if (showHashes) add("--show-hashes")
             if (showOffsets) add("--show-offsets")
+            sourceMap?.let {
+                add("--source-map")
+                add(it)
+            }
             if (string.isNotBlank()) {
                 add("--string")
                 add(string)

@@ -15,10 +15,10 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.util.Alarm
-import org.ton.intellij.acton.cli.ACTON_EXECUTABLE_NAME
-import org.ton.intellij.acton.cli.findActonExecutableInPath
 import org.ton.intellij.acton.ActonBundle
 import org.ton.intellij.acton.ActonUtils.stripAnsiColors
+import org.ton.intellij.acton.cli.ACTON_EXECUTABLE_NAME
+import org.ton.intellij.acton.cli.findActonExecutableInPath
 import org.ton.intellij.util.pathToExecutableTextField
 import javax.swing.JCheckBox
 import javax.swing.JLabel

@@ -120,4 +120,44 @@ class TolkAnnotationPsiTest : TolkTestBase() {
         assertFalse(file.text.contains("@abi. minimalMsgValue"))
         assertFalse(file.text.contains("@abi .minimalMsgValue"))
     }
+
+    fun `test struct field annotations are exposed through annotation holder`() {
+        myFixture.configureByText(
+            "test.tolk",
+            """
+                struct Message {
+                    @deprecated("use body")
+                    body: int
+                }
+            """.trimIndent(),
+        )
+
+        val field = PsiTreeUtil.findChildOfType(myFixture.file, TolkStructField::class.java)
+
+        assertNotNull(field)
+        assertTrue(field!!.annotations.hasAnnotation("deprecated"))
+        assertContainsElements(field.annotations.names().toList(), "deprecated")
+    }
+
+    fun `test annotation argument can be parsed as type expression`() {
+        val file = myFixture.configureByText(
+            "test.tolk",
+            """
+                @abi.clientType(PayloadInline | PayloadRef)
+                struct Message {}
+            """.trimIndent(),
+        )
+
+        val annotation = PsiTreeUtil.findChildOfType(file, TolkAnnotation::class.java)
+
+        assertNotNull(annotation)
+        assertEquals("abi.clientType", annotation!!.name)
+        assertEquals(1, annotation.arguments.size)
+        assertEquals("PayloadInline | PayloadRef", annotation.arguments.single().text)
+        assertNotNull(annotation.arguments.single().typeExpression)
+        assertNull(annotation.arguments.single().expression)
+
+        assertNotNull(PsiTreeUtil.findChildOfType(annotation, TolkTypeExpression::class.java))
+        assertNull(PsiTreeUtil.findChildOfType(annotation, TolkExpression::class.java))
+    }
 }

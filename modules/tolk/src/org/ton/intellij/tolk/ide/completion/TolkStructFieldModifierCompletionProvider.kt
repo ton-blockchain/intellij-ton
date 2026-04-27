@@ -7,7 +7,9 @@ import com.intellij.patterns.PatternCondition
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiComment
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
+import org.ton.intellij.tolk.psi.TolkAnnotation
 import org.ton.intellij.tolk.psi.TolkStructBody
 import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.util.prevVisibleOrNewLine
@@ -32,6 +34,8 @@ object TolkStructFieldModifierCompletionProvider : TolkCompletionProvider() {
             TolkCompletionContributor.CONTEXT_KEYWORD_PRIORITY,
             listOf("private", "readonly"),
         )
+        val position = parameters.originalPosition ?: parameters.position
+        if (position.parentOfType<TolkAnnotation>() != null || position.prevVisibleOrNewLine?.text == "@") return
         provider.addCompletions(parameters, context, result)
     }
 }

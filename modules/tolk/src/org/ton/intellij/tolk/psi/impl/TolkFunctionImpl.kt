@@ -233,7 +233,7 @@ val TolkFunction.receiverTy get() = (this as TolkFunctionMixin).receiverTy
 fun TolkFunction.computeMethodId(): Pair<String, Boolean> {
     val methodId = annotations.annotationByName("method_id").firstOrNull()
     if (methodId != null) {
-        val argument = methodId.argumentList?.argumentList?.firstOrNull()
+        val argument = methodId.arguments.firstOrNull()
         if (argument != null) {
             return argument.text to true
         }

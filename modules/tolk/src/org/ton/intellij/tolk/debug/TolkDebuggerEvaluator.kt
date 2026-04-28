@@ -17,8 +17,11 @@ import org.ton.intellij.tolk.psi.TolkDotExpression
 import org.ton.intellij.tolk.psi.TolkExpression
 import org.ton.intellij.tolk.psi.TolkFieldLookup
 import org.ton.intellij.tolk.psi.TolkFile
+import org.ton.intellij.tolk.psi.TolkParameterElement
 import org.ton.intellij.tolk.psi.TolkReferenceElement
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
+import org.ton.intellij.tolk.psi.TolkSelfParameter
+import org.ton.intellij.tolk.psi.TolkVar
 
 internal class TolkDebuggerEvaluator(private val delegate: XDebuggerEvaluator) : XDebuggerEvaluator() {
     override fun evaluate(expression: String, callback: XEvaluationCallback, expressionPosition: XSourcePosition?) {
@@ -83,26 +86,74 @@ private fun getTolkFile(project: Project, document: Document): TolkFile? {
 }
 
 private fun findExpressionInfoAtOffset(file: TolkFile, document: Document, offset: Int): ExpressionInfo? {
-    val expression = findExpressionAtOffset(file, document, offset) ?: return null
-    if (expression.isCallCallee()) return null
+    val resolved = findEvaluatableElementAtOffset(file, document, offset) ?: return null
+    if (resolved.expression?.isCallCallee() == true) return null
 
-    val expressionText = expression.text
-    return ExpressionInfo(expression.textRange, expressionText, expressionText)
+    return ExpressionInfo(resolved.textRange, resolved.expressionText, resolved.expressionText)
 }
 
-private fun findExpressionAtOffset(file: TolkFile, document: Document, offset: Int): TolkExpression? {
+private fun findEvaluatableElementAtOffset(file: TolkFile, document: Document, offset: Int): TolkEvaluatableElement? {
     val normalizedOffset = offset.coerceIn(0, document.textLength)
     val candidateOffsets = listOf(normalizedOffset, normalizedOffset - 1).distinct().filter { it >= 0 }
     for (candidateOffset in candidateOffsets) {
         val leaf = file.findElementAt(candidateOffset) ?: continue
+        val declaration = leaf.findDeclarationElement()
+        if (declaration != null) {
+            return declaration
+        }
+
         val dotExpression = leaf.findFieldAccessExpression()
         if (dotExpression != null) {
-            return dotExpression
+            return TolkEvaluatableElement(dotExpression, dotExpression.textRange, dotExpression.text)
         }
 
         val referenceExpression = PsiTreeUtil.getParentOfType(leaf, TolkReferenceExpression::class.java, false)
         if (referenceExpression != null && referenceExpression.containsReferenceName(leaf)) {
-            return referenceExpression
+            return TolkEvaluatableElement(
+                expression = referenceExpression,
+                textRange = referenceExpression.textRange,
+                expressionText = referenceExpression.text,
+            )
+        }
+    }
+
+    return null
+}
+
+private fun PsiElement.findDeclarationElement(): TolkEvaluatableElement? {
+    val variable = PsiTreeUtil.getParentOfType(this, TolkVar::class.java, false)
+    if (variable != null && variable.identifier.textRange.containsOffset(textRange.startOffset)) {
+        val variableName = variable.name ?: return null
+        return TolkEvaluatableElement(
+            expression = null,
+            textRange = variable.identifier.textRange,
+            expressionText = variableName,
+        )
+    }
+
+    val parameter = PsiTreeUtil.getParentOfType(this, TolkParameterElement::class.java, false)
+    if (parameter != null) {
+        val identifier = parameter.identifier
+        if (identifier != null && identifier.textRange.containsOffset(textRange.startOffset)) {
+            val parameterName = parameter.name ?: return null
+            return TolkEvaluatableElement(
+                expression = null,
+                textRange = identifier.textRange,
+                expressionText = parameterName,
+            )
+        }
+    }
+
+    val selfParameter = PsiTreeUtil.getParentOfType(this, TolkSelfParameter::class.java, false)
+    if (selfParameter != null) {
+        val identifier = selfParameter.identifier
+        if (identifier != null && identifier.textRange.containsOffset(textRange.startOffset)) {
+            val selfParameterName = selfParameter.name ?: return null
+            return TolkEvaluatableElement(
+                expression = null,
+                textRange = identifier.textRange,
+                expressionText = selfParameterName,
+            )
         }
     }
 
@@ -124,3 +175,9 @@ private fun TolkExpression.isCallCallee(): Boolean {
     val callExpression = parent as? TolkCallExpression ?: return false
     return callExpression.expression == this
 }
+
+private data class TolkEvaluatableElement(
+    val expression: TolkExpression?,
+    val textRange: TextRange,
+    val expressionText: String,
+)

@@ -29,6 +29,7 @@ import com.intellij.util.execution.ParametersListUtil
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
 import org.ton.intellij.acton.ide.ActonBacktraceConsoleFilter
+import org.ton.intellij.acton.ide.ActonTolkFileConsoleFilter
 import org.ton.intellij.acton.profiler.ActonProfilerSupport
 
 class ActonCommandRunState(environment: ExecutionEnvironment, private val configuration: ActonCommandConfiguration) :
@@ -111,6 +112,7 @@ class ActonCommandRunState(environment: ExecutionEnvironment, private val config
                     consoleProperties,
                 ) as SMTRunnerConsoleView
                 console.addMessageFilter(ActonBacktraceConsoleFilter(configuration))
+                console.addMessageFilter(ActonTolkFileConsoleFilter(configuration.project))
                 val handler = startProcess()
                 console.attachToProcess(handler)
                 val testFailureState = configuration.project.actonTestFailureState

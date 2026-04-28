@@ -13,5 +13,6 @@ class ActonConsoleFilterProvider : ConsoleFilterProviderEx {
         ActonTonAddressConsoleFilter(),
         ActonWalletQuickFixFilter(),
         ActonGeneratedFileConsoleFilter(project),
+        ActonTolkFileConsoleFilter(project),
     )
 }

@@ -3,6 +3,8 @@ package org.ton.intellij.tolk.ide.test.configuration
 import com.intellij.execution.actions.ConfigurationContext
 import com.intellij.execution.actions.LazyRunConfigurationProducer
 import com.intellij.execution.configurations.ConfigurationFactory
+import com.intellij.execution.testframework.AbstractTestProxy
+import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiDirectory
@@ -25,26 +27,12 @@ class ActonTestConfigurationProducer : LazyRunConfigurationProducer<ActonCommand
         context: ConfigurationContext,
     ): Boolean {
         if (configuration.command != "test") return false
-        val element = context.location?.psiElement ?: return false
+        val testContext = context.testContext() ?: return false
         ActonToml.find(configuration.project) ?: return false
 
-        if (element is PsiDirectory) {
-            if (!element.containsTolkTests()) return false
-            return configuration.testMode == ActonCommand.Test.TestMode.DIRECTORY &&
-                configuration.testTarget == element.virtualFile.path
-        }
-
-        val containingFile = element.containingFile as? TolkFile ?: return false
-        val function = element.parentOfType<TolkFunction>()
-
-        if (function != null && function.isTestFunction()) {
-            return configuration.testMode == ActonCommand.Test.TestMode.FUNCTION &&
-                configuration.testTarget == containingFile.virtualFile.path &&
-                configuration.testFunctionName == function.name
-        }
-
-        return configuration.testMode == ActonCommand.Test.TestMode.FILE &&
-            configuration.testTarget == containingFile.virtualFile.path
+        return configuration.testMode == testContext.mode &&
+            configuration.testTarget == testContext.target &&
+            configuration.testFunctionName == testContext.functionName
     }
 
     override fun setupConfigurationFromContext(
@@ -52,36 +40,16 @@ class ActonTestConfigurationProducer : LazyRunConfigurationProducer<ActonCommand
         context: ConfigurationContext,
         sourceElement: Ref<PsiElement>,
     ): Boolean {
-        val element = sourceElement.get() ?: return false
+        val testContext = context.testContext() ?: return false
         val actonToml = ActonToml.find(configuration.project) ?: return false
+        testContext.sourceElement?.let(sourceElement::set)
 
         configuration.command = "test"
         configuration.workingDirectory = actonToml.workingDir
-
-        if (element is PsiDirectory) {
-            if (!element.containsTolkTests()) return false
-            configuration.name = "Test ${element.name}"
-            configuration.testMode = ActonCommand.Test.TestMode.DIRECTORY
-            configuration.testTarget = element.virtualFile.path
-            return true
-        }
-
-        val containingFile = element.containingFile as? TolkFile ?: return false
-        if (!containingFile.isTestFile()) return false
-        val function = element.parentOfType<TolkFunction>()
-
-        if (function != null && function.isTestFunction()) {
-            val functionName = function.name ?: return false
-            configuration.name = "Test $functionName"
-            configuration.testMode = ActonCommand.Test.TestMode.FUNCTION
-            configuration.testTarget = containingFile.virtualFile.path
-            configuration.testFunctionName = functionName
-            return true
-        }
-
-        configuration.name = "Test ${containingFile.name}"
-        configuration.testMode = ActonCommand.Test.TestMode.FILE
-        configuration.testTarget = containingFile.virtualFile.path
+        configuration.name = testContext.displayName
+        configuration.testMode = testContext.mode
+        configuration.testTarget = testContext.target
+        configuration.testFunctionName = testContext.functionName
         return true
     }
 
@@ -97,4 +65,66 @@ class ActonTestConfigurationProducer : LazyRunConfigurationProducer<ActonCommand
         }
         return children.any { child -> child.containsTolkTests(fileIndex) }
     }
+
+    private fun ConfigurationContext.testContext(): TestContext? = treeTestContext() ?: psiTestContext()
+
+    private fun ConfigurationContext.treeTestContext(): TestContext? {
+        val selectedTest = AbstractTestProxy.DATA_KEY.getData(dataContext) ?: return null
+        val selection = TolkTestTreeSelection.resolveSelection(selectedTest) ?: return null
+        val sourceElement = TolkTestLocator.findLocation(project, selectedTest.locationUrl)?.psiElement
+        return TestContext(
+            selection.mode,
+            selection.target,
+            selection.functionName,
+            selection.displayName,
+            sourceElement,
+        )
+    }
+
+    private fun ConfigurationContext.psiTestContext(): TestContext? {
+        val element =
+            LangDataKeys.PSI_ELEMENT_ARRAY.getData(dataContext)?.singleOrNull() ?: location?.psiElement ?: return null
+
+        if (element is PsiDirectory) {
+            if (!element.containsTolkTests()) return null
+            return TestContext(
+                mode = ActonCommand.Test.TestMode.DIRECTORY,
+                target = element.virtualFile.path,
+                functionName = "",
+                displayName = "Test ${element.name}",
+                sourceElement = element,
+            )
+        }
+
+        val containingFile = element.containingFile as? TolkFile ?: return null
+        if (!containingFile.isTestFile()) return null
+        val function = element.parentOfType<TolkFunction>()
+
+        if (function != null && function.isTestFunction()) {
+            val functionName = function.name ?: return null
+            return TestContext(
+                mode = ActonCommand.Test.TestMode.FUNCTION,
+                target = containingFile.virtualFile.path,
+                functionName = functionName,
+                displayName = "Test $functionName",
+                sourceElement = function,
+            )
+        }
+
+        return TestContext(
+            mode = ActonCommand.Test.TestMode.FILE,
+            target = containingFile.virtualFile.path,
+            functionName = "",
+            displayName = "Test ${containingFile.name}",
+            sourceElement = containingFile,
+        )
+    }
+
+    private data class TestContext(
+        val mode: ActonCommand.Test.TestMode,
+        val target: String,
+        val functionName: String,
+        val displayName: String,
+        val sourceElement: PsiElement?,
+    )
 }

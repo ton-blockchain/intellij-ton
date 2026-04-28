@@ -284,6 +284,7 @@
     <extensions defaultExtensionNs="org.ton.intellij.acton">
         <testConsolePropertiesProvider
                 implementation="org.ton.intellij.tolk.ide.test.configuration.TolkActonTestConsolePropertiesProvider"/>
+        <toolchainSetupListener implementation="org.ton.intellij.tolk.acton.TolkActonToolchainSetupListener"/>
     </extensions>
 
     <applicationListeners>

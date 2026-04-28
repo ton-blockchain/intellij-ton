@@ -6,16 +6,50 @@ import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.openapi.project.Project
 import com.intellij.util.execution.ParametersListUtil
 import org.ton.intellij.acton.settings.actonSettings
+import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.name
 
 const val ACTON_EXECUTABLE_NAME: String = "acton"
 
 fun findActonExecutableInPath(): String? = PathEnvironmentVariableUtil.findInPath(ACTON_EXECUTABLE_NAME)?.absolutePath
 
+fun findActonExecutableInDefaultInstall(): String? {
+    defaultInstallExecutableCandidates()
+        .firstOrNull(::isExecutable)
+        ?.let { return it.toString() }
+
+    return findLatestVersionedActonExecutable()?.toString()
+}
+
+fun findActonExecutable(): String? = findActonExecutableInPath() ?: findActonExecutableInDefaultInstall()
+
 fun resolveActonExecutable(project: Project): String? {
     val configuredPath = project.actonSettings.actonPath?.trim().orEmpty()
-    return configuredPath.ifBlank { findActonExecutableInPath() }
+    return configuredPath.ifBlank { findActonExecutable() }
 }
+
+private val DEFAULT_ACTON_HOME: Path = Path.of(System.getProperty("user.home"), ".acton")
+private val DEFAULT_ACTON_BIN_DIR: Path = DEFAULT_ACTON_HOME.resolve("bin")
+
+private fun defaultInstallExecutableCandidates(): Sequence<Path> = sequenceOf(
+    DEFAULT_ACTON_BIN_DIR.resolve(ACTON_EXECUTABLE_NAME),
+    DEFAULT_ACTON_HOME.resolve(ACTON_EXECUTABLE_NAME),
+)
+
+private fun findLatestVersionedActonExecutable(): Path? {
+    if (!Files.isDirectory(DEFAULT_ACTON_BIN_DIR)) return null
+
+    return Files.list(DEFAULT_ACTON_BIN_DIR).use { files ->
+        files
+            .filter { it.name.startsWith("$ACTON_EXECUTABLE_NAME-") }
+            .filter(::isExecutable)
+            .max(Comparator.comparingLong { Files.getLastModifiedTime(it).toMillis() })
+            .orElse(null)
+    }
+}
+
+private fun isExecutable(path: Path): Boolean = Files.isRegularFile(path) && Files.isExecutable(path)
 
 data class ActonCommandLine(
     val command: String,

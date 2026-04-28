@@ -10,6 +10,9 @@
         <extensionPoint qualifiedName="org.ton.intellij.acton.profilerSupport"
                         interface="org.ton.intellij.acton.profiler.ActonProfilerSupport"
                         dynamic="true"/>
+        <extensionPoint qualifiedName="org.ton.intellij.acton.toolchainSetupListener"
+                        interface="org.ton.intellij.acton.ide.ActonToolchainSetupListener"
+                        dynamic="true"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">

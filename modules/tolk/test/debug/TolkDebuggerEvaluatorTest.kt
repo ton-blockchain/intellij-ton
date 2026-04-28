@@ -19,6 +19,31 @@ class TolkDebuggerEvaluatorTest : TolkTestBase() {
         assertExpressionInfo(info, "subjectValue")
     }
 
+    fun testFindExpressionInfoForVariableDefinitionIdentifier() {
+        val info = configureAndFindExpressionInfo(
+            """
+                fun main() {
+                    val subjectVal<caret>ue = 1
+                    val result = subjectValue
+                }
+            """.trimIndent(),
+        )
+
+        assertExpressionInfo(info, "subjectValue")
+    }
+
+    fun testFindExpressionInfoForParameterDefinitionIdentifier() {
+        val info = configureAndFindExpressionInfo(
+            """
+                fun main(subjectVal<caret>ue: int) {
+                    val result = subjectValue
+                }
+            """.trimIndent(),
+        )
+
+        assertExpressionInfo(info, "subjectValue")
+    }
+
     fun testFindExpressionInfoForFieldLookupUsesWholeDotExpression() {
         val info = configureAndFindExpressionInfo(
             """

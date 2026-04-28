@@ -7,5 +7,6 @@ import org.ton.intellij.tolk.ide.configurable.tolkSettings
 class TolkActonToolchainSetupListener : ActonToolchainSetupListener {
     override fun actonInstalled(project: Project) {
         project.tolkSettings.refreshDetectedStdlib()
+        TolkActonStdlibSetupSupport.showMissingStdlibNotification(project)
     }
 }

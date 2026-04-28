@@ -26,7 +26,11 @@ fun findActonExecutable(): String? = findActonExecutableInPath() ?: findActonExe
 
 fun resolveActonExecutable(project: Project): String? {
     val configuredPath = project.actonSettings.actonPath?.trim().orEmpty()
-    return configuredPath.ifBlank { findActonExecutable() }
+    if (configuredPath.isNotBlank() && isResolvableExecutable(configuredPath)) {
+        return configuredPath
+    }
+
+    return findActonExecutable()
 }
 
 private val DEFAULT_ACTON_HOME: Path = Path.of(System.getProperty("user.home"), ".acton")
@@ -50,6 +54,16 @@ private fun findLatestVersionedActonExecutable(): Path? {
 }
 
 private fun isExecutable(path: Path): Boolean = Files.isRegularFile(path) && Files.isExecutable(path)
+
+private fun isResolvableExecutable(pathOrCommand: String): Boolean {
+    PathEnvironmentVariableUtil.findInPath(pathOrCommand)?.let { return true }
+
+    return try {
+        isExecutable(Path.of(pathOrCommand))
+    } catch (_: Exception) {
+        false
+    }
+}
 
 data class ActonCommandLine(
     val command: String,

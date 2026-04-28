@@ -190,6 +190,7 @@
         <!-- endregion Postfix Templates -->
 
         <!-- region Editor -->
+        <fileEditorProvider implementation="org.ton.intellij.tolk.ide.assembly.TolkAssemblyPreviewFileEditorProvider"/>
         <editorNotificationProvider
                 implementation="org.ton.intellij.tolk.ide.configurable.TolkSetupToolchainNotificationProvider"/>
         <editorNotificationProvider

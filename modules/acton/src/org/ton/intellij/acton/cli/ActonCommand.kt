@@ -190,16 +190,23 @@ sealed class ActonCommand(val name: String) {
         var bocFile: String = "",
         var string: String = "",
         var output: String = "",
+        var json: Boolean = false,
         var showHashes: Boolean = false,
         var showOffsets: Boolean = false,
+        var sourceMap: String? = null,
         var address: String = "",
         var apiKey: String = "",
         var net: String = "",
         var followLibraries: Boolean = false,
     ) : ActonCommand("disasm") {
         override fun getArguments(): List<String> = buildList {
+            if (json) add("--json")
             if (showHashes) add("--show-hashes")
             if (showOffsets) add("--show-offsets")
+            sourceMap?.let {
+                add("--source-map")
+                add(it)
+            }
             if (string.isNotBlank()) {
                 add("--string")
                 add(string)
@@ -235,6 +242,7 @@ sealed class ActonCommand(val name: String) {
         var fift: String? = null,
         var sourceMap: String? = null,
         var clearCache: Boolean = false,
+        var allowNoEntrypoint: Boolean = false,
     ) : ActonCommand("compile") {
         override fun getArguments(): List<String> = buildList {
             if (json) add("--json")
@@ -252,6 +260,7 @@ sealed class ActonCommand(val name: String) {
                 add(it)
             }
             if (clearCache) add("--clear-cache")
+            if (allowNoEntrypoint) add("--allow-no-entrypoint")
             if (path.isNotBlank()) {
                 add(path)
             }
@@ -422,6 +431,7 @@ sealed class ActonCommand(val name: String) {
                         "--fift" -> if (i + 1 < args.size) compile.fift = args[++i]
                         "--source-map" -> if (i + 1 < args.size) compile.sourceMap = args[++i]
                         "--clear-cache" -> compile.clearCache = true
+                        "--allow-no-entrypoint" -> compile.allowNoEntrypoint = true
                         else -> if (!arg.startsWith("-")) compile.path = arg
                     }
                     i++

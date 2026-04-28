@@ -7,12 +7,15 @@ import com.intellij.execution.runners.ExecutionUtil
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.psi.util.elementType
 import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
+import org.ton.intellij.asm.AsmFileType
+import org.ton.intellij.tolk.ide.assembly.TolkAssemblyPreviewManager
 import org.ton.intellij.tolk.psi.TolkContractDefinition
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFile
@@ -36,12 +39,15 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
 
         return Info(
             AllIcons.Actions.Rebuild,
-            arrayOf(BuildActonContractAction(contractId)),
-        ) { "Build $contractId" }
+            arrayOf(
+                BuildActonContractAction(contractId),
+                DisassembleActonContractAction(virtualFile),
+            ),
+        ) { "Build or disassemble contract" }
     }
 
     private class BuildActonContractAction(private val contractId: String) :
-        AnAction("Build $contractId", null, AllIcons.Actions.Compile) {
+        AnAction("Build", null, AllIcons.Actions.Compile) {
         override fun actionPerformed(e: AnActionEvent) {
             val project = e.project ?: return
             val actonToml = ActonToml.find(project) ?: return
@@ -62,6 +68,14 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
             runManager.selectedConfiguration = settings
 
             ExecutionUtil.runConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance())
+        }
+    }
+
+    private class DisassembleActonContractAction(private val sourceFile: VirtualFile) :
+        AnAction("Disassemble", null, AsmFileType.icon) {
+        override fun actionPerformed(e: AnActionEvent) {
+            val project = e.project ?: return
+            TolkAssemblyPreviewManager.open(project, sourceFile)
         }
     }
 }

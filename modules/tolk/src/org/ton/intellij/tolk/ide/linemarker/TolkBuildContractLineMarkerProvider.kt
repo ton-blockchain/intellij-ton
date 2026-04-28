@@ -14,6 +14,7 @@ import com.intellij.psi.util.elementType
 import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
+import org.ton.intellij.asm.AsmFileType
 import org.ton.intellij.tolk.ide.assembly.TolkAssemblyPreviewManager
 import org.ton.intellij.tolk.psi.TolkContractDefinition
 import org.ton.intellij.tolk.psi.TolkElementTypes
@@ -40,13 +41,13 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
             AllIcons.Actions.Rebuild,
             arrayOf(
                 BuildActonContractAction(contractId),
-                DisassembleActonContractAction(contractId, virtualFile),
+                DisassembleActonContractAction(virtualFile),
             ),
-        ) { "Build or disassemble $contractId" }
+        ) { "Build or disassemble contract" }
     }
 
     private class BuildActonContractAction(private val contractId: String) :
-        AnAction("Build $contractId", null, AllIcons.Actions.Compile) {
+        AnAction("Build", null, AllIcons.Actions.Compile) {
         override fun actionPerformed(e: AnActionEvent) {
             val project = e.project ?: return
             val actonToml = ActonToml.find(project) ?: return
@@ -61,7 +62,7 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
             configuration.command = "build"
             configuration.workingDirectory = actonToml.workingDir
             configuration.buildContractId = contractId
-            configuration.parameters = "--info --allow-no-entrypoint"
+            configuration.parameters = "--info"
 
             runManager.addConfiguration(settings)
             runManager.selectedConfiguration = settings
@@ -70,8 +71,8 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
         }
     }
 
-    private class DisassembleActonContractAction(private val contractId: String, private val sourceFile: VirtualFile) :
-        AnAction("Disassemble $contractId", null, AllIcons.Actions.Execute) {
+    private class DisassembleActonContractAction(private val sourceFile: VirtualFile) :
+        AnAction("Disassemble", null, AsmFileType.icon) {
         override fun actionPerformed(e: AnActionEvent) {
             val project = e.project ?: return
             TolkAssemblyPreviewManager.open(project, sourceFile)

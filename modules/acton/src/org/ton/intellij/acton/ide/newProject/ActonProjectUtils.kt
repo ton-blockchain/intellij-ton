@@ -5,7 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.openapi.vfs.VirtualFile
 import org.ton.intellij.acton.cli.ActonCommand
-import org.ton.intellij.acton.cli.findActonExecutableInPath
+import org.ton.intellij.acton.cli.findActonExecutable
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
 import java.nio.file.Paths
@@ -35,10 +35,10 @@ private fun ActonProjectSettings.shouldIncludeTypeScriptApp(templateCatalog: Act
     templateCatalog.supportsTypeScriptApp(template) && addTypeScriptApp
 
 internal fun validateActonExecutable(): ValidationInfo? {
-    if (findActonExecutableInPath() != null) {
+    if (findActonExecutable() != null) {
         return null
     }
-    return ValidationInfo("Cannot find `acton` executable in PATH")
+    return ValidationInfo("Cannot find `acton` executable")
 }
 
 fun createDefaultRunConfigurations(project: Project, baseDir: VirtualFile) {

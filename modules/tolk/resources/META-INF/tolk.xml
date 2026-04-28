@@ -2,6 +2,8 @@
     <xi:include href="/META-INF/inspections.xml" xpointer="xpointer(/idea-plugin/*)"/>
 
     <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="Tolk Toolchain" displayType="BALLOON"/>
+
         <!-- Tolk language-->
         <fileType name="Tolk"
                   implementationClass="org.ton.intellij.tolk.TolkFileType"
@@ -284,6 +286,7 @@
     <extensions defaultExtensionNs="org.ton.intellij.acton">
         <testConsolePropertiesProvider
                 implementation="org.ton.intellij.tolk.ide.test.configuration.TolkActonTestConsolePropertiesProvider"/>
+        <toolchainSetupListener implementation="org.ton.intellij.tolk.acton.TolkActonToolchainSetupListener"/>
     </extensions>
 
     <applicationListeners>

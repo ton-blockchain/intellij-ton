@@ -10,6 +10,9 @@
         <extensionPoint qualifiedName="org.ton.intellij.acton.profilerSupport"
                         interface="org.ton.intellij.acton.profiler.ActonProfilerSupport"
                         dynamic="true"/>
+        <extensionPoint qualifiedName="org.ton.intellij.acton.toolchainSetupListener"
+                        interface="org.ton.intellij.acton.ide.ActonToolchainSetupListener"
+                        dynamic="true"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">
@@ -33,10 +36,13 @@
         <useScopeEnlarger implementation="org.ton.intellij.acton.toml.ActonTomlUseScopeEnlarger"/>
 
         <notificationGroup id="Acton Update" displayType="BALLOON"/>
+        <notificationGroup id="Acton Setup" displayType="BALLOON"/>
         <notificationGroup id="Acton Formatter" displayType="BALLOON"/>
         <postStartupActivity implementation="org.ton.intellij.acton.ide.ActonUpdateActivity"/>
+        <postStartupActivity implementation="org.ton.intellij.acton.ide.ActonSetupNotificationStartupActivity"/>
 
         <consoleFilterProvider implementation="org.ton.intellij.acton.ide.ActonConsoleFilterProvider"/>
+        <editorNotificationProvider implementation="org.ton.intellij.acton.ide.ActonSetupNotificationProvider"/>
 
         <toolWindow id="Acton Wallets"
                     secondary="true"

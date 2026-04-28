@@ -11,6 +11,7 @@ import com.intellij.openapi.project.RootsChangeRescanningInfo
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.roots.ex.ProjectRootManagerEx
 import com.intellij.openapi.util.io.toNioPathOrNull
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.findFile
@@ -23,6 +24,7 @@ import com.intellij.psi.util.CachedValuesManager
 import com.intellij.util.messages.Topic
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.tolkPsiManager
+import java.nio.file.Path
 
 val Project.tolkSettings: TolkProjectSettingsService get() = service()
 
@@ -112,6 +114,28 @@ class TolkProjectSettingsService(private val project: Project) :
             return cachedDefaultImport
         }
         return stdlibDir?.findFile("common.tolk")?.findPsiFile(project) as? TolkFile
+    }
+
+    fun refreshDetectedStdlib() {
+        val hadStdlib = hasStdlib
+
+        refreshExpectedStdlibPaths()
+        project.tolkPsiManager.incTolkSignatureModificationCount()
+        notifySettingsChanged()
+
+        if (hadStdlib != hasStdlib) {
+            reloadProject()
+        }
+    }
+
+    private fun refreshExpectedStdlibPaths() {
+        val files = expectedStdlibPaths().mapNotNull { path ->
+            runCatching { Path.of(path).toFile() }.getOrNull()
+        }
+
+        if (files.isNotEmpty()) {
+            LocalFileSystem.getInstance().refreshIoFiles(files)
+        }
     }
 
     private fun classifyStdlibChange(event: VFileEvent): StdlibChangeKind? {

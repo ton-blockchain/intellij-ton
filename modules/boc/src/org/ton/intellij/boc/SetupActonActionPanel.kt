@@ -25,7 +25,7 @@ class SetupActonActionPanel(private val project: Project, private val onInstalle
                 onInstalled?.invoke()
             }
             link("Open documentation") {
-                BrowserUtil.browse("https://i582.github.io/acton/docs/installation/")
+                BrowserUtil.browse("https://ton-blockchain.github.io/acton/docs/installation/")
             }
         }
         row {

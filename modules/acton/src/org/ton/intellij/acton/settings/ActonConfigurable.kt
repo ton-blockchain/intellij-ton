@@ -18,7 +18,7 @@ import com.intellij.util.Alarm
 import org.ton.intellij.acton.ActonBundle
 import org.ton.intellij.acton.ActonUtils.stripAnsiColors
 import org.ton.intellij.acton.cli.ACTON_EXECUTABLE_NAME
-import org.ton.intellij.acton.cli.findActonExecutableInPath
+import org.ton.intellij.acton.cli.findActonExecutable
 import org.ton.intellij.util.pathToExecutableTextField
 import javax.swing.JCheckBox
 import javax.swing.JLabel
@@ -67,7 +67,7 @@ class ActonConfigurable(val project: Project) :
         }
         onReset {
             val savedPath = settings.actonPath
-            actonPathField.text = savedPath ?: findActonInPath() ?: ""
+            actonPathField.text = savedPath ?: findActonExecutable() ?: ""
             explorerComboBox.selectedItem = settings.explorer
             environmentVariables.envData = settings.env
             useActonFmtForTolkFormattingCheckbox.isSelected = settings.useActonFmtForTolkFormatting
@@ -96,10 +96,8 @@ class ActonConfigurable(val project: Project) :
         })
     }
 
-    private fun findActonInPath(): String? = findActonExecutableInPath()
-
     private fun updateVersion() {
-        val path = actonPathField.text.ifBlank { findActonInPath() ?: ACTON_EXECUTABLE_NAME }
+        val path = actonPathField.text.ifBlank { findActonExecutable() ?: ACTON_EXECUTABLE_NAME }
         alarm.cancelAllRequests()
         alarm.addRequest({
             val version = try {

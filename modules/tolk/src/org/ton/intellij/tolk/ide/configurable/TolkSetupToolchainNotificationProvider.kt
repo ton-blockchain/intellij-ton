@@ -9,6 +9,7 @@ import com.intellij.ui.EditorNotificationPanel.Status
 import com.intellij.ui.EditorNotificationProvider
 import com.intellij.ui.EditorNotifications
 import org.ton.intellij.tolk.TolkBundle
+import org.ton.intellij.tolk.acton.TolkActonStdlibSetupSupport
 import org.ton.intellij.tolk.ide.configurable.TolkProjectSettingsService.TolkSettingsListener
 import org.ton.intellij.tolk.psi.isTolkFile
 import java.util.function.Function
@@ -46,8 +47,9 @@ class TolkSetupToolchainNotificationProvider(private val project: Project) : Edi
     private fun createToolchainNotification(project: Project): Function<in FileEditor, out JComponent?> =
         Function { fileEditor ->
             EditorNotificationPanel(fileEditor, Status.Warning).apply {
-                text = TolkBundle.message("notification.no.toolchain.configured")
-                createActionLabel(TolkBundle.message("notification.action.set.up.toolchain.text")) {
+                text = TolkBundle.message("notification.tolk.stdlib.not.configured")
+                TolkActonStdlibSetupSupport.addSetUpStdlibAction(this, project)
+                createActionLabel(TolkBundle.message("notification.action.configure.stdlib.path.text")) {
                     project.tolkSettings.configureToolchain()
                 }
                 createActionLabel(TolkBundle.message("notification.action.do.not.show.again.text")) {

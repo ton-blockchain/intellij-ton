@@ -7,7 +7,7 @@ import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import org.ton.intellij.acton.cli.ACTON_EXECUTABLE_NAME
-import org.ton.intellij.acton.cli.findActonExecutableInPath
+import org.ton.intellij.acton.cli.findActonExecutable
 
 internal data class ActonTemplateCatalog(
     @SerializedName("schema_version")
@@ -147,7 +147,7 @@ internal object ActonTemplateCatalogProvider {
         ?.takeIf { it.templates.isNotEmpty() }
 
     private fun runTemplatesCommand(args: List<String>): ActonTemplatesCommandOutput {
-        val actonPath = findActonExecutableInPath() ?: ACTON_EXECUTABLE_NAME
+        val actonPath = findActonExecutable() ?: ACTON_EXECUTABLE_NAME
         val output = CapturingProcessHandler(
             GeneralCommandLine(actonPath).withParameters(args),
         ).runProcess(5000)

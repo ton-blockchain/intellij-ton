@@ -186,6 +186,12 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
+    data class Init(var stdlibOnly: Boolean = false) : ActonCommand("init") {
+        override fun getArguments(): List<String> = buildList {
+            if (stdlibOnly) add("--stdlib-only")
+        }
+    }
+
     data class Disasm(
         var bocFile: String = "",
         var string: String = "",
@@ -452,6 +458,11 @@ sealed class ActonCommand(val name: String) {
                     i++
                 }
                 check
+            }
+
+            "init" -> {
+                val args = ParametersListUtil.parse(parameters)
+                Init(stdlibOnly = args.contains("--stdlib-only"))
             }
 
             else -> Custom("$name $parameters")

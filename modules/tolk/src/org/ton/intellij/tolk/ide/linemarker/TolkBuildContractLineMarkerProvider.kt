@@ -15,6 +15,7 @@ import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
 import org.ton.intellij.asm.AsmFileType
+import org.ton.intellij.tolk.TolkIcons
 import org.ton.intellij.tolk.ide.assembly.TolkAssemblyPreviewManager
 import org.ton.intellij.tolk.psi.TolkContractDefinition
 import org.ton.intellij.tolk.psi.TolkElementTypes
@@ -42,8 +43,10 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
             arrayOf(
                 BuildActonContractAction(contractId),
                 DisassembleActonContractAction(virtualFile),
+                GenerateTolkWrapperAction(contractId),
+                GenerateTypeScriptWrapperAction(contractId),
             ),
-        ) { "Build or disassemble contract" }
+        ) { "Build, disassemble, or generate wrappers" }
     }
 
     private class BuildActonContractAction(private val contractId: String) :
@@ -64,9 +67,6 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
             configuration.buildContractId = contractId
             configuration.parameters = "--info"
 
-            runManager.addConfiguration(settings)
-            runManager.selectedConfiguration = settings
-
             ExecutionUtil.runConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance())
         }
     }
@@ -76,6 +76,48 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
         override fun actionPerformed(e: AnActionEvent) {
             val project = e.project ?: return
             TolkAssemblyPreviewManager.open(project, sourceFile)
+        }
+    }
+
+    private class GenerateTolkWrapperAction(private val contractId: String) :
+        AnAction("Generate Tolk Wrapper", null, TolkIcons.FILE) {
+        override fun actionPerformed(e: AnActionEvent) {
+            val project = e.project ?: return
+            val actonToml = ActonToml.find(project) ?: return
+
+            val runManager = RunManager.getInstance(project)
+            val settings = runManager.createConfiguration(
+                "Generate Tolk wrapper for $contractId",
+                ActonCommandConfigurationType.getInstance().factory,
+            )
+            val configuration = settings.configuration as ActonCommandConfiguration
+
+            configuration.command = "wrapper"
+            configuration.workingDirectory = actonToml.workingDir
+            configuration.parameters = contractId
+
+            ExecutionUtil.runConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance())
+        }
+    }
+
+    private class GenerateTypeScriptWrapperAction(private val contractId: String) :
+        AnAction("Generate TypeScript Wrapper", null, TolkIcons.TYPESCRIPT) {
+        override fun actionPerformed(e: AnActionEvent) {
+            val project = e.project ?: return
+            val actonToml = ActonToml.find(project) ?: return
+
+            val runManager = RunManager.getInstance(project)
+            val settings = runManager.createConfiguration(
+                "Generate TypeScript wrapper for $contractId",
+                ActonCommandConfigurationType.getInstance().factory,
+            )
+            val configuration = settings.configuration as ActonCommandConfiguration
+
+            configuration.command = "wrapper"
+            configuration.workingDirectory = actonToml.workingDir
+            configuration.parameters = "--ts $contractId"
+
+            ExecutionUtil.runConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance())
         }
     }
 }

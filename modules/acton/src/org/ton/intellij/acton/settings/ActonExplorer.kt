@@ -3,12 +3,10 @@ package org.ton.intellij.acton.settings
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-enum class ActonExplorer(
-    val id: String,
-    private val displayName: String,
-) {
+enum class ActonExplorer(val id: String, private val displayName: String) {
     TONVIEWER("tonviewer", "Tonviewer"),
-    TONSCAN("tonscan", "Tonscan");
+    TONSCAN("tonscan", "Tonscan"),
+    ;
 
     override fun toString(): String = displayName
 
@@ -20,7 +18,7 @@ enum class ActonExplorer(
                 "https://$domain/$encodedAddress"
             }
 
-            TONSCAN   -> {
+            TONSCAN -> {
                 val domain = if (isTestnet) "testnet.tonscan.org" else "tonscan.org"
                 "https://$domain/address/$encodedAddress"
             }
@@ -28,7 +26,7 @@ enum class ActonExplorer(
     }
 
     companion object {
-        val DEFAULT = TONVIEWER
+        val DEFAULT = TONSCAN
 
         fun fromId(id: String?): ActonExplorer = entries.firstOrNull { it.id == id } ?: DEFAULT
     }

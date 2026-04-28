@@ -15,7 +15,8 @@ import org.ton.intellij.func.psi.FuncNamedElement
 open class FuncGotoContributorBase<T : FuncNamedElement>(
     private val clazz: Class<T>,
     private vararg val indexKeys: StubIndexKey<String, T>,
-) : GotoClassContributor, ChooseByNameContributorEx {
+) : GotoClassContributor,
+    ChooseByNameContributorEx {
 
     override fun processNames(processor: Processor<in String>, scope: GlobalSearchScope, filter: IdFilter?) {
         for (key in indexKeys) {
@@ -24,19 +25,26 @@ open class FuncGotoContributorBase<T : FuncNamedElement>(
         }
     }
 
-    override fun processElementsWithName(name: String, processor: Processor<in NavigationItem>, parameters: FindSymbolParameters) {
+    override fun processElementsWithName(
+        name: String,
+        processor: Processor<in NavigationItem>,
+        parameters: FindSymbolParameters,
+    ) {
         for (key in indexKeys) {
             ProgressManager.checkCanceled()
             StubIndex.getInstance().processElements(
-                key, name, parameters.project, parameters.searchScope, parameters.idFilter,
-                clazz, processor
+                key,
+                name,
+                parameters.project,
+                parameters.searchScope,
+                parameters.idFilter,
+                clazz,
+                processor,
             )
         }
     }
 
-    override fun getQualifiedName(item: NavigationItem): String? {
-        return if (item is FuncNamedElement) item.name else null
-    }
+    override fun getQualifiedName(item: NavigationItem): String? = if (item is FuncNamedElement) item.name else null
 
     override fun getQualifiedNameSeparator() = "."
 }

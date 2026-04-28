@@ -7,15 +7,13 @@ import org.ton.intellij.tolk.psi.impl.*
 import org.ton.intellij.tolk.type.*
 import kotlin.math.max
 
-class TolkFieldLookupReference(
-    element: TolkFieldLookup
-) : TolkReferenceBase<TolkFieldLookup>(element) {
+class TolkFieldLookupReference(element: TolkFieldLookup) : TolkReferenceBase<TolkFieldLookup>(element) {
     override fun multiResolve(): List<TolkElement> =
         element.inference?.getResolvedRefs(element)?.mapNotNull { it.element as? TolkElement } ?: emptyList()
 
-    override fun isReferenceTo(element: PsiElement): Boolean {
-        return (element is TolkStructField || element is TolkEnumMember || element is TolkFunction) && super.isReferenceTo(element)
-    }
+    override fun isReferenceTo(element: PsiElement): Boolean =
+        (element is TolkStructField || element is TolkEnumMember || element is TolkFunction) &&
+            super.isReferenceTo(element)
 }
 
 fun resolveFieldLookupReferenceWithReceiver(
@@ -48,7 +46,7 @@ fun resolveFieldLookupReferenceWithReceiver(
         receiverType,
         name,
         fieldLookup.containingFile as TolkFile,
-        fieldLookup.typeArgumentList
+        fieldLookup.typeArgumentList,
     )
 }
 
@@ -57,13 +55,13 @@ fun collectFunctionCandidates(
     calledReceiver: TolkTy?,
     name: String,
     containingFile: TolkFile,
-    typeArgumentList: TolkTypeArgumentList?
+    typeArgumentList: TolkTypeArgumentList?,
 ): List<Pair<TolkFunction, Substitution>> {
     val functionCandidates = collectFunctionCandidates(
         project,
         calledReceiver,
         name,
-        containingFile
+        containingFile,
     )
     val typeArgs = typeArgumentList?.typeExpressionList?.map { it.type }
     if (typeArgs != null) {
@@ -93,20 +91,17 @@ data class MethodCallCandidate(
 }
 
 enum class ShapeKind {
-    GenericT,     // T
-    Union,        // U|V, T?
-    Primitive,    // int, slice, address, ...
-    Tensor,       // (A,B,...)
+    GenericT, // T
+    Union, // U|V, T?
+    Primitive, // int, slice, address, ...
+    Tensor, // (A,B,...)
     Instantiated, // Map<K,V>, Container<T>, Struct<X>, ...
 }
 
 // for every receiver, we calculate "score": how deep and specific it is;
 // e.g., between `Container<T>` and `T` we choose the first;
 // e.g., between `map<int8, V>` and `map<K, map<K, K>>` we choose the second;
-data class ShapeScore(
-    val kind: ShapeKind,
-    val depth: Int,
-) {
+data class ShapeScore(val kind: ShapeKind, val depth: Int) {
     fun isShapeBetterThan(rhs: ShapeScore): Boolean {
         if (kind != rhs.kind) {
             return kind > rhs.kind
@@ -144,7 +139,9 @@ fun collectFunctionCandidates(
     if (calledReceiver == null) {
         // simple call like foo()
         // so return all non-method functions
-        val functions = namedFunctionsSeq.filter { !it.hasSelf && !it.hasReceiver }.map { it to EmptySubstitution }.toList()
+        val functions = namedFunctionsSeq.filter {
+            !it.hasSelf && !it.hasReceiver
+        }.map { it to EmptySubstitution }.toList()
         if (functions.isEmpty()) {
             TolkBuiltins[project].getFunction(name)?.let {
                 return listOf(it to EmptySubstitution)
@@ -305,7 +302,7 @@ fun canSubstituteToReachActual(pattern: TolkTy, actual: TolkTy): Boolean {
 fun isMoreSpecificGeneric(typeA: TolkTy, typeB: TolkTy): Boolean {
     // exists θ: θ(B)=A && not exists φ: φ(A)=B
     return canSubstituteToReachActual(typeB, typeA) &&
-            !canSubstituteToReachActual(typeA, typeB)
+        !canSubstituteToReachActual(typeA, typeB)
 }
 
 // calculate score for a receiver;

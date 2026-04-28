@@ -13,7 +13,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 <error descr="Fields 'x', 'y' missed in initialization">Point</error>{};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -31,7 +31,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 <error descr="Fields 'x', 'y' missed in initialization">PointAlias</error> {};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -47,7 +47,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 <error descr="Fields 'x', 'y' missed in initialization">Point<int></error> {};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -65,7 +65,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 <error descr="Fields 'x', 'y' missed in initialization">IntPoint</error> {};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -81,7 +81,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 val p: Point = <error descr="Fields 'x', 'y' missed in initialization">{</error>};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -97,7 +97,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 <error descr="Field 'y' missed in initialization">Point</error>{ x: 1 };
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -115,7 +115,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 Point{ x: 1, y: 2 };
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -131,7 +131,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 Point{x: 1, y: 2};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -147,7 +147,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 Point{`x`: 1, y: 2};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -165,7 +165,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 Point{x, y};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -183,7 +183,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 val point: Point = {x, y};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -201,7 +201,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 Point{x: 10, y};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -216,7 +216,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 <error descr="Field 'x' missed in initialization">Point</error> {};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -232,7 +232,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 <error descr="Fields 'x', 'y' missed in initialization">Point</error> {};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -249,7 +249,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 <error descr="Fields 'x', 'y', 'z' missed in initialization">Point</error> {};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -266,7 +266,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 <error descr="Fields 'x', 'y' missed in initialization">Point</error> { z: 10 };
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -282,7 +282,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 <error descr="Field 'x' missed in initialization">Point</error>{};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -298,7 +298,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 <error descr="Field 'x' missed in initialization">Point</error>{};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 
@@ -314,7 +314,7 @@ class TolkStructInitializationInspectionTest : TolkInspectionTestBase() {
                 Point {};
             }
             """.trimIndent(),
-            TolkStructInitializationInspection()
+            TolkStructInitializationInspection(),
         )
     }
 }

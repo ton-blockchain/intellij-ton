@@ -89,6 +89,7 @@ class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
     fun `test struct-tests`() = doTest()
     fun `test ternary-tests`() = doTest()
     fun `test test-math`() = doTest()
+    fun `test trailing-comma-return-type`() = doTest()
     fun `test try-catch-tests`() = doTest()
     fun `test type-aliases-tests`() = doTest()
     fun `test unbalanced-ret`() = doTest()

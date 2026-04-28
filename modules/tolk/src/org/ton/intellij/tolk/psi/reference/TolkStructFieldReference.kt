@@ -35,7 +35,9 @@ class TolkStructFieldReference(val field: TolkStructExpressionField) :
             val inference = element.parentOfType<TolkInferenceContextOwner>()?.selfInferenceResult
                 ?: return ResolveResult.EMPTY_ARRAY
             inference.getResolvedRefs(field)
-        } else emptyList()
+        } else {
+            emptyList()
+        }
         val structExpression = field.parentOfType<TolkStructExpression>() ?: return ResolveResult.EMPTY_ARRAY
 
         val structType =

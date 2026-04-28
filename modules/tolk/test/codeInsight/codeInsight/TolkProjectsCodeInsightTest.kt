@@ -30,14 +30,14 @@ class TolkProjectsCodeInsightTest : TolkCodeInsightBaseTest() {
         require(testDataDir.exists() && testDataDir.isDirectory) {
             "Test directory not found: ${testDataDir.absolutePath}"
         }
-        
+
         val tolkFiles = findTolkFilesRecursively(testDataDir)
         require(tolkFiles.isNotEmpty()) {
             "No .tolk files found in directory: ${testDataDir.absolutePath}"
         }
-        
+
         myFixture.copyDirectoryToProject(directoryName, directoryName)
-        
+
         tolkFiles.forEach { tolkFile ->
             val relativePath = testDataDir.toPath().relativize(tolkFile.toPath()).toString()
             val testPath = "$directoryName/$relativePath"
@@ -51,7 +51,7 @@ class TolkProjectsCodeInsightTest : TolkCodeInsightBaseTest() {
 
     private fun findTolkFilesRecursively(directory: File): List<File> {
         val result = mutableListOf<File>()
-        
+
         fun traverse(dir: File) {
             dir.listFiles()?.forEach { file ->
                 when {
@@ -60,7 +60,7 @@ class TolkProjectsCodeInsightTest : TolkCodeInsightBaseTest() {
                 }
             }
         }
-        
+
         traverse(directory)
         return result
     }

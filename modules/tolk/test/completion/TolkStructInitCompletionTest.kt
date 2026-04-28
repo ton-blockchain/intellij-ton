@@ -110,6 +110,33 @@ class TolkStructInitCompletionTest : TolkCompletionTestBase() {
         """.trimIndent(),
     )
 
+    fun `test field completion with map type uses bracket literal`() = checkCompletion(
+        "balances",
+        """
+            struct map<K, V> {}
+            
+            struct Foo {
+                balances: map<int, int>
+            }
+
+            fun foo() {
+                Foo { bala/*caret*/ };
+            }
+        """,
+        """
+            struct map<K, V> {}
+            
+            struct Foo {
+                balances: map<int, int>
+            }
+
+            fun foo() {
+                Foo { balances: []/*caret*/ };
+            }
+        """.trimIndent(),
+        '\t',
+    )
+
     fun `test private field completion in function`() = checkEquals(
         """
             struct Foo {
@@ -134,6 +161,6 @@ class TolkStructInitCompletionTest : TolkCompletionTestBase() {
             }
         """,
         1,
-        "foo"
+        "foo",
     )
 }

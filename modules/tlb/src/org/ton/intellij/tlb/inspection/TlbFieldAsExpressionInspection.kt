@@ -8,18 +8,16 @@ import org.ton.intellij.tlb.psi.TlbVisitor
 import org.ton.intellij.tlb.psi.isNatural
 
 class TlbFieldAsExpressionInspection : TlbInspectionBase() {
-    override fun buildTlbVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession
-    ): TlbVisitor = object : TlbVisitor() {
-        override fun visitParamTypeExpression(o: TlbParamTypeExpression) {
-            val resolved = o.reference?.resolve()
-            if (resolved is TlbCommonField && !resolved.typeExpression.isNatural()) {
-                holder.registerProblem(
-                    o,
-                    "Can't use a field in an expression unless it is either an integer or a type",
-                )
+    override fun buildTlbVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TlbVisitor =
+        object : TlbVisitor() {
+            override fun visitParamTypeExpression(o: TlbParamTypeExpression) {
+                val resolved = o.reference?.resolve()
+                if (resolved is TlbCommonField && !resolved.typeExpression.isNatural()) {
+                    holder.registerProblem(
+                        o,
+                        "Can't use a field in an expression unless it is either an integer or a type",
+                    )
+                }
             }
         }
-    }
 }

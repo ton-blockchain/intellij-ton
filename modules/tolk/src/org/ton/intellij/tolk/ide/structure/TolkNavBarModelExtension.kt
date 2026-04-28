@@ -2,8 +2,6 @@ package org.ton.intellij.tolk.ide.structure
 
 import com.intellij.ide.navigationToolbar.StructureAwareNavBarModelExtension
 import com.intellij.lang.Language
-import com.intellij.openapi.actionSystem.DataContext
-import com.intellij.psi.PsiElement
 import com.intellij.util.Processor
 import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.psi.TolkElement
@@ -24,12 +22,6 @@ class TolkNavBarModelExtension : StructureAwareNavBarModelExtension() {
         return null
     }
 
-    override fun getLeafElement(dataContext: DataContext): PsiElement? {
-        val leaf =  super.getLeafElement(dataContext)
-        return leaf
-    }
-
-    override fun processChildren(`object`: Any, rootElement: Any?, processor: Processor<Any>): Boolean {
-        return super.processChildren(`object`, rootElement, processor)
-    }
+    override fun processChildren(`object`: Any, rootElement: Any?, processor: Processor<Any>): Boolean =
+        super.processChildren(`object`, rootElement, processor)
 }

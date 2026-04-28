@@ -22,12 +22,10 @@ import static org.ton.intellij.asm.psi.AsmElementTypes.*;
 %type IElementType
 %unicode
 
-EOL=\R
 WHITE_SPACE=\s+
 
 STACK_REGISTER=s[0-9]+|s\(-[0-9]+\)
 CONTROL_REGISTER=c[0-7]
-UNKNOWN_IDENTIFIER=[a-zA-Z_][a-zA-Z0-9_#]*
 NUMBER_DIGIT_LITERAL=(-?[0-9]+("/"-?[0-9]+)?)
 NUMBER_HEX_LITERAL=(0[xX][0-9a-fA-F]+)
 NUMBER_BINARY_LITERAL=(0[bB][01]+)
@@ -55,5 +53,3 @@ WORD=\S+
   {CONTROL_REGISTER}         { return CONTROL_REGISTER; }
   {WORD}                     { return WORD; }
 }
-
-[^] { return BAD_CHARACTER; }

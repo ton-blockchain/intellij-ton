@@ -1,7 +1,6 @@
 package org.ton.intellij.boc
 
 import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.execution.process.CapturingProcessAdapter
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessEvent
@@ -12,22 +11,20 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
-import org.ton.intellij.acton.settings.actonSettings
-import java.util.concurrent.TimeUnit
+import org.ton.intellij.acton.cli.resolveActonExecutable
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.Base64
 import java.util.HexFormat
+import java.util.concurrent.TimeUnit
 
 object BocActonService {
     private val LOG = logger<BocActonService>()
 
-    fun isAvailable(project: Project): Boolean {
-        val path = project.actonSettings.actonPath ?: PathEnvironmentVariableUtil.findInPath("acton")?.absolutePath
-        return path != null
-    }
+    fun isAvailable(project: Project): Boolean = resolveActonExecutable(project) != null
 
-    fun disassemble(project: Project, bocFilePath: String) = executeActonCommand(project, ActonCommand.Disasm(bocFile = bocFilePath))
+    fun disassemble(project: Project, bocFilePath: String) =
+        executeActonCommand(project, ActonCommand.Disasm(bocFile = bocFilePath))
 
     fun disassembleDetailed(project: Project, bocFilePath: String) =
         executeActonCommand(project, ActonCommand.Disasm(bocFile = bocFilePath, showHashes = true, showOffsets = true))
@@ -55,7 +52,7 @@ object BocActonService {
         val actonCommandLine = ActonCommandLine(
             command = command.name,
             workingDirectory = workingDir,
-            additionalArguments = command.getArguments()
+            additionalArguments = command.getArguments(),
         ).toGeneralCommandLine(project) ?: return Result.failure(IllegalStateException("Cannot find acton executable"))
         return executeCommand(actonCommandLine)
     }

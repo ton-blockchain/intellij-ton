@@ -3,7 +3,6 @@ package org.ton.intellij.func.ide
 import com.intellij.lang.parameterInfo.*
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
-import com.intellij.refactoring.suggested.startOffset
 import org.ton.intellij.func.psi.FuncApplyExpression
 import org.ton.intellij.func.psi.FuncElementTypes
 import org.ton.intellij.func.psi.FuncFunction
@@ -24,9 +23,8 @@ class FuncParameterInfoHandler : ParameterInfoHandler<FuncApplyExpression, List<
         return element
     }
 
-    override fun findElementForUpdatingParameterInfo(context: UpdateParameterInfoContext): FuncApplyExpression? {
-        return findFuncApplyExpression(context.file, context.offset)
-    }
+    override fun findElementForUpdatingParameterInfo(context: UpdateParameterInfoContext): FuncApplyExpression? =
+        findFuncApplyExpression(context.file, context.offset)
 
     override fun updateUI(p: List<String>, context: ParameterInfoUIContext) {
         val range = getArgumentRange(p, context.currentParameterIndex)
@@ -38,7 +36,7 @@ class FuncParameterInfoHandler : ParameterInfoHandler<FuncApplyExpression, List<
             context.removeHint()
             return
         }
-        val currentParameterIndex = if (parameterOwner.startOffset == context.offset) {
+        val currentParameterIndex = if (parameterOwner.textRange.startOffset == context.offset) {
             -1
         } else {
             val right = parameterOwner.right
@@ -55,9 +53,8 @@ class FuncParameterInfoHandler : ParameterInfoHandler<FuncApplyExpression, List<
         context.showHint(element, element.textRange.startOffset, this)
     }
 
-    private fun findFuncApplyExpression(file: PsiFile, offset: Int): FuncApplyExpression? {
-        return file.findElementAt(offset)?.ancestorStrict<FuncApplyExpression>()
-    }
+    private fun findFuncApplyExpression(file: PsiFile, offset: Int): FuncApplyExpression? =
+        file.findElementAt(offset)?.ancestorStrict<FuncApplyExpression>()
 
     private fun updateUI(text: String, range: TextRange, context: ParameterInfoUIContext) {
         context.setupUIComponentPresentation(
@@ -67,7 +64,7 @@ class FuncParameterInfoHandler : ParameterInfoHandler<FuncApplyExpression, List<
             !context.isUIComponentEnabled,
             false,
             false,
-            context.defaultParameterColor
+            context.defaultParameterColor,
         )
     }
 
@@ -78,7 +75,6 @@ class FuncParameterInfoHandler : ParameterInfoHandler<FuncApplyExpression, List<
         return TextRange(start, end)
     }
 
-    private fun presentText(params: List<String>): String {
-        return if (params.isEmpty()) "<no arguments>" else params.joinToString(", ")
-    }
+    private fun presentText(params: List<String>): String =
+        if (params.isEmpty()) "<no arguments>" else params.joinToString(", ")
 }

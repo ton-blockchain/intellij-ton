@@ -9,8 +9,9 @@ import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiTreeUtil
 import org.ton.intellij.func.psi.*
 
-
-abstract class FuncReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), FuncReferenceExpression {
+abstract class FuncReferenceExpressionMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    FuncReferenceExpression {
 
     override fun getReferences(): Array<FuncReference> {
         if (isVariableDefinition()) return EMPTY_ARRAY
@@ -35,15 +36,15 @@ abstract class FuncReferenceExpressionMixin(node: ASTNode) : ASTWrapperPsiElemen
     }
 }
 
-private fun FuncExpression.isTypeExpression(): Boolean =
-    when (this) {
-        is FuncTensorExpression -> this.expressionList.all { it.isTypeExpression() }
-        is FuncTupleExpression -> this.expressionList.all { it.isTypeExpression() }
-        is FuncHoleTypeExpression,
-        is FuncPrimitiveTypeExpression -> true
+private fun FuncExpression.isTypeExpression(): Boolean = when (this) {
+    is FuncTensorExpression -> this.expressionList.all { it.isTypeExpression() }
+    is FuncTupleExpression -> this.expressionList.all { it.isTypeExpression() }
+    is FuncHoleTypeExpression,
+    is FuncPrimitiveTypeExpression,
+    -> true
 
-        else -> false
-    }
+    else -> false
+}
 
 fun FuncReferenceExpression.isVariableDefinition(): Boolean = CachedValuesManager.getCachedValue(this) {
     val result = !PsiTreeUtil.treeWalkUp(this, null) { scope, lastParent ->

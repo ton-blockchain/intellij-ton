@@ -146,7 +146,7 @@ fun createTFrom<U = int, V = int100>(v: (int, (U, V)) = (1, (2, 3))) {
 
 @method_id(108)
 fun test8() {
-    __expect_type(createTFrom<coins,int8>, "((int, (coins, int8))) -> [int, coins, int8]");
+    __expect_type(createTFrom<coins,int8>, "((int, (coins, int8))) -> array<int | coins | int8>");
     return (createTFrom(), createTFrom((5, (8, createTFrom().0))));
 }
 

@@ -10,22 +10,20 @@ import org.ton.intellij.func.inspection.FuncInspectionBase
 import org.ton.intellij.func.psi.*
 
 class FuncMissingImpureInspection : FuncInspectionBase() {
-    override fun buildFuncVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): FuncVisitor = object : FuncVisitor() {
-        override fun visitFunction(function: FuncFunction) {
-            if (shouldHaveImpureSpecifier(function)) {
-                val identifier = function.identifier
-                holder.registerProblem(
-                    identifier,
-                    FuncBundle.message("inspection.func.missing.impure.message"),
-                    ProblemHighlightType.WEAK_WARNING,
-                    FuncAddImpureFix(function)
-                )
+    override fun buildFuncVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): FuncVisitor =
+        object : FuncVisitor() {
+            override fun visitFunction(function: FuncFunction) {
+                if (shouldHaveImpureSpecifier(function)) {
+                    val identifier = function.identifier
+                    holder.registerProblem(
+                        identifier,
+                        FuncBundle.message("inspection.func.missing.impure.message"),
+                        ProblemHighlightType.WEAK_WARNING,
+                        FuncAddImpureFix(function),
+                    )
+                }
             }
         }
-    }
 
     private fun shouldHaveImpureSpecifier(function: FuncFunction): Boolean {
         if (hasSpecifier(function, "impure") || hasSpecifier(function, "method_id")) {
@@ -61,9 +59,9 @@ class FuncMissingImpureInspection : FuncInspectionBase() {
     }
 }
 
-class FuncAddImpureFix(
-    element: PsiElement,
-) : LocalQuickFixAndIntentionActionOnPsiElement(element), LocalQuickFix {
+class FuncAddImpureFix(element: PsiElement) :
+    LocalQuickFixAndIntentionActionOnPsiElement(element),
+    LocalQuickFix {
 
     override fun getFamilyName(): String = FuncBundle.message("inspection.func.missing.impure.fix.family.name")
     override fun getText(): String = FuncBundle.message("inspection.func.missing.impure.fix.text")

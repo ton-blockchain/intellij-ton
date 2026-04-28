@@ -25,10 +25,7 @@ sealed class TvmIntRangeSet {
 
     protected abstract fun asRangeArray(): Array<BigInteger>
 
-    data class Range(
-        override val min: BigInteger,
-        override val max: BigInteger
-    ) : TvmIntRangeSet() {
+    data class Range(override val min: BigInteger, override val max: BigInteger) : TvmIntRangeSet() {
         override fun asRangeArray(): Array<BigInteger> = arrayOf(min, max)
 
         override fun contains(value: BigInteger): Boolean = value in min..max
@@ -84,7 +81,8 @@ sealed class TvmIntRangeSet {
                 if (other.isEmpty() || other == this) return this
                 if (other is Point) return other.join(this)
                 if (other is Range) {
-                    if (other.min <= max && min <= other.max ||
+                    if (other.min <= max &&
+                        min <= other.max ||
                         (other.max < min && other.max + BigInteger.ONE == min) ||
                         (other.min > max && max + BigInteger.ONE == other.min)
                     ) {
@@ -132,16 +130,14 @@ sealed class TvmIntRangeSet {
 
                 return ranges(result, longs.size + remaining)
             } catch (e: Exception) {
-               throw IllegalStateException("Failed to join $this with $other", e)
+                throw IllegalStateException("Failed to join $this with $other", e)
             }
         }
 
         override fun toString(): String = "{${format(min, max)}}"
     }
 
-    data class Point(
-        val value: BigInteger
-    ) : TvmIntRangeSet() {
+    data class Point(val value: BigInteger) : TvmIntRangeSet() {
         constructor(value: Long) : this(BigInteger.valueOf(value))
 
         override val min: BigInteger get() = value
@@ -152,9 +148,7 @@ sealed class TvmIntRangeSet {
         override fun contains(value: TvmIntRangeSet): Boolean = value.isEmpty() || this == value
         override fun contains(value: BigInteger): Boolean = this.value == value
 
-        override fun minus(other: TvmIntRangeSet): TvmIntRangeSet {
-            return if (other.contains(value)) Empty else this
-        }
+        override fun minus(other: TvmIntRangeSet): TvmIntRangeSet = if (other.contains(value)) Empty else this
 
         override fun unaryMinus(): TvmIntRangeSet = Point(-value)
 
@@ -164,9 +158,13 @@ sealed class TvmIntRangeSet {
             if (other is Point) {
                 val min = minOf(value, other.value)
                 val max = maxOf(value, other.value)
-                return if (min + BigInteger.ONE == max) range(min, max) else RangeSet(
-                    arrayOf(min, min, max, max)
-                )
+                return if (min + BigInteger.ONE == max) {
+                    range(min, max)
+                } else {
+                    RangeSet(
+                        arrayOf(min, min, max, max),
+                    )
+                }
             }
             if (other is Range) {
                 return if (value < other.min) {
@@ -220,16 +218,14 @@ sealed class TvmIntRangeSet {
         }
     }
 
-    data class RangeSet(
-        val ranges: Array<BigInteger>
-    ) : TvmIntRangeSet() {
+    data class RangeSet(val ranges: Array<BigInteger>) : TvmIntRangeSet() {
         constructor(r1min: BigInteger, r1max: BigInteger, r2min: BigInteger, r2max: BigInteger) : this(
             arrayOf(
                 r1min,
                 r1max,
                 r2min,
-                r2max
-            )
+                r2max,
+            ),
         )
 
         override val min: BigInteger get() = ranges.first()
@@ -339,9 +335,10 @@ sealed class TvmIntRangeSet {
         fun point(value: Long): Point = Point(value)
         fun point(value: BigInteger): Point = Point(value)
 
-        fun range(from: BigInteger, to: BigInteger): TvmIntRangeSet {
-            return if (from == to) point(from)
-            else Range(from, to)
+        fun range(from: BigInteger, to: BigInteger): TvmIntRangeSet = if (from == to) {
+            point(from)
+        } else {
+            Range(from, to)
         }
 
         private fun ranges(ranges: Array<BigInteger>, bound: Int): TvmIntRangeSet {
@@ -352,16 +349,20 @@ sealed class TvmIntRangeSet {
     }
 }
 
-private fun format(min: BigInteger, max: BigInteger): String {
-    return min.format() + (if (min == max) "" else if (max - min == BigInteger.ONE) "," else "..") + max.format()
-}
-
-private fun BigInteger.format(): String {
-    return when {
-        this == TVM_INT_MAX_VALUE -> "MAX"
-        this == TVM_INT_MAX_VALUE - BigInteger.ONE -> "MAX-1"
-        this == TVM_INT_MIN_VALUE -> "MIN"
-        this == TVM_INT_MIN_VALUE + BigInteger.ONE -> "MIN+1"
-        else -> toString()
+private fun format(min: BigInteger, max: BigInteger): String = min.format() + (
+    if (min == max) {
+        ""
+    } else if (max - min == BigInteger.ONE) {
+        ","
+    } else {
+        ".."
     }
+    ) + max.format()
+
+private fun BigInteger.format(): String = when {
+    this == TVM_INT_MAX_VALUE -> "MAX"
+    this == TVM_INT_MAX_VALUE - BigInteger.ONE -> "MAX-1"
+    this == TVM_INT_MIN_VALUE -> "MIN"
+    this == TVM_INT_MIN_VALUE + BigInteger.ONE -> "MIN+1"
+    else -> toString()
 }

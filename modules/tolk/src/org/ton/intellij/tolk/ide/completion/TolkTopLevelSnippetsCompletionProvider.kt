@@ -56,9 +56,11 @@ object TolkTopLevelSnippetsCompletionProvider : TolkCompletionProvider() {
                             fun ${'$'}name$.save(self) {
                                 contract.setData(self.toCell());
                             }
-                        """.trimIndent(), true, "name" to ConstantNode("Storage")
+                        """.trimIndent(),
+                        true,
+                        "name" to ConstantNode("Storage"),
                     ).handleInsert(context, item)
-                }
+                },
         )
 
         result.addElement(
@@ -85,15 +87,16 @@ object TolkTopLevelSnippetsCompletionProvider : TolkCompletionProvider() {
                                 incomingMessages: ${'$'}messages$
                                 storage: ${'$'}storage$
                             }
-                        """.trimIndent(), true,
+                        """.trimIndent(),
+                        true,
                         "name" to ConstantNode(pascalName),
                         "author" to ConstantNode(""),
                         "version" to ConstantNode("1.0.0"),
                         "description" to ConstantNode("My TON contract"),
                         "messages" to ConstantNode("AllowedMessages"),
-                        "storage" to ConstantNode("Storage")
+                        "storage" to ConstantNode("Storage"),
                     ).handleInsert(context, item)
-                }
+                },
         )
 
         val file = parameters.originalFile as? TolkFile ?: return
@@ -110,13 +113,14 @@ object TolkTopLevelSnippetsCompletionProvider : TolkCompletionProvider() {
                     val start = context.startOffset
                     document.deleteString(start, start + "method fun".length)
                     TemplateStringInsertHandler(
-                        "fun \$type$.\$name$(self\$params$)\$return$ {\n\$END$\n}", true,
+                        "fun \$type$.\$name$(self\$params$)\$return$ {\n\$END$\n}",
+                        true,
                         "type" to ConstantNode(firstType?.name ?: "Foo"),
                         "name" to ConstantNode("name"),
                         "params" to ConstantNode(""),
                         "return" to ConstantNode(""),
                     ).handleInsert(context, item)
-                }
+                },
         )
 
         result.addElement(
@@ -130,13 +134,14 @@ object TolkTopLevelSnippetsCompletionProvider : TolkCompletionProvider() {
                     val start = context.startOffset
                     document.deleteString(start, start + "static method fun".length)
                     TemplateStringInsertHandler(
-                        "fun \$type$.\$name$(\$params$)\$return$ {\n\$END$\n}", true,
+                        "fun \$type$.\$name$(\$params$)\$return$ {\n\$END$\n}",
+                        true,
                         "type" to ConstantNode(firstType?.name ?: "Foo"),
                         "name" to ConstantNode("name"),
                         "params" to ConstantNode(""),
                         "return" to ConstantNode(""),
                     ).handleInsert(context, item)
-                }
+                },
         )
     }
 }

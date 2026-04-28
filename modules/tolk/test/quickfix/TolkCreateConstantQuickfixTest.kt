@@ -1,7 +1,5 @@
 package org.ton.intellij.tolk.quickfix
 
-import com.intellij.codeInspection.InspectionProfileEntry
-import org.intellij.lang.annotations.Language
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.inspection.TolkUnresolvedReferenceInspection
 

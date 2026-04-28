@@ -1,3 +1,5 @@
+@file:Suppress("OVERRIDE_DEPRECATION")
+
 package org.ton.intellij.tolk.coverage
 
 import com.intellij.coverage.CoverageEngine
@@ -10,6 +12,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.NlsContexts.ProgressTitle
+import com.intellij.rt.coverage.data.JumpData
 import com.intellij.rt.coverage.data.LineData
 import com.intellij.rt.coverage.data.ProjectData
 import org.ton.intellij.tolk.TolkBundle
@@ -19,7 +22,7 @@ import java.io.IOException
 
 fun <T> Project.computeWithCancelableProgress(
     @Suppress("UnstableApiUsage") @ProgressTitle title: String,
-    supplier: () -> T
+    supplier: () -> T,
 ): T {
     if (isUnitTestMode) {
         return supplier()
@@ -40,7 +43,9 @@ class TolkCoverageRunner : CoverageRunner() {
         if (baseCoverageSuite !is TolkCoverageSuite) return null
         return try {
             if (ApplicationManager.getApplication().isDispatchThread) {
-                baseCoverageSuite.project.computeWithCancelableProgress(TolkBundle.message("progress.title.loading.coverage.data")) {
+                baseCoverageSuite.project.computeWithCancelableProgress(
+                    TolkBundle.message("progress.title.loading.coverage.data"),
+                ) {
                     readProjectData(sessionDataFile, baseCoverageSuite)
                 }
             } else {
@@ -59,13 +64,12 @@ class TolkCoverageRunner : CoverageRunner() {
         private fun readProjectData(dataFile: File, coverageSuite: TolkCoverageSuite): ProjectData? {
             val projectData = ProjectData()
             val report = readLcov(dataFile, coverageSuite.contextFilePath)
-            for ((filePath, lineHitsList) in report.records) {
+            for ((filePath, fileReport) in report.records) {
                 val classData = projectData.getOrCreateClassData(filePath)
-                val max = lineHitsList.lastOrNull()?.lineNumber ?: 0
+                val max = fileReport.lineHits.lastOrNull()?.lineNumber ?: 0
                 val lines = arrayOfNulls<LineData>(max + 1)
-                for (lineHits in lineHitsList) {
-                    val lineData = LineData(lineHits.lineNumber, null)
-                    lineData.hits = lineHits.hits
+                for (lineHits in fileReport.lineHits) {
+                    val lineData = createLineData(lineHits, fileReport.branchHits[lineHits.lineNumber])
                     lines[lineHits.lineNumber] = lineData
                 }
                 classData.setLines(lines)
@@ -74,3 +78,26 @@ class TolkCoverageRunner : CoverageRunner() {
         }
     }
 }
+
+internal fun createLineData(
+    lineHits: LcovCoverageReport.LineHits,
+    branches: List<LcovCoverageReport.BranchHits>?,
+): LineData {
+    val lineData = LineData(lineHits.lineNumber, null)
+    lineData.hits = lineHits.hits
+    if (branches != null) {
+        for ((jumpIdx, branch) in branches.withIndex()) {
+            val jump: JumpData = lineData.addJump(jumpIdx)
+            jump.trueHits = branch.trueHits
+            jump.falseHits = branch.falseHits
+        }
+        // LineData.getStatus() only looks at the array-backed branch storage.
+        lineData.fillArrays()
+    }
+    return lineData
+}
+
+internal fun createLineStatus(
+    lineHits: LcovCoverageReport.LineHits,
+    branches: List<LcovCoverageReport.BranchHits>?,
+): Int = createLineData(lineHits, branches).status

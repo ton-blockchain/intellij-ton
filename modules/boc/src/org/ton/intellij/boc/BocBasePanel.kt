@@ -22,7 +22,8 @@ abstract class BocBasePanel(
     protected val file: VirtualFile,
     fileType: LanguageFileType = PlainTextFileType.INSTANCE,
     private val onInstalled: (() -> Unit)? = null,
-) : JPanel(BorderLayout()), Disposable {
+) : JPanel(BorderLayout()),
+    Disposable {
 
     protected val document: Document = EditorFactory.getInstance().createDocument("")
     protected val editor: Editor = EditorFactory.getInstance().createEditor(document, project, fileType, true)
@@ -35,16 +36,19 @@ abstract class BocBasePanel(
 
     private fun setupFileListener() {
         val connection = project.messageBus.connect(this)
-        connection.subscribe(VirtualFileManager.VFS_CHANGES, object : BulkFileListener {
-            override fun after(events: List<VFileEvent>) {
-                for (event in events) {
-                    if (event is VFileContentChangeEvent && event.file == file) {
-                        loadContent()
-                        break
+        connection.subscribe(
+            VirtualFileManager.VFS_CHANGES,
+            object : BulkFileListener {
+                override fun after(events: List<VFileEvent>) {
+                    for (event in events) {
+                        if (event is VFileContentChangeEvent && event.file == file) {
+                            loadContent()
+                            break
+                        }
                     }
                 }
-            }
-        })
+            },
+        )
     }
 
     private fun setupUI() {

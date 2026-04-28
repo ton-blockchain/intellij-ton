@@ -9,32 +9,37 @@ import org.ton.intellij.tlb.psi.TlbReference
 import org.ton.intellij.tlb.psi.TlbVisitor
 
 class TlbUnresolvedReferenceInspection : TlbInspectionBase() {
-    override fun buildTlbVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): TlbVisitor = object : TlbVisitor() {
-        override fun visitParamTypeExpression(expression: TlbParamTypeExpression) {
-            val name = expression.identifier?.text ?: return
-            if (name == "Any" || name == "Cell" || name.startsWith("uint") || name.startsWith("int") || name.startsWith("bits")) return
-            val reference = expression.reference as? TlbReference ?: return
-            if (reference.multiResolve(false).isEmpty()) {
-                if (BLOCK_TLB_TYPES.contains(name)) {
-                    holder.registerProblem(
-                        expression, 
-                        "Unresolved reference: ${expression.text}. This type is available in block.tlb", 
-                        ProblemHighlightType.LIKE_UNKNOWN_SYMBOL,
-                        TlbConfigureGlobalBlockTlbFix()
-                    )
-                } else {
-                    holder.registerProblem(
-                        expression, 
-                        "Unresolved reference: ${expression.text}", 
-                        ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
-                    )
+    override fun buildTlbVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TlbVisitor =
+        object : TlbVisitor() {
+            override fun visitParamTypeExpression(expression: TlbParamTypeExpression) {
+                val name = expression.identifier?.text ?: return
+                if (name == "Any" ||
+                    name == "Cell" ||
+                    name.startsWith("uint") ||
+                    name.startsWith("int") ||
+                    name.startsWith("bits")
+                ) {
+                    return
+                }
+                val reference = expression.reference as? TlbReference ?: return
+                if (reference.multiResolve(false).isEmpty()) {
+                    if (BLOCK_TLB_TYPES.contains(name)) {
+                        holder.registerProblem(
+                            expression,
+                            "Unresolved reference: ${expression.text}. This type is available in block.tlb",
+                            ProblemHighlightType.LIKE_UNKNOWN_SYMBOL,
+                            TlbConfigureGlobalBlockTlbFix(),
+                        )
+                    } else {
+                        holder.registerProblem(
+                            expression,
+                            "Unresolved reference: ${expression.text}",
+                            ProblemHighlightType.LIKE_UNKNOWN_SYMBOL,
+                        )
+                    }
                 }
             }
         }
-    }
 }
 
 val BLOCK_TLB_TYPES = setOf(

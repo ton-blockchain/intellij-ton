@@ -21,7 +21,7 @@ class FuncNamedElementIndex : StringStubIndexExtension<FuncNamedElement>() {
         fun findElementsByName(
             project: Project,
             target: String,
-            scope: GlobalSearchScope = GlobalSearchScope.allScope(project)
+            scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
         ): Collection<FuncNamedElement> {
             checkCommitIsNotInProgress(project)
             return getElements(KEY, target, project, scope).also {

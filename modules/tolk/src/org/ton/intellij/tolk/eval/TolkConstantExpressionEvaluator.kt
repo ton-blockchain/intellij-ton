@@ -15,10 +15,8 @@ import java.math.BigInteger
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-class TolkConstantExpressionEvaluator(
-    val project: Project,
-    throwOverflowException: Boolean = false
-) : TolkRecursiveElementWalkingVisitor() {
+class TolkConstantExpressionEvaluator(val project: Project, throwOverflowException: Boolean = false) :
+    TolkRecursiveElementWalkingVisitor() {
     private val key = if (throwOverflowException) WITH_OVERFLOW_KEY else NO_OVERFLOW_KEY
     private val visitor = TolkConstantExpressionVisitor(project, throwOverflowException)
     private val cache get() = CachedValuesManager.getManager(project).getCachedValue(project, key, PROVIDER, false)
@@ -54,17 +52,13 @@ class TolkConstantExpressionEvaluator(
             CachedValueProvider.Result.create(ConcurrentHashMap(), PsiModificationTracker.MODIFICATION_COUNT)
         }
         private val NO_OVERFLOW_KEY = Key.create<CachedValue<ConcurrentMap<PsiElement, TolkValue>>>(
-            "tolk.constant_value.no_overflow"
+            "tolk.constant_value.no_overflow",
         )
         private val WITH_OVERFLOW_KEY = Key.create<CachedValue<ConcurrentMap<PsiElement, TolkValue>>>(
-            "tolk.constant_value.with_overflow"
+            "tolk.constant_value.with_overflow",
         )
 
-        fun compute(
-            project: Project,
-            expression: TolkExpression,
-            throwOverflowException: Boolean = false
-        ): TolkValue? {
+        fun compute(project: Project, expression: TolkExpression, throwOverflowException: Boolean = false): TolkValue? {
             val evaluator = TolkConstantExpressionEvaluator(project, throwOverflowException)
             expression.accept(evaluator)
             return evaluator.cache[expression]
@@ -72,10 +66,8 @@ class TolkConstantExpressionEvaluator(
     }
 }
 
-class TolkConstantExpressionVisitor(
-    private val project: Project,
-    private val throwOverflowException: Boolean = false
-) : TolkVisitor() {
+class TolkConstantExpressionVisitor(private val project: Project, private val throwOverflowException: Boolean = false) :
+    TolkVisitor() {
     private val cachedValues = mutableMapOf<TolkElement, TolkValue>()
     var result: TolkValue? = null
 
@@ -92,9 +84,7 @@ class TolkConstantExpressionVisitor(
         return value
     }
 
-    operator fun get(element: TolkElement?): TolkValue? {
-        return cachedValues.remove(element)
-    }
+    operator fun get(element: TolkElement?): TolkValue? = cachedValues.remove(element)
 
     override fun visitParenExpression(o: TolkParenExpression) {
         result = get(o.expression)
@@ -165,20 +155,20 @@ class TolkConstantExpressionVisitor(
             right: TolkIntValue,
             op: TolkBinaryOp,
             element: TolkElement,
-            throwOverflowException: Boolean = false
+            throwOverflowException: Boolean = false,
         ): TolkValue? {
             return try {
                 when {
                     op.plus != null || op.pluslet != null -> TolkIntValue(
-                        left.value.add(right.value)
+                        left.value.add(right.value),
                     ).checkOverflow(element, throwOverflowException)
 
                     op.minus != null || op.minuslet != null -> TolkIntValue(
-                        left.value.subtract(right.value)
+                        left.value.subtract(right.value),
                     ).checkOverflow(element, throwOverflowException)
 
                     op.times != null || op.timeslet != null -> TolkIntValue(
-                        left.value.multiply(right.value)
+                        left.value.multiply(right.value),
                     ).checkOverflow(element, throwOverflowException)
 
                     op.div != null || op.divlet != null -> {
@@ -186,7 +176,7 @@ class TolkConstantExpressionVisitor(
                             return null
                         }
                         TolkIntValue(
-                            left.value.divModFloor(right.value).first
+                            left.value.divModFloor(right.value).first,
                         ).checkOverflow(element, throwOverflowException)
                     }
 
@@ -195,7 +185,7 @@ class TolkConstantExpressionVisitor(
                             return null
                         }
                         TolkIntValue(
-                            left.value.divModCeil(right.value).first
+                            left.value.divModCeil(right.value).first,
                         ).checkOverflow(element, throwOverflowException)
                     }
 
@@ -204,7 +194,7 @@ class TolkConstantExpressionVisitor(
                             return null
                         }
                         TolkIntValue(
-                            left.value.divModRound(right.value).first
+                            left.value.divModRound(right.value).first,
                         ).checkOverflow(element, throwOverflowException)
                     }
 
@@ -213,7 +203,7 @@ class TolkConstantExpressionVisitor(
                             return null
                         }
                         TolkIntValue(
-                            left.value.divModFloor(right.value).second
+                            left.value.divModFloor(right.value).second,
                         ).checkOverflow(element, throwOverflowException)
                     }
 
@@ -222,7 +212,7 @@ class TolkConstantExpressionVisitor(
                             return null
                         }
                         TolkIntValue(
-                            left.value.divModCeil(right.value).second
+                            left.value.divModCeil(right.value).second,
                         ).checkOverflow(element, throwOverflowException)
                     }
 
@@ -231,7 +221,7 @@ class TolkConstantExpressionVisitor(
                             return null
                         }
                         TolkIntValue(
-                            left.value.divModRound(right.value).second
+                            left.value.divModRound(right.value).second,
                         ).checkOverflow(element, throwOverflowException)
                     }
 
@@ -239,29 +229,29 @@ class TolkConstantExpressionVisitor(
                     op.or != null -> TolkIntValue(left.value.or(right.value))
                     op.xor != null -> TolkIntValue(left.value.xor(right.value))
                     op.lshift != null -> TolkIntValue(
-                        left.value.shiftLeft(right.value.toInt())
+                        left.value.shiftLeft(right.value.toInt()),
                     ).checkOverflow(element, throwOverflowException)
 
                     op.rshift != null -> TolkIntValue(
-                        left.value.shiftRight(right.value.toInt())
+                        left.value.shiftRight(right.value.toInt()),
                     )
 
                     op.gt != null -> TolkIntValue(if (left.value > right.value) -BigInteger.ONE else BigInteger.ZERO)
 
                     op.lt != null -> TolkIntValue(
-                        if (left.value < right.value) -BigInteger.ONE else BigInteger.ZERO
+                        if (left.value < right.value) -BigInteger.ONE else BigInteger.ZERO,
                     )
 
                     op.geq != null -> TolkIntValue(
-                        if (left.value >= right.value) -BigInteger.ONE else BigInteger.ZERO
+                        if (left.value >= right.value) -BigInteger.ONE else BigInteger.ZERO,
                     )
 
                     op.leq != null -> TolkIntValue(
-                        if (left.value <= right.value) -BigInteger.ONE else BigInteger.ZERO
+                        if (left.value <= right.value) -BigInteger.ONE else BigInteger.ZERO,
                     )
 
                     op.eq != null -> TolkIntValue(
-                        if (left.value == right.value) -BigInteger.ONE else BigInteger.ZERO
+                        if (left.value == right.value) -BigInteger.ONE else BigInteger.ZERO,
                     )
 
                     else -> null

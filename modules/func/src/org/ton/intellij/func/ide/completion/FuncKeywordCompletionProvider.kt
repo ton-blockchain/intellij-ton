@@ -12,7 +12,7 @@ class FuncKeywordCompletionProvider(
     val priority: Double,
     val keywords: List<String> = emptyList(),
     val insertHandler: InsertHandler<LookupElement>? = null,
-    val insertSpace: Boolean = true
+    val insertSpace: Boolean = true,
 ) : CompletionProvider<CompletionParameters>() {
     constructor(priority: Double, vararg keywords: String) : this(priority, keywords.toList(), null)
 
@@ -31,7 +31,7 @@ class FuncKeywordCompletionProvider(
         val insertHandler = insertHandler ?: createTemplateBasedInsertHandler("func_lang_$keyword")
         return PrioritizedLookupElement.withPriority(
             LookupElementBuilder.create(keyword).withBoldness(true).withInsertHandler(insertHandler),
-            priority
+            priority,
         )
     }
 

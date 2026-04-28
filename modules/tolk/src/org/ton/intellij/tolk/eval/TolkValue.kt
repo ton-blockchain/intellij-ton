@@ -9,7 +9,6 @@ object TolkUnknownValue : TolkValue
 
 data class TolkIntValue(val value: BigInteger) : TolkValue {
     override fun toString(): String = value.toString()
-
 }
 
 data class TolkTupleValue(val values: List<TolkValue?>) : TolkValue

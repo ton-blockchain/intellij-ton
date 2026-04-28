@@ -7,7 +7,9 @@ import org.ton.intellij.tolk.psi.TolkMatchPatternReference
 import org.ton.intellij.tolk.psi.TolkTypeArgumentList
 import org.ton.intellij.tolk.psi.reference.TolkMatchArmReference
 
-abstract class TolkMatchPatternReferenceMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkMatchPatternReference {
+abstract class TolkMatchPatternReferenceMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    TolkMatchPatternReference {
     override val typeArgumentList: TolkTypeArgumentList?
         get() = findChildByClass(TolkTypeArgumentList::class.java)
 

@@ -20,11 +20,9 @@ fun <T : TypeFoldable<T>> T.substitute(substitution: Substitution): T {
     })
 }
 
-fun <T : TypeFoldable<T>> T.unwrapTypeAliasDeeply(): T {
-    return foldWith(object : TypeFolder {
-        override fun foldType(ty: TolkTy): TolkTy = when (ty) {
-            is TolkTyAlias -> ty.underlyingType
-            else -> ty.superFoldWith(this)
-        }
-    })
-}
+fun <T : TypeFoldable<T>> T.unwrapTypeAliasDeeply(): T = foldWith(object : TypeFolder {
+    override fun foldType(ty: TolkTy): TolkTy = when (ty) {
+        is TolkTyAlias -> ty.underlyingType
+        else -> ty.superFoldWith(this)
+    }
+})

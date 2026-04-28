@@ -4,19 +4,18 @@ import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.intellij.openapi.diagnostic.logger
 
-class ActonExternalLinterResult(
-    val commandOutput: String,
-    val executionTime: Long,
-    val error: String? = null,
-) {
+class ActonExternalLinterResult(val commandOutput: String, val executionTime: Long, val error: String? = null) {
     val diagnostics: List<ActonDiagnostic> = if (error != null) {
         emptyList()
-    } else try {
-        LOG.info("external linter took: ${executionTime}ms")
-        GSON.fromJson(commandOutput, ActonLinterResponse::class.java)?.diagnostics?.filter { it.file != null } ?: emptyList()
-    } catch (e: Exception) {
-        LOG.error("Failed to parse external linter output", e)
-        emptyList()
+    } else {
+        try {
+            LOG.info("external linter took: ${executionTime}ms")
+            GSON.fromJson(commandOutput, ActonLinterResponse::class.java)?.diagnostics?.filter { it.file != null }
+                ?: emptyList()
+        } catch (e: Exception) {
+            LOG.error("Failed to parse external linter output", e)
+            emptyList()
+        }
     }
 
     companion object {
@@ -25,9 +24,7 @@ class ActonExternalLinterResult(
     }
 }
 
-private data class ActonLinterResponse(
-    val diagnostics: List<ActonDiagnostic>? = null,
-)
+private data class ActonLinterResponse(val diagnostics: List<ActonDiagnostic>? = null)
 
 data class ActonDiagnostic(
     val file: String?,
@@ -63,22 +60,19 @@ data class ActonAnnotation(
     private val _message: String? = null,
     @SerializedName("is_primary")
     private val _isPrimary: Boolean? = null,
+    @SerializedName("tags")
+    private val _tags: List<String>? = null,
 ) {
     val range: ActonRange get() = _range!!
     val message: String? get() = _message
     val isPrimary: Boolean get() = _isPrimary ?: true
+    val tags: List<String> get() = _tags ?: emptyList()
     val isValid: Boolean get() = _range != null
 }
 
-data class ActonRange(
-    val start: ActonPosition,
-    val end: ActonPosition,
-)
+data class ActonRange(val start: ActonPosition, val end: ActonPosition)
 
-data class ActonPosition(
-    val line: Int,
-    val character: Int,
-)
+data class ActonPosition(val line: Int, val character: Int)
 
 data class ActonFix(
     @SerializedName("message")
@@ -99,7 +93,7 @@ enum class ActonApplicability {
     Auto,
 
     @SerializedName("manual")
-    Manual
+    Manual,
 }
 
 data class ActonEdit(

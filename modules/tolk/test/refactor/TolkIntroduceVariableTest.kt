@@ -14,7 +14,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var x = name;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable from expression`() = doRefactorTestWithSelection(
@@ -29,7 +29,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var result = name;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable from function call`() = doRefactorTestWithSelection(
@@ -52,7 +52,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var x = name;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable with selection`() = doRefactorTestWithSelection(
@@ -67,7 +67,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var result = name + 3;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable from complex expression`() = doRefactorTestWithSelection(
@@ -86,7 +86,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var result = name;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable from string literal`() = doRefactorTestWithSelection(
@@ -101,7 +101,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var message = name;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable from boolean literal`() = doRefactorTestWithSelection(
@@ -116,7 +116,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var flag = name;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable in condition`() = doRefactorTestWithSelection(
@@ -137,7 +137,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 return false;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable in return statement`() = doRefactorTestWithSelection(
@@ -152,7 +152,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 return name;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable with parentheses`() = doRefactorTestWithSelection(
@@ -167,7 +167,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var result = (name);
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable in arithmetic expression`() = doRefactorTestWithSelection(
@@ -184,7 +184,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var result = name + 5;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable from nested expression`() = doRefactorTestWithSelection(
@@ -203,7 +203,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var result = x + (name);
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable in loop condition`() = doRefactorTestWithSelection(
@@ -224,7 +224,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 }
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable from variable reference`() = doRefactorTestWithSelection(
@@ -241,7 +241,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var copy = name;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable in nested blocks`() = doRefactorTestWithSelection(
@@ -260,7 +260,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 }
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable from comparison`() = doRefactorTestWithSelection(
@@ -279,7 +279,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var result = name;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable with multiple occurrences same block`() = doRefactorTestWithSelection(
@@ -298,7 +298,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var result3 = name;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable with multiple occurrences different blocks`() = doRefactorTestWithSelection(
@@ -325,7 +325,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var z = name;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable with nested occurrences`() = doRefactorTestWithSelection(
@@ -354,7 +354,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 }
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable with complex expression multiple times`() = doRefactorTestWithSelection(
@@ -377,7 +377,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var result3 = (name);
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable in loop with multiple uses`() = doRefactorTestWithSelection(
@@ -408,7 +408,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 }
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable with function calls in different contexts`() = doRefactorTestWithSelection(
@@ -441,7 +441,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 return 0;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable with string concatenation`() = doRefactorTestWithSelection(
@@ -462,7 +462,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 var msg3 = (name);
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable with arithmetic in conditions`() = doRefactorTestWithSelection(
@@ -491,7 +491,7 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 return name;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 
     fun `test introduce variable in try catch blocks`() = doRefactorTestWithSelection(
@@ -524,6 +524,6 @@ class TolkIntroduceVariableTest : TolkRefactorTestBase() {
                 return 0;
             }
         """.trimIndent(),
-        TolkIntroduceVariableHandler()
+        TolkIntroduceVariableHandler(),
     )
 }

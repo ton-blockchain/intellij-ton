@@ -10,7 +10,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 
 @State(
     name = "TlbSettings",
-    storages = [Storage("tlb.xml")]
+    storages = [Storage("tlb.xml")],
 )
 @Service(Service.Level.PROJECT)
 class TlbSettingsState : PersistentStateComponent<TlbSettingsState> {

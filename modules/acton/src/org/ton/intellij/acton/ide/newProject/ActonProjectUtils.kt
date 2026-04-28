@@ -2,11 +2,44 @@ package org.ton.intellij.acton.ide.newProject
 
 import com.intellij.execution.RunManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.openapi.vfs.VirtualFile
 import org.ton.intellij.acton.cli.ActonCommand
+import org.ton.intellij.acton.cli.findActonExecutableInPath
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
 import java.nio.file.Paths
+
+internal fun createActonNewCommand(
+    projectName: String,
+    settings: ActonProjectSettings,
+    templateCatalog: ActonTemplateCatalog = ActonTemplateCatalogProvider.getTemplateCatalog(),
+): ActonCommand.New = ActonCommand.New(
+    path = ".",
+    projectName = projectName,
+    description = settings.description.trim().ifBlank { ActonProjectSettings.DEFAULT_DESCRIPTION },
+    template = settings.template,
+    app = settings.shouldIncludeTypeScriptApp(templateCatalog),
+    license = settings.license.trim().ifBlank { ActonProjectSettings.DEFAULT_LICENSE },
+    hooks = settings.includeGitHooks,
+    agents = settings.includeAgentsMd,
+)
+
+internal fun starterFilePathForTemplate(
+    template: String,
+    includeTypeScriptApp: Boolean = false,
+    templateCatalog: ActonTemplateCatalog = ActonTemplateCatalogProvider.getTemplateCatalog(),
+): String? = templateCatalog.starterFilePath(template, includeTypeScriptApp)
+
+private fun ActonProjectSettings.shouldIncludeTypeScriptApp(templateCatalog: ActonTemplateCatalog): Boolean =
+    templateCatalog.supportsTypeScriptApp(template) && addTypeScriptApp
+
+internal fun validateActonExecutable(): ValidationInfo? {
+    if (findActonExecutableInPath() != null) {
+        return null
+    }
+    return ValidationInfo("Cannot find `acton` executable in PATH")
+}
 
 fun createDefaultRunConfigurations(project: Project, baseDir: VirtualFile) {
     val runManager = RunManager.getInstance(project)

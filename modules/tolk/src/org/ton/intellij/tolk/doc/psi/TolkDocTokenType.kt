@@ -7,9 +7,8 @@ import org.ton.intellij.tolk.psi.TolkTokenType
 
 class TolkDocTokenType(debugName: String) : TolkTokenType(debugName)
 
-class TolkDocCompositeTokenType(
-    debugName: String,
-    private val astFactory: (IElementType) -> CompositeElement,
-) : TolkTokenType(debugName), ICompositeElementType {
+class TolkDocCompositeTokenType(debugName: String, private val astFactory: (IElementType) -> CompositeElement) :
+    TolkTokenType(debugName),
+    ICompositeElementType {
     override fun createCompositeNode(): CompositeElement = astFactory(this)
 }

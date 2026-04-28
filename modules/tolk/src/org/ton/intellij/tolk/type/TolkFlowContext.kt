@@ -8,25 +8,21 @@ class TolkFlowContext(
     val symbolTypes: MutableMap<TolkSymbolElement, TolkTy> = LinkedHashMap(),
     val symbols: MutableMap<String, TolkSymbolElement> = LinkedHashMap(),
     val sinkExpressions: MutableMap<TolkSinkExpression, TolkTy> = LinkedHashMap(),
-    var unreachable: TolkUnreachableKind? = null
+    var unreachable: TolkUnreachableKind? = null,
 ) {
     constructor(other: TolkFlowContext) : this(
         HashMap(other.functions),
         LinkedHashMap(other.symbolTypes),
         LinkedHashMap(other.symbols),
         LinkedHashMap(other.sinkExpressions),
-        other.unreachable
+        other.unreachable,
     )
 
     fun clone() = TolkFlowContext(this)
 
-    fun getType(symbol: TolkSymbolElement): TolkTy? {
-        return symbolTypes[symbol]
-    }
+    fun getType(symbol: TolkSymbolElement): TolkTy? = symbolTypes[symbol]
 
-    fun getType(sinkExpression: TolkSinkExpression): TolkTy? {
-        return sinkExpressions[sinkExpression]
-    }
+    fun getType(sinkExpression: TolkSinkExpression): TolkTy? = sinkExpressions[sinkExpression]
 
     // get the resulting type of variable or struct field
     fun smartcastOrOriginal(sinkExpression: TolkSinkExpression, originalType: TolkTy): TolkTy {
@@ -40,9 +36,7 @@ class TolkFlowContext(
         return smartcast
     }
 
-    fun getSymbol(
-        name: String?,
-    ): TolkSymbolElement? {
+    fun getSymbol(name: String?): TolkSymbolElement? {
         val fullName = name?.removeSurrounding("`") ?: return null
         return symbols[fullName]
     }
@@ -122,11 +116,9 @@ class TolkFlowContext(
             joinedSymbolTypes,
             joinedSymbols,
             joinedSinkExpressionsMutableMap,
-            joinedUnreachable
+            joinedUnreachable,
         )
     }
 }
 
-fun TolkFlowContext?.join(element: TolkFlowContext): TolkFlowContext {
-    return this?.join(element) ?: element
-}
+fun TolkFlowContext?.join(element: TolkFlowContext): TolkFlowContext = this?.join(element) ?: element

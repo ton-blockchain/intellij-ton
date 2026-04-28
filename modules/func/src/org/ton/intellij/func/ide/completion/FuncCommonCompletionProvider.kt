@@ -32,7 +32,7 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         val position = parameters.position
         val element = position.parent as FuncReferenceExpression
@@ -76,7 +76,7 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
 
                     if (expectedName.startsWith("~")) {
                         if (variantName.startsWith("~")) {
-                           return true
+                            return true
                         }
 
                         val returnType = variant.rawReturnType
@@ -85,7 +85,7 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
                             val retModifyType = returnType.types.first()
                             val argType = variant.rawParamType
                             return argType == retModifyType ||
-                                    (argType is FuncTyTensor && argType.types.first() == retModifyType)
+                                (argType is FuncTyTensor && argType.types.first() == retModifyType)
                         }
 
                         return false
@@ -200,14 +200,9 @@ object FuncCommonCompletionProvider : FuncCompletionProvider() {
     }
 }
 
-data class FuncCompletionContext(
-    val context: FuncElement?
-)
+data class FuncCompletionContext(val context: FuncElement?)
 
-fun FuncNamedElement.toLookupElementBuilder(
-    context: FuncCompletionContext,
-    isImported: Boolean
-): LookupElement {
+fun FuncNamedElement.toLookupElementBuilder(context: FuncCompletionContext, isImported: Boolean): LookupElement {
     val contextElement = context.context
     val contextText = contextElement?.text ?: ""
     var name = this.name ?: ""
@@ -220,8 +215,9 @@ fun FuncNamedElement.toLookupElementBuilder(
     }
     val file = this.containingFile.originalFile
     val contextFile = context.context?.containingFile?.originalFile
-    val includePath = if (file == contextFile || contextFile == null) ""
-    else {
+    val includePath = if (file == contextFile || contextFile == null) {
+        ""
+    } else {
         val contextVirtualFile = contextFile.virtualFile
         val elementVirtualFile = file.virtualFile
         if (contextVirtualFile != null && elementVirtualFile != null) {
@@ -244,14 +240,24 @@ fun FuncNamedElement.toLookupElementBuilder(
                         val isExtensionFunction = name.startsWith("~") || name.startsWith(".")
                         val offset = if (
                             (isExtensionFunction && paramType is FuncTyAtomic) || paramType == FuncTyUnit
-                        ) 2 else 1
+                        ) {
+                            2
+                        } else {
+                            1
+                        }
                         val parent = contextElement?.parent
-                        if (parent is FuncApplyExpression && parent.left == contextElement && (parent.right is FuncTensorExpression || parent.right is FuncUnitExpression)) {
+                        if (parent is FuncApplyExpression &&
+                            parent.left == contextElement &&
+                            (parent.right is FuncTensorExpression || parent.right is FuncUnitExpression)
+                        ) {
                             context.editor.caretModel.moveToOffset(
-                                context.editor.caretModel.offset + ((parent.right?.textLength) ?: 0)
+                                context.editor.caretModel.offset + ((parent.right?.textLength) ?: 0),
                             )
                         } else {
-                            if (parent !is FuncApplyExpression || parent.left != contextElement || parent.right !is FuncApplyExpression) {
+                            if (parent !is FuncApplyExpression ||
+                                parent.left != contextElement ||
+                                parent.right !is FuncApplyExpression
+                            ) {
                                 context.editor.document.insertString(context.editor.caretModel.offset, "()")
                                 context.editor.caretModel.moveToOffset(context.editor.caretModel.offset + offset)
                             }
@@ -262,8 +268,11 @@ fun FuncNamedElement.toLookupElementBuilder(
                         val includeCandidateFile = file as? FuncFile ?: return@withInsertHandler
                         insertFile.import(includeCandidateFile)
                     },
-                if (isImported) FuncCompletionContributor.FUNCTION_PRIORITY
-                else FuncCompletionContributor.NOT_IMPORTED_FUNCTION_PRIORITY
+                if (isImported) {
+                    FuncCompletionContributor.FUNCTION_PRIORITY
+                } else {
+                    FuncCompletionContributor.NOT_IMPORTED_FUNCTION_PRIORITY
+                },
             )
         }
 
@@ -279,8 +288,11 @@ fun FuncNamedElement.toLookupElementBuilder(
                         val includeCandidateFile = file as? FuncFile ?: return@withInsertHandler
                         insertFile.import(includeCandidateFile)
                     },
-                if (isImported) FuncCompletionContributor.VAR_PRIORITY
-                else FuncCompletionContributor.NOT_IMPORTED_VAR_PRIORITY
+                if (isImported) {
+                    FuncCompletionContributor.VAR_PRIORITY
+                } else {
+                    FuncCompletionContributor.NOT_IMPORTED_VAR_PRIORITY
+                },
             )
         }
 
@@ -296,8 +308,11 @@ fun FuncNamedElement.toLookupElementBuilder(
                         val includeCandidateFile = file as? FuncFile ?: return@withInsertHandler
                         insertFile.import(includeCandidateFile)
                     },
-                if (isImported) FuncCompletionContributor.VAR_PRIORITY
-                else FuncCompletionContributor.NOT_IMPORTED_VAR_PRIORITY
+                if (isImported) {
+                    FuncCompletionContributor.VAR_PRIORITY
+                } else {
+                    FuncCompletionContributor.NOT_IMPORTED_VAR_PRIORITY
+                },
             )
         }
 
@@ -306,7 +321,7 @@ fun FuncNamedElement.toLookupElementBuilder(
                 base
                     .withIcon(FuncIcons.VARIABLE)
                     .withTypeText((parent as? FuncApplyExpression)?.left?.text ?: ""),
-                FuncCompletionContributor.VAR_PRIORITY
+                FuncCompletionContributor.VAR_PRIORITY,
             )
         }
 
@@ -315,7 +330,7 @@ fun FuncNamedElement.toLookupElementBuilder(
                 base
                     .withIcon(FuncIcons.PARAMETER)
                     .withTypeText(typeReference?.text ?: ""),
-                FuncCompletionContributor.VAR_PRIORITY
+                FuncCompletionContributor.VAR_PRIORITY,
             )
         }
 

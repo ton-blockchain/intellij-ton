@@ -2,7 +2,7 @@ package org.ton.intellij.tolk.type
 
 class TolkTyUnion private constructor(
     val variants: Collection<TolkTy>,
-    override val hasTypeAlias: Boolean = variants.any { it.hasTypeAlias }
+    override val hasTypeAlias: Boolean = variants.any { it.hasTypeAlias },
 ) : TolkTy {
     private var hashCode: Int = 0
 
@@ -10,9 +10,7 @@ class TolkTyUnion private constructor(
 
     override fun hasGenerics(): Boolean = hasGenerics
 
-    override fun superFoldWith(folder: TypeFolder): TolkTy {
-        return create(variants.map { it.foldWith(folder) })
-    }
+    override fun superFoldWith(folder: TypeFolder): TolkTy = create(variants.map { it.foldWith(folder) })
 
     val orNull: TolkTy?
         get() {
@@ -49,9 +47,7 @@ class TolkTyUnion private constructor(
         return variants == other.variants
     }
 
-    override fun isSuperType(other: TolkTy): Boolean {
-        return variants.all { it.isSuperType(other) }
-    }
+    override fun isSuperType(other: TolkTy): Boolean = variants.all { it.isSuperType(other) }
 
     override fun isEquivalentToInner(other: TolkTy): Boolean {
         if (this === other) return true
@@ -68,9 +64,7 @@ class TolkTyUnion private constructor(
         return true
     }
 
-    operator fun contains(type: TolkTy): Boolean {
-        return variants.any { it.isEquivalentTo(type) }
-    }
+    operator fun contains(type: TolkTy): Boolean = variants.any { it.isEquivalentTo(type) }
 
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
@@ -80,9 +74,7 @@ class TolkTyUnion private constructor(
         return other == TolkTy.Never
     }
 
-    fun calculateExactVariantToFitRhs(
-        rhsType: TolkTy
-    ): TolkTy? {
+    fun calculateExactVariantToFitRhs(rhsType: TolkTy): TolkTy? {
         val rhsUnion = rhsType.unwrapTypeAlias() as? TolkTyUnion
         // primitive 1-slot nullable don't store type_id, they can be assigned less strict, like `int?` to `int16?`
         if (rhsUnion != null) {
@@ -115,13 +107,9 @@ class TolkTyUnion private constructor(
     }
 
     companion object {
-        fun create(vararg elements: TolkTy): TolkTy {
-            return create(elements.toList())
-        }
+        fun create(vararg elements: TolkTy): TolkTy = create(elements.toList())
 
-        fun create(elements: Collection<TolkTy>): TolkTy {
-            return flattenVariants(elements)
-        }
+        fun create(elements: Collection<TolkTy>): TolkTy = flattenVariants(elements)
 
         private fun flattenVariants(variants: Collection<TolkTy>): TolkTy {
             if (variants.isEmpty()) {

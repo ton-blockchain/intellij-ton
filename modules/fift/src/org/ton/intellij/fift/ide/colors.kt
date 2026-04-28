@@ -12,10 +12,7 @@ import org.ton.intellij.util.loadTextResource
 import javax.swing.Icon
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
-enum class FiftColor(
-    displayName: String,
-    default: TextAttributesKey,
-) {
+enum class FiftColor(displayName: String, default: TextAttributesKey) {
     COMMENT("Comment", Defaults.LINE_COMMENT),
     DOCUMENTATION("Documentation", Defaults.DOC_COMMENT),
 
@@ -34,7 +31,7 @@ enum class FiftColor(
 
     ASSEMBLY_DEFINITION("Assembly definition", Defaults.FUNCTION_DECLARATION),
     ASSEMBLY_CALL("Assembly call", Defaults.FUNCTION_DECLARATION),
-    ASSEMBLY_INSTRUCTION("Assembly instruction", XmlHighlighterColors.HTML_TAG)
+    ASSEMBLY_INSTRUCTION("Assembly instruction", XmlHighlighterColors.HTML_TAG),
     ;
 
     val textAttributesKey =
@@ -42,9 +39,8 @@ enum class FiftColor(
     val attributesDescriptor = AttributesDescriptor(displayName, textAttributesKey)
 }
 
-
 class FiftColorSettingsPage : ColorSettingsPage {
-    private val DEMO_TEXT by lazy {
+    private val demoSampleText by lazy {
         loadTextResource(FiftColorSettingsPage::class.java, "colors/highlighter_example.fif")
     }
 
@@ -53,7 +49,7 @@ class FiftColorSettingsPage : ColorSettingsPage {
     override fun getDisplayName(): String = FiftLanguage.displayName
     override fun getIcon(): Icon = FiftIcons.FILE
     override fun getHighlighter(): SyntaxHighlighter = FiftSyntaxHighlighter
-    override fun getDemoText(): String = DEMO_TEXT
+    override fun getDemoText(): String = demoSampleText
 
     override fun getAdditionalHighlightingTagToDescriptorMap(): MutableMap<String, TextAttributesKey>? = null
 

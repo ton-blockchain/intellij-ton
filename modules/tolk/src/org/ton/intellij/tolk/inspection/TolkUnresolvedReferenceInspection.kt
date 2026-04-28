@@ -23,58 +23,63 @@ import org.ton.intellij.tolk.psi.TolkVisitor
 import org.ton.intellij.util.parentOfType
 
 class TolkUnresolvedReferenceInspection : TolkInspectionBase() {
-    override fun buildTolkVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): TolkVisitor = object : TolkVisitor() {
-        override fun visitReferenceTypeExpression(expr: TolkReferenceTypeExpression) {
-            val reference = expr.reference ?: return
-            checkReference(reference, expr, expr.identifier)
-        }
-
-        override fun visitReferenceExpression(expr: TolkReferenceExpression) {
-            when (expr.referenceName) {
-                "_" -> return
-            }
-            val reference = expr.reference ?: return
-            checkReference(reference, expr, expr.identifier)
-        }
-
-        private fun checkReference(reference: PsiReference, expr: TolkElement, identifier: PsiElement) {
-            val resolved = reference.resolve()
-            if (resolved != null) return
-            if (InjectedLanguageManager.getInstance(expr.project).isInjectedFragment(expr.containingFile)) return
-
-            val range = TextRange.from(identifier.startOffsetInParent, identifier.textLength)
-            val fixes = createImportFileFixes(expr, reference, holder.isOnTheFly)
-            registerProblem(expr, range, arrayOf(*getCreateQuickfixes(expr, identifier), *fixes))
-        }
-
-        fun getCreateQuickfixes(expr: TolkElement, identifier: PsiElement): Array<LocalQuickFixAndIntentionActionOnPsiElement> {
-            if (expr.parent is TolkCallExpression) {
-                return arrayOf(TolkCreateFunctionQuickfix(identifier))
+    override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor =
+        object : TolkVisitor() {
+            override fun visitReferenceTypeExpression(expr: TolkReferenceTypeExpression) {
+                val reference = expr.reference ?: return
+                checkReference(reference, expr, expr.identifier)
             }
 
-            val fixes = mutableListOf<LocalQuickFixAndIntentionActionOnPsiElement>(
-                TolkCreateConstantQuickfix(identifier),
-                TolkCreateGlobalVariableQuickfix(identifier)
-            )
-
-            if (expr.parentOfType<TolkBlockStatement>() != null) {
-                // don't add a quickfix outside function
-                fixes.add(TolkCreateLocalVariableQuickfix(identifier))
+            override fun visitReferenceExpression(expr: TolkReferenceExpression) {
+                when (expr.referenceName) {
+                    "_" -> return
+                }
+                val reference = expr.reference ?: return
+                checkReference(reference, expr, expr.identifier)
             }
 
-            return fixes.toTypedArray()
+            private fun checkReference(reference: PsiReference, expr: TolkElement, identifier: PsiElement) {
+                val resolved = reference.resolve()
+                if (resolved != null) return
+                if (InjectedLanguageManager.getInstance(expr.project).isInjectedFragment(expr.containingFile)) return
+
+                val range = TextRange.from(identifier.startOffsetInParent, identifier.textLength)
+                val fixes = createImportFileFixes(expr, reference, holder.isOnTheFly)
+                registerProblem(expr, range, arrayOf(*getCreateQuickfixes(expr, identifier), *fixes))
+            }
+
+            fun getCreateQuickfixes(
+                expr: TolkElement,
+                identifier: PsiElement,
+            ): Array<LocalQuickFixAndIntentionActionOnPsiElement> {
+                if (expr.parent is TolkCallExpression) {
+                    return arrayOf(TolkCreateFunctionQuickfix(identifier))
+                }
+
+                val fixes = mutableListOf<LocalQuickFixAndIntentionActionOnPsiElement>(
+                    TolkCreateConstantQuickfix(identifier),
+                    TolkCreateGlobalVariableQuickfix(identifier),
+                )
+
+                if (expr.parentOfType<TolkBlockStatement>() != null) {
+                    // don't add a quickfix outside function
+                    fixes.add(TolkCreateLocalVariableQuickfix(identifier))
+                }
+
+                return fixes.toTypedArray()
+            }
+
+            fun registerProblem(o: PsiElement, range: TextRange, fixes: Array<LocalQuickFix>) {
+                // actual error reported in TolkAnnotator
+                holder.registerProblem(o, "", ProblemHighlightType.INFORMATION, range, *fixes)
+            }
         }
 
-        fun registerProblem(o: PsiElement, range: TextRange, fixes: Array<LocalQuickFix>) {
-            // actual error reported in TolkAnnotator
-            holder.registerProblem(o, "", ProblemHighlightType.INFORMATION, range, *fixes)
-        }
-    }
-
-    private fun createImportFileFixes(target: TolkElement, reference: PsiReference, onTheFly: Boolean): Array<LocalQuickFix> {
+    private fun createImportFileFixes(
+        target: TolkElement,
+        reference: PsiReference,
+        onTheFly: Boolean,
+    ): Array<LocalQuickFix> {
         if (onTheFly) {
             val importFix = TolkImportFileQuickFix(reference)
             if (importFix.isAvailable(target.project, target.containingFile, target, target)) {

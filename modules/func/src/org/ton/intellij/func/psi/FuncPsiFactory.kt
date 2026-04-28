@@ -13,7 +13,8 @@ import org.ton.intellij.util.descendantOfTypeStrict
 class FuncPsiFactory private constructor(val project: Project) {
     val builtinFile by lazy {
         createFile(
-            "builtin.fc", """
+            "builtin.fc",
+            """
             
             int _+_(int x, int y) asm "ADD";
             int _-_(int x, int y) asm "SUB";
@@ -158,31 +159,28 @@ class FuncPsiFactory private constructor(val project: Project) {
                         
             forall X, Y, Z -> () run_method3(int id, X x, Y y, Z z) impure asm(x y z id) "3 CALLXARGS";
             
-        """.trimIndent()
+            """.trimIndent(),
         ).also {
             it.virtualFile.isWritable = false
         }
     }
 
-    fun createFile(text: CharSequence) =
-        createFile(null, text)
+    fun createFile(text: CharSequence) = createFile(null, text)
 
     fun createFile(name: String?, text: CharSequence) =
         PsiFileFactory.getInstance(project).createFileFromText(name ?: "dummy.fc", FuncLanguage, text) as FuncFile
 
     fun createNewline(): PsiElement = createWhitespace("\n")
 
-    fun createWhitespace(ws: String): PsiElement =
-        PsiParserFacade.getInstance(project).createWhiteSpaceFromText(ws)
+    fun createWhitespace(ws: String): PsiElement = PsiParserFacade.getInstance(project).createWhiteSpaceFromText(ws)
 
     fun createStatement(text: String): FuncStatement {
         val file = createFile("() foo() { $text }")
         return file.functions.first().blockStatement!!.statementList.first()
     }
 
-    fun createExpression(text: String): FuncExpression {
-        return (createStatement("$text;") as FuncExpressionStatement).expression
-    }
+    fun createExpression(text: String): FuncExpression =
+        (createStatement("$text;") as FuncExpressionStatement).expression
 
     fun createIdentifier(text: String): PsiElement {
         val funcFile = createFile("() $text() {}")
@@ -197,24 +195,19 @@ class FuncPsiFactory private constructor(val project: Project) {
             ?: error("Failed to create modifier: `$text`")
     }
 
-    fun createIncludeDefinition(text: String): FuncIncludeDefinition =
-        createFromText("#include \"$text\";")
-            ?: error("Failed to create include definition from text: `$text`")
+    fun createIncludeDefinition(text: String): FuncIncludeDefinition = createFromText("#include \"$text\";")
+        ?: error("Failed to create include definition from text: `$text`")
 
-    fun createConstVarList(name: String, value: String): FuncConstVarList =
-        createFromText("const $name = $value;")
-            ?: error("Failed to create const var from text: `const $name = $value;`")
+    fun createConstVarList(name: String, value: String): FuncConstVarList = createFromText("const $name = $value;")
+        ?: error("Failed to create const var from text: `const $name = $value;`")
 
-    fun createTypeReference(typeText: String): FuncTypeReference =
-        createFromText("$typeText foo() {}")
-            ?: error("Failed to create type reference from text: `$typeText`")
+    fun createTypeReference(typeText: String): FuncTypeReference = createFromText("$typeText foo() {}")
+        ?: error("Failed to create type reference from text: `$typeText`")
 
-    private inline fun <reified T : FuncElement> createFromText(
-        code: CharSequence
-    ): T? = createFile(code).descendantOfTypeStrict()
+    private inline fun <reified T : FuncElement> createFromText(code: CharSequence): T? =
+        createFile(code).descendantOfTypeStrict()
 
     companion object {
-        operator fun get(project: Project) =
-            requireNotNull(project.getService(FuncPsiFactory::class.java))
+        operator fun get(project: Project) = requireNotNull(project.getService(FuncPsiFactory::class.java))
     }
 }

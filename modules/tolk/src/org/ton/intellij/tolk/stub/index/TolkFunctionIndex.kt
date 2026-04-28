@@ -21,7 +21,7 @@ class TolkFunctionIndex : StringStubIndexExtension<TolkFunction>() {
         fun processAllElements(
             project: Project,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: Processor<TolkFunction>
+            processor: Processor<TolkFunction>,
         ): Boolean {
             val allKeys = mutableListOf<String>()
             processAllKeys(project, scope) {
@@ -38,20 +38,20 @@ class TolkFunctionIndex : StringStubIndexExtension<TolkFunction>() {
             project: Project,
             target: String,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: Processor<TolkFunction>
+            processor: Processor<TolkFunction>,
         ): Boolean = StubIndex.getInstance().processElements(
             KEY,
             target,
             project,
             scope,
             TolkFunction::class.java,
-            processor
+            processor,
         )
 
         fun processAllKeys(
             project: Project,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: Processor<String>
+            processor: Processor<String>,
         ): Boolean = StubIndex.getInstance().processAllKeys(KEY, processor, scope)
     }
 }

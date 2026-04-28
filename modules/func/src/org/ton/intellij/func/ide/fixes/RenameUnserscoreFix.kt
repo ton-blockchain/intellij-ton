@@ -8,25 +8,21 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import org.ton.intellij.func.psi.*
 
-class RenameUnderscoreFix(
-    val elementName: String,
-    val element: FuncElement,
-) : LocalQuickFixAndIntentionActionOnPsiElement(element) {
+class RenameUnderscoreFix(val elementName: String, val element: FuncElement) :
+    LocalQuickFixAndIntentionActionOnPsiElement(element) {
 
     constructor(element: FuncReferenceExpression) : this(element.name ?: "", element)
 
-    override fun getFamilyName(): String =
-        CodeInsightBundle.message("rename.element.family")
+    override fun getFamilyName(): String = CodeInsightBundle.message("rename.element.family")
 
-    override fun getText(): String =
-        CodeInsightBundle.message("rename.named.element.text", elementName, "_")
+    override fun getText(): String = CodeInsightBundle.message("rename.named.element.text", elementName, "_")
 
     override fun invoke(
         project: Project,
         file: PsiFile,
         editor: Editor?,
         startElement: PsiElement,
-        endElement: PsiElement
+        endElement: PsiElement,
     ) {
         val expression = FuncPsiFactory[project].createExpression("var (_) = 1") as FuncBinExpression
         val newElement = ((expression.left as FuncApplyExpression).right as FuncTensorExpression).expressionList.first()

@@ -37,10 +37,7 @@ class FuncParameterHintsProvider : InlayParameterHintsProvider {
         return result
     }
 
-    private fun needParameterHint(
-        expression: FuncExpression,
-        parameterName: String,
-    ): Boolean {
+    private fun needParameterHint(expression: FuncExpression, parameterName: String): Boolean {
         if (parameterName.length == 1) {
             // no need to show a hint for single letter parameters as it does not add any information to the reader
             return false

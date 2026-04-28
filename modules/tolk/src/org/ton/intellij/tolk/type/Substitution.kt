@@ -1,13 +1,9 @@
 package org.ton.intellij.tolk.type
 
-
-open class Substitution(
-    val typeSubst: Map<TolkTyParam, TolkTy>
-) {
-    operator fun plus(other: Substitution): Substitution =
-        Substitution(
-            typeSubst + other.typeSubst
-        )
+open class Substitution(val typeSubst: Map<TolkTyParam, TolkTy>) {
+    operator fun plus(other: Substitution): Substitution = Substitution(
+        typeSubst + other.typeSubst,
+    )
 
     operator fun get(key: TolkTyParam) = typeSubst[key]
 
@@ -194,9 +190,8 @@ open class Substitution(
     companion object {
         fun empty(): Substitution = EmptySubstitution
 
-        fun instantiate(paramType: TolkTy, argType: TolkTy, applyDefault: Boolean = true): Substitution {
-            return EmptySubstitution.deduce(paramType, argType, applyDefault)
-        }
+        fun instantiate(paramType: TolkTy, argType: TolkTy, applyDefault: Boolean = true): Substitution =
+            EmptySubstitution.deduce(paramType, argType, applyDefault)
     }
 }
 

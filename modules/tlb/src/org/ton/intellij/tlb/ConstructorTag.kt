@@ -9,9 +9,7 @@ private const val SHORT_TAG_MASK = (1L shl 59) - 1
 private const val TAG_MASK = (1L shl 63) - 1
 private const val HEX = "0123456789abcdef"
 
-class ConstructorTag(
-    val value: Long
-) {
+class ConstructorTag(val value: Long) {
     override fun toString(): String {
         if (value == 0L) {
             return "\$_"

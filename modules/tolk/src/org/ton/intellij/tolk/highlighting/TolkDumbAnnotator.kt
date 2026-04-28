@@ -15,8 +15,17 @@ import org.ton.intellij.tolk.psi.impl.isMutable
 import org.ton.intellij.tolk.psi.impl.isStatic
 import org.ton.intellij.util.childOfType
 
-class TolkDumbAnnotator : Annotator, DumbAware {
+class TolkDumbAnnotator :
+    Annotator,
+    DumbAware {
     override fun annotate(element: PsiElement, holder: AnnotationHolder) {
+        if (element is TolkAnnotationName) {
+            holder.newSilentAnnotation(HighlightSeverity.INFORMATION)
+                .textAttributes(TolkColor.ANNOTATION.textAttributesKey)
+                .create()
+            return
+        }
+
         val elementType = element.elementType ?: return
         val color = when (elementType) {
             TolkElementTypes.IDENTIFIER -> {
@@ -26,7 +35,8 @@ class TolkDumbAnnotator : Annotator, DumbAware {
             }
             TolkElementTypes.GET_KEYWORD,
             TolkElementTypes.LAZY_KEYWORD,
-            TolkElementTypes.CONTRACT_KEYWORD -> TolkColor.KEYWORD.textAttributesKey
+            TolkElementTypes.CONTRACT_KEYWORD,
+            -> TolkColor.KEYWORD.textAttributesKey
             TolkElementTypes.SELF_KEYWORD -> {
                 when (val parent = element.parent) {
                     is TolkSelfExpression -> {
@@ -45,7 +55,7 @@ class TolkDumbAnnotator : Annotator, DumbAware {
                             TolkColor.SELF_PARAMETER.textAttributesKey
                         }
                     }
-                    else                  -> TolkColor.KEYWORD.textAttributesKey
+                    else -> TolkColor.KEYWORD.textAttributesKey
                 }
             }
             else -> return

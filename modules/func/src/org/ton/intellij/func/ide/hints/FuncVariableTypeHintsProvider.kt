@@ -67,15 +67,12 @@ class FuncVariableTypeHintsProvider : InlayHintsProvider {
             sink.showType(variableEnd, rightType)
         }
 
-        private fun InlayTreeSink.showType(
-            variableEnd: Int,
-            exprType: FuncTy,
-        ) {
+        private fun InlayTreeSink.showType(variableEnd: Int, exprType: FuncTy) {
             this.addPresentation(
                 InlineInlayPosition(variableEnd, true),
                 listOf(),
                 null,
-                HintFormat.default.withColorKind(HintColorKind.Parameter)
+                HintFormat.default.withColorKind(HintColorKind.Parameter),
             ) {
                 text(": ")
                 text(exprType.toString())

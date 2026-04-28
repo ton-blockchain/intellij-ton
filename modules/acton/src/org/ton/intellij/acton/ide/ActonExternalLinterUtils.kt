@@ -20,13 +20,13 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.NlsSafe
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.AnyPsiChangeListener
 import com.intellij.psi.impl.PsiManagerImpl
 import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.util.execution.ParametersListUtil
 import com.intellij.util.messages.MessageBus
-import org.apache.commons.lang3.StringEscapeUtils
 import org.jetbrains.annotations.Nls
 import org.ton.intellij.acton.ActonBundle
 import org.ton.intellij.acton.cli.ActonCommand
@@ -36,6 +36,8 @@ import org.ton.intellij.acton.settings.externalLinterSettings
 import java.nio.file.Path
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
+
+private val NON_SUPPRESSIBLE_ACTON_RULES = setOf("compiler-error", "parse-error")
 
 object ActonExternalLinterUtils {
     private val LOG = logger<ActonExternalLinterUtils>()
@@ -48,21 +50,21 @@ object ActonExternalLinterUtils {
     )
 
     private val CACHE_KEY =
-        Key.create<ConcurrentHashMap<CacheKey, Pair<Long, Lazy<ActonExternalLinterResult?>>>>("ActonExternalLinterCache")
+        Key.create<ConcurrentHashMap<CacheKey, Pair<Long, Lazy<ActonExternalLinterResult?>>>>(
+            "ActonExternalLinterCache",
+        )
 
-    fun checkLazily(
-        project: Project,
-        workingDirectory: Path,
-        document: Document?,
-    ): Lazy<ActonExternalLinterResult?> {
+    fun checkLazily(project: Project, workingDirectory: Path, document: Document?): Lazy<ActonExternalLinterResult?> {
         val modificationTracker = PsiModificationTracker.getInstance(project)
         val modificationCount = modificationTracker.modificationCount
         val settings = project.externalLinterSettings
         val key = CacheKey(workingDirectory, settings.additionalArguments, settings.envs, settings.isPassParentEnvs)
 
-        val cache = project.getUserData(CACHE_KEY) ?: ConcurrentHashMap<CacheKey, Pair<Long, Lazy<ActonExternalLinterResult?>>>().also {
-            project.putUserData(CACHE_KEY, it)
-        }
+        val cache =
+            project.getUserData(CACHE_KEY)
+                ?: ConcurrentHashMap<CacheKey, Pair<Long, Lazy<ActonExternalLinterResult?>>>().also {
+                    project.putUserData(CACHE_KEY, it)
+                }
 
         val cached = cache[key]
         if (cached != null && cached.first == modificationCount) {
@@ -108,10 +110,7 @@ object ActonExternalLinterUtils {
         }
     }
 
-    private fun check(
-        project: Project,
-        workingDirectory: Path,
-    ): ActonExternalLinterResult? {
+    private fun check(project: Project, workingDirectory: Path): ActonExternalLinterResult? {
         ProgressManager.checkCanceled()
         val started = Instant.now()
 
@@ -121,7 +120,7 @@ object ActonExternalLinterUtils {
             workingDirectory = workingDirectory,
             command = command.name,
             additionalArguments = command.getArguments() + ParametersListUtil.parse(settings.additionalArguments),
-            environmentVariables = EnvironmentVariablesData.create(settings.envs, settings.isPassParentEnvs)
+            environmentVariables = EnvironmentVariablesData.create(settings.envs, settings.isPassParentEnvs),
         ).toGeneralCommandLine(project) ?: return null
 
         val handler = CapturingProcessHandler(commandLine)
@@ -131,17 +130,15 @@ object ActonExternalLinterUtils {
 
         return ActonExternalLinterResult(
             commandOutput = output.stdout,
-            executionTime = executionTime
+            executionTime = executionTime,
         )
     }
 }
 
-data class ActonExternalLinterAdditionalAnnotation(
-    val textRange: TextRange,
-    @Nls val message: String,
-)
+data class ActonExternalLinterAdditionalAnnotation(val textRange: TextRange, @Nls val message: String)
 
 data class ActonExternalLinterFilteredMessage(
+    val highlightType: HighlightInfoType,
     val severity: HighlightSeverity,
     val textRange: TextRange,
     @Nls val message: String,
@@ -153,12 +150,17 @@ data class ActonExternalLinterFilteredMessage(
 ) {
     companion object {
         @Suppress("DEPRECATION")
-        fun filterMessage(file: PsiFile, document: Document, diagnostic: ActonDiagnostic): ActonExternalLinterFilteredMessage? {
+        fun filterMessage(
+            file: PsiFile,
+            document: Document,
+            diagnostic: ActonDiagnostic,
+        ): ActonExternalLinterFilteredMessage? {
             val severity = when (diagnostic.severity) {
-                "error"   -> HighlightSeverity.ERROR
+                "error" -> HighlightSeverity.ERROR
                 "warning" -> HighlightSeverity.WEAK_WARNING
-                else      -> HighlightSeverity.INFORMATION
+                else -> HighlightSeverity.INFORMATION
             }
+            val highlightType = externalLinterHighlightType(diagnostic, severity)
 
             if (diagnostic.file != file.virtualFile.path) {
                 return null
@@ -177,11 +179,11 @@ data class ActonExternalLinterFilteredMessage(
             }
 
             @NlsSafe val tooltip = buildString {
-                append(StringEscapeUtils.escapeHtml4(diagnostic.message))
+                append(StringUtil.escapeXmlEntities(diagnostic.message))
 
                 val primaryAnnotations = diagnostic.annotations
                     .filter { it.isPrimary && it.message != null }
-                    .map { StringEscapeUtils.escapeHtml4(it.message!!) }
+                    .map { StringUtil.escapeXmlEntities(it.message!!) }
 
                 if (primaryAnnotations.isNotEmpty()) {
                     append(primaryAnnotations.joinToString(prefix = "<br>", separator = "<br>"))
@@ -201,11 +203,11 @@ data class ActonExternalLinterFilteredMessage(
                 }
 
             val ruleName = diagnostic.name ?: "unknown"
-            val actions =
-                if (ruleName == "compiler-error") arrayOf() else arrayOf(ActonSuppressLinterFix(ruleName), ActonSuppressLinterFix("all"))
+            val actions = createActonSuppressionFixes(ruleName)
             val suppressionOptions = convertBatchToSuppressIntentionActions(actions).toList()
 
             return ActonExternalLinterFilteredMessage(
+                highlightType,
                 severity,
                 textRange,
                 diagnostic.message,
@@ -213,9 +215,26 @@ data class ActonExternalLinterFilteredMessage(
                 tooltip,
                 additionalMessages,
                 quickFixes,
-                suppressionOptions
+                suppressionOptions,
             )
         }
+    }
+}
+
+internal fun createActonSuppressionFixes(ruleName: String): Array<ActonSuppressLinterFix> {
+    if (ruleName in NON_SUPPRESSIBLE_ACTON_RULES) {
+        return emptyArray()
+    }
+
+    return arrayOf(ActonSuppressLinterFix(ruleName), ActonSuppressLinterFix("all"))
+}
+
+internal fun externalLinterHighlightType(diagnostic: ActonDiagnostic, severity: HighlightSeverity): HighlightInfoType {
+    val primaryTags = diagnostic.primaryAnnotationTags()
+    return when {
+        "deprecated" in primaryTags -> HighlightInfoType.DEPRECATED
+        "unnecessary" in primaryTags -> HighlightInfoType.UNUSED_SYMBOL
+        else -> convertSeverity(severity)
     }
 }
 
@@ -251,15 +270,12 @@ fun MessageBus.createDisposableOnAnyPsiChange(): Disposable {
                     Disposer.dispose(disposable)
                 }
             }
-        }
+        },
     )
     return disposable
 }
 
-fun MutableList<HighlightInfo>.addHighlightsForFile(
-    file: PsiFile,
-    annotationResult: ActonExternalLinterResult,
-) {
+fun MutableList<HighlightInfo>.addHighlightsForFile(file: PsiFile, annotationResult: ActonExternalLinterResult) {
     val doc = file.viewProvider.document
         ?: error("Can't find document for $file in external linter")
 
@@ -279,7 +295,7 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(
     val key = HighlightDisplayKey.findOrRegister(ACTON_EXTERNAL_LINTER_ID, displayName)
 
     for (message in filteredMessages) {
-        val highlightBuilder = HighlightInfo.newHighlightInfo(convertSeverity(message.severity))
+        val highlightBuilder = HighlightInfo.newHighlightInfo(message.highlightType)
             .severity(message.severity)
             .description(message.message)
             .escapedToolTip(message.htmlTooltip.replace("\n", "<br>"))
@@ -299,8 +315,8 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(
         highlightBuilder.create()?.let(::add)
 
         for (annotation in message.additional) {
-            val highlightBuilder = HighlightInfo.newHighlightInfo(HighlightInfoType.WEAK_WARNING)
-                .severity(HighlightSeverity.WEAK_WARNING)
+            val highlightBuilder = HighlightInfo.newHighlightInfo(message.highlightType)
+                .severity(message.severity)
                 .description(annotation.message)
                 .escapedToolTip(annotation.message.replace("\n", "<br>"))
                 .range(annotation.textRange)
@@ -311,11 +327,19 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(
 }
 
 private fun convertSeverity(severity: HighlightSeverity): HighlightInfoType = when (severity) {
-    HighlightSeverity.ERROR                           -> HighlightInfoType.ERROR
-    HighlightSeverity.WARNING                         -> HighlightInfoType.WARNING
-    HighlightSeverity.WEAK_WARNING                    -> HighlightInfoType.WEAK_WARNING
+    HighlightSeverity.ERROR -> HighlightInfoType.ERROR
+    HighlightSeverity.WARNING -> HighlightInfoType.WARNING
+    HighlightSeverity.WEAK_WARNING -> HighlightInfoType.WEAK_WARNING
     HighlightSeverity.GENERIC_SERVER_ERROR_OR_WARNING -> HighlightInfoType.GENERIC_WARNINGS_OR_ERRORS_FROM_SERVER
-    else                                              -> HighlightInfoType.INFORMATION
+    else -> HighlightInfoType.INFORMATION
 }
 
 private const val ACTON_EXTERNAL_LINTER_ID: String = "ActonExternalLinterOptions"
+
+private fun ActonDiagnostic.primaryAnnotationTags(): Set<String> {
+    val annotations = annotations.filter { it.isPrimary }.ifEmpty { annotations }
+    return annotations
+        .flatMap { it.tags }
+        .map { it.lowercase() }
+        .toSet()
+}

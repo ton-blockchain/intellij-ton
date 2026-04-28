@@ -21,7 +21,7 @@ class TolkNamedElementIndex : StringStubIndexExtension<TolkNamedElement>() {
         fun processAllElements(
             project: Project,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: Processor<in TolkNamedElement>
+            processor: Processor<in TolkNamedElement>,
         ): Boolean {
             val allKeys = mutableListOf<String>()
             processAllKeys(project, scope) {
@@ -38,28 +38,23 @@ class TolkNamedElementIndex : StringStubIndexExtension<TolkNamedElement>() {
             project: Project,
             target: String,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: Processor<in TolkNamedElement>
+            processor: Processor<in TolkNamedElement>,
         ): Boolean = StubIndex.getInstance().processElements(
             KEY,
             target,
             project,
             scope,
             TolkNamedElement::class.java,
-            processor
+            processor,
         )
 
         fun processAllKeys(
             project: Project,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: Processor<String>
+            processor: Processor<String>,
         ): Boolean = StubIndex.getInstance().processAllKeys(KEY, processor, scope)
 
-        fun find(
-            fqn: String,
-            project: Project,
-            scope: GlobalSearchScope?,
-        ): Collection<TolkNamedElement> {
-            return StubIndex.getElements(KEY, fqn, project, scope, TolkNamedElement::class.java)
-        }
+        fun find(fqn: String, project: Project, scope: GlobalSearchScope?): Collection<TolkNamedElement> =
+            StubIndex.getElements(KEY, fqn, project, scope, TolkNamedElement::class.java)
     }
 }

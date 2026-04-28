@@ -10,5 +10,5 @@ object AsmFileType : LanguageFileType(AsmLanguage) {
 
     override fun getDefaultExtension(): String = "tvm"
 
-    override fun getIcon(): Icon? = null
+    override fun getIcon(): Icon = AsmIcons.FILE
 }

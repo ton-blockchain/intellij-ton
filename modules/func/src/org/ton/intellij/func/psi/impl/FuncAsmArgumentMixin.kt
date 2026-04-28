@@ -12,7 +12,9 @@ import org.ton.intellij.func.psi.FuncAsmArgument
 import org.ton.intellij.func.psi.FuncFunction
 import org.ton.intellij.func.psi.FuncPsiFactory
 
-abstract class FuncAsmArgumentMixin(node: ASTNode) : ASTWrapperPsiElement(node), FuncAsmArgument {
+abstract class FuncAsmArgumentMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    FuncAsmArgument {
     override fun getReferences(): Array<PsiReference> = arrayOf(FuncAsmArgumentReference(this))
 
     override fun getReference(): PsiReference? = references.firstOrNull()

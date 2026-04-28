@@ -108,5 +108,4 @@ class TolkCreateGlobalVariableQuickfixTest : TolkQuickfixTestBase() {
         """.trimIndent(),
         "Create global variable",
     )
-
 }

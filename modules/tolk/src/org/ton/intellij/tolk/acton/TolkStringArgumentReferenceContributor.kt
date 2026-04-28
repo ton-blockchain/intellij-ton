@@ -15,7 +15,7 @@ class TolkStringArgumentReferenceContributor : PsiReferenceContributor() {
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
         registrar.registerReferenceProvider(
             psiElement(TolkStringLiteral::class.java),
-            TolkStringArgumentReferenceProvider()
+            TolkStringArgumentReferenceProvider(),
         )
     }
 }
@@ -35,7 +35,7 @@ class TolkStringArgumentReferenceProvider : PsiReferenceProvider() {
         val rawString = stringLiteral.rawString ?: return PsiReference.EMPTY_ARRAY
         val range = TextRange(1, rawString.textLength + 1)
 
-        if (functionName == "wallet" && qualifierName == "net" && argumentIndex == 0) {
+        if (functionName == "wallet" && qualifierName == "scripts" && argumentIndex == 0) {
             return arrayOf(TolkWalletReference(stringLiteral, range))
         }
 
@@ -54,8 +54,8 @@ class TolkStringArgumentReferenceProvider : PsiReferenceProvider() {
         val expr = callExpression.expression
         return when (expr) {
             is TolkReferenceExpression -> expr.referenceName
-            is TolkDotExpression       -> expr.fieldLookup?.identifier?.text
-            else                       -> null
+            is TolkDotExpression -> expr.fieldLookup?.identifier?.text
+            else -> null
         }
     }
 
@@ -72,7 +72,8 @@ class TolkStringArgumentReferenceProvider : PsiReferenceProvider() {
 }
 
 class TolkWalletReference(element: TolkStringLiteral, range: TextRange) :
-    PsiReferenceBase<TolkStringLiteral>(element, range), HighlightedReference {
+    PsiReferenceBase<TolkStringLiteral>(element, range),
+    HighlightedReference {
     override fun resolve(): PsiElement? {
         val project = element.project
         val targetName = element.text.removeSurrounding("\"")
@@ -84,7 +85,8 @@ class TolkWalletReference(element: TolkStringLiteral, range: TextRange) :
 }
 
 class TolkContractReference(element: TolkStringLiteral, range: TextRange) :
-    PsiReferenceBase<TolkStringLiteral>(element, range), HighlightedReference {
+    PsiReferenceBase<TolkStringLiteral>(element, range),
+    HighlightedReference {
     override fun resolve(): PsiElement? {
         val project = element.project
         val targetName = element.text.removeSurrounding("\"")
@@ -96,7 +98,8 @@ class TolkContractReference(element: TolkStringLiteral, range: TextRange) :
 }
 
 class TolkGetMethodReference(element: TolkStringLiteral, range: TextRange) :
-    PsiReferenceBase<TolkStringLiteral>(element, range), HighlightedReference {
+    PsiReferenceBase<TolkStringLiteral>(element, range),
+    HighlightedReference {
     override fun resolve(): PsiElement? {
         val project = element.project
         val targetName = element.text.removeSurrounding("\"")

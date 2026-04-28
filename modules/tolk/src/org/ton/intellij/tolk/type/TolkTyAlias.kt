@@ -8,7 +8,8 @@ class TolkTyAlias private constructor(
     override val psi: TolkTypeDef,
     val underlyingType: TolkTy,
     val typeArguments: List<TolkTy> = emptyList(),
-) : TolkTy, TolkTyPsiHolder {
+) : TolkTy,
+    TolkTyPsiHolder {
     override val hasTypeAlias: Boolean = true
 
     private var hashCode: Int = 0
@@ -77,7 +78,8 @@ class TolkTyAlias private constructor(
             return when (underlyingType) {
                 TolkTyNull,
                 TolkTyNever,
-                TolkTyVoid -> underlyingType // aliasing these types is strange, don't store an alias
+                TolkTyVoid,
+                -> underlyingType // aliasing these types is strange, don't store an alias
                 else -> {
                     val params = psi.typeParameterList?.typeParameterList?.map {
                         TolkTyParam.create(it)
@@ -107,10 +109,7 @@ class TolkTyAlias private constructor(
 // > type AssetList = dict
 // > fun BalanceList.validate(self)
 // > fun AssetList.validate(self)
-fun areTwoEqualTypeAliasesDifferent(
-    t1: TolkTyAlias,
-    t2: TolkTyAlias,
-): Boolean {
+fun areTwoEqualTypeAliasesDifferent(t1: TolkTyAlias, t2: TolkTyAlias): Boolean {
     if (t1.psi.isEquivalentTo(t2.psi)) {
         return false
     }
@@ -122,6 +121,7 @@ fun areTwoEqualTypeAliasesDifferent(
     // handle `type MInt2 = MInt1`, as well as `type BalanceList = dict`, then they are equal
     val tUnd1 = t1.underlyingType as? TolkTyAlias
     val tUnd2 = t2.underlyingType as? TolkTyAlias
-    val oneAliasesAnother = (tUnd1 != null && tUnd1.psi.isEquivalentTo(t2.psi)) || (tUnd2 != null && t1.psi.isEquivalentTo(tUnd2.psi))
+    val oneAliasesAnother =
+        (tUnd1 != null && tUnd1.psi.isEquivalentTo(t2.psi)) || (tUnd2 != null && t1.psi.isEquivalentTo(tUnd2.psi))
     return !oneAliasesAnother
 }

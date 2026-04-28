@@ -14,7 +14,7 @@ import org.ton.intellij.tolk.stub.index.TolkFunctionIndex
 
 object TolkWalletNameCompletionProvider : TolkStringArgumentCompletionProvider() {
     override fun shouldAddCompletions(functionName: String, qualifierName: String?, argumentIndex: Int): Boolean =
-        functionName == "wallet" && qualifierName == "net" && argumentIndex == 0
+        functionName == "wallet" && qualifierName == "scripts" && argumentIndex == 0
 
     override fun addStringCompletions(
         parameters: CompletionParameters,
@@ -31,7 +31,7 @@ object TolkWalletNameCompletionProvider : TolkStringArgumentCompletionProvider()
             result.addElement(
                 LookupElementBuilder.create(wallet.name)
                     .withIcon(AllIcons.General.User)
-                    .withTailText(if (wallet.isLocal) " (local)" else " (global)", true)
+                    .withTailText(if (wallet.isLocal) " (local)" else " (global)", true),
             )
         }
     }
@@ -55,7 +55,7 @@ object TolkContractIdCompletionProvider : TolkStringArgumentCompletionProvider()
         for (id in contractIds) {
             result.addElement(
                 LookupElementBuilder.create(id)
-                    .withIcon(AllIcons.Nodes.Class)
+                    .withIcon(AllIcons.Nodes.Class),
             )
         }
     }
@@ -85,7 +85,7 @@ object TolkGetMethodCompletionProvider : TolkStringArgumentCompletionProvider() 
                 result.addElement(
                     LookupElementBuilder.create(name)
                         .withIcon(TolkIcons.METHOD)
-                        .withTailText(" ${file.name}", true)
+                        .withTailText(" ${file.name}", true),
                 )
             }
             true

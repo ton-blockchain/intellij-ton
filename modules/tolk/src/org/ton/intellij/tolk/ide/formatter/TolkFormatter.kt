@@ -18,27 +18,25 @@ class TolkFormatter : FormattingModelBuilder {
             wrap = null,
             alignment = null,
             indent = Indent.getNoneIndent(),
-            childIndent = Indent.getNoneIndent()
+            childIndent = Indent.getNoneIndent(),
         )
 
         return FormattingModelProvider.createFormattingModelForPsiFile(containingFile, block, settings)
     }
 
-    private fun createSpacingBuilder(codeStyleSettings: CodeStyleSettings): SpacingBuilder {
-        return SpacingBuilder(codeStyleSettings, TolkLanguage)
+    private fun createSpacingBuilder(codeStyleSettings: CodeStyleSettings): SpacingBuilder =
+        SpacingBuilder(codeStyleSettings, TolkLanguage)
             .after(TokenSet.create(LPAREN, LBRACK)).none()
             .around(EQ).spaces(1)
-
             .aroundInside(IDENTIFIER, ANNOTATION).none()
+            .aroundInside(TokenSet.create(IDENTIFIER, DOT), ANNOTATION_NAME).none()
             .after(TokenSet.create(ANNOTATION, GET_KEYWORD, FUN_KEYWORD, RETURN_TYPE)).spaces(1)
             .beforeInside(RETURN_TYPE, FUNCTION).none()
             .afterInside(COLON, RETURN_TYPE).spaces(1)
             .after(FUNCTION_RECEIVER).none()
             .around(FUNCTION_BODY).spaces(1)
-
             .beforeInside(TokenSet.create(IDENTIFIER, STRUCT_CONSTRUCTOR_TAG), STRUCT).spaces(1)
             .around(STRUCT_BODY).spaces(1)
-
             .afterInside(IDENTIFIER, TokenSet.create(STRUCT_FIELD, STRUCT_EXPRESSION_FIELD)).none()
             .afterInside(COLON, TokenSet.create(STRUCT_FIELD, STRUCT_EXPRESSION_FIELD)).spaces(1)
             .before(STRUCT_FIELD).lineBreakInCode()
@@ -53,8 +51,8 @@ class TolkFormatter : FormattingModelBuilder {
                     CATCH_KEYWORD,
                     IF_KEYWORD,
                     ELSE_KEYWORD,
-                    MATCH_KEYWORD
-                )
+                    MATCH_KEYWORD,
+                ),
             ).spaces(1)
             .before(TokenSet.create(COMMA, SEMICOLON)).none()
             .after(TokenSet.create(COMMA, VAR_KEYWORD)).spaces(1)
@@ -71,7 +69,9 @@ class TolkFormatter : FormattingModelBuilder {
                     TENSOR_TYPE_EXPRESSION,
                     TUPLE_TYPE_EXPRESSION,
                     REFERENCE_TYPE_EXPRESSION,
-                ), TokenSet.create(IDENTIFIER, TILDE), FUNCTION
+                ),
+                TokenSet.create(IDENTIFIER, TILDE),
+                FUNCTION,
             ).spaces(1)
             .afterInside(TYPE_EXPRESSION, FUNCTION).spaces(1)
             .afterInside(TokenSet.create(TILDE), FUNCTION).none()
@@ -94,9 +94,9 @@ class TolkFormatter : FormattingModelBuilder {
                     EQ, PLUSLET, MINUSLET, TIMESLET, DIVLET, DIVCLET, DIVRLET, MODLET, MODCLET, MODRLET,
                     LSHIFTLET, RSHIFTLET, RSHIFTCLET, RSHIFTRLET, ANDLET, ORLET, XORLET, EQEQ, NEQ, LEQ,
                     GEQ, GT, LT, SPACESHIP, LSHIFT, RSHIFTR, RSHIFTC, MINUS, PLUS, OR, XOR, TIMES, DIV, MOD,
-                    DIVMOD, DIVC, DIVR, MODR, MODC, AND
-                ), BIN_EXPRESSION
+                    DIVMOD, DIVC, DIVR, MODR, MODC, AND,
+                ),
+                BIN_EXPRESSION,
             ).spaces(1)
             .afterInside(tokenSetOf(EXCL, TILDE, MINUS, PLUS), PREFIX_EXPRESSION).none()
-    }
 }

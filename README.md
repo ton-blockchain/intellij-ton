@@ -1,7 +1,7 @@
 # TON Plugin for the IntelliJ IDEs
 
 IntelliJ TON provides comprehensive support for developing for the TON Blockchain.
-Includes support for Tolk, FunC, Fift assembly, TL-B, TASM, BoC and Blueprint.
+Includes support for Tolk, FunC, Fift assembly, TL-B, TASM and BoC.
 
 **[Features] • [Installation] • [Community]**
 
@@ -40,9 +40,13 @@ The plugin supports the following languages:
 
 ## Community
 
-- [`@intellijton` on Telegram](https://t.me/intellijton) — News about IntelliJ TON plugin development
 - [`@tondev_eng` on Telegram](https://t.me/tondev_eng) — Main TON community chat and discussion group.
 - [`@tondev` on Telegram](https://t.me/tondev) — Main Russian TON community chat and discussion group.
+
+## Development
+
+- `./gradlew check` — runs tests and style checks, including `ktlint`
+- `./gradlew fmt` — formats Kotlin sources and Gradle Kotlin scripts with `ktlint`
 
 ## License
 

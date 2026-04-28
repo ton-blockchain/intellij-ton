@@ -24,8 +24,7 @@ class TolkTypeStub<PsiT : TolkElement>(parent: StubElement<*>?, elementType: ISt
             dataStream.writeName(stub.getText())
         }
 
-        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): TolkTypeStub<PsiT> {
-            return TolkTypeStub(parentStub, this, dataStream.readName())
-        }
+        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): TolkTypeStub<PsiT> =
+            TolkTypeStub(parentStub, this, dataStream.readName())
     }
 }

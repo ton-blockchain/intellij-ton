@@ -5,7 +5,6 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StringStubIndexExtension
 import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.stubs.StubIndexKey
-import com.intellij.util.Processor
 import org.ton.intellij.tolk.TolkFileElementType
 import org.ton.intellij.tolk.psi.TolkTypeSymbolElement
 
@@ -22,13 +21,13 @@ class TolkTypeSymbolIndex : StringStubIndexExtension<TolkTypeSymbolElement>() {
             project: Project,
             target: String,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: (TolkTypeSymbolElement) -> Boolean
+            processor: (TolkTypeSymbolElement) -> Boolean,
         ): Boolean = StubIndex.getInstance().processElements(
             KEY,
             target,
             project,
             scope,
-            TolkTypeSymbolElement::class.java
+            TolkTypeSymbolElement::class.java,
         ) { element ->
             processor(element)
         }
@@ -36,7 +35,7 @@ class TolkTypeSymbolIndex : StringStubIndexExtension<TolkTypeSymbolElement>() {
         fun processAllElements(
             project: Project,
             scope: GlobalSearchScope = GlobalSearchScope.allScope(project),
-            processor: (TolkTypeSymbolElement) -> Boolean
+            processor: (TolkTypeSymbolElement) -> Boolean,
         ): Boolean {
             val allKeys = mutableListOf<String>()
             StubIndex.getInstance().processAllKeys(KEY, { key ->

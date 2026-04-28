@@ -21,13 +21,17 @@ class TolkTypedHandler : TypedHandlerDelegate() {
             AutoPopupController.getInstance(project).autoPopupMemberLookup(editor, null)
             return Result.STOP
         }
+        if (charTyped == '.' && isAfterTestAnnotationPrefix(editor)) {
+            AutoPopupController.getInstance(project).autoPopupMemberLookup(editor, null)
+            return Result.STOP
+        }
         return Result.CONTINUE
     }
 
     override fun charTyped(c: Char, project: Project, editor: Editor, file: PsiFile): Result {
         if (file !is TolkFile) return Result.CONTINUE
 
-        when(c) {
+        when (c) {
             '.' -> {
                 if (autoIndentCase(editor, project, file, TolkDotExpression::class.java)) return Result.STOP
             }
@@ -61,7 +65,9 @@ class TolkTypedHandler : TypedHandlerDelegate() {
                 } else {
                     val document = PsiDocumentManager.getInstance(project).getDocument(file)
                     if (document != null) {
-                        CodeStyleManager.getInstance(project).adjustLineIndent(document, DocumentUtil.getLineStartOffset(offset, document))
+                        CodeStyleManager.getInstance(
+                            project,
+                        ).adjustLineIndent(document, DocumentUtil.getLineStartOffset(offset, document))
                     }
                 }
 
@@ -70,5 +76,12 @@ class TolkTypedHandler : TypedHandlerDelegate() {
         }
 
         return false
+    }
+
+    private fun isAfterTestAnnotationPrefix(editor: Editor): Boolean {
+        val offset = editor.caretModel.offset
+        val prefix = "@test"
+        if (offset < prefix.length) return false
+        return editor.document.charsSequence.subSequence(offset - prefix.length, offset).toString() == prefix
     }
 }

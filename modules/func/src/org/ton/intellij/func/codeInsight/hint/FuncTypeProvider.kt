@@ -12,9 +12,8 @@ import org.ton.intellij.func.psi.FuncReferenceExpression
 import org.ton.intellij.func.psi.inference
 
 class FuncTypeProvider : ExpressionTypeProvider<FuncExpression>() {
-    override fun getInformationHint(elementAt: FuncExpression): @NlsContexts.HintText String {
-        return StringUtil.escapeXmlEntities(typePresentation(elementAt))
-    }
+    override fun getInformationHint(elementAt: FuncExpression): @NlsContexts.HintText String =
+        StringUtil.escapeXmlEntities(typePresentation(elementAt))
 
     private fun typePresentation(element: FuncExpression): String {
         val inference = element.inference ?: return "<unknown>"
@@ -23,12 +22,11 @@ class FuncTypeProvider : ExpressionTypeProvider<FuncExpression>() {
 
     override fun getErrorHint(): @NlsContexts.HintText String = FuncBundle.message("codeInsight.hint.error.hint")
 
-    override fun getExpressionsAt(elementAt: PsiElement): List<FuncExpression> {
-        return elementAt.parents(true).filterIsInstance<FuncExpression>().filter {
+    override fun getExpressionsAt(elementAt: PsiElement): List<FuncExpression> =
+        elementAt.parents(true).filterIsInstance<FuncExpression>().filter {
             // remove reference to function (with type `(..)->(..)`) in call expression
-            it !is FuncReferenceExpression || it.node.treeParent.elementType != FuncElementTypes.SPECIAL_APPLY_EXPRESSION
+            it !is FuncReferenceExpression ||
+                it.node.treeParent.elementType != FuncElementTypes.SPECIAL_APPLY_EXPRESSION
         }
             .toList()
-    }
 }
-

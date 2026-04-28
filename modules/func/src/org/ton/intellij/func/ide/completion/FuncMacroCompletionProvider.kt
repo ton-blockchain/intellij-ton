@@ -17,17 +17,17 @@ object FuncMacroCompletionProvider : FuncCompletionProvider(), DumbAware {
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
-        result: CompletionResultSet
+        result: CompletionResultSet,
     ) {
         result.addElement(
             LookupElementBuilder.create("include").bold().withInsertHandler { context, item ->
                 context.document.insertString(context.selectionEndOffset, " \"\";")
                 context.editor.caretModel.moveToOffset(context.selectionEndOffset - 2)
                 AutoPopupController.getInstance(context.project).scheduleAutoPopup(context.editor)
-            }
+            },
         )
         result.addElement(
-            LookupElementBuilder.create("pragma").bold()
+            LookupElementBuilder.create("pragma").bold(),
         )
     }
 }

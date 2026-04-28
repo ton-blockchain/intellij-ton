@@ -6,9 +6,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDirectory
 import org.ton.intellij.func.FuncIcons
 
-class FuncCreateFileAction : CreateFileFromTemplateAction(
-    FILE_TEMPLATE, "", FuncIcons.FILE
-) {
+class FuncCreateFileAction :
+    CreateFileFromTemplateAction(
+        FILE_TEMPLATE,
+        "",
+        FuncIcons.FILE,
+    ) {
     override fun buildDialog(project: Project, directory: PsiDirectory, builder: CreateFileFromTemplateDialog.Builder) {
         builder
             .setTitle(NEW_FUNC_FILE)
@@ -17,9 +20,7 @@ class FuncCreateFileAction : CreateFileFromTemplateAction(
             .addKind("Contract template", FuncIcons.FILE, "FunC Contract")
     }
 
-    override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?): String {
-        return FILE_TEMPLATE
-    }
+    override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?): String = FILE_TEMPLATE
 
     companion object {
         const val FILE_TEMPLATE = "FunC File"

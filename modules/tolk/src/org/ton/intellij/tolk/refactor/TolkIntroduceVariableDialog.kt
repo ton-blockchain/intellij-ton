@@ -15,7 +15,8 @@ import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-class TolkIntroduceVariableDialog(private val operation: TolkIntroduceOperation) : RefactoringDialog(operation.project, true) {
+class TolkIntroduceVariableDialog(private val operation: TolkIntroduceOperation) :
+    RefactoringDialog(operation.project, true) {
     private val occurrencesCount = operation.occurrences.size
     private var nameField: NameSuggestionsField? = null
     private var replaceAllCheckBox: JCheckBox? = null
@@ -63,7 +64,9 @@ class TolkIntroduceVariableDialog(private val operation: TolkIntroduceOperation)
 
     private fun createReplaceAllPanel(): JComponent {
         val panel = JPanel(FlowLayout())
-        val text = UIUtil.replaceMnemonicAmpersand(RefactoringBundle.message("replace.all.occurences", occurrencesCount))
+        val text = UIUtil.replaceMnemonicAmpersand(
+            RefactoringBundle.message("replace.all.occurences", occurrencesCount),
+        )
         replaceAllCheckBox = JCheckBox(text)
         panel.add(replaceAllCheckBox)
         return panel

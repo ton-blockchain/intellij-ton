@@ -18,13 +18,11 @@ class FuncCodeStyleSettingsProvider : CodeStyleSettingsProvider() {
     override fun createConfigurable(
         settings: CodeStyleSettings,
         modelSettings: CodeStyleSettings,
-    ): CodeStyleConfigurable {
-        return object : CodeStyleAbstractConfigurable(settings, modelSettings, this.configurableDisplayName) {
-            override fun createPanel(settings: CodeStyleSettings): CodeStyleAbstractPanel {
-                return FuncCodeStyleMainPanel(currentSettings, settings)
-            }
+    ): CodeStyleConfigurable =
+        object : CodeStyleAbstractConfigurable(settings, modelSettings, this.configurableDisplayName) {
+            override fun createPanel(settings: CodeStyleSettings): CodeStyleAbstractPanel =
+                FuncCodeStyleMainPanel(currentSettings, settings)
         }
-    }
 
     private class FuncCodeStyleMainPanel(currentSettings: CodeStyleSettings, settings: CodeStyleSettings) :
         TabbedLanguageCodeStylePanel(FuncLanguage, currentSettings, settings)

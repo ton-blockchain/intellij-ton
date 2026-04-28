@@ -96,6 +96,10 @@ type bytesN = builtin
 /// - a value must be serializable; valid: int32, coins, AnyStruct, Cell<AnyStruct>; invalid: int, builder
 struct map<K, V> {}
 
+/// `array<T>` is a runtime array with an element type `T`.
+/// Array literals like `[1, 2, 3]` infer to `array<int>`.
+struct array<T> {}
+
 /// `dict` is a low-level TVM dictionary.
 /// Think of it as "a map with unknown keys and unknown values".
 /// Prefer using `map<K, V>`, not `dict`.
@@ -1740,5 +1744,4 @@ fun slice.skipMessageQueryId(mutate self): self
 @deprecated("use `createMessage` instead of composing messages manually")
 fun builder.storeMessageQueryId(mutate self, queryId: int): self
     asm(queryId self) "64 STU"
-
 

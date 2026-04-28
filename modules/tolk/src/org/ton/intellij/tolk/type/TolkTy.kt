@@ -1,6 +1,5 @@
 package org.ton.intellij.tolk.type
 
-
 import org.ton.intellij.tolk.psi.TolkReferenceElement
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.type.TolkTy.Companion.Cell
@@ -11,9 +10,7 @@ import org.ton.intellij.tolk.type.range.TvmIntRangeSet
 interface TolkTy : TypeFoldable<TolkTy> {
     val hasTypeAlias: Boolean
 
-    fun nullable(): TolkTy {
-        return TolkTyUnion.create(this, Null)
-    }
+    fun nullable(): TolkTy = TolkTyUnion.create(this, Null)
 
     fun removeNullable(): TolkTy {
         if (this is TolkTyUnion && variants.contains(Null)) {
@@ -22,9 +19,7 @@ interface TolkTy : TypeFoldable<TolkTy> {
         return this
     }
 
-    fun isNullable(): Boolean {
-        return this is TolkTyUnion && variants.contains(Null)
-    }
+    fun isNullable(): Boolean = this is TolkTyUnion && variants.contains(Null)
 
     fun actualType(): TolkTy = this
 
@@ -139,9 +134,7 @@ interface TolkTy : TypeFoldable<TolkTy> {
 
         fun bool(value: Boolean): TolkTy = if (value) TRUE else FALSE
 
-        fun union(vararg elements: TolkTy): TolkTy {
-            return TolkTyUnion.create(elements.toList())
-        }
+        fun union(vararg elements: TolkTy): TolkTy = TolkTyUnion.create(elements.toList())
 
         fun union(elements: Iterable<TolkTy>): TolkTy = TolkTyUnion.create(elements.toList())
 
@@ -196,13 +189,14 @@ fun TolkTy?.subtract(other: TolkTy?): TolkTy {
     return TolkTyUnion.create(restVariants)
 }
 
-private fun hasAllVariantsOf(union: TolkTyUnion, other: TolkTyUnion): Boolean {
-    return other.variants.all { hasVariantEquivalentTo(union, it) }
+private fun hasAllVariantsOf(union: TolkTyUnion, other: TolkTyUnion): Boolean = other.variants.all {
+    hasVariantEquivalentTo(union, it)
 }
 
-private fun hasVariantEquivalentTo(otherUnwrapped: TolkTyUnion, lhsVariant: TolkTy): Boolean {
-    return otherUnwrapped.variants.any { it.isEquivalentTo(lhsVariant) }
-}
+private fun hasVariantEquivalentTo(otherUnwrapped: TolkTyUnion, lhsVariant: TolkTy): Boolean =
+    otherUnwrapped.variants.any {
+        it.isEquivalentTo(lhsVariant)
+    }
 
 fun TolkTy?.join(other: TolkTy?, hint: TolkTy? = null): TolkTy? {
     if (this == null || this == TolkTy.Unknown) return other
@@ -257,7 +251,6 @@ interface TolkPrimitiveTy : TolkTy {
         }
     }
 }
-
 
 interface TolkConstantTy<T> : TolkTy {
     val value: T
@@ -364,10 +357,7 @@ object TolkTyCoins : TolkIntTyFamily {
     override fun toString(): String = "coins"
 }
 
-data class TolkIntNTy(
-    val n: Int,
-    val unsigned: Boolean,
-) : TolkIntTyFamily {
+data class TolkIntNTy(val n: Int, val unsigned: Boolean) : TolkIntTyFamily {
     override fun actualType(): TolkTy = this
 
     override fun toString(): String = if (unsigned) {
@@ -411,7 +401,7 @@ data class TolkIntNTy(
 
         val VALUES = listOf(
             UINT8, UINT16, UINT32, UINT64, UINT128, UINT256,
-            INT8, INT16, INT32, INT64, INT128, INT256
+            INT8, INT16, INT32, INT64, INT128, INT256,
         )
 
         fun uint(n: Int): TolkIntNTy = when (n) {
@@ -472,9 +462,7 @@ data class TolkIntNTy(
     }
 }
 
-data class TolkBitsNTy(
-    val n: Int,
-) : TolkPrimitiveTy {
+data class TolkBitsNTy(val n: Int) : TolkPrimitiveTy {
     override fun toString(): String = "bits$n"
 
     override fun isEquivalentToInner(other: TolkTy): Boolean {
@@ -496,14 +484,10 @@ data class TolkBitsNTy(
     }
 }
 
-data class TolkBytesNTy(
-    val n: Int,
-) : TolkPrimitiveTy {
+data class TolkBytesNTy(val n: Int) : TolkPrimitiveTy {
     override fun toString(): String = "bytes$n"
 
-    override fun canRhsBeAssigned(other: TolkTy): Boolean {
-        return other.unwrapTypeAlias() == this
-    }
+    override fun canRhsBeAssigned(other: TolkTy): Boolean = other.unwrapTypeAlias() == this
 
     companion object {
         fun fromName(text: String): TolkBytesNTy? {

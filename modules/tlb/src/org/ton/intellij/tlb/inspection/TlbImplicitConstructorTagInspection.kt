@@ -11,35 +11,33 @@ import org.ton.intellij.tlb.psi.TlbConstructor
 import org.ton.intellij.tlb.psi.TlbVisitor
 
 class TlbImplicitConstructorTagInspection : TlbInspectionBase() {
-    override fun buildTlbVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession
-    ): TlbVisitor = object : TlbVisitor() {
-        override fun visitConstructor(o: TlbConstructor) {
-            val constructorTag = o.constructorTag
-            if (constructorTag != null) {
-                return
-            }
-            if (o.name == "_") {
-                return
-            }
-            if (PsiTreeUtil.hasErrorElements(o)) {
-                return
-            }
+    override fun buildTlbVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TlbVisitor =
+        object : TlbVisitor() {
+            override fun visitConstructor(o: TlbConstructor) {
+                val constructorTag = o.constructorTag
+                if (constructorTag != null) {
+                    return
+                }
+                if (o.name == "_") {
+                    return
+                }
+                if (PsiTreeUtil.hasErrorElements(o)) {
+                    return
+                }
 
-            val fixes = ArrayList<LocalQuickFix>(2)
-            fixes.add(TlbSetConstructorTagFix(o, ConstructorTag.EMPTY))
+                val fixes = ArrayList<LocalQuickFix>(2)
+                fixes.add(TlbSetConstructorTagFix(o, ConstructorTag.EMPTY))
 
-            val computedTag = o.computeTag()
-            if (computedTag != null) {
-                fixes.add(TlbSetConstructorTagFix(o, computedTag))
+                val computedTag = o.computeTag()
+                if (computedTag != null) {
+                    fixes.add(TlbSetConstructorTagFix(o, computedTag))
+                }
+
+                holder.registerProblem(
+                    o.identifier,
+                    "Constructor tag not defined",
+                    *fixes.toTypedArray(),
+                )
             }
-
-            holder.registerProblem(
-                o.identifier,
-                "Constructor tag not defined",
-                *fixes.toTypedArray()
-            )
         }
-    }
 }

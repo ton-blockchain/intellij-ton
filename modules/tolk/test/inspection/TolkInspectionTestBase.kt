@@ -20,7 +20,7 @@ abstract class TolkInspectionTestBase : TolkTestBase() {
         vararg inspections: InspectionProfileEntry,
         checkWarnings: Boolean = false,
         checkInfos: Boolean = false,
-        checkWeakWarnings: Boolean = false
+        checkWeakWarnings: Boolean = false,
     ) {
         myFixture.enableInspections(*inspections)
         myFixture.configureByText("test.tolk", code)
@@ -32,7 +32,7 @@ abstract class TolkInspectionTestBase : TolkTestBase() {
         vararg inspections: InspectionProfileEntry,
         checkWarnings: Boolean = false,
         checkInfos: Boolean = false,
-        checkWeakWarnings: Boolean = false
+        checkWeakWarnings: Boolean = false,
     ) {
         myFixture.enableInspections(*inspections)
         myFixture.testHighlighting(checkWarnings, checkInfos, checkWeakWarnings, fileName)
@@ -43,28 +43,27 @@ abstract class TolkInspectionTestBase : TolkTestBase() {
         inspection: LocalInspectionTool,
         checkWarnings: Boolean = false,
         checkInfos: Boolean = false,
-        checkWeakWarnings: Boolean = false
+        checkWeakWarnings: Boolean = false,
     ) {
         myFixture.enableInspections(inspection)
         myFixture.configureByText("test.tolk", code)
         myFixture.testHighlighting(checkWarnings, checkInfos, checkWeakWarnings)
     }
 
-    protected fun checkNoProblems(
-        @Language("Tolk") code: String,
-        vararg inspections: InspectionProfileEntry
-    ) {
+    protected fun checkNoProblems(@Language("Tolk") code: String, vararg inspections: InspectionProfileEntry) {
         myFixture.enableInspections(*inspections)
         myFixture.configureByText("test.tolk", code)
-        
+
         val highlights = myFixture.doHighlighting()
-        val problemHighlights = highlights.filter { 
-            it.severity.name in setOf("ERROR", "WARNING", "WEAK_WARNING", "INFO") 
+        val problemHighlights = highlights.filter {
+            it.severity.name in setOf("ERROR", "WARNING", "WEAK_WARNING", "INFO")
         }
-        
+
         assertTrue(
-            "Expected no problems, but found: ${problemHighlights.joinToString { "${it.severity}: ${it.description}" }}",
-            problemHighlights.isEmpty()
+            "Expected no problems, but found: ${problemHighlights.joinToString {
+                "${it.severity}: ${it.description}"
+            }}",
+            problemHighlights.isEmpty(),
         )
     }
 }

@@ -17,7 +17,7 @@ class TolkTypeDefStub(
     parent: StubElement<*>,
     elementType: IStubElementType<*, *>,
     name: StringRef?,
-    isDeprecated: Boolean
+    isDeprecated: Boolean,
 ) : TolkNamedStub<TolkTypeDef>(parent, elementType, name, isDeprecated) {
     object Type : TolkNamedStubElementType<TolkTypeDefStub, TolkTypeDef>("TYPE_DEF") {
         override val extraIndexKeys = listOf(TolkTypeDefIndex.KEY, TolkTypeSymbolIndex.KEY)
@@ -36,8 +36,7 @@ class TolkTypeDefStub(
         override fun createStub(psi: TolkTypeDef, parentStub: StubElement<out PsiElement>): TolkTypeDefStub =
             TolkTypeDefStub(parentStub, this, StringRef.fromString(psi.name), psi.annotations.hasDeprecatedAnnotation())
 
-        override fun createPsi(stub: TolkTypeDefStub): TolkTypeDef =
-            TolkTypeDefImpl(stub, this)
+        override fun createPsi(stub: TolkTypeDefStub): TolkTypeDef = TolkTypeDefImpl(stub, this)
     }
 
     companion object {

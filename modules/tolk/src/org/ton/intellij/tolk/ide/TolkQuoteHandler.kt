@@ -6,7 +6,9 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.highlighter.HighlighterIterator
 import org.ton.intellij.tolk.psi.TolkElementTypes.*
 
-class TolkQuoteHandler : QuoteHandler, MultiCharQuoteHandler {
+class TolkQuoteHandler :
+    QuoteHandler,
+    MultiCharQuoteHandler {
     override fun isOpeningQuote(iterator: HighlighterIterator, offset: Int): Boolean {
         if (iterator.tokenType == OPEN_QUOTE) {
             val start = iterator.start
@@ -16,17 +18,17 @@ class TolkQuoteHandler : QuoteHandler, MultiCharQuoteHandler {
         return false
     }
 
-    override fun isClosingQuote(iterator: HighlighterIterator, offset: Int): Boolean {
-        return iterator.tokenType == CLOSING_QUOTE
-    }
+    override fun isClosingQuote(iterator: HighlighterIterator, offset: Int): Boolean =
+        iterator.tokenType == CLOSING_QUOTE
 
-    override fun hasNonClosedLiteral(editor: Editor, iterator: HighlighterIterator, offset: Int): Boolean {
-        return true
-    }
+    override fun hasNonClosedLiteral(editor: Editor, iterator: HighlighterIterator, offset: Int): Boolean = true
 
     override fun isInsideLiteral(iterator: HighlighterIterator): Boolean {
         val tokenType = iterator.tokenType
-        return tokenType == RAW_STRING_ELEMENT || tokenType == OPEN_QUOTE || tokenType == CLOSING_QUOTE || tokenType == ESCAPE_SEQUENCE
+        return tokenType == RAW_STRING_ELEMENT ||
+            tokenType == OPEN_QUOTE ||
+            tokenType == CLOSING_QUOTE ||
+            tokenType == ESCAPE_SEQUENCE
     }
 
     override fun getClosingQuote(iterator: HighlighterIterator, offset: Int): CharSequence? {

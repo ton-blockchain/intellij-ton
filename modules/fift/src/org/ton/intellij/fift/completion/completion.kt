@@ -28,7 +28,7 @@ class FuncBasicWordCompletionProvider : CompletionProvider<CompletionParameters>
             IF, IFNOT, COND,
             TRUE, FALSE,
             DUP, DROP, SWAP, ROT, REV_ROT, OVER, TUCK, NIP, DUP_DUP,
-            DROP_DROP, SWAP_SWAP, PICK, ROLL, REV_ROLL, EXCH, EXCH2, COND_DUP
+            DROP_DROP, SWAP_SWAP, PICK, ROLL, REV_ROLL, EXCH, EXCH2, COND_DUP,
         ).map {
             LookupElementBuilder.create(it).insertSpace()
         }.forEach {

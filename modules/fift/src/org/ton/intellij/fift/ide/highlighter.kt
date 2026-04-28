@@ -34,7 +34,7 @@ object FiftSyntaxHighlighter : SyntaxHighlighterBase() {
         TRUE, FALSE -> FiftColor.KEYWORD
         DUP, DROP, SWAP, ROT, REV_ROT, OVER, TUCK, NIP, DUP_DUP,
         DROP_DROP, SWAP_SWAP, PICK, ROLL, REV_ROLL, EXCH, EXCH2, COND_DUP,
-            -> FiftColor.KEYWORD
+        -> FiftColor.KEYWORD
 
         else -> null
     }.let {

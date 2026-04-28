@@ -15,9 +15,7 @@ import org.ton.intellij.tolk.hasCaretMarker
 import org.ton.intellij.tolk.replaceCaretMarker
 import org.ton.intellij.util.presentation
 
-abstract class TolkCompletionTestFixtureBase<IN>(
-    protected val myFixture: CodeInsightTestFixture
-) : BaseFixture() {
+abstract class TolkCompletionTestFixtureBase<IN>(protected val myFixture: CodeInsightTestFixture) : BaseFixture() {
     protected val project get() = myFixture.project
 
     fun executeSoloCompletion() {
@@ -32,8 +30,9 @@ abstract class TolkCompletionTestFixtureBase<IN>(
             }
             fun LookupElement.debug(): String = "$lookupString ($psiElement)"
             error(
-                "Expected a single completion, but got ${lookups.size}\n"
-                        + lookups.joinToString("\n") { it.debug() })
+                "Expected a single completion, but got ${lookups.size}\n" +
+                    lookups.joinToString("\n") { it.debug() },
+            )
         }
     }
 
@@ -54,12 +53,7 @@ abstract class TolkCompletionTestFixtureBase<IN>(
         checkByText(code, after.trimIndent()) { executeSoloCompletion() }
     }
 
-    fun checkCompletion(
-        lookupString: String,
-        before: IN,
-        @Language("Tolk") after: String,
-        completionChar: Char,
-    ) {
+    fun checkCompletion(lookupString: String, before: IN, @Language("Tolk") after: String, completionChar: Char) {
         checkByText(before, after.trimIndent()) {
             val items = myFixture.completeBasic()
                 ?: return@checkByText // single completion was inserted
@@ -117,7 +111,7 @@ abstract class TolkCompletionTestFixtureBase<IN>(
     fun checkContainsCompletion(
         code: IN,
         variants: Iterable<String>,
-        render: LookupElement.() -> String = { lookupString }
+        render: LookupElement.() -> String = { lookupString },
     ) {
         prepare(code)
         doContainsCompletion(variants.toSet(), render)
@@ -140,7 +134,7 @@ abstract class TolkCompletionTestFixtureBase<IN>(
     fun checkNotContainsCompletion(
         code: IN,
         variants: Set<String>,
-        render: LookupElement.() -> String = { lookupString }
+        render: LookupElement.() -> String = { lookupString },
     ) = withNoInsertCompletion {
         prepare(code)
         val lookups = myFixture.completeBasic()
@@ -173,7 +167,13 @@ abstract class TolkCompletionTestFixtureBase<IN>(
     }
 
     enum class CheckType {
-        EQUALS, INCLUDES, EXCLUDES, ORDERED_EQUALS, EMPTY, NOT_EMPTY, FIRST,
+        EQUALS,
+        INCLUDES,
+        EXCLUDES,
+        ORDERED_EQUALS,
+        EMPTY,
+        NOT_EMPTY,
+        FIRST,
     }
 
     open fun doTestVariants(
@@ -197,7 +197,8 @@ abstract class TolkCompletionTestFixtureBase<IN>(
             Possibly the single variant has been completed.
             File after:
             ${myFixture.file.text}
-            """.trimIndent(), stringList
+            """.trimIndent(),
+            stringList,
         )
         val varList = mutableListOf<String>()
         varList.addAll(variants)
@@ -206,26 +207,30 @@ abstract class TolkCompletionTestFixtureBase<IN>(
             CheckType.ORDERED_EQUALS -> {
                 assertOrderedEquals(stringList, *variants)
             }
-            CheckType.EQUALS         -> {
+            CheckType.EQUALS -> {
                 assertSameElements(stringList, *variants)
             }
-            CheckType.INCLUDES       -> {
+            CheckType.INCLUDES -> {
                 varList.removeAll(stringList.toSet())
                 assertTrue("Missing variants: $varList, variants: $stringList", varList.isEmpty())
             }
-            CheckType.EXCLUDES       -> {
+            CheckType.EXCLUDES -> {
                 varList.retainAll(stringList.toSet())
                 assertTrue("Unexpected variants: $varList", varList.isEmpty())
             }
-            CheckType.EMPTY          -> {
+            CheckType.EMPTY -> {
                 assertTrue("Expected empty completion, but got: $stringList", stringList.isEmpty())
             }
-            CheckType.NOT_EMPTY      -> {
+            CheckType.NOT_EMPTY -> {
                 assertTrue("Expected non-empty completion, but got: $stringList", stringList.isNotEmpty())
             }
 
-            CheckType.FIRST          -> {
-                assertEquals("Expected first variant to be ${variants[0]}, but got: $stringList", variants[0], stringList[0])
+            CheckType.FIRST -> {
+                assertEquals(
+                    "Expected first variant to be ${variants[0]}, but got: $stringList",
+                    variants[0],
+                    stringList[0],
+                )
             }
         }
     }

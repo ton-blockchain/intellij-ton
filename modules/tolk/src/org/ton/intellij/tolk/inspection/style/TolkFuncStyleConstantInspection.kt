@@ -16,34 +16,32 @@ import org.ton.intellij.tolk.inspection.TolkInspectionBase
 import org.ton.intellij.tolk.psi.*
 
 class TolkFuncStyleConstantInspection : TolkInspectionBase() {
-    override fun buildTolkVisitor(
-        holder: ProblemsHolder,
-        session: LocalInspectionToolSession,
-    ): TolkVisitor = object : TolkVisitor() {
-        override fun visitFunction(function: TolkFunction) {
-            if (!isFuncStyleConstant(function)) return
+    override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor =
+        object : TolkVisitor() {
+            override fun visitFunction(function: TolkFunction) {
+                if (!isFuncStyleConstant(function)) return
 
-            val constantValue = extractConstantValue(function) ?: return
+                val constantValue = extractConstantValue(function) ?: return
 
-            holder.registerProblem(
-                function.identifier ?: function,
-                TolkBundle.message("inspection.func.style.constant.message"),
-                ProblemHighlightType.WARNING,
-                TolkConvertToConstantFix(function, constantValue),
-                TolkConvertAllToConstantsFix(function)
-            )
+                holder.registerProblem(
+                    function.identifier ?: function,
+                    TolkBundle.message("inspection.func.style.constant.message"),
+                    ProblemHighlightType.WARNING,
+                    TolkConvertToConstantFix(function, constantValue),
+                    TolkConvertAllToConstantsFix(function),
+                )
+            }
         }
-    }
 }
 
-class TolkConvertToConstantFix(
-    element: PsiElement,
-    private val constantValue: String,
-) : LocalQuickFixAndIntentionActionOnPsiElement(element), LocalQuickFix {
+class TolkConvertToConstantFix(element: PsiElement, private val constantValue: String) :
+    LocalQuickFixAndIntentionActionOnPsiElement(element),
+    LocalQuickFix {
 
     override fun getFamilyName() = TolkBundle.message("inspection.func.style.constant.fix.family.name")
     override fun getText() = TolkBundle.message("inspection.func.style.constant.fix.text", constantValue)
-    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo = IntentionPreviewInfo.EMPTY
+    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo =
+        IntentionPreviewInfo.EMPTY
 
     override fun invoke(
         project: Project,
@@ -57,13 +55,14 @@ class TolkConvertToConstantFix(
     }
 }
 
-class TolkConvertAllToConstantsFix(
-    element: PsiElement,
-) : LocalQuickFixAndIntentionActionOnPsiElement(element), LocalQuickFix {
+class TolkConvertAllToConstantsFix(element: PsiElement) :
+    LocalQuickFixAndIntentionActionOnPsiElement(element),
+    LocalQuickFix {
 
     override fun getFamilyName() = TolkBundle.message("inspection.func.style.constant.fix.all.family.name")
     override fun getText() = TolkBundle.message("inspection.func.style.constant.fix.all.text")
-    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo = IntentionPreviewInfo.EMPTY
+    override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo =
+        IntentionPreviewInfo.EMPTY
 
     override fun invoke(
         project: Project,

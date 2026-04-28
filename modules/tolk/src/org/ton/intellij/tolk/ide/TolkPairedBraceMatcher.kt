@@ -15,25 +15,25 @@ private val TYPE_TOKENS = TokenSet.orSet(
         TolkElementTypes.QUEST,
         TolkElementTypes.OR,
         TolkElementTypes.MAPSTO,
-    )
+    ),
 )
 
-class TolkPairedBraceMatcher : PairedBraceMatcherAdapter(
-    TolkBraceMatcher(), TolkLanguage
-) {
-    override fun isLBraceToken(iterator: HighlighterIterator, fileText: CharSequence, fileType: FileType): Boolean {
-        return isBrace(iterator, fileText, fileType, true)
-    }
+class TolkPairedBraceMatcher :
+    PairedBraceMatcherAdapter(
+        TolkBraceMatcher(),
+        TolkLanguage,
+    ) {
+    override fun isLBraceToken(iterator: HighlighterIterator, fileText: CharSequence, fileType: FileType): Boolean =
+        isBrace(iterator, fileText, fileType, true)
 
-    override fun isRBraceToken(iterator: HighlighterIterator, fileText: CharSequence, fileType: FileType): Boolean {
-        return isBrace(iterator, fileText, fileType, false)
-    }
+    override fun isRBraceToken(iterator: HighlighterIterator, fileText: CharSequence, fileType: FileType): Boolean =
+        isBrace(iterator, fileText, fileType, false)
 
     private fun isBrace(
         iterator: HighlighterIterator,
         fileText: CharSequence,
         fileType: FileType,
-        left: Boolean
+        left: Boolean,
     ): Boolean {
         val pair = findPair(left, iterator, fileText, fileType) ?: return false
         val opposite = if (left) TolkElementTypes.GT else TolkElementTypes.LT

@@ -6,8 +6,9 @@ import org.ton.intellij.tolk.psi.TolkBinExpression
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.util.tokenSetOf
 
-
-abstract class TolkBinExpressionMixin(node: ASTNode) : ASTWrapperPsiElement(node), TolkBinExpression {
+abstract class TolkBinExpressionMixin(node: ASTNode) :
+    ASTWrapperPsiElement(node),
+    TolkBinExpression {
     override fun toString(): String = "TolkBinExpression:$text"
 }
 

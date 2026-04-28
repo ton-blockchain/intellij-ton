@@ -12,11 +12,8 @@ import org.ton.intellij.acton.settings.actonSettings
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class ActonCommandConfiguration(
-    project: Project,
-    factory: ConfigurationFactory,
-    name: String,
-) : LocatableConfigurationBase<ActonCommandRunState>(project, factory, name) {
+class ActonCommandConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
+    LocatableConfigurationBase<ActonCommandRunState>(project, factory, name) {
 
     var command: String = "build"
     var workingDirectory: Path? = null
@@ -35,7 +32,6 @@ class ActonCommandConfiguration(
     var scriptForkNet: String = ""
     var scriptForkBlockNumber: String = ""
     var scriptApiKey: String = ""
-    var scriptBroadcast: Boolean = false
     var scriptBroadcastNet: String = ""
     var scriptDebug: Boolean = false
     var scriptDebugPort: String = ""
@@ -45,31 +41,34 @@ class ActonCommandConfiguration(
     var testTarget: String = ""
     var testFunctionName: String = ""
     var testClearCache: Boolean = false
+    var testUi: Boolean = false
 
     // Run command specific settings (Acton.toml scripts)
     var runScriptName: String = ""
 
-    fun getActonCommand(): ActonCommand {
-        return when (command) {
-            "build"  -> ActonCommand.Build(buildContractId, buildClearCache, buildOutDir)
-            "script" -> ActonCommand.Script(
-                scriptPath, scriptClearCache, scriptForkNet, scriptForkBlockNumber, scriptApiKey,
-                scriptBroadcast, scriptBroadcastNet, project.actonSettings.explorer.id, scriptDebug, scriptDebugPort
-            )
+    // Retrace command specific settings
+    var retraceTransactionHash: String = ""
+    var retraceContractId: String = ""
+    var retraceNetwork: String = ""
 
-            "test"   -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache, true)
-            "run"    -> ActonCommand.Run(runScriptName)
-            else     -> ActonCommand.Custom(command)
-        }
+    fun getActonCommand(): ActonCommand = when (command) {
+        "build" -> ActonCommand.Build(buildContractId, buildClearCache, buildOutDir)
+        "script" -> ActonCommand.Script(
+            scriptPath, scriptClearCache, scriptForkNet, scriptForkBlockNumber, scriptApiKey,
+            scriptBroadcastNet, project.actonSettings.explorer.id, scriptDebug, scriptDebugPort,
+        )
+
+        "test" -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache, true, testUi)
+        "run" -> ActonCommand.Run(runScriptName)
+        "retrace" -> ActonCommand.Retrace(retraceTransactionHash, retraceNetwork, retraceContractId)
+        else -> ActonCommand.Custom(command)
     }
 
-    override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState {
-        return ActonCommandRunState(environment, this)
-    }
+    override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState =
+        ActonCommandRunState(environment, this)
 
-    override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> {
-        return ActonCommandConfigurationEditor(project)
-    }
+    override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> =
+        ActonCommandConfigurationEditor(project)
 
     override fun writeExternal(element: Element) {
         super.writeExternal(element)
@@ -89,7 +88,6 @@ class ActonCommandConfiguration(
         element.setAttribute("scriptForkNet", scriptForkNet)
         element.setAttribute("scriptForkBlockNumber", scriptForkBlockNumber)
         element.setAttribute("scriptApiKey", scriptApiKey)
-        element.setAttribute("scriptBroadcast", scriptBroadcast.toString())
         element.setAttribute("scriptBroadcastNet", scriptBroadcastNet)
         element.setAttribute("scriptDebug", scriptDebug.toString())
         element.setAttribute("scriptDebugPort", scriptDebugPort)
@@ -99,9 +97,15 @@ class ActonCommandConfiguration(
         element.setAttribute("testTarget", testTarget)
         element.setAttribute("testFunctionName", testFunctionName)
         element.setAttribute("testClearCache", testClearCache.toString())
+        element.setAttribute("testUi", testUi.toString())
 
         // Run settings
         element.setAttribute("runScriptName", runScriptName)
+
+        // Retrace settings
+        element.setAttribute("retraceTransactionHash", retraceTransactionHash)
+        element.setAttribute("retraceContractId", retraceContractId)
+        element.setAttribute("retraceNetwork", retraceNetwork)
 
         env.writeExternal(element)
     }
@@ -124,21 +128,62 @@ class ActonCommandConfiguration(
         scriptForkNet = element.getAttributeValue("scriptForkNet") ?: ""
         scriptForkBlockNumber = element.getAttributeValue("scriptForkBlockNumber") ?: ""
         scriptApiKey = element.getAttributeValue("scriptApiKey") ?: ""
-        scriptBroadcast = element.getAttributeValue("scriptBroadcast")?.toBoolean() ?: false
         scriptBroadcastNet = element.getAttributeValue("scriptBroadcastNet") ?: ""
         scriptDebug = element.getAttributeValue("scriptDebug")?.toBoolean() ?: false
         scriptDebugPort = element.getAttributeValue("scriptDebugPort") ?: ""
 
         // Test settings
         testMode =
-            element.getAttributeValue("testMode")?.let { ActonCommand.Test.TestMode.valueOf(it) } ?: ActonCommand.Test.TestMode.DIRECTORY
+            element.getAttributeValue("testMode")?.let { ActonCommand.Test.TestMode.valueOf(it) }
+                ?: ActonCommand.Test.TestMode.DIRECTORY
         testTarget = element.getAttributeValue("testTarget") ?: ""
         testFunctionName = element.getAttributeValue("testFunctionName") ?: ""
         testClearCache = element.getAttributeValue("testClearCache")?.toBoolean() ?: false
+        testUi = element.getAttributeValue("testUi")?.toBoolean() ?: false
 
         // Run settings
         runScriptName = element.getAttributeValue("runScriptName") ?: ""
 
+        // Retrace settings
+        retraceTransactionHash = element.getAttributeValue("retraceTransactionHash") ?: ""
+        retraceContractId = element.getAttributeValue("retraceContractId") ?: ""
+        retraceNetwork = element.getAttributeValue("retraceNetwork") ?: ""
+
         env = EnvironmentVariablesData.readExternal(element)
     }
+
+    fun copyFrom(other: ActonCommandConfiguration) {
+        command = other.command
+        workingDirectory = other.workingDirectory
+        parameters = other.parameters
+        env = other.env
+        emulateTerminal = other.emulateTerminal
+
+        buildContractId = other.buildContractId
+        buildClearCache = other.buildClearCache
+        buildOutDir = other.buildOutDir
+
+        scriptPath = other.scriptPath
+        scriptClearCache = other.scriptClearCache
+        scriptForkNet = other.scriptForkNet
+        scriptForkBlockNumber = other.scriptForkBlockNumber
+        scriptApiKey = other.scriptApiKey
+        scriptBroadcastNet = other.scriptBroadcastNet
+        scriptDebug = other.scriptDebug
+        scriptDebugPort = other.scriptDebugPort
+
+        testMode = other.testMode
+        testTarget = other.testTarget
+        testFunctionName = other.testFunctionName
+        testClearCache = other.testClearCache
+        testUi = other.testUi
+
+        runScriptName = other.runScriptName
+
+        retraceTransactionHash = other.retraceTransactionHash
+        retraceContractId = other.retraceContractId
+        retraceNetwork = other.retraceNetwork
+    }
+
+    fun isScriptBroadcast(): Boolean = scriptBroadcastNet.isNotBlank()
 }

@@ -9,10 +9,10 @@ interface FuncTyProvider {
     fun getFuncTy(): FuncTy
 }
 
-sealed class FuncTy : FuncTyFoldable<FuncTy>, FuncTyProvider {
-    override fun getFuncTy(): FuncTy {
-        return this
-    }
+sealed class FuncTy :
+    FuncTyFoldable<FuncTy>,
+    FuncTyProvider {
+    override fun getFuncTy(): FuncTy = this
 
     override fun foldWith(folder: FuncTyFolder): FuncTy = folder.foldTy(this)
 
@@ -28,17 +28,14 @@ sealed class FuncTy : FuncTyFoldable<FuncTy>, FuncTyProvider {
     }
 }
 
-data class FuncTyTensor(
-    val types: List<FuncTy>
-) : FuncTy() {
+data class FuncTyTensor(val types: List<FuncTy>) : FuncTy() {
     constructor(vararg types: FuncTy) : this(types.toList())
 
     init {
         assert(types.isNotEmpty()) { "TyTuple should not be empty" }
     }
 
-    override fun superFoldWith(folder: FuncTyFolder): FuncTy =
-        FuncTy(types.map { it.foldWith(folder) })
+    override fun superFoldWith(folder: FuncTyFolder): FuncTy = FuncTy(types.map { it.foldWith(folder) })
 
     override fun isEquivalentToInner(other: FuncTy): Boolean {
         if (this === other) return true
@@ -68,11 +65,8 @@ data class FuncTyTensor(
     override fun toString(): String = types.joinToString(", ", "(", ")")
 }
 
-data class FuncTyTuple(
-    val types: List<FuncTy>
-) : FuncTy() {
-    override fun superFoldWith(folder: FuncTyFolder): FuncTy =
-        FuncTyTuple(types.map { it.foldWith(folder) })
+data class FuncTyTuple(val types: List<FuncTy>) : FuncTy() {
+    override fun superFoldWith(folder: FuncTyFolder): FuncTy = FuncTyTuple(types.map { it.foldWith(folder) })
 
     override fun isEquivalentToInner(other: FuncTy): Boolean {
         if (this === other) return true
@@ -100,12 +94,10 @@ data class FuncTyTuple(
     override fun toString(): String = types.joinToString(", ", "[", "]")
 }
 
-fun FuncTy(types: List<FuncTy>): FuncTy {
-    return when (types.size) {
-        0 -> FuncTyUnit
-        1 -> types.single()
-        else -> FuncTyTensor(types)
-    }
+fun FuncTy(types: List<FuncTy>): FuncTy = when (types.size) {
+    0 -> FuncTyUnit
+    1 -> types.single()
+    else -> FuncTyTensor(types)
 }
 
 data object FuncTyUnknown : FuncTy() {
@@ -114,12 +106,8 @@ data object FuncTyUnknown : FuncTy() {
     override fun canRhsBeAssigned(other: FuncTy): Boolean = true
 }
 
-data class FuncTyMap(
-    val from: FuncTy,
-    val to: FuncTy
-) : FuncTy() {
-    override fun superFoldWith(folder: FuncTyFolder): FuncTy =
-        FuncTyMap(from.foldWith(folder), to.foldWith(folder))
+data class FuncTyMap(val from: FuncTy, val to: FuncTy) : FuncTy() {
+    override fun superFoldWith(folder: FuncTyFolder): FuncTy = FuncTyMap(from.foldWith(folder), to.foldWith(folder))
 
     override fun isEquivalentToInner(other: FuncTy): Boolean {
         if (this === other) return true
@@ -222,18 +210,18 @@ val FuncTypeReference.rawType: FuncTy
             is FuncTensorType -> FuncTy(
                 typeReferenceList.map {
                     it.rawType
-                }
+                },
             )
 
             is FuncTupleType -> FuncTyTuple(
                 typeReferenceList.map {
                     it.rawType
-                }
+                },
             )
 
             is FuncMapType -> FuncTyMap(
                 from.rawType,
-                to?.rawType ?: return FuncTyUnknown
+                to?.rawType ?: return FuncTyUnknown,
             )
 
             else -> FuncTyUnknown
@@ -244,11 +232,11 @@ val FuncPrimitiveTypeExpression.rawType: FuncTy
     get() {
         return when {
             this.primitiveType.builderKeyword != null -> FuncTyBuilder
-            this.primitiveType.cellKeyword != null    -> FuncTyCell
-            this.primitiveType.contKeyword != null    -> FuncTyCont
-            this.primitiveType.intKeyword != null     -> FuncTyInt
-            this.primitiveType.sliceKeyword != null   -> FuncTySlice
-            this.primitiveType.tupleKeyword != null   -> FuncTyAtomicTuple
-            else                                      -> FuncTyUnknown
+            this.primitiveType.cellKeyword != null -> FuncTyCell
+            this.primitiveType.contKeyword != null -> FuncTyCont
+            this.primitiveType.intKeyword != null -> FuncTyInt
+            this.primitiveType.sliceKeyword != null -> FuncTySlice
+            this.primitiveType.tupleKeyword != null -> FuncTyAtomicTuple
+            else -> FuncTyUnknown
         }
     }

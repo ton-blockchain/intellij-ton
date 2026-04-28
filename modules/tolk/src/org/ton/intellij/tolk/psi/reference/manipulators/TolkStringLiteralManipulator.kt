@@ -9,7 +9,7 @@ class TolkStringLiteralManipulator : AbstractElementManipulator<TolkStringLitera
     override fun handleContentChange(
         element: TolkStringLiteral,
         range: TextRange,
-        newContent: String
+        newContent: String,
     ): TolkStringLiteral {
         val newStr = element.project.tolkPsiFactory.createStringLiteral(newContent)
         return element.replace(newStr) as TolkStringLiteral

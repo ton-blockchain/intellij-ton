@@ -10,9 +10,8 @@ import org.ton.intellij.util.prevVisibleOrNewLine
 import org.ton.intellij.util.psiElement
 
 object FuncPsiPattern {
-    fun baseDeclarationPattern(): PsiElementPattern.Capture<PsiElement> =
-        psiElement<PsiElement>()
-            .withParent(psiElement<FuncFile>())
+    fun baseDeclarationPattern(): PsiElementPattern.Capture<PsiElement> = psiElement<PsiElement>()
+        .withParent(psiElement<FuncFile>())
 
     fun onStatementBeginning(vararg startWords: String): PsiElementPattern.Capture<PsiElement> =
         PlatformPatterns.psiElement().with(OnStatementBeginning(*startWords))
@@ -23,22 +22,16 @@ object FuncPsiPattern {
     fun macroPattern(): PsiElementPattern.Capture<PsiElement> =
         baseDeclarationPattern().and(identifierStatementBeginningPattern("#"))
 
-    private class OnStatementBeginning(vararg startWords: String) :
+    private class OnStatementBeginning(private vararg val startWords: String) :
         PatternCondition<PsiElement>("onStatementBeginning") {
-        private val _startWords = startWords
 
         override fun accepts(t: PsiElement, context: ProcessingContext?): Boolean {
             val prev = t.prevVisibleOrNewLine
-            return if (_startWords.isEmpty())
+            return if (startWords.isEmpty()) {
                 prev == null || prev is PsiWhiteSpace
-            else
-                prev != null && prev.node.text in _startWords
-        }
-    }
-
-    private class TestPattern() : PatternCondition<PsiElement>("testPattern") {
-        override fun accepts(t: PsiElement, context: ProcessingContext?): Boolean {
-            return true
+            } else {
+                prev != null && prev.node.text in startWords
+            }
         }
     }
 }

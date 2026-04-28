@@ -8,5 +8,6 @@
                                 implementationClass="org.ton.intellij.acton.toml.ActonTomlCompletionContributor"/>
         <lang.documentationProvider language="TOML"
                                 implementationClass="org.ton.intellij.acton.toml.ActonTomlDocumentationProvider"/>
+        <multiHostInjector implementation="org.ton.intellij.acton.toml.ActonTomlScriptCommandInjector"/>
     </extensions>
 </idea-plugin>

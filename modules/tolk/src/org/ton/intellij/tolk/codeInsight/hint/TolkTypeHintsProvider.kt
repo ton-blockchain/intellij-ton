@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.ton.intellij.tolk.codeInsight.hint
 
 import com.intellij.codeInsight.hints.declarative.InlayTreeSink
@@ -7,15 +9,12 @@ import org.ton.intellij.tolk.psi.TolkCatchParameter
 import org.ton.intellij.tolk.psi.TolkConstVar
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkVar
-import org.ton.intellij.tolk.type.TolkTyFunction
 import org.ton.intellij.tolk.type.TolkTy
+import org.ton.intellij.tolk.type.TolkTyFunction
 import org.ton.intellij.tolk.type.printTolkType
 
 class TolkTypeHintsProvider : AbstractTolkInlayHintProvider() {
-    override fun collectFromElement(
-        element: PsiElement,
-        sink: InlayTreeSink
-    ) {
+    override fun collectFromElement(element: PsiElement, sink: InlayTreeSink) {
         sink.whenOptionEnabled("hint.type.var") {
             collectFromVar(element, sink)
             collectFromCatch(element, sink)

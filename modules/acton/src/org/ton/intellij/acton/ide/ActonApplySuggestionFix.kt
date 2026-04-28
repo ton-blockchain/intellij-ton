@@ -36,12 +36,12 @@ class ActonApplySuggestionFix(
         for (edit in sortedEdits) {
             val startLine = edit.range.start.line
             val endLine = edit.range.end.line
-            
+
             if (startLine !in 0 until document.lineCount || endLine !in 0 until document.lineCount) continue
-            
+
             val lineStartOffset = document.getLineStartOffset(startLine)
             val lineEndOffset = document.getLineStartOffset(endLine)
-            
+
             val startOffset = (lineStartOffset + edit.range.start.character).coerceIn(0, document.textLength)
             val endOffset = (lineEndOffset + edit.range.end.character).coerceIn(0, document.textLength)
 
@@ -58,7 +58,7 @@ class ActonApplySuggestionFix(
             return ActonApplySuggestionFix(
                 fixName = fix.message,
                 edits = fix.edits,
-                document = document
+                document = document,
             )
         }
     }

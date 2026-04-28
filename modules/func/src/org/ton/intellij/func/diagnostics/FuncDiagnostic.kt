@@ -5,10 +5,7 @@ import com.intellij.psi.PsiElement
 import org.ton.intellij.func.inspection.FuncInspectionBase
 import org.ton.intellij.util.PreparedAnnotation
 
-sealed class FuncDiagnostic(
-    val element: PsiElement,
-    val endElement: PsiElement = element
-) {
+sealed class FuncDiagnostic(val element: PsiElement, val endElement: PsiElement = element) {
     abstract fun prepare(): PreparedAnnotation
 
     abstract fun canApply(inspection: FuncInspectionBase): Boolean
@@ -21,7 +18,7 @@ sealed class FuncDiagnostic(
                 element,
                 prepared.fullDescription,
                 prepared.severity,
-                *fixes
+                *fixes,
             )
         } else {
             val descriptor = holder.manager.createProblemDescriptor(
@@ -30,7 +27,7 @@ sealed class FuncDiagnostic(
                 prepared.fullDescription,
                 prepared.severity,
                 holder.isOnTheFly,
-                *fixes
+                *fixes,
             )
             holder.registerProblem(descriptor)
         }

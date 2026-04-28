@@ -15,5 +15,6 @@ object TolkIcons {
     val STRUCTURE = IconLoader.getIcon("/icons/struct.svg", TolkIcons::class.java)
     val ENUM = AllIcons.Nodes.Enum
     val TYPE_ALIAS = IconLoader.getIcon("/icons/typeAlias.svg", TolkIcons::class.java)
+    val TYPESCRIPT = IconLoader.getIcon("/icons/typeScript.svg", TolkIcons::class.java)
     val GLOBAL_VARIABLE = IconLoader.getIcon("/icons/globalVariable.svg", TolkIcons::class.java)
 }

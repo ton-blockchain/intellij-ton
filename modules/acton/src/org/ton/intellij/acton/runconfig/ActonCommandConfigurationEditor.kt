@@ -9,22 +9,20 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.ExpandableEditorSupport
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextField
 import com.intellij.ui.dsl.builder.*
+import com.intellij.ui.layout.not
 import com.intellij.util.TextFieldCompletionProvider
 import com.intellij.util.textCompletion.TextFieldWithCompletion
 import com.intellij.util.ui.JBUI
 import org.ton.intellij.acton.cli.ActonCommand
-import com.intellij.ui.layout.ComponentPredicate
-import com.intellij.ui.layout.not
-import com.intellij.ui.layout.selected
 import java.nio.file.Paths
 import javax.swing.JComponent
-import com.intellij.openapi.ui.DialogPanel
 
 class ActonCommandConfigurationEditor(private val project: Project) : SettingsEditor<ActonCommandConfiguration>() {
     private lateinit var mainPanel: DialogPanel
@@ -46,23 +44,28 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
     private val scriptForkNetComboBox = ComboBox(arrayOf("", "testnet", "mainnet"))
     private val scriptForkBlockNumberField = JBTextField(null)
     private val scriptApiKeyField = JBTextField(null)
-
-    private val scriptBroadcastCheckBox = JBCheckBox("Broadcast", false)
-    private val scriptBroadcastNetComboBox = ComboBox(arrayOf("", "testnet", "mainnet"))
+    private val scriptBroadcastNetComboBox = ComboBox(arrayOf("", "testnet", "mainnet", "localnet"))
 
     // Test specific
     private val testTargetBrowseField = TextFieldWithBrowseButton()
     private val testFunctionNameField = JBTextField()
     private val testClearCacheCheckBox = JBCheckBox("Clear compilation cache before testing", false)
+    private val testUiCheckBox = JBCheckBox("Open browser UI", false)
     private var testMode: ActonCommand.Test.TestMode = ActonCommand.Test.TestMode.DIRECTORY
 
     // Run specific
     private val runScriptNameField = createTextFieldWithCompletion(ActonScriptCompletionProvider(project))
 
+    // Retrace specific
+    private val retraceTransactionHashField = JBTextField()
+    private val retraceContractIdField = createTextFieldWithCompletion(ActonContractCompletionProvider(project))
+    private val retraceNetworkComboBox = ComboBox(arrayOf("", "testnet", "mainnet"))
+
     private var buildGroup: Row? = null
     private var scriptGroup: Row? = null
     private var testGroup: Row? = null
     private var runGroup: Row? = null
+    private var retraceGroup: Row? = null
     private var additionalArgumentsRow: Row? = null
 
     private var testTargetRow: Row? = null
@@ -71,34 +74,33 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
     init {
         workingDirectoryField.addBrowseFolderListener(
             project,
-            FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle("Select Working Directory")
+            FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle("Select Working Directory"),
         )
         buildOutDirField.addBrowseFolderListener(
             project,
-            FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle("Select Output Directory")
+            FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle("Select Output Directory"),
         )
         scriptPathField.addBrowseFolderListener(
             project,
-            FileChooserDescriptorFactory.createSingleFileDescriptor().withTitle("Select Script File")
+            FileChooserDescriptorFactory.createSingleFileOrExecutableAppDescriptor().withTitle("Select Script File"),
         )
         testTargetBrowseField.addBrowseFolderListener(
             project,
-            FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor().withTitle("Select Test Target")
+            FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor().withTitle("Select Test Target"),
         )
 
         setupExpandableSupport(commandField)
         setupExpandableSupport(parametersField)
         setupExpandableSupport(buildContractIdField)
         setupExpandableSupport(runScriptNameField)
+        setupExpandableSupport(retraceContractIdField)
 
         commandField.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
                 updateVisibility()
             }
         })
-
         scriptForkCheckBox.addActionListener { updateEnabledState() }
-        scriptBroadcastCheckBox.addActionListener { updateEnabledState() }
     }
 
     private fun updateVisibility() {
@@ -107,11 +109,13 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         val isScript = command == "script"
         val isTest = command == "test"
         val isRun = command == "run"
+        val isRetrace = command == "retrace"
 
         buildGroup?.visible(isBuild)
         scriptGroup?.visible(isScript)
         testGroup?.visible(isTest)
         runGroup?.visible(isRun)
+        retraceGroup?.visible(isRetrace)
 
         if (isTest) {
             testTargetRow?.visible(true)
@@ -133,18 +137,27 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         scriptForkNetComboBox.isEnabled = forkEnabled
         scriptForkBlockNumberField.isEnabled = forkEnabled
         scriptApiKeyField.isEnabled = forkEnabled
-
-        val broadcastEnabled = scriptBroadcastCheckBox.isSelected
-        scriptBroadcastNetComboBox.isEnabled = broadcastEnabled
     }
 
     private fun createTextFieldWithCompletion(provider: TextFieldCompletionProvider?): TextFieldWithCompletion {
         val field = if (provider != null) {
             TextFieldWithCompletion(project, provider, "", true, true, true)
         } else {
-            TextFieldWithCompletion(project, object : TextFieldCompletionProvider() {
-                override fun addCompletionVariants(text: String, offset: Int, prefix: String, result: CompletionResultSet) {}
-            }, "", true, true, true)
+            TextFieldWithCompletion(
+                project,
+                object : TextFieldCompletionProvider() {
+                    override fun addCompletionVariants(
+                        text: String,
+                        offset: Int,
+                        prefix: String,
+                        result: CompletionResultSet,
+                    ) {}
+                },
+                "",
+                true,
+                true,
+                true,
+            )
         }
 
         field.addSettingsProvider { editor ->
@@ -179,19 +192,25 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         scriptPathField.text = configuration.scriptPath
         scriptClearCacheCheckBox.isSelected = configuration.scriptClearCache
         scriptForkCheckBox.isSelected =
-            configuration.scriptForkNet.isNotEmpty() || configuration.scriptForkBlockNumber.isNotEmpty() || configuration.scriptApiKey.isNotEmpty()
+            configuration.scriptForkNet.isNotEmpty() ||
+            configuration.scriptForkBlockNumber.isNotEmpty() ||
+            configuration.scriptApiKey.isNotEmpty()
         scriptForkNetComboBox.selectedItem = configuration.scriptForkNet
         scriptForkBlockNumberField.setText(configuration.scriptForkBlockNumber)
         scriptApiKeyField.setText(configuration.scriptApiKey)
-        scriptBroadcastCheckBox.isSelected = configuration.scriptBroadcast
         scriptBroadcastNetComboBox.selectedItem = configuration.scriptBroadcastNet
 
         testMode = configuration.testMode
         testTargetBrowseField.text = configuration.testTarget
         testFunctionNameField.text = configuration.testFunctionName
         testClearCacheCheckBox.isSelected = configuration.testClearCache
+        testUiCheckBox.isSelected = configuration.testUi
 
         runScriptNameField.text = configuration.runScriptName
+
+        retraceTransactionHashField.text = configuration.retraceTransactionHash
+        retraceContractIdField.text = configuration.retraceContractId
+        retraceNetworkComboBox.selectedItem = configuration.retraceNetwork
 
         mainPanel.reset()
         updateVisibility()
@@ -211,19 +230,24 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
 
         configuration.scriptPath = scriptPathField.text.trim()
         configuration.scriptClearCache = scriptClearCacheCheckBox.isSelected
-        configuration.scriptForkNet = if (scriptForkCheckBox.isSelected) (scriptForkNetComboBox.selectedItem as? String ?: "") else ""
-        configuration.scriptForkBlockNumber = if (scriptForkCheckBox.isSelected) scriptForkBlockNumberField.text.trim() else ""
+        configuration.scriptForkNet =
+            if (scriptForkCheckBox.isSelected) (scriptForkNetComboBox.selectedItem as? String ?: "") else ""
+        configuration.scriptForkBlockNumber =
+            if (scriptForkCheckBox.isSelected) scriptForkBlockNumberField.text.trim() else ""
         configuration.scriptApiKey = if (scriptForkCheckBox.isSelected) scriptApiKeyField.text.trim() else ""
-        configuration.scriptBroadcast = scriptBroadcastCheckBox.isSelected
-        configuration.scriptBroadcastNet =
-            if (scriptBroadcastCheckBox.isSelected) (scriptBroadcastNetComboBox.selectedItem as? String ?: "") else ""
+        configuration.scriptBroadcastNet = scriptBroadcastNetComboBox.selectedItem as? String ?: ""
 
         configuration.testMode = testMode
         configuration.testTarget = testTargetBrowseField.text.trim()
         configuration.testFunctionName = testFunctionNameField.text.trim()
         configuration.testClearCache = testClearCacheCheckBox.isSelected
+        configuration.testUi = testUiCheckBox.isSelected
 
         configuration.runScriptName = runScriptNameField.text.trim()
+
+        configuration.retraceTransactionHash = retraceTransactionHashField.text.trim()
+        configuration.retraceContractId = retraceContractIdField.text.trim()
+        configuration.retraceNetwork = retraceNetworkComboBox.selectedItem as? String ?: ""
     }
 
     override fun createEditor(): JComponent {
@@ -258,13 +282,10 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
                     cell(scriptClearCacheCheckBox)
                 }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
 
-                group("Broadcasting") {
-                    row {
-                        cell(scriptBroadcastCheckBox).comment("Send transactions to the blockchain instead of emulating them")
-                    }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
-                    row("Network:") {
-                        cell(scriptBroadcastNetComboBox).align(AlignX.FILL)
-                    }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
+                row("Network:") {
+                    cell(scriptBroadcastNetComboBox)
+                        .align(AlignX.FILL)
+                        .comment("Leave empty to run in emulation mode, or pick a network to broadcast")
                 }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
             }.topGap(TopGap.NONE)
 
@@ -291,11 +312,29 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
                 row {
                     cell(testClearCacheCheckBox)
                 }
+
+                row {
+                    cell(testUiCheckBox)
+                }.topGap(TopGap.NONE)
             }.topGap(TopGap.NONE)
 
             runGroup = group("Run arguments") {
                 row("Script name:") {
                     cell(runScriptNameField).align(AlignX.FILL)
+                }
+            }.topGap(TopGap.NONE)
+
+            retraceGroup = group("Retrace arguments") {
+                row("Transaction hash:") {
+                    cell(retraceTransactionHashField).align(AlignX.FILL)
+                }
+                row("Contract:") {
+                    cell(retraceContractIdField)
+                        .align(AlignX.FILL)
+                        .comment("Required for source-level debug; if empty, you'll be asked on debug launch")
+                }
+                row("Network:") {
+                    cell(retraceNetworkComboBox).align(AlignX.FILL)
                 }
             }.topGap(TopGap.NONE)
 

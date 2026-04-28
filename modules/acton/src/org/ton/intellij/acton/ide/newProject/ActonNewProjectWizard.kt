@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.ton.intellij.acton.ide.newProject
 
 import com.intellij.ide.wizard.AbstractNewProjectWizardStep
@@ -10,7 +12,7 @@ import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.Panel
 
 class ActonNewProjectWizard : LanguageNewProjectWizard {
-    override val name: String = "Acton"
+    override val name: String = "TON"
 
     override val ordinal: Int = 900
 
@@ -24,6 +26,9 @@ class ActonNewProjectWizard : LanguageNewProjectWizard {
                 row {
                     cell(peer.component)
                         .align(AlignX.FILL)
+                        .validationOnApply { _ ->
+                            validateActonExecutable()
+                        }
                 }
             }
         }

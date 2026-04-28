@@ -12,7 +12,7 @@ class TolkLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider(
 
     override fun customizeDefaults(
         commonSettings: CommonCodeStyleSettings,
-        indentOptions: CommonCodeStyleSettings.IndentOptions
+        indentOptions: CommonCodeStyleSettings.IndentOptions,
     ) {
         commonSettings.RIGHT_MARGIN = 100
 

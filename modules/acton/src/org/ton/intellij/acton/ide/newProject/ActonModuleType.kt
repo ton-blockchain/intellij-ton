@@ -8,11 +8,11 @@ import javax.swing.Icon
 class ActonModuleType : ModuleType<ActonModuleBuilder>(ID) {
     override fun createModuleBuilder(): ActonModuleBuilder = ActonModuleBuilder()
 
-    override fun getName(): String = "Acton"
+    override fun getName(): String = "TON"
 
-    override fun getDescription(): String = "Acton project"
+    override fun getDescription(): String = "TON project"
 
-    override fun getNodeIcon(isOpened: Boolean): Icon = ActonIcons.ACTON
+    override fun getNodeIcon(isOpened: Boolean): Icon = ActonIcons.TON
 
     companion object {
         const val ID = "ACTON_MODULE"

@@ -12,9 +12,9 @@ interface FiftReference : PsiReference {
     fun multiResolve(): Sequence<PsiElement>
 }
 
-abstract class FiftReferenceBase<T : FiftElement>(
-    element: T,
-) : PsiPolyVariantReferenceBase<T>(element), FiftReference {
+abstract class FiftReferenceBase<T : FiftElement>(element: T) :
+    PsiPolyVariantReferenceBase<T>(element),
+    FiftReference {
     override fun calculateDefaultRangeInElement() = TextRange(0, element.textRange.length)
     override fun getVariants(): Array<Any> = emptyArray()
     override fun resolve(): FiftElement? = super.resolve() as? FiftElement
@@ -22,9 +22,7 @@ abstract class FiftReferenceBase<T : FiftElement>(
         multiResolve().map(::PsiElementResolveResult).toList().toTypedArray()
 }
 
-class FiftOrdinaryWordReference(
-    element: FiftOrdinaryWord,
-) : FiftReferenceBase<FiftOrdinaryWord>(element) {
+class FiftOrdinaryWordReference(element: FiftOrdinaryWord) : FiftReferenceBase<FiftOrdinaryWord>(element) {
     override fun multiResolve(): Sequence<PsiElement> {
         val name = element.text
         val file = element.resolveFile()

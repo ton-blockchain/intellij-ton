@@ -1,10 +1,13 @@
-
 import groovy.xml.XmlParser
 import org.jetbrains.changelog.Changelog
+import org.jetbrains.grammarkit.tasks.GenerateLexerTask
+import org.jetbrains.grammarkit.tasks.GenerateParserTask
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import java.time.Clock
 import java.time.Instant
 
@@ -26,10 +29,72 @@ plugins {
     id("org.jetbrains.intellij.platform")
     id("org.jetbrains.grammarkit") version "2023.3.0.1"
     id("org.jetbrains.changelog") version "2.5.0"
+    id("org.jlleitschuh.gradle.ktlint") version "13.1.0" apply false
 }
 
 allprojects {
     apply(plugin = "kotlin")
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
+
+    configure<KtlintExtension> {
+        ignoreFailures.set(true)
+        filter {
+            exclude("**/build/**")
+            exclude("**/gen/**")
+        }
+    }
+
+    val grammarKitGenerators =
+        tasks.matching { task ->
+            task.name.startsWith("generate") &&
+                task.name !in setOf("generateLexer", "generateParser") &&
+                (task.name.endsWith("Lexer") || task.name.endsWith("Parser"))
+        }
+
+    tasks.matching { task ->
+        task.name == "runKtlintCheckOverMainSourceSet" || task.name == "runKtlintFormatOverMainSourceSet"
+    }.configureEach {
+        dependsOn(grammarKitGenerators)
+    }
+
+    tasks.withType<GenerateLexerTask>().configureEach {
+        if (name != "generateLexer") return@configureEach
+
+        val flexFiles = fileTree("src").matching { include("**/*Lexer.flex") }.files.toList()
+        if (flexFiles.size != 1) {
+            enabled = false
+            return@configureEach
+        }
+
+        val flexFile = flexFiles.single()
+        val relativeOutputDir = flexFile.parentFile.relativeTo(projectDir.resolve("src"))
+        sourceFile.set(flexFile)
+        targetOutputDir.set(projectDir.resolve("gen").resolve(relativeOutputDir.path))
+        purgeOldFiles.set(true)
+    }
+
+    tasks.withType<GenerateParserTask>().configureEach {
+        if (name != "generateParser") return@configureEach
+
+        val bnfFiles = fileTree("src").matching { include("**/*Parser.bnf") }.files.toList()
+        if (bnfFiles.size != 1) {
+            enabled = false
+            return@configureEach
+        }
+
+        val bnfFile = bnfFiles.single()
+        val relativeParserDir = bnfFile.parentFile.relativeTo(projectDir.resolve("src")).invariantSeparatorsPath
+        val parserName = bnfFile.nameWithoutExtension
+        val psiRoot = bnfFile.parentFile.parentFile.resolve(
+            "psi",
+        ).relativeTo(projectDir.resolve("src")).invariantSeparatorsPath
+
+        sourceFile.set(bnfFile)
+        targetRootOutputDir.set(projectDir.resolve("gen"))
+        pathToParser.set("/$relativeParserDir/$parserName.java")
+        pathToPsiRoot.set("/$psiRoot")
+        purgeOldFiles.set(true)
+    }
 
     tasks.withType<KotlinCompile> {
         compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
@@ -67,7 +132,6 @@ dependencies {
         testFramework(TestFrameworkType.Platform)
     }
     implementation(project(":util"))
-    implementation(project(":blueprint"))
     implementation(project(":asm"))
     implementation(project(":boc"))
     implementation(project(":acton"))
@@ -90,7 +154,7 @@ intellijPlatform {
         TON Blockchain Development Plugin — a JetBrains plugin that brings first-class TON blockchain support to IntelliJ-based IDEs.
 
         - Syntax highlighting, code completion, navigation and inspections for Tolk, FunC, Fift (including assembly), TL-B schemas and TASM (TON Assembly)
-        - Integration with Blueprint
+        - Acton-based project scaffolding, build, test, script and debug workflows
         - Works in IntelliJ IDEA, WebStorm, PyCharm, GoLand and other JetBrains IDEs
 
         Everything you need to develop, test and ship TON smart contracts—right from your editor.
@@ -98,7 +162,7 @@ intellijPlatform {
         changeNotes.set(
             provider {
                 changelog.renderItem(changelog.getLatest(), Changelog.OutputType.HTML)
-            }
+            },
         )
         ideaVersion {
             sinceBuild.set(prop("pluginSinceBuild"))
@@ -112,9 +176,8 @@ intellijPlatform {
     }
     pluginVerification {
         ides {
-            recommended()
             select {
-
+                types = listOf(IntelliJPlatformType.WebStorm)
             }
         }
     }
@@ -139,19 +202,39 @@ val mergePluginJarsTask = tasks.register<Jar>("mergePluginJars") {
     }
 }
 
+val fmt by tasks.registering {
+    group = "formatting"
+    description = "Formats Kotlin sources and Gradle Kotlin scripts in all projects with ktlint."
+    dependsOn(
+        rootProject.allprojects.map { project ->
+            if (project == rootProject) "ktlintFormat" else "${project.path}:ktlintFormat"
+        },
+    )
+}
+
 tasks {
     prepareSandbox {
         finalizedBy(mergePluginJarsTask)
         enabled = true
     }
+
+    prepareTestSandbox {
+        dependsOn(mergePluginJarsTask)
+    }
+
     withType<RunIdeTask> {
         // Force `mergePluginJarTask` be executed before any task based on `RunIdeBase` (for example, `runIde` or `buildSearchableOptions`).
         // Otherwise, these tasks fail because of implicit dependency.
         // Should be dropped when jar merging is implemented in `gradle-intellij-plugin` itself
         dependsOn(mergePluginJarsTask)
     }
+
     verifyPlugin {
         dependsOn(mergePluginJarsTask)
+    }
+
+    wrapper {
+        gradleVersion = providers.gradleProperty("gradleVersion").get()
     }
 }
 

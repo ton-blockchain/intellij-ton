@@ -15,6 +15,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.formatter.FormatterUtil
 import org.ton.intellij.acton.ActonBundle
 import org.ton.intellij.acton.cli.ActonCommandLine
+import org.ton.intellij.acton.cli.findActonExecutableInPath
 import org.ton.intellij.acton.settings.actonSettings
 import java.io.File
 import java.nio.charset.Charset
@@ -27,8 +28,8 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
     override fun canFormat(file: PsiFile): Boolean {
         if (file.virtualFile?.extension != "tolk") return false
         return file.project.actonSettings.useActonFmtForTolkFormatting &&
-                getFormattingReason() == FormattingReason.ReformatCode &&
-                isActonAvailable(file)
+            getFormattingReason() == FormattingReason.ReformatCode &&
+            isActonAvailable(file)
     }
 
     override fun getFeatures(): MutableSet<Feature> = mutableSetOf()
@@ -45,7 +46,7 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
             deleteTempFile(inputFile.file)
             request.onError(
                 ActonBundle.message("acton.fmt.error.title"),
-                ActonBundle.message("acton.fmt.error.acton.not.found")
+                ActonBundle.message("acton.fmt.error.acton.not.found"),
             )
             return null
         }
@@ -64,7 +65,7 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
                                         LOG.warn("Failed to read formatted file `${inputFile.file.absolutePath}`", e)
                                         request.onError(
                                             ActonBundle.message("acton.fmt.error.title"),
-                                            ActonBundle.message("acton.fmt.error.formatted.file.read")
+                                            ActonBundle.message("acton.fmt.error.formatted.file.read"),
                                         )
                                         return
                                     }
@@ -93,7 +94,7 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
             LOG.warn("Failed to start acton fmt", e)
             request.onError(
                 ActonBundle.message("acton.fmt.error.title"),
-                ActonBundle.message("acton.fmt.error.execution", e.message ?: "Unknown error")
+                ActonBundle.message("acton.fmt.error.execution", e.message ?: "Unknown error"),
             )
             null
         }
@@ -113,7 +114,7 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
                 add(projectRoot)
             }
             add(file.absolutePath)
-        }
+        },
     ).toGeneralCommandLine(request.context.project)
 
     private fun createFormattingInputFile(request: AsyncFormattingRequest): FormattingInputFile? {
@@ -126,7 +127,7 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
             LOG.warn("Failed to create temporary file for acton fmt", e)
             request.onError(
                 ActonBundle.message("acton.fmt.error.title"),
-                ActonBundle.message("acton.fmt.error.file.unavailable")
+                ActonBundle.message("acton.fmt.error.file.unavailable"),
             )
             null
         }
@@ -146,7 +147,7 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
     private fun reportError(request: AsyncFormattingRequest) {
         request.onError(
             ActonBundle.message("acton.fmt.error.title"),
-            ActonBundle.message("acton.fmt.error.syntax.in.file")
+            ActonBundle.message("acton.fmt.error.syntax.in.file"),
         )
     }
 
@@ -155,7 +156,7 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
         if (configuredPath.isNotEmpty()) {
             return isExecutable(configuredPath)
         }
-        return PathEnvironmentVariableUtil.findInPath("acton") != null
+        return findActonExecutableInPath() != null
     }
 
     private fun isExecutable(pathOrCommand: String): Boolean {
@@ -168,10 +169,7 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
         }
     }
 
-    private data class FormattingInputFile(
-        val file: File,
-        val charset: Charset,
-    )
+    private data class FormattingInputFile(val file: File, val charset: Charset)
 
     companion object {
         private val LOG = logger<ActonFmtFormattingService>()
@@ -179,14 +177,13 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
         private enum class FormattingReason {
             ReformatCode,
             ReformatCodeBeforeCommit,
-            Implicit
+            Implicit,
         }
 
-        private fun getFormattingReason(): FormattingReason =
-            when (CommandProcessor.getInstance().currentCommandName) {
-                ReformatCodeProcessor.getCommandName() -> FormattingReason.ReformatCode
-                FormatterUtil.getReformatBeforeCommitCommandName() -> FormattingReason.ReformatCodeBeforeCommit
-                else -> FormattingReason.Implicit
-            }
+        private fun getFormattingReason(): FormattingReason = when (CommandProcessor.getInstance().currentCommandName) {
+            ReformatCodeProcessor.getCommandName() -> FormattingReason.ReformatCode
+            FormatterUtil.getReformatBeforeCommitCommandName() -> FormattingReason.ReformatCodeBeforeCommit
+            else -> FormattingReason.Implicit
+        }
     }
 }

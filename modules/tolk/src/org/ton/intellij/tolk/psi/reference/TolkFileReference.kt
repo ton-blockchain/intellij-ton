@@ -11,7 +11,8 @@ import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.TolkFile
 
-class TolkFileReference(set: FileReferenceSet, range: TextRange, index: Int, text: String) : FileReference(set, range, index, text) {
+class TolkFileReference(set: FileReferenceSet, range: TextRange, index: Int, text: String) :
+    FileReference(set, range, index, text) {
     override fun createLookupItem(element: PsiElement): Any {
         val file = element as? TolkFile ?: return FileInfoManager.getFileLookupItem(element)
         if (!file.isPhysical) return FileInfoManager.getFileLookupItem(element)
@@ -33,9 +34,8 @@ class TolkFileReference(set: FileReferenceSet, range: TextRange, index: Int, tex
         return super.bindToElement(element, absolute)
     }
 
-    override fun rename(newName: String): PsiElement {
-        return super.rename(if (isLast) fixLastNameForRename(newName) else newName)
-    }
+    override fun rename(newName: String): PsiElement =
+        super.rename(if (isLast) fixLastNameForRename(newName) else newName)
 
     fun fixLastNameForRename(newName: String): String {
         if (newName.endsWith(".tolk")) {
@@ -44,7 +44,10 @@ class TolkFileReference(set: FileReferenceSet, range: TextRange, index: Int, tex
         return newName
     }
 
-    private fun computeMappedPath(targetVirtualFile: com.intellij.openapi.vfs.VirtualFile, currentPath: String): String? {
+    private fun computeMappedPath(
+        targetVirtualFile: com.intellij.openapi.vfs.VirtualFile,
+        currentPath: String,
+    ): String? {
         val project = element.project
         val alias = currentPath.substringAfter('@', "").substringBefore('/')
         if (alias.isEmpty()) return null
@@ -74,7 +77,7 @@ class TolkFileReference(set: FileReferenceSet, range: TextRange, index: Int, tex
     private fun toMappedPath(
         targetVirtualFile: com.intellij.openapi.vfs.VirtualFile,
         key: String,
-        mappingDir: String
+        mappingDir: String,
     ): String? {
         val normalizedFilePath = targetVirtualFile.path.replace('\\', '/')
         val normalizedMappingDir = mappingDir.replace('\\', '/').trimEnd('/')

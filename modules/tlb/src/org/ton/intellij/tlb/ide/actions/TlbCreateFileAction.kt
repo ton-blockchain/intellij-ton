@@ -8,9 +8,13 @@ import com.intellij.openapi.ui.InputValidatorEx
 import com.intellij.psi.PsiDirectory
 import org.ton.intellij.tlb.TlbIcons
 
-class TlbCreateFileAction : CreateFileFromTemplateAction(
-    "TL-B Schema", "Creates new TL-B schema", TlbIcons.FILE
-), DumbAware {
+class TlbCreateFileAction :
+    CreateFileFromTemplateAction(
+        "TL-B Schema",
+        "Creates new TL-B schema",
+        TlbIcons.FILE,
+    ),
+    DumbAware {
     override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?) = "TL-B Schema"
 
     override fun buildDialog(
@@ -21,10 +25,11 @@ class TlbCreateFileAction : CreateFileFromTemplateAction(
         setTitle("New TL-B Schema")
         addKind("Empty file", TlbIcons.FILE, "TL-B empty schema")
         setValidator(object : InputValidatorEx {
-            override fun getErrorText(inputString: String?): String? =
-                if (inputString.isNullOrEmpty()) {
-                    "`$inputString` is not valid TL-B schema name"
-                } else null
+            override fun getErrorText(inputString: String?): String? = if (inputString.isNullOrEmpty()) {
+                "`$inputString` is not valid TL-B schema name"
+            } else {
+                null
+            }
         })
     }
 }

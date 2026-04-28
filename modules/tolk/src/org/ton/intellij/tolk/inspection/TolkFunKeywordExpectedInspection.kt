@@ -23,7 +23,7 @@ class TolkFunKeywordExpectedInspection : TolkInspectionBase() {
                     TolkBundle.message("inspection.message.fun.keyword.expected.message"),
                     ProblemHighlightType.GENERIC_ERROR_OR_WARNING,
                     nextAfterGet.textRangeInParent,
-                    AddFunKeywordQuickFix()
+                    AddFunKeywordQuickFix(),
                 )
             }
         }
@@ -33,10 +33,7 @@ class TolkFunKeywordExpectedInspection : TolkInspectionBase() {
         override fun getFamilyName(): @IntentionFamilyName String =
             TolkBundle.message("intention.family.name.add.fun.keyword.quickfix.family.name")
 
-        override fun applyFix(
-            project: Project,
-            descriptor: ProblemDescriptor
-        ) {
+        override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
             val function = descriptor.psiElement as? TolkFunction ?: return
             val getKeyword = function.getKeyword ?: return
             val document = function.containingFile.document ?: return

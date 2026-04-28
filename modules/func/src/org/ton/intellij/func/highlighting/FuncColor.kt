@@ -5,10 +5,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Default
 
-enum class FuncColor(
-    displayName: String,
-    default: TextAttributesKey,
-) {
+enum class FuncColor(displayName: String, default: TextAttributesKey) {
     LINE_COMMENT("Comments//Line comment", Default.LINE_COMMENT),
     BLOCK_COMMENT("Comments//Block comment", Default.BLOCK_COMMENT),
     DOC_COMMENT("Documentation//Comment", Default.DOC_COMMENT),

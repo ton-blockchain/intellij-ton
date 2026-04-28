@@ -12,7 +12,9 @@ class TemplateStringInsertHandler(
     private vararg val variables: Pair<String, Expression>,
 ) : InsertHandler<LookupElement> {
     override fun handleInsert(context: InsertionContext, item: LookupElement) {
-        val template = TemplateManager.getInstance(context.project).createTemplate("templateInsertHandler", "ton", string)
+        val template = TemplateManager.getInstance(
+            context.project,
+        ).createTemplate("templateInsertHandler", "ton", string)
         template.isToReformat = reformat
 
         variables.forEach { (name, expression) ->

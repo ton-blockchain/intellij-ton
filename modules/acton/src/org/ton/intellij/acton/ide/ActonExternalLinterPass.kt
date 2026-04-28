@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package org.ton.intellij.acton.ide
 
 import com.intellij.codeHighlighting.DirtyScopeTrackingHighlightingPassFactory
@@ -7,7 +9,6 @@ import com.intellij.codeInsight.daemon.impl.DaemonCodeAnalyzerEx
 import com.intellij.codeInsight.daemon.impl.FileStatusMap
 import com.intellij.codeInsight.daemon.impl.HighlightInfo
 import com.intellij.codeInsight.daemon.impl.UpdateHighlightersUtil
-import com.intellij.codeInsight.multiverse.CodeInsightContextManager
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState
@@ -33,7 +34,8 @@ class ActonExternalLinterPass(
     private val factory: ActonExternalLinterPassFactory,
     private val file: PsiFile,
     private val editor: Editor,
-) : TextEditorHighlightingPass(file.project, editor.document), DumbAware {
+) : TextEditorHighlightingPass(file.project, editor.document),
+    DumbAware {
 
     private val isUnitTestMode: Boolean get() = ApplicationManager.getApplication().isUnitTestMode
 
@@ -58,7 +60,7 @@ class ActonExternalLinterPass(
         annotationInfo = ActonExternalLinterUtils.checkLazily(
             myProject,
             workingDirectory,
-            document
+            document,
         )
     }
 
@@ -123,7 +125,7 @@ class ActonExternalLinterPass(
                 file.textLength,
                 highlights,
                 colorsScheme,
-                id
+                id,
             )
             DaemonCodeAnalyzerEx.getInstanceEx(myProject).fileStatusMap.markFileUpToDate(document, id)
         }
@@ -137,17 +139,15 @@ class ActonExternalLinterPass(
     }
 }
 
-class ActonExternalLinterPassFactory(
-    project: Project,
-    registrar: TextEditorHighlightingPassRegistrar,
-) : DirtyScopeTrackingHighlightingPassFactory {
+class ActonExternalLinterPassFactory(project: Project, registrar: TextEditorHighlightingPassRegistrar) :
+    DirtyScopeTrackingHighlightingPassFactory {
 
     private val myPassId: Int = registrar.registerTextEditorHighlightingPass(
         this,
         null,
         null,
         false,
-        -1
+        -1,
     )
 
     private val externalLinterQueue = MergingUpdateQueue(
@@ -157,7 +157,7 @@ class ActonExternalLinterPassFactory(
         MergingUpdateQueue.ANY_COMPONENT,
         project,
         null,
-        false
+        false,
     )
 
     override fun createHighlightingPass(file: PsiFile, editor: Editor): TextEditorHighlightingPass? {

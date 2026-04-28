@@ -6,13 +6,13 @@ import org.ton.intellij.tolk.TolkTestBase
 import org.ton.intellij.tolk.psi.TolkFile
 
 class TolkMoveFileRefactorTest : TolkTestBase() {
-    fun `test bind to moved file keeps acton mapping path`() {
+    fun `test bind to moved file keeps acton import mapping path`() {
         myFixture.addFileToProject(
             "Acton.toml",
             """
-                [mappings]
+                [import-mappings]
                 contracts = "contracts"
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         myFixture.addFileToProject("contracts/foo.tolk", "fun foo() {}")
@@ -25,7 +25,7 @@ class TolkMoveFileRefactorTest : TolkTestBase() {
                 fun main() {
                     foo();
                 }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         myFixture.configureFromExistingVirtualFile(mainFile.virtualFile)
@@ -45,7 +45,7 @@ class TolkMoveFileRefactorTest : TolkTestBase() {
                 fun main() {
                     foo();
                 }
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 }

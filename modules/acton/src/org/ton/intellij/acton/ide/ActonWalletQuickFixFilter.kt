@@ -16,22 +16,23 @@ import java.awt.Cursor
 
 private const val WALLET_TOOL_WINDOW_ID = "Acton Wallets"
 private const val WALLETS_NOT_CONFIGURED = "Wallets are not configured yet"
-private val WALLET_NOT_FOUND_REGEX = Regex("""Wallet\s+[`'"]?([A-Za-z0-9_.-]+)[`'"]?\s+not found""", RegexOption.IGNORE_CASE)
+private val WALLET_NOT_FOUND_REGEX =
+    Regex("""Wallet\s+[`'"]?([A-Za-z0-9_.-]+)[`'"]?\s+not found""", RegexOption.IGNORE_CASE)
 
 @Suppress("UnstableApiUsage")
-class ActonWalletQuickFixInlay(
-    offset: Int,
-    private val suggestedWalletName: String?,
-) : ResultItem(offset, offset, null), InlayProvider {
+class ActonWalletQuickFixInlay(offset: Int, private val suggestedWalletName: String?) :
+    ResultItem(offset, offset, null),
+    InlayProvider {
     override fun createInlayRenderer(editor: Editor): EditorCustomElementRenderer {
         val factory = PresentationFactory(editor)
         val items = arrayOf(
             factory.smallScaledIcon(AllIcons.Actions.QuickfixBulb),
-            factory.smallText(" Create wallet")
+            factory.smallText(" Create wallet"),
         )
         val basePresentation = factory.referenceOnHover(factory.roundWithBackground(factory.seq(*items))) { _, _ ->
             val project = editor.project ?: return@referenceOnHover
-            val toolWindow = ToolWindowManager.getInstance(project).getToolWindow(WALLET_TOOL_WINDOW_ID) ?: return@referenceOnHover
+            val toolWindow =
+                ToolWindowManager.getInstance(project).getToolWindow(WALLET_TOOL_WINDOW_ID) ?: return@referenceOnHover
             toolWindow.show {
                 openCreateWalletDialogWhenPanelReady(toolWindow)
             }
@@ -57,7 +58,9 @@ class ActonWalletQuickFixInlay(
     }
 }
 
-class ActonWalletQuickFixFilter : Filter, DumbAware {
+class ActonWalletQuickFixFilter :
+    Filter,
+    DumbAware {
     override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
         if (!line.contains(WALLETS_NOT_CONFIGURED)) {
             return null

@@ -22,15 +22,13 @@ abstract class TolkTyBool : TolkPrimitiveTy {
     }
 }
 
-data class TolkConstantBoolTy(
-    override val value: Boolean
-) : TolkTyBool(), TolkConstantTy<Boolean> {
+data class TolkConstantBoolTy(override val value: Boolean) :
+    TolkTyBool(),
+    TolkConstantTy<Boolean> {
 
     override fun toString(): String = value.toString()
 
-    override fun negate(): TolkTyBool {
-        return if (value) TolkTy.FALSE else TolkTy.TRUE
-    }
+    override fun negate(): TolkTyBool = if (value) TolkTy.FALSE else TolkTy.TRUE
 
     override fun join(other: TolkTy, hint: TolkTy?): TolkTy {
         if (other.unwrapTypeAlias() is TolkTyBool) return TolkTy.Bool

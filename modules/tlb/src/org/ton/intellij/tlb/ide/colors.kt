@@ -12,10 +12,7 @@ import org.ton.intellij.util.loadTextResource
 import javax.swing.Icon
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
-enum class TlbColor(
-    displayName: String,
-    default: TextAttributesKey,
-) {
+enum class TlbColor(displayName: String, default: TextAttributesKey) {
     COMMENT("Comments//Line", Defaults.LINE_COMMENT),
     DOCUMENTATION("Comments//Documentation", Defaults.DOC_COMMENT),
 
@@ -34,7 +31,7 @@ enum class TlbColor(
     RESULT_TYPE_NAME("Type//Result type name", Defaults.KEYWORD),
     IMPLICIT_FIELD_NAME("Type//Implicit field name", XmlHighlighterColors.HTML_ATTRIBUTE_VALUE),
     BUILTIN_TYPE("Builtin type", XmlHighlighterColors.HTML_ATTRIBUTE_VALUE),
-    IDENTIFIER("Identifier",  XmlHighlighterColors.HTML_ATTRIBUTE_NAME),
+    IDENTIFIER("Identifier", XmlHighlighterColors.HTML_ATTRIBUTE_NAME),
     ;
 
     val textAttributesKey =
@@ -43,15 +40,20 @@ enum class TlbColor(
 }
 
 class TlbColorSettingsPage : ColorSettingsPage {
-    private val DEMO_TEXT by lazy {
+    private val demoSampleText by lazy {
         loadTextResource(TlbColorSettingsPage::class.java, "colors/highlighter_example.tlb")
     }
 
-    override fun getAdditionalHighlightingTagToDescriptorMap(): Map<String, TextAttributesKey> = TlbColor.entries.associateBy({ it.name }, { it.textAttributesKey })
-    override fun getAttributeDescriptors(): Array<AttributesDescriptor> = TlbColor.entries.map { it.attributesDescriptor }.toTypedArray()
+    override fun getAdditionalHighlightingTagToDescriptorMap(): Map<String, TextAttributesKey> =
+        TlbColor.entries.associateBy({
+            it.name
+        }, { it.textAttributesKey })
+    override fun getAttributeDescriptors(): Array<AttributesDescriptor> = TlbColor.entries.map {
+        it.attributesDescriptor
+    }.toTypedArray()
     override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
     override fun getDisplayName(): String = TlbLanguage.displayName
     override fun getIcon(): Icon = TlbIcons.FILE
     override fun getHighlighter(): SyntaxHighlighter = TlbSyntaxHighlighter
-    override fun getDemoText(): String = DEMO_TEXT
+    override fun getDemoText(): String = demoSampleText
 }

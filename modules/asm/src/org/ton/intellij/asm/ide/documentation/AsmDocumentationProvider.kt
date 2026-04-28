@@ -19,10 +19,15 @@ import org.ton.intellij.util.asm.getStackPresentation
 class AsmDocumentationProvider : AbstractDocumentationProvider() {
     override fun generateDoc(element: PsiElement?, originalElement: PsiElement?) = when (element) {
         is AsmInstruction -> element.generateDoc()
-        else              -> null
+        else -> null
     }
 
-    override fun getCustomDocumentationElement(editor: Editor, file: PsiFile, contextElement: PsiElement?, targetOffset: Int): PsiElement? {
+    override fun getCustomDocumentationElement(
+        editor: Editor,
+        file: PsiFile,
+        contextElement: PsiElement?,
+        targetOffset: Int,
+    ): PsiElement? {
         val parent = contextElement?.parent
         if (parent is AsmInstruction) {
             return parent
@@ -32,7 +37,8 @@ class AsmDocumentationProvider : AbstractDocumentationProvider() {
 }
 
 private class FiftDocMarkdownFlavourDescriptor(
-    private val gfm: MarkdownFlavourDescriptor = GFMFlavourDescriptor(useSafeLinks = false, absolutizeAnchorLinks = true),
+    private val gfm: MarkdownFlavourDescriptor =
+        GFMFlavourDescriptor(useSafeLinks = false, absolutizeAnchorLinks = true),
 ) : MarkdownFlavourDescriptor by gfm
 
 fun documentationAsHtml(documentationText: String): String {
@@ -86,8 +92,7 @@ fun AsmInstruction.generateDoc(): String {
     return actualInstructionDescription.joinToString("\n")
 }
 
-fun formatOperands(operands: Map<String, Any?>): String {
-    return operands.values.joinToString(" ") { it.toString() }
-}
+fun formatOperands(operands: Map<String, Any?>): String = operands.values.joinToString(" ") { it.toString() }
 
-fun wrapDefinition(content: String): String = DocumentationMarkup.DEFINITION_START + content + DocumentationMarkup.DEFINITION_END
+fun wrapDefinition(content: String): String =
+    DocumentationMarkup.DEFINITION_START + content + DocumentationMarkup.DEFINITION_END

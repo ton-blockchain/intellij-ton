@@ -12,7 +12,7 @@ import org.intellij.markdown.parser.LinkMap
 class FuncDocMarkdownFlavourDescriptor(
     private val gfm: MarkdownFlavourDescriptor = GFMFlavourDescriptor(
         useSafeLinks = false,
-        absolutizeAnchorLinks = true
+        absolutizeAnchorLinks = true,
     ),
 ) : MarkdownFlavourDescriptor by gfm {
     override fun createHtmlGeneratingProviders(linkMap: LinkMap, baseURI: URI?): Map<IElementType, GeneratingProvider> {

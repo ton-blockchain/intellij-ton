@@ -8,10 +8,9 @@ import com.intellij.ui.dsl.builder.panel
 import java.awt.BorderLayout
 import javax.swing.JPanel
 
-class SetupActonActionPanel(
-    private val project: Project,
-    private val onInstalled: (() -> Unit)? = null,
-) : JPanel(BorderLayout()), Disposable {
+class SetupActonActionPanel(private val project: Project, private val onInstalled: (() -> Unit)? = null) :
+    JPanel(BorderLayout()),
+    Disposable {
 
     init {
         add(buildUi(), BorderLayout.CENTER)

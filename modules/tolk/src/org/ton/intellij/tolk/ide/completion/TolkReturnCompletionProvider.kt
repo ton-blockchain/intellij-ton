@@ -9,7 +9,6 @@ import com.intellij.patterns.ElementPattern
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.ide.completion.TolkLookupElementData.KeywordKind.KEYWORD
-import org.ton.intellij.tolk.ide.completion.TolkLookupElementData.KeywordKind.CONTEXT_RETURN_KEYWORD
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.impl.returnTy
 import org.ton.intellij.tolk.type.TolkIntTyFamily
@@ -37,10 +36,12 @@ object TolkReturnCompletionProvider : TolkCompletionProvider(), DumbAware {
                     .withTailText(" expr;", true)
                     .withInsertHandler(
                         TemplateStringInsertHandler(
-                            " \$expr$;", true, "expr" to ConstantNode("")
-                        )
+                            " \$expr$;",
+                            true,
+                            "expr" to ConstantNode(""),
+                        ),
                     )
-                    .toTolkLookupElement(TolkLookupElementData(keywordKind = KEYWORD))
+                    .toTolkLookupElement(TolkLookupElementData(keywordKind = KEYWORD)),
             )
         }
 
@@ -49,7 +50,7 @@ object TolkReturnCompletionProvider : TolkCompletionProvider(), DumbAware {
             result.addElement(
                 LookupElementBuilder.create("return;")
                     .bold()
-                    .toTolkLookupElement(TolkLookupElementData(keywordKind = KEYWORD))
+                    .toTolkLookupElement(TolkLookupElementData(keywordKind = KEYWORD)),
             )
             return
         }
@@ -60,10 +61,13 @@ object TolkReturnCompletionProvider : TolkCompletionProvider(), DumbAware {
                 .withTailText(" expr;", true)
                 .withInsertHandler(
                     TemplateStringInsertHandler(
-                        " \$expr$;", true, "expr" to ConstantNode("")
-                    )
+                        " \$expr$;",
+                        true,
+                        "expr" to ConstantNode(""),
+                    ),
                 )
-                .toTolkLookupElement(TolkLookupElementData(keywordKind = KEYWORD)) // lower priority than CONTEXT_RETURN_KEYWORD
+                // Lower priority than CONTEXT_RETURN_KEYWORD.
+                .toTolkLookupElement(TolkLookupElementData(keywordKind = KEYWORD)),
         )
 
         if (returnTy is TolkTyBool) {
@@ -80,7 +84,8 @@ object TolkReturnCompletionProvider : TolkCompletionProvider(), DumbAware {
         }
     }
 
-    private fun createReturnExprElement2(value: String): TolkLookupElement = LookupElementBuilder.create("return ${value};")
-        .bold()
-        .toTolkLookupElement(TolkLookupElementData())
+    private fun createReturnExprElement2(value: String): TolkLookupElement =
+        LookupElementBuilder.create("return $value;")
+            .bold()
+            .toTolkLookupElement(TolkLookupElementData())
 }

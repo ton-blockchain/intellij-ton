@@ -55,17 +55,15 @@ class UnificationTable<K : Node, V> {
         root.key.parent = VarValue(value, root.rank)
     }
 
-    private fun unify(rootA: Root<K, V>, rootB: Root<K, V>, newValue: V?): K {
-        return when {
-            // a has greater rank, so a should become b's parent,
-            // i.e., b should redirect to a.
-            rootA.rank > rootB.rank -> redirectRoot(rootA.rank, rootB, rootA, newValue)
-            // b has greater rank, so a should redirect to b.
-            rootA.rank < rootB.rank -> redirectRoot(rootB.rank, rootA, rootB, newValue)
-            // If equal, redirect one to the other and increment the
-            // other's rank.
-            else -> redirectRoot(rootA.rank + 1, rootA, rootB, newValue)
-        }
+    private fun unify(rootA: Root<K, V>, rootB: Root<K, V>, newValue: V?): K = when {
+        // a has greater rank, so a should become b's parent,
+        // i.e., b should redirect to a.
+        rootA.rank > rootB.rank -> redirectRoot(rootA.rank, rootB, rootA, newValue)
+        // b has greater rank, so a should redirect to b.
+        rootA.rank < rootB.rank -> redirectRoot(rootB.rank, rootA, rootB, newValue)
+        // If equal, redirect one to the other and increment the
+        // other's rank.
+        else -> redirectRoot(rootA.rank + 1, rootA, rootB, newValue)
     }
 
     private fun redirectRoot(newRank: Int, oldRoot: Root<K, V>, newRoot: Root<K, V>, newValue: V?): K {

@@ -18,24 +18,21 @@ class TolkSelfReturnTypeStub : StubWithText<TolkSelfReturnType> {
 
     constructor(
         parent: StubElement<*>?,
-        elementType: IStubElementType<*, *>?, text: String?,
+        elementType: IStubElementType<*, *>?,
+        text: String?,
     ) : this(parent, elementType, StringRef.fromString(text))
 
     class Type(name: String) : TolkStubElementType<TolkSelfReturnTypeStub, TolkSelfReturnType>(name) {
-        override fun createPsi(stub: TolkSelfReturnTypeStub): TolkSelfReturnType {
-            return TolkSelfReturnTypeImpl(stub, this)
-        }
+        override fun createPsi(stub: TolkSelfReturnTypeStub): TolkSelfReturnType = TolkSelfReturnTypeImpl(stub, this)
 
-        override fun createStub(psi: TolkSelfReturnType, parentStub: StubElement<*>?): TolkSelfReturnTypeStub {
-            return TolkSelfReturnTypeStub(parentStub, this, psi.text)
-        }
+        override fun createStub(psi: TolkSelfReturnType, parentStub: StubElement<*>?): TolkSelfReturnTypeStub =
+            TolkSelfReturnTypeStub(parentStub, this, psi.text)
 
         override fun serialize(stub: TolkSelfReturnTypeStub, dataStream: StubOutputStream) {
             dataStream.writeName(stub.getText())
         }
 
-        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): TolkSelfReturnTypeStub {
-            return TolkSelfReturnTypeStub(parentStub, this, dataStream.readName())
-        }
+        override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?): TolkSelfReturnTypeStub =
+            TolkSelfReturnTypeStub(parentStub, this, dataStream.readName())
     }
 }

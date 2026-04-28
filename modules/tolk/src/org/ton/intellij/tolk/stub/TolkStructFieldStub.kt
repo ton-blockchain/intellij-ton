@@ -5,13 +5,11 @@ import com.intellij.psi.stubs.StubElement
 import com.intellij.util.io.StringRef
 import org.ton.intellij.tolk.psi.TolkStructField
 
-class TolkStructFieldStub(
-    parent: StubElement<*>,
-    elementType: IStubElementType<*, *>,
-    name: StringRef?,
-) : TolkNamedStub<TolkStructField>(parent, elementType, name, false) {
+class TolkStructFieldStub(parent: StubElement<*>, elementType: IStubElementType<*, *>, name: StringRef?) :
+    TolkNamedStub<TolkStructField>(parent, elementType, name, false) {
     constructor(
-        parent: StubElement<*>, elementType: IStubElementType<*, *>,
+        parent: StubElement<*>,
+        elementType: IStubElementType<*, *>,
         name: String?,
     ) : this(
         parent,

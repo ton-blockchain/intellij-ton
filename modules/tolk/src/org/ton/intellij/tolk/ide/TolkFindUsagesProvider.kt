@@ -18,12 +18,10 @@ class TolkFindUsagesProvider : FindUsagesProvider {
         TolkLexer(),
         TokenSet.create(TolkElementTypes.IDENTIFIER),
         TOLK_COMMENTS,
-        TolkParserDefinition.STRING_LITERALS
+        TolkParserDefinition.STRING_LITERALS,
     )
 
-    override fun canFindUsagesFor(psiElement: PsiElement): Boolean {
-        return true
-    }
+    override fun canFindUsagesFor(psiElement: PsiElement): Boolean = true
 
     override fun getHelpId(psiElement: PsiElement): String = HelpID.FIND_OTHER_USAGES
 

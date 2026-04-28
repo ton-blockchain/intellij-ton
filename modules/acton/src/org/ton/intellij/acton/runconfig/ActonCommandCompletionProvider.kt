@@ -10,7 +10,7 @@ class ActonCommandCompletionProvider : TextFieldCompletionProvider() {
         val commands = listOf(
             "init", "new", "wallet", "test", "wrapper", "script",
             "build", "run", "compile", "disasm", "verify", "retrace",
-            "library", "up", "completions"
+            "library", "up", "completions",
         )
 
         for (command in commands) {

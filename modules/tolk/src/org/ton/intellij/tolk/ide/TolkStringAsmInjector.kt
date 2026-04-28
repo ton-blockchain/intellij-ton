@@ -9,10 +9,7 @@ import org.ton.intellij.tolk.psi.TolkStringLiteral
 import org.ton.intellij.util.parentOfType
 
 class TolkStringAsmInjector : LanguageInjector {
-    override fun getLanguagesToInject(
-        host: PsiLanguageInjectionHost,
-        places: InjectedLanguagePlaces,
-    ) {
+    override fun getLanguagesToInject(host: PsiLanguageInjectionHost, places: InjectedLanguagePlaces) {
         if (host !is TolkStringLiteral) return
         if (!host.isValidHost) return
         if (host.parentOfType<TolkAsmDefinition>() == null) return

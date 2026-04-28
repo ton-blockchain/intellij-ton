@@ -19,7 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-//include(":blueprint")
 module("acton")
 module("asm")
 module("tolk")
@@ -28,7 +27,6 @@ module("func")
 module("boc")
 module("tlb")
 module("fift")
-module("blueprint")
 module("tasm")
 
 fun module(name: String) {

@@ -13,6 +13,7 @@ abstract class BitFlagsBuilder private constructor(private val limit: Limit, sta
     }
 
     protected enum class Limit(val bits: Int) {
-        BYTE(8), INT(32)
+        BYTE(8),
+        INT(32),
     }
 }

@@ -18,14 +18,15 @@ import org.ton.intellij.tolk.type.render
 import org.ton.intellij.util.childOfType
 import javax.swing.Icon
 
-abstract class TolkTypeDefMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTypeDef, TolkTypedElement {
+abstract class TolkTypeDefMixin :
+    TolkNamedElementImpl<TolkTypeDefStub>,
+    TolkTypeDef,
+    TolkTypedElement {
     constructor(node: ASTNode) : super(node)
 
     constructor(stub: TolkTypeDefStub, stubType: IStubElementType<*, *>) : super(stub, stubType)
 
-    override fun getUseScope(): SearchScope {
-        return super.getUseScope()
-    }
+    override fun getUseScope(): SearchScope = super.getUseScope()
 
     override val type: TolkTy get() {
         val referenceName = stub?.name ?: identifier?.text
@@ -42,22 +43,20 @@ abstract class TolkTypeDefMixin : TolkNamedElementImpl<TolkTypeDefStub>, TolkTyp
 
     override fun getIcon(flags: Int) = TolkIcons.TYPE_ALIAS
 
-    override fun getPresentation(): ItemPresentation? {
-        return object : ItemPresentation {
-            override fun getPresentableText(): String = buildString {
-                append(name)
-                type.let {
-                    append(" = ")
-                    val underlyingType = when(it) {
-                        is TolkTyAlias -> it.underlyingType.render()
-                        else -> it.render()
-                    }
-                    append(underlyingType)
+    override fun getPresentation(): ItemPresentation? = object : ItemPresentation {
+        override fun getPresentableText(): String = buildString {
+            append(name)
+            type.let {
+                append(" = ")
+                val underlyingType = when (it) {
+                    is TolkTyAlias -> it.underlyingType.render()
+                    else -> it.render()
                 }
+                append(underlyingType)
             }
-
-            override fun getIcon(unused: Boolean): Icon = getIcon(0)
         }
+
+        override fun getIcon(unused: Boolean): Icon = getIcon(0)
     }
 }
 

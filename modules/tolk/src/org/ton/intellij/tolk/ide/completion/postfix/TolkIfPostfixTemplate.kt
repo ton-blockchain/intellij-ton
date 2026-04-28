@@ -8,10 +8,13 @@ import com.intellij.psi.util.parentOfType
 import com.intellij.psi.util.startOffset
 import org.ton.intellij.tolk.psi.TolkExpressionStatement
 
-class TolkIfPostfixTemplate : PostfixTemplate(
-    "tolk.postfix.if", "if",
-    "if (cond) {}", null
-) {
+class TolkIfPostfixTemplate :
+    PostfixTemplate(
+        "tolk.postfix.if",
+        "if",
+        "if (cond) {}",
+        null,
+    ) {
     override fun isApplicable(context: PsiElement, copyDocument: Document, newOffset: Int) =
         TolkPostfixUtil.isExpression(context)
 

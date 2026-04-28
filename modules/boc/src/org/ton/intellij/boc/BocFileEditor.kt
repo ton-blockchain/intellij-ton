@@ -10,16 +10,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.tabs.JBTabs
 import com.intellij.ui.tabs.JBTabsFactory
-import com.intellij.ui.tabs.TabInfo
 import com.intellij.ui.tabs.JBTabsPosition
+import com.intellij.ui.tabs.TabInfo
 import com.intellij.util.ui.JBInsets
 import java.beans.PropertyChangeListener
 import javax.swing.JComponent
 
-class BocFileEditor(
-    project: Project,
-    private val file: VirtualFile,
-) : FileEditorBase() {
+class BocFileEditor(project: Project, private val file: VirtualFile) : FileEditorBase() {
 
     private val disassemblyPanel = BocDisassemblyPanel(project, file) { onInstalled() }
     private val detailedDisassemblyPanel = BocDetailedDisassemblyPanel(project, file) { onInstalled() }

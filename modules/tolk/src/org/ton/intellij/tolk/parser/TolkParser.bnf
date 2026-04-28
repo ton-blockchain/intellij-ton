@@ -296,12 +296,13 @@ private StructBodyElements ::= (StructBody_MultipleElement | StructBody_SingleEl
 private StructBody_SingleElement ::= StructField
 private StructBody_MultipleElement ::= StructField ((','|';')? StructField)+
 
-StructField ::= StructFieldModifiers? IDENTIFIER ':' TypeExpression StructFieldDefault? {
-    pin = 2
+StructField ::= Annotations StructFieldModifiers? IDENTIFIER ':' TypeExpression StructFieldDefault? {
+    pin = 3
     recoverWhile = StructField_recover
     mixin="org.ton.intellij.tolk.psi.impl.TolkStructFieldMixin"
     implements=[
         "org.ton.intellij.tolk.psi.TolkSymbolElement"
+        "org.ton.intellij.tolk.psi.TolkAnnotationHolder"
         "org.ton.intellij.tolk.psi.TolkInferenceContextOwner"
         "org.ton.intellij.tolk.psi.TolkDocOwner"
     ]
@@ -309,7 +310,7 @@ StructField ::= StructFieldModifiers? IDENTIFIER ':' TypeExpression StructFieldD
     elementTypeFactory="org.ton.intellij.tolk.psi.TolkElementTypeFactory.stubFactory"
     hooks = [ leftBinder = "ADJACENT_LINE_COMMENTS" ]
 }
-private StructField_recover ::= !(';'|','|'}'|IDENTIFIER|'private'|'readonly')
+private StructField_recover ::= !(';'|','|'}'|IDENTIFIER|'private'|'readonly'|'@')
 
 StructFieldModifiers ::= StructFieldModifier+ {}
 StructFieldModifier ::= 'private' | 'readonly' {}
@@ -403,17 +404,19 @@ SelfReturnType ::= 'self' {
 
 private ReturnType_recovery ::= !(FunctionBody_first|TopLevelDefinition_first)
 
-Annotation ::= '@' IDENTIFIER AnnotationArgumentList? {
+Annotation ::= '@' AnnotationName AnnotationArgumentList? {
+    pin = 1
+}
+
+AnnotationName ::= IDENTIFIER ('.' IDENTIFIER)* {
     pin = 1
 }
 
 AnnotationArgumentList ::= '(' [<<list_with_recover AnnotationArgument>>] ')' {
     pin = 1
-    elementType = ArgumentList
 }
 
-AnnotationArgument ::= Expression {
-    elementType = Argument
+AnnotationArgument ::= TypeExpression | Expression {
 }
 
 FunctionBody ::= ';' | AsmDefinition | BlockStatement | ('builtin' ';'?)
@@ -1031,7 +1034,7 @@ TensorOrParenTypeExpression ::= '(' (TensorEmpty | (TypeExpression (TensorType_u
     elementType = ParenTypeExpression
 }
 upper TensorEmpty ::= ')' {elementType = TensorTypeExpression}
-upper TensorType_upper ::= ',' [ TypeExpression (',' TypeExpression)* ] ')' {
+upper TensorType_upper ::= ',' [ <<comma_separated_list TypeExpression>> ] ')' {
     pin=1
     elementType = TensorTypeExpression
 }

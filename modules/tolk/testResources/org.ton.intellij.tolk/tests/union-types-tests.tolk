@@ -47,10 +47,10 @@ fun testFlatten() {
     __expect_type(0 !is builder, "bool");
     __expect_type(0!!is builder, "bool");
 
-    __expect_type(match (0) { int => [] }, "[]");
+    __expect_type(match (0) { int => [] }, "array<unknown>");
     __expect_type(match (0 as int|slice) { int => 0, slice => 0 }, "int");
     __expect_type(match (0 as int|slice) { int => 0, slice => 0 as int8 } as int|int8, "int | int8");
-    __expect_type(match (0 as int?) { int => "", null => null }, "slice?");
+    __expect_type(match (0 as int?) { int => "", null => null }, "string?");
     __expect_type(match (0 as int?) {
         int => 10>3 ? match(0) { int => 0 } : match (10>3 ? 6 : null) { null => 0, int => { return; } },
         null => match(null) { null => 0 }

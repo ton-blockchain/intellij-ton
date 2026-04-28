@@ -16,14 +16,15 @@ import org.ton.intellij.fift.psi.name
 import javax.swing.Icon
 
 class FiftStructureViewFactory : PsiStructureViewFactory {
-    override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder {
-        return object : TreeBasedStructureViewBuilder() {
+    override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder =
+        object : TreeBasedStructureViewBuilder() {
             override fun createStructureViewModel(editor: Editor?): StructureViewModel = Model(psiFile, editor)
             override fun isRootNodeShown() = false
         }
-    }
 
-    class Model(file: PsiFile, editor: Editor?) : StructureViewModelBase(file, editor, Element(file)), ElementInfoProvider {
+    class Model(file: PsiFile, editor: Editor?) :
+        StructureViewModelBase(file, editor, Element(file)),
+        ElementInfoProvider {
         init {
             withSuitableClasses(FiftFile::class.java, FiftNamedElement::class.java)
         }

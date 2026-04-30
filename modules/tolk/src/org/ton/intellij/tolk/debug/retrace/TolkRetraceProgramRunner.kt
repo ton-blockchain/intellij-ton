@@ -9,6 +9,8 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.ui.RunContentDescriptor
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.util.io.FileUtil
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.platform.dap.DapStartRequest
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.concurrency.AsyncPromise
@@ -104,9 +106,22 @@ class TolkRetraceProgramRunner : AsyncProgramRunner<RunnerSettings>() {
 
         val resolved = arrayOfNulls<String>(1)
         ApplicationManager.getApplication().invokeAndWait {
-            resolved[0] = TolkRetraceLauncher.chooseContractId(profile.project, ActonToml.find(profile.project))
+            resolved[0] = TolkRetraceLauncher.chooseContractId(profile.project, findActonToml(profile))
         }
         return resolved[0]
+    }
+
+    private fun findActonToml(profile: ActonCommandConfiguration): ActonToml? {
+        val workingDirectory = profile.workingDirectory
+        if (workingDirectory != null) {
+            val directory = LocalFileSystem.getInstance()
+                .findFileByPath(FileUtil.toSystemIndependentName(workingDirectory.toString()))
+            if (directory != null) {
+                ActonToml.find(profile.project, directory)?.let { return it }
+            }
+        }
+
+        return ActonToml.find(profile.project)
     }
 
     private fun findFreePort(): Int {

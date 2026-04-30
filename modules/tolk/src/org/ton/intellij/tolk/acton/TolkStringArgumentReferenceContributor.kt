@@ -77,7 +77,8 @@ class TolkWalletReference(element: TolkStringLiteral, range: TextRange) :
     override fun resolve(): PsiElement? {
         val project = element.project
         val targetName = element.text.removeSurrounding("\"")
-        val actonToml = ActonToml.find(project) ?: return null
+        val sourceVirtualFile = element.containingFile.originalFile.virtualFile ?: return null
+        val actonToml = ActonToml.find(project, sourceVirtualFile) ?: return null
         return actonToml.getWallets().find { it.name == targetName }?.element
     }
 
@@ -90,7 +91,8 @@ class TolkContractReference(element: TolkStringLiteral, range: TextRange) :
     override fun resolve(): PsiElement? {
         val project = element.project
         val targetName = element.text.removeSurrounding("\"")
-        val actonToml = ActonToml.find(project) ?: return null
+        val sourceVirtualFile = element.containingFile.originalFile.virtualFile ?: return null
+        val actonToml = ActonToml.find(project, sourceVirtualFile) ?: return null
         return actonToml.getContractElements().find { it.name == targetName }
     }
 

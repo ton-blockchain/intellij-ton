@@ -83,7 +83,7 @@ class ActonTomlCompletionContributor : CompletionContributor() {
             }
 
             segments.size == 3 && segments[0].name == "lint" && segments[1].name == "rules" -> {
-                val actonToml = ActonToml.find(project) ?: return
+                val actonToml = ActonToml.find(project, file.virtualFile ?: return) ?: return
                 for (contractId in actonToml.getContractIds().distinct()) {
                     result.addElement(
                         LookupElementBuilder.create(contractId)
@@ -109,7 +109,7 @@ class ActonTomlCompletionContributor : CompletionContributor() {
         val literal = PsiTreeUtil.getParentOfType(parameters.position, TomlLiteral::class.java, false) ?: return
         val valueContext = findActonTomlValueContext(literal) ?: return
         val project = parameters.editor.project ?: return
-        val actonToml = ActonToml.find(project) ?: return
+        val actonToml = ActonToml.find(project, parameters.originalFile.virtualFile ?: return) ?: return
 
         when {
             valueContext.matches("litenode", "accounts") && valueContext.isArrayItem -> {

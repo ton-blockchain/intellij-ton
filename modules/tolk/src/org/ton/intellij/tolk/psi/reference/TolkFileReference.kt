@@ -59,7 +59,8 @@ class TolkFileReference(set: FileReferenceSet, range: TextRange, index: Int, tex
             return "@stdlib/$relativePath".removeSuffix(".tolk")
         }
 
-        val actonToml = ActonToml.find(project) ?: return null
+        val sourceVirtualFile = element.containingFile.originalFile.virtualFile ?: return null
+        val actonToml = ActonToml.find(project, sourceVirtualFile) ?: return null
         val normalizedMappings = actonToml.getNormalizedMappings()
 
         val preferredPath = normalizedMappings[alias]

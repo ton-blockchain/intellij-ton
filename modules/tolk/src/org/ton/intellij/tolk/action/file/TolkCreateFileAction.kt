@@ -36,7 +36,7 @@ class TolkCreateFileAction :
         if (templateName == CONTRACT_TEMPLATE) {
             val project = createdElement.project
             val file = createdElement.virtualFile ?: return
-            val actonToml = ActonToml.find(project) ?: return
+            val actonToml = ActonToml.find(project, file) ?: return
             val relativePath = VfsUtil.getRelativePath(file, actonToml.virtualFile.parent) ?: return
 
             val command = ActonCommand.InternalRegisterContract(path = relativePath)

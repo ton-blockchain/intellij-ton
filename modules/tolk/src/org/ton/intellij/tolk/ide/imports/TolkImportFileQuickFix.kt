@@ -55,12 +55,12 @@ class TolkImportFileQuickFix :
     constructor(element: PsiElement, file: TolkFile) : super(element) {
         symbolToResolve = ""
         filesToImport = listOf(SmartPointerManager.createPointer(file))
-        actonToml = ActonToml.find(file.project)
+        actonToml = findActonToml(element)
     }
 
     constructor(reference: PsiReference) : super(reference.element) {
         symbolToResolve = reference.canonicalText
-        actonToml = ActonToml.find(reference.element.project)
+        actonToml = findActonToml(reference.element)
     }
 
     override fun showHint(editor: Editor) = doAutoImportOrShowHint(editor, true)
@@ -236,6 +236,11 @@ class TolkImportFileQuickFix :
 
         private fun isSupportedReference(reference: PsiReference?) =
             reference is TolkSymbolReference || reference is TolkTypeReference
+
+        private fun findActonToml(element: PsiElement): ActonToml? {
+            val sourceVirtualFile = element.containingFile?.originalFile?.virtualFile ?: return null
+            return ActonToml.find(element.project, sourceVirtualFile)
+        }
 
         private fun getText(
             element: PsiElement,

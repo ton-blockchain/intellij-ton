@@ -160,23 +160,25 @@ class TolkFile(viewProvider: FileViewProvider) :
             if (containsMap) return
         }
 
-        var path = VfsUtil.findRelativePath(virtualFile ?: return, file.virtualFile ?: return, '/') ?: return
-        val needImport = includeDefinitions.none { (it.resolve() as? TolkFile)?.virtualFile == file.virtualFile }
+        val sourceVirtualFile = virtualFile ?: return
+        val targetVirtualFile = file.virtualFile ?: return
+        var path = VfsUtil.findRelativePath(sourceVirtualFile, targetVirtualFile, '/') ?: return
+        val needImport = includeDefinitions.none { (it.resolve() as? TolkFile)?.virtualFile == targetVirtualFile }
         if (!needImport) return
 
         val factory = TolkPsiFactory[project]
         val sdk = project.tolkSettings.stdlibDir
-        if (sdk != null && VfsUtil.isAncestor(sdk, file.virtualFile, false)) {
+        if (sdk != null && VfsUtil.isAncestor(sdk, targetVirtualFile, false)) {
             val sdkPath = sdk.path
-            path = file.virtualFile.path.replace(sdkPath, "@stdlib")
+            path = targetVirtualFile.path.replace(sdkPath, "@stdlib")
             if (path == "@stdlib/common.tolk") {
                 return
             }
         } else {
-            val actonToml = ActonToml.find(project)
+            val actonToml = ActonToml.find(project, sourceVirtualFile)
             if (actonToml != null) {
                 val mappings = actonToml.getNormalizedMappings()
-                val filePath = file.virtualFile.path
+                val filePath = targetVirtualFile.path
                 for ((key, mappingDir) in mappings) {
                     if (filePath.startsWith(mappingDir)) {
                         val subPath = filePath.substring(

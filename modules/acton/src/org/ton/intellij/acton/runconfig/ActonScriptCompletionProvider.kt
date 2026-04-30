@@ -7,9 +7,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.TextFieldCompletionProvider
 import org.ton.intellij.acton.cli.ActonToml
 
-class ActonScriptCompletionProvider(private val project: Project) : TextFieldCompletionProvider() {
+class ActonScriptCompletionProvider(
+    private val project: Project,
+    private val actonTomlProvider: () -> ActonToml? = { ActonToml.find(project) },
+) : TextFieldCompletionProvider() {
     override fun addCompletionVariants(text: String, offset: Int, prefix: String, result: CompletionResultSet) {
-        val actonToml = ActonToml.find(project) ?: return
+        val actonToml = actonTomlProvider() ?: return
         val scripts = actonToml.getScripts()
 
         for ((name, definition) in scripts) {

@@ -36,7 +36,7 @@ class TolkUnregisteredContractNotificationProvider(private val project: Project)
         // only show for files with onInternalMessage
         if (tolkFile.functions.none { it.name == "onInternalMessage" }) return null
 
-        val actonToml = ActonToml.find(project) ?: return null
+        val actonToml = ActonToml.find(project, file) ?: return null
 
         val relativePath = VfsUtil.getRelativePath(file, actonToml.virtualFile.parent) ?: return null
         if (actonToml.getContractSources().contains(relativePath)) return null

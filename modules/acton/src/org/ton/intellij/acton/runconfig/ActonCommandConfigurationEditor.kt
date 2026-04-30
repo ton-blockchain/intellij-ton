@@ -11,6 +11,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
+import com.intellij.openapi.util.io.FileUtil
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.ExpandableEditorSupport
 import com.intellij.ui.components.JBCheckBox
@@ -21,6 +23,7 @@ import com.intellij.util.TextFieldCompletionProvider
 import com.intellij.util.textCompletion.TextFieldWithCompletion
 import com.intellij.util.ui.JBUI
 import org.ton.intellij.acton.cli.ActonCommand
+import org.ton.intellij.acton.cli.ActonToml
 import java.nio.file.Paths
 import javax.swing.JComponent
 
@@ -33,7 +36,9 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
     private val emulateTerminal = JBCheckBox("Emulate terminal in output console", true)
 
     // Build specific
-    private val buildContractIdField = createTextFieldWithCompletion(ActonContractCompletionProvider(project))
+    private val buildContractIdField = createTextFieldWithCompletion(
+        ActonContractCompletionProvider(project, ::findActonTomlForWorkingDirectory),
+    )
     private val buildClearCacheCheckBox = JBCheckBox("Clear compilation cache before building", false)
     private val buildOutDirField = TextFieldWithBrowseButton()
 
@@ -54,11 +59,15 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
     private var testMode: ActonCommand.Test.TestMode = ActonCommand.Test.TestMode.DIRECTORY
 
     // Run specific
-    private val runScriptNameField = createTextFieldWithCompletion(ActonScriptCompletionProvider(project))
+    private val runScriptNameField = createTextFieldWithCompletion(
+        ActonScriptCompletionProvider(project, ::findActonTomlForWorkingDirectory),
+    )
 
     // Retrace specific
     private val retraceTransactionHashField = JBTextField()
-    private val retraceContractIdField = createTextFieldWithCompletion(ActonContractCompletionProvider(project))
+    private val retraceContractIdField = createTextFieldWithCompletion(
+        ActonContractCompletionProvider(project, ::findActonTomlForWorkingDirectory),
+    )
     private val retraceNetworkComboBox = ComboBox(arrayOf("", "testnet", "mainnet"))
 
     private var buildGroup: Row? = null
@@ -176,6 +185,19 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
 
     private fun setupExpandableSupport(field: EditorTextField) {
         ExpandableEditorSupport(field)
+    }
+
+    private fun findActonTomlForWorkingDirectory(): ActonToml? {
+        val workingDirectory = workingDirectoryField.text.trim()
+        if (workingDirectory.isNotEmpty()) {
+            val directory = LocalFileSystem.getInstance()
+                .findFileByPath(FileUtil.toSystemIndependentName(workingDirectory))
+            if (directory != null) {
+                ActonToml.find(project, directory)?.let { return it }
+            }
+        }
+
+        return ActonToml.find(project)
     }
 
     override fun resetEditorFrom(configuration: ActonCommandConfiguration) {

@@ -122,8 +122,6 @@
             EXPORT_KEYWORD              = 'export'
             GLOBAL_KEYWORD              = 'global'
             ASM_KEYWORD                 = 'asm'
-            OPERATOR_KEYWORD            = 'operator'
-            INFIX_KEYWORD               = 'infix'
             CONST_KEYWORD               = 'const'
             BUILTIN_KEYWORD             = 'builtin'
             GET_KEYWORD                 = 'GET_KEYWORD'

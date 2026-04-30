@@ -60,7 +60,7 @@ fun TolkNamedElement.toLookupElementBuilder(
             if (sdk != null && VfsUtilCore.isAncestor(sdk, elementVirtualFile, false)) {
                 "@stdlib/${elementVirtualFile.name}"
             } else {
-                val actonToml = ActonToml.find(project)
+                val actonToml = ActonToml.find(project, contextVirtualFile)
                 var mappedPath: String? = null
                 if (actonToml != null) {
                     val mappings = actonToml.getNormalizedMappings()

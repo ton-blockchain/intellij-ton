@@ -5,6 +5,7 @@ import com.intellij.execution.actions.LazyRunConfigurationProducer
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.testframework.AbstractTestProxy
 import com.intellij.openapi.actionSystem.LangDataKeys
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiDirectory
@@ -28,7 +29,7 @@ class ActonTestConfigurationProducer : LazyRunConfigurationProducer<ActonCommand
     ): Boolean {
         if (configuration.command != "test") return false
         val testContext = context.testContext() ?: return false
-        ActonToml.find(configuration.project) ?: return false
+        testContext.findActonToml(configuration.project) ?: return false
 
         return configuration.testMode == testContext.mode &&
             configuration.testTarget == testContext.target &&
@@ -41,7 +42,7 @@ class ActonTestConfigurationProducer : LazyRunConfigurationProducer<ActonCommand
         sourceElement: Ref<PsiElement>,
     ): Boolean {
         val testContext = context.testContext() ?: return false
-        val actonToml = ActonToml.find(configuration.project) ?: return false
+        val actonToml = testContext.findActonToml(configuration.project) ?: return false
         testContext.sourceElement?.let(sourceElement::set)
 
         configuration.command = "test"
@@ -127,4 +128,16 @@ class ActonTestConfigurationProducer : LazyRunConfigurationProducer<ActonCommand
         val displayName: String,
         val sourceElement: PsiElement?,
     )
+
+    private fun TestContext.findActonToml(project: Project): ActonToml? {
+        val sourceVirtualFile = when (val element = sourceElement) {
+            is PsiDirectory -> element.virtualFile
+            else -> element?.containingFile?.originalFile?.virtualFile
+        }
+        return if (sourceVirtualFile != null) {
+            ActonToml.find(project, sourceVirtualFile)
+        } else {
+            ActonToml.find(project)
+        }
+    }
 }

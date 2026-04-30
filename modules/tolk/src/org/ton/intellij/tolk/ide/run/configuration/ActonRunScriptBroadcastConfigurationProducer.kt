@@ -25,7 +25,7 @@ class ActonRunScriptBroadcastConfigurationProducer(private val broadcastNet: Str
         val function = element.parentOfType<TolkFunction>() ?: return false
 
         if (function.name == "main") {
-            val actonToml = ActonToml.find(configuration.project) ?: return false
+            val actonToml = ActonToml.find(configuration.project, containingFile.virtualFile) ?: return false
             return configuration.command == "script" &&
                 configuration.scriptPath == containingFile.virtualFile.path &&
                 configuration.workingDirectory == actonToml.workingDir &&
@@ -44,7 +44,7 @@ class ActonRunScriptBroadcastConfigurationProducer(private val broadcastNet: Str
         val function = element.parentOfType<TolkFunction>() ?: return false
 
         if (function.name == "main") {
-            val actonToml = ActonToml.find(configuration.project) ?: return false
+            val actonToml = ActonToml.find(configuration.project, containingFile.virtualFile) ?: return false
             configuration.name = "Broadcast ${containingFile.name} ($broadcastNet)"
             configuration.command = "script"
             configuration.scriptPath = containingFile.virtualFile.path

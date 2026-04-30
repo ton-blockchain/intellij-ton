@@ -8,6 +8,7 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.ui.EditorNotifications
 import org.ton.intellij.acton.ActonUtils.stripAnsiColors
@@ -19,14 +20,14 @@ import org.ton.intellij.tolk.TolkBundle
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
 
 object TolkActonStdlibSetupSupport {
-    fun canSetUpStdlib(project: Project): Boolean =
-        ActonToml.find(project) != null && resolveActonExecutable(project) != null
+    fun canSetUpStdlib(project: Project, contextFile: VirtualFile? = null): Boolean =
+        findActonToml(project, contextFile) != null && resolveActonExecutable(project) != null
 
-    fun addSetUpStdlibAction(panel: EditorNotificationPanel, project: Project) {
-        if (!canSetUpStdlib(project)) return
+    fun addSetUpStdlibAction(panel: EditorNotificationPanel, project: Project, contextFile: VirtualFile? = null) {
+        if (!canSetUpStdlib(project, contextFile)) return
 
         panel.createActionLabel(TolkBundle.message("notification.action.setup.stdlib.text")) {
-            runStdlibInit(project)
+            runStdlibInit(project, contextFile)
         }
     }
 
@@ -63,9 +64,9 @@ object TolkActonStdlibSetupSupport {
         }
     }
 
-    fun runStdlibInit(project: Project) {
+    fun runStdlibInit(project: Project, contextFile: VirtualFile? = null) {
         val command = ActonCommand.Init(stdlibOnly = true)
-        runProjectCommand(project, command, STDLIB_INIT_TIMEOUT_MS) { details ->
+        runProjectCommand(project, command, STDLIB_INIT_TIMEOUT_MS, contextFile) { details ->
             showCommandFailedNotification(
                 project,
                 TolkBundle.message("notification.tolk.stdlib.setup.failed.title"),
@@ -79,9 +80,10 @@ object TolkActonStdlibSetupSupport {
         project: Project,
         command: ActonCommand,
         timeoutMs: Int,
+        contextFile: VirtualFile? = null,
         onFailure: (String) -> Unit,
     ) {
-        val actonToml = ActonToml.find(project) ?: return
+        val actonToml = findActonToml(project, contextFile) ?: return
         val commandLine = ActonCommandLine(
             command = command.name,
             workingDirectory = actonToml.workingDir,
@@ -110,6 +112,9 @@ object TolkActonStdlibSetupSupport {
             }
         }
     }
+
+    private fun findActonToml(project: Project, contextFile: VirtualFile?): ActonToml? =
+        if (contextFile != null) ActonToml.find(project, contextFile) else ActonToml.find(project)
 
     private fun showCommandFailedNotification(project: Project, title: String, baseContent: String, details: String) {
         val content = buildString {

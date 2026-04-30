@@ -32,7 +32,8 @@ class TolkLiteralFileReferenceSet(str: String, element: TolkStringLiteral, start
             return listOf(psiFile as PsiFileSystemItem)
         }
 
-        val actonToml = ActonToml.find(project) ?: return contexts
+        val sourceVirtualFile = element.containingFile.originalFile.virtualFile ?: return contexts
+        val actonToml = ActonToml.find(project, sourceVirtualFile) ?: return contexts
         val mappings = actonToml.getNormalizedMappings()
         val firstSegment = pathString.split('/').firstOrNull() ?: return contexts
         if (!firstSegment.startsWith("@")) return contexts

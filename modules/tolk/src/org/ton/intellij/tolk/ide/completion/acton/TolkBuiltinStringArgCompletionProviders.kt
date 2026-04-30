@@ -25,7 +25,8 @@ object TolkWalletNameCompletionProvider : TolkStringArgumentCompletionProvider()
         argumentIndex: Int,
     ) {
         val project = parameters.editor.project ?: return
-        val actonToml = ActonToml.find(project) ?: return
+        val sourceVirtualFile = parameters.originalFile.virtualFile ?: return
+        val actonToml = ActonToml.find(project, sourceVirtualFile) ?: return
         val wallets = actonToml.getWallets()
         for (wallet in wallets) {
             result.addElement(
@@ -50,7 +51,8 @@ object TolkContractIdCompletionProvider : TolkStringArgumentCompletionProvider()
         argumentIndex: Int,
     ) {
         val project = parameters.editor.project ?: return
-        val actonToml = ActonToml.find(project) ?: return
+        val sourceVirtualFile = parameters.originalFile.virtualFile ?: return
+        val actonToml = ActonToml.find(project, sourceVirtualFile) ?: return
         val contractIds = actonToml.getContractIds()
         for (id in contractIds) {
             result.addElement(

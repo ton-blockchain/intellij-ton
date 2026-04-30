@@ -38,26 +38,28 @@ class TolkSetupToolchainNotificationProvider(private val project: Project) : Edi
 
         val tolkSettings = project.tolkSettings
         if (!tolkSettings.hasStdlib) {
-            return createToolchainNotification(project)
+            return createToolchainNotification(project, file)
         }
 
         return null
     }
 
-    private fun createToolchainNotification(project: Project): Function<in FileEditor, out JComponent?> =
-        Function { fileEditor ->
-            EditorNotificationPanel(fileEditor, Status.Warning).apply {
-                text = TolkBundle.message("notification.tolk.stdlib.not.configured")
-                TolkActonStdlibSetupSupport.addSetUpStdlibAction(this, project)
-                createActionLabel(TolkBundle.message("notification.action.configure.stdlib.path.text")) {
-                    project.tolkSettings.configureToolchain()
-                }
-                createActionLabel(TolkBundle.message("notification.action.do.not.show.again.text")) {
-                    disableNotification()
-                    updateAllNotifications()
-                }
+    private fun createToolchainNotification(
+        project: Project,
+        file: VirtualFile,
+    ): Function<in FileEditor, out JComponent?> = Function { fileEditor ->
+        EditorNotificationPanel(fileEditor, Status.Warning).apply {
+            text = TolkBundle.message("notification.tolk.stdlib.not.configured")
+            TolkActonStdlibSetupSupport.addSetUpStdlibAction(this, project, file)
+            createActionLabel(TolkBundle.message("notification.action.configure.stdlib.path.text")) {
+                project.tolkSettings.configureToolchain()
+            }
+            createActionLabel(TolkBundle.message("notification.action.do.not.show.again.text")) {
+                disableNotification()
+                updateAllNotifications()
             }
         }
+    }
 
     private fun disableNotification() {
         PropertiesComponent.getInstance(project).setValue(NOTIFICATION_STATUS_KEY, true)

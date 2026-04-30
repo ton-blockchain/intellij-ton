@@ -32,7 +32,7 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
         if (file.isTestFile() || file.isActonFile() || file.isInScriptsFolder()) return null
 
         val virtualFile = file.virtualFile ?: return null
-        val actonToml = ActonToml.find(contract.project) ?: return null
+        val actonToml = ActonToml.find(contract.project, virtualFile) ?: return null
         val contractId = actonToml.findContractIdBySource(virtualFile) ?: return null
 
         val definitionsInFile = PsiTreeUtil.getChildrenOfTypeAsList(file, TolkContractDefinition::class.java)
@@ -41,19 +41,19 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
         return Info(
             AllIcons.Actions.Rebuild,
             arrayOf(
-                BuildActonContractAction(contractId),
+                BuildActonContractAction(contractId, virtualFile),
                 DisassembleActonContractAction(virtualFile),
-                GenerateTolkWrapperAction(contractId),
-                GenerateTypeScriptWrapperAction(contractId),
+                GenerateTolkWrapperAction(contractId, virtualFile),
+                GenerateTypeScriptWrapperAction(contractId, virtualFile),
             ),
         ) { "Build, disassemble, or generate wrappers" }
     }
 
-    private class BuildActonContractAction(private val contractId: String) :
+    private class BuildActonContractAction(private val contractId: String, private val sourceFile: VirtualFile) :
         AnAction("Build", null, AllIcons.Actions.Compile) {
         override fun actionPerformed(e: AnActionEvent) {
             val project = e.project ?: return
-            val actonToml = ActonToml.find(project) ?: return
+            val actonToml = ActonToml.find(project, sourceFile) ?: return
 
             val runManager = RunManager.getInstance(project)
             val settings = runManager.createConfiguration(
@@ -79,11 +79,11 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
         }
     }
 
-    private class GenerateTolkWrapperAction(private val contractId: String) :
+    private class GenerateTolkWrapperAction(private val contractId: String, private val sourceFile: VirtualFile) :
         AnAction("Generate Tolk Wrapper", null, TolkIcons.FILE) {
         override fun actionPerformed(e: AnActionEvent) {
             val project = e.project ?: return
-            val actonToml = ActonToml.find(project) ?: return
+            val actonToml = ActonToml.find(project, sourceFile) ?: return
 
             val runManager = RunManager.getInstance(project)
             val settings = runManager.createConfiguration(
@@ -100,11 +100,11 @@ class TolkBuildContractLineMarkerProvider : RunLineMarkerContributor() {
         }
     }
 
-    private class GenerateTypeScriptWrapperAction(private val contractId: String) :
+    private class GenerateTypeScriptWrapperAction(private val contractId: String, private val sourceFile: VirtualFile) :
         AnAction("Generate TypeScript Wrapper", null, TolkIcons.TYPESCRIPT) {
         override fun actionPerformed(e: AnActionEvent) {
             val project = e.project ?: return
-            val actonToml = ActonToml.find(project) ?: return
+            val actonToml = ActonToml.find(project, sourceFile) ?: return
 
             val runManager = RunManager.getInstance(project)
             val settings = runManager.createConfiguration(

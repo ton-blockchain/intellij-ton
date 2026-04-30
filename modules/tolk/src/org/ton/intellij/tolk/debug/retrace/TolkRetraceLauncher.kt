@@ -9,6 +9,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.InputValidator
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.util.io.FileUtil
+import com.intellij.openapi.vfs.LocalFileSystem
 import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
@@ -22,7 +24,7 @@ object TolkRetraceLauncher {
         contractId: String? = null,
         workingDirectory: Path? = null,
     ): Boolean {
-        val actonToml = ActonToml.find(project)
+        val actonToml = findActonToml(project, workingDirectory)
         val resolvedWorkingDirectory =
             workingDirectory ?: actonToml?.workingDir ?: project.guessProjectDir()?.toNioPath()
         if (resolvedWorkingDirectory == null) {
@@ -88,4 +90,16 @@ object TolkRetraceLauncher {
     }
 
     private val NETWORK_REGEX = Regex("""(?:^|\s)--net\s+(testnet|mainnet)(?:\s|$)""")
+
+    private fun findActonToml(project: Project, workingDirectory: Path?): ActonToml? {
+        if (workingDirectory != null) {
+            val directory = LocalFileSystem.getInstance()
+                .findFileByPath(FileUtil.toSystemIndependentName(workingDirectory.toString()))
+            if (directory != null) {
+                ActonToml.find(project, directory)?.let { return it }
+            }
+        }
+
+        return ActonToml.find(project)
+    }
 }

@@ -24,7 +24,7 @@ class ActonRunScriptConfigurationProducer : LazyRunConfigurationProducer<ActonCo
         val function = element.parentOfType<TolkFunction>() ?: return false
 
         if (function.name == "main") {
-            val actonToml = ActonToml.find(configuration.project) ?: return false
+            val actonToml = ActonToml.find(configuration.project, containingFile.virtualFile) ?: return false
             return configuration.command == "script" &&
                 configuration.scriptPath == containingFile.virtualFile.path &&
                 configuration.workingDirectory == actonToml.workingDir &&
@@ -43,7 +43,7 @@ class ActonRunScriptConfigurationProducer : LazyRunConfigurationProducer<ActonCo
         val function = element.parentOfType<TolkFunction>() ?: return false
 
         if (function.name == "main") {
-            val actonToml = ActonToml.find(configuration.project) ?: return false
+            val actonToml = ActonToml.find(configuration.project, containingFile.virtualFile) ?: return false
             configuration.name = "Run ${containingFile.name}"
             configuration.command = "script"
             configuration.scriptPath = containingFile.virtualFile.path

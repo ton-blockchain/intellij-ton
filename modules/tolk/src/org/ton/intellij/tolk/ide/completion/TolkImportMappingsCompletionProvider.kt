@@ -35,7 +35,8 @@ object TolkImportMappingsCompletionProvider : TolkCompletionProvider(), DumbAwar
 
         val project = position.project
         val mappings = mutableListOf("@stdlib")
-        val actonToml = ActonToml.find(project)
+        val sourceVirtualFile = parameters.originalFile.virtualFile
+        val actonToml = sourceVirtualFile?.let { ActonToml.find(project, it) }
         if (actonToml != null) {
             mappings.addAll(actonToml.getMappings().keys.map { "@$it" })
         }

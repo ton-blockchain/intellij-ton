@@ -2,10 +2,10 @@ package org.ton.intellij.acton.cli
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
+import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
-import com.intellij.psi.search.FilenameIndex
-import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.util.CachedValueProvider.Result.create
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
@@ -161,15 +161,16 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
     private fun normalizePath(path: String): String = path.replace('\\', '/')
 
     companion object {
+        /**
+         * Finds the Acton configuration at the IDE project root.
+         *
+         * Use this overload only for project-level flows that do not have a source file or directory context.
+         * File-based features should use [find] with a [VirtualFile] so nested Acton projects resolve their nearest
+         * configuration instead of the project-root one.
+         */
         fun find(project: Project): ActonToml? = CachedValuesManager.getManager(project).getCachedValue(project) {
             val projectDir = project.guessProjectDir()
-            val actonTomlFile = projectDir?.findChild("Acton.toml")
-            val virtualFile =
-                actonTomlFile
-                    ?: FilenameIndex.getVirtualFilesByName(
-                        "Acton.toml",
-                        GlobalSearchScope.projectScope(project),
-                    ).firstOrNull()
+            val virtualFile = projectDir?.findChild(ACTON_TOML)?.takeUnless { it.isDirectory }
 
             val actonToml = virtualFile?.let { ActonToml(it, project) }
             create(
@@ -178,5 +179,42 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
                 PsiModificationTracker.MODIFICATION_COUNT,
             )
         }
+
+        /**
+         * Finds the nearest Acton configuration for [from].
+         *
+         * The search starts from [from] itself when it is a directory, or from its parent when it is a file, and walks
+         * upward until the IDE project root. For files outside the project root but inside a content root, the content
+         * root is used as the boundary. The search intentionally does not fall back to an arbitrary `Acton.toml` from
+         * the whole project scope.
+         */
+        fun find(project: Project, from: VirtualFile): ActonToml? {
+            val startDir = if (from.isDirectory) from else from.parent ?: return null
+            val stopDir = findSearchRoot(project, startDir) ?: return null
+
+            var dir: VirtualFile? = startDir
+            while (dir != null) {
+                dir.findChild(ACTON_TOML)?.takeUnless { it.isDirectory }?.let { return ActonToml(it, project) }
+                if (dir == stopDir) break
+                dir = dir.parent
+            }
+            return null
+        }
+
+        private fun findSearchRoot(project: Project, startDir: VirtualFile): VirtualFile? {
+            val projectDir = project.guessProjectDir()
+            if (projectDir != null && (projectDir == startDir || VfsUtilCore.isAncestor(projectDir, startDir, false))) {
+                return projectDir
+            }
+
+            val contentRoot = ProjectFileIndex.getInstance(project).getContentRootForFile(startDir)
+            if (contentRoot != null) {
+                return contentRoot
+            }
+
+            return null
+        }
+
+        private const val ACTON_TOML = "Acton.toml"
     }
 }

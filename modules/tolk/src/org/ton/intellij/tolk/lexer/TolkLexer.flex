@@ -250,8 +250,6 @@ EOL_DOC_LINE  = {LINE_WS}*!(!(("///").*)|(("////").*))
       "else"                   { return ELSE_KEYWORD; }
       "global"                 { return GLOBAL_KEYWORD; }
       "asm"                    { return ASM_KEYWORD; }
-      "operator"               { return OPERATOR_KEYWORD; }
-      "infix"                  { return INFIX_KEYWORD; }
       "const"                  { return CONST_KEYWORD; }
       "true"                   { return TRUE_KEYWORD; }
       "false"                  { return FALSE_KEYWORD; }

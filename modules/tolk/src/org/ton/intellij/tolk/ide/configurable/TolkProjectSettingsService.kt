@@ -39,6 +39,7 @@ val Project.tolkSettings: TolkProjectSettingsService get() = service()
 class TolkProjectSettingsService(private val project: Project) :
     SimplePersistentStateComponent<TolkProjectSettingsService.TolkProjectSettings>(TolkProjectSettings()),
     Disposable {
+    private val cachedActonRootsByStartDirUrl = ConcurrentHashMap<String, CachedValue<VirtualFile?>>()
     private val cachedStdlibDirsByRootUrl = ConcurrentHashMap<String, CachedValue<VirtualFile?>>()
     private val cachedDefaultImportsByStdlibUrl = ConcurrentHashMap<String, CachedValue<TolkFile?>>()
 
@@ -160,6 +161,7 @@ class TolkProjectSettingsService(private val project: Project) :
 
     private fun classifyStdlibChange(event: VFileEvent): StdlibChangeKind? {
         val eventPath = normalizePath(event.path)
+        if (!isInsideProjectPath(eventPath)) return null
         return classifyExpectedStdlibChange(eventPath) ?: classifyNestedStdlibChange(eventPath)
     }
 
@@ -196,9 +198,20 @@ class TolkProjectSettingsService(private val project: Project) :
 
     private fun stdlibSearchRoots(contextFile: VirtualFile?): List<VirtualFile> {
         contextFile?.let { file ->
-            ActonToml.find(project, file)?.virtualFile?.parent?.let { return listOf(it) }
+            cachedActonRoot(file)?.let { return listOf(it) }
         }
         return listOfNotNull(project.guessProjectDir())
+    }
+
+    private fun cachedActonRoot(contextFile: VirtualFile): VirtualFile? {
+        val startDir = if (contextFile.isDirectory) contextFile else contextFile.parent ?: return null
+        return cachedActonRootsByStartDirUrl.computeIfAbsent(startDir.url) { startDirUrl ->
+            CachedValuesManager.getManager(project).createCachedValue({
+                val currentStartDir = VirtualFileManager.getInstance().findFileByUrl(startDirUrl)
+                val result = currentStartDir?.let { ActonToml.find(project, it)?.virtualFile?.parent }
+                CachedValueProvider.Result.create(result, VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS)
+            }, false)
+        }.value
     }
 
     private fun cachedStdlibDir(root: VirtualFile): VirtualFile? =
@@ -222,6 +235,14 @@ class TolkProjectSettingsService(private val project: Project) :
         }.value
 
     private fun normalizePath(path: String): String = path.substringAfter("://", path).replace('\\', '/').trimEnd('/')
+
+    private fun isInsideProjectPath(path: String): Boolean {
+        val projectDir = project.guessProjectDir() ?: return true
+        return isSameOrUnder(path, normalizePath(projectDir.path))
+    }
+
+    private fun isSameOrUnder(path: String, rootPath: String): Boolean =
+        path == rootPath || path.startsWith("$rootPath/")
 
     private fun reloadProject() {
         invokeLater(modalityState = ModalityState.nonModal()) {

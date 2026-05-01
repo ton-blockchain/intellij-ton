@@ -167,7 +167,7 @@ class TolkFile(viewProvider: FileViewProvider) :
         if (!needImport) return
 
         val factory = TolkPsiFactory[project]
-        val sdk = project.tolkSettings.stdlibDir
+        val sdk = project.tolkSettings.stdlibDirFor(sourceVirtualFile)
         if (sdk != null && VfsUtil.isAncestor(sdk, targetVirtualFile, false)) {
             val sdkPath = sdk.path
             path = targetVirtualFile.path.replace(sdkPath, "@stdlib")
@@ -255,7 +255,9 @@ class TolkFile(viewProvider: FileViewProvider) :
         val result = HashMap<String, MutableList<TolkSymbolElement>>()
 
         val visitedFiles = mutableSetOf<TolkFile>()
-        project.tolkSettings.getDefaultImport()?.let {
+        val defaultImport = virtualFile?.let { project.tolkSettings.getDefaultImport(it) }
+            ?: project.tolkSettings.getDefaultImport()
+        defaultImport?.let {
             if (it != this) {
                 visitedFiles.add(it)
                 it.findDeclarations(skipTypes).forEach { (name, declarations) ->

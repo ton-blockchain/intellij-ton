@@ -9,7 +9,7 @@ fun TolkNamedElement.isVisibleInCompletionFrom(currentFile: TolkFile): Boolean {
     if (!currentFile.isInContractsFolder()) return true
 
     val symbolFile = (containingFile.originalFile as? TolkFile) ?: (containingFile as? TolkFile) ?: return true
-    return !symbolFile.isActonProjectHelperFile()
+    return !symbolFile.isActonProjectHelperFile(currentFile)
 }
 
 private fun TolkFile.isInContractsFolder(): Boolean {
@@ -17,9 +17,9 @@ private fun TolkFile.isInContractsFolder(): Boolean {
     return path.contains("/contracts/") || path.contains("\\contracts\\")
 }
 
-private fun TolkFile.isActonProjectHelperFile(): Boolean {
+private fun TolkFile.isActonProjectHelperFile(currentFile: TolkFile): Boolean {
     val file = virtualFile ?: return false
-    val stdlibDir = project.tolkSettings.stdlibDir
+    val stdlibDir = project.tolkSettings.stdlibDirFor(currentFile.originalFile.virtualFile)
     if (stdlibDir != null && VfsUtilCore.isAncestor(stdlibDir, file, false)) {
         return false
     }

@@ -37,7 +37,7 @@ class TolkSetupToolchainNotificationProvider(private val project: Project) : Edi
         if (isNotificationDisabled()) return null
 
         val tolkSettings = project.tolkSettings
-        if (!tolkSettings.hasStdlib) {
+        if (!tolkSettings.hasStdlibFor(file)) {
             return createToolchainNotification(project, file)
         }
 

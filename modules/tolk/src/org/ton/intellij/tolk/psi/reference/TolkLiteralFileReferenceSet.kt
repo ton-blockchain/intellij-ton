@@ -25,14 +25,14 @@ class TolkLiteralFileReferenceSet(str: String, element: TolkStringLiteral, start
     override fun computeDefaultContexts(): Collection<PsiFileSystemItem> {
         val contexts = super.computeDefaultContexts()
         val project = element.project
+        val sourceVirtualFile = element.containingFile.originalFile.virtualFile ?: return contexts
 
         if (pathString.startsWith("@stdlib")) {
-            val stdlibDir = project.tolkSettings.stdlibDir ?: return contexts
+            val stdlibDir = project.tolkSettings.stdlibDirFor(sourceVirtualFile) ?: return contexts
             val psiFile = PsiManager.getInstance(project).findDirectory(stdlibDir) ?: return contexts
             return listOf(psiFile as PsiFileSystemItem)
         }
 
-        val sourceVirtualFile = element.containingFile.originalFile.virtualFile ?: return contexts
         val actonToml = ActonToml.find(project, sourceVirtualFile) ?: return contexts
         val mappings = actonToml.getNormalizedMappings()
         val firstSegment = pathString.split('/').firstOrNull() ?: return contexts

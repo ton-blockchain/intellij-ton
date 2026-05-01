@@ -56,7 +56,7 @@ fun TolkNamedElement.toLookupElementBuilder(
         val contextVirtualFile = contextFile.virtualFile
         val elementVirtualFile = file.virtualFile
         if (contextVirtualFile != null && elementVirtualFile != null) {
-            val sdk = project.tolkSettings.stdlibDir
+            val sdk = project.tolkSettings.stdlibDirFor(contextVirtualFile)
             if (sdk != null && VfsUtilCore.isAncestor(sdk, elementVirtualFile, false)) {
                 "@stdlib/${elementVirtualFile.name}"
             } else {

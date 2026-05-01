@@ -45,8 +45,20 @@ abstract class TolkResolvingTestBase : BasePlatformTestCase() {
         myFixture.configureByText(path, fileText)
     }
 
+    protected fun projectFile(path: String, @Language("Tolk") text: String) {
+        val fileText = text.replace(CARET, CARET_ORIGINAL)
+        myFixture.addFileToProject(path, fileText)
+    }
+
     protected fun mainFile(path: String, @Language("Tolk") text: String) {
         file(path, text)
+        carets = myFixture.editor.caretModel.allCarets
+    }
+
+    protected fun mainProjectFile(path: String, @Language("Tolk") text: String) {
+        val fileText = text.replace(CARET, CARET_ORIGINAL)
+        val file = myFixture.addFileToProject(path, fileText)
+        myFixture.configureFromExistingVirtualFile(file.virtualFile)
         carets = myFixture.editor.caretModel.allCarets
     }
 

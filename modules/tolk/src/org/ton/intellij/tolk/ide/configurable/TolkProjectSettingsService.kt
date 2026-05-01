@@ -19,12 +19,15 @@ import com.intellij.openapi.vfs.findPsiFile
 import com.intellij.openapi.vfs.newvfs.BulkFileListener
 import com.intellij.openapi.vfs.newvfs.events.VFileContentChangeEvent
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent
+import com.intellij.psi.util.CachedValue
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.util.messages.Topic
+import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.tolk.psi.TolkFile
 import org.ton.intellij.tolk.psi.tolkPsiManager
 import java.nio.file.Path
+import java.util.concurrent.ConcurrentHashMap
 
 val Project.tolkSettings: TolkProjectSettingsService get() = service()
 
@@ -36,6 +39,9 @@ val Project.tolkSettings: TolkProjectSettingsService get() = service()
 class TolkProjectSettingsService(private val project: Project) :
     SimplePersistentStateComponent<TolkProjectSettingsService.TolkProjectSettings>(TolkProjectSettings()),
     Disposable {
+    private val cachedActonRootsByStartDirUrl = ConcurrentHashMap<String, CachedValue<VirtualFile?>>()
+    private val cachedStdlibDirsByRootUrl = ConcurrentHashMap<String, CachedValue<VirtualFile?>>()
+    private val cachedDefaultImportsByStdlibUrl = ConcurrentHashMap<String, CachedValue<TolkFile?>>()
 
     init {
         project.messageBus.connect(this).subscribe(
@@ -79,57 +85,72 @@ class TolkProjectSettingsService(private val project: Project) :
             reloadProject()
         }
 
-    private fun findStdlib(): VirtualFile? {
-        val projectDir = project.guessProjectDir() ?: return null
-        for (candidate in STDLIB_CANDIDATES) {
-            val file = projectDir.findFileByRelativePath(candidate)
-            if (file != null && file.isDirectory) {
-                return file
-            }
+    private fun findStdlib(): VirtualFile? = findStdlib(null)
+
+    private fun findStdlib(contextFile: VirtualFile?): VirtualFile? {
+        for (root in stdlibSearchRoots(contextFile)) {
+            cachedStdlibDir(root)?.let { return it }
         }
         return null
     }
 
     val stdlibDir: VirtualFile?
         get() {
-            return stdlibPath?.let {
-                val vfm = VirtualFileManager.getInstance()
-                vfm.findFileByUrl(it) ?: vfm.findFileByNioPath(it.toNioPathOrNull() ?: return null)
-            }
+            return configuredStdlibDir() ?: findStdlib()
         }
 
-    private val defaultImport = CachedValuesManager.getManager(project).createCachedValue({
-        val result = stdlibDir?.findFile("common.tolk")?.findPsiFile(project) as? TolkFile
-        CachedValueProvider.Result.create(result, project.tolkPsiManager.tolkStructureModificationCount)
-    }, false)
+    fun stdlibDirFor(contextFile: VirtualFile?): VirtualFile? {
+        val configuredStdlibDir = configuredStdlibDir()
+        if (configuredStdlibDir != null) return configuredStdlibDir
+        return findStdlib(contextFile)
+    }
+
+    fun stdlibDirs(): List<VirtualFile> {
+        val configuredStdlibDir = configuredStdlibDir()
+        if (configuredStdlibDir != null) return listOf(configuredStdlibDir)
+
+        return stdlibSearchRoots(null)
+            .flatMap { root ->
+                STDLIB_CANDIDATES.mapNotNull { candidate ->
+                    root.findFileByRelativePath(candidate)?.takeIf { it.isDirectory }
+                }
+            }
+            .distinctBy { it.path }
+    }
+
+    private fun configuredStdlibDir(): VirtualFile? {
+        val configuredPath = state.stdlibPath ?: return null
+        val vfm = VirtualFileManager.getInstance()
+        return vfm.findFileByUrl(configuredPath)
+            ?: vfm.findFileByNioPath(configuredPath.toNioPathOrNull() ?: return null)
+    }
 
     val hasStdlib get() = getDefaultImport() != null
 
+    fun hasStdlibFor(contextFile: VirtualFile?): Boolean =
+        if (contextFile != null) getDefaultImport(contextFile) != null else hasStdlib
+
     fun getDefaultImport(): TolkFile? {
-        val cachedDefaultImport = defaultImport.value
-        if (
-            cachedDefaultImport == null ||
-            (cachedDefaultImport.isValid && cachedDefaultImport.virtualFile?.isValid == true)
-        ) {
-            return cachedDefaultImport
-        }
-        return stdlibDir?.findFile("common.tolk")?.findPsiFile(project) as? TolkFile
+        val stdlibDir = stdlibDir ?: return null
+        return cachedDefaultImport(stdlibDir)
     }
 
-    fun refreshDetectedStdlib() {
-        val hadStdlib = hasStdlib
+    fun getDefaultImport(contextFile: VirtualFile): TolkFile? = stdlibDirFor(contextFile)?.let(::cachedDefaultImport)
 
-        refreshExpectedStdlibPaths()
+    fun refreshDetectedStdlib(contextFile: VirtualFile? = null) {
+        val hadStdlib = hasStdlibFor(contextFile)
+
+        refreshExpectedStdlibPaths(contextFile)
         project.tolkPsiManager.incTolkSignatureModificationCount()
         notifySettingsChanged()
 
-        if (hadStdlib != hasStdlib) {
+        if (hadStdlib != hasStdlibFor(contextFile)) {
             reloadProject()
         }
     }
 
-    private fun refreshExpectedStdlibPaths() {
-        val files = expectedStdlibPaths().mapNotNull { path ->
+    private fun refreshExpectedStdlibPaths(contextFile: VirtualFile?) {
+        val files = expectedStdlibPaths(contextFile).mapNotNull { path ->
             runCatching { Path.of(path).toFile() }.getOrNull()
         }
 
@@ -140,7 +161,12 @@ class TolkProjectSettingsService(private val project: Project) :
 
     private fun classifyStdlibChange(event: VFileEvent): StdlibChangeKind? {
         val eventPath = normalizePath(event.path)
-        return expectedStdlibPaths().firstNotNullOfOrNull { stdlibPath ->
+        if (!isInsideProjectPath(eventPath)) return null
+        return classifyExpectedStdlibChange(eventPath) ?: classifyNestedStdlibChange(eventPath)
+    }
+
+    private fun classifyExpectedStdlibChange(eventPath: String): StdlibChangeKind? =
+        expectedStdlibPaths(null).firstNotNullOfOrNull { stdlibPath ->
             when {
                 eventPath == stdlibPath -> StdlibChangeKind.ROOTS
                 stdlibPath.startsWith("$eventPath/") -> StdlibChangeKind.ROOTS
@@ -148,19 +174,75 @@ class TolkProjectSettingsService(private val project: Project) :
                 else -> null
             }
         }
-    }
 
-    private fun expectedStdlibPaths(): List<String> {
+    private fun classifyNestedStdlibChange(eventPath: String): StdlibChangeKind? =
+        STDLIB_CANDIDATES.firstNotNullOfOrNull { candidate ->
+            when {
+                eventPath.endsWith("/$candidate") -> StdlibChangeKind.ROOTS
+                "/$candidate/" in eventPath -> StdlibChangeKind.CONTENTS
+                candidate.startsWith(".acton/") && eventPath.endsWith("/.acton") -> StdlibChangeKind.ROOTS
+                else -> null
+            }
+        }
+
+    private fun expectedStdlibPaths(contextFile: VirtualFile?): List<String> {
         val configuredPath = state.stdlibPath?.let(::normalizePath)
         if (configuredPath != null) {
             return listOf(configuredPath)
         }
 
-        val projectDir = project.guessProjectDir()?.path?.let(::normalizePath) ?: return emptyList()
-        return STDLIB_CANDIDATES.map { candidate -> normalizePath("$projectDir/$candidate") }
+        return stdlibSearchRoots(contextFile).flatMap { root ->
+            STDLIB_CANDIDATES.map { candidate -> normalizePath("${root.path}/$candidate") }
+        }
     }
 
+    private fun stdlibSearchRoots(contextFile: VirtualFile?): List<VirtualFile> {
+        contextFile?.let { file ->
+            cachedActonRoot(file)?.let { return listOf(it) }
+        }
+        return listOfNotNull(project.guessProjectDir())
+    }
+
+    private fun cachedActonRoot(contextFile: VirtualFile): VirtualFile? {
+        val startDir = if (contextFile.isDirectory) contextFile else contextFile.parent ?: return null
+        return cachedActonRootsByStartDirUrl.computeIfAbsent(startDir.url) { startDirUrl ->
+            CachedValuesManager.getManager(project).createCachedValue({
+                val currentStartDir = VirtualFileManager.getInstance().findFileByUrl(startDirUrl)
+                val result = currentStartDir?.let { ActonToml.find(project, it)?.virtualFile?.parent }
+                CachedValueProvider.Result.create(result, VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS)
+            }, false)
+        }.value
+    }
+
+    private fun cachedStdlibDir(root: VirtualFile): VirtualFile? =
+        cachedStdlibDirsByRootUrl.computeIfAbsent(root.url) { rootUrl ->
+            CachedValuesManager.getManager(project).createCachedValue({
+                val currentRoot = VirtualFileManager.getInstance().findFileByUrl(rootUrl)
+                val result = STDLIB_CANDIDATES.firstNotNullOfOrNull { candidate ->
+                    currentRoot?.findFileByRelativePath(candidate)?.takeIf { it.isDirectory }
+                }
+                CachedValueProvider.Result.create(result, VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS)
+            }, false)
+        }.value
+
+    private fun cachedDefaultImport(stdlibDir: VirtualFile): TolkFile? =
+        cachedDefaultImportsByStdlibUrl.computeIfAbsent(stdlibDir.url) { stdlibUrl ->
+            CachedValuesManager.getManager(project).createCachedValue({
+                val currentStdlibDir = VirtualFileManager.getInstance().findFileByUrl(stdlibUrl)
+                val result = currentStdlibDir?.findFile("common.tolk")?.findPsiFile(project) as? TolkFile
+                CachedValueProvider.Result.create(result, VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS)
+            }, false)
+        }.value
+
     private fun normalizePath(path: String): String = path.substringAfter("://", path).replace('\\', '/').trimEnd('/')
+
+    private fun isInsideProjectPath(path: String): Boolean {
+        val projectDir = project.guessProjectDir() ?: return true
+        return isSameOrUnder(path, normalizePath(projectDir.path))
+    }
+
+    private fun isSameOrUnder(path: String, rootPath: String): Boolean =
+        path == rootPath || path.startsWith("$rootPath/")
 
     private fun reloadProject() {
         invokeLater(modalityState = ModalityState.nonModal()) {

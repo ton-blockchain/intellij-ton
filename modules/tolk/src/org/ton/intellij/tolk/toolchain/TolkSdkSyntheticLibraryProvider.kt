@@ -14,9 +14,9 @@ class TolkSdkSyntheticLibraryProvider : AdditionalLibraryRootsProvider() {
 
     override fun getAdditionalProjectLibraries(project: Project): Collection<SyntheticLibrary> {
         val settings = project.tolkSettings
-        val stdlibDir = settings.stdlibDir ?: return emptyList()
-        val library = TolkLibrary("Tolk", stdlibDir)
-        return listOf(library)
+        return settings.stdlibDirs().map { stdlibDir ->
+            TolkLibrary("Tolk", stdlibDir)
+        }
     }
 
     override fun getRootsToWatch(project: Project) = getAdditionalProjectLibraries(project).flatMap { it.sourceRoots }

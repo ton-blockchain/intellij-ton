@@ -103,7 +103,7 @@ object TolkActonStdlibSetupSupport {
             ApplicationManager.getApplication().invokeLater {
                 if (output.exitCode == 0) {
                     VfsUtil.markDirtyAndRefresh(true, true, true, actonToml.virtualFile.parent)
-                    project.tolkSettings.refreshDetectedStdlib()
+                    project.tolkSettings.refreshDetectedStdlib(contextFile)
                     EditorNotifications.getInstance(project).updateAllNotifications()
                 } else {
                     val message = stripAnsiColors(output.stderr.ifBlank { output.stdout })

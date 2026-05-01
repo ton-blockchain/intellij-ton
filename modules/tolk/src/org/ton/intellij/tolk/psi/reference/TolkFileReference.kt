@@ -52,14 +52,14 @@ class TolkFileReference(set: FileReferenceSet, range: TextRange, index: Int, tex
         val alias = currentPath.substringAfter('@', "").substringBefore('/')
         if (alias.isEmpty()) return null
 
+        val sourceVirtualFile = element.containingFile.originalFile.virtualFile ?: return null
         if (alias == "stdlib") {
-            val stdlibDir = project.tolkSettings.stdlibDir ?: return null
+            val stdlibDir = project.tolkSettings.stdlibDirFor(sourceVirtualFile) ?: return null
             if (!VfsUtilCore.isAncestor(stdlibDir, targetVirtualFile, false)) return null
             val relativePath = VfsUtilCore.getRelativePath(targetVirtualFile, stdlibDir, '/') ?: return null
             return "@stdlib/$relativePath".removeSuffix(".tolk")
         }
 
-        val sourceVirtualFile = element.containingFile.originalFile.virtualFile ?: return null
         val actonToml = ActonToml.find(project, sourceVirtualFile) ?: return null
         val normalizedMappings = actonToml.getNormalizedMappings()
 

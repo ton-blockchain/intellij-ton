@@ -113,7 +113,7 @@ class TolkAnnotator : Annotator {
                     parent !is TolkDotExpression ||
                     parent.expression.type !is TolkTyParam
                 ) {
-                    if (element.project.tolkSettings.hasStdlib) {
+                    if (element.project.tolkSettings.hasStdlibFor(element.containingFile?.originalFile?.virtualFile)) {
                         return holder.error(
                             "Unresolved reference: `$referenceName`",
                             ProblemHighlightType.LIKE_UNKNOWN_SYMBOL,

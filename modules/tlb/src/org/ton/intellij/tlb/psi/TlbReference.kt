@@ -57,25 +57,27 @@ class TlbReference(val project: Project, element: TlbParamTypeExpression, rangeI
         val argumentList = (element.parent as? TlbApplyTypeExpression)?.argumentList?.typeExpressionList ?: emptyList()
 
         val tlbFile = t.element.containingFile as? TlbFile
-        tlbFile?.findResultTypes(name)?.forEach { resultType ->
-            val parameterList = resultType.paramList.typeExpressionList
-            if (incompleteCode || matchArgumentAndParams(argumentList, parameterList)) {
-                results.add(PsiElementResolveResult(resultType))
-            }
-        }
-
-        // Search in dependency files from dependson declarations
-        if (results.isEmpty() && tlbFile != null) {
-            searchInDependencies(tlbFile, name, argumentList, results, mutableSetOf(), incompleteCode)
-        }
-
-        // Search in a global block.tlb file if no results found in the current file and dependencies
-        if (results.isEmpty()) {
-            val globalBlockTlbFile = getGlobalBlockTlbFile(project)
-            globalBlockTlbFile?.findResultTypes(name)?.forEach { resultType ->
+        if (!element.isBareResultTypeParameter()) {
+            tlbFile?.findResultTypes(name)?.forEach { resultType ->
                 val parameterList = resultType.paramList.typeExpressionList
                 if (incompleteCode || matchArgumentAndParams(argumentList, parameterList)) {
                     results.add(PsiElementResolveResult(resultType))
+                }
+            }
+
+            // Search in dependency files from dependson declarations
+            if (results.isEmpty() && tlbFile != null) {
+                searchInDependencies(tlbFile, name, argumentList, results, mutableSetOf(), incompleteCode)
+            }
+
+            // Search in a global block.tlb file if no results found in the current file and dependencies
+            if (results.isEmpty()) {
+                val globalBlockTlbFile = getGlobalBlockTlbFile(project)
+                globalBlockTlbFile?.findResultTypes(name)?.forEach { resultType ->
+                    val parameterList = resultType.paramList.typeExpressionList
+                    if (incompleteCode || matchArgumentAndParams(argumentList, parameterList)) {
+                        results.add(PsiElementResolveResult(resultType))
+                    }
                 }
             }
         }
@@ -135,5 +137,15 @@ class TlbReference(val project: Project, element: TlbParamTypeExpression, rangeI
 
         val virtualFile = VirtualFileManager.getInstance().findFileByUrl("file://$globalPath") ?: return null
         return PsiManager.getInstance(project).findFile(virtualFile) as? TlbFile
+    }
+
+    private fun TlbParamTypeExpression.isBareResultTypeParameter(): Boolean {
+        var current: PsiElement = this
+        var parent = current.parent
+        while (parent is TlbParenTypeExpression || parent is TlbNegatedTypeExpression) {
+            current = parent
+            parent = current.parent
+        }
+        return parent is TlbParamList && parent.parent is TlbResultType
     }
 }

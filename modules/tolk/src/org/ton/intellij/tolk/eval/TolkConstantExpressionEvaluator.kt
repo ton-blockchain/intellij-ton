@@ -149,6 +149,14 @@ class TolkConstantExpressionVisitor(private val project: Project, private val th
         }
     }
 
+    override fun visitDotExpression(o: TolkDotExpression) {
+        val resolved = o.fieldLookup?.reference?.resolve()
+        result = when (resolved) {
+            is TolkEnumMember -> TolkEnumValueEvaluator.compute(resolved)?.let(::TolkIntValue)
+            else -> null
+        }
+    }
+
     companion object {
         fun compute(
             left: TolkIntValue,
@@ -250,8 +258,12 @@ class TolkConstantExpressionVisitor(private val project: Project, private val th
                         if (left.value <= right.value) -BigInteger.ONE else BigInteger.ZERO,
                     )
 
-                    op.eq != null -> TolkIntValue(
+                    op.eq != null || op.eqeq != null -> TolkIntValue(
                         if (left.value == right.value) -BigInteger.ONE else BigInteger.ZERO,
+                    )
+
+                    op.neq != null -> TolkIntValue(
+                        if (left.value != right.value) -BigInteger.ONE else BigInteger.ZERO,
                     )
 
                     else -> null

@@ -10,4 +10,13 @@
                                 implementationClass="org.ton.intellij.acton.toml.ActonTomlDocumentationProvider"/>
         <multiHostInjector implementation="org.ton.intellij.acton.toml.ActonTomlScriptCommandInjector"/>
     </extensions>
+
+    <actions>
+        <!--suppress PluginXmlI18n -->
+        <action id="ActonInitializeDapp" class="org.ton.intellij.acton.toml.ActonInitializeDappAction"
+                text="Initialize dApp" description="Run acton init --create-dapp">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>

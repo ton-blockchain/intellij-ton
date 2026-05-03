@@ -24,7 +24,6 @@ import com.intellij.util.IncorrectOperationException
 import com.intellij.util.ui.JBUI
 import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.tolk.TolkIcons
-import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.TolkCallExpression
 import org.ton.intellij.tolk.psi.TolkConstVar
 import org.ton.intellij.tolk.psi.TolkDotExpression
@@ -36,13 +35,11 @@ import org.ton.intellij.tolk.psi.TolkReferenceExpression
 import org.ton.intellij.tolk.psi.TolkReferenceTypeExpression
 import org.ton.intellij.tolk.psi.TolkStruct
 import org.ton.intellij.tolk.psi.TolkTypeDef
+import org.ton.intellij.tolk.psi.computeTolkImportPath
 import org.ton.intellij.tolk.psi.reference.TolkSymbolReference
 import org.ton.intellij.tolk.psi.reference.TolkTypeReference
 import org.ton.intellij.tolk.stub.index.TolkNamedElementIndex
 import java.io.File
-import kotlin.io.path.Path
-import kotlin.io.path.pathString
-import kotlin.io.path.relativeTo
 
 class TolkImportFileQuickFix :
     LocalQuickFixAndIntentionActionOnPsiElement,
@@ -302,26 +299,8 @@ class TolkImportFileQuickFix :
 }
 
 fun SmartPsiElementPointer<TolkFile>.relativePath(file: PsiFile, actonToml: ActonToml?): String {
-    val path = virtualFile.path
-    val containingFile = file.virtualFile.parent?.path ?: ""
-
-    val sdk = project.tolkSettings.stdlibDirFor(file.virtualFile)
-    val sdkPath = sdk?.path
-    if (sdkPath != null && path.contains(sdkPath)) {
-        // @stdlib/gas-payments
-        return path.replace(sdkPath, "@stdlib").removeSuffix(".tolk")
-    }
-
-    if (actonToml != null) {
-        val mappings = runReadAction { actonToml.getMappings() }
-        for ((key, value) in mappings) {
-            val mappingDir = actonToml.workingDir.resolve(value).normalize().toString()
-            if (path.startsWith(mappingDir)) {
-                val subPath = path.substring(mappingDir.length).removePrefix("/").removePrefix("\\").replace('\\', '/')
-                return "@$key/$subPath".removeSuffix(".tolk")
-            }
-        }
-    }
-
-    return Path(path).relativeTo(Path(containingFile)).pathString.removeSuffix(".tolk")
+    val sourceVirtualFile = file.virtualFile ?: return virtualFile.name.removeSuffix(".tolk")
+    return runReadAction {
+        computeTolkImportPath(project, sourceVirtualFile, virtualFile, actonToml)
+    } ?: virtualFile.name.removeSuffix(".tolk")
 }

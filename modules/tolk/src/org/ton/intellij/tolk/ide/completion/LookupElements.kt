@@ -5,11 +5,8 @@ import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.editorActions.TabOutScopesTracker
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.editor.EditorModificationUtil
-import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
-import org.ton.intellij.acton.cli.ActonToml
-import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.presentation.TolkPsiRenderer
 import org.ton.intellij.tolk.presentation.renderParameterList
 import org.ton.intellij.tolk.presentation.renderTypeExpression
@@ -56,26 +53,7 @@ fun TolkNamedElement.toLookupElementBuilder(
         val contextVirtualFile = contextFile.virtualFile
         val elementVirtualFile = file.virtualFile
         if (contextVirtualFile != null && elementVirtualFile != null) {
-            val sdk = project.tolkSettings.stdlibDirFor(contextVirtualFile)
-            if (sdk != null && VfsUtilCore.isAncestor(sdk, elementVirtualFile, false)) {
-                "@stdlib/${elementVirtualFile.name}"
-            } else {
-                val actonToml = ActonToml.find(project, contextVirtualFile)
-                var mappedPath: String? = null
-                if (actonToml != null) {
-                    val mappings = actonToml.getNormalizedMappings()
-                    for ((key, mappingDir) in mappings) {
-                        if (elementVirtualFile.path.startsWith(mappingDir)) {
-                            val subPath = elementVirtualFile.path.substring(
-                                mappingDir.length,
-                            ).removePrefix("/").removePrefix("\\").replace('\\', '/')
-                            mappedPath = "@$key/$subPath"
-                            break
-                        }
-                    }
-                }
-                mappedPath ?: VfsUtilCore.findRelativePath(contextVirtualFile, elementVirtualFile, '/') ?: ""
-            }
+            computeTolkImportPath(project, contextVirtualFile, elementVirtualFile) ?: ""
         } else {
             file.name
         }

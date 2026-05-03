@@ -3,14 +3,12 @@ package org.ton.intellij.tolk.psi
 import com.intellij.extapi.psi.PsiFileBase
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.util.Key
-import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
 import com.intellij.psi.scope.PsiScopeProcessor
 import com.intellij.psi.util.CachedValueProvider.Result
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
-import org.ton.intellij.acton.cli.ActonToml
 import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.TolkLanguage
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
@@ -162,34 +160,13 @@ class TolkFile(viewProvider: FileViewProvider) :
 
         val sourceVirtualFile = virtualFile ?: return
         val targetVirtualFile = file.virtualFile ?: return
-        var path = VfsUtil.findRelativePath(sourceVirtualFile, targetVirtualFile, '/') ?: return
         val needImport = includeDefinitions.none { (it.resolve() as? TolkFile)?.virtualFile == targetVirtualFile }
         if (!needImport) return
 
+        val path = computeTolkImportPath(project, sourceVirtualFile, targetVirtualFile) ?: return
+        if (path == "@stdlib/common") return
+
         val factory = TolkPsiFactory[project]
-        val sdk = project.tolkSettings.stdlibDirFor(sourceVirtualFile)
-        if (sdk != null && VfsUtil.isAncestor(sdk, targetVirtualFile, false)) {
-            val sdkPath = sdk.path
-            path = targetVirtualFile.path.replace(sdkPath, "@stdlib")
-            if (path == "@stdlib/common.tolk") {
-                return
-            }
-        } else {
-            val actonToml = ActonToml.find(project, sourceVirtualFile)
-            if (actonToml != null) {
-                val mappings = actonToml.getNormalizedMappings()
-                val filePath = targetVirtualFile.path
-                for ((key, mappingDir) in mappings) {
-                    if (filePath.startsWith(mappingDir)) {
-                        val subPath = filePath.substring(
-                            mappingDir.length,
-                        ).removePrefix("/").removePrefix("\\").replace('\\', '/')
-                        path = "@$key/$subPath"
-                        break
-                    }
-                }
-            }
-        }
         val newInclude = factory.createIncludeDefinition(path.removeSuffix(".tolk"))
 
         tryIncludeAtCorrectLocation(newInclude)

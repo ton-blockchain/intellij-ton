@@ -70,13 +70,13 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         }
 
         if (!isStaticReceiver && !isBeforeParenthesis) {
-            when (calledType) {
+            when (val unwrappedCalledType = calledType.unwrapTypeAlias().actualType()) {
                 is TolkTyStruct -> {
-                    val sub = Substitution.instantiate(calledType.psi.declaredType, calledType)
-                    for (field in calledType.psi.structBody?.structFieldList.orEmpty()) {
+                    val sub = Substitution.instantiate(unwrappedCalledType.psi.declaredType, unwrappedCalledType)
+                    for (field in unwrappedCalledType.psi.structBody?.structFieldList.orEmpty()) {
                         if (!checkLimit()) return
                         val lookupElement = field.toLookupElementBuilder(ctx, sub)
-                        if (prefixMatcher.prefixMatches(lookupElement) && field.canUse(calledType, element)) {
+                        if (prefixMatcher.prefixMatches(lookupElement) && field.canUse(unwrappedCalledType, element)) {
                             result.addElement(
                                 lookupElement.toTolkLookupElement(
                                     TolkLookupElementData(
@@ -89,9 +89,9 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
                 }
 
                 is TolkTyTypedTuple, is TolkTyTensor -> {
-                    val elements = when (calledType) {
-                        is TolkTyTypedTuple -> calledType.elements
-                        is TolkTyTensor -> calledType.elements
+                    val elements = when (unwrappedCalledType) {
+                        is TolkTyTypedTuple -> unwrappedCalledType.elements
+                        is TolkTyTensor -> unwrappedCalledType.elements
                         else -> emptyList()
                     }
                     for ((index, element) in elements.withIndex()) {

@@ -49,7 +49,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
     private val scriptForkNetComboBox = ComboBox(arrayOf("", "testnet", "mainnet"))
     private val scriptForkBlockNumberField = JBTextField(null)
     private val scriptApiKeyField = JBTextField(null)
-    private val scriptBroadcastNetComboBox = ComboBox(arrayOf("", "testnet", "mainnet", "localnet"))
+    private val scriptBroadcastNetComboBox = ComboBox(arrayOf("", "testnet", "mainnet"))
 
     // Test specific
     private val testTargetBrowseField = TextFieldWithBrowseButton()

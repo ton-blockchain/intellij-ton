@@ -57,7 +57,7 @@ object TolkTestLocator : SMTestLocator {
     internal data class TestLocation(val filePath: String, val functionName: String)
 
     private fun parseLocationPath(path: String): TestLocation? {
-        val separatorIndex = path.lastIndexOf(':')
+        val separatorIndex = path.indexOf(':')
         if (separatorIndex <= 0 || separatorIndex == path.lastIndex) return null
 
         val filePath = path.substring(0, separatorIndex)

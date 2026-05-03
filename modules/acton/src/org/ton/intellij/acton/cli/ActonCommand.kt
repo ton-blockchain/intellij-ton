@@ -186,9 +186,10 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
-    data class Init(var stdlibOnly: Boolean = false) : ActonCommand("init") {
+    data class Init(var stdlibOnly: Boolean = false, var createDapp: Boolean = false) : ActonCommand("init") {
         override fun getArguments(): List<String> = buildList {
             if (stdlibOnly) add("--stdlib-only")
+            if (createDapp) add("--create-dapp")
         }
     }
 
@@ -462,7 +463,10 @@ sealed class ActonCommand(val name: String) {
 
             "init" -> {
                 val args = ParametersListUtil.parse(parameters)
-                Init(stdlibOnly = args.contains("--stdlib-only"))
+                Init(
+                    stdlibOnly = args.contains("--stdlib-only"),
+                    createDapp = args.contains("--create-dapp"),
+                )
             }
 
             else -> Custom("$name $parameters")

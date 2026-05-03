@@ -59,6 +59,7 @@ class ActonCommandConfiguration(project: Project, factory: ConfigurationFactory,
         )
 
         "test" -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache, true, testUi)
+        "init" -> ActonCommand.Init()
         "run" -> ActonCommand.Run(runScriptName)
         "retrace" -> ActonCommand.Retrace(retraceTransactionHash, retraceNetwork, retraceContractId)
         else -> ActonCommand.Custom(command)

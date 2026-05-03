@@ -873,18 +873,18 @@ fun TolkContractDefinition.generateDoc(): String = buildString {
 }
 
 private val CONTRACT_FIELD_DOCS = mapOf(
-    "contractName" to "Name of the contract.",
-    "author" to "Author of the contract.",
-    "version" to "Version of the contract.",
-    "description" to "Description of the contract.",
-    "symbolsNamespace" to "Namespace for contract symbols.",
+    "author" to "Contract author. This is an arbitrary string exported to ABI as-is.",
+    "version" to "Contract version. This is an arbitrary string exported as-is; prefer semver when possible.",
+    "description" to "Contract description. This is an arbitrary string exported as-is.",
     "incomingMessages" to
-        "Defines the type of allowed incoming internal messages. Usually a union type of all supported message structs.",
-    "incomingExternal" to "Defines the type of allowed incoming external messages.",
-    "storage" to
-        "Defines the persistent storage structure for the contract. This field usually points to a struct type.",
-    "storageAtDeployment" to "Defines the storage structure at the moment of deployment.",
-    "forceAbiExport" to "List of types to additionally export to ABI.",
+        "Defines internal messages accepted by this contract. Typically this is the same union type used for lazy match parsing.",
+    "incomingExternal" to
+        "Defines the expected slice shape when the contract has onExternalMessage. Typically this is the struct or union used with lazy fromSlice.",
+    "storage" to "Specifies the shape of persistent on-chain data.",
+    "storageAtDeployment" to
+        "Specifies the storage shape at deployment, used when calculating the initial address if it differs from runtime storage. For example, an NFT item can be deployed with itemIndex and collectionAddr and later initialized with owner and content.",
+    "forceAbiExport" to
+        "Additional types to include in ABI even when they are not reachable from storage, messages, or getters. This is useful, for example, for TypeScript unit tests.",
 )
 
 fun TolkContractField.generateDoc(): String {

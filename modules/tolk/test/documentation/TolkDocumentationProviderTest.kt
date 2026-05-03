@@ -2,6 +2,7 @@ package org.ton.intellij.tolk.documentation
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiRecursiveElementVisitor
+import com.intellij.psi.util.PsiTreeUtil
 import org.ton.intellij.tolk.TolkTestBase
 import org.ton.intellij.tolk.doc.TolkDocumentationProvider
 import org.ton.intellij.tolk.psi.*
@@ -34,6 +35,66 @@ class TolkDocumentationProviderTest : TolkTestBase() {
     fun testSelfTypesDocumentation() = doTest("self_types")
     fun testPrimitiveTypesDocumentation() = doTest("primitive_types")
     fun testDocCommentsDocumentation() = doTest("doc_comments")
+
+    fun testContractFieldDocumentation() {
+        val file = myFixture.configureByText(
+            "contract_fields.tolk",
+            """
+            contract SomeName {
+                author: "Tolk team"
+                version: "1.0"
+                description: "..."
+                storage: MyStorage
+                storageAtDeployment: PartialStruct
+                incomingMessages: UnionOfStructs
+                incomingExternal: SomeStructOrUnion
+                forceAbiExport: (Type1, Type2)
+                symbolsNamespace: Legacy
+            }
+            """.trimIndent(),
+        )
+
+        val fields = PsiTreeUtil.findChildrenOfType(file, TolkContractField::class.java)
+            .associateBy { it.identifier.text }
+
+        assertContractFieldDoc(fields, "author", "Contract author. This is an arbitrary string exported to ABI as-is.")
+        assertContractFieldDoc(
+            fields,
+            "version",
+            "Contract version. This is an arbitrary string exported as-is; prefer semver when possible.",
+        )
+        assertContractFieldDoc(
+            fields,
+            "description",
+            "Contract description. This is an arbitrary string exported as-is.",
+        )
+        assertContractFieldDoc(fields, "storage", "Specifies the shape of persistent on-chain data.")
+        assertContractFieldDoc(
+            fields,
+            "storageAtDeployment",
+            "For example, an NFT item can be deployed with itemIndex and collectionAddr",
+        )
+        assertContractFieldDoc(
+            fields,
+            "incomingMessages",
+            "Defines internal messages accepted by this contract.",
+        )
+        assertContractFieldDoc(
+            fields,
+            "incomingExternal",
+            "Defines the expected slice shape when the contract has onExternalMessage.",
+        )
+        assertContractFieldDoc(
+            fields,
+            "forceAbiExport",
+            "This is useful, for example, for TypeScript unit tests.",
+        )
+
+        val legacyDoc = provider.generateDoc(fields.getValue("symbolsNamespace"), null)
+
+        assertNotNull(legacyDoc)
+        assertFalse(legacyDoc!!.contains("Namespace for contract symbols"))
+    }
 
     private fun doTest(testName: String) {
         val tolkFile = myFixture.configureByFile("$testName.tolk")
@@ -69,6 +130,18 @@ class TolkDocumentationProviderTest : TolkTestBase() {
             val expectedHtml = expectedFile.readText()
             assertEquals("Documentation mismatch for $testName", expectedHtml.trim(), actualHtml.trim())
         }
+    }
+
+    private fun assertContractFieldDoc(
+        fields: Map<String, TolkContractField>,
+        fieldName: String,
+        expectedText: String,
+    ) {
+        val field = fields[fieldName] ?: error("Field not found: $fieldName")
+        val documentation = provider.generateDoc(field, null)
+
+        assertNotNull(documentation)
+        assertTrue(documentation!!.contains(expectedText))
     }
 
     private fun getElementDescription(element: PsiElement): String = when (element) {

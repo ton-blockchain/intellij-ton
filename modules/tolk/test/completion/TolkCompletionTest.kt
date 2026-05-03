@@ -1,6 +1,49 @@
 package org.ton.intellij.tolk.completion
 
+import org.ton.intellij.util.presentation
+
 class TolkCompletionTest : TolkCompletionTestBase() {
+    fun `test contract field completion exposes supported ABI fields`() = checkContainsCompletion(
+        listOf(
+            "author",
+            "version",
+            "description",
+            "incomingMessages",
+            "incomingExternal",
+            "storage",
+            "storageAtDeployment",
+            "forceAbiExport",
+        ),
+        """
+        contract SomeName {
+            /*caret*/
+        }
+        """,
+    )
+
+    fun `test contract field completion does not include symbolsNamespace`() = checkNotContainsCompletion(
+        "symbolsNamespace",
+        """
+        contract SomeName {
+            /*caret*/
+        }
+        """,
+    )
+
+    fun `test contract field completion descriptions use ABI field docs`() = checkContainsCompletion(
+        listOf(
+            "author Contract author exported to ABI as-is",
+            "storageAtDeployment Initial storage shape used for address calculation",
+            "forceAbiExport Extra ABI types not reachable from storage, messages, or getters",
+        ),
+        """
+        contract SomeName {
+            /*caret*/
+        }
+        """,
+        render = { lookupString + presentation.tailText },
+    )
+
     fun `test local variable`() = doSingleCompletion(
         """
         fun foo(quux: int) { qu/*caret*/ }

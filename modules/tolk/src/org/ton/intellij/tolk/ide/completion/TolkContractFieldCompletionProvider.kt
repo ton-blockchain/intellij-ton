@@ -29,15 +29,14 @@ object TolkContractFieldCompletionProvider : TolkCompletionProvider() {
         }?.toSet() ?: emptySet()
 
         val fields = mapOf(
-            "author" to "Author of the contract",
-            "version" to "Version of the contract",
-            "description" to "Description of the contract",
-            "symbolsNamespace" to "Namespace for contract symbols",
-            "incomingMessages" to "Allowed incoming messages type",
-            "incomingExternal" to "Allowed incoming external messages type",
-            "storage" to "Persistent storage structure",
-            "storageAtDeployment" to "Storage structure at deployment",
-            "forceAbiExport" to "List of symbols to additionally export to ABI",
+            "author" to "Contract author exported to ABI as-is",
+            "version" to "Contract version exported as-is, preferably semver",
+            "description" to "Contract description exported as-is",
+            "incomingMessages" to "Accepted internal messages type",
+            "incomingExternal" to "Expected external message slice type",
+            "storage" to "Persistent on-chain data shape",
+            "storageAtDeployment" to "Initial storage shape used for address calculation",
+            "forceAbiExport" to "Extra ABI types not reachable from storage, messages, or getters",
         )
 
         val typeFields = setOf(

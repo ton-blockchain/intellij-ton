@@ -27,7 +27,6 @@ class TolkRunScriptLineMarkerProvider : RunLineMarkerContributor() {
                 RunActonScriptAction(),
                 RunActonScriptBroadcastAction("testnet"),
                 RunActonScriptBroadcastAction("mainnet"),
-                RunActonScriptBroadcastAction("localnet"),
             )
             return Info(
                 AllIcons.RunConfigurations.TestState.Run,

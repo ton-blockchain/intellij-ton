@@ -110,6 +110,15 @@
                                               descriptionKey="codeInsight.hint.description.values.exit.code"
                                               providerId="tolk.values.hints.exit.code"/>
 
+        <codeInsight.declarativeInlayProvider language="Tolk"
+                                              bundle="messages.TolkBundle"
+                                              nameKey="codeInsight.hint.values.enum.value"
+                                              group="VALUES_GROUP"
+                                              implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkEnumValueHintsProvider"
+                                              isEnabledByDefault="true"
+                                              descriptionKey="codeInsight.hint.description.values.enum.value"
+                                              providerId="tolk.values.hints.enum.value"/>
+
         <codeInsight.declarativeInlayProvider group="PARAMETERS_GROUP"
                                               implementationClass="org.ton.intellij.tolk.codeInsight.hint.TolkParameterHintsProvider"
                                               isEnabledByDefault="true"

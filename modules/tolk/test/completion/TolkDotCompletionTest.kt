@@ -110,6 +110,42 @@ class TolkDotCompletionTest : TolkCompletionTestBase() {
         "value",
     )
 
+    fun `test struct fields completion through type alias`() = checkOrderedEquals(
+        """
+            struct Bar {
+                foo: int
+            }
+
+            type Foo = Bar
+
+            fun main(foo: Foo) {
+                foo./*caret*/
+            }
+        """,
+        1,
+        "foo",
+    )
+
+    fun `test struct fields completion after type alias match narrowing`() = checkOrderedEquals(
+        """
+            struct Bar {
+                foo: int
+            }
+
+            type Foo = Bar
+
+            fun main(foo: Foo) {
+                match (foo) {
+                    Bar => {
+                        foo./*caret*/
+                    }
+                };
+            }
+        """,
+        1,
+        "foo",
+    )
+
     fun `test simple instance method completion`() = checkOrderedEquals(
         """
             struct Foo {}

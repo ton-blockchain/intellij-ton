@@ -11,6 +11,7 @@ import com.intellij.formatting.service.AsyncFormattingRequest
 import com.intellij.formatting.service.FormattingService.Feature
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiFile
 import com.intellij.psi.formatter.FormatterUtil
 import org.ton.intellij.acton.ActonBundle
@@ -32,7 +33,7 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
             isActonAvailable(file)
     }
 
-    override fun getFeatures(): MutableSet<Feature> = mutableSetOf()
+    override fun getFeatures(): MutableSet<Feature> = mutableSetOf(Feature.FORMAT_FRAGMENTS)
 
     override fun getNotificationGroupId(): String = ACTON_FMT_NOTIFICATION_GROUP_ID
 
@@ -113,6 +114,10 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
                 add("--project-root")
                 add(projectRoot)
             }
+            createActonFmtRangeArgument(request.documentText, request.formattingRanges)?.let { range ->
+                add("--range")
+                add(range)
+            }
             add(file.absolutePath)
         },
     ).toGeneralCommandLine(request.context.project)
@@ -173,6 +178,43 @@ class ActonFmtFormattingService : AsyncDocumentFormattingService() {
 
     companion object {
         private val LOG = logger<ActonFmtFormattingService>()
+
+        internal fun createActonFmtRangeArgument(documentText: String, ranges: List<TextRange>): String? {
+            val normalizedRanges = ranges
+                .mapNotNull { range ->
+                    val start = range.startOffset.coerceIn(0, documentText.length)
+                    val end = range.endOffset.coerceIn(0, documentText.length)
+                    if (start >= end) null else TextRange(start, end)
+                }
+
+            if (normalizedRanges.isEmpty()) return null
+
+            val startOffset = normalizedRanges.minOf { it.startOffset }
+            val endOffset = normalizedRanges.maxOf { it.endOffset }
+            if (startOffset == 0 && endOffset == documentText.length) return null
+
+            val start = documentText.toActonFmtPosition(startOffset)
+            val end = documentText.toActonFmtPosition(endOffset)
+            return "${start.line}:${start.byteColumn}-${end.line}:${end.byteColumn}"
+        }
+
+        private fun String.toActonFmtPosition(offset: Int): ActonFmtPosition {
+            val normalizedOffset = offset.coerceIn(0, length)
+            var line = 0
+            var lineStartOffset = 0
+
+            for (index in 0 until normalizedOffset) {
+                if (this[index] == '\n') {
+                    line++
+                    lineStartOffset = index + 1
+                }
+            }
+
+            val byteColumn = substring(lineStartOffset, normalizedOffset).toByteArray(Charsets.UTF_8).size
+            return ActonFmtPosition(line, byteColumn)
+        }
+
+        internal data class ActonFmtPosition(val line: Int, val byteColumn: Int)
 
         private enum class FormattingReason {
             ReformatCode,

@@ -57,13 +57,16 @@ object TolkTestLocator : SMTestLocator {
     internal data class TestLocation(val filePath: String, val functionName: String)
 
     private fun parseLocationPath(path: String): TestLocation? {
-        val separatorIndex = path.indexOf(':')
+        val separatorIndex = path.indexOf(':', startIndex = pathStartAfterWindowsDrive(path))
         if (separatorIndex <= 0 || separatorIndex == path.lastIndex) return null
 
         val filePath = path.substring(0, separatorIndex)
         val functionName = path.substring(separatorIndex + 1)
         return TestLocation(filePath, functionName)
     }
+
+    private fun pathStartAfterWindowsDrive(path: String): Int =
+        if (path.length >= 2 && path[0].isLetter() && path[1] == ':') 2 else 0
 
     private fun normalizeTestName(name: String): String = name
 

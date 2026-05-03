@@ -42,6 +42,30 @@ class ActonTomlLineMarkerProviderTest : BasePlatformTestCase() {
         assertContainsElements(actionTexts, "Run All Tests", "Run All Tests with UI")
     }
 
+    fun testTolkWrappersSectionProvidesGenerateAllAction() {
+        val info = lineMarkerInfoFor(
+            """
+                [wrappers.to<caret>lk]
+                output-dir = "wrappers"
+            """.trimIndent(),
+        )
+
+        val actionTexts = info.actions.mapNotNull { it.templateText }
+        assertContainsElements(actionTexts, "Generate All Tolk Wrappers")
+    }
+
+    fun testTypeScriptWrappersSectionProvidesGenerateAllAction() {
+        val info = lineMarkerInfoFor(
+            """
+                [wrappers.type<caret>script]
+                output-dir = "wrappers"
+            """.trimIndent(),
+        )
+
+        val actionTexts = info.actions.mapNotNull { it.templateText }
+        assertContainsElements(actionTexts, "Generate All TypeScript Wrappers")
+    }
+
     private fun lineMarkerInfoFor(code: String): com.intellij.execution.lineMarker.RunLineMarkerContributor.Info {
         val file = myFixture.configureByText("Acton.toml", code)
         val element = file.findElementAt(myFixture.caretOffset)?.parent as? TomlKeySegment

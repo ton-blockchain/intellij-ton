@@ -34,6 +34,22 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
                 ) { "Build $contractName" }
             }
 
+            if (segments.size == 2 && segments[0].name == "wrappers" && segments[1] == element) {
+                return when (segments[1].name) {
+                    "tolk" -> Info(
+                        AllIcons.Actions.Rebuild,
+                        arrayOf(ActonGenerateAllWrappersAction(WrapperLanguage.TOLK)),
+                    ) { "Generate all Tolk wrappers" }
+
+                    "typescript" -> Info(
+                        AllIcons.Actions.Rebuild,
+                        arrayOf(ActonGenerateAllWrappersAction(WrapperLanguage.TYPESCRIPT)),
+                    ) { "Generate all TypeScript wrappers" }
+
+                    else -> null
+                }
+            }
+
             if (segments.size == 1 && segments[0] == element) {
                 return when (segments[0].name) {
                     "test" -> Info(
@@ -76,6 +92,21 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
         }
 
         return null
+    }
+
+    private enum class WrapperLanguage(val presentableName: String, val commandParameters: String) {
+        TOLK("Tolk", "--all"),
+        TYPESCRIPT("TypeScript", "--ts --all"),
+    }
+
+    private class ActonGenerateAllWrappersAction(private val language: WrapperLanguage) :
+        AnAction("Generate All ${language.presentableName} Wrappers", null, AllIcons.Actions.Rebuild) {
+        override fun actionPerformed(e: AnActionEvent) {
+            runConfiguration(e, "Generate all ${language.presentableName} wrappers") {
+                command = "wrapper"
+                parameters = language.commandParameters
+            }
+        }
     }
 
     private class ActonRunTestsAction : AnAction("Run All Tests", null, AllIcons.Actions.Execute) {

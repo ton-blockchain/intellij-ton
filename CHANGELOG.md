@@ -1,5 +1,108 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [4.0.0]
+
+v4.0.0 collects the work since v3.0.0 and makes Acton the main TON development workflow in the IDE.
+
+The headline change is that Acton is no longer just an external command you run next to the editor. It is now integrated
+through the whole project lifecycle: you can create TON projects from the current Acton templates, configure Acton.toml
+with completion and navigation, run builds, tests, scripts, linting and formatting from the IDE, generate wrappers,
+debug scripts and tests, inspect wallets and follow coverage, and deploy through Acton scripts without
+leaving the JetBrains workflow.
+
+This release also brings the Tolk support line forward from 1.2 through 1.4, adds smarter completion and hints around
+contracts, enums, arrays, annotations and wrappers, and keeps the rest of the TON tooling in step: BoC disassembly is
+Acton-powered, TL-B resolving is better, Blueprint support is removed, and the plugin targets the modern 2025.2+
+JetBrains platform.
+
+### Acton
+
+#### Project setup and templates
+
+- feat(acton): add the first Acton integration with Acton.toml actions and run configurations in https://github.com/ton-blockchain/intellij-ton/pull/598 and https://github.com/ton-blockchain/intellij-ton/pull/758
+- feat(acton): add the Acton project wizard in https://github.com/ton-blockchain/intellij-ton/pull/608
+- feat(acton): create `Run all tests` and `Build all contracts` run configurations for new projects in https://github.com/ton-blockchain/intellij-ton/pull/621
+- feat(acton): support all project wizard options, including TypeScript app generation, in https://github.com/ton-blockchain/intellij-ton/pull/706 and https://github.com/ton-blockchain/intellij-ton/pull/697
+- feat(acton): load project wizard templates from Acton itself in https://github.com/ton-blockchain/intellij-ton/pull/749; keep fallback templates aligned with current Acton templates, including `empty`, `counter`, `jetton`, `nft`, `w5-extension` and TypeScript app scaffolds
+- feat(acton): add an action to initialize a TypeScript dApp from Acton.toml in https://github.com/ton-blockchain/intellij-ton/pull/782
+- feat(acton): add an Acton auto-installer and startup version checks in https://github.com/ton-blockchain/intellij-ton/pull/772 and https://github.com/ton-blockchain/intellij-ton/pull/624
+- feat(acton): allow skipping `acton up` version suggestions at application level in https://github.com/ton-blockchain/intellij-ton/pull/695
+- chore(new): prevent project creation when `acton` is not available in https://github.com/ton-blockchain/intellij-ton/pull/759
+
+#### Acton.toml, mappings and monorepos
+
+- feat(acton): add Acton.toml name completion and resolving in https://github.com/ton-blockchain/intellij-ton/pull/614 and https://github.com/ton-blockchain/intellij-ton/pull/615
+- feat(acton): support mappings for Tolk and correctly handle mapped imports on file moves in https://github.com/ton-blockchain/intellij-ton/pull/669 and https://github.com/ton-blockchain/intellij-ton/pull/694
+- feat(acton): update Acton.toml schema and IDE support to the latest Acton versions in https://github.com/ton-blockchain/intellij-ton/pull/688, https://github.com/ton-blockchain/intellij-ton/pull/696, https://github.com/ton-blockchain/intellij-ton/pull/704, https://github.com/ton-blockchain/intellij-ton/pull/707, https://github.com/ton-blockchain/intellij-ton/pull/777
+- feat(acton): add completion, resolving and language injection for Acton.toml script and config values in https://github.com/ton-blockchain/intellij-ton/pull/713, https://github.com/ton-blockchain/intellij-ton/pull/714, https://github.com/ton-blockchain/intellij-ton/pull/715
+- feat(acton): improve Acton.toml and Tolk stdlib discovery in monorepositories in https://github.com/ton-blockchain/intellij-ton/pull/775 and https://github.com/ton-blockchain/intellij-ton/pull/776
+- feat(acton): add actions to register a contract and create a new registered contract from the IDE in https://github.com/ton-blockchain/intellij-ton/pull/630 and https://github.com/ton-blockchain/intellij-ton/pull/631
+- fix(acton): improve missing-Acton handling, project creation stability, EDT-safe template loading and directory test line markers in https://github.com/ton-blockchain/intellij-ton/pull/672, https://github.com/ton-blockchain/intellij-ton/pull/681, https://github.com/ton-blockchain/intellij-ton/pull/754, https://github.com/ton-blockchain/intellij-ton/pull/735
+
+#### Build, wrappers, scripts and deployment
+
+- feat(acton): integrate Acton test runner, coverage and script runner in https://github.com/ton-blockchain/intellij-ton/pull/599
+- feat(acton): add build, test, fmt, lint and contract-header line markers, including UI test runs from Acton.toml, in https://github.com/ton-blockchain/intellij-ton/pull/610, https://github.com/ton-blockchain/intellij-ton/pull/716, https://github.com/ton-blockchain/intellij-ton/pull/717, https://github.com/ton-blockchain/intellij-ton/pull/725
+- feat(acton): support `acton fmt`, range-based formatting and external `acton check` linters in https://github.com/ton-blockchain/intellij-ton/pull/693, https://github.com/ton-blockchain/intellij-ton/pull/781, https://github.com/ton-blockchain/intellij-ton/pull/670
+- feat(acton): add linter suppression and issue tag support for `acton check` in https://github.com/ton-blockchain/intellij-ton/pull/708, https://github.com/ton-blockchain/intellij-ton/pull/722, https://github.com/ton-blockchain/intellij-ton/pull/738
+- feat(acton): support script broadcasting with `--net` and default to tonscan for explorer links in https://github.com/ton-blockchain/intellij-ton/pull/710 and https://github.com/ton-blockchain/intellij-ton/pull/740
+- feat(acton): run Acton commands in a terminal-like console with PTY and prompt support in https://github.com/ton-blockchain/intellij-ton/pull/720 and https://github.com/ton-blockchain/intellij-ton/pull/721
+- feat(acton): add console filters for Acton test assertions and Tolk file paths in https://github.com/ton-blockchain/intellij-ton/pull/605 and https://github.com/ton-blockchain/intellij-ton/pull/771
+- feat(acton): add gutter actions to regenerate Tolk or TypeScript wrappers and Tolk actions to generate wrappers from contract headers in https://github.com/ton-blockchain/intellij-ton/pull/779 and https://github.com/ton-blockchain/intellij-ton/pull/768
+
+#### Debugging, tests, coverage and profiling
+
+- feat(acton): support debugging scripts, tests and retrace commands, and wait for process termination after debug finishes, in https://github.com/ton-blockchain/intellij-ton/pull/712 and https://github.com/ton-blockchain/intellij-ton/pull/745
+- feat(acton): show debug values for variables and fields on hover in https://github.com/ton-blockchain/intellij-ton/pull/756
+- feat(acton): preserve failed-test underlines, show actual/expected values and suggest debug or backtrace reruns from test failure inspections in https://github.com/ton-blockchain/intellij-ton/pull/724, https://github.com/ton-blockchain/intellij-ton/pull/736, https://github.com/ton-blockchain/intellij-ton/pull/746, https://github.com/ton-blockchain/intellij-ton/pull/747
+- feat(acton): add rerun failed tests and rerun selected tests actions in https://github.com/ton-blockchain/intellij-ton/pull/741 and https://github.com/ton-blockchain/intellij-ton/pull/770
+- feat(acton): add initial profiling support and readable coverage-unavailable errors in https://github.com/ton-blockchain/intellij-ton/pull/705 and https://github.com/ton-blockchain/intellij-ton/pull/719
+- feat(coverage): include branch hit tracking and coverage line data reports in https://github.com/ton-blockchain/intellij-ton/pull/703 and https://github.com/ton-blockchain/intellij-ton/pull/748
+
+#### Wallets and project UX
+
+- feat(acton): add a wallet tool window with wallet cards, balances, unconfigured-wallet hints, new-wallet actions, testnet airdrops and wallet-address fixes in https://github.com/ton-blockchain/intellij-ton/pull/633, https://github.com/ton-blockchain/intellij-ton/pull/634, https://github.com/ton-blockchain/intellij-ton/pull/635, https://github.com/ton-blockchain/intellij-ton/pull/636, https://github.com/ton-blockchain/intellij-ton/pull/637, https://github.com/ton-blockchain/intellij-ton/pull/680, https://github.com/ton-blockchain/intellij-ton/pull/690, https://github.com/ton-blockchain/intellij-ton/pull/691
+- feat(acton): add a default explorer setting and use folder icons for `tests/`, `contracts/` and `src/` in https://github.com/ton-blockchain/intellij-ton/pull/692 and https://github.com/ton-blockchain/intellij-ton/pull/739
+- feat(acton): support new Acton stdlib functions and hide Acton-only symbols from contract completions in https://github.com/ton-blockchain/intellij-ton/pull/755 and https://github.com/ton-blockchain/intellij-ton/pull/727
+
+### Tolk
+
+#### Language versions
+
+- feat(tolk/1.2): support lambdas, new low-level functions and `any_address` in https://github.com/ton-blockchain/intellij-ton/pull/586, https://github.com/ton-blockchain/intellij-ton/pull/587, https://github.com/ton-blockchain/intellij-ton/pull/588
+- feat(tolk/1.3): support strings, arrays, `??`, contract definitions, `@test`, `@abi`, contract stubs and validation in https://github.com/ton-blockchain/intellij-ton/pull/650, https://github.com/ton-blockchain/intellij-ton/pull/652, https://github.com/ton-blockchain/intellij-ton/pull/654, https://github.com/ton-blockchain/intellij-ton/pull/657, https://github.com/ton-blockchain/intellij-ton/pull/659, https://github.com/ton-blockchain/intellij-ton/pull/665
+- feat(tolk/1.4): support void type parameters, lambda completion and highlighting for captured variables in https://github.com/ton-blockchain/intellij-ton/pull/709, https://github.com/ton-blockchain/intellij-ton/pull/731, https://github.com/ton-blockchain/intellij-ton/pull/732
+- feat(tolk): support dotted annotations, field annotations, new test annotations and richer `@abi.X` / `@abi.clientType<T>` completion in https://github.com/ton-blockchain/intellij-ton/pull/743 and https://github.com/ton-blockchain/intellij-ton/pull/766
+
+#### Completion, inference and editor support
+
+- feat(tolk): add better generic completion, signature help, uppercase type-name completion and array indexing inference in https://github.com/ton-blockchain/intellij-ton/pull/622, https://github.com/ton-blockchain/intellij-ton/pull/644, https://github.com/ton-blockchain/intellij-ton/pull/647, https://github.com/ton-blockchain/intellij-ton/pull/661, https://github.com/ton-blockchain/intellij-ton/pull/674
+- feat(tolk): improve default values for `Cell<T>`, maps, arrays and struct fields in completion and initialization in https://github.com/ton-blockchain/intellij-ton/pull/606, https://github.com/ton-blockchain/intellij-ton/pull/682, https://github.com/ton-blockchain/intellij-ton/pull/683, https://github.com/ton-blockchain/intellij-ton/pull/733
+- feat(tolk): add pack-prefix generation, rename it for clarity, test get-method completion, postfix `println`, contract-header build markers and wrapper generation actions in https://github.com/ton-blockchain/intellij-ton/pull/603, https://github.com/ton-blockchain/intellij-ton/pull/613, https://github.com/ton-blockchain/intellij-ton/pull/623, https://github.com/ton-blockchain/intellij-ton/pull/717, https://github.com/ton-blockchain/intellij-ton/pull/768, https://github.com/ton-blockchain/intellij-ton/pull/773
+- feat(tolk): improve hover documentation for default values, computed values, debugger values and contract header fields in https://github.com/ton-blockchain/intellij-ton/pull/663, https://github.com/ton-blockchain/intellij-ton/pull/769, https://github.com/ton-blockchain/intellij-ton/pull/783
+- feat(tolk): add inlay hints for computed enum member values and reduce noisy builtin parameter hints in https://github.com/ton-blockchain/intellij-ton/pull/648, https://github.com/ton-blockchain/intellij-ton/pull/711, https://github.com/ton-blockchain/intellij-ton/pull/765, https://github.com/ton-blockchain/intellij-ton/pull/785
+- feat(tolk): add the new disassemble view and Acton-powered disassembly actions in https://github.com/ton-blockchain/intellij-ton/pull/611 and https://github.com/ton-blockchain/intellij-ton/pull/767
+- feat(tolk): add statement/top-level movers, better Windows path handling and shortest import path selection with mappings in https://github.com/ton-blockchain/intellij-ton/pull/737, https://github.com/ton-blockchain/intellij-ton/pull/780, https://github.com/ton-blockchain/intellij-ton/pull/786
+- feat(tolk): simplify toolchain setup, auto-detect Acton's Tolk stdlib and highlight `array` as a builtin type in https://github.com/ton-blockchain/intellij-ton/pull/607 and https://github.com/ton-blockchain/intellij-ton/pull/642
+
+#### Fixes
+
+- fix(tolk): fix lambda parsing, struct initialization with `void`, tensor type parsing, nested stub access, test location parsing and alias field completion in https://github.com/ton-blockchain/intellij-ton/pull/590, https://github.com/ton-blockchain/intellij-ton/pull/662, https://github.com/ton-blockchain/intellij-ton/pull/757, https://github.com/ton-blockchain/intellij-ton/pull/778, https://github.com/ton-blockchain/intellij-ton/pull/784
+- fix(tolk): don't inspect Acton stdlib, fix stdlib test paths, don't auto-import `common.tolk`, don't add test functions to completion and don't consider `_x` parameters unused in https://github.com/ton-blockchain/intellij-ton/pull/609, https://github.com/ton-blockchain/intellij-ton/pull/612, https://github.com/ton-blockchain/intellij-ton/pull/619, https://github.com/ton-blockchain/intellij-ton/pull/627, https://github.com/ton-blockchain/intellij-ton/pull/730
+- fix(tolk): remove odd grammar keywords and avoid deprecated `createEmptyMap()` in generated defaults in https://github.com/ton-blockchain/intellij-ton/pull/723 and https://github.com/ton-blockchain/intellij-ton/pull/774
+
+### TL-B, FunC, BoC and Platform
+
+- feat(tlb): improve TL-B resolving in https://github.com/ton-blockchain/intellij-ton/pull/787
+- fix(func): restore FunC test launch and move FunC tests into the FunC module in https://github.com/ton-blockchain/intellij-ton/pull/626 and https://github.com/ton-blockchain/intellij-ton/pull/628
+- feat(boc): use Acton for BoC disassembly in https://github.com/ton-blockchain/intellij-ton/pull/618
+- feat(all): highlight TON addresses as terminal links in https://github.com/ton-blockchain/intellij-ton/pull/632
+- feat(all): remove Blueprint support and make Acton the supported project workflow in https://github.com/ton-blockchain/intellij-ton/pull/718
+- feat(all): support JetBrains 2025.2, bump the minimum platform, use RustRover as the development base platform and refresh build tooling in https://github.com/ton-blockchain/intellij-ton/pull/579, https://github.com/ton-blockchain/intellij-ton/pull/582, https://github.com/ton-blockchain/intellij-ton/pull/592, https://github.com/ton-blockchain/intellij-ton/pull/593, https://github.com/ton-blockchain/intellij-ton/pull/594, https://github.com/ton-blockchain/intellij-ton/pull/689, https://github.com/ton-blockchain/intellij-ton/pull/751, https://github.com/ton-blockchain/intellij-ton/pull/752
+- chore(all): switch to the TON icon, delete unused files, replace old organization links and remove unused links in https://github.com/ton-blockchain/intellij-ton/pull/742, https://github.com/ton-blockchain/intellij-ton/pull/604, https://github.com/ton-blockchain/intellij-ton/pull/595, https://github.com/ton-blockchain/intellij-ton/pull/702
+- fix(all): fix template configuration, language-registration exceptions, 2025.3 editor API compatibility, `.acton` invalidation, broad Acton regressions and test stability in https://github.com/ton-blockchain/intellij-ton/pull/601, https://github.com/ton-blockchain/intellij-ton/pull/620, https://github.com/ton-blockchain/intellij-ton/pull/625, https://github.com/ton-blockchain/intellij-ton/pull/629, https://github.com/ton-blockchain/intellij-ton/pull/666, https://github.com/ton-blockchain/intellij-ton/pull/726, https://github.com/ton-blockchain/intellij-ton/pull/734, https://github.com/ton-blockchain/intellij-ton/pull/750
+- chore(ci): stabilize CI, fix disk-space failures, add Zizmor checks and fix project-wide compiler, formatting and ktlint issues in https://github.com/ton-blockchain/intellij-ton/pull/600, https://github.com/ton-blockchain/intellij-ton/pull/701, https://github.com/ton-blockchain/intellij-ton/pull/760, https://github.com/ton-blockchain/intellij-ton/pull/753, https://github.com/ton-blockchain/intellij-ton/pull/728, https://github.com/ton-blockchain/intellij-ton/pull/729
+
 ## [3.2.0]
 
 v3.2.0 focuses on Tolk 1.3 support, editor improvements and compatibility updates for newer JetBrains platforms.

@@ -151,13 +151,13 @@ intellijPlatform {
         name = "TON"
         version = project.version.toString()
         description = """
-        TON Blockchain Development Plugin — a JetBrains plugin that brings first-class TON blockchain support to IntelliJ-based IDEs.
-
-        - Syntax highlighting, code completion, navigation and inspections for Tolk, FunC, Fift (including assembly), TL-B schemas and TASM (TON Assembly)
-        - Acton project scaffolding, build, test, script, deploy, debug, coverage, lint and formatting workflows
-        - Works in IntelliJ IDEA, WebStorm, PyCharm, GoLand and other JetBrains IDEs
-
-        Everything you need to develop, test and ship TON smart contracts—right from your editor.
+        <p>TON Blockchain Development Plugin — a JetBrains plugin that brings first-class TON blockchain support to IntelliJ-based IDEs.</p>
+        <ul>
+          <li>Syntax highlighting, code completion, navigation and inspections for Tolk, FunC, Fift (including assembly), TL-B schemas and TASM (TON Assembly)</li>
+          <li>Acton project scaffolding, build, test, script, deploy, debug, coverage, lint and formatting workflows</li>
+          <li>Works in IntelliJ IDEA, WebStorm, PyCharm, GoLand and other JetBrains IDEs</li>
+        </ul>
+        <p>Everything you need to develop, test and ship TON smart contracts—right from your editor.</p>
         """.trimIndent()
         changeNotes.set(
             provider {

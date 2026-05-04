@@ -165,7 +165,7 @@ internal object ActonTemplateCatalogProvider {
             ActonTemplateDefinition(
                 id = "empty",
                 description = "Minimal project skeleton",
-                supportsApp = false,
+                supportsApp = true,
                 scaffolds = listOf(
                     ActonTemplateScaffold(
                         kind = "standard",
@@ -175,6 +175,17 @@ internal object ActonTemplateCatalogProvider {
                                 id = "Empty",
                                 name = "Empty",
                                 src = "contracts/Empty.tolk",
+                            ),
+                        ),
+                    ),
+                    ActonTemplateScaffold(
+                        kind = "app",
+                        includesTypeScriptApp = true,
+                        contracts = listOf(
+                            ActonTemplateContract(
+                                id = "Empty",
+                                name = "Empty",
+                                src = "contracts/src/Empty.tolk",
                             ),
                         ),
                     ),
@@ -212,7 +223,7 @@ internal object ActonTemplateCatalogProvider {
             ActonTemplateDefinition(
                 id = "jetton",
                 description = "Jetton minter and wallet contracts",
-                supportsApp = false,
+                supportsApp = true,
                 scaffolds = listOf(
                     ActonTemplateScaffold(
                         kind = "standard",
@@ -230,12 +241,28 @@ internal object ActonTemplateCatalogProvider {
                             ),
                         ),
                     ),
+                    ActonTemplateScaffold(
+                        kind = "app",
+                        includesTypeScriptApp = true,
+                        contracts = listOf(
+                            ActonTemplateContract(
+                                id = "JettonMinter",
+                                name = "JettonMinter",
+                                src = "contracts/src/JettonMinter.tolk",
+                            ),
+                            ActonTemplateContract(
+                                id = "JettonWallet",
+                                name = "JettonWallet",
+                                src = "contracts/src/JettonWallet.tolk",
+                            ),
+                        ),
+                    ),
                 ),
             ),
             ActonTemplateDefinition(
                 id = "nft",
                 description = "NFT collection and item contracts",
-                supportsApp = false,
+                supportsApp = true,
                 scaffolds = listOf(
                     ActonTemplateScaffold(
                         kind = "standard",
@@ -250,6 +277,61 @@ internal object ActonTemplateCatalogProvider {
                                 id = "NftItem",
                                 name = "NftItem",
                                 src = "contracts/NftItem.tolk",
+                            ),
+                        ),
+                    ),
+                    ActonTemplateScaffold(
+                        kind = "app",
+                        includesTypeScriptApp = true,
+                        contracts = listOf(
+                            ActonTemplateContract(
+                                id = "NftCollection",
+                                name = "NftCollection",
+                                src = "contracts/src/NftCollection.tolk",
+                            ),
+                            ActonTemplateContract(
+                                id = "NftItem",
+                                name = "NftItem",
+                                src = "contracts/src/NftItem.tolk",
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            ActonTemplateDefinition(
+                id = "w5-extension",
+                description = "Wallet V5 extension contract and subscription example",
+                supportsApp = true,
+                scaffolds = listOf(
+                    ActonTemplateScaffold(
+                        kind = "standard",
+                        includesTypeScriptApp = false,
+                        contracts = listOf(
+                            ActonTemplateContract(
+                                id = "SimpleExtension",
+                                name = "SimpleExtension",
+                                src = "contracts/SimpleExtension.tolk",
+                            ),
+                            ActonTemplateContract(
+                                id = "WalletV5",
+                                name = "WalletV5",
+                                src = "contracts/walletv5/WalletV5.tolk",
+                            ),
+                        ),
+                    ),
+                    ActonTemplateScaffold(
+                        kind = "app",
+                        includesTypeScriptApp = true,
+                        contracts = listOf(
+                            ActonTemplateContract(
+                                id = "SimpleExtension",
+                                name = "SimpleExtension",
+                                src = "contracts/src/SimpleExtension.tolk",
+                            ),
+                            ActonTemplateContract(
+                                id = "WalletV5",
+                                name = "WalletV5",
+                                src = "contracts/src/walletv5/WalletV5.tolk",
                             ),
                         ),
                     ),

@@ -1,6 +1,5 @@
 package org.ton.intellij.tolk.ide.fixes
 
-import com.intellij.codeInsight.intention.HighPriorityAction
 import com.intellij.codeInsight.template.TemplateManager
 import com.intellij.codeInsight.template.impl.ConstantNode
 import com.intellij.codeInspection.LocalQuickFixAndIntentionActionOnPsiElement

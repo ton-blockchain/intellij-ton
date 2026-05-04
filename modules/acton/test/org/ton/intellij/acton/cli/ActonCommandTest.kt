@@ -27,4 +27,15 @@ class ActonCommandTest {
             ActonCommand.from("init", "--create-dapp"),
         )
     }
+
+    @Test
+    fun `test command includes full backtrace flag`() {
+        assertEquals(
+            listOf("--reporter", "console,teamcity", "--backtrace", "full", "."),
+            ActonCommand.Test(
+                target = ".",
+                backtraceFull = true,
+            ).getArguments(),
+        )
+    }
 }

@@ -72,6 +72,7 @@ sealed class ActonCommand(val name: String) {
         var clearCache: Boolean = false,
         var useColors: Boolean = false,
         var ui: Boolean = false,
+        var backtraceFull: Boolean = false,
         var debug: Boolean = false,
         var debugPort: String = "",
     ) : ActonCommand("test") {
@@ -86,6 +87,10 @@ sealed class ActonCommand(val name: String) {
                 add("always")
             }
             if (ui) add("--ui")
+            if (backtraceFull) {
+                add("--backtrace")
+                add("full")
+            }
             if (debug) {
                 add("--debug")
                 if (debugPort.isNotBlank()) {

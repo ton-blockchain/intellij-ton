@@ -56,6 +56,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
     private val testFunctionNameField = JBTextField()
     private val testClearCacheCheckBox = JBCheckBox("Clear compilation cache before testing", false)
     private val testUiCheckBox = JBCheckBox("Open browser UI", false)
+    private val testBacktraceFullCheckBox = JBCheckBox("Run tests with full execution backtrace", false)
     private var testMode: ActonCommand.Test.TestMode = ActonCommand.Test.TestMode.DIRECTORY
 
     // Run specific
@@ -227,6 +228,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         testFunctionNameField.text = configuration.testFunctionName
         testClearCacheCheckBox.isSelected = configuration.testClearCache
         testUiCheckBox.isSelected = configuration.testUi
+        testBacktraceFullCheckBox.isSelected = configuration.testBacktraceFull
 
         runScriptNameField.text = configuration.runScriptName
 
@@ -264,6 +266,7 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
         configuration.testFunctionName = testFunctionNameField.text.trim()
         configuration.testClearCache = testClearCacheCheckBox.isSelected
         configuration.testUi = testUiCheckBox.isSelected
+        configuration.testBacktraceFull = testBacktraceFullCheckBox.isSelected
 
         configuration.runScriptName = runScriptNameField.text.trim()
 
@@ -337,6 +340,10 @@ class ActonCommandConfigurationEditor(private val project: Project) : SettingsEd
 
                 row {
                     cell(testUiCheckBox)
+                }.topGap(TopGap.NONE)
+
+                row {
+                    cell(testBacktraceFullCheckBox)
                 }.topGap(TopGap.NONE)
             }.topGap(TopGap.NONE)
 

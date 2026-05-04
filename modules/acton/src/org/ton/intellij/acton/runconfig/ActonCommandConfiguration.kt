@@ -42,6 +42,7 @@ class ActonCommandConfiguration(project: Project, factory: ConfigurationFactory,
     var testFunctionName: String = ""
     var testClearCache: Boolean = false
     var testUi: Boolean = false
+    var testBacktraceFull: Boolean = false
 
     // Run command specific settings (Acton.toml scripts)
     var runScriptName: String = ""
@@ -58,7 +59,15 @@ class ActonCommandConfiguration(project: Project, factory: ConfigurationFactory,
             scriptBroadcastNet, project.actonSettings.explorer.id, scriptDebug, scriptDebugPort,
         )
 
-        "test" -> ActonCommand.Test(testMode, testTarget, testFunctionName, testClearCache, true, testUi)
+        "test" -> ActonCommand.Test(
+            testMode,
+            testTarget,
+            testFunctionName,
+            testClearCache,
+            true,
+            testUi,
+            testBacktraceFull,
+        )
         "init" -> ActonCommand.Init()
         "run" -> ActonCommand.Run(runScriptName)
         "retrace" -> ActonCommand.Retrace(retraceTransactionHash, retraceNetwork, retraceContractId)
@@ -99,6 +108,7 @@ class ActonCommandConfiguration(project: Project, factory: ConfigurationFactory,
         element.setAttribute("testFunctionName", testFunctionName)
         element.setAttribute("testClearCache", testClearCache.toString())
         element.setAttribute("testUi", testUi.toString())
+        element.setAttribute("testBacktraceFull", testBacktraceFull.toString())
 
         // Run settings
         element.setAttribute("runScriptName", runScriptName)
@@ -141,6 +151,7 @@ class ActonCommandConfiguration(project: Project, factory: ConfigurationFactory,
         testFunctionName = element.getAttributeValue("testFunctionName") ?: ""
         testClearCache = element.getAttributeValue("testClearCache")?.toBoolean() ?: false
         testUi = element.getAttributeValue("testUi")?.toBoolean() ?: false
+        testBacktraceFull = element.getAttributeValue("testBacktraceFull")?.toBoolean() ?: false
 
         // Run settings
         runScriptName = element.getAttributeValue("runScriptName") ?: ""
@@ -178,6 +189,7 @@ class ActonCommandConfiguration(project: Project, factory: ConfigurationFactory,
         testFunctionName = other.testFunctionName
         testClearCache = other.testClearCache
         testUi = other.testUi
+        testBacktraceFull = other.testBacktraceFull
 
         runScriptName = other.runScriptName
 

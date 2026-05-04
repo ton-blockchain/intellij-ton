@@ -123,16 +123,16 @@ internal class ActonProjectGeneratorPeer(
                 comboBox(templateOptions)
                     .bindItem(template)
                     .align(AlignX.FILL)
-            }.bottomGap(BottomGap.NONE)
+            }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
             addTypeScriptAppRow = row {
-                checkBox("Add TypeScript app")
+                checkBox("Add TypeScript dApp")
                     .bindSelected(addTypeScriptApp)
-                    .comment("Include the template's TypeScript app scaffold")
+                    .comment("Include the template's TypeScript dApp scaffold")
             }
             row(environmentVariables.label) {
                 cell(environmentVariables)
                     .align(AlignX.FILL)
-            }.topGap(TopGap.NONE).bottomGap(BottomGap.NONE)
+            }.topGap(TopGap.SMALL).bottomGap(BottomGap.NONE)
             row {
                 cell(createAdvancedOptionsPanel())
                     .align(AlignX.FILL)

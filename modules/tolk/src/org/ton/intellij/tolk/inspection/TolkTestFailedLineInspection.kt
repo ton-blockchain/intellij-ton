@@ -9,8 +9,6 @@ import com.intellij.execution.TestStateStorage
 import com.intellij.execution.actions.ConfigurationContext
 import com.intellij.execution.executors.DefaultDebugExecutor
 import com.intellij.execution.runners.ExecutionUtil
-import com.intellij.execution.testframework.TestIconMapper
-import com.intellij.execution.testframework.sm.runner.states.TestStateInfo
 import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Iconable
@@ -24,13 +22,13 @@ import org.ton.intellij.acton.runconfig.ActonTestFailureStateService
 import org.ton.intellij.acton.runconfig.ComparisonFailure
 import org.ton.intellij.acton.runconfig.actonTestFailureState
 import org.ton.intellij.tolk.ide.linemarker.TolkTestLineMarkerProvider
+import org.ton.intellij.tolk.ide.test.TolkTestStateMagnitude
 import org.ton.intellij.tolk.ide.test.configuration.TolkTestLocator
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkVisitor
 import org.ton.intellij.tolk.psi.impl.isTestFunction
 import javax.swing.Icon
 
-@Suppress("UnstableApiUsage")
 class TolkTestFailedLineInspection : TolkInspectionBase() {
     override fun buildTolkVisitor(holder: ProblemsHolder, session: LocalInspectionToolSession): TolkVisitor =
         object : TolkVisitor() {
@@ -40,13 +38,8 @@ class TolkTestFailedLineInspection : TolkInspectionBase() {
                 if (!function.isTestFunction()) return
 
                 val state = TolkTestLineMarkerProvider.getTestState(function)
-                val magnitude = state?.let { TestIconMapper.getMagnitude(it.magnitude) } ?: return
-
-                if (magnitude != TestStateInfo.Magnitude.ERROR_INDEX &&
-                    magnitude != TestStateInfo.Magnitude.FAILED_INDEX
-                ) {
-                    return
-                }
+                    ?.takeIf(TolkTestStateMagnitude::isFailure)
+                    ?: return
 
                 val locationUrl = TolkTestLocator.getTestUrl(function)
                 val failedElement = findFailedElement(function, state, locationUrl, testFailureState)

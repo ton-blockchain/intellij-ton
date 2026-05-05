@@ -3,11 +3,10 @@ package org.ton.intellij.tolk.ide.linemarker
 import com.intellij.execution.TestStateStorage
 import com.intellij.execution.lineMarker.ExecutorAction
 import com.intellij.execution.lineMarker.RunLineMarkerContributor
-import com.intellij.execution.testframework.TestIconMapper
-import com.intellij.execution.testframework.sm.runner.states.TestStateInfo
 import com.intellij.icons.AllIcons
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.elementType
+import org.ton.intellij.tolk.ide.test.TolkTestStateMagnitude
 import org.ton.intellij.tolk.ide.test.configuration.TolkTestLocator
 import org.ton.intellij.tolk.psi.TolkElementTypes
 import org.ton.intellij.tolk.psi.TolkFunction
@@ -22,17 +21,14 @@ class TolkTestLineMarkerProvider : RunLineMarkerContributor() {
 
         val parent = element.parent
         if (parent is TolkFunction && parent.isTestFunction()) {
-            val magnitude = getTestState(parent)
-                ?.let { TestIconMapper.getMagnitude(it.magnitude) }
+            val state = getTestState(parent)
 
-            val icon = when (magnitude) {
-                TestStateInfo.Magnitude.PASSED_INDEX,
-                TestStateInfo.Magnitude.COMPLETE_INDEX,
-                -> AllIcons.RunConfigurations.TestState.Green2
+            val icon = when {
+                state?.let(TolkTestStateMagnitude::isPassed) == true ->
+                    AllIcons.RunConfigurations.TestState.Green2
 
-                TestStateInfo.Magnitude.ERROR_INDEX,
-                TestStateInfo.Magnitude.FAILED_INDEX,
-                -> AllIcons.RunConfigurations.TestState.Red2
+                state?.let(TolkTestStateMagnitude::isFailure) == true ->
+                    AllIcons.RunConfigurations.TestState.Red2
 
                 else -> AllIcons.RunConfigurations.TestState.Run
             }

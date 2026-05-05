@@ -12,7 +12,6 @@ import com.intellij.openapi.editor.event.EditorMouseEvent
 import com.intellij.openapi.editor.event.EditorMouseMotionListener
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.openapi.editor.ex.EditorEx
-import com.intellij.openapi.editor.ex.EditorGutterFreePainterAreaState
 import com.intellij.openapi.editor.markup.ActiveGutterRenderer
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
@@ -61,7 +60,6 @@ class TolkAssemblyPreviewEditor(
         setVerticalSplit(false)
         (assemblyTextEditor.editor as? EditorEx)?.let { assemblyEditor ->
             assemblyEditor.setViewer(true)
-            assemblyEditor.gutterComponentEx.setRightFreePaintersAreaState(EditorGutterFreePainterAreaState.SHOW)
             assemblyEditor.gutterComponentEx.addMouseListener(AssemblyGutterMouseListener())
         }
         val sourceConnectionMouseHandler = SourceConnectionMouseHandler()

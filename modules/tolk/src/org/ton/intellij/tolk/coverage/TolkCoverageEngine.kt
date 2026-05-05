@@ -10,7 +10,6 @@ import com.intellij.coverage.view.DirectoryCoverageViewExtension
 import com.intellij.coverage.view.PercentageCoverageColumnInfo
 import com.intellij.execution.configurations.RunConfigurationBase
 import com.intellij.execution.configurations.coverage.CoverageEnabledConfiguration
-import com.intellij.execution.testframework.AbstractTestProxy
 import com.intellij.ide.util.treeView.AbstractTreeNode
 import com.intellij.ide.util.treeView.AlphaComparator
 import com.intellij.ide.util.treeView.NodeDescriptor
@@ -19,7 +18,6 @@ import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.Messages
@@ -27,7 +25,6 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.rt.coverage.data.ClassData
 import com.intellij.rt.coverage.data.LineData
@@ -77,19 +74,8 @@ class TolkCoverageEngine : CoverageEngine() {
     override fun createCoverageEnabledConfiguration(conf: RunConfigurationBase<*>): CoverageEnabledConfiguration =
         TolkCoverageEnabledConfiguration(conf)
 
-    override fun getQualifiedName(outputFile: File, sourceFile: PsiFile): String? = getQName(sourceFile)
-
-    override fun includeUntouchedFileInCoverage(
-        qualifiedName: String,
-        outputFile: File,
-        sourceFile: PsiFile,
-        suite: CoverageSuitesBundle,
-    ): Boolean = false
-
     override fun coverageProjectViewStatisticsApplicableTo(fileOrDir: VirtualFile): Boolean =
         !fileOrDir.isDirectory && fileOrDir.fileType == TolkFileType
-
-    override fun getTestMethodName(element: PsiElement, testProxy: AbstractTestProxy): String? = null
 
     override fun getCoverageAnnotator(project: Project): CoverageAnnotator = TolkCoverageAnnotator.getInstance(project)
 
@@ -129,16 +115,6 @@ class TolkCoverageEngine : CoverageEngine() {
                     }
                 }
         }
-
-    override fun recompileProjectAndRerunAction(
-        module: Module,
-        suite: CoverageSuitesBundle,
-        chooseSuiteAction: Runnable,
-    ): Boolean = false
-
-    override fun canHavePerTestCoverage(conf: RunConfigurationBase<*>): Boolean = false
-
-    override fun findTestsByNames(testNames: Array<out String>, project: Project): List<PsiElement> = emptyList()
 
     override fun isReportGenerationAvailable(
         project: Project,
@@ -224,8 +200,6 @@ class TolkCoverageEngine : CoverageEngine() {
         }
         return LcovCoverageReport.FileReport(lineHitsList, branchHits)
     }
-
-    override fun collectSrcLinesForUntouchedFile(classFile: File, suite: CoverageSuitesBundle): List<Int>? = null
 
     override fun createCoverageSuite(
         name: String,

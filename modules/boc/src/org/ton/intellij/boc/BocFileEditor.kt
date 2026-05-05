@@ -12,7 +12,7 @@ import com.intellij.ui.tabs.JBTabs
 import com.intellij.ui.tabs.JBTabsFactory
 import com.intellij.ui.tabs.JBTabsPosition
 import com.intellij.ui.tabs.TabInfo
-import com.intellij.util.ui.JBInsets
+import com.intellij.util.ui.JBUI
 import java.beans.PropertyChangeListener
 import javax.swing.JComponent
 
@@ -24,7 +24,7 @@ class BocFileEditor(project: Project, private val file: VirtualFile) : FileEdito
     private val base64Panel = BocBase64Panel(project, file) { onInstalled() }
 
     private val tabs: JBTabs = JBTabsFactory.createEditorTabs(project, this).apply {
-        presentation.setInnerInsets(JBInsets.emptyInsets())
+        presentation.setInnerInsets(JBUI.emptyInsets())
         presentation.setTabsPosition(JBTabsPosition.bottom)
     }
 

@@ -4,10 +4,8 @@ import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.vfs.VirtualFileVisitor
 import org.jetbrains.annotations.TestOnly
 
 private val TOML_PLUGIN_ID: PluginId = PluginId.getId("org.toml.lang")
@@ -18,15 +16,7 @@ private var tomlPluginInstalledOverride: Boolean? = null
 fun isTomlPluginInstalled(): Boolean =
     tomlPluginInstalledOverride ?: (PluginManagerCore.getPlugin(TOML_PLUGIN_ID)?.isEnabled == true)
 
-fun hasActonToml(project: Project): Boolean {
-    val contentRoots = ProjectRootManager.getInstance(project).contentRoots
-    for (root in contentRoots) {
-        if (containsActonToml(root)) return true
-    }
-
-    val projectDir = project.guessProjectDir()
-    return projectDir != null && projectDir !in contentRoots && containsActonToml(projectDir)
-}
+fun hasActonToml(project: Project): Boolean = project.guessProjectDir()?.findChild("Acton.toml")?.isDirectory == false
 
 fun hasNearestActonToml(project: Project, from: VirtualFile): Boolean = findNearestActonToml(project, from) != null
 
@@ -49,26 +39,7 @@ private fun findSearchRoot(project: Project, startDir: VirtualFile): VirtualFile
         return projectDir
     }
 
-    return ProjectRootManager.getInstance(project).fileIndex.getContentRootForFile(startDir)
-}
-
-private fun containsActonToml(root: VirtualFile): Boolean {
-    if (!root.isDirectory) return root.name == "Acton.toml"
-
-    var found = false
-    VfsUtilCore.visitChildrenRecursively(
-        root,
-        object : VirtualFileVisitor<Unit>() {
-            override fun visitFile(file: VirtualFile): Boolean {
-                if (file.name == "Acton.toml" && !file.isDirectory) {
-                    found = true
-                    return false
-                }
-                return !found
-            }
-        },
-    )
-    return found
+    return com.intellij.openapi.roots.ProjectRootManager.getInstance(project).fileIndex.getContentRootForFile(startDir)
 }
 
 @TestOnly

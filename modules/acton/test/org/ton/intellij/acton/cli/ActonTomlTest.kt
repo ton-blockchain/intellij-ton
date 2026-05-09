@@ -83,7 +83,7 @@ class ActonTomlTest : BasePlatformTestCase() {
         assertNull(ActonToml.find(project))
     }
 
-    fun testHasActonTomlFindsNestedActonProject() {
+    fun testHasActonTomlChecksOnlyProjectRoot() {
         myFixture.addFileToProject(
             "packages/app/Acton.toml",
             """
@@ -92,6 +92,6 @@ class ActonTomlTest : BasePlatformTestCase() {
             """.trimIndent(),
         )
 
-        assertTrue(hasActonToml(project))
+        assertFalse(hasActonToml(project))
     }
 }

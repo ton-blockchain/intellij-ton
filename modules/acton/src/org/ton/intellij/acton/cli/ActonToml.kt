@@ -13,6 +13,7 @@ import com.intellij.psi.util.PsiTreeUtil
 import org.toml.lang.psi.TomlFile
 import org.toml.lang.psi.TomlKeySegment
 import org.toml.lang.psi.TomlTable
+import org.ton.intellij.acton.ide.isTomlPluginInstalled
 import java.nio.file.Path
 
 class ActonToml(val virtualFile: VirtualFile, val project: Project) {
@@ -168,16 +169,19 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
          * File-based features should use [find] with a [VirtualFile] so nested Acton projects resolve their nearest
          * configuration instead of the project-root one.
          */
-        fun find(project: Project): ActonToml? = CachedValuesManager.getManager(project).getCachedValue(project) {
-            val projectDir = project.guessProjectDir()
-            val virtualFile = projectDir?.findChild(ACTON_TOML)?.takeUnless { it.isDirectory }
+        fun find(project: Project): ActonToml? {
+            if (!isTomlPluginInstalled()) return null
+            return CachedValuesManager.getManager(project).getCachedValue(project) {
+                val projectDir = project.guessProjectDir()
+                val virtualFile = projectDir?.findChild(ACTON_TOML)?.takeUnless { it.isDirectory }
 
-            val actonToml = virtualFile?.let { ActonToml(it, project) }
-            create(
-                actonToml,
-                com.intellij.openapi.vfs.VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS,
-                PsiModificationTracker.MODIFICATION_COUNT,
-            )
+                val actonToml = virtualFile?.let { ActonToml(it, project) }
+                create(
+                    actonToml,
+                    com.intellij.openapi.vfs.VirtualFileManager.VFS_STRUCTURE_MODIFICATIONS,
+                    PsiModificationTracker.MODIFICATION_COUNT,
+                )
+            }
         }
 
         /**
@@ -189,6 +193,7 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
          * the whole project scope.
          */
         fun find(project: Project, from: VirtualFile): ActonToml? {
+            if (!isTomlPluginInstalled()) return null
             val startDir = if (from.isDirectory) from else from.parent ?: return null
             val stopDir = findSearchRoot(project, startDir) ?: return null
 

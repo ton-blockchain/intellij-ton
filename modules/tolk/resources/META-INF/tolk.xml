@@ -55,7 +55,6 @@
         <navbar implementation="org.ton.intellij.tolk.ide.structure.TolkNavBarModelExtension" order="first"/>
         <psi.referenceContributor language="Tolk"
                                   implementation="org.ton.intellij.tolk.acton.TolkStringArgumentReferenceContributor"/>
-        <referencesSearch implementation="org.ton.intellij.tolk.acton.TolkActonReferencesSearch"/>
         <!-- endregion Navigation -->
 
         <!-- region Imports -->

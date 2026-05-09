@@ -1,8 +1,15 @@
 package org.ton.intellij.acton.cli
 
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import org.ton.intellij.acton.ide.hasActonToml
+import org.ton.intellij.acton.ide.setTomlPluginInstalledOverride
 
 class ActonTomlTest : BasePlatformTestCase() {
+    override fun tearDown() {
+        setTomlPluginInstalledOverride(null)
+        super.tearDown()
+    }
+
     fun testFindProjectUsesProjectRootActonToml() {
         myFixture.addFileToProject(
             "Acton.toml",
@@ -60,5 +67,31 @@ class ActonTomlTest : BasePlatformTestCase() {
         )
 
         assertNull(ActonToml.find(project))
+    }
+
+    fun testFindReturnsNullWhenTomlPluginIsUnavailable() {
+        myFixture.addFileToProject(
+            "Acton.toml",
+            """
+            [contracts.counter]
+            src = "contracts/counter.tolk"
+            """.trimIndent(),
+        )
+
+        setTomlPluginInstalledOverride(false)
+
+        assertNull(ActonToml.find(project))
+    }
+
+    fun testHasActonTomlChecksOnlyProjectRoot() {
+        myFixture.addFileToProject(
+            "packages/app/Acton.toml",
+            """
+                [contracts.app]
+                src = "contracts/app.tolk"
+            """.trimIndent(),
+        )
+
+        assertFalse(hasActonToml(project))
     }
 }

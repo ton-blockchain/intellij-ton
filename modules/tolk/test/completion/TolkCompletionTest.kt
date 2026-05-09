@@ -44,6 +44,19 @@ class TolkCompletionTest : TolkCompletionTestBase() {
         render = { lookupString + presentation.tailText },
     )
 
+    fun `test contract field completion does not insert trailing comma`() = doSingleCompletion(
+        """
+        contract SomeName {
+            auth/*caret*/
+        }
+        """,
+        """
+        contract SomeName {
+            author: /*caret*/
+        }
+        """,
+    )
+
     fun `test local variable`() = doSingleCompletion(
         """
         fun foo(quux: int) { qu/*caret*/ }

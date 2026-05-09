@@ -62,7 +62,7 @@ object TolkContractFieldCompletionProvider : TolkCompletionProvider() {
                         context.editor.caretModel.moveToOffset(offset + 2)
 
                         val templateManager = TemplateManager.getInstance(context.project)
-                        val template = templateManager.createTemplate("", "", "${'$'}VALUE$,")
+                        val template = templateManager.createTemplate("", "", "${'$'}VALUE$")
                         template.addVariable("VALUE", ConstantNode(""), true)
                         templateManager.startTemplate(context.editor, template)
 

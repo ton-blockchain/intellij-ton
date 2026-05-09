@@ -2,6 +2,12 @@
     <depends>org.toml.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <psi.referenceContributor language="TOML"
+                                  implementation="org.ton.intellij.acton.toml.ActonTomlReferenceContributor"/>
+        <lang.findUsagesProvider language="TOML"
+                                 implementationClass="org.ton.intellij.acton.toml.ActonTomlFindUsagesProvider"
+                                 order="first"/>
+        <useScopeEnlarger implementation="org.ton.intellij.acton.toml.ActonTomlUseScopeEnlarger"/>
         <runLineMarkerContributor language="TOML"
                                 implementationClass="org.ton.intellij.acton.toml.ActonTomlLineMarkerProvider"/>
         <completion.contributor language="TOML"
@@ -9,6 +15,11 @@
         <lang.documentationProvider language="TOML"
                                 implementationClass="org.ton.intellij.acton.toml.ActonTomlDocumentationProvider"/>
         <multiHostInjector implementation="org.ton.intellij.acton.toml.ActonTomlScriptCommandInjector"/>
+        <referencesSearch implementation="org.ton.intellij.tolk.acton.TolkActonReferencesSearch"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="JavaScript">
+        <JsonSchema.ProviderFactory implementation="org.ton.intellij.acton.toml.ActonTomlJsonSchemaProviderFactory"/>
     </extensions>
 
     <actions>

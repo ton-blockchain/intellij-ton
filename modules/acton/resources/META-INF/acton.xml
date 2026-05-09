@@ -28,21 +28,16 @@
                              id="acton"
                              displayName="Acton"/>
 
-        <psi.referenceContributor language="TOML"
-                                  implementation="org.ton.intellij.acton.toml.ActonTomlReferenceContributor"/>
-        <lang.findUsagesProvider language="TOML"
-                                 implementationClass="org.ton.intellij.acton.toml.ActonTomlFindUsagesProvider"
-                                 order="first"/>
-        <useScopeEnlarger implementation="org.ton.intellij.acton.toml.ActonTomlUseScopeEnlarger"/>
-
         <notificationGroup id="Acton Update" displayType="BALLOON"/>
         <notificationGroup id="Acton Setup" displayType="BALLOON"/>
         <notificationGroup id="Acton Formatter" displayType="BALLOON"/>
         <postStartupActivity implementation="org.ton.intellij.acton.ide.ActonUpdateActivity"/>
         <postStartupActivity implementation="org.ton.intellij.acton.ide.ActonSetupNotificationStartupActivity"/>
+        <postStartupActivity implementation="org.ton.intellij.acton.ide.ActonTomlPluginNotificationStartupActivity"/>
 
         <consoleFilterProvider implementation="org.ton.intellij.acton.ide.ActonConsoleFilterProvider"/>
         <editorNotificationProvider implementation="org.ton.intellij.acton.ide.ActonSetupNotificationProvider"/>
+        <editorNotificationProvider implementation="org.ton.intellij.acton.ide.ActonTomlPluginNotificationProvider"/>
 
         <toolWindow id="Acton Wallets"
                     secondary="true"
@@ -57,9 +52,5 @@
                              id="acton.external.linter"
                              bundle="messages.ActonBundle"
                              key="settings.acton.external.linter.title.name"/>
-    </extensions>
-
-    <extensions defaultExtensionNs="JavaScript">
-        <JsonSchema.ProviderFactory implementation="org.ton.intellij.acton.toml.ActonTomlJsonSchemaProviderFactory"/>
     </extensions>
 </idea-plugin>

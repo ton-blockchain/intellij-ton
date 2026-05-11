@@ -45,60 +45,62 @@ abstract class TolkNamedElementImpl<T : TolkNamedStub<*>> :
 
     override fun toString(): String = "${greenStub?.stubType ?: node.elementType}:$name"
 
-    override fun getPresentation(): ItemPresentation? = object : ItemPresentation {
-        override fun getLocationString(): String = containingFile.name
+    override fun getPresentation(): ItemPresentation? = TolkNamedElementPresentation(this)
+}
 
-        override fun getPresentableText(): String? = when (this@TolkNamedElementImpl) {
-            is TolkFunction -> buildString {
-                if (hasReceiver) {
-                    append(receiverTy.render())
-                    append(".")
-                }
-                append(name)
-                append("(")
-                var separator = ""
-                parameterList?.parameterList?.forEach { parameter ->
-                    append(separator)
-                    append((parameter.type ?: TolkTy.Unknown).render())
-                    separator = ", "
-                }
-                (type as? TolkTyFunction)?.returnType?.let {
-                    append("): ")
-                    append(it.render())
-                } ?: append("): void")
+private class TolkNamedElementPresentation(private val element: TolkNamedElementImpl<*>) : ItemPresentation {
+    override fun getLocationString(): String = element.containingFile.name
+
+    override fun getPresentableText(): String? = when (element) {
+        is TolkFunction -> buildString {
+            if (element.hasReceiver) {
+                append(element.receiverTy.render())
+                append(".")
             }
-
-            is TolkConstVar -> buildString {
-                append(name)
-                append(": ")
-                append((type ?: TolkTy.Unknown).render())
+            append(element.name)
+            append("(")
+            var separator = ""
+            element.parameterList?.parameterList?.forEach { parameter ->
+                append(separator)
+                append((parameter.type ?: TolkTy.Unknown).render())
+                separator = ", "
             }
-
-            is TolkGlobalVar -> buildString {
-                append(name)
-                append(": ")
-                append((type ?: TolkTy.Unknown).render())
-            }
-
-            is TolkStructField -> buildString {
-                append(name)
-                append(": ")
-                append((type ?: TolkTy.Unknown).render())
-            }
-
-            is TolkEnumMember -> buildString {
-                append(name)
-
-                if (expression != null) {
-                    append(" = ")
-                    append(expression?.text)
-                }
-            }
-
-            is TolkTypeDef -> name
-            else -> name
+            (element.type as? TolkTyFunction)?.returnType?.let {
+                append("): ")
+                append(it.render())
+            } ?: append("): void")
         }
 
-        override fun getIcon(unused: Boolean): Icon? = this@TolkNamedElementImpl.getIcon(0)
+        is TolkConstVar -> buildString {
+            append(element.name)
+            append(": ")
+            append((element.type ?: TolkTy.Unknown).render())
+        }
+
+        is TolkGlobalVar -> buildString {
+            append(element.name)
+            append(": ")
+            append((element.type ?: TolkTy.Unknown).render())
+        }
+
+        is TolkStructField -> buildString {
+            append(element.name)
+            append(": ")
+            append((element.type ?: TolkTy.Unknown).render())
+        }
+
+        is TolkEnumMember -> buildString {
+            append(element.name)
+
+            if (element.expression != null) {
+                append(" = ")
+                append(element.expression?.text)
+            }
+        }
+
+        is TolkTypeDef -> element.name
+        else -> element.name
     }
+
+    override fun getIcon(unused: Boolean): Icon? = element.getIcon(0)
 }

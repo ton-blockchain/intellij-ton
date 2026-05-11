@@ -18,5 +18,6 @@ class TolkActonReferencesSearch : QueryExecutorBase<PsiReference, ReferencesSear
 
         val optimizer = queryParameters.optimizer
         optimizer.searchWord(name, queryParameters.effectiveSearchScope, UsageSearchContext.IN_STRINGS, true, element)
+        optimizer.searchWord(name, queryParameters.effectiveSearchScope, UsageSearchContext.IN_CODE, true, element)
     }
 }

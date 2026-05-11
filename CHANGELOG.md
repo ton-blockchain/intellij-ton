@@ -1,5 +1,26 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [4.1.0]
+
+v4.1.0 is a smaller follow-up to the Acton-focused v4.0.0 release. It improves navigation and editor polish around
+Acton-backed Tolk projects, fixes completion in TypeScript app scaffolds, and keeps the plugin compatible with newer
+JetBrains platform APIs.
+
+### Tolk
+
+- feat(tolk): add navigation from a Tolk contract header name to the matching `[contracts.<id>]` entry in Acton.toml in https://github.com/ton-blockchain/intellij-ton/pull/797
+- fix(tolk): don't add a comma when completing the last field in a contract header in https://github.com/ton-blockchain/intellij-ton/pull/794
+
+### Acton
+
+- feat(acton): detect when the TOML plugin is disabled and show an Acton.toml notification instead of silently disabling Acton.toml support in https://github.com/ton-blockchain/intellij-ton/pull/795
+- fix(acton): keep `.acton` helper symbols available in TypeScript app scaffold scripts and tests while still hiding them from contract-source completion in https://github.com/ton-blockchain/intellij-ton/pull/796
+
+### Platform
+
+- chore(all): migrate away from internal JetBrains APIs for newer platform compatibility in https://github.com/ton-blockchain/intellij-ton/pull/793
+- fix(tolk): avoid synthetic presentation class loading failures during navigation and hover documentation
+
 ## [4.0.0]
 
 v4.0.0 collects the work since v3.0.0 and makes Acton the main TON development workflow in the IDE.

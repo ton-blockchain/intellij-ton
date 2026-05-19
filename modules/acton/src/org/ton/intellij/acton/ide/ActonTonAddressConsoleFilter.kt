@@ -60,7 +60,7 @@ class ActonTonAddressConsoleFilter : Filter {
 
     companion object {
         private val rawPattern = Regex("""\b-?[0-9]:[0-9a-fA-F]{64}\b""")
-        private val userFriendlyPattern = Regex("""\b[EfUk0][Qf][a-zA-Z0-9+_-]{46}\b""")
+        private val userFriendlyPattern = Regex("""\b[EfUk0][Qf][a-zA-Z0-9+_-]{46}(?![A-Za-z0-9+_-])""")
     }
 }
 

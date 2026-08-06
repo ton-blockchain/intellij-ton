@@ -36,6 +36,31 @@ class TolkDocumentationProviderTest : TolkTestBase() {
     fun testPrimitiveTypesDocumentation() = doTest("primitive_types")
     fun testDocCommentsDocumentation() = doTest("doc_comments")
 
+    fun testFileDocumentation() {
+        val file = myFixture.configureByText(
+            "module.tolk",
+            """
+            /// # Module overview
+            ///
+            /// This documentation belongs to the file.
+
+            import "other"
+
+            /// This documentation belongs to the function.
+            fun main() {}
+            """.trimIndent(),
+        ) as TolkFile
+
+        assertNotNull(file.doc)
+        assertSame(file, file.doc?.owner)
+
+        val documentation = provider.generateDoc(file, null)
+        assertNotNull(documentation)
+        assertTrue(documentation!!.contains("<h1> Module overview</h1>"))
+        assertTrue(documentation.contains("This documentation belongs to the file."))
+        assertFalse(documentation.contains("This documentation belongs to the function."))
+    }
+
     fun testContractFieldDocumentation() {
         val file = myFixture.configureByText(
             "contract_fields.tolk",

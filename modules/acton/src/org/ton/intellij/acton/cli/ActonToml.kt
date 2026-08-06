@@ -67,6 +67,32 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
 
     fun getContractElements(): List<TomlKeySegment> = getContracts().map { it.element }
 
+    fun getWrapperOutputDir(language: String): String? {
+        val file = psiFile ?: return null
+        val outputDirs = CachedValuesManager.getCachedValue(file) {
+            val result = PsiTreeUtil.getChildrenOfType(file, TomlTable::class.java)
+                ?.mapNotNull { table ->
+                    val segments = table.header.key?.segments ?: return@mapNotNull null
+                    if (segments.size != 2 || segments[0].name != "wrappers") return@mapNotNull null
+
+                    val outputDir = table.entries
+                        .find { it.key.text == "output-dir" }
+                        ?.value
+                        ?.text
+                        ?.removeSurrounding("\"")
+                        ?.removeSurrounding("'")
+
+                    segments[1].name to outputDir
+                }
+                ?.toMap()
+                ?: emptyMap()
+
+            create(result, file)
+        }
+
+        return outputDirs[language]
+    }
+
     data class ContractInfo(
         val id: String,
         val sourcePath: String?,
@@ -168,7 +194,7 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
             } ?: emptyList()
     }
 
-    private fun resolveConfiguredPath(path: String): String {
+    internal fun resolveConfiguredPath(path: String): String {
         val normalized = Path.of(path)
         val resolved = if (normalized.isAbsolute) normalized else workingDir.resolve(normalized)
         return normalizePath(resolved.normalize().toString())

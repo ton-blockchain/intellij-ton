@@ -94,4 +94,23 @@ class ActonTomlTest : BasePlatformTestCase() {
 
         assertFalse(hasActonToml(project))
     }
+
+    fun testReadsWrapperOutputDirectory() {
+        myFixture.addFileToProject(
+            "Acton.toml",
+            """
+                [wrappers.tolk]
+                output-dir = "contracts/wrappers"
+
+                [wrappers.typescript]
+                output-dir = 'wrappers-ts'
+            """.trimIndent(),
+        )
+
+        val actonToml = ActonToml.find(project)
+
+        assertNotNull(actonToml)
+        assertEquals("contracts/wrappers", actonToml!!.getWrapperOutputDir("tolk"))
+        assertEquals("wrappers-ts", actonToml.getWrapperOutputDir("typescript"))
+    }
 }

@@ -880,6 +880,12 @@ private val CONTRACT_FIELD_DOCS = mapOf(
         "Defines internal messages accepted by this contract. Typically this is the same union type used for lazy match parsing.",
     "incomingExternal" to
         "Defines the expected slice shape when the contract has onExternalMessage. Typically this is the struct or union used with lazy fromSlice.",
+    "outgoingMessages" to
+        "Defines outgoing internal messages created by this contract. This is inferred from createMessage calls unless specified explicitly.",
+    "emittedEvents" to
+        "Defines external events emitted by this contract. This is inferred from createExternalLogMessage calls unless specified explicitly.",
+    "thrownErrors" to
+        "Defines exception codes the contract may throw. The value must be an enum type and is inferred from throw and assert expressions unless specified explicitly.",
     "storage" to "Specifies the shape of persistent on-chain data.",
     "storageAtDeployment" to
         "Specifies the storage shape at deployment, used when calculating the initial address if it differs from runtime storage. For example, an NFT item can be deployed with itemIndex and collectionAddr and later initialized with owner and content.",

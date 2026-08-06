@@ -48,6 +48,9 @@ class TolkDocumentationProviderTest : TolkTestBase() {
                 storageAtDeployment: PartialStruct
                 incomingMessages: UnionOfStructs
                 incomingExternal: SomeStructOrUnion
+                outgoingMessages: OutgoingMessage
+                emittedEvents: EmittedEvent
+                thrownErrors: ContractError
                 forceAbiExport: (Type1, Type2)
                 symbolsNamespace: Legacy
             }
@@ -83,6 +86,21 @@ class TolkDocumentationProviderTest : TolkTestBase() {
             fields,
             "incomingExternal",
             "Defines the expected slice shape when the contract has onExternalMessage.",
+        )
+        assertContractFieldDoc(
+            fields,
+            "outgoingMessages",
+            "Defines outgoing internal messages created by this contract.",
+        )
+        assertContractFieldDoc(
+            fields,
+            "emittedEvents",
+            "Defines external events emitted by this contract.",
+        )
+        assertContractFieldDoc(
+            fields,
+            "thrownErrors",
+            "The value must be an enum type",
         )
         assertContractFieldDoc(
             fields,

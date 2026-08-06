@@ -10,6 +10,9 @@ class TolkCompletionTest : TolkCompletionTestBase() {
             "description",
             "incomingMessages",
             "incomingExternal",
+            "outgoingMessages",
+            "emittedEvents",
+            "thrownErrors",
             "storage",
             "storageAtDeployment",
             "forceAbiExport",
@@ -33,6 +36,9 @@ class TolkCompletionTest : TolkCompletionTestBase() {
     fun `test contract field completion descriptions use ABI field docs`() = checkContainsCompletion(
         listOf(
             "author Contract author exported to ABI as-is",
+            "outgoingMessages Outgoing internal messages type",
+            "emittedEvents Emitted external events type",
+            "thrownErrors Exception codes enum type",
             "storageAtDeployment Initial storage shape used for address calculation",
             "forceAbiExport Extra ABI types not reachable from storage, messages, or getters",
         ),

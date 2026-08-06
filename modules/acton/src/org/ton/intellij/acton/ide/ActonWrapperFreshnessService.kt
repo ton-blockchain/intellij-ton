@@ -7,6 +7,7 @@ import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.project.Project
@@ -16,6 +17,7 @@ import org.ton.intellij.acton.cli.ActonCommandLine
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
 
 val Project.actonWrapperFreshness: ActonWrapperFreshnessService
     get() = service()
@@ -29,48 +31,62 @@ internal enum class ActonWrapperFreshness {
 
 @Service(Service.Level.PROJECT)
 class ActonWrapperFreshnessService(private val project: Project) {
-    private val entries = ConcurrentHashMap<String, CacheEntry>()
+    private val states = ConcurrentHashMap<String, ActonWrapperFreshness>()
+    private val requests = ConcurrentHashMap<String, Long>()
     private val updates = ConcurrentHashMap.newKeySet<String>()
+    private val nextRequestId = AtomicLong()
 
     init {
         project.messageBus.connect().subscribe(
             FileEditorManagerListener.FILE_EDITOR_MANAGER,
             object : FileEditorManagerListener {
+                override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
+                    if (ActonWrapperLanguage.fromFile(file) == null) return
+                    invalidate(file)
+                    EditorNotifications.getInstance(project).updateNotifications(file)
+                }
+
+                override fun fileClosed(source: FileEditorManager, file: VirtualFile) {
+                    if (ActonWrapperLanguage.fromFile(file) == null) return
+                    invalidate(file)
+                }
+
                 override fun selectionChanged(event: FileEditorManagerEvent) {
                     val file = event.newFile ?: return
                     if (ActonWrapperLanguage.fromFile(file) == null) return
-                    retry(file)
+                    invalidate(file)
                     EditorNotifications.getInstance(project).updateNotifications(file)
                 }
             },
         )
     }
 
-    private fun retry(file: VirtualFile) {
-        val entry = entries[file.path] ?: return
-        if (entry.state == ActonWrapperFreshness.UNKNOWN) {
-            entries.remove(file.path, entry)
-        }
+    private fun invalidate(file: VirtualFile) {
+        states.remove(file.path)
+        requests.remove(file.path)
     }
 
     internal fun check(target: ActonWrapperTarget): ActonWrapperFreshness {
-        val key = CacheKey.from(target)
         val path = target.wrapperFile.path
-        val current = entries[path]
-        if (current?.key == key) return current.state
+        states[path]?.let { return it }
 
-        val entry = CacheEntry(key, ActonWrapperFreshness.CHECKING)
-        entries[path] = entry
+        val requestId = nextRequestId.incrementAndGet()
+        requests[path] = requestId
+        states[path] = ActonWrapperFreshness.CHECKING
         ApplicationManager.getApplication().executeOnPooledThread {
             val state = checkInBackground(target)
             if (project.isDisposed) return@executeOnPooledThread
 
             ApplicationManager.getApplication().invokeLater {
                 if (project.isDisposed) return@invokeLater
-                if (entries[path]?.key != key) return@invokeLater
+                if (requests[path] != requestId) return@invokeLater
 
-                entries[path] = CacheEntry(key, state)
-                EditorNotifications.getInstance(project).updateAllNotifications()
+                if (state == ActonWrapperFreshness.OUTDATED) {
+                    states[path] = state
+                    EditorNotifications.getInstance(project).updateAllNotifications()
+                } else {
+                    states.remove(path)
+                }
             }
         }
 
@@ -81,8 +97,9 @@ class ActonWrapperFreshnessService(private val project: Project) {
         val path = target.wrapperFile.path
         if (!updates.add(path)) return
 
-        val key = CacheKey.from(target)
-        entries[path] = CacheEntry(key, ActonWrapperFreshness.CHECKING)
+        val requestId = nextRequestId.incrementAndGet()
+        requests[path] = requestId
+        states[path] = ActonWrapperFreshness.CHECKING
         ApplicationManager.getApplication().executeOnPooledThread {
             val result = runWrapper(target, target.wrapperFile.path)
             updates.remove(path)
@@ -90,6 +107,7 @@ class ActonWrapperFreshnessService(private val project: Project) {
             if (project.isDisposed) return@executeOnPooledThread
             ApplicationManager.getApplication().invokeLater {
                 if (project.isDisposed) return@invokeLater
+                if (requests[path] != requestId) return@invokeLater
 
                 if (result.success) {
                     runWriteAction {
@@ -98,10 +116,9 @@ class ActonWrapperFreshnessService(private val project: Project) {
                             FileDocumentManager.getInstance().reloadFromDisk(document)
                         }
                     }
-                    entries[path] = CacheEntry(CacheKey.from(target), ActonWrapperFreshness.UP_TO_DATE)
-                    EditorNotifications.getInstance(project).updateAllNotifications()
+                    states.remove(path)
                 } else {
-                    entries[path] = CacheEntry(key, ActonWrapperFreshness.OUTDATED)
+                    states[path] = ActonWrapperFreshness.OUTDATED
                     EditorNotifications.getInstance(project).updateAllNotifications()
                 }
             }
@@ -165,53 +182,6 @@ class ActonWrapperFreshnessService(private val project: Project) {
     }
 
     private fun normalize(content: String): String = content.replace("\r\n", "\n").replace('\r', '\n')
-
-    private data class CacheEntry(val key: CacheKey, val state: ActonWrapperFreshness)
-
-    private data class CacheKey(
-        val contractId: String,
-        val language: ActonWrapperLanguage,
-        val wrapperStamp: Long,
-        val documentStamp: Long,
-        val actonTomlStamp: Long,
-        val sourceStamp: Long,
-        val sourceDocumentStamp: Long,
-        val typesStamp: Long,
-        val typesDocumentStamp: Long,
-    ) {
-        companion object {
-            fun from(target: ActonWrapperTarget): CacheKey {
-                val documentStamp = runCatching {
-                    runReadAction {
-                        FileDocumentManager.getInstance()
-                            .getDocument(target.wrapperFile)
-                            ?.modificationStamp
-                            ?: -1L
-                    }
-                }.getOrDefault(-1L)
-                return CacheKey(
-                    contractId = target.contractId,
-                    language = target.language,
-                    wrapperStamp = target.wrapperFile.modificationStamp,
-                    documentStamp = documentStamp,
-                    actonTomlStamp = target.actonToml.virtualFile.modificationStamp,
-                    sourceStamp = target.sourceFile.modificationStamp,
-                    sourceDocumentStamp = documentModificationStamp(target.sourceFile),
-                    typesStamp = target.typesFile?.modificationStamp ?: -1L,
-                    typesDocumentStamp = target.typesFile?.let(::documentModificationStamp) ?: -1L,
-                )
-            }
-
-            private fun documentModificationStamp(file: VirtualFile): Long = runCatching {
-                runReadAction {
-                    FileDocumentManager.getInstance()
-                        .getDocument(file)
-                        ?.modificationStamp
-                        ?: -1L
-                }
-            }.getOrDefault(-1L)
-        }
-    }
 
     private data class WrapperProcessResult(val success: Boolean)
 

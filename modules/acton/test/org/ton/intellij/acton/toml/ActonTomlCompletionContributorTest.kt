@@ -17,6 +17,67 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
         )
     }
 
+    fun testBuildOutputAbiProvidesPathCompletion() {
+        myFixture.addFileToProject("generated/abi/counter.json", "{}")
+
+        assertCompletionContains(
+            """
+                [build]
+                output-abi = "generated/<caret>"
+            """.trimIndent(),
+            "abi",
+        )
+    }
+
+    fun testBuildOutputSourcesProvidesPathCompletion() {
+        myFixture.addFileToProject("generated/sources/counter.json", "{}")
+
+        assertCompletionContains(
+            """
+                [build]
+                output-sources = "generated/<caret>"
+            """.trimIndent(),
+            "sources",
+        )
+    }
+
+    fun testContractTypesProvidesPathCompletion() {
+        myFixture.addFileToProject("interfaces/counter.types.tolk", "contract Counter {}")
+
+        assertCompletionContains(
+            """
+                [contracts.counter]
+                src = "contracts/counter.boc"
+                types = "interfaces/<caret>"
+            """.trimIndent(),
+            "counter.types.tolk",
+        )
+    }
+
+    fun testGasProfileProvidesPathCompletion() {
+        myFixture.addFileToProject("profiles/gas.json", "{}")
+
+        assertCompletionContains(
+            """
+                [test]
+                gas-profile = "profiles/<caret>"
+            """.trimIndent(),
+            "gas.json",
+        )
+    }
+
+    fun testLocalnetDbPathProvidesPathCompletion() {
+        myFixture.addFileToProject("state/localnet.sqlite", "")
+
+        assertCompletionContains(
+            """
+                [localnet]
+                db-path = "state/<caret>"
+            """.trimIndent(),
+            "localnet.sqlite",
+        )
+    }
+
     fun testDependencyPathProvidesPathCompletion() {
         myFixture.addFileToProject("generated/contracts/counter.code.fc", "// generated")
         myFixture.addFileToProject("generated/wrappers/counter.wrapper.tolk", "fun main() {}")

@@ -19,7 +19,7 @@ class FuncUnusedVariableInspection : FuncInspectionBase() {
                 super.visitReferenceExpression(o)
                 if (!o.isVariableDefinition()) return
                 val id = o.identifier
-                if (id.text == "_") return
+                if (id.text.startsWith("_")) return
                 if (ReferencesSearch.search(o, o.useScope).findFirst() == null) {
                     val range = TextRange.from(id.startOffsetInParent, id.textLength)
                     val parent = o.parent

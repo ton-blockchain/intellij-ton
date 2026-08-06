@@ -2,6 +2,7 @@ package org.ton.intellij.acton.ide
 
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.components.Service
@@ -151,6 +152,8 @@ class ActonWrapperFreshnessService(private val project: Project) {
     }
 
     private fun runWrapper(target: ActonWrapperTarget, outputPath: String): WrapperProcessResult {
+        if (!saveAllDocuments()) return WrapperProcessResult(false)
+
         val arguments = buildList {
             add(target.contractId)
             add("--output")
@@ -168,6 +171,28 @@ class ActonWrapperFreshnessService(private val project: Project) {
             WrapperProcessResult(output.exitCode == 0)
         } catch (_: Exception) {
             WrapperProcessResult(false)
+        }
+    }
+
+    private fun saveAllDocuments(): Boolean {
+        val save = {
+            FileDocumentManager.getInstance().saveAllDocuments()
+            FileDocumentManager.getInstance().unsavedDocuments.isEmpty()
+        }
+
+        return try {
+            if (ApplicationManager.getApplication().isDispatchThread) {
+                save()
+            } else {
+                var saved = false
+                ApplicationManager.getApplication().invokeAndWait(
+                    { saved = save() },
+                    ModalityState.nonModal(),
+                )
+                saved
+            }
+        } catch (_: Exception) {
+            false
         }
     }
 

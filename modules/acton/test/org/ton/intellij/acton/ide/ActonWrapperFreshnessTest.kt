@@ -25,45 +25,6 @@ class ActonWrapperFreshnessTest : BasePlatformTestCase() {
         assertEquals("voter-contract.tolk", target.sourceFile.name)
     }
 
-    fun testFindsTypeScriptWrapperAtDefaultPath() {
-        myFixture.addFileToProject(
-            "Acton.toml",
-            """
-                [contracts.counter]
-                src = "contracts/counter.tolk"
-            """.trimIndent(),
-        )
-        myFixture.addFileToProject("contracts/counter.tolk", "contract Counter {}")
-        val wrapper = myFixture.addFileToProject("wrappers-ts/Counter.gen.ts", "")
-
-        val target = findActonWrapperTarget(project, wrapper.virtualFile)
-
-        assertNotNull(target)
-        assertEquals("counter", target!!.contractId)
-        assertEquals(ActonWrapperLanguage.TYPESCRIPT, target.language)
-    }
-
-    fun testFindsTypeScriptWrapperAtConfiguredPath() {
-        myFixture.addFileToProject(
-            "Acton.toml",
-            """
-                [contracts.counter]
-                src = "contracts/counter.tolk"
-
-                [wrappers.typescript]
-                output-dir = "generated-ts"
-            """.trimIndent(),
-        )
-        myFixture.addFileToProject("contracts/counter.tolk", "contract Counter {}")
-        val wrapper = myFixture.addFileToProject("generated-ts/Counter.gen.ts", "")
-
-        val target = findActonWrapperTarget(project, wrapper.virtualFile)
-
-        assertNotNull(target)
-        assertEquals("counter", target!!.contractId)
-        assertEquals(ActonWrapperLanguage.TYPESCRIPT, target.language)
-    }
-
     fun testFindsTolkWrapperFromWrappersMapping() {
         myFixture.addFileToProject(
             "Acton.toml",
@@ -117,7 +78,7 @@ class ActonWrapperFreshnessTest : BasePlatformTestCase() {
         assertNull(findActonWrapperTarget(project, wrapper.virtualFile))
     }
 
-    fun testDoesNotAssociateUnsupportedWrapperFile() {
+    fun testDoesNotAssociateTypeScriptWrapper() {
         myFixture.addFileToProject(
             "Acton.toml",
             """
@@ -126,7 +87,7 @@ class ActonWrapperFreshnessTest : BasePlatformTestCase() {
             """.trimIndent(),
         )
         myFixture.addFileToProject("contracts/counter.tolk", "contract Counter {}")
-        val wrapper = myFixture.addFileToProject("wrappers/Counter.gen.js", "")
+        val wrapper = myFixture.addFileToProject("wrappers-ts/Counter.gen.ts", "")
 
         assertNull(findActonWrapperTarget(project, wrapper.virtualFile))
     }

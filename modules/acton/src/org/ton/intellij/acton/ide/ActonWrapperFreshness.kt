@@ -14,7 +14,6 @@ internal enum class ActonWrapperLanguage(
     val defaultOutputDir: String,
 ) {
     TOLK(".gen.tolk", "tolk", "wrappers"),
-    TYPESCRIPT(".gen.ts", "typescript", "wrappers-ts"),
     ;
 
     companion object {
@@ -37,7 +36,7 @@ internal fun findActonWrapperTarget(project: Project, file: VirtualFile): ActonW
     val actonToml = ActonToml.find(project, file) ?: return null
     val wrapperName = file.name.removeSuffix(language.fileSuffix).takeIf(String::isNotBlank) ?: return null
     val expectedWrapperPath = runCatching {
-        expectedWrapperPath(actonToml, wrapperName, language)
+        expectedWrapperPath(actonToml, wrapperName)
     }.getOrNull() ?: return null
     if (normalizePath(file.path) != normalizePath(expectedWrapperPath.toString())) return null
 
@@ -54,20 +53,18 @@ internal fun findActonWrapperTarget(project: Project, file: VirtualFile): ActonW
     return matches.singleOrNull()
 }
 
-private fun expectedWrapperPath(actonToml: ActonToml, wrapperName: String, language: ActonWrapperLanguage): Path {
-    val configuredOutputDir = actonToml.getWrapperOutputDir(language.configName)
+private fun expectedWrapperPath(actonToml: ActonToml, wrapperName: String): Path {
+    val configuredOutputDir = actonToml.getWrapperOutputDir(ActonWrapperLanguage.TOLK.configName)
         ?.takeIf(String::isNotBlank)
     val outputDir = when {
         configuredOutputDir != null -> Path.of(actonToml.resolveConfiguredPath(configuredOutputDir))
-        language == ActonWrapperLanguage.TOLK -> {
+        else -> {
             val mappedOutputDir = actonToml.getNormalizedMappings()["wrappers"]
-            mappedOutputDir?.let(Path::of) ?: actonToml.workingDir.resolve(language.defaultOutputDir)
+            mappedOutputDir?.let(Path::of) ?: actonToml.workingDir.resolve(ActonWrapperLanguage.TOLK.defaultOutputDir)
         }
-
-        else -> actonToml.workingDir.resolve(language.defaultOutputDir)
     }
 
-    return outputDir.resolve(wrapperName + language.fileSuffix).normalize()
+    return outputDir.resolve(wrapperName + ActonWrapperLanguage.TOLK.fileSuffix).normalize()
 }
 
 private fun findConfiguredFile(actonToml: ActonToml, configuredPath: String): VirtualFile? {

@@ -101,9 +101,6 @@ class ActonTomlTest : BasePlatformTestCase() {
             """
                 [wrappers.tolk]
                 output-dir = "contracts/wrappers"
-
-                [wrappers.typescript]
-                output-dir = 'wrappers-ts'
             """.trimIndent(),
         )
 
@@ -111,6 +108,5 @@ class ActonTomlTest : BasePlatformTestCase() {
 
         assertNotNull(actonToml)
         assertEquals("contracts/wrappers", actonToml!!.getWrapperOutputDir("tolk"))
-        assertEquals("wrappers-ts", actonToml.getWrapperOutputDir("typescript"))
     }
 }

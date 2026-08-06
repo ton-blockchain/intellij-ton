@@ -153,7 +153,6 @@ class ActonWrapperFreshnessService(private val project: Project) {
     private fun runWrapper(target: ActonWrapperTarget, outputPath: String): WrapperProcessResult {
         val arguments = buildList {
             add(target.contractId)
-            if (target.language == ActonWrapperLanguage.TYPESCRIPT) add("--ts")
             add("--output")
             add(outputPath)
         }

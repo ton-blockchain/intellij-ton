@@ -25,6 +25,7 @@ class FuncUnusedFunctionParameterInspection : FuncInspectionBase() {
 
             private fun processParameter(parameter: FuncFunctionParameter) {
                 val id = parameter.identifier ?: return
+                if (id.text.startsWith("_")) return
                 if (ReferencesSearch.search(parameter, parameter.useScope).findFirst() == null) {
                     val range = TextRange.from(id.startOffsetInParent, id.textLength)
                     holder.registerProblem(

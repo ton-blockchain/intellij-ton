@@ -14,6 +14,7 @@ fun TolkNamedElement.isVisibleInCompletionFrom(currentFile: TolkFile): Boolean {
 }
 
 private fun TolkFile.isInContractSourceScope(): Boolean {
+    if (isTestFile()) return false
     val path = originalFile.virtualFile?.path ?: return false
     ActonToml.find(project, originalFile.virtualFile)?.getNormalizedMappings()?.get("contracts")?.let { contractsDir ->
         return path.isSameOrUnder(contractsDir)

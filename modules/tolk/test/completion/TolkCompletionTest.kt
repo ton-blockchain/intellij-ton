@@ -66,6 +66,21 @@ class TolkCompletionTest : TolkCompletionTestBase() {
     """,
     )
 
+    fun `test lambda parameters`() = checkContainsCompletion(
+        "item",
+        """
+        fun map(value: int, cb: (int) -> int): int {
+            return cb(value);
+        }
+
+        fun main() {
+            map(10, fun(item) {
+                it/*caret*/
+            })
+        }
+        """.trimIndent(),
+    )
+
     fun `test function call zero args`() = doSingleCompletion(
         """
         fun foo() {}

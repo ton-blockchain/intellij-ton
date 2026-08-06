@@ -309,6 +309,11 @@ fun collectLocalVariables(startFrom: PsiElement, processor: (TolkLocalSymbolElem
                 if (!processor(catchParameter)) return@treeWalkUp false
             }
         }
+        if (scope is TolkLambdaFunExpression) {
+            scope.parameterList.parameterList.forEach { parameter ->
+                if (!processor(parameter)) return@treeWalkUp false
+            }
+        }
         if (scope is TolkInferenceContextOwner) {
             return@treeWalkUp false
         }

@@ -67,7 +67,12 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
 
     fun getContractElements(): List<TomlKeySegment> = getContracts().map { it.element }
 
-    data class ContractInfo(val id: String, val sourcePath: String?, val element: TomlKeySegment)
+    data class ContractInfo(
+        val id: String,
+        val sourcePath: String?,
+        val typesPath: String?,
+        val element: TomlKeySegment,
+    )
 
     fun getContracts(): List<ContractInfo> {
         return CachedValuesManager.getCachedValue(psiFile ?: return emptyList()) {
@@ -85,7 +90,14 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
                         ?.removeSurrounding("\"")
                         ?.removeSurrounding("'")
 
-                    ContractInfo(id, sourcePath, segments[1])
+                    val typesPath = table.entries
+                        .find { it.key.text == "types" }
+                        ?.value
+                        ?.text
+                        ?.removeSurrounding("\"")
+                        ?.removeSurrounding("'")
+
+                    ContractInfo(id, sourcePath, typesPath, segments[1])
                 }
                 ?: emptyList()
 
@@ -102,6 +114,9 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
             }
             ?.id
     }
+
+    fun isConfiguredPath(path: String, file: VirtualFile): Boolean =
+        resolveConfiguredPath(path) == normalizePath(file.path)
 
     data class WalletInfo(val name: String, val isLocal: Boolean, val element: TomlKeySegment? = null)
 

@@ -7,9 +7,10 @@ import com.intellij.openapi.editor.colors.CodeInsightColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
+import org.ton.intellij.acton.ide.LocalnetStatus.RUNNING
 import org.ton.intellij.acton.settings.actonSettings
 
-class ActonTonAddressConsoleFilter : Filter {
+class ActonTonAddressConsoleFilter(private val project: Project) : Filter {
     override fun applyFilter(line: String, entireLength: Int): Filter.Result? {
         if (line.length > 300) {
             // likely some raw data
@@ -30,7 +31,7 @@ class ActonTonAddressConsoleFilter : Filter {
                 Filter.ResultItem(
                     offset + match.range.first,
                     offset + match.range.last + 1,
-                    TonAddressHyperlinkInfo(address, false),
+                    TonAddressHyperlinkInfo(project, address, isTestnet = false, preferLocalnetExplorer = true),
                     getAttrs(), // Most lines will not contain addresses, so avoid fetching attrs until needed.
                 ),
             )
@@ -44,7 +45,12 @@ class ActonTonAddressConsoleFilter : Filter {
                 Filter.ResultItem(
                     offset + match.range.first,
                     offset + match.range.last + 1,
-                    TonAddressHyperlinkInfo(address, isTestnet),
+                    TonAddressHyperlinkInfo(
+                        project = project,
+                        address = address,
+                        isTestnet = isTestnet,
+                        preferLocalnetExplorer = isTestnet,
+                    ),
                     getAttrs(),
                 ),
             )
@@ -64,9 +70,20 @@ class ActonTonAddressConsoleFilter : Filter {
     }
 }
 
-class TonAddressHyperlinkInfo(private val address: String, private val isTestnet: Boolean) : HyperlinkInfo {
+class TonAddressHyperlinkInfo(
+    private val project: Project,
+    private val address: String,
+    private val isTestnet: Boolean,
+    private val preferLocalnetExplorer: Boolean,
+) : HyperlinkInfo {
     override fun navigate(project: Project) {
-        val explorerUrl = project.actonSettings.explorer.addressUrl(address, isTestnet)
-        BrowserUtil.browse(explorerUrl)
+        val snapshot = this.project.actonLocalnetService.snapshot()
+        val targetUrl =
+            if (preferLocalnetExplorer && snapshot.status == RUNNING) {
+                ActonLocalnetService.explorerAddressUrl(snapshot.port, address)
+            } else {
+                this.project.actonSettings.explorer.addressUrl(address, isTestnet)
+            }
+        BrowserUtil.browse(targetUrl)
     }
 }

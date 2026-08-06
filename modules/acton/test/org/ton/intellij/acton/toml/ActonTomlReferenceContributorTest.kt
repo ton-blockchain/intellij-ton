@@ -55,7 +55,7 @@ class ActonTomlReferenceContributorTest : BasePlatformTestCase() {
         assertEquals("Acton.toml", resolved.containingFile.name)
     }
 
-    fun testLitenodeAccountResolvesToWalletDefinition() {
+    fun testLocalnetAccountResolvesToWalletDefinition() {
         myFixture.addFileToProject(
             "wallets.toml",
             """
@@ -66,7 +66,7 @@ class ActonTomlReferenceContributorTest : BasePlatformTestCase() {
 
         val resolved = resolveLiteralReference(
             """
-                [litenode]
+                [localnet]
                 accounts = ["ali<caret>ce"]
             """.trimIndent(),
         )

@@ -42,6 +42,24 @@ class ActonTomlLineMarkerProviderTest : BasePlatformTestCase() {
         assertContainsElements(actionTexts, "Run All Tests", "Run All Tests with UI")
     }
 
+    fun testLocalnetSectionProvidesManagementActions() {
+        val info = lineMarkerInfoFor(
+            """
+                [local<caret>net]
+                port = 5411
+            """.trimIndent(),
+        )
+
+        val actionTexts = info.actions.mapNotNull { it.templateText }
+        assertContainsElements(
+            actionTexts,
+            "Start Localnet",
+            "Restart Localnet",
+            "Airdrop by Address",
+            "Open Localnet UI",
+        )
+    }
+
     fun testTolkWrappersSectionProvidesGenerateAllAction() {
         val info = lineMarkerInfoFor(
             """

@@ -94,4 +94,27 @@ class ActonTomlTest : BasePlatformTestCase() {
 
         assertFalse(hasActonToml(project))
     }
+
+    fun testLocalnetSettingsAreParsedFromActonToml() {
+        myFixture.addFileToProject(
+            "Acton.toml",
+            """
+                [localnet]
+                port = 3010
+                fork-net = "testnet"
+                fork-block-number = 55000000
+                accounts = ["deployer", "user"]
+                rate-limit = 2
+            """.trimIndent(),
+        )
+
+        val localnet = ActonToml.find(project)?.getLocalnetSettings()
+
+        assertNotNull(localnet)
+        assertEquals(3010, localnet!!.port)
+        assertEquals("testnet", localnet.forkNet)
+        assertEquals(55_000_000L, localnet.forkBlockNumber)
+        assertEquals(listOf("deployer", "user"), localnet.accounts)
+        assertEquals(2, localnet.rateLimit)
+    }
 }

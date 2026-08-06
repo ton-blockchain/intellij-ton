@@ -44,6 +44,11 @@
                     icon="com.intellij.icons.AllIcons.General.User"
                     anchor="right"
                     factoryClass="org.ton.intellij.acton.ide.ActonWalletToolWindowFactory"/>
+        <toolWindow id="Acton Localnet"
+                    secondary="true"
+                    icon="com.intellij.icons.AllIcons.RunConfigurations.Web_app"
+                    anchor="right"
+                    factoryClass="org.ton.intellij.acton.ide.ActonLocalnetToolWindowFactory"/>
 
         <highlightingPassFactory implementation="org.ton.intellij.acton.ide.ActonHighlightingPassFactoryRegistrar"/>
         <formattingService implementation="org.ton.intellij.acton.ide.formatter.ActonFmtFormattingService"/>

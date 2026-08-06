@@ -461,7 +461,7 @@
                 },
                 "port": {
                     "description": "Localnet port used by `acton localnet` commands",
-                    "default": 3000,
+                    "default": 5411,
                     "type": "integer",
                     "format": "uint16",
                     "maximum": 65535.0,

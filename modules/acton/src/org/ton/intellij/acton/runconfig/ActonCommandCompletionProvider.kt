@@ -8,9 +8,9 @@ class ActonCommandCompletionProvider : TextFieldCompletionProvider() {
     override fun addCompletionVariants(text: String, offset: Int, prefix: String, result: CompletionResultSet) {
         // TODO: maybe we can expose API to get available commands?
         val commands = listOf(
-            "init", "new", "wallet", "test", "wrapper", "script",
+            "init", "new", "wallet", "localnet", "test", "wrapper", "script",
             "build", "run", "compile", "disasm", "verify", "retrace",
-            "library", "up", "completions",
+            "check", "fmt", "library", "up", "completions",
         )
 
         for (command in commands) {

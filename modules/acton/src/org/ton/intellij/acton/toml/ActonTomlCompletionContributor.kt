@@ -112,7 +112,7 @@ class ActonTomlCompletionContributor : CompletionContributor() {
         val actonToml = ActonToml.find(project, parameters.originalFile.virtualFile ?: return) ?: return
 
         when {
-            valueContext.matches("litenode", "accounts") && valueContext.isArrayItem -> {
+            valueContext.matches("localnet", "accounts") && valueContext.isArrayItem -> {
                 for (wallet in actonToml.getWallets().distinctBy { it.name }) {
                     result.addElement(
                         LookupElementBuilder.create(wallet.name)
@@ -135,7 +135,7 @@ class ActonTomlCompletionContributor : CompletionContributor() {
             }
 
             valueContext.matches("test", "fork-net", "custom") ||
-                valueContext.matches("litenode", "fork-net", "custom") -> {
+                valueContext.matches("localnet", "fork-net", "custom") -> {
                 for (networkName in actonToml.getCustomNetworkNames()) {
                     result.addElement(LookupElementBuilder.create(networkName).withTypeText("custom network"))
                 }

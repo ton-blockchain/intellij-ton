@@ -10,7 +10,7 @@ class ActonConsoleFilterProvider : ConsoleFilterProviderEx {
         getDefaultFilters(project, GlobalSearchScope.allScope(project))
 
     override fun getDefaultFilters(project: Project, scope: GlobalSearchScope): Array<out Filter?> = arrayOf(
-        ActonTonAddressConsoleFilter(),
+        ActonTonAddressConsoleFilter(project),
         ActonWalletQuickFixFilter(),
         ActonGeneratedFileConsoleFilter(project),
         ActonTolkFileConsoleFilter(project),

@@ -35,7 +35,7 @@ class ActonTomlValueReferenceProvider : PsiReferenceProvider() {
 
         val actonToml = element.containingActonToml()
         val target = when {
-            valueContext.matches("litenode", "accounts") && valueContext.isArrayItem -> {
+            valueContext.matches("localnet", "accounts") && valueContext.isArrayItem -> {
                 actonToml?.getWallets()
                     ?.find { it.name == valueContext.literal.stringValue() }
                     ?.element
@@ -48,7 +48,7 @@ class ActonTomlValueReferenceProvider : PsiReferenceProvider() {
             }
 
             valueContext.matches("test", "fork-net", "custom") ||
-                valueContext.matches("litenode", "fork-net", "custom") -> {
+                valueContext.matches("localnet", "fork-net", "custom") -> {
                 actonToml?.getCustomNetworkElements()
                     ?.find { it.name == valueContext.literal.stringValue() }
             }

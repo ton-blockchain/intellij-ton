@@ -5,15 +5,23 @@ import com.intellij.execution.executors.DefaultRunExecutor
 import com.intellij.execution.lineMarker.RunLineMarkerContributor
 import com.intellij.execution.runners.ExecutionUtil
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.application.ReadAction
+import com.intellij.openapi.components.service
 import com.intellij.psi.PsiElement
 import org.toml.lang.psi.TomlKeySegment
 import org.toml.lang.psi.TomlKeyValue
 import org.toml.lang.psi.TomlTable
 import org.toml.lang.psi.TomlTableHeader
 import org.ton.intellij.acton.cli.ActonCommand
+import org.ton.intellij.acton.cli.ActonToml
+import org.ton.intellij.acton.ide.ActonLocalnetService
+import org.ton.intellij.acton.ide.isExternalActive
+import org.ton.intellij.acton.ide.isManagedActive
+import org.ton.intellij.acton.ide.toLocalnetTarget
 import org.ton.intellij.acton.runconfig.ActonCommandConfiguration
 import org.ton.intellij.acton.runconfig.ActonCommandConfigurationType
 
@@ -66,6 +74,16 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
                         AllIcons.Actions.Execute,
                         arrayOf(ActonCheckFormattingAction(), ActonFormatProjectAction()),
                     ) { "Run formatter" }
+
+                    "localnet" -> Info(
+                        AllIcons.RunConfigurations.Web_app,
+                        arrayOf(
+                            ActonToggleLocalnetAction(),
+                            ActonRestartLocalnetAction(),
+                            ActonLocalnetAirdropAction(),
+                            ActonOpenLocalnetUiAction(),
+                        ),
+                    ) { "Manage localnet" }
 
                     else -> null
                 }
@@ -155,6 +173,133 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
         }
     }
 
+    private class ActonToggleLocalnetAction : AnAction("Start Localnet", null, AllIcons.Actions.Execute) {
+        override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.EDT
+
+        override fun update(e: AnActionEvent) {
+            val project = e.project ?: return
+            val service = project.service<ActonLocalnetService>()
+            service.requestHealthRefresh()
+            val snapshot = service.snapshot()
+
+            when {
+                snapshot.isExternalActive() -> {
+                    e.presentation.text = "External Localnet Running"
+                    e.presentation.description = "This localnet was not started by the IDE"
+                    e.presentation.icon = AllIcons.RunConfigurations.Web_app
+                    e.presentation.isEnabled = false
+                }
+                snapshot.status == org.ton.intellij.acton.ide.LocalnetStatus.STOPPING -> {
+                    e.presentation.text = "Stopping Localnet"
+                    e.presentation.description = "Wait for localnet to stop"
+                    e.presentation.icon = AllIcons.Actions.Suspend
+                    e.presentation.isEnabled = false
+                }
+                snapshot.isManagedActive() -> {
+                    e.presentation.text = "Stop Localnet"
+                    e.presentation.description = "Stop managed localnet process"
+                    e.presentation.icon = AllIcons.Actions.Suspend
+                    e.presentation.isEnabled = true
+                }
+                else -> {
+                    e.presentation.text = "Start Localnet"
+                    e.presentation.description = "Start Acton localnet"
+                    e.presentation.icon = AllIcons.Actions.Execute
+                    e.presentation.isEnabled = true
+                }
+            }
+        }
+
+        override fun actionPerformed(e: AnActionEvent) {
+            val project = e.project ?: return
+            val service = project.service<ActonLocalnetService>()
+            val snapshot = service.snapshot()
+            if (snapshot.isManagedActive()) {
+                service.stop()
+                return
+            }
+            if (snapshot.isExternalActive() ||
+                snapshot.status == org.ton.intellij.acton.ide.LocalnetStatus.STOPPING
+            ) {
+                return
+            }
+
+            val target = ReadAction.compute<LocalnetActionTarget?, RuntimeException> {
+                val actonToml = findActonToml(e) ?: return@compute null
+                LocalnetActionTarget(
+                    actonToml.toLocalnetTarget(DEFAULT_LOCALNET_PORT),
+                )
+            } ?: return
+            service.start(target.target)
+        }
+    }
+
+    private class ActonOpenLocalnetUiAction : AnAction("Open Localnet UI", null, AllIcons.Actions.Preview) {
+        override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.EDT
+
+        override fun update(e: AnActionEvent) {
+            val project = e.project ?: return
+            val service = project.service<ActonLocalnetService>()
+            service.requestHealthRefresh()
+            e.presentation.isEnabled = service.snapshot().status.isActive()
+        }
+
+        override fun actionPerformed(e: AnActionEvent) {
+            val project = e.project ?: return
+            project.service<ActonLocalnetService>().openUi()
+        }
+    }
+
+    private class ActonRestartLocalnetAction : AnAction("Restart Localnet", null, AllIcons.Actions.Restart) {
+        override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.EDT
+
+        override fun update(e: AnActionEvent) {
+            val project = e.project ?: return
+            val service = project.service<ActonLocalnetService>()
+            service.requestHealthRefresh()
+            e.presentation.isEnabled = service.snapshot().isManagedActive()
+        }
+
+        override fun actionPerformed(e: AnActionEvent) {
+            val project = e.project ?: return
+            if (project.service<ActonLocalnetService>().snapshot().isExternalActive()) return
+            val target = ReadAction.compute<LocalnetActionTarget?, RuntimeException> {
+                val actonToml = findActonToml(e) ?: return@compute null
+                LocalnetActionTarget(
+                    actonToml.toLocalnetTarget(DEFAULT_LOCALNET_PORT),
+                )
+            } ?: return
+
+            project.service<ActonLocalnetService>().start(target.target)
+        }
+    }
+
+    private class ActonLocalnetAirdropAction : AnAction("Airdrop by Address", null, AllIcons.Nodes.Deploy) {
+        override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.EDT
+
+        override fun update(e: AnActionEvent) {
+            val project = e.project ?: return
+            val service = project.service<ActonLocalnetService>()
+            service.requestHealthRefresh()
+            e.presentation.isEnabled = service.snapshot().status.isActive()
+        }
+
+        override fun actionPerformed(e: AnActionEvent) {
+            val project = e.project ?: return
+            val target = ReadAction.compute<LocalnetActionTarget?, RuntimeException> {
+                val actonToml = findActonToml(e) ?: return@compute null
+                LocalnetActionTarget(
+                    actonToml.toLocalnetTarget(DEFAULT_LOCALNET_PORT),
+                )
+            } ?: return
+
+            project.service<ActonLocalnetService>().promptAndAirdrop(
+                target.target.workingDirectory,
+                target.target.port,
+            )
+        }
+    }
+
     private class TolkBuildContractAction(private val contractName: String) :
         AnAction("Build $contractName", null, AllIcons.Actions.Compile) {
         override fun actionPerformed(e: AnActionEvent) {
@@ -177,6 +322,8 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
     }
 
     private companion object {
+        private const val DEFAULT_LOCALNET_PORT: Int = 5411
+
         fun runConfiguration(
             e: AnActionEvent,
             configurationName: String,
@@ -201,5 +348,13 @@ class ActonTomlLineMarkerProvider : RunLineMarkerContributor() {
 
             ExecutionUtil.runConfiguration(settings, DefaultRunExecutor.getRunExecutorInstance())
         }
+
+        fun findActonToml(e: AnActionEvent): ActonToml? {
+            val project = e.project ?: return null
+            val file = e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return null
+            return ActonToml.find(project, file) ?: ActonToml.find(project)
+        }
     }
 }
+
+private data class LocalnetActionTarget(val target: org.ton.intellij.acton.ide.LocalnetTarget)

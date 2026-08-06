@@ -105,6 +105,14 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
 
     data class WalletInfo(val name: String, val isLocal: Boolean, val element: TomlKeySegment? = null)
 
+    data class LocalnetSettings(
+        val port: Int?,
+        val forkNet: String?,
+        val forkBlockNumber: Long?,
+        val accounts: List<String>,
+        val rateLimit: Int?,
+    )
+
     fun getWallets(): List<WalletInfo> {
         val result = mutableListOf<WalletInfo>()
         val projectDir = virtualFile.parent ?: return emptyList()
@@ -124,6 +132,24 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
     }
 
     fun getCustomNetworkNames(): List<String> = getCustomNetworkElements().mapNotNull { it.name }.distinct()
+
+    fun getLocalnetSettings(): LocalnetSettings? {
+        return CachedValuesManager.getCachedValue(psiFile ?: return null) {
+            val table = PsiTreeUtil.getChildrenOfType(psiFile, TomlTable::class.java)
+                ?.find { it.header.key?.segments?.singleOrNull()?.name == "localnet" }
+
+            val entries = table?.entries.orEmpty().associateBy { it.key.text }
+            val settings = LocalnetSettings(
+                port = entries["port"]?.value?.text?.toIntOrNull(),
+                forkNet = entries["fork-net"]?.value?.text?.removeSurrounding("\"")?.removeSurrounding("'"),
+                forkBlockNumber = entries["fork-block-number"]?.value?.text?.toLongOrNull(),
+                accounts = parseStringArray(entries["accounts"]?.value?.text),
+                rateLimit = entries["rate-limit"]?.value?.text?.toIntOrNull(),
+            )
+
+            create(settings, psiFile)
+        }
+    }
 
     fun getCustomNetworkElements(): List<TomlKeySegment> {
         val file = psiFile ?: return emptyList()
@@ -151,6 +177,20 @@ class ActonToml(val virtualFile: VirtualFile, val project: Project) {
                     null
                 }
             } ?: emptyList()
+    }
+
+    private fun parseStringArray(text: String?): List<String> {
+        if (text.isNullOrBlank()) return emptyList()
+        return text
+            .removePrefix("[")
+            .removeSuffix("]")
+            .split(',')
+            .mapNotNull { item ->
+                item.trim()
+                    .removeSurrounding("\"")
+                    .removeSurrounding("'")
+                    .takeIf(String::isNotBlank)
+            }
     }
 
     private fun resolveConfiguredPath(path: String): String {

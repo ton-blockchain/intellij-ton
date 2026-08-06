@@ -389,6 +389,82 @@ sealed class ActonCommand(val name: String) {
         }
     }
 
+    sealed class Localnet(val subcommand: String) : ActonCommand("localnet") {
+        override fun getArguments(): List<String> = listOf(subcommand) + getSubcommandArguments()
+        abstract fun getSubcommandArguments(): List<String>
+
+        data class Start(
+            val port: Int? = null,
+            val forkNet: String? = null,
+            val forkBlockNumber: Long? = null,
+            val accounts: List<String> = emptyList(),
+            val dbPath: String? = null,
+            val rateLimit: Int? = null,
+            val loadState: String? = null,
+            val dumpState: String? = null,
+        ) : Localnet("start") {
+            override fun getSubcommandArguments(): List<String> = buildList {
+                port?.let {
+                    add("--port")
+                    add(it.toString())
+                }
+                forkNet?.takeIf(String::isNotBlank)?.let {
+                    add("--fork-net")
+                    add(it)
+                }
+                forkBlockNumber?.let {
+                    add("--fork-block-number")
+                    add(it.toString())
+                }
+                if (accounts.isNotEmpty()) {
+                    add("--accounts")
+                    add(accounts.joinToString(","))
+                }
+                dbPath?.takeIf(String::isNotBlank)?.let {
+                    add("--db-path")
+                    add(it)
+                }
+                rateLimit?.let {
+                    add("--rate-limit")
+                    add(it.toString())
+                }
+                loadState?.takeIf(String::isNotBlank)?.let {
+                    add("--load-state")
+                    add(it)
+                }
+                dumpState?.takeIf(String::isNotBlank)?.let {
+                    add("--dump-state")
+                    add(it)
+                }
+            }
+        }
+
+        data class Status(val port: Int? = null, val json: Boolean = false) : Localnet("status") {
+            override fun getSubcommandArguments(): List<String> = buildList {
+                port?.let {
+                    add("--port")
+                    add(it.toString())
+                }
+                if (json) add("--json")
+            }
+        }
+
+        data class Airdrop(val address: String, val amountTon: Double? = null, val port: Int? = null) :
+            Localnet("airdrop") {
+            override fun getSubcommandArguments(): List<String> = buildList {
+                add(address)
+                amountTon?.let {
+                    add("--amount")
+                    add(it.toString())
+                }
+                port?.let {
+                    add("--port")
+                    add(it.toString())
+                }
+            }
+        }
+    }
+
     data class Custom(var command: String = "") : ActonCommand(command) {
         override fun getArguments(): List<String> = emptyList()
     }

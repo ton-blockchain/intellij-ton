@@ -35,7 +35,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
         )
     }
 
-    fun testLitenodeAccountsProvidesWalletNameCompletion() {
+    fun testLocalnetAccountsProvidesWalletNameCompletion() {
         myFixture.addFileToProject(
             "wallets.toml",
             """
@@ -49,7 +49,7 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
 
         assertCompletionContains(
             """
-                [litenode]
+                [localnet]
                 accounts = ["<caret>"]
             """.trimIndent(),
             "alice",

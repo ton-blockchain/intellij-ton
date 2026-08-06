@@ -77,14 +77,19 @@ class ActonTomlValueReferenceProvider : PsiReferenceProvider() {
 
     private fun ActonTomlValueContext.isPathField(): Boolean = matches("build", "gen-dir") ||
         matches("build", "out-dir") ||
+        matches("build", "output-abi") ||
         matches("build", "output-fift") ||
+        matches("build", "output-sources") ||
         matches("import-mappings", null) ||
         matches("contracts", null, "src") ||
+        matches("contracts", null, "types") ||
         matches("contracts", null, "output") ||
         matches("contracts", null, "depends", "path") ||
         matches("test", "coverage", "output-file") ||
+        matches("test", "gas-profile") ||
         matches("test", "junit-path") ||
         matches("test", "mutation", "rules-file") ||
+        matches("localnet", "db-path") ||
         matches("wrappers", "tolk", "output-dir") ||
         matches("wrappers", "tolk", "test-output-dir") ||
         matches("wrappers", "typescript", "output-dir")

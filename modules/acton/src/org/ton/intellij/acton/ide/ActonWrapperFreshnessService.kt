@@ -47,7 +47,7 @@ class ActonWrapperFreshnessService(private val project: Project) {
                 if (entries[path]?.key != key) return@invokeLater
 
                 entries[path] = CacheEntry(key, state)
-                EditorNotifications.getInstance(project).updateNotifications(target.wrapperFile)
+                EditorNotifications.getInstance(project).updateAllNotifications()
             }
         }
 
@@ -75,11 +75,11 @@ class ActonWrapperFreshnessService(private val project: Project) {
                             FileDocumentManager.getInstance().reloadFromDisk(document)
                         }
                     }
-                    entries.remove(path)
-                    EditorNotifications.getInstance(project).updateNotifications(target.wrapperFile)
+                    entries[path] = CacheEntry(CacheKey.from(target), ActonWrapperFreshness.UP_TO_DATE)
+                    EditorNotifications.getInstance(project).updateAllNotifications()
                 } else {
                     entries[path] = CacheEntry(key, ActonWrapperFreshness.OUTDATED)
-                    EditorNotifications.getInstance(project).updateNotifications(target.wrapperFile)
+                    EditorNotifications.getInstance(project).updateAllNotifications()
                 }
             }
         }

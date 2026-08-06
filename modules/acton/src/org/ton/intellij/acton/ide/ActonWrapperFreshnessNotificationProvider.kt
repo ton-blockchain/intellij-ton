@@ -23,7 +23,7 @@ class ActonWrapperFreshnessNotificationProvider : EditorNotificationProvider {
                     text = ActonBundle.message("notification.acton.wrapper.outdated")
                     createActionLabel(ActonBundle.message("notification.acton.wrapper.action.regenerate")) {
                         project.actonWrapperFreshness.update(target)
-                        EditorNotifications.getInstance(project).updateNotifications(file)
+                        EditorNotifications.getInstance(project).updateAllNotifications()
                     }
                 }
             }

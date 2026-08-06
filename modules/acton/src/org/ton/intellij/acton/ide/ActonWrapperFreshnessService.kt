@@ -7,6 +7,8 @@ import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManagerEvent
+import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotifications
@@ -29,6 +31,27 @@ internal enum class ActonWrapperFreshness {
 class ActonWrapperFreshnessService(private val project: Project) {
     private val entries = ConcurrentHashMap<String, CacheEntry>()
     private val updates = ConcurrentHashMap.newKeySet<String>()
+
+    init {
+        project.messageBus.connect().subscribe(
+            FileEditorManagerListener.FILE_EDITOR_MANAGER,
+            object : FileEditorManagerListener {
+                override fun selectionChanged(event: FileEditorManagerEvent) {
+                    val file = event.newFile ?: return
+                    if (ActonWrapperLanguage.fromFile(file) == null) return
+                    retry(file)
+                    EditorNotifications.getInstance(project).updateNotifications(file)
+                }
+            },
+        )
+    }
+
+    private fun retry(file: VirtualFile) {
+        val entry = entries[file.path] ?: return
+        if (entry.state == ActonWrapperFreshness.UNKNOWN) {
+            entries.remove(file.path, entry)
+        }
+    }
 
     internal fun check(target: ActonWrapperTarget): ActonWrapperFreshness {
         val key = CacheKey.from(target)
@@ -152,7 +175,9 @@ class ActonWrapperFreshnessService(private val project: Project) {
         val documentStamp: Long,
         val actonTomlStamp: Long,
         val sourceStamp: Long,
+        val sourceDocumentStamp: Long,
         val typesStamp: Long,
+        val typesDocumentStamp: Long,
     ) {
         companion object {
             fun from(target: ActonWrapperTarget): CacheKey {
@@ -171,9 +196,20 @@ class ActonWrapperFreshnessService(private val project: Project) {
                     documentStamp = documentStamp,
                     actonTomlStamp = target.actonToml.virtualFile.modificationStamp,
                     sourceStamp = target.sourceFile.modificationStamp,
+                    sourceDocumentStamp = documentModificationStamp(target.sourceFile),
                     typesStamp = target.typesFile?.modificationStamp ?: -1L,
+                    typesDocumentStamp = target.typesFile?.let(::documentModificationStamp) ?: -1L,
                 )
             }
+
+            private fun documentModificationStamp(file: VirtualFile): Long = runCatching {
+                runReadAction {
+                    FileDocumentManager.getInstance()
+                        .getDocument(file)
+                        ?.modificationStamp
+                        ?: -1L
+                }
+            }.getOrDefault(-1L)
         }
     }
 

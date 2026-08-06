@@ -38,6 +38,7 @@
         <consoleFilterProvider implementation="org.ton.intellij.acton.ide.ActonConsoleFilterProvider"/>
         <editorNotificationProvider implementation="org.ton.intellij.acton.ide.ActonSetupNotificationProvider"/>
         <editorNotificationProvider implementation="org.ton.intellij.acton.ide.ActonTomlPluginNotificationProvider"/>
+        <editorNotificationProvider implementation="org.ton.intellij.acton.ide.ActonWrapperFreshnessNotificationProvider"/>
 
         <toolWindow id="Acton Wallets"
                     secondary="true"

@@ -4,6 +4,7 @@ import com.intellij.execution.ExecutionException
 import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.ide.actions.CreateFileFromTemplateAction
 import com.intellij.ide.actions.CreateFileFromTemplateDialog
+import com.intellij.ide.fileTemplates.FileTemplate
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
@@ -30,6 +31,9 @@ class TolkCreateFileAction :
 
     override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?): String =
         templateName ?: FILE_TEMPLATE
+
+    override fun createFileFromTemplate(name: String, template: FileTemplate, dir: PsiDirectory): PsiFile? =
+        super.createFileFromTemplate(name.withoutTolkExtension(), template, dir)
 
     override fun postProcess(createdElement: PsiFile, templateName: String?, settings: Map<String, String>?) {
         super.postProcess(createdElement, templateName, settings)
@@ -69,3 +73,5 @@ class TolkCreateFileAction :
         const val TOLK_FILE = "New Tolk file"
     }
 }
+
+internal fun String.withoutTolkExtension(): String = removeSuffix(".tolk")

@@ -7,6 +7,7 @@ import com.intellij.execution.process.CapturingProcessHandler
 import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessListener
+import com.intellij.execution.process.ProcessOutputTypes
 import com.intellij.icons.AllIcons
 import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.actionSystem.ActionManager
@@ -401,40 +402,37 @@ class ActonWalletPanel(private val project: Project) : JPanel(BorderLayout()) {
                     environmentVariables = EnvironmentVariablesData.DEFAULT,
                 ).toGeneralCommandLine(project) ?: return@executeOnPooledThread
 
+                val stdout = StringBuilder()
+                val stderr = StringBuilder()
                 val handler = OSProcessHandler(commandLine)
                 handler.addProcessListener(object : ProcessListener {
                     override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
-                        val text = event.text.trim()
-                        if (text.startsWith("{")) {
-                            try {
-                                val json = gson.fromJson(text, Map::class.java)
-                                if (json["success"] != null) {
-                                    val success = json["success"] as Boolean
-                                    val message = json["message"] as? String ?: json["error"] as? String ?: "Finished"
-                                    ApplicationManager.getApplication().invokeLater {
-                                        progressBar?.isVisible = false
-                                        label.isEnabled = true
-                                        label.text = "Request testnet TON"
-                                        if (!success) {
-                                            Messages.showErrorDialog(project, message, "Airdrop Error")
-                                        } else {
-                                            Messages.showInfoMessage(project, message, "Airdrop Success")
-                                            refreshWallets()
-                                        }
-                                    }
-                                }
-                            } catch (_: Exception) {
-                                // ignore parse errors
-                            }
+                        if (outputType == ProcessOutputTypes.STDOUT) {
+                            stdout.append(event.text)
+                        } else {
+                            stderr.append(event.text)
                         }
                     }
 
                     override fun processTerminated(event: ProcessEvent) {
+                        val response = parseActonAirdropResponse(stdout.toString())
+                            ?: parseActonAirdropResponse(stderr.toString())
+                        val success = response?.success == true
+                        val message = if (success) {
+                            response.message?.takeIf(String::isNotEmpty) ?: "Airdrop completed"
+                        } else {
+                            renderActonAirdropError(response, stdout.toString(), stderr.toString(), event.exitCode)
+                        }
+
                         ApplicationManager.getApplication().invokeLater {
                             progressBar?.isVisible = false
                             label.isEnabled = true
-                            if (label.text == "Requesting...") {
-                                label.text = "Request testnet TON"
+                            label.text = "Request testnet TON"
+                            if (success) {
+                                Messages.showInfoMessage(project, message, "Airdrop Success")
+                                refreshWallets()
+                            } else {
+                                Messages.showErrorDialog(project, message, "Airdrop Error")
                             }
                         }
                     }

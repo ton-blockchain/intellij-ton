@@ -17,6 +17,8 @@ class TolkContractDefinitionReference(element: TolkContractDefinition) :
         return actonToml.getContractElements().find { it.name == contractName }
     }
 
+    override fun handleElementRename(newElementName: String): PsiElement = element.setName(newElementName)
+
     override fun getVariants(): Array<Any> = emptyArray()
 }
 

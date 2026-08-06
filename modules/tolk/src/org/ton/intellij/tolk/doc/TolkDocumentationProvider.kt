@@ -74,6 +74,7 @@ import kotlin.math.max
 
 class TolkDocumentationProvider : AbstractDocumentationProvider() {
     override fun generateDoc(element: PsiElement?, originalElement: PsiElement?) = when (element) {
+        is TolkFile -> element.generateDoc()
         is TolkFunction -> element.generateDoc()
         is TolkConstVar -> element.generateDoc()
         is TolkGlobalVar -> element.generateDoc()
@@ -128,6 +129,8 @@ class TolkDocumentationProvider : AbstractDocumentationProvider() {
         context: PsiElement,
     ): PsiElement? = resolveDocumentationReference(link, context)
 }
+
+fun TolkFile.generateDoc(): String? = doc?.renderHtml()
 
 fun TolkTy.generateDoc(): String = buildString {
     when (this@generateDoc) {

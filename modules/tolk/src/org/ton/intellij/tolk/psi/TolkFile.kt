@@ -11,6 +11,7 @@ import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
 import org.ton.intellij.tolk.TolkFileType
 import org.ton.intellij.tolk.TolkLanguage
+import org.ton.intellij.tolk.doc.psi.TolkDocComment
 import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.impl.resolve
 import org.ton.intellij.tolk.stub.*
@@ -19,10 +20,19 @@ import org.ton.intellij.tolk.stub.type.TolkIncludeDefinitionStubElementType
 
 class TolkFile(viewProvider: FileViewProvider) :
     PsiFileBase(viewProvider, TolkLanguage),
-    TolkElement {
+    TolkDocOwner {
     override fun getFileType(): FileType = TolkFileType
 
     override fun getStub(): TolkFileStub? = super.getStub() as? TolkFileStub
+
+    override val doc: TolkDocComment?
+        get() {
+            var child = firstChild
+            while (child is PsiWhiteSpace) {
+                child = child.nextSibling
+            }
+            return (child as? TolkDocComment)?.takeIf { it.text.startsWith("///") }
+        }
 
     fun isTestFile() = name.endsWith(".test.tolk")
     fun isActonFile() = virtualFile?.path?.contains(".acton") == true

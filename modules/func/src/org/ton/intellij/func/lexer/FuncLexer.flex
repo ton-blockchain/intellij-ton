@@ -138,7 +138,7 @@ BIN_INTEGER_LITERAL=0[Bb]({DIGIT_OR_UNDERSCORE})*
 //PLAIN_IDENTIFIER=[.~]?[^\s;,\(\)\[\]\{\},.~\"\+\-\*\/%]+
 //PLAIN_IDENTIFIER=^(?!{\-|;;)[.~]?[^\s;,.~\(\)\[\]\"\{\}]+
 PLAIN_IDENTIFIER=[^\s()\[\],.;~\"\{\}#]+
-QUOTE_ESCAPED_IDENTIFIER = (`[^`\n]+`)|(_[^_\n\w,]+_)
+QUOTE_ESCAPED_IDENTIFIER = (`[^`\n]+`)|(_[^_\s\n\w,()\[\]\{\};\"]+_)
 IDENTIFIER = [.~]?({QUOTE_ESCAPED_IDENTIFIER}|{PLAIN_IDENTIFIER})
 VERSION_VALUE = (=|>|>=|<|<=|\^)?\d+(\.\d+)?(\.\d+)?
 

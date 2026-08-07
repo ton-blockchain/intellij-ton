@@ -133,6 +133,10 @@
                 "output-fift": {
                     "description": "Directory where per-contract compiled Fift files are saved",
                     "type": "string"
+                },
+                "output-sources": {
+                    "description": "Directory where per-contract source registration artifacts are saved",
+                    "type": "string"
                 }
             }
         },
@@ -205,6 +209,14 @@
                 "types": {
                     "description": "Optional Tolk interface file used to produce ABI for precompiled `.boc` contracts",
                     "type": "string"
+                },
+                "wrappers": {
+                    "description": "Wrapper settings that override the project-level `[wrappers]` defaults for this contract",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/WrappersConfig"
+                        }
+                    ]
                 }
             }
         },
@@ -277,11 +289,11 @@
             "type": "object",
             "properties": {
                 "v2": {
-                    "description": "The URL for the `TonCenter` API v2. For localnet this defaults to `http://localhost:<localnet.port>/api/v2` with `5411` as the fallback port",
+                    "description": "The URL for the `TonCenter` API v2. For localnet this defaults to `http://127.0.0.1:<localnet.port>/api/v2` with `5411` as the fallback port",
                     "type": "string"
                 },
                 "v3": {
-                    "description": "The URL for the `TonCenter` API v3. For localnet this defaults to `http://localhost:<localnet.port>/api/v3` with `5411` as the fallback port",
+                    "description": "The URL for the `TonCenter` API v3. For localnet this defaults to `http://127.0.0.1:<localnet.port>/api/v3` with `5411` as the fallback port",
                     "type": "string"
                 }
             },
@@ -302,6 +314,11 @@
                 "explorer": {
                     "description": "Base URL used to build transaction links for this network. Acton appends `/tx/<hash>` automatically and derives links from `api.v2` when omitted",
                     "type": "string"
+                },
+                "global-id": {
+                    "description": "TON network global ID used to derive Wallet V5 IDs. Custom networks default to the testnet value (`-3`)",
+                    "type": "integer",
+                    "format": "int32"
                 }
             },
             "additionalProperties": false
@@ -349,6 +366,25 @@
                     "minimum": 0.0
                 }
             }
+        },
+        "GasProfileFormat": {
+            "description": "Gas profile output formats supported by `acton test`",
+            "oneOf": [
+                {
+                    "description": "Chrome `DevTools` `.cpuprofile` output",
+                    "type": "string",
+                    "enum": [
+                        "cpuprofile"
+                    ]
+                },
+                {
+                    "description": "Folded stack output for flamegraph-style tooling",
+                    "type": "string",
+                    "enum": [
+                        "collapsed"
+                    ]
+                }
+            ]
         },
         "LintConfig": {
             "description": "Linter configuration for the project",
@@ -449,6 +485,16 @@
                         "type": "string"
                     }
                 },
+                "block-interval-ms": {
+                    "description": "Block production interval in milliseconds for `acton localnet start`",
+                    "type": "integer",
+                    "format": "uint64",
+                    "minimum": 1.0
+                },
+                "db-path": {
+                    "description": "Path to an `SQLite` database used by `acton localnet start` for persistent node state",
+                    "type": "string"
+                },
                 "fork-block-number": {
                     "description": "Block sequence number used by `acton localnet start` when forking from historical state",
                     "type": "integer",
@@ -463,6 +509,14 @@
                         }
                     ]
                 },
+                "mine-empty-blocks": {
+                    "description": "Mine blocks even when there are no pending messages",
+                    "type": "boolean"
+                },
+                "no-mining": {
+                    "description": "Disable automatic block production for `acton localnet start`",
+                    "type": "boolean"
+                },
                 "port": {
                     "description": "Localnet port used by `acton localnet` commands",
                     "default": 3000,
@@ -475,6 +529,12 @@
                     "description": "Maximum number of API requests per second served by `Localnet` `/api` endpoints",
                     "type": "integer",
                     "format": "uint32",
+                    "minimum": 0.0
+                },
+                "response-delay-ms": {
+                    "description": "Response delay in milliseconds for `Localnet` `/api/v2`, `/api/v3`, and `/api/emulate/v1` endpoints",
+                    "type": "integer",
+                    "format": "uint64",
                     "minimum": 0.0
                 }
             }
@@ -793,6 +853,22 @@
                         }
                     ]
                 },
+                "gas-profile": {
+                    "description": "Output path for gas-weighted execution profiling",
+                    "type": "string"
+                },
+                "gas-profile-format": {
+                    "description": "Export format for gas-weighted execution profiling",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/GasProfileFormat"
+                        }
+                    ]
+                },
+                "gas-profile-include-tests": {
+                    "description": "Include `.test.tolk` unit-test execution in the generated gas profile",
+                    "type": "boolean"
+                },
                 "include": {
                     "description": "Glob patterns to include in testing",
                     "type": "array",
@@ -822,6 +898,10 @@
                     "items": {
                         "$ref": "#/definitions/ReportFormat"
                     }
+                },
+                "studio-reporting": {
+                    "description": "Send test run data to Acton Studio when it is available",
+                    "type": "boolean"
                 },
                 "ui": {
                     "description": "Enable the test UI server",

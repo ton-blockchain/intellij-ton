@@ -54,6 +54,51 @@ class ActonTomlCompletionContributorTest : BasePlatformTestCase() {
         )
     }
 
+    fun testContractTolkWrapperOutputDirProvidesPathCompletion() {
+        myFixture.addFileToProject("generated/tolk/Counter.gen.tolk", "")
+
+        assertCompletionContains(
+            """
+                [contracts.counter]
+                src = "contracts/counter.tolk"
+
+                [contracts.counter.wrappers.tolk]
+                output-dir = "generated/<caret>"
+            """.trimIndent(),
+            "tolk",
+        )
+    }
+
+    fun testContractTolkWrapperTestOutputDirProvidesPathCompletion() {
+        myFixture.addFileToProject("generated/tests/Counter.test.tolk", "")
+
+        assertCompletionContains(
+            """
+                [contracts.counter]
+                src = "contracts/counter.tolk"
+
+                [contracts.counter.wrappers.tolk]
+                test-output-dir = "generated/<caret>"
+            """.trimIndent(),
+            "tests",
+        )
+    }
+
+    fun testContractTypeScriptWrapperOutputDirProvidesPathCompletion() {
+        myFixture.addFileToProject("generated/typescript/Counter.ts", "")
+
+        assertCompletionContains(
+            """
+                [contracts.counter]
+                src = "contracts/counter.tolk"
+
+                [contracts.counter.wrappers.typescript]
+                output-dir = "generated/<caret>"
+            """.trimIndent(),
+            "typescript",
+        )
+    }
+
     fun testGasProfileProvidesPathCompletion() {
         myFixture.addFileToProject("profiles/gas.json", "{}")
 

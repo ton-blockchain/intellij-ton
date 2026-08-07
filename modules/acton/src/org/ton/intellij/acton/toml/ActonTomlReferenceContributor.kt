@@ -85,6 +85,9 @@ class ActonTomlValueReferenceProvider : PsiReferenceProvider() {
         matches("contracts", null, "types") ||
         matches("contracts", null, "output") ||
         matches("contracts", null, "depends", "path") ||
+        matches("contracts", null, "wrappers", "tolk", "output-dir") ||
+        matches("contracts", null, "wrappers", "tolk", "test-output-dir") ||
+        matches("contracts", null, "wrappers", "typescript", "output-dir") ||
         matches("test", "coverage", "output-file") ||
         matches("test", "gas-profile") ||
         matches("test", "junit-path") ||

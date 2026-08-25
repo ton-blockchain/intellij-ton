@@ -205,11 +205,11 @@ class TolkFillMatchArmsIntentionTest : TolkTestBase() {
                     AskToBurn => {
 
                     }
-                    else => {
-
-                    }
                     AskToTransfer => {
                         return;
+                    }
+                    else => {
+
                     }
                 }
             }
@@ -244,10 +244,10 @@ class TolkFillMatchArmsIntentionTest : TolkTestBase() {
                     Color.Green => {
 
                     }
+                    Color.Blue => {
+                    }
                     else => {
 
-                    }
-                    Color.Blue => {
                     }
                 }
             }
@@ -317,10 +317,87 @@ class TolkFillMatchArmsIntentionTest : TolkTestBase() {
                     Color.Green => {
 
                     }
+                    Color.Blue => {
+                    }
                     else => {
 
                     }
-                    Color.Blue => {
+                }
+            }
+        """,
+    )
+
+    fun `test a generic variant named without type arguments is already covered`() = doUnavailableTest(
+        """
+            struct Ok<T> { result: T }
+            struct Err<T> { errPayload: T }
+
+            type Response<TResult, TError> = Ok<TResult> | Err<TError>
+
+            fun foo(r: Response<int, slice>) {
+                match/*caret*/ (r) {
+                    Ok => {
+                    }
+                    Err => {
+                    }
+                    else => {
+                    }
+                }
+            }
+        """,
+    )
+
+    fun `test an aliased variant is already covered`() = doUnavailableTest(
+        """
+            struct Ok<T> { result: T }
+            struct Err<T> { errPayload: T }
+
+            type OkAlias<T> = Ok<T>
+
+            type Response<TResult, TError> = Ok<TResult> | Err<TError>
+
+            fun foo(r: Response<int, slice>) {
+                match/*caret*/ (r) {
+                    OkAlias<int> => {
+                    }
+                    Err<slice> => {
+                    }
+                    else => {
+                    }
+                }
+            }
+        """,
+    )
+
+    fun `test fills only the generic variant that is not covered`() = doAvailableTest(
+        """
+            struct Ok<T> { result: T }
+            struct Err<T> { errPayload: T }
+
+            type Response<TResult, TError> = Ok<TResult> | Err<TError>
+
+            fun foo(r: Response<int, slice>) {
+                match/*caret*/ (r) {
+                    Ok => {
+                    }
+                }
+            }
+        """,
+        """
+            struct Ok<T> { result: T }
+            struct Err<T> { errPayload: T }
+
+            type Response<TResult, TError> = Ok<TResult> | Err<TError>
+
+            fun foo(r: Response<int, slice>) {
+                match (r) {
+                    Ok => {
+                    }
+                    Err<slice> => {
+
+                    }
+                    else => {
+
                     }
                 }
             }

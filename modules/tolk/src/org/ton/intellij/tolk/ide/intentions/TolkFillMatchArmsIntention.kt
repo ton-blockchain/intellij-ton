@@ -24,21 +24,21 @@ class TolkFillMatchArmsIntention : PsiElementBaseIntentionAction() {
 
     override fun invoke(project: Project, editor: Editor?, element: PsiElement) {
         if (editor == null) return
-        val edit = armsEdit(editor, element) ?: return
-        TolkMatchArms.applyAsTemplate(project, editor, edit)
+        TolkMatchArms.applyAsTemplate(project, editor, armsEdits(editor, element))
     }
 
     override fun generatePreview(project: Project, editor: Editor, file: PsiFile): IntentionPreviewInfo {
         val element = file.findElementAt(editor.caretModel.offset) ?: return IntentionPreviewInfo.EMPTY
-        val edit = armsEdit(editor, element) ?: return IntentionPreviewInfo.EMPTY
-        TolkMatchArms.applyPlain(project, file, edit)
+        val edits = armsEdits(editor, element)
+        if (edits.isEmpty()) return IntentionPreviewInfo.EMPTY
+        TolkMatchArms.applyPlain(project, file, edits)
         return IntentionPreviewInfo.DIFF
     }
 
-    private fun armsEdit(editor: Editor, element: PsiElement): TolkMatchArms.ArmsEdit? {
-        val matchExpression = findMatchExpression(element) ?: return null
+    private fun armsEdits(editor: Editor, element: PsiElement): List<TolkMatchArms.ArmsEdit> {
+        val matchExpression = findMatchExpression(element) ?: return emptyList()
         val patterns = TolkMatchArms.missingPatterns(matchExpression)
-        return TolkMatchArms.armsEdit(matchExpression, patterns, editor.caretModel.offset)
+        return TolkMatchArms.armsEdits(matchExpression, patterns, editor.caretModel.offset)
     }
 
     /**

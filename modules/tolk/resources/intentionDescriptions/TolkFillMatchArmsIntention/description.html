@@ -11,7 +11,9 @@ Fills a <code>match</code> expression with the arms it is still missing.
 
 <p>
     The generated arms are placed where the caret stands when it is between the existing arms, and
-    at the end of the <code>match</code> otherwise. They never go below an <code>else</code> arm.
+    at the end of the <code>match</code> otherwise. A generated <code>else</code> always goes last,
+    and no arm is ever placed below an existing <code>else</code>, since that would make it
+    unreachable.
 </p>
 
 <p>

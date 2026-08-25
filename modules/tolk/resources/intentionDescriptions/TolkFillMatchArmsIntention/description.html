@@ -1,0 +1,44 @@
+<html>
+<body>
+Fills a <code>match</code> expression with the arms it is still missing.
+
+<p>
+    For a <code>match</code> over a union type an arm is generated for every variant that is not
+    matched yet; for a <code>match</code> over an enum an arm is generated for every enum member.
+    An <code>else</code> arm is appended unless the <code>match</code> already has one.
+    Arms that are already present are left untouched.
+</p>
+
+<p>
+    The generated arms are placed where the caret stands when it is between the existing arms, and
+    at the end of the <code>match</code> otherwise. They never go below an <code>else</code> arm.
+</p>
+
+<p>
+    Examples:
+</p>
+<pre><code>
+type Message = AskToTransfer | AskToBurn
+
+// Before
+match (msg) {
+}
+
+// After applying intention
+match (msg) {
+    AskToTransfer => {
+
+    }
+    AskToBurn => {
+
+    }
+    else => {
+
+    }
+}
+</code></pre>
+
+<!-- tooltip end -->
+<p>To use this intention, place your cursor on a <code>match</code> expression and press Alt+Enter.</p>
+</body>
+</html>

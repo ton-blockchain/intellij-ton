@@ -245,6 +245,10 @@
             <language>Tolk</language>
             <className>org.ton.intellij.tolk.ide.intentions.TolkAddPackPrefixIntention</className>
         </intentionAction>
+        <intentionAction>
+            <language>Tolk</language>
+            <className>org.ton.intellij.tolk.ide.intentions.TolkFillMatchArmsIntention</className>
+        </intentionAction>
         <!-- endregion Intentions -->
 
         <internalFileTemplate name="Tolk Contract"/>

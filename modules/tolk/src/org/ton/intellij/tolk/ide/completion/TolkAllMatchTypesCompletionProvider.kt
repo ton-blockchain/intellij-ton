@@ -6,13 +6,13 @@ import com.intellij.codeInsight.completion.InsertHandler
 import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
-import com.intellij.codeInsight.template.TemplateManager
 import com.intellij.icons.AllIcons
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.parentOfType
 import com.intellij.util.ProcessingContext
+import org.ton.intellij.tolk.ide.TolkMatchArms
 import org.ton.intellij.tolk.psi.TolkMatchExpression
 import org.ton.intellij.tolk.psi.TolkMatchPattern
 import org.ton.intellij.tolk.psi.TolkReferenceExpression
@@ -67,15 +67,8 @@ object TolkAllMatchTypesCompletionProvider : TolkCompletionProvider() {
 
     class MatchTypesInsertHandler(private val types: Collection<TolkTy>) : InsertHandler<LookupElement> {
         override fun handleInsert(context: InsertionContext, item: LookupElement) {
-            val project = context.project
-
-            val patterns = types.map { it.render() } + "else"
-            val arms = patterns.mapIndexed { index, pattern -> "$pattern => {\n${if (index == 0) "\$END$" else ""}\n}" }
-            val templateText = arms.joinToString("\n")
-
-            val template = TemplateManager.getInstance(project).createTemplate("match-types", "tolk", templateText)
-            template.isToReformat = true
-            TemplateManager.getInstance(project).startTemplate(context.editor, template)
+            val patterns = types.map { it.render() } + TolkMatchArms.ELSE_PATTERN
+            TolkMatchArms.startTemplate(context.project, context.editor, TolkMatchArms.armsTemplateText(patterns))
         }
     }
 }

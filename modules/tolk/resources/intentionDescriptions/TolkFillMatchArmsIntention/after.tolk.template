@@ -1,0 +1,11 @@
+match (msg) {
+    AskToTransfer => {
+
+    }
+    AskToBurn => {
+
+    }
+    else => {
+
+    }
+}

@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [4.2.0]
+
 This release adds contract renaming across Tolk files and Acton settings, outdated-wrapper notifications, and a quick fix
 for missing `match` cases. It also adds Localnet to the script run menu and improves completion, file documentation,
 and wallet error messages.

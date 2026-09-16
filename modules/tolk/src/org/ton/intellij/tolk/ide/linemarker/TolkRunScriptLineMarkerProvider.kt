@@ -25,6 +25,7 @@ class TolkRunScriptLineMarkerProvider : RunLineMarkerContributor() {
         if (parent is TolkFunction && parent.name == "main") {
             val actions = listOf(
                 RunActonScriptAction(),
+                RunActonScriptBroadcastAction("localnet"),
                 RunActonScriptBroadcastAction("testnet"),
                 RunActonScriptBroadcastAction("mainnet"),
             )

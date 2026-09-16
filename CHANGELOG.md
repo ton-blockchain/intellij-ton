@@ -1,5 +1,37 @@
 # TON Plugin for the IntelliJ IDEs Changelog
 
+## [Unreleased]
+
+This release adds contract renaming across Tolk files and Acton settings, outdated-wrapper notifications, and a quick fix
+for missing `match` cases. It also adds Localnet to the script run menu and improves completion, file documentation,
+and wallet error messages.
+
+### Tolk
+
+- feat(tolk): rename a contract from its header or Acton.toml and update its filename and configured `src` or `types` paths in https://github.com/ton-blockchain/intellij-ton/pull/809
+- feat(tolk): add a `Fill all cases` quick fix for missing `match` cases in unions and enums in https://github.com/ton-blockchain/intellij-ton/pull/815
+- feat(tolk): display leading `///` comments in file documentation in https://github.com/ton-blockchain/intellij-ton/pull/808
+- feat(tolk): add completion and documentation for `outgoingMessages`, `emittedEvents`, and `thrownErrors` in contract headers in https://github.com/ton-blockchain/intellij-ton/pull/806
+- fix(tolk): include lambda parameters in completion inside the lambda body in https://github.com/ton-blockchain/intellij-ton/pull/807
+- fix(tolk): preserve existing values when completing struct field names and avoid duplicate colons in https://github.com/ton-blockchain/intellij-ton/commit/a1b37bd35d3c5043ee884cd4194a9f2f54c67096
+- fix(tolk): keep Acton helpers available in completion in all `.test.tolk` files, including tests under contract directories, in https://github.com/ton-blockchain/intellij-ton/pull/803
+- fix(tolk): accept names ending in `.tolk` when creating files or contracts without duplicating the extension in https://github.com/ton-blockchain/intellij-ton/pull/804
+
+### Acton
+
+- feat(acton): add `Broadcast to Localnet` to the script run menu
+- feat(acton): detect outdated Tolk wrappers when opened and offer a `Regenerate` action in https://github.com/ton-blockchain/intellij-ton/pull/811
+- feat(acton): support contract interfaces, per-contract wrapper settings, gas profiles, Studio reporting, network IDs, and additional localnet settings in Acton.toml in https://github.com/ton-blockchain/intellij-ton/pull/812
+- feat(acton): add path completion and navigation for ABI and source outputs, contract interfaces, gas profiles, localnet databases, and per-contract wrapper directories in https://github.com/ton-blockchain/intellij-ton/pull/805 and https://github.com/ton-blockchain/intellij-ton/pull/813
+- feat(acton): add Actonscan as an explorer and use it by default when no explorer preference is set in https://github.com/ton-blockchain/intellij-ton/pull/814
+- fix(acton): recognize console addresses ending in `-` and reject invalid address prefixes in https://github.com/ton-blockchain/intellij-ton/pull/799 and https://github.com/ton-blockchain/intellij-ton/pull/800
+- fix(acton): show readable error messages for failed testnet faucet requests in https://github.com/ton-blockchain/intellij-ton/pull/810
+
+### FunC
+
+- feat(func): ignore variable and parameter names beginning with `_` in unused-declaration inspections in https://github.com/ton-blockchain/intellij-ton/pull/801
+- fix(func): avoid false unresolved-reference errors in tuple destructuring with `_` and adjacent function calls in https://github.com/ton-blockchain/intellij-ton/pull/802
+
 ## [4.1.0]
 
 v4.1.0 is a smaller follow-up to the Acton-focused v4.0.0 release. It improves navigation and editor polish around

@@ -13,7 +13,7 @@ import org.ton.intellij.tolk.psi.impl.functionSymbol
 import org.ton.intellij.tolk.psi.unwrapParentheses
 import org.ton.intellij.util.printPsi
 
-private val FUNCTIONS_WITHOUT_PARAMETER_HINTS = setOf("ton", "address", "println", "format")
+private val FUNCTIONS_WITHOUT_PARAMETER_HINTS = setOf("grams", "ton", "address", "println", "format")
 
 private val PARAMETERS_WITHOUT_PARAMETER_HINTS = mapOf(
     "expect" to setOf("value"),

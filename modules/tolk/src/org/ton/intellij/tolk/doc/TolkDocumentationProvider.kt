@@ -842,7 +842,7 @@ fun TolkExpression.generateDoc(): String {
         val number = TOLK_NUMBERS.contains(type)
         val string = TOLK_STRING_LITERALS.contains(type)
         val booleanLiteral = tokenText == "true" || tokenText == "false"
-        val builtinFunctions = tokenText == "ton" || tokenText == "address"
+        val builtinFunctions = tokenText == "grams" || tokenText == "ton" || tokenText == "address"
         val primitiveType = TolkPrimitiveTy.fromName(tokenText)
 
         if (tokenText.contains("\n")) {

@@ -8,6 +8,7 @@ and wallet error messages.
 
 ### Tolk
 
+- fix(tolk): use `grams()` in generated coin values when available in the project's stdlib, and keep `ton()` for older projects
 - feat(tolk): rename a contract from its header or Acton.toml and update its filename and configured `src` or `types` paths in https://github.com/ton-blockchain/intellij-ton/pull/809
 - feat(tolk): add a `Fill all cases` quick fix for missing `match` cases in unions and enums in https://github.com/ton-blockchain/intellij-ton/pull/815
 - feat(tolk): display leading `///` comments in file documentation in https://github.com/ton-blockchain/intellij-ton/pull/808

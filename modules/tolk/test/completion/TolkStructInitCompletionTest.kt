@@ -1,5 +1,7 @@
 package org.ton.intellij.tolk.completion
 
+import org.ton.intellij.tolk.replaceCaretMarker
+
 class TolkStructInitCompletionTest : TolkCompletionTestBase() {
     fun `test field completion inside empty struct instance`() = checkEquals(
         """
@@ -59,6 +61,91 @@ class TolkStructInitCompletionTest : TolkCompletionTestBase() {
     fun `test field completion replaces existing field name`() = checkFieldNameReplacement('\n')
 
     fun `test field completion replaces existing field name with replace selection`() = checkFieldNameReplacement('\t')
+
+    fun `test coins completion prefers grams over the deprecated ton alias`() {
+        myFixture.addFileToProject(
+            ".acton/tolk-stdlib/common.tolk",
+            """
+            fun grams(value: string): coins builtin
+            fun ton(value: string): coins builtin
+            """.trimIndent(),
+        )
+
+        checkCoinsCompletion("grams")
+    }
+
+    fun `test coins completion keeps ton with an older stdlib`() {
+        myFixture.addFileToProject(".acton/tolk-stdlib/common.tolk", "fun ton(value: slice): coins builtin")
+
+        checkCoinsCompletion("ton")
+    }
+
+    fun `test coins completion defaults to grams without a stdlib`() = checkCoinsCompletion("grams")
+
+    fun `test coins completion uses the nested project stdlib`() {
+        myFixture.addFileToProject(".acton/tolk-stdlib/common.tolk", "fun ton(value: slice): coins builtin")
+        myFixture.addFileToProject("packages/app/Acton.toml", "")
+        myFixture.addFileToProject(
+            "packages/app/.acton/tolk-stdlib/common.tolk",
+            "fun grams(value: string): coins builtin",
+        )
+
+        val fixture = object : TolkCompletionTestFixtureBase<String>(myFixture) {
+            override fun prepare(code: String) {
+                val file = myFixture.addFileToProject("packages/app/main.tolk", replaceCaretMarker(code.trimIndent()))
+                myFixture.configureFromExistingVirtualFile(file.virtualFile)
+            }
+        }
+        fixture.apply {
+            setUp()
+            try {
+                checkCoinsCompletion("grams", this)
+            } finally {
+                tearDown()
+            }
+        }
+    }
+
+    fun `test fill all fields uses grams for nested coins values`() {
+        myFixture.addFileToProject(".acton/tolk-stdlib/common.tolk", "fun grams(value: string): coins builtin")
+
+        checkCompletion(
+            "0",
+            """
+                struct Cell<T> {}
+                struct Transfer {
+                    amount: coins
+                    tuple: [coins, int]
+                    tensor: (coins, bool)
+                    cell: Cell<coins>
+                }
+
+                fun main() {
+                    Transfer {
+                        /*caret*/
+                    };
+                }
+            """,
+            """
+                struct Cell<T> {}
+                struct Transfer {
+                    amount: coins
+                    tuple: [coins, int]
+                    tensor: (coins, bool)
+                    cell: Cell<coins>
+                }
+
+                fun main() {
+                    Transfer {
+                        amount: grams("0.1"),
+                        tuple: [grams("0.1"), 0],
+                        tensor: (grams("0.1"), false),
+                        cell: grams("0.1").toCell(),/*caret*/
+                    };
+                }
+            """,
+        )
+    }
 
     fun `test field completion with enum type`() = doFirstCompletion(
         """
@@ -166,6 +253,32 @@ class TolkStructInitCompletionTest : TolkCompletionTestBase() {
         """,
         1,
         "foo",
+    )
+
+    private fun checkCoinsCompletion(
+        functionName: String,
+        fixture: TolkCompletionTestFixtureBase<String> = completionFixture,
+    ) = fixture.checkCompletion(
+        "amount",
+        """
+            struct Transfer {
+                amount: coins
+            }
+
+            fun main() {
+                Transfer { am/*caret*/ };
+            }
+        """,
+        """
+            struct Transfer {
+                amount: coins
+            }
+
+            fun main() {
+                Transfer { amount: $functionName("0.1")/*caret*/ };
+            }
+        """,
+        '\n',
     )
 
     private fun checkFieldNameReplacement(completionChar: Char) = checkCompletion(

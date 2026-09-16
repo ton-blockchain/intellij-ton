@@ -13,10 +13,12 @@ import com.intellij.icons.AllIcons
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.util.endOffset
 import com.intellij.psi.util.parentOfType
 import com.intellij.psi.util.startOffset
 import com.intellij.util.ProcessingContext
+import org.ton.intellij.tolk.ide.configurable.tolkSettings
 import org.ton.intellij.tolk.psi.TolkStructExpression
 import org.ton.intellij.tolk.psi.TolkStructExpressionField
 import org.ton.intellij.tolk.psi.TolkStructField
@@ -95,7 +97,7 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
             } ?: TemplateStringInsertHandler(
                 ": \$value$$comma",
                 true,
-                "value" to ConstantNode(typeDefaultValue(field.type)),
+                "value" to ConstantNode(typeDefaultValue(field.type, parameters.originalFile)),
             )
 
             result.addElement(
@@ -144,7 +146,7 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         }
     }
 
-    fun typeDefaultValue(type: TolkTy?): String {
+    private fun typeDefaultValue(type: TolkTy?, contextFile: PsiFile): String {
         if (type == null) {
             return "null"
         }
@@ -162,7 +164,16 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         }
 
         if (type is TolkTyCoins) {
-            return "ton(\"0.1\")"
+            // Use the completion site's stdlib, which can differ between projects in a monorepo.
+            val stdlib = contextFile.originalFile.virtualFile?.let {
+                contextFile.project.tolkSettings.getDefaultImport(it)
+            }
+            val functionName = when {
+                stdlib?.resolveSymbols("grams", skipTypes = true)?.any() == true -> "grams"
+                stdlib?.resolveSymbols("ton", skipTypes = true)?.any() == true -> "ton"
+                else -> "grams"
+            }
+            return "$functionName(\"0.1\")"
         }
 
         if (type is TolkIntTyFamily) {
@@ -200,7 +211,7 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
             if (type.typeArguments.isNotEmpty() && type.psi.name == "Cell") {
                 // `Cell<T>` -> `T {}.toCell()` or `defaultOf(T).toCell()`
                 val arg = type.typeArguments[0]
-                return "${typeDefaultValue(arg)}.toCell()"
+                return "${typeDefaultValue(arg, contextFile)}.toCell()"
             }
 
             return "${type.render()} {}"
@@ -216,15 +227,15 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         }
 
         if (type is TolkTyTypedTuple) {
-            return "[${type.elements.joinToString(", ") { this.typeDefaultValue(it) }}]"
+            return "[${type.elements.joinToString(", ") { typeDefaultValue(it, contextFile) }}]"
         }
 
         if (type is TolkTyTensor) {
-            return "(${type.elements.joinToString(", ") { this.typeDefaultValue(it) }})"
+            return "(${type.elements.joinToString(", ") { typeDefaultValue(it, contextFile) }})"
         }
 
         if (type is TolkTyUnion) {
-            return this.typeDefaultValue(type.variants.first())
+            return typeDefaultValue(type.variants.first(), contextFile)
         }
 
         return "null"
@@ -239,7 +250,7 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
             val lines = fields.mapIndexed { index, it -> "${it.name}: \$field$index$," }
             val defaultValues = fields.mapIndexed { index, it ->
                 "field$index" to
-                    ConstantNode(typeDefaultValue(it.type))
+                    ConstantNode(typeDefaultValue(it.type, context.file))
             }
 
             val snippet = lines.joinToString("\n")

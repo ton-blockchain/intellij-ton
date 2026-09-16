@@ -36,6 +36,23 @@ class TolkDocumentationProviderTest : TolkTestBase() {
     fun testPrimitiveTypesDocumentation() = doTest("primitive_types")
     fun testDocCommentsDocumentation() = doTest("doc_comments")
 
+    fun testGramsAndTonHighlightingInConstantValues() {
+        val file = myFixture.configureByText(
+            "coins.tolk",
+            """
+            const modern: coins = grams("0.1");
+            const legacy: coins = ton("0.1");
+            """.trimIndent(),
+        ) as TolkFile
+
+        val modern = provider.generateDoc(file.constVars[0], null)
+        val legacy = provider.generateDoc(file.constVars[1], null)
+
+        assertNotNull(modern)
+        assertNotNull(legacy)
+        assertEquals(legacy!!.replace("legacy", "modern").replace("ton", "grams"), modern)
+    }
+
     fun testFileDocumentation() {
         val file = myFixture.configureByText(
             "module.tolk",

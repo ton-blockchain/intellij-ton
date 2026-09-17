@@ -1,0 +1,34 @@
+<html>
+<body>
+Fills a struct initializer with the missing fields that have no default value.
+
+<p>
+    Works like <code>Fill all fields</code>, but skips the fields the struct declaration already
+    gives a default to, so only the ones that have to be written out are generated. It is offered
+    only when that is actually a smaller set than all the missing fields.
+</p>
+
+<p>
+    Examples:
+</p>
+<pre><code>
+struct Point {
+    x: int
+    y: int
+    label: slice = createEmptySlice()
+}
+
+// Before
+var p = Point {};
+
+// After applying intention
+var p = Point {
+    x: 0,
+    y: 0,
+};
+</code></pre>
+
+<!-- tooltip end -->
+<p>To use this intention, place your cursor on a struct initializer and press Alt+Enter.</p>
+</body>
+</html>

@@ -249,6 +249,14 @@
             <language>Tolk</language>
             <className>org.ton.intellij.tolk.ide.intentions.TolkFillMatchArmsIntention</className>
         </intentionAction>
+        <intentionAction>
+            <language>Tolk</language>
+            <className>org.ton.intellij.tolk.ide.intentions.TolkFillStructFieldsIntention</className>
+        </intentionAction>
+        <intentionAction>
+            <language>Tolk</language>
+            <className>org.ton.intellij.tolk.ide.intentions.TolkFillRequiredStructFieldsIntention</className>
+        </intentionAction>
         <!-- endregion Intentions -->
 
         <internalFileTemplate name="Tolk Contract"/>

@@ -1,0 +1,38 @@
+<html>
+<body>
+Fills a struct initializer with the fields it is still missing.
+
+<p>
+    Every field of the struct that the initializer doesn't mention yet is written out with a default
+    value for its type, which the live template then lets you tab through. Fields that are already
+    there are left untouched.
+</p>
+
+<p>
+    The generated fields are placed where the caret stands when it is between the existing ones, and
+    at the end of the initializer otherwise.
+</p>
+
+<p>
+    Examples:
+</p>
+<pre><code>
+struct Point {
+    x: int
+    y: int
+}
+
+// Before
+var p = Point {};
+
+// After applying intention
+var p = Point {
+    x: 0,
+    y: 0,
+};
+</code></pre>
+
+<!-- tooltip end -->
+<p>To use this intention, place your cursor on a struct initializer and press Alt+Enter.</p>
+</body>
+</html>

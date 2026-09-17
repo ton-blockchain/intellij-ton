@@ -13,38 +13,18 @@ import com.intellij.icons.AllIcons
 import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiFile
 import com.intellij.psi.util.endOffset
 import com.intellij.psi.util.parentOfType
 import com.intellij.psi.util.startOffset
 import com.intellij.util.ProcessingContext
-import org.ton.intellij.tolk.ide.configurable.tolkSettings
+import org.ton.intellij.tolk.ide.TolkStructFields
 import org.ton.intellij.tolk.psi.TolkStructExpression
 import org.ton.intellij.tolk.psi.TolkStructExpressionField
 import org.ton.intellij.tolk.psi.TolkStructField
 import org.ton.intellij.tolk.psi.impl.canUse
 import org.ton.intellij.tolk.psi.impl.hasPrivateFields
-import org.ton.intellij.tolk.psi.impl.members
 import org.ton.intellij.tolk.psi.impl.structFields
-import org.ton.intellij.tolk.type.TolkBitsNTy
-import org.ton.intellij.tolk.type.TolkBytesNTy
-import org.ton.intellij.tolk.type.TolkCellTy
-import org.ton.intellij.tolk.type.TolkIntTyFamily
-import org.ton.intellij.tolk.type.TolkSliceTy
-import org.ton.intellij.tolk.type.TolkStringTy
-import org.ton.intellij.tolk.type.TolkTy
-import org.ton.intellij.tolk.type.TolkTyAddress
-import org.ton.intellij.tolk.type.TolkTyArray
-import org.ton.intellij.tolk.type.TolkTyBool
-import org.ton.intellij.tolk.type.TolkTyBuilder
-import org.ton.intellij.tolk.type.TolkTyCoins
-import org.ton.intellij.tolk.type.TolkTyEnum
-import org.ton.intellij.tolk.type.TolkTyNull
 import org.ton.intellij.tolk.type.TolkTyStruct
-import org.ton.intellij.tolk.type.TolkTyTensor
-import org.ton.intellij.tolk.type.TolkTyTypedTuple
-import org.ton.intellij.tolk.type.TolkTyUnion
-import org.ton.intellij.tolk.type.render
 
 object TolkExpressionFieldProvider : TolkCompletionProvider() {
     override val elementPattern: ElementPattern<out PsiElement> = psiElement()
@@ -97,7 +77,7 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
             } ?: TemplateStringInsertHandler(
                 ": \$value$$comma",
                 true,
-                "value" to ConstantNode(typeDefaultValue(field.type, parameters.originalFile)),
+                "value" to ConstantNode(TolkStructFields.typeDefaultValue(field.type, parameters.originalFile)),
             )
 
             result.addElement(
@@ -146,116 +126,16 @@ object TolkExpressionFieldProvider : TolkCompletionProvider() {
         }
     }
 
-    private fun typeDefaultValue(type: TolkTy?, contextFile: PsiFile): String {
-        if (type == null) {
-            return "null"
-        }
-
-        if (type is TolkTyNull) {
-            return "null"
-        }
-
-        if (type is TolkTyUnion && type.isNullable()) {
-            return "null"
-        }
-
-        if (type is TolkTyBool) {
-            return "false"
-        }
-
-        if (type is TolkTyCoins) {
-            // Use the completion site's stdlib, which can differ between projects in a monorepo.
-            val stdlib = contextFile.originalFile.virtualFile?.let {
-                contextFile.project.tolkSettings.getDefaultImport(it)
-            }
-            val functionName = when {
-                stdlib?.resolveSymbols("grams", skipTypes = true)?.any() == true -> "grams"
-                stdlib?.resolveSymbols("ton", skipTypes = true)?.any() == true -> "ton"
-                else -> "grams"
-            }
-            return "$functionName(\"0.1\")"
-        }
-
-        if (type is TolkIntTyFamily) {
-            return "0"
-        }
-
-        if (type is TolkBitsNTy || type is TolkBytesNTy) {
-            return "createEmptySlice()"
-        }
-
-        if (type is TolkTyAddress) {
-            return "address(\"\")"
-        }
-
-        if (type is TolkCellTy) {
-            return "createEmptyCell()"
-        }
-
-        if (type is TolkSliceTy) {
-            return "createEmptySlice()"
-        }
-
-        if (type is TolkStringTy) {
-            return "\"\""
-        }
-
-        if (type is TolkTyBuilder) {
-            return "beginCell()"
-        }
-
-        if (type is TolkTyStruct) {
-            if (type.psi.name == "map") {
-                return "[]"
-            }
-            if (type.typeArguments.isNotEmpty() && type.psi.name == "Cell") {
-                // `Cell<T>` -> `T {}.toCell()` or `defaultOf(T).toCell()`
-                val arg = type.typeArguments[0]
-                return "${typeDefaultValue(arg, contextFile)}.toCell()"
-            }
-
-            return "${type.render()} {}"
-        }
-
-        if (type is TolkTyEnum) {
-            val member = type.psi.members.firstOrNull() ?: return type.render()
-            return "${type.render()}.${member.name}"
-        }
-
-        if (type is TolkTyArray) {
-            return "[]"
-        }
-
-        if (type is TolkTyTypedTuple) {
-            return "[${type.elements.joinToString(", ") { typeDefaultValue(it, contextFile) }}]"
-        }
-
-        if (type is TolkTyTensor) {
-            return "(${type.elements.joinToString(", ") { typeDefaultValue(it, contextFile) }})"
-        }
-
-        if (type is TolkTyUnion) {
-            return typeDefaultValue(type.variants.first(), contextFile)
-        }
-
-        return "null"
-    }
-
     class FillFieldsInsertHandler(private val fields: List<TolkStructField>) : InsertHandler<LookupElement> {
         override fun handleInsert(context: InsertionContext, item: LookupElement) {
-            val document = context.document
             val start = context.startOffset
-            document.deleteString(start, start + 1)
-
-            val lines = fields.mapIndexed { index, it -> "${it.name}: \$field$index$," }
-            val defaultValues = fields.mapIndexed { index, it ->
-                "field$index" to
-                    ConstantNode(typeDefaultValue(it.type, context.file))
-            }
-
-            val snippet = lines.joinToString("\n")
-
-            TemplateStringInsertHandler(snippet, true, *defaultValues.toTypedArray()).handleInsert(context, item)
+            context.document.deleteString(start, start + 1)
+            TolkStructFields.startTemplate(
+                context.project,
+                context.editor,
+                TolkStructFields.fieldsTemplateText(fields),
+                TolkStructFields.fieldsVariables(fields, context.file),
+            )
         }
     }
 

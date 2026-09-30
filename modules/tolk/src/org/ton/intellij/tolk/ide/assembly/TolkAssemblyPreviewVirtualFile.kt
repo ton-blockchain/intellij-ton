@@ -10,10 +10,10 @@ import org.ton.intellij.tasm.TasmFileType
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicLong
 
-class TolkAssemblyPreviewVirtualFile(val sourceFile: VirtualFile) :
-    LightVirtualFile("${sourceFile.name} [Assembly]", PlainTextFileType.INSTANCE, "") {
+class TolkAssemblyPreviewVirtualFile(val sourceFile: VirtualFile, val functionName: String? = null) :
+    LightVirtualFile("${sourceFile.name} [${functionName ?: "Assembly"}]", PlainTextFileType.INSTANCE, "") {
     val assemblyFile = LightVirtualFile(
-        "${sourceFile.nameWithoutExtension}.tasm",
+        "${sourceFile.nameWithoutExtension}${functionName?.let { ".$it" }.orEmpty()}.tasm",
         TasmFileType,
         LOADING_TEXT,
     )

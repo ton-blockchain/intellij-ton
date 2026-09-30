@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Tolk
+
+- feat(tolk): show approximate gas costs above functions with Code Vision and open assembly beside the source on click, with source-map connections and batched Acton disassembly
+
 ## [4.2.0]
 
 This release adds contract renaming across Tolk files and Acton settings, outdated-wrapper notifications, and a quick fix

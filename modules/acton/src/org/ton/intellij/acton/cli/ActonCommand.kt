@@ -210,6 +210,7 @@ sealed class ActonCommand(val name: String) {
         var apiKey: String = "",
         var net: String = "",
         var followLibraries: Boolean = false,
+        var functions: List<String> = emptyList(),
     ) : ActonCommand("disasm") {
         override fun getArguments(): List<String> = buildList {
             if (json) add("--json")
@@ -240,6 +241,10 @@ sealed class ActonCommand(val name: String) {
                 add(net)
             }
             if (followLibraries) add("--follow-libraries")
+            functions.forEach {
+                add("--function")
+                add(it)
+            }
             if (bocFile.isNotBlank()) {
                 add(bocFile)
             }
@@ -424,6 +429,8 @@ sealed class ActonCommand(val name: String) {
                         "--api-key" -> if (i + 1 < args.size) disasm.apiKey = args[++i]
                         "--net" -> if (i + 1 < args.size) disasm.net = args[++i]
                         "--follow-libraries" -> disasm.followLibraries = true
+                        "--function" -> if (i + 1 < args.size) disasm.functions += args[++i]
+                        "--json" -> disasm.json = true
                         else -> if (!arg.startsWith("-")) disasm.bocFile = arg
                     }
                     i++

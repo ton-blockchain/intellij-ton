@@ -14,7 +14,24 @@ internal data class TolkDisasmJsonResult(
     val success: Boolean = false,
     val assembly: String? = null,
     val blocks: List<TolkDisasmJsonBlock> = emptyList(),
+    val functions: List<TolkDisasmJsonFunction> = emptyList(),
     val error: String? = null,
+)
+
+/** A function body from source disassembly; its gas is a static estimate, not an execution measurement. */
+internal data class TolkDisasmJsonFunction(
+    val name: String,
+    val method_id: Long,
+    val assembly: String,
+    val gas_estimate: TolkDisasmGasEstimate,
+    val blocks: List<TolkDisasmJsonBlock>? = null,
+)
+
+internal data class TolkDisasmGasEstimate(
+    val value: Long,
+    val has_dynamic_cost: Boolean,
+    val has_control_flow: Boolean,
+    val unknown_instructions: Int,
 )
 
 internal data class TolkDisasmJsonBlock(

@@ -7,6 +7,7 @@ import com.intellij.execution.process.OSProcessHandler
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessNotCreatedException
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.application.runWriteAction
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -19,6 +20,7 @@ import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.vfs.VirtualFile
 import org.ton.intellij.acton.cli.ActonCommand
 import org.ton.intellij.acton.cli.ActonCommandLine
+import org.ton.intellij.acton.cli.ActonToml
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
@@ -34,6 +36,38 @@ object TolkAssemblyPreviewManager {
         refresh(project, previewFile)
     }
 
+    /** Opens a cached function body in the source/assembly split without running Acton again. */
+    internal fun openFunction(
+        project: Project,
+        sourceFile: VirtualFile,
+        function: TolkDisasmJsonFunction,
+        sourceLine: Int,
+    ) {
+        val previewFile = findPreview(project, sourceFile, function.name)
+            ?: TolkAssemblyPreviewVirtualFile(sourceFile, function.name)
+        val header = "// ${function.name} (method_id ${function.method_id}, gas ~${function.gas_estimate.value})\n"
+        val blocks = buildPreviewBlocks(function.blocks.orEmpty(), sourceFile).map { block ->
+            block.copy(assemblyLines = block.assemblyLines.map { (it.first + 1)..(it.last + 1) })
+        }
+        runWriteAction {
+            previewFile.completeRefresh(
+                previewFile.startRefresh(),
+                TolkAssemblyPreviewStatus.Ready,
+                header + function.assembly,
+                blocks,
+            )
+        }
+        FileEditorManager.getInstance(project).openFile(previewFile, true)
+            .filterIsInstance<TolkAssemblyPreviewEditor>()
+            .forEach { editor ->
+                val document = editor.sourceTextEditor.editor.document
+                editor.sourceTextEditor.editor.caretModel.moveToOffset(document.getLineStartOffset(sourceLine))
+                editor.sourceTextEditor.editor.scrollingModel.scrollToCaret(
+                    com.intellij.openapi.editor.ScrollType.CENTER,
+                )
+            }
+    }
+
     fun refresh(project: Project, previewFile: TolkAssemblyPreviewVirtualFile) {
         saveSourceDocument(previewFile.sourceFile)
 
@@ -46,7 +80,7 @@ object TolkAssemblyPreviewManager {
             "Compiling ${previewFile.sourceFile.name}",
         ) {
             override fun run(indicator: ProgressIndicator) {
-                val result = compileAndDisassemble(project, previewFile.sourceFile)
+                val result = compileAndDisassemble(project, previewFile.sourceFile, previewFile.functionName)
                 ApplicationManager.getApplication().invokeLater {
                     if (project.isDisposed) {
                         return@invokeLater
@@ -80,19 +114,37 @@ object TolkAssemblyPreviewManager {
         })
     }
 
-    private fun findPreview(project: Project, sourceFile: VirtualFile): TolkAssemblyPreviewVirtualFile? =
-        FileEditorManager.getInstance(project).openFiles
-            .filterIsInstance<TolkAssemblyPreviewVirtualFile>()
-            .firstOrNull { it.sourceFile.url == sourceFile.url }
+    private fun findPreview(
+        project: Project,
+        sourceFile: VirtualFile,
+        functionName: String? = null,
+    ): TolkAssemblyPreviewVirtualFile? = FileEditorManager.getInstance(project).openFiles
+        .filterIsInstance<TolkAssemblyPreviewVirtualFile>()
+        .firstOrNull { it.sourceFile.url == sourceFile.url && it.functionName == functionName }
 
     private fun saveSourceDocument(sourceFile: VirtualFile) {
         val document = FileDocumentManager.getInstance().getDocument(sourceFile) ?: return
         FileDocumentManager.getInstance().saveDocument(document)
     }
 
-    private fun compileAndDisassemble(project: Project, sourceFile: VirtualFile): Result<TolkAssemblyPreviewOutput> {
-        val workingDir = project.guessProjectDir()?.toNioPath()
-            ?: return Result.failure(IllegalStateException("Cannot determine project directory"))
+    private fun compileAndDisassemble(
+        project: Project,
+        sourceFile: VirtualFile,
+        functionName: String?,
+    ): Result<TolkAssemblyPreviewOutput> {
+        val workingDir = runReadAction {
+            ActonToml.find(project, sourceFile)?.workingDir ?: project.guessProjectDir()?.toNioPath()
+        } ?: return Result.failure(IllegalStateException("Cannot determine project directory"))
+        if (functionName != null) {
+            val command = ActonCommand.Disasm(bocFile = sourceFile.path, json = true, functions = listOf(functionName))
+            val commandLine =
+                ActonCommandLine(command.name, workingDir, command.getArguments()).toGeneralCommandLine(project)
+                    ?: return Result.failure(IllegalStateException("Cannot find acton executable"))
+            return runExternal(commandLine).fold(
+                onSuccess = { parseDisasmResult(it, sourceFile) },
+                onFailure = { Result.failure(it) },
+            )
+        }
         val sourceMapPath = try {
             Files.createTempFile("tolk-assembly-preview-", ".source-map.json")
         } catch (e: Exception) {

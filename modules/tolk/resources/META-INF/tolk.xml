@@ -142,6 +142,10 @@
                                        implementationClass="org.ton.intellij.tolk.codeInsight.hint.codeVision.TolkVcsCodeVisionContext"/>
         <codeInsight.daemonBoundCodeVisionProvider
                 implementation="org.ton.intellij.tolk.codeInsight.hint.codeVision.TolkReferencesCodeVisionProvider"/>
+        <codeInsight.codeVisionProvider
+                implementation="org.ton.intellij.tolk.codeInsight.hint.codeVision.TolkGasCodeVisionProvider"/>
+        <config.codeVisionGroupSettingProvider
+                implementation="org.ton.intellij.tolk.codeInsight.hint.codeVision.TolkGasCodeVisionSettingsProvider"/>
         <!-- endregion CodeVision & Hints -->
 
         <!-- region Indexes -->

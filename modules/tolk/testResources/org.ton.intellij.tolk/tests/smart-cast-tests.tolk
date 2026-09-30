@@ -101,8 +101,8 @@ fun test5() {
 fun test6() {
     var a: int? = 5;
     __expect_type(a, "int");
-    __expect_type(a != null ? a : null, "int");
-    __expect_type(a == null ? "" : a, "int");
+    __expect_type(a != null ? a : null, "int?");
+    __expect_type((a == null ? "" : a) as string | int, "string | int");
     takeNullableInt(a);
     __expect_type(a, "int");
     if (rand()) {
@@ -113,7 +113,7 @@ fun test6() {
     }
     __expect_type(a, "null");
     takeNullableSlice(a);   // ok, `slice?` is `slice | null`, here a definitely null
-    var b: int? = true ? null : "sl";
+    var b: int? = null;
     __expect_type(b, "null");
     takeNullableInt(b);
     takeNullableSlice(b);   // same reason

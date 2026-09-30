@@ -47,22 +47,6 @@ class TolkTyFunction(
         returnType.foldWith(folder),
     )
 
-    override fun join(other: TolkTy, hint: TolkTy?): TolkTy {
-        if (this == other.unwrapTypeAlias()) return other
-        if (other is TolkTyFunction) {
-            var hasGenerics = false
-            val newParameterType = parametersType.asSequence().zip(other.parametersType.asSequence()).map { (a, b) ->
-                val join = a.join(b)
-                hasGenerics = hasGenerics || join.hasGenerics()
-                join
-            }.toList()
-            val newReturnType = returnType.join(other.returnType)
-            hasGenerics = hasGenerics || newReturnType.hasGenerics()
-            return TolkTyFunction(newParameterType, newReturnType, hasGenerics)
-        }
-        return TolkTyUnion.create(this, other)
-    }
-
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (this == other) return true
         if (other is TolkTyAlias) return canRhsBeAssigned(other.unwrapTypeAlias())

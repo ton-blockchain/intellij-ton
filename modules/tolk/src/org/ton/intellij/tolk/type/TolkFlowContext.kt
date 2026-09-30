@@ -2,6 +2,8 @@ package org.ton.intellij.tolk.type
 
 import org.ton.intellij.tolk.psi.TolkFunction
 import org.ton.intellij.tolk.psi.TolkSymbolElement
+import org.ton.intellij.tolk.psi.TolkVar
+import org.ton.intellij.tolk.psi.impl.*
 
 class TolkFlowContext(
     val functions: MutableMap<String, MutableCollection<TolkFunction>> = HashMap(),
@@ -43,16 +45,74 @@ class TolkFlowContext(
 
     fun getType(sinkExpression: TolkSinkExpression): TolkTy? = sinkExpressions[sinkExpression]
 
-    // get the resulting type of variable or struct field
-    fun smartcastOrOriginal(sinkExpression: TolkSinkExpression, originalType: TolkTy): TolkTy {
-        val smartcast = sinkExpressions[sinkExpression] ?: return originalType
+    /** Returns the current smart cast, falling back to the type inferred for this expression. */
+    fun smartcastOr(sinkExpression: TolkSinkExpression, originalType: TolkTy): TolkTy =
+        sinkExpressions[sinkExpression] ?: originalType
 
-        if (smartcast.isEquivalentTo(originalType.unwrapTypeAlias())) {
-            // given `var a: dict`, after merging control flow branches, restore `a: dict` instead of `a: cell?`
-            // (same for struct fields and other sink expressions)
-            return originalType
+    private fun declaredType(sink: TolkSinkExpression, ctx: TolkInferenceContext): TolkTy? {
+        var current = if (sink.symbol is TolkVar) ctx.getType(sink.symbol) else sink.symbol.type
+        var path = sink.indexPath
+        while (path != 0L) {
+            current = childType(current, ((path and 0xFF) - 1).toInt())
+            path = path ushr 8
         }
-        return smartcast
+        return current
+    }
+
+    private fun effectiveType(sink: TolkSinkExpression, ctx: TolkInferenceContext): TolkTy? {
+        var currentSink = sink.copy(indexPath = 0)
+        var current = sinkExpressions[currentSink] ?: symbolTypes[sink.symbol] ?: declaredType(currentSink, ctx)
+        var remaining = sink.indexPath
+        var shift = 0
+        while (remaining != 0L) {
+            val index = ((remaining and 0xFF) - 1).toInt()
+            currentSink = currentSink.copy(indexPath = currentSink.indexPath or ((remaining and 0xFF) shl shift))
+            current = sinkExpressions[currentSink] ?: childType(current, index) ?: return null
+            remaining = remaining ushr 8
+            shift += 8
+        }
+        return current
+    }
+
+    /** Restores source-level aliases after a merge without discarding narrower types from reachable paths. */
+    fun reanchorTo(before: TolkFlowContext, ctx: TolkInferenceContext) {
+        val iterator = sinkExpressions.iterator()
+        while (iterator.hasNext()) {
+            val (sink, type) = iterator.next()
+            val typeBefore = before.effectiveType(sink, ctx)
+            if (type.unwrapTypeAlias().isEquivalentTo(typeBefore?.unwrapTypeAlias())) {
+                val factBefore = before.sinkExpressions[sink]
+                if (factBefore != null) {
+                    sinkExpressions[sink] = factBefore
+                } else {
+                    iterator.remove()
+                }
+                continue
+            }
+            val declared = declaredType(sink, ctx)
+            if (type.unwrapTypeAlias().isEquivalentTo(declared?.unwrapTypeAlias())) {
+                if (sink.indexPath == 0L) {
+                    sinkExpressions[sink] = declared!!
+                } else {
+                    iterator.remove()
+                }
+            }
+        }
+    }
+
+    private fun childType(parent: TolkTy?, index: Int): TolkTy? {
+        var type = parent?.unwrapTypeAlias()
+        if (type is TolkTyUnion) type = type.orNull?.unwrapTypeAlias() ?: type
+        return when (type) {
+            is TolkTyTensor -> type.elements.getOrNull(index)
+            is TolkTyTypedTuple -> type.elements.getOrNull(index)
+            is TolkTyStruct -> {
+                val field = type.psi.structFields.getOrNull(index) ?: return null
+                val sub = Substitution.instantiate(type.psi.declaredType, type)
+                field.type?.substitute(sub)
+            }
+            else -> null
+        }
     }
 
     fun getSymbol(name: String?): TolkSymbolElement? {
@@ -75,7 +135,7 @@ class TolkFlowContext(
 
         var indexMask = 0L
         while (indexPath > 0) {
-            indexMask = (indexPath ushr 8) or 0xFF
+            indexMask = (indexMask shl 8) or 0xFF
             indexPath = indexPath ushr 8
         }
         invalidateAllSubfields(element.symbol, element.indexPath, indexMask)

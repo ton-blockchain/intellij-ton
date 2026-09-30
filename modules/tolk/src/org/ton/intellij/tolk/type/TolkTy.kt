@@ -32,47 +32,10 @@ interface TolkTy : TypeFoldable<TolkTy> {
     }
 
     fun join(other: TolkTy, hint: TolkTy? = null): TolkTy {
-        if (this.isEquivalentTo(other)) return this
-
-        var other = other
-
-        // example: `var r = ... ? int8 : int16`, will be inferred as `int8 | int16` (via unification)
-        // but `var r: int = ... ? int8 : int16`, will be inferred as `int` (it's dest_hint)
-        if (hint != null && hint !is TolkTyUnknown && hint.unwrapTypeAlias() !is TolkTyUnion) {
-            if (hint.canRhsBeAssigned(other)) {
-                other = hint
-            }
-        }
-
-        if (other == Unknown) return Unknown
-        if (other == Never) return this
-        if (other == Null) return TolkTyUnion.create(this, other)
-
-        val tensor1 = this as? TolkTyTensor
-        val tensor2 = other as? TolkTyTensor
-        if (tensor1 != null && tensor2 != null && tensor1.elements.size == tensor2.elements.size) {
-            val types = ArrayList<TolkTy>(tensor1.elements.size)
-            for (i in tensor1.elements.indices) {
-                val type1 = tensor1.elements[i]
-                val type2 = tensor2.elements[i]
-                types.add(type1.join(type2))
-            }
-            return TolkTyTensor.create(types)
-        }
-
-        val tuple1 = this as? TolkTyTypedTuple
-        val tuple2 = other as? TolkTyTypedTuple
-        if (tuple1 != null && tuple2 != null && tuple1.elements.size == tuple2.elements.size) {
-            val types = ArrayList<TolkTy>(tuple1.elements.size)
-            for (i in tuple1.elements.indices) {
-                val type1 = tuple1.elements[i]
-                val type2 = tuple2.elements[i]
-                types.add(type1.join(type2))
-            }
-            return TolkTyTypedTuple.create(types)
-        }
-
-        return TolkTyUnion.create(this, other)
+        val unifier = TolkTypeUnifier(hint)
+        unifier.unifyWith(this)
+        unifier.unifyWith(other)
+        return unifier.result!!
     }
 
     fun meet(other: TolkTy): TolkTy = if (other.isSuperType(this)) this else TolkTyNever
@@ -199,18 +162,10 @@ private fun hasVariantEquivalentTo(otherUnwrapped: TolkTyUnion, lhsVariant: Tolk
     }
 
 fun TolkTy?.join(other: TolkTy?, hint: TolkTy? = null): TolkTy? {
-    if (this == null || this == TolkTy.Unknown) return other
-    if (other == null || other == TolkTy.Unknown) return this
-
-    // example: `var r = ... ? int8 : int16`, will be inferred as `int8 | int16` (via unification)
-    // but `var r: int = ... ? int8 : int16`, will be inferred as `int` (it's dest_hint)
-    if (hint != null && hint !is TolkTyUnknown && hint.unwrapTypeAlias() !is TolkTyUnion) {
-        if (hint.canRhsBeAssigned(this)) {
-            return hint.join(other, hint)
-        }
-    }
-
-    return this.join(other, hint)
+    val unifier = TolkTypeUnifier(hint)
+    this?.let { unifier.unifyWith(it) }
+    other?.let { unifier.unifyWith(it) }
+    return unifier.result
 }
 
 interface TolkPrimitiveTy : TolkTy {
@@ -262,12 +217,6 @@ object TolkTyVoid : TolkPrimitiveTy {
 
 object TolkTyNull : TolkPrimitiveTy {
     override fun toString(): String = "TolkTy(null)"
-
-    override fun join(other: TolkTy, hint: TolkTy?): TolkTy {
-        if (other == this || other == Never) return this
-        if (other == TolkTy.Unknown) return TolkTy.Unknown
-        return TolkTyUnion.create(other, this)
-    }
 }
 
 object TolkCellTy : TolkPrimitiveTy {

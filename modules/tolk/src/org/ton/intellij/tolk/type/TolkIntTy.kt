@@ -17,13 +17,6 @@ interface TolkIntTy : TolkPrimitiveTy {
         return range.contains(other.range)
     }
 
-    override fun join(other: TolkTy, hint: TolkTy?): TolkTy {
-        if (other.unwrapTypeAlias() == this) return this
-        if (other == TolkTy.Never) return this
-        if (other !is TolkIntTy) return TolkTyUnion.create(this, other)
-        return TolkTy.Int
-    }
-
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (other == this) return true
         if (other is TolkIntNTy) return true

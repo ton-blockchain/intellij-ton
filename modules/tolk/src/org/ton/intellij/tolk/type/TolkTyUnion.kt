@@ -111,7 +111,10 @@ class TolkTyUnion private constructor(
 
         fun create(elements: Collection<TolkTy>): TolkTy = flattenVariants(elements)
 
-        private fun flattenVariants(variants: Collection<TolkTy>): TolkTy {
+        internal fun createForLca(elements: Collection<TolkTy>, onInvalidDuplicate: () -> Unit): TolkTy =
+            flattenVariants(elements, onInvalidDuplicate)
+
+        private fun flattenVariants(variants: Collection<TolkTy>, onInvalidDuplicate: (() -> Unit)? = null): TolkTy {
             if (variants.isEmpty()) {
                 // may happen with broken union type declaration while typing
                 return TolkTyUnion(listOf(TolkTyUnknown))
@@ -121,10 +124,10 @@ class TolkTyUnion private constructor(
                 val nestedUnion = variant.unwrapTypeAlias() as? TolkTyUnion
                 if (nestedUnion != null) {
                     nestedUnion.variants.forEach {
-                        flatVariants.addUniqueType(it)
+                        flatVariants.addUniqueType(it, onInvalidDuplicate)
                     }
                 } else {
-                    flatVariants.addUniqueType(variant)
+                    flatVariants.addUniqueType(variant, onInvalidDuplicate)
                 }
             }
             if (flatVariants.size == 1) {
@@ -133,10 +136,11 @@ class TolkTyUnion private constructor(
             return TolkTyUnion(flatVariants)
         }
 
-        private fun MutableCollection<TolkTy>.addUniqueType(variant: TolkTy) {
+        private fun MutableCollection<TolkTy>.addUniqueType(variant: TolkTy, onInvalidDuplicate: (() -> Unit)?) {
             val actualType = variant.unwrapTypeAlias().actualType()
             for (existing in this) {
                 if (existing.isEquivalentTo(actualType)) {
+                    if (onInvalidDuplicate != null && existing.render() != variant.render()) onInvalidDuplicate()
                     return
                 }
             }

@@ -9,6 +9,8 @@
 
 ### Tolk
 
+- Match Tolk 1.5 smart casts after branch merges, including alias restoration, tensor unions, and the types of both ternary branches
+
 - Track `break` and `continue` paths when inferring types across loop iterations and exits
 - Complete `break` and `continue` inside loop bodies, respecting function and `try`/`catch` boundaries in Tolk 1.5
 - Offer `@pure` only for `asm` and `builtin` functions and describe its scope in hover

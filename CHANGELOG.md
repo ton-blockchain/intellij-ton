@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Tolk
+
+- Complete `break` and `continue` inside loop bodies, respecting function and `try`/`catch` boundaries in Tolk 1.5
+- Offer `@pure` only for `asm` and `builtin` functions and describe its scope in hover
+
 ## [4.2.0]
 
 This release adds contract renaming across Tolk files and Acton settings, outdated-wrapper notifications, and a quick fix

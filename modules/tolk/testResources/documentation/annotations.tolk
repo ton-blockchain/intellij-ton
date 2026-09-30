@@ -18,9 +18,7 @@ fun noinlineFunction(): int {
 
 /// Function with pure annotation
 @pure
-fun pureFunction(x: int): int {
-    return x * 2;
-}
+fun pureFunction(x: int): int asm "2 MUL"
 
 /// Deprecated function
 @deprecated("Use newFunction() instead")
@@ -47,9 +45,7 @@ fun getBalance(): int {
 @method_id(456)
 @inline
 @pure
-fun multiAnnotatedFunction(): int {
-    return 1;
-}
+fun multiAnnotatedFunction(): int asm "ONE"
 
 /// Constant with deprecated annotation
 @deprecated("Use NEW_CONST instead")

@@ -1,6 +1,19 @@
 package org.ton.intellij.tolk.completion
 
 class TolkAnnotationCompletionTest : TolkCompletionTestBase() {
+    fun `test pure completion follows function body kind`() {
+        for (code in listOf(
+            "@/*caret*/\nfun zero(): int asm \"ZERO\"",
+            "@/*caret*/\nfun zero(): int builtin",
+            "@/*caret*/\nfun int.identity(self): int asm \"NOP\"",
+        )) {
+            checkContainsCompletion("pure", code)
+        }
+        for (code in listOf("@/*caret*/", "@/*caret*/\nfun f() {}", "@/*caret*/\nget fun f() {}")) {
+            checkNotContainsCompletion("pure", code)
+        }
+    }
+
     fun `test root annotation completion variants after at`() = checkContainsCompletion(
         listOf("deprecated", "test", "method_id"),
         """

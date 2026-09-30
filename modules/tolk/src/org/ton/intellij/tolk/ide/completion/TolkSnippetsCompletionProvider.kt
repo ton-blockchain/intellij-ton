@@ -9,6 +9,8 @@ import com.intellij.patterns.ElementPattern
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
 import org.ton.intellij.tolk.ide.completion.TolkLookupElementData.KeywordKind.KEYWORD
+import org.ton.intellij.tolk.psi.*
+import org.ton.intellij.util.addSuffix
 
 object TolkSnippetsCompletionProvider : TolkCompletionProvider(), DumbAware {
     override val elementPattern: ElementPattern<out PsiElement>
@@ -108,11 +110,50 @@ object TolkSnippetsCompletionProvider : TolkCompletionProvider(), DumbAware {
         ),
     )
 
+    /**
+     * Checks lexical restrictions on loop transfers. Compiler control-flow analysis
+     * still checks restrictions involving other statements in the loop.
+     */
+    private fun allowsLoopTransfer(position: PsiElement): Boolean {
+        var child = position
+        var insideLoop = false
+        while (true) {
+            val parent = child.parent ?: break
+            when (parent) {
+                is TolkFunction, is TolkLambdaFunExpression -> break
+                is TolkTryStatement -> return false
+                is TolkWhileStatement, is TolkRepeatStatement, is TolkDoStatement -> {
+                    if (child !is TolkBlockStatement) return false
+                    insideLoop = true
+                }
+            }
+            child = parent
+        }
+        return insideLoop
+    }
+
     override fun addCompletions(
         parameters: CompletionParameters,
         context: ProcessingContext,
         result: CompletionResultSet,
     ) {
+        if (allowsLoopTransfer(parameters.position)) {
+            for (keyword in listOf("break", "continue")) {
+                result.addElement(
+                    LookupElementBuilder.create(keyword).bold()
+                        .withTailText(";", true)
+                        .withInsertHandler { ctx, _ ->
+                            if (ctx.document.charsSequence.getOrNull(ctx.tailOffset) == ';') {
+                                ctx.editor.caretModel.moveToOffset(ctx.tailOffset + 1)
+                            } else {
+                                ctx.addSuffix(";")
+                            }
+                        }
+                        .toTolkLookupElement(TolkLookupElementData(keywordKind = KEYWORD)),
+                )
+            }
+        }
+
         for (snippet in snippets) {
             val builder = LookupElementBuilder.create(snippet.keyword).bold()
                 .withTailText(snippet.presentation, true)

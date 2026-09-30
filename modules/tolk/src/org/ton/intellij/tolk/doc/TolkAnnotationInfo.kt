@@ -12,7 +12,9 @@ object TolkAnnotationInfo {
             "Function with this annotation will not be inlined even if compiler can inline it",
         ),
         "pure" to AnnotationInfo(
-            "Function with this annotation has no side effects and can be optimized away by the compiler",
+            "Marks an <code>asm</code> or <code>builtin</code> function as having no side effects, " +
+                "allowing the compiler to remove calls whose results are unused. " +
+                "Tolk 1.5 does not allow <code>@pure</code> on functions with a Tolk body.",
         ),
         "deprecated" to AnnotationInfo(
             "Symbol with this annotation is deprecated and should not be used in new code. " +

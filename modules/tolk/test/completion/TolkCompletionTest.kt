@@ -3,6 +3,49 @@ package org.ton.intellij.tolk.completion
 import org.ton.intellij.util.presentation
 
 class TolkCompletionTest : TolkCompletionTestBase() {
+    fun `test loop transfer completion respects lexical boundaries`() {
+        val variants = listOf("break", "continue")
+        for (code in listOf(
+            "fun main() { while (true) { /*caret*/ } }",
+            "fun main() { repeat (3) { /*caret*/ } }",
+            "fun main() { do { /*caret*/ } while (true); }",
+            "fun main() { while (true) { if (true) { /*caret*/ } } }",
+            "fun main() { try { val f = fun() { while (true) { /*caret*/ } }; } catch (e) {} }",
+        )) {
+            checkContainsCompletion(variants, code)
+        }
+        for (code in listOf(
+            "fun main() { /*caret*/ }",
+            "fun main() { while (true) { val f = fun() { /*caret*/ }; } }",
+            "fun main() { while (true) { try { /*caret*/ } catch (e) {} } }",
+            "fun main() { while (true) { try {} catch (e) { /*caret*/ } } }",
+            "fun main() { try { while (true) { /*caret*/ } } catch (e) {} }",
+            "fun main() { while (match (1) { else => { /*caret*/ } }) {} }",
+            "fun main() { repeat (match (1) { else => { /*caret*/ } }) {} }",
+            "fun main() { do {} while (match (1) { else => { /*caret*/ } }); }",
+        )) {
+            checkNotContainsCompletion(variants, code)
+        }
+    }
+
+    fun `test loop transfer insertion`() {
+        checkCompletion(
+            "break",
+            "fun main() { while (true) { br/*caret*/ } }",
+            "fun main() { while (true) { break;/*caret*/ } }",
+        )
+        checkCompletion(
+            "continue",
+            "fun main() { repeat (3) { con/*caret*/ } }",
+            "fun main() { repeat (3) { continue;/*caret*/ } }",
+        )
+        checkCompletion(
+            "break",
+            "fun main() { while (true) { br/*caret*/; } }",
+            "fun main() { while (true) { break;/*caret*/ } }",
+        )
+    }
+
     fun `test contract field completion exposes supported ABI fields`() = checkContainsCompletion(
         listOf(
             "author",

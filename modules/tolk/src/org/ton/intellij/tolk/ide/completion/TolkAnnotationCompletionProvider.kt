@@ -33,6 +33,10 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
 
     val forAny: Applicability = { true }
     val forFunctions: Applicability = { it is TolkFunction }
+    private val forAsmOrBuiltinFunctions: Applicability = {
+        val body = (it as? TolkFunction)?.functionBody
+        body?.asmDefinition != null || body?.builtinKeyword != null
+    }
     val forGetMethods: Applicability = { it is TolkFunction && it.isGetMethod }
     val forStructs: Applicability = { it is TolkStruct }
     val forStructFields: Applicability = { it is TolkStructField }
@@ -45,7 +49,7 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
     )
 
     private val rootLookupElements = listOf(
-        annotationLookup("pure", forFunctions),
+        annotationLookup("pure", forAsmOrBuiltinFunctions),
         annotationLookup("noinline", forFunctions),
         annotationLookup("inline", forFunctions),
         annotationLookup("inline_ref", forFunctions),
@@ -176,7 +180,7 @@ object TolkAnnotationCompletionProvider : TolkCompletionProvider(), DumbAware {
             return
         }
 
-        resultSet.addAllElements(lookupElements.map { it.element })
+        resultSet.addAllElements(lookupElements.filter { it.fullName != "pure" }.map { it.element })
     }
 
     private fun annotationLookup(

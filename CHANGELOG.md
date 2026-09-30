@@ -4,6 +4,7 @@
 
 ### Acton
 
+- Update wallet import guidance for 12-word BIP39 and 24-word TON phrases
 - Show related compiler locations as informational notes instead of additional errors
 - Read structured compiler errors in assembly previews, including related locations
 

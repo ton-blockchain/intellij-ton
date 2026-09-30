@@ -631,7 +631,7 @@ class ImportWalletDialog(project: Project) : DialogWrapper(project) {
                     .bindText(::mnemonic)
                     .align(AlignX.FILL)
                     .rows(3)
-                    .comment("Enter 24 words separated by spaces")
+                    .comment("Enter 12 or 24 words separated by spaces")
             }
             row {
                 checkBox("Store in global wallets")

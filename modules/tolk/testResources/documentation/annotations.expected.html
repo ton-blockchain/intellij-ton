@@ -37,7 +37,19 @@
     <div class="element">
         <div class="element-title">Annotation: inline</div>
         <div class="documentation">
-            <div class='definition'><pre><span style="color:#808000;">@</span><span style="color:#808000;">inline</span></pre></div><div class='content'>Function with this annotation will be automatically inlined during compilation</div>
+            <div class='definition'><pre><span style="color:#808000;">@</span><span style="color:#808000;">inline</span></pre></div><div class='content'><p>Requests in-place inlining: the compiler inserts the function body at each direct call site.
+If this is not possible, compilation fails.</p>
+<p>Tolk 1.5 supports early <code>return</code> in <code>if</code> and <code>match</code> statements.
+Each such statement must leave at most one path to the following code.
+A fully terminating <code>if</code> or <code>match</code> that contains <code>return</code>
+must be the last statement in its block.</p>
+<p>Inlining is not supported for:</p>
+<ul>
+<li>Recursive functions or functions used as values</li>
+<li>Contract entrypoints, getters, or functions with <code>@method_id</code></li>
+<li>Functions without a Tolk body, such as <code>asm</code> functions</li>
+<li><code>return</code> inside loops, <code>try/catch</code>, standalone blocks, or expressions</li>
+</ul></div>
         </div>
     </div>
     <div class="element">
@@ -161,7 +173,19 @@
     <div class="element">
         <div class="element-title">Annotation: inline</div>
         <div class="documentation">
-            <div class='definition'><pre><span style="color:#808000;">@</span><span style="color:#808000;">inline</span></pre></div><div class='content'>Function with this annotation will be automatically inlined during compilation</div>
+            <div class='definition'><pre><span style="color:#808000;">@</span><span style="color:#808000;">inline</span></pre></div><div class='content'><p>Requests in-place inlining: the compiler inserts the function body at each direct call site.
+If this is not possible, compilation fails.</p>
+<p>Tolk 1.5 supports early <code>return</code> in <code>if</code> and <code>match</code> statements.
+Each such statement must leave at most one path to the following code.
+A fully terminating <code>if</code> or <code>match</code> that contains <code>return</code>
+must be the last statement in its block.</p>
+<p>Inlining is not supported for:</p>
+<ul>
+<li>Recursive functions or functions used as values</li>
+<li>Contract entrypoints, getters, or functions with <code>@method_id</code></li>
+<li>Functions without a Tolk body, such as <code>asm</code> functions</li>
+<li><code>return</code> inside loops, <code>try/catch</code>, standalone blocks, or expressions</li>
+</ul></div>
         </div>
     </div>
     <div class="element">

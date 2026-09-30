@@ -159,7 +159,7 @@ object TolkAssemblyPreviewManager {
             return Result.failure(IllegalStateException("Failed to parse compile JSON: ${e.message}", e))
         }
         if (!compileResult.success) {
-            return Result.failure(IllegalStateException(compileResult.error ?: "Compilation failed"))
+            return Result.failure(IllegalStateException(compileResult.errorMessage ?: "Compilation failed"))
         }
         if (compileResult.code_boc64.isNullOrBlank()) {
             return Result.failure(IllegalStateException("Compilation succeeded but produced empty code_boc64"))
@@ -276,7 +276,10 @@ object TolkAssemblyPreviewManager {
             if (exitCode == 0) {
                 Result.success(stdoutMsg)
             } else {
-                val stdoutTrimmed = stripAnsiCodes(stdoutMsg.trim())
+                val stdoutTrimmed = stripAnsiCodes(stdoutMsg.trim()).let { output ->
+                    runCatching { gson.fromJson(output, TolkCompileJsonResult::class.java)?.errorMessage }
+                        .getOrNull() ?: output
+                }
                 val stderrTrimmed = stripAnsiCodes(stderrMsg.trim())
                 val errorMsg = when {
                     stderrTrimmed.isNotEmpty() && stdoutTrimmed.isNotEmpty() -> "$stderrTrimmed\n\n$stdoutTrimmed"

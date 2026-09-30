@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Acton
+
+- Show related compiler locations as informational notes instead of additional errors
+- Read structured compiler errors in assembly previews, including related locations
+
 ### Tolk
 
 - Complete `break` and `continue` inside loop bodies, respecting function and `try`/`catch` boundaries in Tolk 1.5

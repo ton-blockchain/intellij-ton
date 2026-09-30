@@ -315,10 +315,10 @@ fun MutableList<HighlightInfo>.addHighlightsForFile(file: PsiFile, annotationRes
         highlightBuilder.create()?.let(::add)
 
         for (annotation in message.additional) {
-            val highlightBuilder = HighlightInfo.newHighlightInfo(message.highlightType)
-                .severity(message.severity)
+            val highlightBuilder = HighlightInfo.newHighlightInfo(HighlightInfoType.INFORMATION)
+                .severity(HighlightSeverity.INFORMATION)
                 .description(annotation.message)
-                .escapedToolTip(annotation.message.replace("\n", "<br>"))
+                .escapedToolTip(StringUtil.escapeXmlEntities(annotation.message).replace("\n", "<br>"))
                 .range(annotation.textRange)
                 .needsUpdateOnTyping(true)
             highlightBuilder.create()?.let(::add)

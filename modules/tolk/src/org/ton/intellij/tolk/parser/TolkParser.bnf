@@ -457,6 +457,8 @@ Statement ::= ReturnStatement
             | IfStatement
             | DoStatement
             | WhileStatement
+            | BreakStatement
+            | ContinueStatement
             | AssertStatement
             | ThrowStatement
             | TryStatement
@@ -476,6 +478,9 @@ EmptyStatement ::= ';'
 
 ReturnStatement ::= 'return' Expression? {pin=1}
 
+BreakStatement ::= 'break' {pin=1}
+ContinueStatement ::= 'continue' {pin=1}
+
 BlockStatement ::= '{' BlockElement_with_recovery* '}' {
     pin=1
 }
@@ -483,7 +488,7 @@ private BlockElement_with_recovery ::= Statement {
     recoverWhile=BlockElement_recovery
 }
 private BlockElement_recovery ::= !(StatementFirst | ExpressionFirst | '}')
-private StatementFirst ::= 'return'|'{'|'repeat'|'if'|'do'|'while'|'assert'|'throw'|'try'|'var'|'val'|'match'|'fun'|';'
+private StatementFirst ::= 'return'|'break'|'continue'|'{'|'repeat'|'if'|'do'|'while'|'assert'|'throw'|'try'|'var'|'val'|'match'|'fun'|';'
 private ExpressionFirst ::= IDENTIFIER | INTEGER_LITERAL | '-' | '+' | '!' | '(' | '[' | 'match' | 'self' | 'fun'
 
 RepeatStatement ::= 'repeat' Expression BlockStatement {pin=1}

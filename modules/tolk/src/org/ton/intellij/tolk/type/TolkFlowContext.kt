@@ -20,6 +20,25 @@ class TolkFlowContext(
 
     fun clone() = TolkFlowContext(this)
 
+    /** Compares reachability and inferred types to detect a loop's fixed point. */
+    fun equivalentTo(other: TolkFlowContext): Boolean {
+        if ((unreachable == null) != (other.unreachable == null) ||
+            symbolTypes.size != other.symbolTypes.size ||
+            sinkExpressions.size != other.sinkExpressions.size
+        ) {
+            return false
+        }
+        for ((symbol, type) in symbolTypes) {
+            val otherType = other.symbolTypes[symbol] ?: return false
+            if (!type.isEquivalentTo(otherType)) return false
+        }
+        for ((sink, type) in sinkExpressions) {
+            val otherType = other.sinkExpressions[sink] ?: return false
+            if (!type.isEquivalentTo(otherType)) return false
+        }
+        return true
+    }
+
     fun getType(symbol: TolkSymbolElement): TolkTy? = symbolTypes[symbol]
 
     fun getType(sinkExpression: TolkSinkExpression): TolkTy? = sinkExpressions[sinkExpression]

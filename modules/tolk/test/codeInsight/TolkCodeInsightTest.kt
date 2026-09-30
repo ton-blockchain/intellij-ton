@@ -55,6 +55,7 @@ class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
     fun `test lazy-algo-tests`() = doTest()
     fun `test lazy-load-tests`() = doTest()
     fun `test logical-operators`() = doTest()
+    fun `test loop-flow`() = doTest()
     fun `test match-by-expr-tests`() = doTest()
     fun `test meaningful-1`() = doTest()
     fun `test methods-tests`() = doTest()

@@ -7,4 +7,6 @@ enum class TolkUnreachableKind {
     ReturnStatement,
     CallNeverReturnFunction,
     InfiniteLoop,
+    BreakStatement,
+    ContinueStatement,
 }

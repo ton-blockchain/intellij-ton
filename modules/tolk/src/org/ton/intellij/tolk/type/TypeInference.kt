@@ -342,6 +342,19 @@ class TolkExpressionInferenceResult(
     val substitution: Substitution = EmptySubstitution,
 )
 
+/** Collects transfers to the nearest enclosing loop during one fixed-point pass. */
+private class LoopFlowFrame {
+    var breakFlow = TolkFlowContext()
+    var continueFlow = TolkFlowContext()
+
+    fun resetInFixpoint(loopEntryFacts: TolkFlowContext) {
+        breakFlow = loopEntryFacts.clone()
+        breakFlow.unreachable = TolkUnreachableKind.BreakStatement
+        continueFlow = loopEntryFacts.clone()
+        continueFlow.unreachable = TolkUnreachableKind.ContinueStatement
+    }
+}
+
 class TolkInferenceWalker(
     val ctx: TolkInferenceContext,
 //    val parent: TolkInferenceWalker? = null,
@@ -350,6 +363,7 @@ class TolkInferenceWalker(
     private val project = ctx.project
     private val importFiles = LinkedHashSet<VirtualFile>()
     private var currentFunction: TolkFunction? = null
+    private var loopStack = ArrayDeque<LoopFlowFrame>()
     private var localSymbols: Map<TolkReferenceElement, TolkLocalSymbolElement> = emptyMap()
 
     fun inferFunction(element: TolkFunction, flow: TolkFlowContext): TolkFlowContext {
@@ -439,6 +453,8 @@ class TolkInferenceWalker(
         is TolkRepeatStatement -> processRepeatStatement(element, flow)
         is TolkWhileStatement -> processWhileStatement(element, flow)
         is TolkDoStatement -> processDoStatement(element, flow)
+        is TolkBreakStatement -> processBreakStatement(flow)
+        is TolkContinueStatement -> processContinueStatement(flow)
         is TolkThrowStatement -> processThrowStatement(element, flow)
         is TolkAssertStatement -> processAssertStatement(element, flow)
         is TolkTryStatement -> processTryStatement(element, flow)
@@ -482,38 +498,86 @@ class TolkInferenceWalker(
     }
 
     private fun processRepeatStatement(element: TolkRepeatStatement, flow: TolkFlowContext): TolkFlowContext {
-        val afterCondition = inferExpression(element.expression ?: return flow, flow, false)
-        val body = element.blockStatement ?: return afterCondition.outFlow
-        return processBlockStatement(body, afterCondition.outFlow)
+        val afterCount = inferExpression(element.expression ?: return flow, flow, false)
+        val body = element.blockStatement ?: return afterCount.outFlow
+        val loopEntryFacts = afterCount.outFlow.clone()
+        var loopFlow = afterCount.outFlow
+        loopStack.addLast(LoopFlowFrame())
+
+        while (true) {
+            loopStack.last().resetInFixpoint(loopEntryFacts)
+            val bodyOut = processBlockStatement(body, loopFlow.clone())
+            val backEdge = bodyOut.join(loopStack.last().continueFlow.clone())
+            val nextFlow = loopEntryFacts.clone().join(backEdge)
+            if (nextFlow.equivalentTo(loopFlow)) {
+                val exitFlow = nextFlow.join(loopStack.last().breakFlow)
+                loopStack.removeLast()
+                return exitFlow
+            }
+            loopFlow = nextFlow
+        }
     }
 
     private fun processWhileStatement(element: TolkWhileStatement, flow: TolkFlowContext): TolkFlowContext {
         val condition = element.condition ?: return flow
-        val loopEntryFacts = TolkFlowContext(flow)
-        val afterCond = inferExpression(condition, loopEntryFacts, true)
-        val body = element.blockStatement ?: return afterCond.outFlow
-        val bodyOut = processBlockStatement(body, afterCond.trueFlow)
+        val body = element.blockStatement ?: return inferExpression(condition, flow, true).outFlow
+        val loopEntryFacts = flow.clone()
+        var loopFlow = flow
+        loopStack.addLast(LoopFlowFrame())
 
-        val nextFlow = loopEntryFacts.join(bodyOut)
-        val afterCond2 = inferExpression(condition, nextFlow, true)
-        processBlockStatement(body, afterCond2.trueFlow)
-
-        return afterCond2.falseFlow
+        while (true) {
+            loopStack.last().resetInFixpoint(loopEntryFacts)
+            val afterCond = inferExpression(condition, loopFlow.clone(), true)
+            val bodyOut = processBlockStatement(body, afterCond.trueFlow)
+            val backEdge = bodyOut.join(loopStack.last().continueFlow.clone())
+            val nextFlow = loopEntryFacts.clone().join(backEdge)
+            if (nextFlow.equivalentTo(loopFlow)) {
+                val exitFlow = afterCond.falseFlow.join(loopStack.last().breakFlow)
+                loopStack.removeLast()
+                return exitFlow
+            }
+            loopFlow = nextFlow
+        }
     }
 
     private fun processDoStatement(element: TolkDoStatement, flow: TolkFlowContext): TolkFlowContext {
         val body = element.blockStatement ?: return flow
-        // do while is also handled twice; read comments above
-        val loopEntryFacts = TolkFlowContext(flow)
-        var nextFlow = processBlockStatement(body, flow)
-        val condition = element.expression ?: return nextFlow
-        val afterCond = inferExpression(condition, nextFlow, true)
-        // second time
-        nextFlow = loopEntryFacts.join(afterCond.trueFlow)
-        nextFlow = processBlockStatement(body, nextFlow)
-        val afterCond2 = inferExpression(condition, nextFlow, true)
+        val condition = element.expression ?: return flow
+        val loopEntryFacts = flow.clone()
+        var loopFlow = flow
+        loopStack.addLast(LoopFlowFrame())
 
-        return afterCond2.falseFlow
+        while (true) {
+            loopStack.last().resetInFixpoint(loopEntryFacts)
+            val bodyOut = processBlockStatement(body, loopFlow.clone())
+            val condInput = bodyOut.join(loopStack.last().continueFlow.clone())
+            val afterCond = inferExpression(condition, condInput, true)
+            val nextFlow = loopEntryFacts.clone().join(afterCond.trueFlow)
+            if (nextFlow.equivalentTo(loopFlow)) {
+                val exitFlow = afterCond.falseFlow.join(loopStack.last().breakFlow)
+                loopStack.removeLast()
+                return exitFlow
+            }
+            loopFlow = nextFlow
+        }
+    }
+
+    private fun processBreakStatement(flow: TolkFlowContext): TolkFlowContext {
+        if (loopStack.isNotEmpty()) {
+            val loop = loopStack.last()
+            loop.breakFlow = loop.breakFlow.join(flow.clone())
+        }
+        flow.unreachable = TolkUnreachableKind.BreakStatement
+        return flow
+    }
+
+    private fun processContinueStatement(flow: TolkFlowContext): TolkFlowContext {
+        if (loopStack.isNotEmpty()) {
+            val loop = loopStack.last()
+            loop.continueFlow = loop.continueFlow.join(flow.clone())
+        }
+        flow.unreachable = TolkUnreachableKind.ContinueStatement
+        return flow
     }
 
     private fun processThrowStatement(element: TolkThrowStatement, flow: TolkFlowContext): TolkFlowContext {
@@ -891,6 +955,8 @@ class TolkInferenceWalker(
         val oldDeclaredReturnType = ctx.declaredReturnType
         val oldReturnStatements = ctx.returnStatements
         val oldUnreachable = flow.unreachable
+        val oldLoopStack = loopStack
+        loopStack = ArrayDeque()
         ctx.returnStatements.clear()
         ctx.declaredReturnType = explicitReturnType
 
@@ -917,6 +983,7 @@ class TolkInferenceWalker(
             ctx.returnStatements.push(statement)
         }
         ctx.declaredReturnType = oldDeclaredReturnType
+        loopStack = oldLoopStack
         nextFlow.unreachable = oldUnreachable
 
         val finalType = TolkTyFunction(paramTypes, returnTy)

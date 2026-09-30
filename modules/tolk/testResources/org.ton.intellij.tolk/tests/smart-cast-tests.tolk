@@ -719,6 +719,7 @@ fun test63() {
 type BalanceDict = dict
 
 fun cell.myDepth(self): int1 { return 0 }
+fun dict.myDepth(self): int2 { return 0 }
 fun BalanceDict.myDepth(self): int3 { return 0 }
 fun null.myDepth(self): int4 { return 0 }
 
@@ -728,7 +729,7 @@ fun test64(d: dict, b: BalanceDict) {
         cell => { __expect_type(d.myDepth(), "int1") }
     }
     __expect_type(d, "dict");
-    __expect_type(d.myDepth(), "int3");
+    __expect_type(d.myDepth(), "int2");
     
     match (b) {
         null => { __expect_type(b.myDepth(), "int4") }

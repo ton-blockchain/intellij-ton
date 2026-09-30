@@ -45,7 +45,7 @@ fun Pair<A,B>.compareWith<U,V>(self, f: U, s: V) {
     return self.first == f && self.second == s;
 }
 
-type Tuple2Int = [int, int];
+type Tuple2Int = [int, MInt];
 fun [int, int].getLast(self) { return self.1; }
 fun [int, MInt].assignLast(mutate self, v: int) { self.1 = v; }
 fun Tuple2Int.getSum(self) { return self.0 + self.1; }
@@ -66,7 +66,7 @@ fun createWrapper<T>(item: T) { return Wrapper<T>.create(item); }
 
 @method_id(101)
 fun test1() {
-    var i = int.zero() + MInt.zero();
+    var i: MInt = int.zero() + MInt.zero();
     i = i.plus1();
     return (i.plus1(), i, i.plusN(5), i.plusN(i.plus1()));
 }
@@ -74,7 +74,7 @@ fun test1() {
 @method_id(102)
 fun test2(a: int8, b: int16) {
     var c = b as coins?;
-    return (a.plus1(), b.plusN(a), c!.plus1());
+    return (a.plus1(), (b as MInt).plusN(a), c!.plus1());
 }
 
 @method_id(103)
@@ -197,8 +197,8 @@ fun test12() {
     __expect_type(null.arbitraryMethod(), "never");
     __expect_type((10 as coins?).arbitraryMethod(), "never");
 
-    __expect_type(Wrapper { item: 10 }.arbitraryMethod(), "Wrapper<MInt>");
-    __expect_type(Wrapper<int> { item: 10 as int8 }.arbitraryMethod(), "Wrapper<MInt>");
+    __expect_type(Wrapper<MInt> { item: 10 }.arbitraryMethod(), "Wrapper<MInt>");
+    __expect_type(Wrapper<MInt> { item: 10 as int8 }.arbitraryMethod(), "Wrapper<MInt>");
 
     __expect_type(Wrapper { item: 10 as int8 }.arbitraryMethod(), "builder");
     __expect_type(Wrapper { item: Wrapper { item: 10 } }.arbitraryMethod(), "builder");
@@ -261,7 +261,7 @@ fun CounterMsg.onInternalMessage(self) {
 fun test16() {
     var inc: CounterIncrement = { inc_by: 100 };
     var msg = inc as CounterMsg;
-    return (inc.onInternalMessage(), msg.onInternalMessage(), CounterMsg.onInternalMessage(CounterReset{initial_value:5}));
+    return ((inc as CounterMsg).onInternalMessage(), msg.onInternalMessage(), CounterMsg.onInternalMessage(CounterReset{initial_value:5}));
 }
 
 fun int.`0`() { return 0; }

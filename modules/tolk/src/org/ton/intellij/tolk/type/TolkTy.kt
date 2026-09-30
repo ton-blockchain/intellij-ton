@@ -48,7 +48,9 @@ interface TolkTy : TypeFoldable<TolkTy> {
         return other == Never
     }
 
-    fun isEquivalentTo(other: TolkTy?): Boolean = other != null && isEquivalentToInner(other)
+    /** Compares runtime types, erasing aliases recursively; method receivers use [subtypeDistanceTo]. */
+    fun isEquivalentTo(other: TolkTy?): Boolean =
+        other != null && unwrapTypeAlias().isEquivalentToInner(other.unwrapTypeAlias())
 
     fun isEquivalentToInner(other: TolkTy): Boolean {
         val actualType = this.actualType()

@@ -9,6 +9,8 @@
 
 ### Tolk
 
+- Match Tolk 1.5 alias equality and method selection, including alias chains, generic receivers, and declared types after smart casts
+
 - Match Tolk 1.5 smart casts after branch merges, including alias restoration, tensor unions, and the types of both ternary branches
 
 - Track `break` and `continue` paths when inferring types across loop iterations and exits

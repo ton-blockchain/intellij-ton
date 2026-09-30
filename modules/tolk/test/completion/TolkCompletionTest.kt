@@ -3,6 +3,25 @@ package org.ton.intellij.tolk.completion
 import org.ton.intellij.util.presentation
 
 class TolkCompletionTest : TolkCompletionTestBase() {
+    fun `test alias method completion after smart cast`() {
+        for (receiver in listOf("value", "holder.data", "tuple.1", "value.retain()")) {
+            checkContainsCompletion(
+                "validate",
+                """
+                type Balance = cell?;
+                type Assets = cell?;
+                struct Holder<T> { padding: int; data: T }
+                fun Balance.validate(self): int { return 0; }
+                fun cell.retain(self): self { return self; }
+                fun main(value: Balance, holder: Holder<Balance>, tuple: (int, Balance)) {
+                    if (value == null || holder.data == null || tuple.1 == null) { return; }
+                    $receiver.vali/*caret*/
+                }
+                """,
+            )
+        }
+    }
+
     fun `test loop transfer completion respects lexical boundaries`() {
         val variants = listOf("break", "continue")
         for (code in listOf(

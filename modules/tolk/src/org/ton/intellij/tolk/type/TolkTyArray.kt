@@ -42,7 +42,7 @@ class TolkTyArray private constructor(
         if (this == other) return true
         if (other is TolkTyAlias) return this.isEquivalentTo(other.underlyingType)
         if (other !is TolkTyArray) return false
-        return elementType.isEquivalentToInner(other.elementType)
+        return elementType.isEquivalentTo(other.elementType)
     }
 
     override fun hashCode(): Int {

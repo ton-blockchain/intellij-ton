@@ -328,8 +328,8 @@ fun test15() {
     }
     
     return (
-        i.plus0(), i.plus1(), i.plus2(),
-        m.plus0(), m.plus1(), m.plus2(),
+        i.plus0(),
+        m.plus0(), m.plus1(),
         t.plus0(), t.plus1(), t.plus2(),
     )
 }
@@ -400,7 +400,7 @@ fun main(x: MInt, y: MInt?) {
 @testcase | 110 |     | 41
 @testcase | 112 | 0   | [ 1 1 ]
 @testcase | 112 | -1  | [ 2 1 ]
-@testcase | 115 |     | 0 1 2 10 11 12 20 21 22
+@testcase | 115 |     | 0 10 11 20 21 22
 
 @fif_codegen
 """

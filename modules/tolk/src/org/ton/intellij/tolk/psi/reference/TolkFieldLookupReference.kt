@@ -84,10 +84,11 @@ fun collectFunctionCandidates(
 data class MethodCallCandidate(
     val originalReceiver: TolkTy,
     val instantiatedReceiver: TolkTy,
+    val receiverDistance: Int,
     val method: TolkFunction,
     val substitutedTs: Substitution,
 ) {
-    fun isGeneric() = !originalReceiver.isEquivalentTo(instantiatedReceiver)
+    fun isGeneric() = originalReceiver.hasGenerics()
 }
 
 enum class ShapeKind {
@@ -164,7 +165,6 @@ fun collectFunctionCandidates(
 fun collectMethodCandidates(
     calledReceiver: TolkTy,
     methods: List<TolkFunction>,
-    forCompletion: Boolean = false,
 ): List<Pair<TolkFunction, Substitution>> {
     // find all methods theoretically applicable; we'll filter them by priority;
     // for instance, if there is `T.method`, it will be instantiated with T=provided_receiver
@@ -175,11 +175,16 @@ fun collectMethodCandidates(
             // check whether exist some T to make it a valid call (probably with type coercion)
             val deducingTs = Substitution.instantiate(receiver, calledReceiver)
             val replaced = receiver.substitute(deducingTs)
-            if (replaced.canRhsBeAssigned(calledReceiver)) {
-                viable.add(MethodCallCandidate(receiver, replaced, method, deducingTs))
+            val distance = replaced.receiverDistanceFrom(calledReceiver)
+            // Generic bodies are analyzed before instantiation, so caller type parameters can remain.
+            if (distance != null && (!replaced.hasGenerics() || calledReceiver.hasGenerics())) {
+                viable.add(MethodCallCandidate(receiver, replaced, distance, method, deducingTs))
             }
-        } else if (receiver.canRhsBeAssigned(calledReceiver)) {
-            viable.add(MethodCallCandidate(receiver, receiver, method, Substitution.empty())) // empty?
+        } else {
+            val distance = receiver.receiverDistanceFrom(calledReceiver)
+            if (distance != null && calledReceiver != TolkTy.Never) {
+                viable.add(MethodCallCandidate(receiver, receiver, distance, method, Substitution.empty()))
+            }
         }
     }
 
@@ -203,43 +208,15 @@ fun collectMethodCandidates(
         return viable.map { it.method to it.substitutedTs }
     }
 
-    if (forCompletion) {
-        return viable.map { it.method to EmptySubstitution }
-    }
-
     // okay, we have multiple viable methods, and need to locate the better
 
-    // 1) exact match candidates with equal_to()
-    //    (for instance, an alias equals to its underlying type, as well as `T1|T2` equals to `T2|T1`)
-    val exact = mutableListOf<MethodCallCandidate>()
-    for (candidate in viable) {
-        if (candidate.instantiatedReceiver.isEquivalentTo(calledReceiver)) {
-            exact.add(candidate)
-        }
+    // Nearest receivers win before generic specificity or shape breaks a tie.
+    val bestDistance = viable.minOf { it.receiverDistance }
+    viable = viable.filter { it.receiverDistance == bestDistance }.toMutableList()
+    if (viable.size == 1 || viable.none { it.isGeneric() }) {
+        return viable.map { it.method to it.substitutedTs }
     }
-    if (exact.size == 1) {
-        return exact.map { it.method to it.substitutedTs }
-    }
-    if (exact.isNotEmpty()) {
-        viable = exact
-    }
-
-    // 2) if there are both generic and non-generic functions, filter out generic
-    var nGenerics = 0
-    for (candidate in viable) {
-        nGenerics += if (candidate.isGeneric()) 1 else 0
-    }
-    if (nGenerics < viable.size) {
-        val nonGeneric = mutableListOf<MethodCallCandidate>()
-        for (candidate in viable) {
-            if (!candidate.isGeneric()) {
-                nonGeneric.add(candidate)
-            }
-        }
-
-        // all the code below is dedicated to choosing between generic Ts, so return if non-generic
-        return nonGeneric.map { it.method to it.substitutedTs }
-    }
+    findOnlyGenericDominator(viable)?.let { return listOf(it.method to it.substitutedTs) }
 
     // 3) better shape in terms of structural depth
     //    (prefer `Container<T>` over `T` and `map<K1, map<K2,V2>>` over `map<K,V>`)
@@ -264,26 +241,26 @@ fun collectMethodCandidates(
         viable = bestByShape
     }
 
-    // 4) find the overload that dominates all others
-    //    (prefer `Container<int>` over `Container<T>` and `map<K, slice>` over `map<K, V>`)
+    // Within the same shape, concrete receivers take precedence over generic receivers.
+    val nonGeneric = viable.filter { !it.isGeneric() }
+    if (nonGeneric.isNotEmpty()) return nonGeneric.map { it.method to it.substitutedTs }
+    findOnlyGenericDominator(viable)?.let { return listOf(it.method to it.substitutedTs) }
+    return viable.map { it.method to it.substitutedTs }
+}
+
+private fun findOnlyGenericDominator(candidates: List<MethodCallCandidate>): MethodCallCandidate? {
     var dominator: MethodCallCandidate? = null
-    for (candidate in viable) {
-        var dominatesAll = true
-        for (other in viable) {
-            if (candidate.method != other.method) {
-                dominatesAll = dominatesAll && isMoreSpecificGeneric(candidate.originalReceiver, other.originalReceiver)
-            }
+    for (candidate in candidates) {
+        val dominatesAll = candidates.all { other ->
+            candidate.method == other.method ||
+                isMoreSpecificGeneric(candidate.originalReceiver, other.originalReceiver)
         }
         if (dominatesAll) {
+            if (dominator != null) return null
             dominator = candidate
         }
     }
-
-    if (dominator != null && !forCompletion) {
-        return listOf(dominator.method to dominator.substitutedTs)
-    }
-
-    return viable.map { it.method to EmptySubstitution }
+    return dominator
 }
 
 // tries to find Ts in `pattern` to reach `actual`;
@@ -336,7 +313,11 @@ fun calculateShapeScore(ty: TolkTy): ShapeScore {
         return ShapeScore(ShapeKind.Tensor, 1 + d)
     }
 
-    if (ty is TolkTyStruct) {
+    if (ty is TolkTyArray) {
+        return ShapeScore(ShapeKind.Instantiated, 1 + calculateShapeScore(ty.elementType).depth)
+    }
+
+    if (ty is TolkTyStruct && ty.typeArguments.isNotEmpty()) {
         var d = 0
         for (typeT in ty.typeArguments) {
             d = max(d, calculateShapeScore(typeT).depth)
@@ -349,7 +330,7 @@ fun calculateShapeScore(ty: TolkTy): ShapeScore {
         if (ty.typeArguments.isEmpty()) {
             return innerShape
         }
-        var d = innerShape.depth
+        var d = 0
         for (typeT in ty.typeArguments) {
             d = max(d, calculateShapeScore(typeT).depth)
         }

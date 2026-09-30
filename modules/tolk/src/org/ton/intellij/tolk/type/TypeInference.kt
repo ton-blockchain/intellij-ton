@@ -40,6 +40,63 @@ interface TolkInferenceData {
     fun getResolvedRefs(element: TolkElement): Collection<PsiElementResolveResult>
 
     fun getType(element: TolkTypedElement?): TolkTy?
+
+    /** Restores declared receiver types for method lookup after narrowing, including fields and `self` chains. */
+    fun declaredTypeBeforeSmartCast(expression: TolkExpression): TolkTy? {
+        when (expression) {
+            is TolkReferenceExpression -> {
+                val symbol = getResolvedRefs(expression).firstOrNull()?.element as? TolkSymbolElement
+                if (symbol is TolkVar) {
+                    return getType(symbol)
+                }
+                return symbol?.type
+            }
+
+            is TolkCallExpression -> {
+                val callee = expression.expression as? TolkDotExpression
+                val field = callee?.fieldLookup
+                val function = field?.let { getResolvedRefs(it).firstOrNull()?.element } as? TolkFunction
+                if (function?.hasSelf == true &&
+                    (
+                        function.returnType?.selfReturnType != null ||
+                            function.returnType?.typeExpression is TolkSelfTypeExpression
+                        )
+                ) {
+                    return declaredTypeBeforeSmartCast(callee.expression)
+                }
+            }
+
+            is TolkParenExpression -> {
+                return expression.expression?.let { declaredTypeBeforeSmartCast(it) }
+            }
+
+            is TolkDotExpression -> {
+                val leftType = getType(expression.expression)?.unwrapTypeAlias() ?: return null
+                return when (leftType) {
+                    is TolkTyStruct -> {
+                        val right = expression.fieldLookup ?: return null
+                        val field =
+                            getResolvedRefs(right).firstOrNull()?.element as? TolkStructField ?: return null
+                        val sub = Substitution.instantiate(leftType.psi.declaredType, leftType)
+                        field.type?.substitute(sub)
+                    }
+
+                    is TolkTyTensor -> {
+                        val index = expression.targetIndex ?: return null
+                        leftType.elements.getOrNull(index)
+                    }
+
+                    is TolkTyTypedTuple -> {
+                        val index = expression.targetIndex ?: return null
+                        leftType.elements.getOrNull(index)
+                    }
+
+                    else -> null
+                }
+            }
+        }
+        return getType(expression)
+    }
 }
 
 private val EMPTY_RESOLVED_SET = emptySet<PsiElementResolveResult>()
@@ -1793,7 +1850,14 @@ class TolkInferenceWalker(
         isStaticReceiver: Boolean,
         hint: TolkTy?,
     ): Pair<TolkTy, List<TolkTypedElement>> {
-        val variants = resolveFieldLookupReferenceWithReceiver(receiver, fieldLookup, isStaticReceiver)
+        var variants = resolveFieldLookupReferenceWithReceiver(receiver, fieldLookup, isStaticReceiver)
+        if (variants.isEmpty()) {
+            val dot = fieldLookup.parent as? TolkDotExpression
+            val declared = dot?.expression?.let { calcDeclaredTypeBeforeSmartCast(it) }
+            if (declared != null) {
+                variants = resolveFieldLookupReferenceWithReceiver(declared, fieldLookup, isStaticReceiver)
+            }
+        }
         val firstVariant = variants.firstOrNull()
         if (firstVariant == null) {
             val fieldIndex = fieldLookup.integerLiteral?.text?.toIntOrNull() ?: return TolkTy.Unknown to emptyList()
@@ -2225,42 +2289,8 @@ class TolkInferenceWalker(
         }
     }
 
-    private fun calcDeclaredTypeBeforeSmartCast(expression: TolkExpression): TolkTy? {
-        when (expression) {
-            is TolkReferenceExpression -> {
-                val symbol = ctx.getResolvedRefs(expression).firstOrNull()?.element as? TolkSymbolElement
-                if (symbol is TolkVar) {
-                    return ctx.getType(symbol)
-                }
-                return symbol?.type
-            }
-
-            is TolkDotExpression -> {
-                val leftType = calcDeclaredTypeBeforeSmartCast(expression.expression)?.unwrapTypeAlias() ?: return null
-                return when (leftType) {
-                    is TolkTyStruct -> {
-                        val right = expression.fieldLookup ?: return null
-                        val field =
-                            ctx.getResolvedFields(right).firstOrNull() as? TolkStructField ?: return null
-                        field.type
-                    }
-
-                    is TolkTyTensor -> {
-                        val index = expression.targetIndex ?: return null
-                        leftType.elements.getOrNull(index)
-                    }
-
-                    is TolkTyTypedTuple -> {
-                        val index = expression.targetIndex ?: return null
-                        leftType.elements.getOrNull(index)
-                    }
-
-                    else -> null
-                }
-            }
-        }
-        return ctx.getType(expression)
-    }
+    private fun calcDeclaredTypeBeforeSmartCast(expression: TolkExpression): TolkTy? =
+        ctx.declaredTypeBeforeSmartCast(expression)
 
     private fun TolkExpression.unwrapNotNull(): TolkExpression {
         var current = this

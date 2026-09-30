@@ -83,6 +83,7 @@ class TolkCodeInsightTest : TolkCodeInsightBaseTest() {
     fun `test send-msg-3`() = doTest()
     fun `test smart-cast-tests`() = doTest()
     fun `test smart-casts-reanchor`() = doTest()
+    fun `test alias-distance`() = doTest()
     fun `test some-tests-1`() = doTest()
     fun `test some-tests-2`() = doTest()
     fun `test some-tests-3`() = doTest()

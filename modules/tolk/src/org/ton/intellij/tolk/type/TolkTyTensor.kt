@@ -67,7 +67,7 @@ class TolkTyTensor private constructor(
         for (i in elements.indices) {
             val element = elements[i]
             val otherElement = other.elements[i]
-            if (!element.isEquivalentToInner(otherElement)) {
+            if (!element.isEquivalentTo(otherElement)) {
                 return false
             }
         }

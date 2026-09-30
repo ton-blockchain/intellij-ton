@@ -47,6 +47,12 @@ class TolkTyFunction(
         returnType.foldWith(folder),
     )
 
+    override fun isEquivalentToInner(other: TolkTy): Boolean {
+        if (other !is TolkTyFunction || parametersType.size != other.parametersType.size) return false
+        return parametersType.zip(other.parametersType).all { (a, b) -> a.isEquivalentTo(b) } &&
+            returnType.isEquivalentTo(other.returnType)
+    }
+
     override fun canRhsBeAssigned(other: TolkTy): Boolean {
         if (this == other) return true
         if (other is TolkTyAlias) return canRhsBeAssigned(other.unwrapTypeAlias())

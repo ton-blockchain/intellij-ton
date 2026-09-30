@@ -131,6 +131,7 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
         val methodsForCompletion = mutableListOf<TolkFunction>()
         TolkFunctionIndex.processAllElements(project, processor = { function ->
             if (!function.isVisibleInCompletionFrom(currentFile)) return@processAllElements true
+            if (!isStaticReceiver && function.isStatic) return@processAllElements true
             val name = function.name ?: return@processAllElements true
             if (isHiddenMethodFromCompletion(name)) return@processAllElements true
             if (!prefixMatcher.prefixMatches(name)) return@processAllElements true
@@ -138,7 +139,15 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
             true
         })
 
-        val elements = collectMethodCandidates(calledType, methodsForCompletion, forCompletion = true)
+        val declaredType = if (isStaticReceiver) null else qualifier.inference?.declaredTypeBeforeSmartCast(qualifier)
+        val elements = methodsForCompletion.groupBy { it.name }.values.flatMap { methods ->
+            val candidates = collectMethodCandidates(calledType, methods)
+            if (candidates.isEmpty() && declaredType != null && declaredType != calledType) {
+                collectMethodCandidates(declaredType, methods)
+            } else {
+                candidates
+            }
+        }
 
         for ((function) in elements) {
             if (!checkLimit()) break
@@ -147,9 +156,6 @@ object TolkDotExpressionCompletionProvider : TolkCompletionProvider() {
             val isStatic = function.isStatic
             val receiverType = function.receiverTy.unwrapTypeAlias().actualType()
             val isResolved = currentFile.resolveSymbols(name).contains(function)
-
-            // don't complete static methods for instance expression
-            if (!isStaticReceiver && isStatic) continue
 
             // when call instance method as static
             val methodCallTypeMismatch = isStaticReceiver && !isStatic

@@ -57,9 +57,9 @@ fun MyPair<K, V>.mapFn(self): int4 { return 0 }
 
 fun test3() {
     __expect_type(MyPair<int, slice>{}.mapFn(), "int1");
-    __expect_type(MyPair<MInt, slice>{}.mapFn(), "int1");
+    __expect_type(MyPair<MInt, slice>{}.mapFn(), "int2");
     __expect_type(MyPair<int8, slice>{}.mapFn(), "int2");
-    __expect_type(MyPair<int8, MSlice>{}.mapFn(), "int2");
+    __expect_type(MyPair<int8, MSlice>{}.mapFn(), "int4");
     __expect_type(MyPair<int, slice?>{}.mapFn(), "int3");
     __expect_type(MyPair<int8, cell>{}.mapFn(), "int4");
     __expect_type(MyPair<never, (slice,slice)>{}.mapFn(), "int4");
@@ -95,13 +95,13 @@ fun U?.myBAlias(self): int5 { return 0 }
 fun test6(b: builder, b1: AliasBuilder1, b2: AliasBuilder2, b1n: AliasBuilder1?, b2n: AliasBuilder2?) {
     __expect_type(b1.myBAlias(), "int1");
     __expect_type(b2.myBAlias(), "int2");
-    __expect_type(b1n.myBAlias(), "int3");
+    __expect_type(b1n.myBAlias(), "int5");
     __expect_type((b2n as builder?).myBAlias(), "int3");
 
     __expect_type((b as builder|slice).myBAlias(), "int4");
     __expect_type(0.myBAlias(), "int4");
     __expect_type((0 as int|int16).myBAlias(), "int4");
-    __expect_type(b2n.myBAlias(), "int3");
+    __expect_type(b2n.myBAlias(), "int5");
     __expect_type((null as builder|slice?).myBAlias(), "int5");
     __expect_type((0 as int?).myBAlias(), "int5");
 }

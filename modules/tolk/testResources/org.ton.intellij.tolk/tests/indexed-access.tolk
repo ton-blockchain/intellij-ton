@@ -63,7 +63,7 @@ fun testCodegenSimple() {
 
 @method_id(101)
 fun test101() {
-    var t = (1, (2, 3), [4, 5, [6, 7]], 8);
+    var t = (1, (2, 3), [4, 5, [6, 7]] as [int, int, [int, int]], 8 as MInt);
     (t.0, t.1.0, t.2.0) = (2, 3, 5);
     t.3.increment();
     t.2.1 += (t.1.1 += 1) - t.1.1 + 1;
@@ -135,13 +135,13 @@ fun test107() {
     return (ab.0 as int, getBuilderBitsCount(ab.1));
 }
 
-global t108: [int, [int, [int]]];
+global t108: [int, [int, [MInt]]];
 
 @method_id(108)
 fun test108(last: int) {
     t108 = [1, [2, [last]]];
     t108.1.1.0.increment();
-    var t = [1, [2, [last]]];
+    var t: [int, [int, [MInt]]] = [1, [2, [last]]];
     t.1.1.0.increment();
     return (t108, t);
 }
@@ -244,15 +244,15 @@ fun test120() {
     return (getT().0 = 3, getT().0 = sizeof(getT()) * 2, [getT().0 = 5, getT().0 = 6]);
 }
 
+global t121: (int, int);
+
 @method_id(121)
-fun test121(zero: int) {
-    var t = createEmptyTuple();
-    t.push(-100);
-    t.set(0, zero);
-    (t.0 as int).increment();
-    (((t.0) as int) as int).increment();
-    increment(mutate t.0 as int);
-    return t;
+fun test121() {
+    t121 = (0, 0);
+    t121.0 = t121.1 = 1;
+    var tup = [[0, 0]] as [[int,int]];
+    tup.0.0 = tup.0.1 = 2;
+    return (t121, tup);
 }
 
 fun (T1, T2).isFirstComponentGt0(self): bool {
@@ -304,7 +304,7 @@ fun main(){
 @testcase | 118 | 1 2   | 2 1
 @testcase | 119 | 1 2 3 4 | 4 1 3
 @testcase | 120 |       | 3 4 [ 5 6 ]
-@testcase | 121 | 0     | [ 3 ]
+@testcase | 121 |       | 1 1 [ [ 2 2 ] ]
 @testcase | 122 | 1 2   | -1 -1 0 -1 -1 0
 @testcase | 123 |       | [ [ 100 100 ] ]
 
